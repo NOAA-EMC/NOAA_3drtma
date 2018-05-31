@@ -1,0 +1,7 @@
+# ignore vim temporary file (*.swp)
+*.swp
+
+# ignore directory 'build/'
+build/
+
+# exceptional pattern is led by sign "!"
