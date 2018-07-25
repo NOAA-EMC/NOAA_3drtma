@@ -29,10 +29,13 @@ Some basic repo interactions are listed below.  Note that anything preceded by a
 *** gerrit ***
 	clone: 
 		git clone gerrit:$REPO_NAME
+                OR TO FETCH ALL SUBMODULES RECURSIVELY WHEN CLONING (for branch master if not no specified branch name)
+		git clone --recursive gerrit:$REPO_NAME
 
 	push to gerrit for review: 
 		git push gerrit:$REPO_NAME HEAD:refs/for/$BRANCH_NAME
 		(alt): git push $DEFINED_REMOTE
+		(alt): git push origin HEAD:refs/for/$BRANCH_NAME
 
 *** git ***
 	clone: 
