@@ -1,7 +1,21 @@
 # ignore vim temporary file (*.swp)
 *.swp
 
-# ignore directory 'build/'
+# ignore building directory ('build/'), directory of executable files ('exec/','bin/')
 build/
+exec/
+bin/
+
+# ignore directory of log files ('log/', 'logs/')
+log/
+logs/
+ 
+# ignore rocoto database files ('*.db')
+*.db
+
+# ignore object/executable file ('*.o, *.x, *.exe')
+*.o
+*.x
+*.exe
 
 # exceptional pattern is led by sign "!"
