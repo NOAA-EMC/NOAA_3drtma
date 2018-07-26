@@ -1,7 +1,7 @@
 [submodule "rtma_gsi"]
 	path = sorc/rtma_gsi.fd
 	url = gerrit:ProdGSI
-	branch = master
+	branch = feature/gsd_raphrrr_july2018
 [submodule "rtma_post"]
 	path = sorc/rtma_post.fd
 	url = gerrit:EMC_post
