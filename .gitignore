@@ -1,6 +1,9 @@
 # ignore vim temporary file (*.swp)
 *.swp
 
+# ignore "untracked" directory ('untrack/')
+untrack/
+
 # ignore building directory ('build/'), directory of executable files ('exec/','bin/')
 build/
 exec/
