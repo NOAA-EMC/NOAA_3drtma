@@ -16,9 +16,10 @@ logs/
 # ignore rocoto database files ('*.db')
 *.db
 
-# ignore object/executable file ('*.o, *.x, *.exe')
+# ignore object/executable/lib file ('*.o, *.x, *.exe, *.a')
 *.o
 *.x
 *.exe
+*.a
 
 # exceptional pattern is led by sign "!"

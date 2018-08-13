@@ -1,6 +1,0 @@
-[submodule "rtma_post"]
-	path = sorc/rtma_post.fd
-	url = gerrit:EMC_post
-[submodule "rtma_gsi"]
-	path = sorc/rtma_gsi.fd
-	url = gerrit:ProdGSI
