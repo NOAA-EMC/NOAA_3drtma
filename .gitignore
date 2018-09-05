@@ -13,8 +13,6 @@ logs/
 
 # ignore object/executable file ('*.o, *.x, *.exe')
 *.o
-*.x
-*.exe
 
 # exceptional pattern is led by sign "!"
 hrrr_dir
