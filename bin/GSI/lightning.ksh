@@ -28,7 +28,6 @@ MPIRUN=mpiexec
 #export F_UFMTENDIAN="big;little:10,15,66" #not used, G.Ge 2018/9/4
 #export GMPIENVVAR=F_UFMTENDIAN  #not used, G.Ge 2018/9/4
 export MV2_ON_DEMAND_THRESHOLD=256
-set -x
 
 # Set the path to the gsi executable
 LIGHTNING=${GSI_ROOT}/process_Lightning.exe
