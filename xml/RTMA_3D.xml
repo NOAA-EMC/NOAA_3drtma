@@ -51,9 +51,11 @@
 <!ENTITY TOWER_RSD "&OBS_DIR;/tower/restricted/met/netcdf">
 <!ENTITY TOWER_NRSD "&OBS_DIR;/tower/public/netcdf">
 <!ENTITY SODAR_NRSD "&OBS_DIR;/profiler/wind/external/netcdf">
+<!ENTITY TAMDAR_DIR "&OBS_DIR;/acars/raw/netcdf">
 <!ENTITY NCEPSNOW_DIR "&OBS_DIR;/grids/ncep/snow/ims96/grib2">
 <!ENTITY HIGHRES_SST_DIR "&OBS_DIR;/grids/ncep/sst/0p083deg/grib2">
 <!ENTITY HIGHRES_SST14KM_DIR "&OBS_DIR;/grids/ncep/sst/grib">
+<!ENTITY TCVITALS_DIR "&OBS_DIR;/nhc/tcvitals">
 
 <!ENTITY LOG_DIR "&DATABASE_DIR;/log">
 <!ENTITY DATAROOT_ENS "&DATABASE_DIR;/gfsenkf">
@@ -419,7 +421,7 @@
     <dependency>
       <or>
         <and>
-          <datadep><cyclestr>&PREPBUFR_EARLY_DIR;/@Y@j@H00.rap.t@Hz.prepbufr.tm00.@Y@m@d.test</cyclestr></datadep>
+          <datadep><cyclestr>&PREPBUFR_DIR;/@Y@j@H00.rap.t@Hz.prepbufr.tm00.@Y@m@d</cyclestr></datadep>
           <datadep><cyclestr>&NACELLE_RSD;/@y@j@H000010o</cyclestr></datadep>
           <datadep><cyclestr>&TOWER_RSD;/@y@j@H000010o</cyclestr></datadep>
           <datadep><cyclestr>&TOWER_NRSD;/@y@j@H000100o</cyclestr></datadep>
@@ -510,7 +512,7 @@
     <dependency>
       <or>
         <and>
-          <datadep><cyclestr>&PREPBUFR_EARLY_DIR;/@Y@j@H00.rap_e.t@Hz.prepbufr.tm00.@Y@m@d.test</cyclestr></datadep>
+          <datadep><cyclestr>&PREPBUFR_DIR;/@Y@j@H00.rap_e.t@Hz.prepbufr.tm00.@Y@m@d</cyclestr></datadep>
           <datadep><cyclestr>&NACELLE_RSD;/@y@j@H000010o</cyclestr></datadep>
           <datadep><cyclestr>&TOWER_RSD;/@y@j@H000010o</cyclestr></datadep>
           <datadep><cyclestr>&TOWER_NRSD;/@y@j@H000100o</cyclestr></datadep>
