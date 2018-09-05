@@ -365,7 +365,7 @@ for loop in $loops; do
 done
 EYYYYMMDD=$(echo ${availtime} | cut -c1-8)
 EHH=$(echo ${availtime} | cut -c9-10)
-${LS} ${ENKF_FCST}/${enkfcstname}.mem???.nemsio > filelist03
+touch filelist03
 
 ## 
 ## Link to pre-processed GFS EnKF forecast members
@@ -477,8 +477,8 @@ export JCAP=62
 export LEVS=60
 export DELTIM=${DELTIM:-$((3600/($JCAP/20)))}
 ndatrap=62
-grid_ratio=1 #4
-cloudanalysistype=1 #5
+grid_ratio=4
+cloudanalysistype=5
 
 # Build the GSI namelist on-the-fly
 . ${fixdir}/gsiparm.anl.sh
@@ -546,6 +546,55 @@ esac
    done
 done
 
+# save results from 1st run
+${CP} fort.201    fit_p1.${YYYYMMDDHH}
+${CP} fort.202    fit_w1.${YYYYMMDDHH}
+${CP} fort.203    fit_t1.${YYYYMMDDHH}
+${CP} fort.204    fit_q1.${YYYYMMDDHH}
+${CP} fort.207    fit_rad1.${YYYYMMDDHH}
+${CP} stdout      stdout_var
 cat fort.* > ${DATABASE_DIR}/log/fits_${YYYYMMDDHH}.txt
+
+## second GSI run
+
+mv gsiparm.anl gsiparm.anl_var
+mv sigf03 sigf03_step1
+mv siganl sigf03
+
+ndatrap=67
+grid_ratio=1
+cloudanalysistype=6
+ifhyb=.false.
+
+# Build the GSI namelist on-the-fly
+. ${fixdir}/gsiparm.anl.sh
+cat << EOF > gsiparm.anl
+$gsi_namelist
+EOF
+
+# Run GSI
+${MPIRUN} -np $np ${GSI} < gsiparm.anl > stdout 2>&1
+error=$?
+if [ ${error} -ne 0 ]; then
+  ${ECHO} "ERROR: ${GSI} crashed  Exit status=${error}"
+  cp stdout ../.
+  exit ${error}
+fi
+ls -l > GSI_workdir_list_cloud
+
+# Look for successful completion messages in rsl files
+nsuccess=`${TAIL} -20 stdout | ${AWK} '/PROGRAM GSI_ANL HAS ENDED/' | ${WC} -l`
+ntotal=1
+${ECHO} "Found ${nsuccess} of ${ntotal} completion messages"
+if [ ${nsuccess} -ne ${ntotal} ]; then
+   ${ECHO} "ERROR: ${GSI} did not complete sucessfully  Exit status=${error}"
+   cp stdout ../stdout_cloud
+   cp GSI_workdir_list_cloud ../.
+   if [ ${error} -ne 0 ]; then
+     exit ${error}
+   else
+     exit 1
+   fi
+fi
 
 exit 0
