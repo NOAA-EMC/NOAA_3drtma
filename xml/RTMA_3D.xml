@@ -422,8 +422,6 @@
       <or>
         <and>
           <datadep><cyclestr>&PREPBUFR_DIR;/@Y@j@H00.rap.t@Hz.prepbufr.tm00.@Y@m@d</cyclestr></datadep>
-          <datadep><cyclestr>&NACELLE_RSD;/@y@j@H000010o</cyclestr></datadep>
-          <datadep><cyclestr>&TOWER_RSD;/@y@j@H000010o</cyclestr></datadep>
           <datadep><cyclestr>&TOWER_NRSD;/@y@j@H000100o</cyclestr></datadep>
           <datadep><cyclestr>&SODAR_NRSD;/@y@j@H000015o</cyclestr></datadep>
         </and>
