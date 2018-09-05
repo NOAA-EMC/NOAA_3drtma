@@ -11,8 +11,8 @@
 <!ENTITY QUEUE "batch">
 
 <!ENTITY SYSTEM_ID "RTMA_3D"> 
-<!ENTITY HOMEBASE_DIR "/home/rtrr/RTMA_3D_dev1">
-<!ENTITY DATABASE_DIR "/home/rtrr/rtma_3d_dev1_databasedir">
+<!ENTITY HOMEBASE_DIR "/home/rtrr/RTMA_3D">
+<!ENTITY DATABASE_DIR "/home/rtrr/rtma_3d_databasedir">
 <!ENTITY OBS_DIR "/public/data">
 <!ENTITY NCL_VER "6.3.0">
 
