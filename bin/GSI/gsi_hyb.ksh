@@ -261,46 +261,46 @@ fi
 if [ -r "${DATAOBSHOME}/NSSLRefInGSI.bufr" ]; then
   ${LN} -s ${DATAOBSHOME}/NSSLRefInGSI.bufr ./refInGSI
 else
-  ${ECHO} "Warning: ${DATAOBSHOME}/NSSLRefInGSI.bufr dones not exist!"
+  ${ECHO} "Warning: ${DATAOBSHOME}/NSSLRefInGSI.bufr does not exist!"
 fi
 
 if [ -r "${DATAOBSHOME}/LightningInGSI.bufr" ]; then
   ${LN} -s ${DATAOBSHOME}/LightningInGSI.bufr ./lghtInGSI
 else
-  ${ECHO} "Warning: ${DATAOBSHOME}/LightningInGSI.bufr dones not exist!"
+  ${ECHO} "Warning: ${DATAOBSHOME}/LightningInGSI.bufr does not exist!"
 fi
 
 if [ -r "${DATAOBSHOME}/NASALaRCCloudInGSI_bufr.bufr" ]; then
   ${LN} -s ${DATAOBSHOME}/NASALaRCCloudInGSI_bufr.bufr ./larcInGSI
 else
-  ${ECHO} "Warning: ${DATAOBSHOME}/NASALaRCCloudInGSI_bufr.bufr dones not exist!"
+  ${ECHO} "Warning: ${DATAOBSHOME}/NASALaRCCloudInGSI_bufr.bufr does not exist!"
 fi
 
 # Link statellite radiance data
 # if [ -r "${DATAOBSHOME}/newgblav.${YYYYMMDD}.rap.t${HH}z.1bamua" ]; then
 #  ${LN} -s ${DATAOBSHOME}/newgblav.${YYYYMMDD}.rap.t${HH}z.1bamua ./amsuabufr
 # else
-#   ${ECHO} "Warning: ${DATAOBSHOME}/newgblav.${YYYYMMDD}.rap.t${HH}z.1bamua dones not exist!"
+#   ${ECHO} "Warning: ${DATAOBSHOME}/newgblav.${YYYYMMDD}.rap.t${HH}z.1bamua does not exist!"
 # fi
 # if [ -r "${DATAOBSHOME}/newgblav.${YYYYMMDD}.rap.t${HH}z.1bamub" ]; then
 #   ${LN} -s ${DATAOBSHOME}/newgblav.${YYYYMMDD}.rap.t${HH}z.1bamub ./amsubbufr
 # else
-#   ${ECHO} "Warning: ${DATAOBSHOME}/newgblav.${YYYYMMDD}.rap.t${HH}z.1bamub dones not exist!"
+#   ${ECHO} "Warning: ${DATAOBSHOME}/newgblav.${YYYYMMDD}.rap.t${HH}z.1bamub does not exist!"
 # fi
 # if [ -r "${DATAOBSHOME}/newgblav.${YYYYMMDD}.rap.t${HH}z.1bhrs3" ]; then
 #   ${LN} -s ${DATAOBSHOME}/newgblav.${YYYYMMDD}.rap.t${HH}z.1bhrs3 ./hirs3bufr
 # else
-#   ${ECHO} "Warning: ${DATAOBSHOME}/newgblav.${YYYYMMDD}.rap.t${HH}z.1bhrs3 dones not exist!"
+#   ${ECHO} "Warning: ${DATAOBSHOME}/newgblav.${YYYYMMDD}.rap.t${HH}z.1bhrs3 does not exist!"
 # fi
 # if [ -r "${DATAOBSHOME}/newgblav.${YYYYMMDD}.rap.t${HH}z.1bhrs4" ]; then
 #   ${LN} -s ${DATAOBSHOME}/newgblav.${YYYYMMDD}.rap.t${HH}z.1bhrs4 ./hirs4bufr
 # else
-#   ${ECHO} "Warning: ${DATAOBSHOME}/newgblav.${YYYYMMDD}.rap.t${HH}z.1bhrs4 dones not exist!"
+#   ${ECHO} "Warning: ${DATAOBSHOME}/newgblav.${YYYYMMDD}.rap.t${HH}z.1bhrs4 does not exist!"
 # fi
 # if [ -r "${DATAOBSHOME}/newgblav.${YYYYMMDD}.rap.t${HH}z.1bmhs" ]; then
 #   ${LN} -s ${DATAOBSHOME}/newgblav.${YYYYMMDD}.rap.t${HH}z.1bmhs ./mhsbufr
 # else
-#   ${ECHO} "Warning: ${DATAOBSHOME}/newgblav.${YYYYMMDD}.rap.t${HH}z.1bmhs dones not exist!"
+#   ${ECHO} "Warning: ${DATAOBSHOME}/newgblav.${YYYYMMDD}.rap.t${HH}z.1bmhs does not exist!"
 # fi
 
 # Link the radial velocity data
@@ -308,26 +308,26 @@ fi
 if [ -r "${DATAOBSHOME}/newgblav.${YYYYMMDD}.rap.t${HH}z.radwnd" ]; then
   ${LN} -s ${DATAOBSHOME}/newgblav.${YYYYMMDD}.rap.t${HH}z.radwnd ./radarbufr
 else
-  ${ECHO} "Warning: ${DATAOBSHOME}/newgblav.${YYYYMMDD}.rap.t${HH}z.radwnd dones not exist!"
+  ${ECHO} "Warning: ${DATAOBSHOME}/newgblav.${YYYYMMDD}.rap.t${HH}z.radwnd does not exist!"
 fi
 if [ -r "${DATAOBSHOME}/newgblav.${YYYYMMDD}.rap.t${HH}z.nexrad" ]; then
   ${LN} -s ${DATAOBSHOME}/newgblav.${YYYYMMDD}.rap.t${HH}z.nexrad ./l2rwbufr
 else
-  ${ECHO} "Warning: ${DATAOBSHOME}/newgblav.${YYYYMMDD}.rap.t${HH}z.nexrad dones not exist!"
+  ${ECHO} "Warning: ${DATAOBSHOME}/newgblav.${YYYYMMDD}.rap.t${HH}z.nexrad does not exist!"
 fi
 
 # Link the AMV data
 if [ -r "${DATAOBSHOME}/newgblav.${YYYYMMDD}.rap.t${HH}z.satwnd" ]; then
   ${LN} -s ${DATAOBSHOME}/newgblav.${YYYYMMDD}.rap.t${HH}z.satwnd ./satwndbufr
 else
-  ${ECHO} "Warning: ${DATAOBSHOME}/newgblav.${YYYYMMDD}.rap.t${HH}z.satwnd dones not exist!"
+  ${ECHO} "Warning: ${DATAOBSHOME}/newgblav.${YYYYMMDD}.rap.t${HH}z.satwnd does not exist!"
 fi
 
 # Link the TC vital data
 if [ -r "${DATAOBSHOME}/newgblav.${YYYYMMDD}.tcvitals.t${HH}z" ]; then
    ${LN} -s ${DATAOBSHOME}/newgblav.${YYYYMMDD}.tcvitals.t${HH}z ./tcvitl
 else
-   ${ECHO} "Warning: ${DATAOBSHOME}/newgblav.${YYYYMMDD}.tcvitals.t${HH}z dones not exist!"
+   ${ECHO} "Warning: ${DATAOBSHOME}/newgblav.${YYYYMMDD}.tcvitals.t${HH}z does not exist!"
 fi
 
 ## 

@@ -9,7 +9,7 @@ module load netcdf
 # Vars used for testing.  Should be commented out for production mode
 
 # Set up paths to unix commands
-/RM=/bin/rm
+RM=/bin/rm
 CP=/bin/cp
 MV=/bin/mv
 LN=/bin/ln
@@ -28,6 +28,7 @@ MPIRUN=mpiexec
 #export F_UFMTENDIAN="big;little:10,15,66" #not used, G.Ge 2018/9/4
 #export GMPIENVVAR=F_UFMTENDIAN  #not used, G.Ge 2018/9/4
 export MV2_ON_DEMAND_THRESHOLD=256
+set -x
 
 # Set the path to the gsi executable
 LIGHTNING=${GSI_ROOT}/process_Lightning.exe
@@ -81,7 +82,7 @@ else
     ${ECHO} "ERROR: start time, '${START_TIME}', is not in 'yyyymmddhh' or 'yyyymmdd hh' format"
     exit 1
   fi
-  START_TIME=`${DATE} -d "${START_TIME} ${SUBH_TIME} minutes"`
+  #START_TIME=`${DATE} -d "${START_TIME} ${SUBH_TIME} minutes"`
 fi
 
 # Make sure the GSI executable exists
@@ -101,7 +102,7 @@ if [ -x "process_Lightning.exe" ]; then
 fi
 
 # Compute date & time components for the analysis time
-YYYYMMDDHH=`${DATE} +"%Y%m%d%H" -d "${START_TIME}"`
+YYYYMMDDHH=`${DATE} +"%Y%m%d%H" -d "${START_TIME} ${SUBH_TIME} minutes"`
 YJH=`${DATE} +"%y%j%H" -d "${START_TIME}"`
 NEXTYJH=`${DATE} +"%y%j%H" -d "${START_TIME} 1 hour"`
 

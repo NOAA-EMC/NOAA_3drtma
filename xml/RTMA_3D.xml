@@ -70,7 +70,7 @@
 <!ENTITY LIGHTNING_PROC "1">
 <!ENTITY RADAR_PROC "33">
 <!ENTITY SATELLITE_PROC "1">
-<!ENTITY GSI_HYB_PROC "184">
+<!ENTITY GSI_HYB_PROC "384">
 <!ENTITY GSI_DIAG_PROC "1">
 
 <!ENTITY POST_PROC "32">
@@ -169,7 +169,7 @@
 
       <dependency>
         <or>
-          <datadep><cyclestr offset="-#off#">&LIGHTNING_DIR;/vaisala/netcdf/@y@j@H#min#0005r</cyclestr></datadep>
+          <datadep><cyclestr offset="-#off#">&LIGHTNING_DIR;/vaisala/netcdf/@y@j@H@M0005r</cyclestr></datadep>
           <timedep><cyclestr offset="&START_TIME_RADAR;">@Y@m@d@H@M00</cyclestr></timedep>
         </or>
       </dependency>
@@ -422,7 +422,6 @@
       <or>
         <and>
           <datadep><cyclestr>&PREPBUFR_DIR;/@Y@j@H00.rap.t@Hz.prepbufr.tm00.@Y@m@d</cyclestr></datadep>
-          <datadep><cyclestr>&TOWER_NRSD;/@y@j@H000100o</cyclestr></datadep>
           <datadep><cyclestr>&SODAR_NRSD;/@y@j@H000015o</cyclestr></datadep>
         </and>
         <timedep><cyclestr offset="&START_TIME_CONVENTIONAL;">@Y@m@d@H@M00</cyclestr></timedep>
@@ -511,9 +510,6 @@
       <or>
         <and>
           <datadep><cyclestr>&PREPBUFR_DIR;/@Y@j@H00.rap_e.t@Hz.prepbufr.tm00.@Y@m@d</cyclestr></datadep>
-          <datadep><cyclestr>&NACELLE_RSD;/@y@j@H000010o</cyclestr></datadep>
-          <datadep><cyclestr>&TOWER_RSD;/@y@j@H000010o</cyclestr></datadep>
-          <datadep><cyclestr>&TOWER_NRSD;/@y@j@H000100o</cyclestr></datadep>
           <datadep><cyclestr>&SODAR_NRSD;/@y@j@H000015o</cyclestr></datadep>
         </and>
         <timedep><cyclestr offset="&START_TIME_CONVENTIONAL;">@Y@m@d@H@M00</cyclestr></timedep>
