@@ -3,8 +3,6 @@
 
 # ignore building directory ('build/'), directory of executable files ('exec/','bin/')
 build/
-exec/
-bin/
 
 # ignore directory of log files ('log/', 'logs/')
 log/
@@ -19,3 +17,5 @@ logs/
 *.exe
 
 # exceptional pattern is led by sign "!"
+hrrr_dir
+rtma_dir
