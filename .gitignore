@@ -28,9 +28,9 @@ exec/
 fix/*
 
 # ignore the link files under directory modulefiles
-modulefile/modulefile.ProdGSI.wcoss
-modulefile/modulefile.ProdGSI.theia
-modulefile/modulefile.global_gsi.theia
+modulefiles/modulefile.ProdGSI.wcoss
+modulefiles/modulefile.ProdGSI.theia
+modulefiles/modulefile.global_gsi.theia
 
 # ignore directory of development ('dev')
 **/dev/

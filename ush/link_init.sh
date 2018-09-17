@@ -1,4 +1,4 @@
-#/bin/sh
+#!/bin/sh
 
 # set -x
 
@@ -43,6 +43,7 @@ do
     cd ./sorc
     TOP_SORC=`pwd`
     TOP_RTMA=`dirname $(readlink -f .)`
+    echo " found sorc/ is under $TOP_RTMA"
     break
   else
     cd ..
@@ -60,7 +61,7 @@ TOP_FIX=${TOP_RTMA}/fix
 if [ ! -d ${TOP_FIX} ] ; then mkdir -p ${TOP_FIX} ; fi
 
 # link fix directories
-cd ${FIX_DIR}
+cd ${TOP_FIX}
 if [ $target = theia ]; then
   echo " linking fixed data on $target"
   GSI_fix="/scratch4/NCEPDEV/meso/save/Gang.Zhao/FixData/GSI-fix_rtma3d_emc_test"
@@ -77,6 +78,10 @@ else
   echo " Abort linking task."
   exit 9
 fi
+echo
+ls -ltr $TOP_FIX
+echo
+echo
 
 # copy/link executable files (GSI utility files, etc.)
 GSI_BIN=${TOP_SORC}/build_gsi/bin
@@ -88,10 +93,13 @@ exe_fnames=`ls *`
 cd $EXEC
 for fn in $exe_fnames
 do
-# ln -sf $BIN_GSI/$fn  ./$fn
-  echo " cp -p  $BIN_GSI/$fn  ./$fn "
-  cp -p  $BIN_GSI/$fn  ./$fn
+  echo " cp -p  $GSI_BIN/$fn  ./$fn "
+# ln -sf $GSI_BIN/$fn  ./$fn
+  cp -p  $GSI_BIN/$fn  ./$fn
 done
+
+echo
+ls -ltr $EXEC
 
 #set +x
 

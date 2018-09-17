@@ -1,0 +1,23 @@
+#   load modules for running gsi anl
+#
+ 
+#   . /etc/profile
+#   . /apps/lmod/lmod/init/sh >/dev/null # Module Support
+
+    module purge
+
+    module load intel                   # compiler: intel or pgi
+    module load impi                    # mpi-lib : impi (with intel)
+#   module load mvapich2                #           mvapich2 (with pgi)
+
+#   add nwprod lib/modules available by adding them into module path (command: module use)
+#   module use -a /scratch3/NCEPDEV/nwprod/lib/modulefiles
+
+    module load netcdf
+    module load pnetcdf
+    export NETCDF_INCLUDES=${NETCDF}/include
+    export NETCDF_LIBRARIES=${NETCDF}/lib
+    module load hdf5
+
+    echo "done loading user-specified modules for compiling the code on Theia"
+    echo "Note: all the nwprod libs (e.g., bacio, bufr, etc.) will be re-compiled when GSI is compiled,, instead of using the nwprod libs installed in Theia."

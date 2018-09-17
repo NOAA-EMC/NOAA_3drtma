@@ -51,6 +51,7 @@ do
     cd ./sorc
     TOP_SORC=`pwd`
     TOP_RTMA=`dirname $(readlink -f .)`
+    echo " found sorc/ is under $TOP_RTMA"
     break
   else
     cd ..
@@ -71,13 +72,12 @@ if [ ! -d ${EXEC} ]; then mkdir -p ${EXEC}; fi
 cd ${TOP_SORC}
 # all the building GSI jobs is to be done under sub-direvtory build_gsi
 BUILD_GSI=${TOP_SORC}/build_gsi
-BUILD_LOG=${BUILD_DIR}/build_log
-if [ ! -d ${BUILD_DIR} ] ; then mkdir -p ${BUILD_DIR} ; fi
+BUILD_LOG=${BUILD_GSI}/build_log
+DIRNAME_GSI="rtma_gsi.fd"
+SORCDIR_GSI=${TOP_SORC}/${DIRNAME_GSI}
+if [ ! -d ${BUILD_GSI} ] ; then mkdir -p ${BUILD_GSI} ; fi
 if [ ! -d ${BUILD_LOG} ] ; then mkdir -p ${BUILD_LOG} ; fi
-
 cd ${TOP_SORC}
-GSINAME="rtma_gsi.fd"
-SORCDIR_GSI=${TOP_SORC}/${GSINAME}
 if [ ! -d ${SORCDIR_GSI} ]
 then
   echo " ====> WARNING: GSI source code directory: ${SORCDIR_GSI}  does NOT exist."
@@ -94,6 +94,12 @@ cd ${SORCDIR_GSI}
 echo " ----> check out working branch (based on GSD-GSI branch)"
 echo " ----> git checkout ${wrking_branch} "
 git checkout ${wrking_branch}
+echo " ----------------------------------------------- "
+echo " ----> check up the working branch :"
+git branch
+echo " ----------------------------------------------- "
+echo  " please make sure it is the branch you specified: "
+read -p " Press [Enter] key to continue:"
 
 #==================#
 # load modules
@@ -133,16 +139,18 @@ fi
 # compiling gsi
 echo " ====>  compiling GSI under building directory: ${BUILD_GSI} "
 cd ${BUILD_GSI}
-CMAKE_COMMAND="cmake -DBUILD_UTIL=ON -DCMAKE_BUILD_TYPE=${BUILD_TYPE} -DBUILD_CORELIBS=${build_corelibs}  ../${DIRNAME_GSI}  >& ${BUILD_LOG}/log.cmake.${DIRNAME_GSI}.${BUILD_TYPE}.txt "
-echo " ----> ${CMAKE_COMMAND}" 
-${CMAKE_COMMAND}
 
+echo " cmake -DBUILD_UTIL=ON -DCMAKE_BUILD_TYPE=${BUILD_TYPE} -DBUILD_CORELIBS=${build_corelibs}  ../${DIRNAME_GSI}  >& ./build_log/log.cmake.${DIRNAME_GSI}.${BUILD_TYPE}.txt "
+cmake -DBUILD_UTIL=ON -DCMAKE_BUILD_TYPE=${BUILD_TYPE} -DBUILD_CORELIBS=${build_corelibs}  ../${DIRNAME_GSI}  >& ./build_log/log.cmake.${DIRNAME_GSI}.${BUILD_TYPE}.txt
 
-MAKE_COMMAND="make VERBOSE=1 -j 8 >& ${BUILD_LOG}/log.make.${DIRNAME_GSI}.${BUILD_TYPE}.txt "
-echo " ----> ${MAKE_COMMAND}" 
-${MAKE_COMMAND}
+echo " make VERBOSE=1 -j 8 >& ./build_log/log.make.${DIRNAME_GSI}.${BUILD_TYPE}.txt "
+make VERBOSE=1 -j 8 >& ./build_log/log.make.${DIRNAME_GSI}.${BUILD_TYPE}.txt
 
-copy -p ${BUILD_GSI}/bin/gsi.x   ${EXEC}/rtma3d_gsi
+if [ $? -eq 0 ] ; then
+  echo " cp -p ${BUILD_GSI}/bin/gsi.x   ${EXEC}/rtma3d_gsi "
+  cp -p ${BUILD_GSI}/bin/gsi.x   ${EXEC}/rtma3d_gsi
+  ls -l ${EXEC}/rtma3d_gsi
+fi
 
 #===================================================================#
 

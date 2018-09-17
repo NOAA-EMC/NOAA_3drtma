@@ -1,6 +1,7 @@
 #!/bin/sh
 
-set -x
+date
+# set -x
 
 branch_gsdgsi="feature/gsd_raphrrr_july2018"
 branch_wrking="feature/rtma3d_gsi_${USER}"
@@ -25,6 +26,7 @@ do
     cd ./sorc
     TOP_SORC=`pwd`
     TOP_RTMA=`dirname $(readlink -f .)`
+    echo " found sorc/ is under $TOP_RTMA"
     break
   else
     cd ..
@@ -42,7 +44,7 @@ cd ${TOP_SORC}
 DIRNAME_GSI="rtma_gsi.fd"
 SORCDIR_GSI=${TOP_SORC}/${DIRNAME_GSI}
 
-echo " make a local clone of the ProdGSI repository ... "
+echo " make a local clone of the ProdGSI repository under ${TOP_SORC}/${DIRNAME_GSI} ... "
 echo " ====> git clone gerrit:EMC_noaa-3drtma  ./${DIRNAME_GSI} "
 git clone gerrit:ProdGSI  ./${DIRNAME_GSI}
 cd ./${DIRNAME_GSI}
@@ -62,15 +64,22 @@ git checkout -b ${branch_wrking}
 echo " ====> git branch # (to make sure it is the working branch) "
 git branch
 
+echo ""
+
 # link modulefiles used in GSI
 MODULEFILES=${TOP_RTMA}/modulefiles
 SORCDIR_GSI=${TOP_SORC}/rtma_gsi.fd
+echo " --> linking modulefiles (used for compilation of GSI)  "
 cd ${MODULEFILES}
 mfiles="modulefile.ProdGSI.wcoss modulefile.ProdGSI.theia modulefile.global_gsi.theia"
 for modfile in $mfiles
 do
-  echo " ln -sf ${MODULEFILES}/$modfile ${SORCDIR_GSI}/modulefiles/$modfile "
-  ln -sf ${MODULEFILES}/$modfile ${SORCDIR_GSI}/modulefiles/$modfile
+  echo " ----> ln -sf ${MODULEFILES}/$modfile ${SORCDIR_GSI}/modulefiles/$modfile "
+  ln -sf ${SORCDIR_GSI}/modulefiles/$modfile ${MODULEFILES}/$modfile 
 done
+
+set +x
+
+date
 
 exit 0
