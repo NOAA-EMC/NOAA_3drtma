@@ -2,20 +2,39 @@
 *.swp
 
 # ignore building directory ('build/'), directory of executable files ('exec/','bin/')
-build/
 exec/
-bin/
+**/build*/
+**/bin/
+**/build_log/
 
 # ignore directory of log files ('log/', 'logs/')
-log/
-logs/
+**/log/
+**/logs/
  
 # ignore rocoto database files ('*.db')
 *.db
 
-# ignore object/executable file ('*.o, *.x, *.exe')
+# ignore object/executable/lib file ('*.o, *.x, *.exei, *.a')
 *.o
 *.x
 *.exe
+*.a
+
+# ignore directory of gsi and post(upp) source code ('sorc/rtma_gsi.fd, sorc/rtma_post.fd')
+**/rtma_gsi.fd/
+**/rtma_post.fd/
+
+# ignore the directory of fixed data ('fix/')
+fix/*
+
+# ignore the link files under directory modulefiles
+modulefile/modulefile.ProdGSI.wcoss
+modulefile/modulefile.ProdGSI.theia
+modulefile/modulefile.global_gsi.theia
+
+# ignore directory of development ('dev')
+**/dev/
+**/untrack/
+
 
 # exceptional pattern is led by sign "!"
