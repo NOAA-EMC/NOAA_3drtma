@@ -24,8 +24,8 @@ exec/
 **/rtma_gsi.fd/
 **/rtma_post.fd/
 
-# ignore the directory of fixed data ('fix/')
-fix/
+# ignore the contents under the directory of fixed data ('fix/')
+fix/**
 
 # ignore the link files under directory modulefiles
 modulefiles/modulefile.ProdGSI.wcoss
@@ -42,3 +42,5 @@ workflow/clean_db.sh
 
 
 # exceptional pattern is led by sign "!"
+!workflow/prep_*.sh
+!workflow/prep_*.ksh
