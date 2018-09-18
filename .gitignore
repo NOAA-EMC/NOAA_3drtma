@@ -25,7 +25,7 @@ exec/
 **/rtma_post.fd/
 
 # ignore the directory of fixed data ('fix/')
-fix/*
+fix/
 
 # ignore the link files under directory modulefiles
 modulefiles/modulefile.ProdGSI.wcoss
@@ -35,6 +35,10 @@ modulefiles/modulefile.global_gsi.theia
 # ignore directory of development ('dev')
 **/dev/
 **/untrack/
+
+workflow/rtma3d_retro.xml
+workflow/run_rtma3d_retro.sh
+workflow/clean_db.sh
 
 
 # exceptional pattern is led by sign "!"

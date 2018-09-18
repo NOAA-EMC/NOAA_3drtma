@@ -101,6 +101,13 @@ done
 echo
 ls -ltr $EXEC
 
+# set up the log directory for rocoto workflow running job
+WORFLOW_DIR=${TOP_RTMA}/workflow
+cd WORKFLOW_DIR
+mkdir -p logs
+mkdir -p logs/jlogfiles
+mkdir -p logs/pgmout
+
 #set +x
 
 date
