@@ -3,19 +3,39 @@
 date
 # set -x
 
-branch_gsdgsi="feature/gsd_raphrrr_july2018"
-branch_wrking="feature/rtma3d_gsi_${USER}"
+#=========================================================================#
+# User define the following variables:
 
-build_corelibs="OFF"
+# branch_gsi_gsd: GSD RAP/HRRR-based GSI branch in repository of ProdGSI
+branch_gsi_gsd="feature/gsd_raphrrr_july2018"
+
+# branch_gsi_source: source branch  # the user-specified branch to build on.
+                                    # if not specified by user, 
+                                    #   it is branch_gsi_gsd by default.
+
+# branch_gsi_source="<specify_your_source_branch_name_here>"
+branch_gsi_source=${branch_gsi_source:-"$branch_gsi_gsd"}
+
+build_corelibs="OFF"   # OFF: using installed corelibs (bacio, bufr, etc.)
 # build_type="DEBUG"   # option: DEBUG, or PRODUCTION(default)
 
-echo " this script is going to clone a local repository of ProdGSI "
-echo " to sub-directory of sorc/rtma_gsi.fd and "
-echo " check out the branch of gsdgsi --> ${branch_gsdgsi}"
-echo " to the user working/topic branch --> ${branch_wrking} "
+#=========================================================================#
 
-#===================================================================#
-# detect the machine/platform
+echo "*==================================================================*"
+echo " this script is going to build/make the GSI code for RTMA3D " 
+echo "  building process is under sorc/build_gsi/ "
+echo "   the branch is "
+echo
+echo "   ----> ${branch_gsi_wrking}"
+echo
+echo " please look at the branch name and make sure it is the branch you want to build GSI code on "
+echo " if it is not, abort and change the definition of branch_gsi_source in this script ($0)  "
+read -p " Press [Enter] key to continue (or Press Ctrl-C to abort) "
+echo
+echo "*==================================================================*"
+#
+#--- detect the machine/platform
+#
 if [[ -d /dcom && -d /hwrf ]] ; then
     . /usrx/local/Modules/3.2.10/init/sh
     target=wcoss
@@ -38,11 +58,14 @@ fi
 echo " This machine is $target ."
 #===================================================================#
 
+#
+#--- Finding the RTMA ROOT DIRECTORY --- #
+#
 BASE=`pwd`;
 echo " current directory is $BASE "
 
 # detect existence of directory sorc/
-i_max=4; i=0;
+i_max=5; i=0;
 while [ "$i" -lt "$i_max" ]
 do
   let "i=$i+1"
@@ -77,6 +100,10 @@ DIRNAME_GSI="rtma_gsi.fd"
 SORCDIR_GSI=${TOP_SORC}/${DIRNAME_GSI}
 if [ ! -d ${BUILD_GSI} ] ; then mkdir -p ${BUILD_GSI} ; fi
 if [ ! -d ${BUILD_LOG} ] ; then mkdir -p ${BUILD_LOG} ; fi
+
+#
+#--- detecting the existence of the directory of GSI source package
+#
 cd ${TOP_SORC}
 if [ ! -d ${SORCDIR_GSI} ]
 then
@@ -86,20 +113,20 @@ then
   exit 2
 fi
 
-#===================================================================#
-#                      compilation of GSI
+#
+#--- compilation of GSI
+#
 # working branch
-wrking_branch=${branch_wrking:-"$branch_gsdgsi"}
+wrking_branch=${branch_gsi_source}
 cd ${SORCDIR_GSI}
-echo " ----> check out working branch (based on GSD-GSI branch)"
+echo " ----> check out working branch "
 echo " ----> git checkout ${wrking_branch} "
 git checkout ${wrking_branch}
-echo " ----------------------------------------------- "
-echo " ----> check up the working branch :"
-git branch
-echo " ----------------------------------------------- "
-echo  " please make sure it is the branch you specified: "
-read -p " Press [Enter] key to continue:"
+
+if [ $? -ne 0 ] ; then
+  echo " failed to check out the branch ${wrking_branch} and abort "
+  exit 1
+fi
 
 #==================#
 # load modules
@@ -133,7 +160,6 @@ else
     echo " ----> warning: abort compilation "
     exit 9
 fi
-#==================#
 
 #==================#
 # compiling gsi
@@ -143,17 +169,32 @@ cd ${BUILD_GSI}
 echo " cmake -DBUILD_UTIL=ON -DCMAKE_BUILD_TYPE=${BUILD_TYPE} -DBUILD_CORELIBS=${build_corelibs}  ../${DIRNAME_GSI}  >& ./build_log/log.cmake.${DIRNAME_GSI}.${BUILD_TYPE}.txt "
 cmake -DBUILD_UTIL=ON -DCMAKE_BUILD_TYPE=${BUILD_TYPE} -DBUILD_CORELIBS=${build_corelibs}  ../${DIRNAME_GSI}  >& ./build_log/log.cmake.${DIRNAME_GSI}.${BUILD_TYPE}.txt
 
+if [ $? -ne 0 ] ; then
+  echo " ================ WARNING =============== " 
+  echo " CMake step failed."
+  echo " Check up with the log.cmake file under build_gsi/build_log/"
+  echo "   ----> log.cmake.${DIRNAME_GSI}.${BUILD_TYPE}.txt : "
+  echo " ================ WARNING =============== " 
+fi
+
 echo " make VERBOSE=1 -j 8 >& ./build_log/log.make.${DIRNAME_GSI}.${BUILD_TYPE}.txt "
 make VERBOSE=1 -j 8 >& ./build_log/log.make.${DIRNAME_GSI}.${BUILD_TYPE}.txt
 
 if [ $? -eq 0 ] ; then
+  echo " GSI code and utility codes were built successfully."
   echo " cp -p ${BUILD_GSI}/bin/gsi.x   ${EXEC}/rtma3d_gsi "
   cp -p ${BUILD_GSI}/bin/gsi.x   ${EXEC}/rtma3d_gsi
   ls -l ${EXEC}/rtma3d_gsi
+else
+  echo " ================ WARNING =============== " 
+  echo " Compilation of GSI code was failed."
+  echo " Check up with the log file under build_gsi/build_log/"
+  echo "   ----> log.cmake.${DIRNAME_GSI}.${BUILD_TYPE}.txt : "
+  echo "   ----> log.make.${DIRNAME_GSI}.${BUILD_TYPE}.txt  : "
+  echo " ================ WARNING =============== " 
 fi
 
 #===================================================================#
-
 
 # set +x
 date

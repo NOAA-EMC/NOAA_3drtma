@@ -7,7 +7,9 @@ echo " this script is going to link the fixed data to directory fix/ "
 echo "*==================================================================*"
 
 #===================================================================#
-# detect the machine/platform
+#
+#--- detect the machine/platform
+#
 if [[ -d /dcom && -d /hwrf ]] ; then
     . /usrx/local/Modules/3.2.10/init/sh
     target=wcoss
@@ -28,13 +30,14 @@ else
     exit 9
 fi
 echo " This machine is $target ."
-#===================================================================#
 
 BASE=`pwd`;
 echo " current directory is $BASE "
 
-# detect existence of directory sorc/
-i_max=4; i=0;
+#
+#--- detect existence of directory sorc/
+#
+i_max=5; i=0;
 while [ "$i" -lt "$i_max" ]
 do
   let "i=$i+1"
@@ -60,7 +63,9 @@ USH_DIR=${TOP_RTMA}/ush
 TOP_FIX=${TOP_RTMA}/fix
 if [ ! -d ${TOP_FIX} ] ; then mkdir -p ${TOP_FIX} ; fi
 
-# link fix directories
+#
+#--- link fix directories
+#
 cd ${TOP_FIX}
 if [ $target = theia ]; then
   echo " linking fixed data on $target"
@@ -83,7 +88,9 @@ ls -ltr $TOP_FIX
 echo
 echo
 
-# copy/link executable files (GSI utility files, etc.)
+#
+#--- copy/link executable files (GSI utility files, etc.)
+#
 GSI_BIN=${TOP_SORC}/build_gsi/bin
 EXEC=${TOP_RTMA}/exec
 
@@ -101,7 +108,9 @@ done
 echo
 ls -ltr $EXEC
 
-# set up the log directory for rocoto workflow running job
+#
+#--- set up the log directory for rocoto workflow running job
+#
 WORKFLOW_DIR=${TOP_RTMA}/workflow
 cd $WORKFLOW_DIR
 mkdir -p logs
