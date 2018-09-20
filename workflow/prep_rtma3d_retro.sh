@@ -2,7 +2,9 @@
 
 #This script preps directories for ROCOTO-controlled RTMA/URMA real time and retro runs.
 
-# detect existence of directory sorc/
+#
+#--- detect existence of directory sorc/
+#
 i_max=4; i=0;
 while [ "$i" -lt "$i_max" ]
 do
@@ -25,6 +27,9 @@ then
   exit 1
 fi
 
+#####################################################
+#--- User defined variables                         #
+#####################################################
 set -x
 export startCDATE=201807110000              #yyyymmddhhmm - Starting day of retro run 
 export endCDATE=201807120000                #yyyymmddhhmm - Ending day of RTMA3D run (needed for both RETRO and REAL TIME). 
@@ -58,6 +63,27 @@ export CAP_RUN=`echo ${RUN} | tr '[:lower:]' '[:upper:]'`
 export CAP_ENVIR=`echo ${envir} | tr '[:lower:]' '[:upper:]'`
 export CAP_RUN_ENVIR=`echo ${run_envir} | tr '[:lower:]' '[:upper:]'`
 
+#
+#--- define the path to the static data
+#
+# Note: the following absolute path for static data are only valid for Theia.
+#       User can specify the path to use user's static data.
+# export Fixrtma3d="/scratch4/NCEPDEV/fv3-cam/save/Gang.Zhao/FixData"
+# export FIX_GSI="/scratch4/NCEPDEV/fv3-cam/save/Gang.Zhao/FixData/GSI-fix_rtma3d_emc_test"
+# export FIX_CRTM="/scratch4/NCEPDEV/fv3-cam/save/Gang.Zhao/FixData/CRTM-fix_rtma3d"
+# export OBS_USELIST="/scratch4/NCEPDEV/fv3-cam/save/Gang.Zhao/FixData/ObsUseList_rtma3d"
+# export SFCOBS_USELIST="/scratch4/NCEPDEV/fv3-cam/save/Gang.Zhao/FixData/ObsUseList_rtma3d/gsd/mesonet_uselists"
+# export AIRCRAFT_REJECT="/scratch4/NCEPDEV/fv3-cam/save/Gang.Zhao/FixData/ObsUseList_rtma3d/gsd/amdar_reject_lists"
+# export SFCOBS_PROVIDER="/scratch4/NCEPDEV/fv3-cam/save/Gang.Zhao/FixData/GSI-fix_rtma3d_emc_test"
+
+  export FIXrtma3d="${NWROOT}/fix"
+  export FIX_GSI="${FIXrtma3d}/GSI-fix"
+  export FIX_CRTM="${FIXrtma3d}/CRTM-fix"
+  export OBS_USELIST="${FIXrtma3d}/ObsUseList"
+  export SFCOBS_USELIST="${OBS_USELIST}/mesonet_uselists"
+  export AIRCRAFT_REJECT="${OBS_USELIST}/amdar_reject_lists"
+  export SFCOBS_PROVIDER="${FIX_GSI}"
+
 ########################################################################################
 # Workflow is specified using user-derived settings in xml format    
 ########################################################################################
@@ -90,8 +116,8 @@ cat > ${NWROOT}/workflow/${RUN}_${expname}.xml <<EOF
 <!ENTITY ptmp_base	"${ptmp_base}">
 <!ENTITY NWROOT		"${NWROOT}">
 
-<!ENTITY OBS_DIR	"/scratch4/NCEPDEV/meso/save/Gang.Zhao/Data/GSD_GSI_Case/obs">
-<!ENTITY HRRR_DIR	"/scratch4/NCEPDEV/meso/save/Gang.Zhao/Data/GSD_GSI_Case/fgs">
+<!ENTITY OBS_DIR	"/scratch4/NCEPDEV/fv3-cam/save/Gang.Zhao/Data/GSD_GSI_Case/obs">
+<!ENTITY HRRR_DIR	"/scratch4/NCEPDEV/fv3-cam/save/Gang.Zhao/Data/GSD_GSI_Case/fgs">
 
 <!--  -->
 
@@ -108,11 +134,16 @@ cat > ${NWROOT}/workflow/${RUN}_${expname}.xml <<EOF
 <!ENTITY MODULEFILES	"&HOMErtma3d;/modulefiles">
 <!ENTITY EXECrtma3d	"&HOMErtma3d;/exec">
 <!ENTITY PARMrtma3d	"&HOMErtma3d;/parm">
-<!ENTITY FIXrtma3d	"&HOMErtma3d;/fix">
 
-<!ENTITY FIX_CRTM       "&FIXrtma3d;/CRTM-fix">
-<!ENTITY FIX_GSI        "&FIXrtma3d;/GSI-fix">
-<!ENTITY OBS_USELIST    "&FIXrtma3d;/ObsUseList/gsd">
+<!-- Specific Definition for static data -->
+<!ENTITY FIXrtma3d	"${FIXrtma3d}">
+<!ENTITY FIX_CRTM       "${FIX_CRTM}">
+<!ENTITY FIX_GSI        "${FIX_GSI}">
+<!ENTITY OBS_USELIST    "${OBS_USELIST}">
+<!ENTITY AIRCRAFT_REJECT        "${AIRCRAFT_REJECT}">
+<!ENTITY SFCOBS_USELIST         "${SFCOBS_USELIST}">
+<!ENTITY SFCOBS_PROVIDER        "${SFCOBS_PROVIDER}">
+
 <!ENTITY LOG_WRKFLW	"&LOG_DIR;">
 <!ENTITY LOG_JJOB	"&LOG_DIR;/jlogfiles">
 <!ENTITY LOG_SCHDLR	"&LOG_DIR;">
@@ -133,10 +164,6 @@ cat > ${NWROOT}/workflow/${RUN}_${expname}.xml <<EOF
 <!ENTITY HOMEBASE_DIR	"&NWROOT;">
 <!ENTITY DATABASE_DIR	"&ptmp_base;">
 
-<!-- Specific Definition -->
-<!ENTITY AIRCRAFT_REJECT        "&OBS_USELIST;/amdar_reject_lists">
-<!ENTITY SFCOBS_USELIST         "&OBS_USELIST;/mesonet_uselists">
-<!ENTITY SFCOBS_PROVIDER        "&FIX_GSI;">
 
 <!-- for workflow -->
 

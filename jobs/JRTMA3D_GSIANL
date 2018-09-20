@@ -139,13 +139,14 @@ fi
     export GSI=${GSI_ROOT}/gsi.x
 
 #   Set the path to the GSI static files
-    export FIX_ROOT=${FIXrtma3d:?} 
-    export fixdir=${FIX_GSI:?}
-    export CRTMFIX=${FIX_CRTM:?}
+#   export FIX_ROOT=${FIXrtma3d:?} 
+    export fixdir=${FIX_GSI:-"${FIXrtma3d}/GSI-fix"}
+    export CRTMFIX=${FIX_CRTM:-"${FIXrtma3d}/CRTM-fix"}
+    export OBS_USELIST=${OBS_USELIST:-"${FIXrtma3d}/CRTM-fix"}
 
-    export SFCOBS_USELIST=${SFCOBS_USELIST:?}
-    export AIRCRAFT_REJECT=${AIRCRAFT_REJECT:?}
-    export SFCOBS_PROVIDER=${SFCOBS_PROVIDER:?}
+    export SFCOBS_USELIST=${SFCOBS_USELIST:-"${FIXrtma3d}/ObsUseList/gsd/mesonet_uselists"}
+    export AIRCRAFT_REJECT=${AIRCRAFT_REJECT:-"${FIXrtma3d}/ObsUseList/gsd/amdar_reject_lists"}
+    export SFCOBS_PROVIDER=${SFCOBS_PROVIDER:-"${FIXrtma3d}/GSI-fix"}
 
 ##########################################################
 
