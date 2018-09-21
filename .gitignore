@@ -37,11 +37,14 @@ modulefiles/modulefile.global_gsi.theia
 **/untrack/
 
 # special ignoring rules for workflow/
-workflow/rtma3d_retro.xml
-workflow/run_rtma3d_retro.sh
-workflow/clean_db.sh
+workflow/*.sh
+workflow/*.ksh
+workflow/*.xml
+workflow/*.db
 
 !workflow/prep_*.sh
 !workflow/prep_*.ksh
+!workflow/rtma3d_retro.xml
+!workflow/run_rtma3d_retro.sh
 
 # exceptional pattern is led by sign "!"
