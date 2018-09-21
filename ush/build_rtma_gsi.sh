@@ -26,7 +26,7 @@ echo " this script is going to build/make the GSI code for RTMA3D "
 echo "  building process is under sorc/build_gsi/ "
 echo "   the branch is "
 echo
-echo "   ----> ${branch_gsi_wrking}"
+echo "   ----> ${branch_gsi_source}"
 echo
 echo " please look at the branch name and make sure it is the branch you want to build GSI code on "
 echo " if it is not, abort and change the definition of branch_gsi_source in this script ($0)  "

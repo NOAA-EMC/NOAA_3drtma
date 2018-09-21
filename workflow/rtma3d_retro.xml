@@ -1,120 +1,29 @@
-#!/bin/sh
-
-#This script preps directories for ROCOTO-controlled RTMA/URMA real time and retro runs.
-
-#
-#--- detect existence of directory sorc/
-#
-i_max=4; i=0;
-while [ "$i" -lt "$i_max" ]
-do
-  let "i=$i+1"
-  if [ -d ./sorc ]
-  then
-    cd ./sorc
-    TOP_RTMA=`dirname $(readlink -f .)`
-    TOP_0000=`dirname ${TOP_RTMA}`
-    TOP_BASE=`basename ${TOP_RTMA}`
-    echo " found the rtma3d root directory is $TOP_RTMA"
-    break
-  else
-    cd ..
-  fi
-done
-if [ "$i" -ge "$i_max" ]
-then
-  echo ' RTMA3D root directory could not be found. Abort the task of compilation.'
-  exit 1
-fi
-
-#####################################################
-#--- User defined variables                         #
-#####################################################
-set -x
-export startCDATE=201807110000              #yyyymmddhhmm - Starting day of retro run 
-export endCDATE=201807120000                #yyyymmddhhmm - Ending day of RTMA3D run (needed for both RETRO and REAL TIME). 
-export NET=rtma3d                           #selection of rtma3d (or rtma,urma)
-export RUN=rtma3d                           #selection of rtma3d (or rtma,urma)
-export envir="retro"                        #environment (test, prod, dev, etc.)
-export run_envir="dev"                      #
-export expname="${envir}"
-export ptmp_base="/scratch3/NCEPDEV/stmp1/${USER}/wrkdir_${NET}"  #base subdirectory for all subsequent working and storage directories
-export NWROOT=${TOP_RTMA}                   #root directory for RTMA/URMA j-job scripts, scripts, parm files, etc. 
-export QUEUE="batch"                        #user-specified processing queue
-export QUEUE_DBG="debug"                    #user-specified processing queue -- debug
-export QUEUE_SVC="service"                  #user-specified transfer queue
-export ACCOUNT="fv3-cpu"                    #Theia account
-export ACCOUNT_DA="da-cpu"                  #Theia account
-
-# detect the machine/platform
-if [ `grep -c 'E5-2690 v3' /proc/cpuinfo` -gt 0 ]; then
-  # Look for the Haswell chip
-  echo 'Running on Theia'
-  MACHINE=theia
-else
-  echo 'Running on wcoss'
-  MACHINE=wcoss
-  echo ' $machine is ready for running $NET.'
-  exit 1
-fi
-
-export CAP_NET=`echo ${NET} | tr '[:lower:]' '[:upper:]'`
-export CAP_RUN=`echo ${RUN} | tr '[:lower:]' '[:upper:]'`
-export CAP_ENVIR=`echo ${envir} | tr '[:lower:]' '[:upper:]'`
-export CAP_RUN_ENVIR=`echo ${run_envir} | tr '[:lower:]' '[:upper:]'`
-
-#
-#--- define the path to the static data
-#
-# Note: the following absolute path for static data are only valid for Theia.
-#       User can specify the path to use user's static data.
-# export Fixrtma3d="/scratch4/NCEPDEV/fv3-cam/save/Gang.Zhao/FixData"
-# export FIX_GSI="/scratch4/NCEPDEV/fv3-cam/save/Gang.Zhao/FixData/GSI-fix_rtma3d_emc_test"
-# export FIX_CRTM="/scratch4/NCEPDEV/fv3-cam/save/Gang.Zhao/FixData/CRTM-fix_rtma3d"
-# export OBS_USELIST="/scratch4/NCEPDEV/fv3-cam/save/Gang.Zhao/FixData/ObsUseList_rtma3d"
-# export SFCOBS_USELIST="/scratch4/NCEPDEV/fv3-cam/save/Gang.Zhao/FixData/ObsUseList_rtma3d/gsd/mesonet_uselists"
-# export AIRCRAFT_REJECT="/scratch4/NCEPDEV/fv3-cam/save/Gang.Zhao/FixData/ObsUseList_rtma3d/gsd/amdar_reject_lists"
-# export SFCOBS_PROVIDER="/scratch4/NCEPDEV/fv3-cam/save/Gang.Zhao/FixData/GSI-fix_rtma3d_emc_test"
-
-  export FIXrtma3d="${NWROOT}/fix"
-  export FIX_GSI="${FIXrtma3d}/GSI-fix"
-  export FIX_CRTM="${FIXrtma3d}/CRTM-fix"
-  export OBS_USELIST="${FIXrtma3d}/ObsUseList"
-  export SFCOBS_USELIST="${OBS_USELIST}/mesonet_uselists"
-  export AIRCRAFT_REJECT="${OBS_USELIST}/amdar_reject_lists"
-  export SFCOBS_PROVIDER="${FIX_GSI}"
-
-########################################################################################
-# Workflow is specified using user-derived settings in xml format    
-########################################################################################
-
-cat > ${NWROOT}/workflow/${RUN}_${expname}.xml <<EOF 
 <?xml version="1.0" encoding="UTF-8"?>
 
 <!DOCTYPE workflow [
 
 <!-- Key variables -->
 <!-- date/time of cases or cycles -->
-<!ENTITY startCDATE     "${startCDATE}">
-<!ENTITY endCDATE       "${endCDATE}">
+<!ENTITY startCDATE     "201807110000">
+<!ENTITY endCDATE       "201807120000">
 
-<!ENTITY NET		"${NET}">
-<!ENTITY RUN		"${RUN}">
-<!ENTITY envir		"${envir}">
-<!ENTITY RUN_ENVIR	"${run_envir}">
-<!ENTITY CAP_NET	"${CAP_NET}">
-<!ENTITY CAP_RUN	"${CAP_RUN}">
-<!ENTITY CAP_ENVIR	"${CAP_ENVIR}">
-<!ENTITY CAP_RUN_ENVIR	"${CAP_RUN_ENVIR}">
+<!ENTITY NET		"rtma3d">
+<!ENTITY RUN		"rtma3d">
+<!ENTITY envir		"retro">
+<!ENTITY RUN_ENVIR	"dev">
+<!ENTITY CAP_NET	"RTMA3D">
+<!ENTITY CAP_RUN	"RTMA3D">
+<!ENTITY CAP_ENVIR	"RETRO">
+<!ENTITY CAP_RUN_ENVIR	"DEV">
 <!ENTITY model		"&RUN;">
 
-<!ENTITY MACHINE	"${MACHINE}">
+<!ENTITY MACHINE	"theia">
 <!ENTITY machine	"&MACHINE;">
 
 <!-- Variables Defined by absolute paths -->
 
-<!ENTITY ptmp_base	"${ptmp_base}">
-<!ENTITY NWROOT		"${NWROOT}">
+<!ENTITY ptmp_base	"/scratch3/NCEPDEV/stmp1/Gang.Zhao/wrkdir_rtma3d">
+<!ENTITY NWROOT		"/scratch4/NCEPDEV/da/save/Gang.Zhao/rtma3d_dev/testrun">
 
 <!ENTITY OBS_DIR	"/scratch4/NCEPDEV/fv3-cam/save/Gang.Zhao/Data/GSD_GSI_Case/obs">
 <!ENTITY HRRR_DIR	"/scratch4/NCEPDEV/fv3-cam/save/Gang.Zhao/Data/GSD_GSI_Case/fgs">
@@ -136,13 +45,13 @@ cat > ${NWROOT}/workflow/${RUN}_${expname}.xml <<EOF
 <!ENTITY PARMrtma3d	"&HOMErtma3d;/parm">
 
 <!-- Specific Definition for static data -->
-<!ENTITY FIXrtma3d	"${FIXrtma3d}">
-<!ENTITY FIX_CRTM       "${FIX_CRTM}">
-<!ENTITY FIX_GSI        "${FIX_GSI}">
-<!ENTITY OBS_USELIST    "${OBS_USELIST}">
-<!ENTITY AIRCRAFT_REJECT        "${AIRCRAFT_REJECT}">
-<!ENTITY SFCOBS_USELIST         "${SFCOBS_USELIST}">
-<!ENTITY SFCOBS_PROVIDER        "${SFCOBS_PROVIDER}">
+<!ENTITY FIXrtma3d	"/scratch4/NCEPDEV/da/save/Gang.Zhao/rtma3d_dev/testrun/fix">
+<!ENTITY FIX_CRTM       "/scratch4/NCEPDEV/da/save/Gang.Zhao/rtma3d_dev/testrun/fix/CRTM-fix">
+<!ENTITY FIX_GSI        "/scratch4/NCEPDEV/da/save/Gang.Zhao/rtma3d_dev/testrun/fix/GSI-fix">
+<!ENTITY OBS_USELIST    "/scratch4/NCEPDEV/da/save/Gang.Zhao/rtma3d_dev/testrun/fix/ObsUseList">
+<!ENTITY AIRCRAFT_REJECT        "/scratch4/NCEPDEV/da/save/Gang.Zhao/rtma3d_dev/testrun/fix/ObsUseList/amdar_reject_lists">
+<!ENTITY SFCOBS_USELIST         "/scratch4/NCEPDEV/da/save/Gang.Zhao/rtma3d_dev/testrun/fix/ObsUseList/mesonet_uselists">
+<!ENTITY SFCOBS_PROVIDER        "/scratch4/NCEPDEV/da/save/Gang.Zhao/rtma3d_dev/testrun/fix/GSI-fix">
 
 <!ENTITY LOG_WRKFLW	"&LOG_DIR;">
 <!ENTITY LOG_JJOB	"&LOG_DIR;/jlogfiles">
@@ -185,11 +94,11 @@ cat > ${NWROOT}/workflow/${RUN}_${expname}.xml <<EOF
 
 <!-- Resources -->
 
-<!ENTITY ACCOUNT         "${ACCOUNT}">
-<!ENTITY ACCOUNT_DA      "${ACCOUNT_DA}">
-<!ENTITY QUEUE           "${QUEUE}">
-<!ENTITY QUEUE_DBG       "${QUEUE_DBG}">
-<!ENTITY QUEUE_SVC       "${QUEUE_SVC}">
+<!ENTITY ACCOUNT         "fv3-cpu">
+<!ENTITY ACCOUNT_DA      "da-cpu">
+<!ENTITY QUEUE           "batch">
+<!ENTITY QUEUE_DBG       "debug">
+<!ENTITY QUEUE_SVC       "service">
 
 <!ENTITY time_sig  "@Y@m@d@H">
 <!ENTITY time_int  "1hr">
@@ -638,7 +547,7 @@ cat > ${NWROOT}/workflow/${RUN}_${expname}.xml <<EOF
 
     <command>&JJOB_DIR;/launch.sh &JJOB_DIR;/J&CAP_NET;_FETCHHPSS</command>
     <jobname><cyclestr>&NET;_fetchhpss_@H</cyclestr></jobname>
-    <join><cyclestr>&LOG_SCHDLR;/&NET;_submit_fetchhpss_@Y@m@d@H@M.log\${PBS_JOBID}</cyclestr></join>
+    <join><cyclestr>&LOG_SCHDLR;/&NET;_submit_fetchhpss_@Y@m@d@H@M.log${PBS_JOBID}</cyclestr></join>
 
     &FETCHHPSS_RESOURCES;
     &ENVARS_FETCHHPSS;
@@ -656,7 +565,7 @@ cat > ${NWROOT}/workflow/${RUN}_${expname}.xml <<EOF
 
     <command>&JJOB_DIR;/launch.sh &JJOB_DIR;/J&CAP_NET;_PREPOBS</command>
     <jobname><cyclestr>&NET;_prepobs_@H</cyclestr></jobname>
-    <join><cyclestr>&LOG_SCHDLR;/&NET;_submit_prepobs_@Y@m@d@H@M.log\${PBS_JOBID}</cyclestr></join>
+    <join><cyclestr>&LOG_SCHDLR;/&NET;_submit_prepobs_@Y@m@d@H@M.log${PBS_JOBID}</cyclestr></join>
 
     &PREPOBS_RESOURCES;
     &ENVARS_PREPJOB;
@@ -678,7 +587,7 @@ cat > ${NWROOT}/workflow/${RUN}_${expname}.xml <<EOF
 
     <command>&JJOB_DIR;/launch.sh &JJOB_DIR;/J&CAP_NET;_PREPFGS</command>
     <jobname><cyclestr>&NET;_prepfgs_@H</cyclestr></jobname>
-    <join><cyclestr>&LOG_SCHDLR;/&NET;_submit_prepfgs_@Y@m@d@H@M.log\${PBS_JOBID}</cyclestr></join>
+    <join><cyclestr>&LOG_SCHDLR;/&NET;_submit_prepfgs_@Y@m@d@H@M.log${PBS_JOBID}</cyclestr></join>
 
     &PREPFGS_RESOURCES;
     &ENVARS_PREPJOB;
@@ -703,7 +612,7 @@ cat > ${NWROOT}/workflow/${RUN}_${expname}.xml <<EOF
 
     <command>&JJOB_DIR;/launch.sh &JJOB_DIR;/J&CAP_NET;_GSIANL</command>
     <jobname><cyclestr>&NET;_gsianl_@H</cyclestr></jobname>
-    <join><cyclestr>&LOG_SCHDLR;/&NET;_submit_gsianl_@Y@m@d@H@M.log\${PBS_JOBID}</cyclestr></join>
+    <join><cyclestr>&LOG_SCHDLR;/&NET;_submit_gsianl_@Y@m@d@H@M.log${PBS_JOBID}</cyclestr></join>
 
     &ENVARS_GSI;
 
@@ -717,66 +626,3 @@ cat > ${NWROOT}/workflow/${RUN}_${expname}.xml <<EOF
   </task>
 
 </workflow>
-EOF
-
-########################################################################################
-#   Done building xml file 
-########################################################################################
-
-########################################################################################
-#   Setting up and creating RTMA3D directories 
-########################################################################################
-
-
-if [ ! -d $ptmp_base ]; then
-  mkdir -p $ptmp_base
-fi
-export DATAROOT=$ptmp_base/data
-if [ ! -d $DATAROOT ]; then
-  mkdir -p $DATAROOT
-fi
-export COMROOT=$ptmp_base/com2
-if [ ! -d $COMROOT ]; then
-  mkdir -p $COMROOT
-fi
-
-export LOGDIR=$NWROOT/workflow/logs
-if [ ! -d $LOGDIR ] ; then
-  mkdir -p $LOGDIR
-fi
-export JLOGFILES=$LOGDIR/jlogfiles
-if [ ! -d $JLOGFILES ] ; then
-  mkdir -p $JLOGFILES
-fi
-export PGMOUT=$LOGDIR/pgmout
-if [ ! -d $PGMOUT ] ; then
-  mkdir -p $PGMOUT
-fi
-
-########################################################################################
-#   Creating RTMA3D run script
-########################################################################################
-
-
-# Now make the run_NAMRR.sh script that can be invoked from a crontab
-
-if [ ${MACHINE} = 'theia' ]; then
-cat > ${NWROOT}/workflow/run_${RUN}_${expname}.sh <<EOF 
-#!/bin/sh -l
-
-# . /etc/profile
-# . /apps/lmod/lmod/init/ksh >/dev/null # Module Support
-
-module load intel
-module load rocoto
-EOF
-fi
-
-cat >> ${NWROOT}/workflow/run_${RUN}_${expname}.sh <<EOF
-rocotorun -v 10 -w ${NWROOT}/workflow/${RUN}_${expname}.xml -d ${NWROOT}/workflow/${RUN}_${expname}.db 
-EOF
-
-chmod 744 ${NWROOT}/workflow/run_${RUN}_${expname}.sh
-echo "RTMA3D is ready to go! Run using run_${RUN}_${expname}.sh.  Make sure your xml file has consistent directory settings!"
-
-exit 
