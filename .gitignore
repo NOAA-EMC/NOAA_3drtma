@@ -30,7 +30,10 @@ fix/
 # ignore the link files under directory modulefiles
 modulefiles/modulefile.ProdGSI.wcoss
 modulefiles/modulefile.ProdGSI.theia
+modulefiles/modulefile.POST.wcoss
+modulefiles/modulefile.POST.theia
 modulefiles/modulefile.global_gsi.theia
+modulefiles/modulefile.global_post.theia
 
 # ignore directory of development ('dev')
 **/dev/
