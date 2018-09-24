@@ -6,6 +6,7 @@ exec/
 **/build*/
 **/bin/
 **/build_log/
+sorc/**/log.*
 
 # ignore directory of log files ('log/', 'logs/')
 **/log/
@@ -14,11 +15,12 @@ exec/
 # ignore rocoto database files ('*.db')
 *.db
 
-# ignore object/executable/lib file ('*.o, *.x, *.exei, *.a')
+# ignore object/executable/lib/module file ('*.o, *.x, *.exei, *.a, *.mod')
 *.o
 *.x
 *.exe
 *.a
+sorc/**/*.mod
 
 # ignore directory of gsi and post(upp) source code ('sorc/rtma_gsi.fd, sorc/rtma_post.fd')
 **/rtma_gsi.fd/

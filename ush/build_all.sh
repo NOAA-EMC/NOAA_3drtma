@@ -48,6 +48,27 @@ echo " running build_rtma_gsi.sh to build GSI code ..."
 ./build_rtma_gsi.sh
 
 #
+#--- build obs pre-process code for MOSAIC Radar data
+#
+cd ${USH_DIR}
+echo " running build_rtma_process_mosaic.sh to build obs process MOSAIC code ..."
+./build_rtma_process_mosaic.sh
+
+#
+#--- build obs pre-process code for NASA Cloud data
+#
+cd ${USH_DIR}
+echo " running build_rtma_process_cloud.sh to build obs process NASA Cloud code ..."
+./build_rtma_process_cloud.sh
+
+#
+#--- build obs pre-process code for ENLTN GLM lightning data
+#
+cd ${USH_DIR}
+echo " running build_rtma_process_lightning.sh to build obs process ENLTN lightning code ..."
+./build_rtma_process_lightning.sh
+
+#
 #--- link exe, fixed data, etc.
 #
 cd ${USH_DIR}
