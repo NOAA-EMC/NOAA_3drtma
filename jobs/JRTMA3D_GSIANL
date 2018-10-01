@@ -142,6 +142,7 @@ fi
 #   export FIX_ROOT=${FIXrtma3d:?} 
     export fixdir=${FIX_GSI:-"${FIXrtma3d}/GSI-fix"}
     export CRTMFIX=${FIX_CRTM:-"${FIXrtma3d}/CRTM-fix"}
+    export WRFPARM=${PARM_WRF:-"${FIXrtma3d}/WRF-parm"}
     export OBS_USELIST=${OBS_USELIST:-"${FIXrtma3d}/CRTM-fix"}
 
     export SFCOBS_USELIST=${SFCOBS_USELIST:-"${FIXrtma3d}/ObsUseList/gsd/mesonet_uselists"}

@@ -72,12 +72,15 @@ if [ $target = theia ]; then
   GSI_fix="/scratch4/NCEPDEV/meso/save/Gang.Zhao/FixData/GSI-fix_rtma3d_emc_test"
   CRTM_fix="/scratch4/NCEPDEV/meso/save/Gang.Zhao/FixData/CRTM-fix_rtma3d"
   ObsUseList="/scratch4/NCEPDEV/meso/save/Gang.Zhao/FixData/ObsUseList_rtma3d"
+  WRF_parm="/scratch4/NCEPDEV/meso/save/Gang.Zhao/FixData/WRF-parm"
   echo " ln -sf ${GSI_fix}        ./GSI-fix"
   ln -sf ${GSI_fix}        ./GSI-fix
   echo " ln -sf ${CRTM_fix}       ./CRTM-fix"
   ln -sf ${CRTM_fix}       ./CRTM-fix
   echo " ln -sf ${ObsUseList}     ./ObsUseList"
   ln -sf ${ObsUseList}     ./ObsUseList
+  echo " ln -sf ${WRF_parm}       ./WRF-parm"
+  ln -sf ${WRF_parm}       ./WRF_parm
 else
   echo " this fix directories have not set up yet for machine $target."
   echo " Abort linking task."

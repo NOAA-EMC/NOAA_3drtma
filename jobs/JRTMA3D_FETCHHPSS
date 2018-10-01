@@ -78,12 +78,21 @@ export USHrtma3d=${USHrtma3d:-$HOMErtma3d/ush/${RUN}}
 #################################################
 export COMIN=${COMIN:-${COMROOT}/${NET}/${envir}/${RUN}.${PDY}}
 export COMOUT=${COMOUT:-${COMROOT}/${NET}/${envir}/${RUN}.${PDY}}
+export COMINobsproc_rtma3d=${COMINobsproc_rtma3d:-"${COMIN}/obsprd.${cycle}"}
+export GESINhrrr_rtma3d=${GESINhrrr_rtma3d:-"${COMIN}/fgsprd.${cycle}"}
 
+# preparing directories
 if [ ! -d "${COMIN}" ] ; then
    mkdir -p $COMIN
 fi
 if [ ! -d "${COMOUT}" ] ; then
    mkdir -p $COMOUT
+fi
+if [ ! -d "${COMINobsproc_rtma3d}" ] ; then
+   mkdir -p $COMINobsproc_rtma3d
+fi
+if [ ! -d "${GESINhrrr_rtma3d}" ] ; then
+   mkdir -p $GESINhrrr_rtma3d
 fi
 
 

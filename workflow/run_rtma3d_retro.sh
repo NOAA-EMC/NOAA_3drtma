@@ -5,4 +5,4 @@
 
 module load intel
 module load rocoto
-rocotorun -v 10 -w /scratch4/NCEPDEV/da/save/Gang.Zhao/rtma3d_dev/testrun/workflow/rtma3d_retro.xml -d /scratch4/NCEPDEV/da/save/Gang.Zhao/rtma3d_dev/testrun/workflow/rtma3d_retro.db 
+rocotorun -v 10 -w /scratch4/NCEPDEV/da/save/Gang.Zhao/rtma3d_dev/rtma3d_workflow/workflow/rtma3d_retro.xml -d /scratch4/NCEPDEV/da/save/Gang.Zhao/rtma3d_dev/rtma3d_workflow/workflow/rtma3d_retro.db 
