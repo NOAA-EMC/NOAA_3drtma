@@ -46,7 +46,7 @@ fi
 
 #############################################################################
 # Make sure START_TIME is defined and in the correct format
-START_TIME=${START_TIME:-"{PDY}' '${cyc}"}
+START_TIME=${START_TIME:-"{PDY} ${cyc}"}
 echo $START_TIME
 echo $cyc
 if [ ! "${START_TIME}" ]; then
@@ -124,6 +124,6 @@ fi
 
 export err=$? ; err_chk
 
-ls -l ${GESINhrrr_rtma3d} > ${GESINhrrr_rtma3d}/fgs_data_${PDY}_t${cycle}_${subcyc}.list
+ls -l ${GESINhrrr_rtma3d} > ${GESINhrrr_rtma3d}/fgs_data_${PDY}_${cyc}_${subcyc}.list
 
 exit 0

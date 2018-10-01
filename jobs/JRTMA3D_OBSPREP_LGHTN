@@ -90,19 +90,19 @@ export FGS_OPT=${FGS_OPT:-1}
 export COMIN=${COMIN:-${COMROOT}/${NET}/${envir}/${RUN}.${PDY}}
 export COMOUT=${COMOUT:-${COMROOT}/${NET}/${envir}/${RUN}.${PDY}}
 
+### Observations Products/Input from RAP
+export COMINrap=${COMINrap:-"${COMIN}/rap.${PDY}"}
+export COMINrap_e=${COMINrap:-"${COMIN}/rap_e.${PDY}"}
+export COMINhrrr=${COMINhrrr:-"${COMIN}/hrrr.${PDY}/conus"}
+export COMINlightning=${COMINlightning:-"${COMIN}/lightning.${PDY}"}
+export COMINmosaic=${COMINmosaic:-"${COMIN}/radar.${PDY}"}
+export COMINradar=${COMINradar:-"${COMIN}/radar.${PDY}"}
+
 ### Observations Products/Input for the RTMA3D (prepbufr files) 
 export COMINobsproc_rtma3d=${COMINobsproc_rtma3d:-"${COMIN}/obsprd.${cycle}"}
-if [ ! -d "${COMINobsproc_rtma3d}" ] ; then
-  echo " Directory of obs data does NOT exist. Job abort!"
-  err_exit
-fi
 
 ### Firstguess Products/Input for the RTMA3D (prepbufr files) 
 export GESINhrrr_rtma3d=${GESINhrrr_rtma3d:-"${COMIN}/fgsprd.${cycle}"}
-if [ ! -d "${GESINhrrr_rtma3d}" ] ; then
-  echo " Directory of HRRRs fgs data does NOT exist. Job abort!"
-  err_exit
-fi
 
 if [ ! -d "${COMIN}" ] ; then
    mkdir -p $COMIN
@@ -110,33 +110,28 @@ fi
 if [ ! -d "${COMOUT}" ] ; then
    mkdir -p $COMOUT
 fi
+if [ ! -d "${COMINobsproc_rtma3d}" ] ; then
+# echo " Directory of obs data does NOT exist. Job abort!"
+# err_exit
+  mkdir -p $COMINobsproc_rtma3d
+fi
 
 ###########################################################
 #
-# The following variables are used in exrtma3d_gsianl.sh
+# The following variables are used in exrtma3d_obsprep_lghtn.sh
 #
 ###########################################################
-#   Set the path to the working/obs/ges directories
-    RUNDIR_GSD=${RUNDIR_GSD:-"${DATAROOT}/${RUN}_${PDY}${cyc}${subcyc}"}
-    if [ ! -d "${RUNDIR_GSD}" ] ; then
-        mkdir -p ${RUNDIR_GSD}
+
+#   Set the path to the executable
+    export LGHTN_EXEDIR=${LGHTN_EXEDIR:-"${EXECrtma3d}"}
+    if [ $obsprep_lghtn -eq 1 ] ; then
+        export LGHTN_EXE=${LGHTN_EXE:-"process_Lightning_bufr.exe"}
+    elif [ $obsprep_lghtn -eq 2 ] ; then
+        export LGHTN_EXE=${LGHTN_EXE:-"process_Lightning_entln.exe"}
+    elif [ $obsprep_lghtn -eq 3 ] ; then
+        export LGHTN_EXE=${LGHTN_EXE:-"process_Lightning.exe"}
     fi
-    export DATAHOME=${RUNDIR_GSD}/gsiprd
-    ${RM} -rf ${DATAHOME}
-    ${LN} -s  ${DATA}  ${DATAHOME}
-
-    export DATAOBSHOME=${RUNDIR_GSD}/obsprd
-    ${RM} -rf ${DATAOBSHOME}
-    ${LN} -s  ${COMINobsproc_rtma3d}  ${DATAOBSHOME}
-
-    export DATAHOME_BK=${RUNDIR_GSD}/fgsprd
-    ${RM} -rf ${DATAHOME_BK}
-    ${LN} -s  ${GESINhrrr_rtma3d}  ${DATAHOME_BK}
-
-
-#   Set the path to the gsi executable
-    export GSI_ROOT=${EXECrtma3d:?} 
-    export GSI=${GSI_ROOT}/gsi.x
+    export LGHTN=${LGHTN:-"${LGHTN_EXEDIR}/${LGHTN_EXE}"}
 
 #   Set the path to the GSI static files
 #   export FIX_ROOT=${FIXrtma3d:?} 
@@ -145,16 +140,12 @@ fi
     export WRFPARM=${PARM_WRF:-"${FIXrtma3d}/WRF-parm"}
     export OBS_USELIST=${OBS_USELIST:-"${FIXrtma3d}/CRTM-fix"}
 
-    export SFCOBS_USELIST=${SFCOBS_USELIST:-"${FIXrtma3d}/ObsUseList/gsd/mesonet_uselists"}
-    export AIRCRAFT_REJECT=${AIRCRAFT_REJECT:-"${FIXrtma3d}/ObsUseList/gsd/amdar_reject_lists"}
-    export SFCOBS_PROVIDER=${SFCOBS_PROVIDER:-"${FIXrtma3d}/GSI-fix"}
-
 ##########################################################
 
 ######################
 # Execute the script.
 ######################
-${exSCR_GSIANL:-$HOMErtma3d/scripts/${RUN}/ex${RUN}_gsianl.sh}
+${exSCR_OBSPREP_LGHTN:-$HOMErtma3d/scripts/${RUN}/ex${RUN}_obsprep_lghtn.sh}
 export err=$?; err_chk
 
 msg="$0 of $job completed normally"

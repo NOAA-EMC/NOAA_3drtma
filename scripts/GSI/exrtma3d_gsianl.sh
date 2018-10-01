@@ -82,6 +82,7 @@ fi
 # Make sure START_TIME is defined and in the correct format
 
 # START_TIME=${PDY}' '${cyc}
+START_TIME=${START_TIME:-"{PDY} ${cyc}"}
 echo $START_TIME
 echo $cyc
 if [ ! "${START_TIME}" ]; then
@@ -177,24 +178,32 @@ if [ -r "${DATAOBSHOME}/NSSLRefInGSI.bufr" ]; then
   ${LN} -s ${DATAOBSHOME}/NSSLRefInGSI.bufr ./refInGSI
 elif [ -r "${DATAOBSHOME}/hrrr.t${HH}z.NSSLRefInGSI.bufr" ]; then
   ${LN} -s ${DATAOBSHOME}/hrrr.t${HH}z.NSSLRefInGSI.bufr ./refInGSI
+elif [ -r "${DATAOBSHOME}/${RUN}.t${HH}z.NSSLRefInGSI.bufr" ]; then
+  ${LN} -s ${DATAOBSHOME}/${RUN}.t${HH}z.NSSLRefInGSI.bufr ./refInGSI
 else
-  ${ECHO} "Warning: ${DATAOBSHOME}/hrrr.t${HH}z.NSSLRefInGSI.bufr or NSSLRefInGSI.bufr dones not exist!"
+  ${ECHO} "Warning: ${DATAOBSHOME}:NSSLRefInGSI.bufr does not exist!"
 fi
 
 if [ -r "${DATAOBSHOME}/LightningInGSI.bufr" ]; then
   ${LN} -s ${DATAOBSHOME}/LightningInGSI.bufr ./lghtInGSI
 elif [ -r "${DATAOBSHOME}/hrrr.t${HH}z.LightningInGSI.bufr" ]; then
   ${LN} -s ${DATAOBSHOME}/hrrr.t${HH}z.LightningInGSI.bufr ./lghtInGSI
+elif [ -r "${DATAOBSHOME}/${RUN}.t${HH}z.LightningInGSI.bufr" ]; then
+  ${LN} -s ${DATAOBSHOME}/${RUN}.t${HH}z.LightningInGSI.bufr ./lghtInGSI
+elif [ -r "${DATAOBSHOME}/${RUN}.t${HH}z.LightningInGSI_bufr.bufr" ]; then
+  ${LN} -s ${DATAOBSHOME}/${RUN}.t${HH}z.LightningInGSI_bufr.bufr ./lghtInGSI
 else
-  ${ECHO} "Warning: ${DATAOBSHOME}/hrrr.t${HH}z.LightningInGSI.bufr or LightningInGSI.bufr dones not exist!"
+  ${ECHO} "Warning: ${DATAOBSHOME}: LightningInGSI.bufr does not exist!"
 fi
 
 if [ -r "${DATAOBSHOME}/NASALaRCCloudInGSI.bufr" ]; then
   ${LN} -s ${DATAOBSHOME}/NASALaRCCloudInGSI.bufr ./larcInGSI
 elif [ -r "${DATAOBSHOME}/hrrr.t${HH}z.NASALaRCCloudInGSI.bufr" ]; then
   ${LN} -s ${DATAOBSHOME}/hrrr.t${HH}z.NASALaRCCloudInGSI.bufr ./larcInGSI
+elif [ -r "${DATAOBSHOME}/${RUN}.t${HH}z.NASALaRCCloudInGSI.bufr" ]; then
+  ${LN} -s ${DATAOBSHOME}/${RUN}.t${HH}z.NASALaRCCloudInGSI.bufr ./larcInGSI
 else
-  ${ECHO} "Warning: ${DATAOBSHOME}/hrrr.t${HH}z.NASALaRCCloudInGSI.bufr does not exist!"
+  ${ECHO} "Warning: ${DATAOBSHOME}: NASALaRCCloudInGSI.bufr does not exist!"
 fi
 
 # Link statellite radiance data

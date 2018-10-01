@@ -14,7 +14,7 @@ ARCH     =
 FLAGS= -O3 -fp-model precise -assume byterecl -fpe0 -g -traceback $(LDFLAGS) -DLINUX ## -convert big_endian
 CPPFLAGS =  -DLINUX -Dfunder -DFortranByte=char -DFortranInt=int -DFortranLlong='long long' -D_UNDERSCORE
 
-EXEFILE  = process_Lightning_glm.exe
+EXEFILE  = process_Lightning.exe
 
 # NWPROD LIBs (pre-installed on Theia)
 CORELIB  = /scratch3/NCEPDEV/nwprod/lib
@@ -40,12 +40,12 @@ GSI_BUILDDIR = ../../build_gsi
 GSI_INCDIR   = ${GSI_BUILDDIR}/include
 GSI_LIBDIR   = ${GSI_BUILDDIR}/lib
 
-# INCLD=  -I${NETCDF4}/include -I../../../include
+# INCLD=  -I${NETCDF}/include -I../../../include
 # INCLD=  -I${NETCDF4}/include -I${GSI_INCDIR}
 INCLD=  -I${NETCDF}/include -I${GSI_INCDIR}
 
-# LIBS =  -L${NETCDF4}/lib -lnetcdf -lnetcdff -L${GSILIBS} \
-#       ../../../src/main/constants.o
+# LIBS =  -L${NETCDF}/lib -lnetcdf  -L${GSILIBS} \
+#         ../../../src/main/constants.o
 # LIBS =  -L${NETCDF4}/lib -lnetcdf -lnetcdff ${GSILIBS} \
 #         ${GSI_LIBDIR}/libgsilib_shrd.a
 LIBS =  -L${NETCDF}/lib -lnetcdf  ${GSILIBS} \
@@ -61,7 +61,7 @@ OBJS = Check_Alaska.o Check_NLDN.o \
 all: process_Lightning clean_obj
 
 process_Lightning: ${OBJS}
-	${FC} -o $(EXEFILE) ${FLAGS} ${OBJS} ${LIBS}
+	${FC} -o $(EXEFILE) ${FLAGS} ${OBJS} ${LIBS} 
 
 .SUFFIXES : .F90 .f90 .f .c .o
 

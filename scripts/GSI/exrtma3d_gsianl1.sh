@@ -82,6 +82,7 @@ fi
 # Make sure START_TIME is defined and in the correct format
 
 # START_TIME=${PDY}' '${cyc}
+START_TIME=${START_TIME:-"{PDY} ${cyc}"}
 echo $START_TIME
 echo $cyc
 if [ ! "${START_TIME}" ]; then

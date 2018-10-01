@@ -9,6 +9,8 @@ date
 dirname_source="rtma_process_lightning.fd"
 ltn_glm="netcdf_glm"
 ltn_bufr="netcdf_bufr"
+ltn_cdf="netcdf"
+ltn_entln="netcdf_entln"
 
 #=========================================================================#
 
@@ -85,6 +87,10 @@ echo
 echo "   ----> ${SOURCE_DIR}/${ltn_glm}"
 echo "             and"
 echo "   ----> ${SOURCE_DIR}/${ltn_bufr}"
+echo "             and"
+echo "   ----> ${SOURCE_DIR}/${ltn_cdf}"
+echo "             and"
+echo "   ----> ${SOURCE_DIR}/${ltn_entln}"
 echo
 echo " please look at the source code directory name and make sure it is the name you want to build code on "
 echo " if it is not, abort and change the definition of 'dirname_source' in this script ($0)  "
@@ -94,10 +100,10 @@ echo "*==================================================================*"
 #
 #--- detecting the existence of the directory of source package
 #
-if [ ! -d ${SOURCE_DIR}/${ltn_glm} ] && [ ! -d ${SOURCE_DIR}/${ltn_bufr} ]
+if [ ! -d ${SOURCE_DIR}/${ltn_glm} ] && [ ! -d ${SOURCE_DIR}/${ltn_bufr} ] && [ ! -d ${SOURCE_DIR}/${ltn_cdf} ] && [ ! -d ${SOURCE_DIR}/${ltn_entln} ]
 then
   echo " ====> WARNING: source code of obs pre-process ENLTN Lightning (GLM) : under ${SOURCE_DIR}"
-  echo " ====> WARNING: both of ${ltn_glm} and ${ltn_bufr} do NOT exist."
+  echo " ====> WARNING: both of ${ltn_glm} and ${ltn_bufr} and ${ltn_cdf} and ${ltn_entln} do NOT exist."
   echo " ====> Warning: abort compilation of obs pre-process ENLTN Lightning (GLM) for RTMA3D."
   exit 2
 fi
@@ -140,15 +146,15 @@ else
 fi
 
 #==================#
-# compiling NLDN lightning (glm)
-BUILD_DIR=${SOURCE_DIR}/${ltn_glm}
+# compiling lightning
+BUILD_DIR=${SOURCE_DIR}/${ltn_entln}
 cd ${BUILD_DIR}
-exefile=process_Lightning_glm.exe
-echo " ====>  compiling NLDN (glm lighting)is under directory: ${BUILD_DIR} "
+exefile=process_Lightning_entln.exe
+echo " ====>  compiling lightning (ENTLN NETCDF) is under directory: ${BUILD_DIR} "
 
 make clean  -f makefile_${target}
-echo " make -f makefile_${target}  >& ./log.make.process_ENLTN_GLM_lightning "
-make -f makefile_${target}  >& ./log.make.process_ENLTN_GLM_lightning
+echo " make -f makefile_${target}  >& ./log.make.process_lightning_entln "
+make -f makefile_${target}  >& ./log.make.process_lightning_entln
 
 if [ $? -eq 0 ] ; then
   echo " code was built successfully."
@@ -157,9 +163,62 @@ if [ $? -eq 0 ] ; then
   ls -l ${EXEC}/${exefile}
 else
   echo " ================ WARNING =============== " 
-  echo " Compilation of process_ENLTN_GLM_lightning code was failed."
+  echo " Compilation of ${exefile} code was failed."
   echo " Check up with the log file under ${BUILD_DIR}"
-  echo "   ----> log.make.process_ENLTN_GLM_lightning: "
+  echo "   ----> log.make.process_lightning_entln: "
+  echo " ================ WARNING =============== " 
+fi
+
+echo
+echo
+echo
+
+BUILD_DIR=${SOURCE_DIR}/${ltn_cdf}
+cd ${BUILD_DIR}
+exefile=process_Lightning.exe
+echo " ====>  compiling lightning (NETCDF) is under directory: ${BUILD_DIR} "
+
+make clean  -f makefile_${target}
+echo " make -f makefile_${target}  >& ./log.make.process_lightning "
+make -f makefile_${target}  >& ./log.make.process_lightning
+
+if [ $? -eq 0 ] ; then
+  echo " code was built successfully."
+  echo " cp -p ${BUILD_DIR}/${exefile}  ${EXEC}/${exefile} "
+  cp -p ${BUILD_DIR}/${exefile}  ${EXEC}/${exefile}
+  ls -l ${EXEC}/${exefile}
+else
+  echo " ================ WARNING =============== " 
+  echo " Compilation of ${exefile} code was failed."
+  echo " Check up with the log file under ${BUILD_DIR}"
+  echo "   ----> log.make.process_lightning: "
+  echo " ================ WARNING =============== " 
+fi
+
+echo
+echo
+echo
+
+# compiling NLDN lightning (glm)
+BUILD_DIR=${SOURCE_DIR}/${ltn_glm}
+cd ${BUILD_DIR}
+exefile=process_Lightning_glm.exe
+echo " ====>  compiling NLDN (glm lighting)is under directory: ${BUILD_DIR} "
+
+make clean  -f makefile_${target}
+echo " make -f makefile_${target}  >& ./log.make.process_lightning_glm "
+make -f makefile_${target}  >& ./log.make.process_lightning_glm
+
+if [ $? -eq 0 ] ; then
+  echo " code was built successfully."
+  echo " cp -p ${BUILD_DIR}/${exefile}  ${EXEC}/${exefile} "
+  cp -p ${BUILD_DIR}/${exefile}  ${EXEC}/${exefile}
+  ls -l ${EXEC}/${exefile}
+else
+  echo " ================ WARNING =============== " 
+  echo " Compilation of ${exefile} code was failed."
+  echo " Check up with the log file under ${BUILD_DIR}"
+  echo "   ----> log.make.process_lightning_glm: "
   echo " ================ WARNING =============== " 
 fi
 
@@ -174,8 +233,8 @@ exefile=process_Lightning_bufr.exe
 echo " ====>  compiling (bufr lightning)  is under directory: ${BUILD_DIR} "
 
 make clean  -f makefile_${target}
-echo " make -f makefile_${target}  >& ./log.make.process_bufr_lightning "
-make -f makefile_${target}  >& ./log.make.process_bufr_lightning
+echo " make -f makefile_${target}  >& ./log.make.process_lightning_bufr "
+make -f makefile_${target}  >& ./log.make.process_lightning_bufr
 
 if [ $? -eq 0 ] ; then
   echo " code was built successfully."
@@ -184,9 +243,9 @@ if [ $? -eq 0 ] ; then
   ls -l ${EXEC}/${exefile}
 else
   echo " ================ WARNING =============== " 
-  echo " Compilation of process_ENLTN_GLM_lightning code was failed."
+  echo " Compilation of ${exefile} code was failed."
   echo " Check up with the log file under ${BUILD_DIR}"
-  echo "   ----> log.make.process_bufr_lightning: "
+  echo "   ----> log.make.process_lightning_bufr: "
   echo " ================ WARNING =============== " 
 fi
 

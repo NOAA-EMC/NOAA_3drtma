@@ -31,11 +31,11 @@ fi
 #--- User defined variables                         #
 #####################################################
 set -x
-export startCDATE=201807110000              #yyyymmddhhmm - Starting day of retro run 
-export endCDATE=201807120000                #yyyymmddhhmm - Ending day of RTMA3D run (needed for both RETRO and REAL TIME). 
+export startCDATE=201805011800              #yyyymmddhhmm - Starting day of retro run 
+export endCDATE=201805011800                #yyyymmddhhmm - Ending day of RTMA3D run (needed for both RETRO and REAL TIME). 
 export NET=rtma3d                           #selection of rtma3d (or rtma,urma)
 export RUN=rtma3d                           #selection of rtma3d (or rtma,urma)
-export envir="retro"                        #environment (test, prod, dev, etc.)
+export envir="retro8_131"                       #environment (test, prod, dev, etc.)
 export run_envir="dev"                      #
 export expname="${envir}"
 export ptmp_base="/scratch3/NCEPDEV/stmp1/${USER}/wrkdir_${NET}"  #base subdirectory for all subsequent working and storage directories
@@ -43,8 +43,7 @@ export NWROOT=${TOP_RTMA}                   #root directory for RTMA/URMA j-job 
 export QUEUE="batch"                        #user-specified processing queue
 export QUEUE_DBG="debug"                    #user-specified processing queue -- debug
 export QUEUE_SVC="service"                  #user-specified transfer queue
-export ACCOUNT="fv3-cpu"                    #Theia account
-export ACCOUNT_DA="da-cpu"                  #Theia account
+export ACCOUNT="da-cpu"                     #Theia account for CPU resources :  da-cpu; fv3-cpu; fv3-cam;
 
 # detect the machine/platform
 if [ `grep -c 'E5-2690 v3' /proc/cpuinfo` -gt 0 ]; then
@@ -75,6 +74,7 @@ export CAP_RUN_ENVIR=`echo ${run_envir} | tr '[:lower:]' '[:upper:]'`
 # export SFCOBS_USELIST="/scratch4/NCEPDEV/fv3-cam/save/Gang.Zhao/FixData/ObsUseList_rtma3d/gsd/mesonet_uselists"
 # export AIRCRAFT_REJECT="/scratch4/NCEPDEV/fv3-cam/save/Gang.Zhao/FixData/ObsUseList_rtma3d/gsd/amdar_reject_lists"
 # export SFCOBS_PROVIDER="/scratch4/NCEPDEV/fv3-cam/save/Gang.Zhao/FixData/GSI-fix_rtma3d_emc_test"
+# export PARM_WRF="/scratch4/NCEPDEV/fv3-cam/save/Gang.Zhao/FixData/WRF-parm"
 
   export FIXrtma3d="${NWROOT}/fix"
   export FIX_GSI="${FIXrtma3d}/GSI-fix"
@@ -83,11 +83,25 @@ export CAP_RUN_ENVIR=`echo ${run_envir} | tr '[:lower:]' '[:upper:]'`
   export SFCOBS_USELIST="${OBS_USELIST}/mesonet_uselists"
   export AIRCRAFT_REJECT="${OBS_USELIST}/amdar_reject_lists"
   export SFCOBS_PROVIDER="${FIX_GSI}"
+  export PARM_WRF="${FIXrtma3d}/WRF-parm"
+
+#
+#--- option control for obs pre-processing (esp. for obs used in cloud analysis)
+#
+  export obsprep_radar=1  # 0: No (using processed ReflInGSI.bufr_d of hrrr)
+                          # 1: pre-processing MRMS grib2 radar reflectivity obs
+  export obsprep_lghtn=3  # 0: No pre-processing lightning obs data
+                          # 1: processing bufr data from rap run
+                          # 2: processing entln data
+                          # 3: processing Vaisala data
+  export obsprep_cloud=1  # 0: No (using processed CloudInGSI.bufr_d of hrrr)
+                          # 1: processing bufr data from rap run
 
 ########################################################################################
 # Workflow is specified using user-derived settings in xml format    
 ########################################################################################
 
+rm -f ${NWROOT}/workflow/${RUN}_${expname}.xml
 cat > ${NWROOT}/workflow/${RUN}_${expname}.xml <<EOF 
 <?xml version="1.0" encoding="UTF-8"?>
 
@@ -143,6 +157,7 @@ cat > ${NWROOT}/workflow/${RUN}_${expname}.xml <<EOF
 <!ENTITY AIRCRAFT_REJECT        "${AIRCRAFT_REJECT}">
 <!ENTITY SFCOBS_USELIST         "${SFCOBS_USELIST}">
 <!ENTITY SFCOBS_PROVIDER        "${SFCOBS_PROVIDER}">
+<!ENTITY PARM_WRF       "${PARM_WRF}">
 
 <!ENTITY LOG_WRKFLW	"&LOG_DIR;">
 <!ENTITY LOG_JJOB	"&LOG_DIR;/jlogfiles">
@@ -157,8 +172,14 @@ cat > ${NWROOT}/workflow/${RUN}_${expname}.xml <<EOF
 
 <!ENTITY hpsspath1      "/NCEPPROD/hpssprod/runhistory">
 <!ENTITY hpsspath1_1yr  "/NCEPPROD/1year/hpssprod/runhistory">
+<!ENTITY hpsspath1_gsd  "/BMC/fdr/Permanent">
 
 <!ENTITY FGS_OPT        "1">
+
+<!-- for obs pre-processing -->
+<!ENTITY obsprep_radar  "${obsprep_radar}">
+<!ENTITY obsprep_lghtn  "${obsprep_lghtn}">
+<!ENTITY obsprep_cloud  "${obsprep_cloud}">
 
 <!-- Variables used in GSD scripts -->
 <!ENTITY HOMEBASE_DIR	"&NWROOT;">
@@ -176,6 +197,12 @@ cat > ${NWROOT}/workflow/${RUN}_${expname}.xml <<EOF
 <!-- ex-shell and J-job script name -->
 <!ENTITY JJOB_FETCHHPSS  "&JJOB_DIR;/J&CAP_RUN;_FETCHHPSS">
 <!ENTITY exSCR_FETCHHPSS "&SCRIPT_DIR;/GSI/ex&RUN;_fetchhpss.sh">
+<!ENTITY JJOB_OBSPREP_RADAR    "&JJOB_DIR;/J&CAP_RUN;_OBSPREP_RADAR">
+<!ENTITY exSCR_OBSPREP_RADAR   "&SCRIPT_DIR;/GSI/ex&RUN;_obsprep_radar.sh">
+<!ENTITY JJOB_OBSPREP_LGHTN    "&JJOB_DIR;/J&CAP_RUN;_OBSPREP_LGHTN">
+<!ENTITY exSCR_OBSPREP_LGHTN   "&SCRIPT_DIR;/GSI/ex&RUN;_obsprep_lghtn.sh">
+<!ENTITY JJOB_OBSPREP_CLOUD    "&JJOB_DIR;/J&CAP_RUN;_OBSPREP_CLOUD">
+<!ENTITY exSCR_OBSPREP_CLOUD   "&SCRIPT_DIR;/GSI/ex&RUN;_obsprep_cloud.sh">
 <!ENTITY JJOB_PREPOBS    "&JJOB_DIR;/J&CAP_RUN;_PREPOBS">
 <!ENTITY exSCR_PREPOBS "&SCRIPT_DIR;/GSI/ex&RUN;_prepobs.sh">
 <!ENTITY JJOB_PREPFGS    "&JJOB_DIR;/J&CAP_RUN;_PREPFGS">
@@ -186,7 +213,6 @@ cat > ${NWROOT}/workflow/${RUN}_${expname}.xml <<EOF
 <!-- Resources -->
 
 <!ENTITY ACCOUNT         "${ACCOUNT}">
-<!ENTITY ACCOUNT_DA      "${ACCOUNT_DA}">
 <!ENTITY QUEUE           "${QUEUE}">
 <!ENTITY QUEUE_DBG       "${QUEUE_DBG}">
 <!ENTITY QUEUE_SVC       "${QUEUE_SVC}">
@@ -200,7 +226,28 @@ cat > ${NWROOT}/workflow/${RUN}_${expname}.xml <<EOF
    '<cores>&FETCHHPSS_PROC;</cores>
     <walltime>01:30:00</walltime>
     <queue>&QUEUE_SVC;</queue>
-    <account>&ACCOUNT_DA;</account>'>
+    <account>&ACCOUNT;</account>'>
+
+<!ENTITY OBSPREP_RADAR_PROC "36">
+<!ENTITY OBSPREP_RADAR_RESOURCES
+   '<cores>&OBSPREP_RADAR_PROC;</cores>
+    <walltime>00:15:00</walltime>
+    <queue>&QUEUE_DBG;</queue>
+    <account>&ACCOUNT;</account>'>
+
+<!ENTITY OBSPREP_LGHTN_PROC "1">
+<!ENTITY OBSPREP_LGHTN_RESOURCES
+   '<cores>&OBSPREP_LGHTN_PROC;</cores>
+    <walltime>00:15:00</walltime>
+    <queue>&QUEUE_DBG;</queue>
+    <account>&ACCOUNT;</account>'>
+
+<!ENTITY OBSPREP_CLOUD_PROC "4">
+<!ENTITY OBSPREP_CLOUD_RESOURCES
+   '<cores>&OBSPREP_CLOUD_PROC;</cores>
+    <walltime>00:15:00</walltime>
+    <queue>&QUEUE_DBG;</queue>
+    <account>&ACCOUNT;</account>'>
 
 <!ENTITY PREPOBS_PROC "1">
 <!ENTITY PREPOBS_RESOURCES
@@ -324,6 +371,10 @@ cat > ${NWROOT}/workflow/${RUN}_${expname}.xml <<EOF
         <value>&FIX_GSI;</value>
    </envar>
    <envar>
+        <name>PARM_WRF</name>
+        <value>&PARM_WRF;</value>
+   </envar>
+   <envar>
         <name>OBS_USELIST</name>
         <value>&OBS_USELIST;</value>
    </envar>
@@ -370,6 +421,18 @@ cat > ${NWROOT}/workflow/${RUN}_${expname}.xml <<EOF
    <envar>
         <name>FGS_OPT</name>
         <value>&FGS_OPT;</value>
+   </envar>
+   <envar>
+        <name>obsprep_radar</name>
+        <value>&obsprep_radar;</value>
+   </envar>
+   <envar>
+        <name>obsprep_lghtn</name>
+        <value>&obsprep_lghtn;</value>
+   </envar>
+   <envar>
+        <name>obsprep_cloud</name>
+        <value>&obsprep_cloud;</value>
    </envar>
    <envar>
         <name>PDY</name>
@@ -496,6 +559,10 @@ cat > ${NWROOT}/workflow/${RUN}_${expname}.xml <<EOF
       <value>&hpsspath1_1yr;</value>
     </envar>
     <envar>
+      <name>hpsspath1_gsd</name>
+      <value>&hpsspath1_gsd;</value>
+    </envar>
+    <envar>
       <name>exSCR_FETCHHPSS</name>
       <value>&exSCR_FETCHHPSS;</value>
     </envar>
@@ -533,6 +600,30 @@ cat > ${NWROOT}/workflow/${RUN}_${expname}.xml <<EOF
     <envar>
       <name>RUNDIR_GSD</name>
       <value><cyclestr>&DATAROOT;/&RUN;_@Y@m@d@H@M</cyclestr></value>
+    </envar>
+    <envar>
+      <name>exSCR_OBSPREP_RADAR</name>
+      <value>&exSCR_OBSPREP_RADAR;</value>
+    </envar>
+    <envar>
+      <name>JJOB_OBSPREP_RADAR</name>
+      <value>&JJOB_OBSPREP_RADAR;</value>
+    </envar>
+    <envar>
+      <name>exSCR_OBSPREP_LGHTN</name>
+      <value>&exSCR_OBSPREP_LGHTN;</value>
+    </envar>
+    <envar>
+      <name>JJOB_OBSPREP_LGHTN</name>
+      <value>&JJOB_OBSPREP_LGHTN;</value>
+    </envar>
+    <envar>
+      <name>exSCR_OBSPREP_CLOUD</name>
+      <value>&exSCR_OBSPREP_CLOUD;</value>
+    </envar>
+    <envar>
+      <name>JJOB_OBSPREP_CLOUD</name>
+      <value>&JJOB_OBSPREP_CLOUD;</value>
     </envar>
     <envar>
       <name>exSCR_PREPOBS</name>
@@ -603,7 +694,7 @@ cat > ${NWROOT}/workflow/${RUN}_${expname}.xml <<EOF
    </envar>
    <envar>
         <name>AWK</name>
-        <value>/bin/awk</value>
+        <value>/bin/awk --posix</value>
    </envar>
    <envar>
         <name>TAIL</name>
@@ -622,7 +713,7 @@ cat > ${NWROOT}/workflow/${RUN}_${expname}.xml <<EOF
 <workflow realtime="F" scheduler="moabtorque" cyclethrottle="1" taskthrottle="350" cyclelifespan="01:00:00:00">
 
   <log>
-    <cyclestr>&LOG_WRKFLW;/&NET;_workflow_@Y@m@d@H.log</cyclestr>
+    <cyclestr>&LOG_WRKFLW;/&NET;_workflow_&envir;_@Y@m@d@H.log</cyclestr>
   </log>
 
   <cycledef group="&time_int;">&startCDATE; &endCDATE; &time_int_ex;</cycledef>
@@ -638,12 +729,93 @@ cat > ${NWROOT}/workflow/${RUN}_${expname}.xml <<EOF
 
     <command>&JJOB_DIR;/launch.sh &JJOB_DIR;/J&CAP_NET;_FETCHHPSS</command>
     <jobname><cyclestr>&NET;_fetchhpss_@H</cyclestr></jobname>
-    <join><cyclestr>&LOG_SCHDLR;/&NET;_submit_fetchhpss_@Y@m@d@H@M.log\${PBS_JOBID}</cyclestr></join>
+    <join><cyclestr>&LOG_SCHDLR;/&NET;_&envir;_fetchhpss_@Y@m@d@H@M.log\${PBS_JOBID}</cyclestr></join>
 
     &FETCHHPSS_RESOURCES;
     &ENVARS_FETCHHPSS;
 
   </task>
+EOF
+
+if [ ${obsprep_radar} -eq 1 ] ; then
+
+cat >> ${NWROOT}/workflow/${RUN}_${expname}.xml <<EOF 
+
+  <task name="&NET;_obsprep_radar" cycledefs="&time_int;" maxtries="&maxtries;">
+
+    &ENVARS;
+    &SYS_COMMANDS;
+
+    <command>&JJOB_DIR;/launch.sh &JJOB_DIR;/J&CAP_NET;_OBSPREP_RADAR</command>
+    <jobname><cyclestr>&NET;_obsprep_radar_@H</cyclestr></jobname>
+    <join><cyclestr>&LOG_SCHDLR;/&NET;_&envir;_obsprep_radar_@Y@m@d@H@M.log\${PBS_JOBID}</cyclestr></join>
+
+    &OBSPREP_RADAR_RESOURCES;
+    &ENVARS_PREPJOB;
+
+    <dependency>
+      <taskdep task="&NET;_fetchhpss"/>
+    </dependency>
+
+  </task>
+
+EOF
+
+fi
+
+if [ ${obsprep_lghtn} -eq 1 ] || [ ${obsprep_lghtn} -eq 2 ] || [ ${obsprep_lghtn} -eq 3 ] ; then
+
+cat >> ${NWROOT}/workflow/${RUN}_${expname}.xml <<EOF 
+
+  <task name="&NET;_obsprep_lghtn" cycledefs="&time_int;" maxtries="&maxtries;">
+
+    &ENVARS;
+    &SYS_COMMANDS;
+
+    <command>&JJOB_DIR;/launch.sh &JJOB_DIR;/J&CAP_NET;_OBSPREP_LGHTN</command>
+    <jobname><cyclestr>&NET;_obsprep_lghtn_@H</cyclestr></jobname>
+    <join><cyclestr>&LOG_SCHDLR;/&NET;_&envir;_obsprep_lghtn_@Y@m@d@H@M.log\${PBS_JOBID}</cyclestr></join>
+
+    &OBSPREP_LGHTN_RESOURCES;
+    &ENVARS_PREPJOB;
+
+    <dependency>
+      <taskdep task="&NET;_fetchhpss"/>
+    </dependency>
+
+  </task>
+
+EOF
+
+fi
+
+if [ ${obsprep_cloud} -eq 1 ] ; then
+
+cat >> ${NWROOT}/workflow/${RUN}_${expname}.xml <<EOF 
+
+  <task name="&NET;_obsprep_cloud" cycledefs="&time_int;" maxtries="&maxtries;">
+
+    &ENVARS;
+    &SYS_COMMANDS;
+
+    <command>&JJOB_DIR;/launch.sh &JJOB_DIR;/J&CAP_NET;_OBSPREP_CLOUD</command>
+    <jobname><cyclestr>&NET;_obsprep_cloud_@H</cyclestr></jobname>
+    <join><cyclestr>&LOG_SCHDLR;/&NET;_&envir;_obsprep_cloud_@Y@m@d@H@M.log\${PBS_JOBID}</cyclestr></join>
+
+    &OBSPREP_CLOUD_RESOURCES;
+    &ENVARS_PREPJOB;
+
+    <dependency>
+      <taskdep task="&NET;_fetchhpss"/>
+    </dependency>
+
+  </task>
+
+EOF
+
+fi
+
+cat >> ${NWROOT}/workflow/${RUN}_${expname}.xml <<EOF 
 
   <task name="&NET;_prepobs" cycledefs="&time_int;" maxtries="&maxtries;">
 
@@ -656,13 +828,36 @@ cat > ${NWROOT}/workflow/${RUN}_${expname}.xml <<EOF
 
     <command>&JJOB_DIR;/launch.sh &JJOB_DIR;/J&CAP_NET;_PREPOBS</command>
     <jobname><cyclestr>&NET;_prepobs_@H</cyclestr></jobname>
-    <join><cyclestr>&LOG_SCHDLR;/&NET;_submit_prepobs_@Y@m@d@H@M.log\${PBS_JOBID}</cyclestr></join>
+    <join><cyclestr>&LOG_SCHDLR;/&NET;_&envir;_prepobs_@Y@m@d@H@M.log\${PBS_JOBID}</cyclestr></join>
 
     &PREPOBS_RESOURCES;
     &ENVARS_PREPJOB;
 
     <dependency>
-      <taskdep task="&NET;_fetchhpss"/>
+      <and>
+        <taskdep task="&NET;_fetchhpss"/>
+EOF
+
+if [ $obsprep_radar -eq 1 ] ; then
+cat >> ${NWROOT}/workflow/${RUN}_${expname}.xml <<EOF 
+        <taskdep task="&NET;_obsprep_radar"/>
+EOF
+fi
+
+if [ $obsprep_lghtn -eq 1 ] || [ $obsprep_lghtn -eq 2 ] || [ $obsprep_lghtn -eq 3 ] ; then
+cat >> ${NWROOT}/workflow/${RUN}_${expname}.xml <<EOF 
+        <taskdep task="&NET;_obsprep_lghtn"/>
+EOF
+fi
+
+if [ $obsprep_cloud -eq 1 ] ; then
+cat >> ${NWROOT}/workflow/${RUN}_${expname}.xml <<EOF 
+        <taskdep task="&NET;_obsprep_cloud"/>
+EOF
+fi
+
+cat >> ${NWROOT}/workflow/${RUN}_${expname}.xml <<EOF 
+      </and>
     </dependency>
 
   </task>
@@ -678,7 +873,7 @@ cat > ${NWROOT}/workflow/${RUN}_${expname}.xml <<EOF
 
     <command>&JJOB_DIR;/launch.sh &JJOB_DIR;/J&CAP_NET;_PREPFGS</command>
     <jobname><cyclestr>&NET;_prepfgs_@H</cyclestr></jobname>
-    <join><cyclestr>&LOG_SCHDLR;/&NET;_submit_prepfgs_@Y@m@d@H@M.log\${PBS_JOBID}</cyclestr></join>
+    <join><cyclestr>&LOG_SCHDLR;/&NET;_&envir;_prepfgs_@Y@m@d@H@M.log\${PBS_JOBID}</cyclestr></join>
 
     &PREPFGS_RESOURCES;
     &ENVARS_PREPJOB;
@@ -703,7 +898,7 @@ cat > ${NWROOT}/workflow/${RUN}_${expname}.xml <<EOF
 
     <command>&JJOB_DIR;/launch.sh &JJOB_DIR;/J&CAP_NET;_GSIANL</command>
     <jobname><cyclestr>&NET;_gsianl_@H</cyclestr></jobname>
-    <join><cyclestr>&LOG_SCHDLR;/&NET;_submit_gsianl_@Y@m@d@H@M.log\${PBS_JOBID}</cyclestr></join>
+    <join><cyclestr>&LOG_SCHDLR;/&NET;_&envir;_gsianl_@Y@m@d@H@M.log\${PBS_JOBID}</cyclestr></join>
 
     &ENVARS_GSI;
 
@@ -778,5 +973,24 @@ EOF
 
 chmod 744 ${NWROOT}/workflow/run_${RUN}_${expname}.sh
 echo "RTMA3D is ready to go! Run using run_${RUN}_${expname}.sh.  Make sure your xml file has consistent directory settings!"
+
+# script to check the workflow running status
+if [ ${MACHINE} = 'theia' ]; then
+cat > ${NWROOT}/workflow/chk_${RUN}_${expname}.sh <<EOF 
+#!/bin/sh -l
+
+# . /etc/profile
+# . /apps/lmod/lmod/init/ksh >/dev/null # Module Support
+
+module load intel
+module load rocoto
+EOF
+fi
+
+cat >> ${NWROOT}/workflow/chk_${RUN}_${expname}.sh <<EOF
+rocotostat -v 10 -w ${NWROOT}/workflow/${RUN}_${expname}.xml -d ${NWROOT}/workflow/${RUN}_${expname}.db 
+EOF
+
+chmod 744 ${NWROOT}/workflow/chk_${RUN}_${expname}.sh
 
 exit 

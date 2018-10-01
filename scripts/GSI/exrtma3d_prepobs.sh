@@ -47,7 +47,7 @@ fi
 
 #############################################################################
 # Make sure START_TIME is defined and in the correct format
-START_TIME=${START_TIME:-"{PDY}' '${cyc}"}
+START_TIME=${START_TIME:-"{PDY} ${cyc}"}
 echo $START_TIME
 echo $cyc
 if [ ! "${START_TIME}" ]; then
@@ -71,6 +71,7 @@ YYYY=`${DATE} +"%Y" -d "${START_TIME}"`
 MM=`${DATE} +"%m" -d "${START_TIME}"`
 DD=`${DATE} +"%d" -d "${START_TIME}"`
 HH=`${DATE} +"%H" -d "${START_TIME}"`
+mm=`${DATE} +"%M" -d "${START_TIME}"`
 #############################################################################
 
 # Create the working directory and cd into it
@@ -86,7 +87,8 @@ time_run=${time_str}
 startmsg
 msg="***********************************************************"
 postmsg "$jlogfile" "$msg"
-msg="  begin copy bufr format obs data to obsproc.${cycle}/"
+# msg="  begin copy bufr format obs data to obsproc.${cycle}/"
+msg="  begin copy bufr format obs data to ${COMIN}/obsprd.t${HH}z"
 postmsg "$jlogfile" "$msg"
 msg="***********************************************************"
 postmsg "$jlogfile" "$msg"
@@ -104,27 +106,61 @@ else
 fi
 
 # MRMS MOSAIC RADAR data (pre-processed bufr data/remapped on model grid )
-if [ -r "${COMINhrrr}/hrrr.t${HH}z.NSSLRefInGSI.bufr" ]; then
-  cpreq ${COMINhrrr}/hrrr.t${HH}z.NSSLRefInGSI.bufr ${COMINobsproc_rtma3d}
-  ${LN} -sf ${COMINobsproc_rtma3d}/hrrr.t${HH}z.NSSLRefInGSI.bufr ${DATA}/hrrr.t${HH}z.NSSLRefInGSI.bufr
+if [ ${obsprep_radar} -eq 0 ] ; then
+  ${ECHO} " using hrrr.t${HH}z.NSSLRefInGSI.bufr (used in HRRR)"
+  if [ -r "${COMINhrrr}/hrrr.t${HH}z.NSSLRefInGSI.bufr" ]; then
+    cpreq ${COMINhrrr}/hrrr.t${HH}z.NSSLRefInGSI.bufr ${COMINobsproc_rtma3d}
+    ${LN} -sf ${COMINobsproc_rtma3d}/hrrr.t${HH}z.NSSLRefInGSI.bufr ${DATA}/hrrr.t${HH}z.NSSLRefInGSI.bufr
+  else
+    ${ECHO} "Warning: ${COMINhrrr}/hrrr.t${HH}z.NSSLRefInGSI.bufr dones not exist!"
+  fi
 else
-  ${ECHO} "Warning: ${COMINhrrr}/hrrr.t${HH}z.NSSLRefInGSI.bufr dones not exist!"
+  ${ECHO} "using processed MRMS mosaic data for $RUN"
+  if [ -r ${COMINobsproc_rtma3d}/${RUN}.t${HH}z.NSSLRefInGSI.bufr ] ; then
+    ${LN} -sf ${COMINobsproc_rtma3d}/${RUN}.t${HH}z.NSSLRefInGSI.bufr ${DATA}/${RUN}.t${HH}z.NSSLRefInGSI.bufr
+  else
+    ${ECHO} "Warning: ${COMINobsproc_rtma3d}/${RUN}.t${HH}z.NSSLRefInGSI.bufr dones not exist!"
+  fi
 fi
 
 # lightning obs (pre-processed/re-mapped to model grid)
-if [ -r "${COMINhrrr}/hrrr.t${HH}z.LightningInGSI.bufr" ]; then
-  cpreq  ${COMINhrrr}/hrrr.t${HH}z.LightningInGSI.bufr  ${COMINobsproc_rtma3d}
-  ${LN} -sf ${COMINobsproc_rtma3d}/hrrr.t${HH}z.LightningInGSI.bufr ${DATA}/hrrr.t${HH}z.LightningInGSI.bufr
+if [ $obsprep_lghtn -eq 0 ] ; then
+  if [ -r "${COMINhrrr}/hrrr.t${HH}z.LightningInGSI.bufr" ]; then
+    cpreq  ${COMINhrrr}/hrrr.t${HH}z.LightningInGSI.bufr  ${COMINobsproc_rtma3d}
+    ${LN} -sf ${COMINobsproc_rtma3d}/hrrr.t${HH}z.LightningInGSI.bufr ${DATA}/hrrr.t${HH}z.LightningInGSI.bufr
+  else
+    ${ECHO} "Warning: ${COMINhrrr}/hrrr.t${HH}z.LightningInGSI.bufr does not exist!"
+  fi
 else
-  ${ECHO} "Warning: ${COMINhrrr}/hrrr.t${HH}z.LightningInGSI.bufr does not exist!"
+  if [ -r "${COMINobsproc_rtma3d}/${RUN}.t${HH}z.LightningInGSI.bufr" ]; then
+    ${ECHO} "using preocessed NLDN lightning data"
+    ${LN} -sf ${COMINobsproc_rtma3d}/${RUN}.t${HH}z.LightningInGSI.bufr ${DATA}/${RUN}.t${HH}z.LightningInGSI.bufr
+  elif [ -r "${COMINobsproc_rtma3d}/${RUN}.t${HH}z.LightningInGSI_bufr.bufr" ]; then
+    ${ECHO} "using preocessed RAP BUFR lightning data"
+    ${LN} -sf ${COMINobsproc_rtma3d}/${RUN}.t${HH}z.LightningInGSI_bufr.bufr ${DATA}/${RUN}.t${HH}z.LightningInGSI_bufr.bufr
+  else
+    ${ECHO} "Warning: ${COMINobsproc_rtma3d}/${RUN}.t${HH}z.LightningInGSI(_bufr).bufr  does not exist!"
+  fi
 fi
 
 # NASA LaRC Cloud data (pre-processed/re-mapped to model grid)
-if [ -r "${COMINhrrr}/hrrr.t${HH}z.NASALaRCCloudInGSI.bufr" ]; then
-  cpreq  ${COMINhrrr}/hrrr.t${HH}z.NASALaRCCloudInGSI.bufr ${COMINobsproc_rtma3d}
-  ${LN} -sf ${COMINobsproc_rtma3d}/hrrr.t${HH}z.NASALaRCCloudInGSI.bufr ${DATA}/hrrr.t${HH}z.NASALaRCCloudInGSI.bufr
+if [ $obsprep_cloud -eq 0 ] ; then
+  if [ -r "${COMINhrrr}/hrrr.t${HH}z.NASALaRCCloudInGSI.bufr" ]; then
+    cpreq  ${COMINhrrr}/hrrr.t${HH}z.NASALaRCCloudInGSI.bufr ${COMINobsproc_rtma3d}
+    ${LN} -sf ${COMINobsproc_rtma3d}/hrrr.t${HH}z.NASALaRCCloudInGSI.bufr ${DATA}/hrrr.t${HH}z.NASALaRCCloudInGSI.bufr
+  else
+    ${ECHO} "Warning: ${COMINhrrr}/hrrr.t${HH}z.NASALaRCCloudInGSI.bufr does not exist!"
+  fi
 else
-  ${ECHO} "Warning: ${COMINhrrr}/hrrr.t${HH}z.NASALaRCCloudInGSI.bufr does not exist!"
+  if [ -r "${COMINobsproc_rtma3d}/${RUN}.t${HH}z.NASALaRCCloudInGSI.bufr" ]; then
+    ${ECHO} "using preocessed satellite cloud data from NASA LaRC NETCDF satellite cloud obs"
+    ${LN} -sf ${COMINobsproc_rtma3d}/${RUN}.t${HH}z.NASALaRCCloudInGSI.bufr ${DATA}/${RUN}.t${HH}z.NASALaRCCloudInGSI.bufr
+  elif [ -r "${COMINobsproc_rtma3d}/${RUN}.t${HH}z.NASALaRCCloudInGSI_bufr.bufr" ]; then
+    ${ECHO} "using preocessed satellte cloud data from RAP bufr cloud data"
+    ${LN} -sf ${COMINobsproc_rtma3d}/${RUN}.t${HH}z.NASALaRCCloudInGSI_bufr.bufr ${DATA}/${RUN}.t${HH}z.NASALaRCCloudInGSI_bufr.bufr
+  else
+    ${ECHO} "Warning: ${COMINobsproc_rtma3d}/${RUN}.t${HH}z.NASALaRCCloudInGSI(_bufr).bufr  does not exist!"
+  fi
 fi
 
 # statellite radiance data
@@ -138,6 +174,6 @@ fi
 
 export err=$? ; err_chk
 
-ls -l ${COMINobsproc_rtma3d} > ${COMINobsproc_rtma3d}/obs_data_${PDY}_t${cycle}_${subcyc}.list
+ls -l ${COMINobsproc_rtma3d} > ${COMINobsproc_rtma3d}/obs_data_${PDY}_${cyc}_${subcyc}.list
 
 exit 0

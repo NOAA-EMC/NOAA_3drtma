@@ -4,8 +4,8 @@
 
 <!-- Key variables -->
 <!-- date/time of cases or cycles -->
-<!ENTITY startCDATE     "201807110000">
-<!ENTITY endCDATE       "201807120000">
+<!ENTITY startCDATE     "201805011800">
+<!ENTITY endCDATE       "201805011800">
 
 <!ENTITY NET		"rtma3d">
 <!ENTITY RUN		"rtma3d">
@@ -23,7 +23,7 @@
 <!-- Variables Defined by absolute paths -->
 
 <!ENTITY ptmp_base	"/scratch3/NCEPDEV/stmp1/Gang.Zhao/wrkdir_rtma3d">
-<!ENTITY NWROOT		"/scratch4/NCEPDEV/da/save/Gang.Zhao/rtma3d_dev/testrun">
+<!ENTITY NWROOT		"/scratch4/NCEPDEV/da/save/Gang.Zhao/rtma3d_dev/rtma3d_workflow">
 
 <!ENTITY OBS_DIR	"/scratch4/NCEPDEV/fv3-cam/save/Gang.Zhao/Data/GSD_GSI_Case/obs">
 <!ENTITY HRRR_DIR	"/scratch4/NCEPDEV/fv3-cam/save/Gang.Zhao/Data/GSD_GSI_Case/fgs">
@@ -45,13 +45,14 @@
 <!ENTITY PARMrtma3d	"&HOMErtma3d;/parm">
 
 <!-- Specific Definition for static data -->
-<!ENTITY FIXrtma3d	"/scratch4/NCEPDEV/da/save/Gang.Zhao/rtma3d_dev/testrun/fix">
-<!ENTITY FIX_CRTM       "/scratch4/NCEPDEV/da/save/Gang.Zhao/rtma3d_dev/testrun/fix/CRTM-fix">
-<!ENTITY FIX_GSI        "/scratch4/NCEPDEV/da/save/Gang.Zhao/rtma3d_dev/testrun/fix/GSI-fix">
-<!ENTITY OBS_USELIST    "/scratch4/NCEPDEV/da/save/Gang.Zhao/rtma3d_dev/testrun/fix/ObsUseList">
-<!ENTITY AIRCRAFT_REJECT        "/scratch4/NCEPDEV/da/save/Gang.Zhao/rtma3d_dev/testrun/fix/ObsUseList/amdar_reject_lists">
-<!ENTITY SFCOBS_USELIST         "/scratch4/NCEPDEV/da/save/Gang.Zhao/rtma3d_dev/testrun/fix/ObsUseList/mesonet_uselists">
-<!ENTITY SFCOBS_PROVIDER        "/scratch4/NCEPDEV/da/save/Gang.Zhao/rtma3d_dev/testrun/fix/GSI-fix">
+<!ENTITY FIXrtma3d	"/scratch4/NCEPDEV/da/save/Gang.Zhao/rtma3d_dev/rtma3d_workflow/fix">
+<!ENTITY FIX_CRTM       "/scratch4/NCEPDEV/da/save/Gang.Zhao/rtma3d_dev/rtma3d_workflow/fix/CRTM-fix">
+<!ENTITY FIX_GSI        "/scratch4/NCEPDEV/da/save/Gang.Zhao/rtma3d_dev/rtma3d_workflow/fix/GSI-fix">
+<!ENTITY OBS_USELIST    "/scratch4/NCEPDEV/da/save/Gang.Zhao/rtma3d_dev/rtma3d_workflow/fix/ObsUseList">
+<!ENTITY AIRCRAFT_REJECT        "/scratch4/NCEPDEV/da/save/Gang.Zhao/rtma3d_dev/rtma3d_workflow/fix/ObsUseList/amdar_reject_lists">
+<!ENTITY SFCOBS_USELIST         "/scratch4/NCEPDEV/da/save/Gang.Zhao/rtma3d_dev/rtma3d_workflow/fix/ObsUseList/mesonet_uselists">
+<!ENTITY SFCOBS_PROVIDER        "/scratch4/NCEPDEV/da/save/Gang.Zhao/rtma3d_dev/rtma3d_workflow/fix/GSI-fix">
+<!ENTITY PARM_WRF       "/scratch4/NCEPDEV/da/save/Gang.Zhao/rtma3d_dev/rtma3d_workflow/fix/WRF-parm">
 
 <!ENTITY LOG_WRKFLW	"&LOG_DIR;">
 <!ENTITY LOG_JJOB	"&LOG_DIR;/jlogfiles">
@@ -66,8 +67,14 @@
 
 <!ENTITY hpsspath1      "/NCEPPROD/hpssprod/runhistory">
 <!ENTITY hpsspath1_1yr  "/NCEPPROD/1year/hpssprod/runhistory">
+<!ENTITY hpsspath1_gsd  "/BMC/fdr/Permanent">
 
 <!ENTITY FGS_OPT        "1">
+
+<!-- for obs pre-processing -->
+<!ENTITY obsprep_radar  "0">
+<!ENTITY obsprep_lghtn  "1">
+<!ENTITY obsprep_cloud  "0">
 
 <!-- Variables used in GSD scripts -->
 <!ENTITY HOMEBASE_DIR	"&NWROOT;">
@@ -85,6 +92,12 @@
 <!-- ex-shell and J-job script name -->
 <!ENTITY JJOB_FETCHHPSS  "&JJOB_DIR;/J&CAP_RUN;_FETCHHPSS">
 <!ENTITY exSCR_FETCHHPSS "&SCRIPT_DIR;/GSI/ex&RUN;_fetchhpss.sh">
+<!ENTITY JJOB_OBSPREP_RADAR    "&JJOB_DIR;/J&CAP_RUN;_OBSPREP_RADAR">
+<!ENTITY exSCR_OBSPREP_RADAR   "&SCRIPT_DIR;/GSI/ex&RUN;_obsprep_radar.sh">
+<!ENTITY JJOB_OBSPREP_LGHTN    "&JJOB_DIR;/J&CAP_RUN;_OBSPREP_LGHTN">
+<!ENTITY exSCR_OBSPREP_LGHTN   "&SCRIPT_DIR;/GSI/ex&RUN;_obsprep_lghtn.sh">
+<!ENTITY JJOB_OBSPREP_CLOUD    "&JJOB_DIR;/J&CAP_RUN;_OBSPREP_CLOUD">
+<!ENTITY exSCR_OBSPREP_CLOUD   "&SCRIPT_DIR;/GSI/ex&RUN;_obsprep_cloud.sh">
 <!ENTITY JJOB_PREPOBS    "&JJOB_DIR;/J&CAP_RUN;_PREPOBS">
 <!ENTITY exSCR_PREPOBS "&SCRIPT_DIR;/GSI/ex&RUN;_prepobs.sh">
 <!ENTITY JJOB_PREPFGS    "&JJOB_DIR;/J&CAP_RUN;_PREPFGS">
@@ -94,8 +107,7 @@
 
 <!-- Resources -->
 
-<!ENTITY ACCOUNT         "fv3-cpu">
-<!ENTITY ACCOUNT_DA      "da-cpu">
+<!ENTITY ACCOUNT         "da-cpu">
 <!ENTITY QUEUE           "batch">
 <!ENTITY QUEUE_DBG       "debug">
 <!ENTITY QUEUE_SVC       "service">
@@ -109,7 +121,28 @@
    '<cores>&FETCHHPSS_PROC;</cores>
     <walltime>01:30:00</walltime>
     <queue>&QUEUE_SVC;</queue>
-    <account>&ACCOUNT_DA;</account>'>
+    <account>&ACCOUNT;</account>'>
+
+<!ENTITY OBSPREP_RADAR_PROC "36">
+<!ENTITY OBSPREP_RADAR_RESOURCES
+   '<cores>&OBSPREP_RADAR_PROC;</cores>
+    <walltime>00:15:00</walltime>
+    <queue>&QUEUE_DBG;</queue>
+    <account>&ACCOUNT;</account>'>
+
+<!ENTITY OBSPREP_LGHTN_PROC "1">
+<!ENTITY OBSPREP_LGHTN_RESOURCES
+   '<cores>&OBSPREP_LGHTN_PROC;</cores>
+    <walltime>00:15:00</walltime>
+    <queue>&QUEUE_DBG;</queue>
+    <account>&ACCOUNT;</account>'>
+
+<!ENTITY OBSPREP_CLOUD_PROC "4">
+<!ENTITY OBSPREP_CLOUD_RESOURCES
+   '<cores>&OBSPREP_CLOUD_PROC;</cores>
+    <walltime>00:15:00</walltime>
+    <queue>&QUEUE_DBG;</queue>
+    <account>&ACCOUNT;</account>'>
 
 <!ENTITY PREPOBS_PROC "1">
 <!ENTITY PREPOBS_RESOURCES
@@ -233,6 +266,10 @@
         <value>&FIX_GSI;</value>
    </envar>
    <envar>
+        <name>PARM_WRF</name>
+        <value>&PARM_WRF;</value>
+   </envar>
+   <envar>
         <name>OBS_USELIST</name>
         <value>&OBS_USELIST;</value>
    </envar>
@@ -279,6 +316,18 @@
    <envar>
         <name>FGS_OPT</name>
         <value>&FGS_OPT;</value>
+   </envar>
+   <envar>
+        <name>obsprep_radar</name>
+        <value>&obsprep_radar;</value>
+   </envar>
+   <envar>
+        <name>obsprep_lghtn</name>
+        <value>&obsprep_lghtn;</value>
+   </envar>
+   <envar>
+        <name>obsprep_cloud</name>
+        <value>&obsprep_cloud;</value>
    </envar>
    <envar>
         <name>PDY</name>
@@ -405,6 +454,10 @@
       <value>&hpsspath1_1yr;</value>
     </envar>
     <envar>
+      <name>hpsspath1_gsd</name>
+      <value>&hpsspath1_gsd;</value>
+    </envar>
+    <envar>
       <name>exSCR_FETCHHPSS</name>
       <value>&exSCR_FETCHHPSS;</value>
     </envar>
@@ -442,6 +495,30 @@
     <envar>
       <name>RUNDIR_GSD</name>
       <value><cyclestr>&DATAROOT;/&RUN;_@Y@m@d@H@M</cyclestr></value>
+    </envar>
+    <envar>
+      <name>exSCR_OBSPREP_RADAR</name>
+      <value>&exSCR_OBSPREP_RADAR;</value>
+    </envar>
+    <envar>
+      <name>JJOB_OBSPREP_RADAR</name>
+      <value>&JJOB_OBSPREP_RADAR;</value>
+    </envar>
+    <envar>
+      <name>exSCR_OBSPREP_LGHTN</name>
+      <value>&exSCR_OBSPREP_LGHTN;</value>
+    </envar>
+    <envar>
+      <name>JJOB_OBSPREP_LGHTN</name>
+      <value>&JJOB_OBSPREP_LGHTN;</value>
+    </envar>
+    <envar>
+      <name>exSCR_OBSPREP_CLOUD</name>
+      <value>&exSCR_OBSPREP_CLOUD;</value>
+    </envar>
+    <envar>
+      <name>JJOB_OBSPREP_CLOUD</name>
+      <value>&JJOB_OBSPREP_CLOUD;</value>
     </envar>
     <envar>
       <name>exSCR_PREPOBS</name>
@@ -512,7 +589,7 @@
    </envar>
    <envar>
         <name>AWK</name>
-        <value>/bin/awk</value>
+        <value>/bin/awk --posix</value>
    </envar>
    <envar>
         <name>TAIL</name>
@@ -531,7 +608,7 @@
 <workflow realtime="F" scheduler="moabtorque" cyclethrottle="1" taskthrottle="350" cyclelifespan="01:00:00:00">
 
   <log>
-    <cyclestr>&LOG_WRKFLW;/&NET;_workflow_@Y@m@d@H.log</cyclestr>
+    <cyclestr>&LOG_WRKFLW;/&NET;_workflow_&envir;_@Y@m@d@H.log</cyclestr>
   </log>
 
   <cycledef group="&time_int;">&startCDATE; &endCDATE; &time_int_ex;</cycledef>
@@ -547,12 +624,31 @@
 
     <command>&JJOB_DIR;/launch.sh &JJOB_DIR;/J&CAP_NET;_FETCHHPSS</command>
     <jobname><cyclestr>&NET;_fetchhpss_@H</cyclestr></jobname>
-    <join><cyclestr>&LOG_SCHDLR;/&NET;_submit_fetchhpss_@Y@m@d@H@M.log${PBS_JOBID}</cyclestr></join>
+    <join><cyclestr>&LOG_SCHDLR;/&NET;_&envir;_fetchhpss_@Y@m@d@H@M.log${PBS_JOBID}</cyclestr></join>
 
     &FETCHHPSS_RESOURCES;
     &ENVARS_FETCHHPSS;
 
   </task>
+
+  <task name="&NET;_obsprep_lghtn" cycledefs="&time_int;" maxtries="&maxtries;">
+
+    &ENVARS;
+    &SYS_COMMANDS;
+
+    <command>&JJOB_DIR;/launch.sh &JJOB_DIR;/J&CAP_NET;_OBSPREP_LGHTN</command>
+    <jobname><cyclestr>&NET;_obsprep_lghtn_@H</cyclestr></jobname>
+    <join><cyclestr>&LOG_SCHDLR;/&NET;_&envir;_obsprep_lghtn_@Y@m@d@H@M.log${PBS_JOBID}</cyclestr></join>
+
+    &OBSPREP_LGHTN_RESOURCES;
+    &ENVARS_PREPJOB;
+
+    <dependency>
+      <taskdep task="&NET;_fetchhpss"/>
+    </dependency>
+
+  </task>
+
 
   <task name="&NET;_prepobs" cycledefs="&time_int;" maxtries="&maxtries;">
 
@@ -565,13 +661,16 @@
 
     <command>&JJOB_DIR;/launch.sh &JJOB_DIR;/J&CAP_NET;_PREPOBS</command>
     <jobname><cyclestr>&NET;_prepobs_@H</cyclestr></jobname>
-    <join><cyclestr>&LOG_SCHDLR;/&NET;_submit_prepobs_@Y@m@d@H@M.log${PBS_JOBID}</cyclestr></join>
+    <join><cyclestr>&LOG_SCHDLR;/&NET;_&envir;_prepobs_@Y@m@d@H@M.log${PBS_JOBID}</cyclestr></join>
 
     &PREPOBS_RESOURCES;
     &ENVARS_PREPJOB;
 
     <dependency>
-      <taskdep task="&NET;_fetchhpss"/>
+      <and>
+        <taskdep task="&NET;_fetchhpss"/>
+        <taskdep task="&NET;_obsprep_lghtn"/>
+      </and>
     </dependency>
 
   </task>
@@ -587,7 +686,7 @@
 
     <command>&JJOB_DIR;/launch.sh &JJOB_DIR;/J&CAP_NET;_PREPFGS</command>
     <jobname><cyclestr>&NET;_prepfgs_@H</cyclestr></jobname>
-    <join><cyclestr>&LOG_SCHDLR;/&NET;_submit_prepfgs_@Y@m@d@H@M.log${PBS_JOBID}</cyclestr></join>
+    <join><cyclestr>&LOG_SCHDLR;/&NET;_&envir;_prepfgs_@Y@m@d@H@M.log${PBS_JOBID}</cyclestr></join>
 
     &PREPFGS_RESOURCES;
     &ENVARS_PREPJOB;
@@ -612,7 +711,7 @@
 
     <command>&JJOB_DIR;/launch.sh &JJOB_DIR;/J&CAP_NET;_GSIANL</command>
     <jobname><cyclestr>&NET;_gsianl_@H</cyclestr></jobname>
-    <join><cyclestr>&LOG_SCHDLR;/&NET;_submit_gsianl_@Y@m@d@H@M.log${PBS_JOBID}</cyclestr></join>
+    <join><cyclestr>&LOG_SCHDLR;/&NET;_&envir;_gsianl_@Y@m@d@H@M.log${PBS_JOBID}</cyclestr></join>
 
     &ENVARS_GSI;
 
