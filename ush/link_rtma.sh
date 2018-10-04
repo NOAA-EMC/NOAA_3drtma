@@ -70,10 +70,15 @@ cd ${TOP_FIX}
 if [ $target = theia ]; then
   echo " linking fixed data on $target"
   GSI_fix="/scratch4/NCEPDEV/meso/save/Gang.Zhao/FixData/GSI-fix_rtma3d_emc_test"
+  POST_fix="/scratch4/NCEPDEV/meso/save/Gang.Zhao/FixData/GSI-fix"
+ 
   CRTM_fix="/scratch4/NCEPDEV/meso/save/Gang.Zhao/FixData/CRTM-fix_rtma3d"
   ObsUseList="/scratch4/NCEPDEV/meso/save/Gang.Zhao/FixData/ObsUseList_rtma3d"
+
   echo " ln -sf ${GSI_fix}        ./GSI-fix"
   ln -sf ${GSI_fix}        ./GSI-fix
+  echo " ln -sf ${POST_fix}        ./GSI-fix"
+  ln -sf ${POST_fix}        ./POST-fix
   echo " ln -sf ${CRTM_fix}       ./CRTM-fix"
   ln -sf ${CRTM_fix}       ./CRTM-fix
   echo " ln -sf ${ObsUseList}     ./ObsUseList"
@@ -107,6 +112,22 @@ done
 
 echo
 ls -ltr $EXEC
+
+#
+#--- copy/link executable files (POST utility files, etc.)
+#
+POST_BIN=${TOP_SORC}/rtma_post.fd/exec/ncep_post
+EXEC=${TOP_RTMA}/exec
+
+echo " linking POST executable files ... "
+
+cp $POST_BIN $EXEC/post.x
+
+
+echo
+ls -ltr $EXEC
+
+
 
 #
 #--- set up the log directory for rocoto workflow running job

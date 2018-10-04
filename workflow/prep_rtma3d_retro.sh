@@ -43,8 +43,8 @@ export NWROOT=${TOP_RTMA}                   #root directory for RTMA/URMA j-job 
 export QUEUE="batch"                        #user-specified processing queue
 export QUEUE_DBG="debug"                    #user-specified processing queue -- debug
 export QUEUE_SVC="service"                  #user-specified transfer queue
-export ACCOUNT="fv3-cpu"                    #Theia account
-export ACCOUNT_DA="da-cpu"                  #Theia account
+export ACCOUNT="nems"                    #Theia account
+export ACCOUNT_DA="nems"                  #Theia account
 
 # detect the machine/platform
 if [ `grep -c 'E5-2690 v3' /proc/cpuinfo` -gt 0 ]; then
@@ -151,6 +151,7 @@ cat > ${NWROOT}/workflow/${RUN}_${expname}.xml <<EOF
 
 <!ENTITY DATA_RUNDIR    "&DATAROOT;/&envir;/&RUN;.@Y@m@d@H@M">
 <!ENTITY DATA_GSIANL    "&DATA_RUNDIR;/gsiprd">
+<!ENTITY DATA_POST      "&DATA_RUNDIR;/postprd">
 <!ENTITY DATA_OBSPRD    "&DATA_RUNDIR;/obsprd">
 <!ENTITY DATA_FGSPRD    "&DATA_RUNDIR;/fgsprd">
 <!ENTITY DATA_FETCHHPSS "&DATA_RUNDIR;/fetchhpss">
@@ -182,6 +183,8 @@ cat > ${NWROOT}/workflow/${RUN}_${expname}.xml <<EOF
 <!ENTITY exSCR_PREPFGS "&SCRIPT_DIR;/GSI/ex&RUN;_prepfgs.sh">
 <!ENTITY JJOB_GSIANL	 "&JJOB_DIR;/J&CAP_RUN;_GSIANL">
 <!ENTITY exSCR_GSIANL	 "&SCRIPT_DIR;/GSI/ex&RUN;_gsianl.sh">
+<!ENTITY JJOB_POST     "&JJOB_DIR;/J&CAP_RUN;_POST">
+<!ENTITY exSCR_POST    "&SCRIPT_DIR;/GSI/ex&RUN;_post.sh">
 
 <!-- Resources -->
 
@@ -234,6 +237,26 @@ cat > ${NWROOT}/workflow/${RUN}_${expname}.xml <<EOF
 <!-- Variables in Namelist -->
 <!ENTITY GSI_grid_ratio_in_var       "1">
 <!ENTITY GSI_grid_ratio_in_cldanl    "1">
+
+<!ENTITY POST_CORES "48">
+<!ENTITY POST_THREADS "1">
+<!ENTITY POST_RESOURCES  
+   "<nodes>4:ppn=12</nodes>
+    <walltime>00:30:00</walltime>">
+<!ENTITY POST_OMP_STACKSIZE "512M">
+
+<!ENTITY POST_START_TIME "00:40:00">
+<!ENTITY POST_DEADLINE   "01:30:00">
+<!ENTITY POST_WALL_LIMIT 
+   '<deadline><cyclestr offset="&POST_DEADLINE;">@Y@m@d@H@M</cyclestr></deadline>'>
+<!ENTITY POST_RESERVATION 
+   '<native>-m n</native>
+    <queue>&QUEUE_DBG;</queue>
+    <account>&ACCOUNT;</account>'>
+
+<!-- Variables in Namelist -->
+<!ENTITY POST_grid_ratio_in_var       "1">
+<!ENTITY POST_grid_ratio_in_cldanl    "1">
 
 
 <!-- Block of Variables passed to workflow and tasks -->
@@ -400,6 +423,10 @@ cat > ${NWROOT}/workflow/${RUN}_${expname}.xml <<EOF
       <value><cyclestr>&DATA_GSIANL;</cyclestr></value>
    </envar>
    <envar>
+      <name>DATA_POST</name>
+      <value><cyclestr>&DATA_POST;</cyclestr></value>
+   </envar>
+   <envar>
       <name>DATA_OBSPRD</name>
       <value><cyclestr>&DATA_OBSPRD;</cyclestr></value>
    </envar>
@@ -482,6 +509,54 @@ cat > ${NWROOT}/workflow/${RUN}_${expname}.xml <<EOF
       <value>&SFCOBS_PROVIDER;</value>
     </envar>'>
 
+<!ENTITY ENVARS_POST
+    '<envar>
+      <name>POSTPROC</name>
+      <value>&GSI_CORES;</value>
+    </envar>
+    <envar>
+      <name>START_TIME</name>
+      <value><cyclestr>@Y@m@d@H</cyclestr></value>
+    </envar>
+    <envar>
+      <name>FULLCYC</name>
+      <value>1</value>
+    </envar>
+    <envar>
+      <name>DATABASE_DIR</name>
+      <value>&DATABASE_DIR;</value>
+    </envar>
+    <envar>
+      <name>RUNDIR_GSD</name>
+      <value><cyclestr>&DATA_RUNDIR;</cyclestr></value>
+    </envar>
+    <envar>
+      <name>DATA_GES</name>
+      <value>&HRRR_DIR;/<cyclestr offset="-1:00:00">@Y@m@d@H</cyclestr>/wrfprd</value>
+    </envar>
+    <envar>
+      <name>POST_grid_ratio_in_var</name>
+      <value>&GSI_grid_ratio_in_var;</value>
+    </envar>
+    <envar>
+      <name>POST_grid_ratio_in_cldanl</name>
+      <value>&GSI_grid_ratio_in_cldanl;</value>
+    </envar>
+    <envar>
+      <name>exSCR_POST</name>
+      <value>&exSCR_GSIANL;</value>
+    </envar>
+    <envar>
+      <name>WGRIB2</name>
+      <value>/apps/wgrib2/0.2.0.6c/bin/wgrib2</value>
+    </envar>
+    <envar>
+      <name>JJOB_POST</name>
+      <value>&JJOB_GSIANL;</value>
+    </envar>'>
+
+
+
 <!ENTITY ENVARS_FETCHHPSS
     '<envar>
       <name>START_TIME</name>
@@ -520,6 +595,21 @@ cat > ${NWROOT}/workflow/${RUN}_${expname}.xml <<EOF
         <name>OMP_STACKSIZE</name>
         <value>&GSI_OMP_STACKSIZE;</value>
    </envar>'>
+
+<!ENTITY OPTIMIZATIONS_POST
+   '<envar>
+        <name>LANG</name>
+        <value>en_US</value>
+   </envar>
+   <envar>
+        <name>OMP_NUM_THREADS</name>
+        <value>&POST_THREADS;</value>
+   </envar>
+   <envar>
+        <name>OMP_STACKSIZE</name>
+        <value>&POST_OMP_STACKSIZE;</value>
+   </envar>'>
+
 
 <!ENTITY ENVARS_PREPJOB
     '<envar>
@@ -715,6 +805,31 @@ cat > ${NWROOT}/workflow/${RUN}_${expname}.xml <<EOF
     </dependency>
 
   </task>
+
+  <task name="&NET;_post" cycledefs="&time_int;" maxtries="&maxtries;">
+
+    &ENVARS;
+    &POST_RESOURCES;
+    &POST_RESERVATION;
+    &SYS_COMMANDS;
+    &OPTIMIZATIONS_POST;
+    <envar>
+       <name>rundir_task</name>
+       <value><cyclestr>&DATA_POST;</cyclestr></value>
+    </envar>
+
+    <command>&JJOB_DIR;/launch.sh &JJOB_DIR;/J&CAP_NET;_POST</command>
+    <jobname><cyclestr>&NET;_post_@H</cyclestr></jobname>
+    <join><cyclestr>&LOG_SCHDLR;/&NET;_submit_post_@Y@m@d@H@M.log\${PBS_JOBID}</cyclestr></join>
+
+    &ENVARS_POST;
+
+    <dependency>
+          <taskdep task="&NET;_gsianl"/>
+    </dependency>
+
+  </task>
+
 
 </workflow>
 EOF
