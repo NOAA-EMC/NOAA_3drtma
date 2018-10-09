@@ -17,14 +17,29 @@ rm -f fort.*
 CDATE=$PDY$cyc
 JDAY=`date2jday.sh $PDY` 
 
-YYYY=`echo ${CDATE} | cut -c 1-4`
-MM=`echo ${CDATE} | cut -c 5-6`
-DD=`echo ${CDATE} | cut -c 7-8`
-HH=`echo ${CDATE} | cut -c 9-10`
-timeform=${YYYY}"-"${MM}"-"${DD}"-"${HH}":00:00" 
-timeformalt=${YYYY}"-"${MM}"-"${DD}"_"${HH}"_00_00"
+#YYYY=`echo ${CDATE} | cut -c 1-4`
+#MM=`echo ${CDATE} | cut -c 5-6`
+#DD=`echo ${CDATE} | cut -c 7-8`
+#HH=`echo ${CDATE} | cut -c 9-10`
 
+
+YYYY=2018
+MM=10
+DD=09
+HH=11
+
+timeform=${YYYY}"-"${MM}"-"${DD}"-"${HH}":00:00" 
+#timeformalt=${YYYY}"-"${MM}"-"${DD}"_"${HH}"_00_00"
+
+
+export XLFRTEOPTS="unit_vars=yes"
+export MP_SHARED_MEMORY=yes
+export RSTFNL=${DATA}/
 export tmmark=tm00
+#fullpath=$COMOUT/gsianl_wrf_inout_d01_$timeformalt
+fullpath=$COMOUT/hrrr_${YYYY}${MM}${DD}${HH}f001
+OUTTYP=netcdf
+GTYPE=grib2
 export CORE=RAPR
 export SPLNUM=47
 export SPL=2.,5.,7.,10.,20.,30.\
@@ -50,49 +65,45 @@ fi
 cp $PARMrtma/hrrr_run_ETAMPNEW_DATA eta_micro_lookup.dat
 cp $PARMrtma/hrrr_imgr_insat3d.SpcCoeff.bin imgr_insat3d.SpcCoeff.bin
 cp $PARMrtma/hrrr_imgr_insat3d.TauCoeff.bin imgr_insat3d.TauCoeff.bin
-cp $FIX_CRTM/imgr_g11.SpcCoeff.bin imgr_g11.SpcCoeff.bin
-cp $FIX_CRTM/imgr_g12.SpcCoeff.bin imgr_g12.SpcCoeff.bin
-cp $FIX_CRTM/imgr_g13.SpcCoeff.bin imgr_g13.SpcCoeff.bin
-cp $FIX_CRTM/imgr_g15.SpcCoeff.bin imgr_g15.SpcCoeff.bin
-cp $FIX_CRTM/imgr_mt1r.SpcCoeff.bin imgr_mt1r.SpcCoeff.bin
-cp $FIX_CRTM/imgr_mt2.SpcCoeff.bin imgr_mt2.SpcCoeff.bin
-cp $FIX_CRTM/amsre_aqua.SpcCoeff.bin amsre_aqua.SpcCoeff.bin
-cp $FIX_CRTM/tmi_trmm.SpcCoeff.bin tmi_trmm.SpcCoeff.bin
-cp $FIX_CRTM/ssmi_f13.SpcCoeff.bin ssmi_f13.SpcCoeff.bin
-cp $FIX_CRTM/ssmi_f14.SpcCoeff.bin ssmi_f14.SpcCoeff.bin
-cp $FIX_CRTM/ssmi_f15.SpcCoeff.bin ssmi_f15.SpcCoeff.bin
-cp $FIX_CRTM/ssmis_f16.SpcCoeff.bin ssmis_f16.SpcCoeff.bin
-cp $FIX_CRTM/ssmis_f17.SpcCoeff.bin ssmis_f17.SpcCoeff.bin
-cp $FIX_CRTM/ssmis_f18.SpcCoeff.bin ssmis_f18.SpcCoeff.bin
-cp $FIX_CRTM/ssmis_f20.SpcCoeff.bin ssmis_f20.SpcCoeff.bin
-cp $FIX_CRTM/seviri_m10.SpcCoeff.bin seviri_m10.SpcCoeff.bin
-cp $FIX_CRTM/v.seviri_m10.SpcCoeff.bin v.seviri_m10.SpcCoeff.bin
-cp $FIX_CRTM/imgr_g11.TauCoeff.bin imgr_g11.TauCoeff.bin
-cp $FIX_CRTM/imgr_g12.TauCoeff.bin imgr_g12.TauCoeff.bin
-cp $FIX_CRTM/imgr_g13.TauCoeff.bin imgr_g13.TauCoeff.bin
-cp $FIX_CRTM/imgr_g15.TauCoeff.bin imgr_g15.TauCoeff.bin
-cp $FIX_CRTM/imgr_mt1r.TauCoeff.bin imgr_mt1r.TauCoeff.bin
-cp $FIX_CRTM/imgr_mt2.TauCoeff.bin imgr_mt2.TauCoeff.bin
-cp $FIX_CRTM/amsre_aqua.TauCoeff.bin amsre_aqua.TauCoeff.bin
-cp $FIX_CRTM/tmi_trmm.TauCoeff.bin tmi_trmm.TauCoeff.bin
-cp $FIX_CRTM/ssmi_f13.TauCoeff.bin ssmi_f13.TauCoeff.bin
-cp $FIX_CRTM/ssmi_f14.TauCoeff.bin ssmi_f14.TauCoeff.bin
-cp $FIX_CRTM/ssmi_f15.TauCoeff.bin ssmi_f15.TauCoeff.bin
-cp $FIX_CRTM/ssmis_f16.TauCoeff.bin ssmis_f16.TauCoeff.bin
-cp $FIX_CRTM/ssmis_f17.TauCoeff.bin ssmis_f17.TauCoeff.bin
-cp $FIX_CRTM/ssmis_f18.TauCoeff.bin ssmis_f18.TauCoeff.bin
-cp $FIX_CRTM/ssmis_f19.TauCoeff.bin ssmis_f19.TauCoeff.bin
-cp $FIX_CRTM/ssmis_f20.TauCoeff.bin ssmis_f20.TauCoeff.bin
-cp $FIX_CRTM/seviri_m10.TauCoeff.bin seviri_m10.TauCoeff.bin
-cp $FIX_CRTM/CloudCoeff.bin CloudCoeff.bin 
-cp $FIX_CRTM/AerosolCoeff.bin AerosolCoeff.bin
-cp $FIX_CRTM/EmisCoeff.bin EmisCoeff.bin
+cp $PARMrtma/imgr_g11.SpcCoeff.bin imgr_g11.SpcCoeff.bin
+cp $PARMrtma/imgr_g12.SpcCoeff.bin imgr_g12.SpcCoeff.bin
+cp $PARMrtma/imgr_g13.SpcCoeff.bin imgr_g13.SpcCoeff.bin
+cp $PARMrtma/imgr_g15.SpcCoeff.bin imgr_g15.SpcCoeff.bin
+cp $PARMrtma/imgr_mt1r.SpcCoeff.bin imgr_mt1r.SpcCoeff.bin
+cp $PARMrtma/imgr_mt2.SpcCoeff.bin imgr_mt2.SpcCoeff.bin
+cp $PARMrtma/amsre_aqua.SpcCoeff.bin amsre_aqua.SpcCoeff.bin
+cp $PARMrtma/tmi_trmm.SpcCoeff.bin tmi_trmm.SpcCoeff.bin
+cp $PARMrtma/ssmi_f13.SpcCoeff.bin ssmi_f13.SpcCoeff.bin
+cp $PARMrtma/ssmi_f14.SpcCoeff.bin ssmi_f14.SpcCoeff.bin
+cp $PARMrtma/ssmi_f15.SpcCoeff.bin ssmi_f15.SpcCoeff.bin
+cp $PARMrtma/ssmis_f16.SpcCoeff.bin ssmis_f16.SpcCoeff.bin
+cp $PARMrtma/ssmis_f17.SpcCoeff.bin ssmis_f17.SpcCoeff.bin
+cp $PARMrtma/ssmis_f18.SpcCoeff.bin ssmis_f18.SpcCoeff.bin
+cp $PARMrtma/ssmis_f19.SpcCoeff.bin ssmis_f19.SpcCoeff.bin
+cp $PARMrtma/ssmis_f20.SpcCoeff.bin ssmis_f20.SpcCoeff.bin
+cp $PARMrtma/seviri_m10.SpcCoeff.bin seviri_m10.SpcCoeff.bin
+cp $PARMrtma/v.seviri_m10.SpcCoeff.bin v.seviri_m10.SpcCoeff.bin
+cp $PARMrtma/imgr_g11.TauCoeff.bin imgr_g11.TauCoeff.bin
+cp $PARMrtma/imgr_g12.TauCoeff.bin imgr_g12.TauCoeff.bin
+cp $PARMrtma/imgr_g13.TauCoeff.bin imgr_g13.TauCoeff.bin
+cp $PARMrtma/imgr_g15.TauCoeff.bin imgr_g15.TauCoeff.bin
+cp $PARMrtma/imgr_mt1r.TauCoeff.bin imgr_mt1r.TauCoeff.bin
+cp $PARMrtma/imgr_mt2.TauCoeff.bin imgr_mt2.TauCoeff.bin
+cp $PARMrtma/amsre_aqua.TauCoeff.bin amsre_aqua.TauCoeff.bin
+cp $PARMrtma/tmi_trmm.TauCoeff.bin tmi_trmm.TauCoeff.bin
+cp $PARMrtma/ssmi_f13.TauCoeff.bin ssmi_f13.TauCoeff.bin
+cp $PARMrtma/ssmi_f14.TauCoeff.bin ssmi_f14.TauCoeff.bin
+cp $PARMrtma/ssmi_f15.TauCoeff.bin ssmi_f15.TauCoeff.bin
+cp $PARMrtma/ssmis_f16.TauCoeff.bin ssmis_f16.TauCoeff.bin
+cp $PARMrtma/ssmis_f17.TauCoeff.bin ssmis_f17.TauCoeff.bin
+cp $PARMrtma/ssmis_f18.TauCoeff.bin ssmis_f18.TauCoeff.bin
+cp $PARMrtma/ssmis_f19.TauCoeff.bin ssmis_f19.TauCoeff.bin
+cp $PARMrtma/ssmis_f20.TauCoeff.bin ssmis_f20.TauCoeff.bin
+cp $PARMrtma/seviri_m10.TauCoeff.bin seviri_m10.TauCoeff.bin
+cp $PARMrtma/CloudCoeff.bin CloudCoeff.bin 
+cp $PARMrtma/AerosolCoeff.bin AerosolCoeff.bin
+cp $PARMrtma/EmisCoeff.bin EmisCoeff.bin
 
-
-fullpath=$COMOUT/gsianl_wrf_inout_d01_$timeformalt
-OUTTYP=netcdf
-GTYPE=grib2
-MODELTYPE=RAPR
 
 cat > itag <<EOF
 $fullpath
@@ -100,8 +111,8 @@ $OUTTYP
 $GTYPE
 $timeform
 $CORE
-$SLPNUM
-$SLP
+$SPLNUM
+$SPL
 ${VALIDTIMEUNITS}
 EOF
 

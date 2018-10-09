@@ -77,7 +77,7 @@
 
 <!-- for workflow -->
 
-<!ENTITY maxtries	"5">
+<!ENTITY maxtries	"10">
 <!ENTITY KEEPDATA	"YES">
 <!ENTITY SENDCOM	"YES">
 
