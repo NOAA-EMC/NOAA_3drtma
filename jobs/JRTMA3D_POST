@@ -131,7 +131,7 @@ fi
 ######################
 # Execute the script.
 ######################
-${exSCR_POSTANL:-$HOMErtma3d/scripts/UPP/ex${RUN}_post.sh}
+${exSCR_POSTANL:-$HOMErtma3d/scripts/UPP/test_unipost_fgs_1hrfcst.sh}
 export err=$?; err_chk
 
 msg="$0 of $job completed normally"
