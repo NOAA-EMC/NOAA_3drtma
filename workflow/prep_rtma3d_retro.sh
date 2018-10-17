@@ -70,7 +70,6 @@ export CAP_RUN_ENVIR=`echo ${run_envir} | tr '[:lower:]' '[:upper:]'`
 #       User can specify the path to use user's static data.
 # export Fixrtma3d="/scratch4/NCEPDEV/fv3-cam/save/Gang.Zhao/FixData"
 # export FIX_GSI="/scratch4/NCEPDEV/fv3-cam/save/Gang.Zhao/FixData/GSI-fix_rtma3d_emc_test"
-# export FIX_CRTM="/scratch4/NCEPDEV/fv3-cam/save/Gang.Zhao/FixData/CRTM-fix_rtma3d"
 # export OBS_USELIST="/scratch4/NCEPDEV/fv3-cam/save/Gang.Zhao/FixData/ObsUseList_rtma3d"
 # export SFCOBS_USELIST="/scratch4/NCEPDEV/fv3-cam/save/Gang.Zhao/FixData/ObsUseList_rtma3d/gsd/mesonet_uselists"
 # export AIRCRAFT_REJECT="/scratch4/NCEPDEV/fv3-cam/save/Gang.Zhao/FixData/ObsUseList_rtma3d/gsd/amdar_reject_lists"
@@ -78,7 +77,6 @@ export CAP_RUN_ENVIR=`echo ${run_envir} | tr '[:lower:]' '[:upper:]'`
 
   export FIXrtma3d="${NWROOT}/fix"
   export FIX_GSI="${FIXrtma3d}/GSI-fix"
-  export FIX_CRTM="${FIXrtma3d}/CRTM-fix"
   export OBS_USELIST="${FIXrtma3d}/ObsUseList"
   export SFCOBS_USELIST="${OBS_USELIST}/mesonet_uselists"
   export AIRCRAFT_REJECT="${OBS_USELIST}/amdar_reject_lists"
@@ -118,6 +116,7 @@ cat > ${NWROOT}/workflow/${RUN}_${expname}.xml <<EOF
 
 <!ENTITY OBS_DIR	"/scratch4/NCEPDEV/fv3-cam/save/Gang.Zhao/Data/GSD_GSI_Case/obs">
 <!ENTITY HRRR_DIR	"/scratch4/NCEPDEV/fv3-cam/save/Gang.Zhao/Data/GSD_GSI_Case/fgs">
+<!ENTITY FIX_CRTM       "/scratch4/NCEPDEV/da/save/Michael.Lueken/nwprod/lib/crtm/2.2.3/fix_update">
 
 <!--  -->
 
@@ -137,7 +136,6 @@ cat > ${NWROOT}/workflow/${RUN}_${expname}.xml <<EOF
 
 <!-- Specific Definition for static data -->
 <!ENTITY FIXrtma3d	"${FIXrtma3d}">
-<!ENTITY FIX_CRTM       "${FIX_CRTM}">
 <!ENTITY FIX_GSI        "${FIX_GSI}">
 <!ENTITY OBS_USELIST    "${OBS_USELIST}">
 <!ENTITY AIRCRAFT_REJECT        "${AIRCRAFT_REJECT}">

@@ -16,7 +16,6 @@ export RUN_ENVIR=${RUN_ENVIR:-nco}
 ######################
 export NET=${NET:-rtma3d}
 export RUN=${RUN:-rtma3d}
-export model=${model:-rtma3d}
 
 ##########################################################
 # obtain unique process id (pid) and make temp directories
@@ -25,7 +24,7 @@ export job=${job:-"${outid}.o$$"}
 export jobid=${jobid:-"${outid}.o$$"}
 export MPIRUN=${MPIRUN:-"mpirun"}
 export CNVGRIB=${CNVGRIB:-cnvgrib}
-export fixdir=${FIX_POST:-"${FIXrtma3d}/POST-fix"}
+export FIXPOST=${FIX_POST:-"${FIXrtma3d}/POST-fix"}
 
 ##########################################################
 # make temp/running directories
@@ -45,9 +44,8 @@ cd $DATA
 #    setpdy.sh needs the variables 
 #    $PDY and $cyc already defined in advance
 #####################################################
-export cycle=${cycle:-t${cyc}z}
-setpdy.sh
-. ${DATA}/PDY
+#setpdy.sh
+#. ${DATA}/PDY
 
 export subcyc=${subcyc} #Note: Must define subcyc in upper level script. Can be 00, 15, 30, or 45 /MPondeca, 30Jun2017
                          #only used for rurtma2p5
@@ -75,17 +73,9 @@ export PARMrtma=${PARMrtma3d:-$HOMErtma/parm/${RUN}}
 export USHrtma=${USHrtma3d:-$HOMErtma/ush/${RUN}}
 
 # date and time for previous and next cycle
-export PDYHH_cycm1=`$EXECrtma3d/ndate.x -1 "${PDYHH}"`
-export PDYHH_cycm1=$($NDATE -01  "${PDYHH}")
-export PDYHH_cycp1=`$EXECrtma3d/ndate.x +1 "${PDYHH}"`
-export PDYHH_cycp1=$($NDATE +01  "${PDYHH}")
-echo $PDYHH
-echo ${PDYHH_cycm1}
-echo ${PDYHH_cycp1}
 
-export FGS_OPT=${FGS_OPT:-1}
-export RUNDIR_GSD=${RUNDIR_GSD:-"${DATAROOT}/${RUN}_${PDY}${cyc}${subcyc}"}
-export DATAHOME=${DATAHOME:-$RUNDIR_GSD/gsiprd}
+export RUNDIR_GSD=${RUNDIR_GSD:-${DATAROOT}/${RUN}_${PDY}${cyc}${subcyc}}
+export DATAHOME=${DATAHOME:-$RUNDIR_GSD/postprd}
 
 
 #################################################
@@ -94,25 +84,10 @@ export DATAHOME=${DATAHOME:-$RUNDIR_GSD/gsiprd}
 export COMIN=${COM_IN:-$COMROOT/${NET}/${envir}}/${RUN}.${PDY}
 export COMOUT=${COM_OUT:-$COMROOT/${NET}/${envir}}/${RUN}.${PDY}
 
-
-### Observations Products/Input for the RTMA3D (prepbufr files) 
-export COMINobsproc_rtma3d=${COMINobsproc_rtma3d:-"${COMIN}/obsprd.${cycle}"}
-if [ ! -d "${COMINobsproc_rtma3d}" ] ; then
-  echo " Directory of obs data does NOT exist. Job abort!"
-  err_exit
-fi
-
-### Firstguess Products/Input for the RTMA3D (prepbufr files) 
-export GESINhrrr_rtma3d=${GESINhrrr_rtma3d:-"${COMIN}/fgsprd.${cycle}"}
-if [ ! -d "${GESINhrrr_rtma3d}" ] ; then
-  echo " Directory of HRRRs fgs data does NOT exist. Job abort!"
-  err_exit
-fi
-
-if [ ! -d "${COMIN}" ] ; then
+if [ ! -d ${COMIN} ] ; then
    mkdir -p $COMIN
 fi
-if [ ! -d "${COMOUT}" ] ; then
+if [ ! -d ${COMOUT} ] ; then
    mkdir -p $COMOUT
 fi
 
@@ -131,7 +106,7 @@ fi
 ######################
 # Execute the script.
 ######################
-${exSCR_POSTANL:-$HOMErtma3d/scripts/UPP/test_unipost_fgs_1hrfcst.sh}
+${exSCR_POSTANL:-$HOMErtma3d/scripts/UPP/rtma3d_unipost.sh}
 export err=$?; err_chk
 
 msg="$0 of $job completed normally"

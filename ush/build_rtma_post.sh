@@ -17,7 +17,7 @@ branch_post_gsd="master"
 branch_post_source=${branch_post_source:-"$branch_post_gsd"}
 
 build_corelibs="OFF"   # OFF: using installed corelibs (bacio, bufr, etc.)
-# build_type="DEBUG"   # option: DEBUG, or PRODUCTION(default)
+build_type="DEBUG"   # option: DEBUG, or PRODUCTION(default)
 
 #=========================================================================#
 
