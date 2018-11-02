@@ -66,11 +66,11 @@ fi
 
 
 # Specify Execution Areas
-export HOMErtma=${HOMErtma3d:-$NWROOT/rtma.${rtma_ver}}
-export EXECrtma=${EXECrtma3d:-$HOMErtma/exec}
-export FIXrtma=${FIXrtma3d:-$HOMErtma/fix/${RUN}}
-export PARMrtma=${PARMrtma3d:-$HOMErtma/parm/${RUN}}
-export USHrtma=${USHrtma3d:-$HOMErtma/ush/${RUN}}
+export HOMErtma3d=${HOMErtma3d:-$NWROOT/rtma.${rtma_ver}}
+export EXECrtma3d=${EXECrtma3d:-$HOMErtma/exec}
+export FIXrtma3d=${FIXrtma3d:-$HOMErtma/fix/${RUN}}
+export PARMrtma3d=${PARMrtma3d:-$HOMErtma/parm/${RUN}}
+export USHrtma3d=${USHrtma3d:-$HOMErtma/ush/${RUN}}
 
 # date and time for previous and next cycle
 
@@ -106,7 +106,7 @@ fi
 ######################
 # Execute the script.
 ######################
-${exSCR_POSTANL:-$HOMErtma3d/scripts/UPP/rtma3d_unipost.sh}
+${exSCR_POST:-$HOMErtma3d/scripts/${RUN}/ex${RUN}_unipost.sh}
 export err=$?; err_chk
 
 msg="$0 of $job completed normally"

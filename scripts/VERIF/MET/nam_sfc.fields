@@ -1,0 +1,12 @@
+VIS:surface
+GUST:surface
+MSLET:mean sea level
+PRES:surface
+HGT:surface
+TMP:2 m above ground
+SPFH:2 m above ground
+DPT:2 m above ground
+UGRD:10 m above ground
+VGRD:10 m above ground
+TCDC:entire atmosphere (considered as a single layer)
+HGT:cloud ceiling

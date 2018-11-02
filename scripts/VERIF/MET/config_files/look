@@ -1,0 +1,117 @@
+1:0:vt=2018080901:2 m above ground:1 hour fcst:TMP Temperature [K]:
+    ndata=2953665:undef=268549:mean=299.518:min=278.275:max=322.775
+    grid_template=30:winds(grid):
+	Lambert Conformal: (2145 x 1377) input WE:SN output WE:SN res 56
+	Lat1 20.191999 Lon1 238.445999 LoV 265.000000
+	LatD 25.000000 Latin1 25.000000 Latin2 25.000000
+	LatSP 0.000000 LonSP 0.000000
+	North Pole (2145 x 1377) Dx 2539.703000 m Dy 2539.703000 m mode 56
+
+2:1484259:vt=2018080901:2 m above ground:1 hour fcst:DPT Dew Point Temperature [K]:
+    ndata=2953665:undef=268549:mean=288.976:min=250.064:max=301.564
+    grid_template=30:winds(grid):
+	Lambert Conformal: (2145 x 1377) input WE:SN output WE:SN res 56
+	Lat1 20.191999 Lon1 238.445999 LoV 265.000000
+	LatD 25.000000 Latin1 25.000000 Latin2 25.000000
+	LatSP 0.000000 LonSP 0.000000
+	North Pole (2145 x 1377) Dx 2539.703000 m Dy 2539.703000 m mode 56
+
+3:2923427:vt=2018080901:2 m above ground:1 hour fcst:SPFH Specific Humidity [kg/kg]:
+    ndata=2953665:undef=268549:mean=0.0129152:min=0.0009:max=0.0239
+    grid_template=30:winds(grid):
+	Lambert Conformal: (2145 x 1377) input WE:SN output WE:SN res 56
+	Lat1 20.191999 Lon1 238.445999 LoV 265.000000
+	LatD 25.000000 Latin1 25.000000 Latin2 25.000000
+	LatSP 0.000000 LonSP 0.000000
+	North Pole (2145 x 1377) Dx 2539.703000 m Dy 2539.703000 m mode 56
+
+4:4545693:vt=2018080901:10 m above ground:1 hour fcst:UGRD U-Component of Wind [m/s]:
+    ndata=2953665:undef=268549:mean=0.112522:min=-25.6924:max=16.5576
+    grid_template=30:winds(grid):
+	Lambert Conformal: (2145 x 1377) input WE:SN output WE:SN res 56
+	Lat1 20.191999 Lon1 238.445999 LoV 265.000000
+	LatD 25.000000 Latin1 25.000000 Latin2 25.000000
+	LatSP 0.000000 LonSP 0.000000
+	North Pole (2145 x 1377) Dx 2539.703000 m Dy 2539.703000 m mode 56
+
+5:5881500:vt=2018080901:10 m above ground:1 hour fcst:VGRD V-Component of Wind [m/s]:
+    ndata=2953665:undef=268549:mean=0.565989:min=-22.0804:max=18.9196
+    grid_template=30:winds(grid):
+	Lambert Conformal: (2145 x 1377) input WE:SN output WE:SN res 56
+	Lat1 20.191999 Lon1 238.445999 LoV 265.000000
+	LatD 25.000000 Latin1 25.000000 Latin2 25.000000
+	LatSP 0.000000 LonSP 0.000000
+	North Pole (2145 x 1377) Dx 2539.703000 m Dy 2539.703000 m mode 56
+
+6:7163187:vt=2018080901:surface:1 hour fcst:PRES Pressure [Pa]:
+    ndata=2953665:undef=268549:mean=95778.2:min=61900:max=102200
+    grid_template=30:winds(grid):
+	Lambert Conformal: (2145 x 1377) input WE:SN output WE:SN res 56
+	Lat1 20.191999 Lon1 238.445999 LoV 265.000000
+	LatD 25.000000 Latin1 25.000000 Latin2 25.000000
+	LatSP 0.000000 LonSP 0.000000
+	North Pole (2145 x 1377) Dx 2539.703000 m Dy 2539.703000 m mode 56
+
+7:8718952:vt=2018080901:mean sea level:1 hour fcst:PRMSL Pressure Reduced to MSL [Pa]:
+    ndata=2953665:undef=268549:mean=101143:min=98990:max=102100
+    grid_template=30:winds(grid):
+	Lambert Conformal: (2145 x 1377) input WE:SN output WE:SN res 56
+	Lat1 20.191999 Lon1 238.445999 LoV 265.000000
+	LatD 25.000000 Latin1 25.000000 Latin2 25.000000
+	LatSP 0.000000 LonSP 0.000000
+	North Pole (2145 x 1377) Dx 2539.703000 m Dy 2539.703000 m mode 56
+
+8:9610031:vt=2018080901:surface:1 hour fcst:HGT Geopotential Height [gpm]:
+    ndata=2953665:undef=268549:mean=507.723:min=-80:max=4230
+    grid_template=30:winds(grid):
+	Lambert Conformal: (2145 x 1377) input WE:SN output WE:SN res 56
+	Lat1 20.191999 Lon1 238.445999 LoV 265.000000
+	LatD 25.000000 Latin1 25.000000 Latin2 25.000000
+	LatSP 0.000000 LonSP 0.000000
+	North Pole (2145 x 1377) Dx 2539.703000 m Dy 2539.703000 m mode 56
+
+9:11116983:vt=2018080901:surface:1 hour fcst:GUST Wind Speed (Gust) [m/s]:
+    ndata=2953665:undef=268549:mean=5.76891:min=0.1:max=39
+    grid_template=30:winds(grid):
+	Lambert Conformal: (2145 x 1377) input WE:SN output WE:SN res 56
+	Lat1 20.191999 Lon1 238.445999 LoV 265.000000
+	LatD 25.000000 Latin1 25.000000 Latin2 25.000000
+	LatSP 0.000000 LonSP 0.000000
+	North Pole (2145 x 1377) Dx 2539.703000 m Dy 2539.703000 m mode 56
+
+10:12749524:vt=2018080901:surface:1 hour fcst:VIS Visibility [m]:
+    ndata=2953665:undef=268549:mean=35380.8:min=0:max=90000
+    grid_template=30:winds(grid):
+	Lambert Conformal: (2145 x 1377) input WE:SN output WE:SN res 56
+	Lat1 20.191999 Lon1 238.445999 LoV 265.000000
+	LatD 25.000000 Latin1 25.000000 Latin2 25.000000
+	LatSP 0.000000 LonSP 0.000000
+	North Pole (2145 x 1377) Dx 2539.703000 m Dy 2539.703000 m mode 56
+
+11:14392990:vt=2018080901:entire atmosphere (considered as a single layer):1 hour fcst:TCDC Total Cloud Cover [%]:
+    ndata=2953665:undef=268549:mean=17.0972:min=0:max=100
+    grid_template=30:winds(grid):
+	Lambert Conformal: (2145 x 1377) input WE:SN output WE:SN res 56
+	Lat1 20.191999 Lon1 238.445999 LoV 265.000000
+	LatD 25.000000 Latin1 25.000000 Latin2 25.000000
+	LatSP 0.000000 LonSP 0.000000
+	North Pole (2145 x 1377) Dx 2539.703000 m Dy 2539.703000 m mode 56
+
+12:15696927:vt=2018080901:cloud base:1 hour fcst:HGT Geopotential Height [gpm]:
+    ndata=2953665:undef=2358425:mean=4095.75:min=20.5107:max=18021.5
+    grid_template=30:winds(grid):
+	Lambert Conformal: (2145 x 1377) input WE:SN output WE:SN res 56
+	Lat1 20.191999 Lon1 238.445999 LoV 265.000000
+	LatD 25.000000 Latin1 25.000000 Latin2 25.000000
+	LatSP 0.000000 LonSP 0.000000
+	North Pole (2145 x 1377) Dx 2539.703000 m Dy 2539.703000 m mode 56
+
+13:16988940:vt=2018080901:cloud ceiling:1 hour fcst:HGT Geopotential Height [gpm]:
+    ndata=2953665:undef=2295896:mean=3525.47:min=38.0921:max=14849.6
+    grid_template=30:winds(grid):
+	Lambert Conformal: (2145 x 1377) input WE:SN output WE:SN res 56
+	Lat1 20.191999 Lon1 238.445999 LoV 265.000000
+	LatD 25.000000 Latin1 25.000000 Latin2 25.000000
+	LatSP 0.000000 LonSP 0.000000
+	North Pole (2145 x 1377) Dx 2539.703000 m Dy 2539.703000 m mode 56
+
