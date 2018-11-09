@@ -5,8 +5,8 @@
 <!ENTITY ACCOUNT "nrtrr">
 <!ENTITY ACCOUNT_DA "nrtrr">
 
-<!ENTITY PARTITION "xjet:vjet:sjet:ujet:tjet">
-<!ENTITY PARTITION_DA "xjet:vjet:sjet:ujet:tjet">
+<!ENTITY PARTITION "xjet:vjet:sjet:tjet">
+<!ENTITY PARTITION_DA "xjet:vjet:sjet:tjet">
 <!ENTITY RES_DA "vjet">
 <!ENTITY QUEUE "batch">
 
