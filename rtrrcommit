@@ -1,0 +1,12 @@
+#!/bin/bash
+
+echo "Input your user name:"
+read username
+
+git config user.email "${username}@noaa.gov"
+git config user.name "${username}"
+
+git commit "$@"
+
+git config --unset user.name
+git config --unset user.email
