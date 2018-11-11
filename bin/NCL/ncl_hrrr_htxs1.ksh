@@ -1,6 +1,7 @@
 #!/bin/ksh --login
 
 np=`cat $PBS_NODEFILE | wc -l`
+NCL_VER=6.3.0
 
 # Load modules
 module load intel
@@ -44,10 +45,10 @@ typeset -RZ2 FCST_TIME
 ulimit -s 1024000
 
 # Settings for testing
-EXE_ROOT=/misc/whome/wrfruc/bin/ncl/nclhrrr
-# START_TIME=2014032811
-# FCST_TIME=12
-# DATAROOT=/home/rtrr/hrrr
+EXE_ROOT=/misc/whome/wrfruc/bin/ncl/nclhrrrak
+# START_TIME=2017032110
+# FCST_TIME=0
+# DATAROOT=/home/rtrr/rua_ak_databasedir/run
 # DATAHOME=${DATAROOT}/${START_TIME}
 
 # Print run parameters
@@ -104,34 +105,38 @@ ls -al prs_file.grb
 ${LN} -s ${EXE_ROOT}/WRFUserARW.ncl WRFUserARW.ncl
 ${LN} -s ${EXE_ROOT}/stdatm.txt stdatm.txt
 
-set -A ncgms sitesA_htxswind  \
-             sitesA_htxscond
+set -A ncgms sitesAK_htxswind  \
+             sitesAK_htxscond  \
+             sitesAK_htxsrwmr  \
+             sitesAK_htxssnmr  \
+             sitesAK_htxsgrmr  \
+             sitesAK_htxsclwmr
 
-set -A pngs sitesA_htxswind-0.png \
-            sitesA_htxswind-1.png \
-            sitesA_htxswind-2.png \
-            sitesA_htxswind-3.png \
-            sitesA_htxswind-4.png \
-            sitesA_htxswind-5.png \
-            sitesA_htxscond-0.png \
-            sitesA_htxscond-1.png \
-            sitesA_htxscond-2.png \
-            sitesA_htxscond-3.png \
-            sitesA_htxscond-4.png \
-            sitesA_htxscond-5.png
+set -A pngs sitesAK_htxswind-0.png \
+            sitesAK_htxswind-1.png \
+            sitesAK_htxscond-0.png \
+            sitesAK_htxscond-1.png \
+            sitesAK_htxsrwmr-0.png \
+            sitesAK_htxsrwmr-1.png \
+            sitesAK_htxssnmr-0.png \
+            sitesAK_htxssnmr-1.png \
+            sitesAK_htxsgrmr-0.png \
+            sitesAK_htxsgrmr-1.png \
+            sitesAK_htxsclwmr-0.png \
+            sitesAK_htxsclwmr-1.png
 
-set -A webnames htxswind_bouA  \
-                htxswind_lwxA  \
-                htxswind_mkxA  \
-                htxswind_seaA  \
-                htxswind_miaA  \
-                htxswind_atlA  \
-                htxscond_bouA  \
-                htxscond_lwxA  \
-                htxscond_mkxA  \
-                htxscond_seaA  \
-                htxscond_miaA  \
-                htxscond_atlA
+set -A webnames htxswind_afcweA  \
+                htxswind_afcnsA  \
+                htxscond_afcweA  \
+                htxscond_afcnsA  \
+                htxsrwmr_afcweA  \
+                htxsrwmr_afcnsA  \
+                htxssnmr_afcweA  \
+                htxssnmr_afcnsA  \
+                htxsgrmr_afcweA  \
+                htxsgrmr_afcnsA  \
+                htxsclwmr_afcweA  \
+                htxsclwmr_afcnsA
 
 ncl_error=0
 
