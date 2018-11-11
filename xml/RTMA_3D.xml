@@ -10,9 +10,9 @@
 <!ENTITY RES_DA "vjet">
 <!ENTITY QUEUE "batch">
 
-<!ENTITY SYSTEM_ID "RTMA_3D"> 
-<!ENTITY HOMEBASE_DIR "/home/rtrr/RTMA_3D">
-<!ENTITY DATABASE_DIR "/home/rtrr/rtma_3d_databasedir">
+<!ENTITY SYSTEM_ID "RTMA_3D_AK"> 
+<!ENTITY HOMEBASE_DIR "/home/rtrr/RTMA_3D_AK">
+<!ENTITY DATABASE_DIR "/home/rtrr/rtma_3d_ak_databasedir">
 <!ENTITY OBS_DIR "/public/data">
 <!ENTITY NCL_VER "6.3.0">
 
