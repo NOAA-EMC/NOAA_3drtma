@@ -58,7 +58,7 @@ hh=$HH
 # BUFR Table includingthe description for HREF
 ${CP} -p ${FIX_GSI}/prepobs_prep_RAP.bufrtable   ./prepobs_prep.bufrtable
 # WPS GEO_GRID Data
-${LN} -s ${PARM_WRF}/hrrr_geo_em.d01.nc          ./geo_em.d01.nc 
+${LN} -s ${PARMwps}/hrrr_geo_em.d01.nc           ./geo_em.d01.nc 
 
 # find NSSL grib2 mosaic files
 COM_MOSAIC_GRIB2=${COMINmosaic}/mrms.t${HH}z/conus

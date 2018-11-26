@@ -2,11 +2,12 @@
 *.swp
 
 # ignore building directory ('build/'), directory of executable files ('exec/','bin/')
-exec/
-**/build*/
+**/exec/
 **/bin/
+**/build*/
 **/build_log/
 sorc/**/log.*
+sorc/**/log_*
 
 # ignore directory of log files ('log/', 'logs/')
 **/log/
@@ -26,8 +27,9 @@ sorc/**/*.mod
 **/rtma_gsi.fd/
 **/rtma_post.fd/
 
-# ignore directory of static data ('fix/')
+# ignore directory of static data ('fix/', 'parm/')
 fix/
+parm/
 
 # ignore the link files under directory modulefiles
 modulefiles/modulefile.ProdGSI.wcoss

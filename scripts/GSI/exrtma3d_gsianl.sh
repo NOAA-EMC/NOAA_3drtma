@@ -2,7 +2,6 @@
 
 set -x 
 
-
 #-- Testing the status of some important variables. --#
 # Make sure DATAHOME is defined and exists
 if [ ! "${DATAHOME}" ]; then
@@ -81,10 +80,16 @@ fi
 
 # Make sure START_TIME is defined and in the correct format
 
-# START_TIME=${PDY}' '${cyc}
-START_TIME=${START_TIME:-"{PDY} ${cyc}"}
+mm=$subcyc
+subhtime=$subcyc
+${ECHO} $PDY $cyc $mm
+# START_TIME=${PDY}' '${cyc}     # YYYYMMDD HH
+# START_TIME="${PDY}${cyc}"      # YYYYMMDDHH
+  START_TIME=${START_TIME:-"{PDY} ${cyc}"}      # YYYYMMDD HH
+# START_TIME="${PDY} ${cyc} ${subcyc} minutes"  # YYYYMMDD HH MN 
+
 echo $START_TIME
-echo $cyc
+echo $subhtime
 if [ ! "${START_TIME}" ]; then
   ${ECHO} "ERROR: \$START_TIME is not defined!"
   exit 1
@@ -95,8 +100,9 @@ else
     ${ECHO} "ERROR: start time, '${START_TIME}', is not in 'yyyymmddhh' or 'yyyymmdd hh' format"
     exit 1
   fi
-  START_TIME=`${DATE} -d "${START_TIME}"`
+  START_TIME=`${DATE} -d "${START_TIME} ${subhtime} minutes"`
 fi
+echo $START_TIME
 
 # Make sure the GSI executable exists
 if [ ! -x "${GSI}" ]; then
@@ -135,28 +141,15 @@ ${ECHO} " time_str = ${time_str}"
 time_run=${time_str}
 
 # Look for bqckground from pre-forecast background
-FGS_FNAME0="wrfout_d01_${time_str}"
-FGS_FNAME1="hrrr.t${HH_cycp1}z.wrfguess_rap"
-FGS_FNAME2="hrrr.t${HH}z.wrfguess"
-if [ -r ${DATAHOME_BK}/${FGS_FNAME0} ]; then
-  ${ECHO} " Cycled run using ${DATAHOME_BK}/${FGS_FNAME0}"
-  cp ${DATAHOME_BK}/${FGS_FNAME0} ./wrf_inout
-  ${ECHO} " Cycle ${YYYYMMDDHH}: GSI background=${DATAHOME_BK}/${FGS_FNAME0}"
-
-elif [ -r ${DATAHOME_BK}/${FGS_FNAME1} ] && [ $FGS_OPT -eq "1" ] ; then
-  ${ECHO} " Cycled run using ${DATAHOME_BK}/${FGS_FNAME1}"
-  cp ${DATAHOME_BK}/${FGS_FNAME1} ./wrf_inout
-  ${ECHO} " Cycle ${YYYYMMDDHH}: GSI background=${DATAHOME_BK}/${FGS_FNAME1}"
-
-elif [ -r ${DATAHOME_BK}/${FGS_FNAME2} ] && [ $FGS_OPT -eq "2"  ] ; then
-  ${ECHO} " Cycled run using ${DATAHOME_BK}/${FGS_FNAME2}"
-  cp ${DATAHOME_BK}/${FGS_FNAME2} ./wrf_inout
-  ${ECHO} " Cycle ${YYYYMMDDHH}: GSI background=${DATAHOME_BK}/${FGS_FNAME2}"
-# No background available so abort
+if [ -r ${DATAHOME_BK}/${FGSrtma3d_FNAME} ]; then
+# copy the background to running directory (it is going to updatd by analysis)
+  cpfs ${DATAHOME_BK}/${FGSrtma3d_FNAME}    ./wrf_inout
+  ${ECHO} " Cycle ${YYYYMMDDHH}: GSI background=${DATAHOME_BK}/${FGSrtma3d_FNAME}"
 else
-  ${ECHO} "either ${DATAHOME_BK}/${FGS_FNAME0} or ${FGS_FNAME1} or ${FGS_FNAME2} does not exist!!"
+# No background available so abort
+  ${ECHO} "${DATAHOME_BK}/${FGSrtma3d_FNAME} does not exist!!"
   ${ECHO} "ERROR: No background file for analysis at ${time_run}!!!!"
-  ${ECHO} " Cycle ${YYYYMMDDHH}: GSI failed because of no background" >> ${pgmout} 
+  ${ECHO} " Cycle ${YYYYMMDDHH}: GSI failed because of no background" >> ${pgmout}
   exit 1
 fi
 
@@ -532,7 +525,7 @@ fi
 ${CP} -p  ${pgmout_stdout}  ${COMOUT}/${pgmout_stdout}_gsianl.${YYYYMMDDHH}
 
 # COPY ANALYSIS TO COM2 DIRECTORY AS PRODUCT
-# ${CP}    ${DATA}/wrf_inout                 ${COMIN}/gsianl_wrf_inout_d01_${time_str}
-${LN} -sf  ${DATA}/wrf_inout                 ${COMIN}/gsianl_wrf_inout_d01_${time_str}
+${CP} -p   ${DATA}/wrf_inout                        ${COMOUTgsi_rtma3d}/${ANLrtma3d_FNAME}
+${LN} -sf  ${COMOUTgsi_rtma3d}/${ANLrtma3d_FNAME}   ${COMIN}/${ANLrtma3d_FNAME}
 
 exit 0

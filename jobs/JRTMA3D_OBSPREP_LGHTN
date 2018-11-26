@@ -66,6 +66,9 @@ if [ ! -d ${LOG_PGMOUT} ] ; then
    mkdir -p ${LOG_PGMOUT}
 fi
 
+# specify the file head for the file names of the archived data files
+export PROD_HEAD=${PROD_HEAD:-"${RUN}.t${cyc}z"}
+
 # Specify Execution Areas
 export HOMErtma3d=${HOMErtma3d:-$NWROOT/rtma.${rtma_ver}}
 export EXECrtma3d=${EXECrtma3d:-$HOMErtma3d/exec}
@@ -137,8 +140,12 @@ fi
 #   export FIX_ROOT=${FIXrtma3d:?} 
     export fixdir=${FIX_GSI:-"${FIXrtma3d}/GSI-fix"}
     export CRTMFIX=${FIX_CRTM:-"${FIXrtma3d}/CRTM-fix"}
-    export WRFPARM=${PARM_WRF:-"${FIXrtma3d}/WRF-parm"}
-    export OBS_USELIST=${OBS_USELIST:-"${FIXrtma3d}/CRTM-fix"}
+    export PARMwps=${PARMwps:-"${FIXrtma3d}/WPS"}
+
+    export PARMupp=${PARMupp:-"${PARMrtma3d}/UPP"}
+    export PARMwrf=${PARMwrf:-"${PARMrtma3d}/WRF"}
+
+    export OBS_USELIST=${OBS_USELIST:-"${FIXrtma3d}/GSI-fix"}
 
 ##########################################################
 

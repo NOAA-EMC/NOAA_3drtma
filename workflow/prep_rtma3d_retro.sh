@@ -31,11 +31,12 @@ fi
 #--- User defined variables                         #
 #####################################################
 set -x
-export startCDATE=201805011800              #yyyymmddhhmm - Starting day of retro run 
-export endCDATE=201805011800                #yyyymmddhhmm - Ending day of RTMA3D run (needed for both RETRO and REAL TIME). 
+export startCDATE=201810230000              #yyyymmddhhmm - Starting day of retro run 
+export endCDATE=201810252300                #yyyymmddhhmm - Ending day of RTMA3D run (needed for both RETRO and REAL TIME). 
 export NET=rtma3d                           #selection of rtma3d (or rtma,urma)
 export RUN=rtma3d                           #selection of rtma3d (or rtma,urma)
-export envir="retro8_131"                       #environment (test, prod, dev, etc.)
+# export envir="retro"                      #environment (test, prod, dev, etc.)
+  export envir="retro10"                    #environment (test, prod, dev, etc.)
 export run_envir="dev"                      #
 export expname="${envir}"
 export ptmp_base="/scratch3/NCEPDEV/stmp1/${USER}/wrkdir_${NET}"  #base subdirectory for all subsequent working and storage directories
@@ -43,7 +44,7 @@ export NWROOT=${TOP_RTMA}                   #root directory for RTMA/URMA j-job 
 export QUEUE="batch"                        #user-specified processing queue
 export QUEUE_DBG="debug"                    #user-specified processing queue -- debug
 export QUEUE_SVC="service"                  #user-specified transfer queue
-export ACCOUNT="da-cpu"                     #Theia account for CPU resources :  da-cpu; fv3-cpu; fv3-cam;
+export ACCOUNT="da-cpu"                    #Theia account for CPU resources :  da-cpu; fv3-cpu; fv3-cam;
 
 # detect the machine/platform
 if [ `grep -c 'E5-2690 v3' /proc/cpuinfo` -gt 0 ]; then
@@ -74,7 +75,9 @@ export CAP_RUN_ENVIR=`echo ${run_envir} | tr '[:lower:]' '[:upper:]'`
 # export SFCOBS_USELIST="/scratch4/NCEPDEV/fv3-cam/save/Gang.Zhao/FixData/ObsUseList_rtma3d/gsd/mesonet_uselists"
 # export AIRCRAFT_REJECT="/scratch4/NCEPDEV/fv3-cam/save/Gang.Zhao/FixData/ObsUseList_rtma3d/gsd/amdar_reject_lists"
 # export SFCOBS_PROVIDER="/scratch4/NCEPDEV/fv3-cam/save/Gang.Zhao/FixData/GSI-fix_rtma3d_emc_test"
-# export PARM_WRF="/scratch4/NCEPDEV/fv3-cam/save/Gang.Zhao/FixData/WRF-parm"
+# export PARMwps="/scratch4/NCEPDEV/fv3-cam/save/Gang.Zhao/FixData/WPS"
+# export PARMupp="/scratch4/NCEPDEV/fv3-cam/save/Gang.Zhao/FixData/static_gsd_rtma3d_gge/UPP"
+# export PARMwrf="/scratch4/NCEPDEV/fv3-cam/save/Gang.Zhao/FixData/static_gsd_rtma3d_gge/WRF"
 
   export FIXrtma3d="${NWROOT}/fix"
   export FIX_GSI="${FIXrtma3d}/GSI-fix"
@@ -83,19 +86,38 @@ export CAP_RUN_ENVIR=`echo ${run_envir} | tr '[:lower:]' '[:upper:]'`
   export SFCOBS_USELIST="${OBS_USELIST}/mesonet_uselists"
   export AIRCRAFT_REJECT="${OBS_USELIST}/amdar_reject_lists"
   export SFCOBS_PROVIDER="${FIX_GSI}"
-  export PARM_WRF="${FIXrtma3d}/WRF-parm"
+  export PARMwps="${FIXrtma3d}/WPS"
+
+  export PARMrtma3d="${NWROOT}/parm"
+  export PARMupp="${PARMrtma3d}/UPP"
+  export PARMwrf="${PARMrtma3d}/WRF"
 
 #
 #--- option control for obs pre-processing (esp. for obs used in cloud analysis)
 #
-  export obsprep_radar=1  # 0: No (using processed ReflInGSI.bufr_d of hrrr)
+  export obsprep_radar=0  # 0: No (using processed ReflInGSI.bufr_d of hrrr)
                           # 1: pre-processing MRMS grib2 radar reflectivity obs
-  export obsprep_lghtn=3  # 0: No pre-processing lightning obs data
+  export obsprep_lghtn=1  # 0: No pre-processing lightning obs data
                           # 1: processing bufr data from rap run
                           # 2: processing entln data
                           # 3: processing Vaisala data
-  export obsprep_cloud=1  # 0: No (using processed CloudInGSI.bufr_d of hrrr)
+  export obsprep_cloud=0  # 0: No (using processed CloudInGSI.bufr_d of hrrr)
                           # 1: processing bufr data from rap run
+
+#
+#--- option control for UPP control parameter data set 
+#
+  export upp_cntrl=1      # 0: UPP default set for hrrr 
+                          # 1: GSD
+                          # 2: operational hrrr
+
+#
+  option_plt=$1
+  export run_plt=${option_plt:-0}  # 1:    plot (and    post-process of firstguess fields)
+                    # any other number: no plot (and no post-process of firstguess fields)
+# control option for using hrrr wrfguess(_rap) as firstguess for rtma3d
+  export fgshrrr_opt=1    # 1: wrfguess_rap (init made from RAP at 1 hr before analysis time)
+                          # 2: wrfguess     (1 hr forecast to analysis time with wrfguess_rap)
 
 ########################################################################################
 # Workflow is specified using user-derived settings in xml format    
@@ -157,7 +179,9 @@ cat > ${NWROOT}/workflow/${RUN}_${expname}.xml <<EOF
 <!ENTITY AIRCRAFT_REJECT        "${AIRCRAFT_REJECT}">
 <!ENTITY SFCOBS_USELIST         "${SFCOBS_USELIST}">
 <!ENTITY SFCOBS_PROVIDER        "${SFCOBS_PROVIDER}">
-<!ENTITY PARM_WRF       "${PARM_WRF}">
+<!ENTITY PARMwps        "${PARMwps}">
+<!ENTITY PARMwrf        "${PARMwrf}">
+<!ENTITY PARMupp        "${PARMupp}">
 
 <!ENTITY LOG_WRKFLW	"&LOG_DIR;">
 <!ENTITY LOG_JJOB	"&LOG_DIR;/jlogfiles">
@@ -168,18 +192,28 @@ cat > ${NWROOT}/workflow/${RUN}_${expname}.xml <<EOF
 <!ENTITY DATA_GSIANL    "&DATA_RUNDIR;/gsiprd">
 <!ENTITY DATA_OBSPRD    "&DATA_RUNDIR;/obsprd">
 <!ENTITY DATA_FGSPRD    "&DATA_RUNDIR;/fgsprd">
+<!ENTITY DATA_POST      "&DATA_RUNDIR;/postprd">
+<!ENTITY DATA_POST4FGS  "&DATA_RUNDIR;/postprd4fgs">
+<!ENTITY DATA_PLOTGRADS "&DATA_RUNDIR;/plotgrads">
 <!ENTITY DATA_FETCHHPSS "&DATA_RUNDIR;/fetchhpss">
+<!ENTITY DATA_OBSPREP_LGHTN    "&DATA_RUNDIR;/obsprep_lghtn">
+<!ENTITY DATA_OBSPREP_RADAR    "&DATA_RUNDIR;/obsprep_radar">
+<!ENTITY DATA_OBSPREP_CLOUD    "&DATA_RUNDIR;/obsprep_cloud">
 
 <!ENTITY hpsspath1      "/NCEPPROD/hpssprod/runhistory">
 <!ENTITY hpsspath1_1yr  "/NCEPPROD/1year/hpssprod/runhistory">
 <!ENTITY hpsspath1_gsd  "/BMC/fdr/Permanent">
 
-<!ENTITY FGS_OPT        "1">
+<!ENTITY FGS_OPT        "${fgshrrr_opt}">
 
 <!-- for obs pre-processing -->
 <!ENTITY obsprep_radar  "${obsprep_radar}">
 <!ENTITY obsprep_lghtn  "${obsprep_lghtn}">
 <!ENTITY obsprep_cloud  "${obsprep_cloud}">
+
+<!-- for upp control/config parameter dataset -->
+<!ENTITY UPP_CNTRL      "${upp_cntrl}">
+
 
 <!-- Variables used in GSD scripts -->
 <!ENTITY HOMEBASE_DIR	"&NWROOT;">
@@ -204,11 +238,17 @@ cat > ${NWROOT}/workflow/${RUN}_${expname}.xml <<EOF
 <!ENTITY JJOB_OBSPREP_CLOUD    "&JJOB_DIR;/J&CAP_RUN;_OBSPREP_CLOUD">
 <!ENTITY exSCR_OBSPREP_CLOUD   "&SCRIPT_DIR;/GSI/ex&RUN;_obsprep_cloud.sh">
 <!ENTITY JJOB_PREPOBS    "&JJOB_DIR;/J&CAP_RUN;_PREPOBS">
-<!ENTITY exSCR_PREPOBS "&SCRIPT_DIR;/GSI/ex&RUN;_prepobs.sh">
+<!ENTITY exSCR_PREPOBS   "&SCRIPT_DIR;/GSI/ex&RUN;_prepobs.sh">
 <!ENTITY JJOB_PREPFGS    "&JJOB_DIR;/J&CAP_RUN;_PREPFGS">
-<!ENTITY exSCR_PREPFGS "&SCRIPT_DIR;/GSI/ex&RUN;_prepfgs.sh">
+<!ENTITY exSCR_PREPFGS   "&SCRIPT_DIR;/GSI/ex&RUN;_prepfgs.sh">
 <!ENTITY JJOB_GSIANL	 "&JJOB_DIR;/J&CAP_RUN;_GSIANL">
 <!ENTITY exSCR_GSIANL	 "&SCRIPT_DIR;/GSI/ex&RUN;_gsianl.sh">
+<!ENTITY JJOB_POST  	 "&JJOB_DIR;/J&CAP_RUN;_POST">
+<!ENTITY exSCR_POST      "&SCRIPT_DIR;/ex&RUN;_post.sh">
+<!ENTITY JJOB_POST4FGS   "&JJOB_DIR;/J&CAP_RUN;_POST4FGS">
+<!ENTITY exSCR_POST4FGS  "&SCRIPT_DIR;/ex&RUN;_post4fgs.sh">
+<!ENTITY JJOB_PLOTGRADS  "&JJOB_DIR;/J&CAP_RUN;_PLOTGRADS">
+<!ENTITY exSCR_PLOTGRADS "&SCRIPT_DIR;/ex&RUN;_plotgrads.sh">
 
 <!-- Resources -->
 
@@ -252,13 +292,13 @@ cat > ${NWROOT}/workflow/${RUN}_${expname}.xml <<EOF
 <!ENTITY PREPOBS_PROC "1">
 <!ENTITY PREPOBS_RESOURCES
    '<cores>&PREPOBS_PROC;</cores>
-    <walltime>00:05:00</walltime>
+    <walltime>00:15:00</walltime>
     <queue>&QUEUE_DBG;</queue>
     <account>&ACCOUNT;</account>'>
 <!ENTITY PREPFGS_PROC "1">
 <!ENTITY PREPFGS_RESOURCES
    '<cores>&PREPFGS_PROC;</cores>
-    <walltime>00:05:00</walltime>
+    <walltime>00:15:00</walltime>
     <queue>&QUEUE_DBG;</queue>
     <account>&ACCOUNT;</account>'>
 
@@ -276,6 +316,23 @@ cat > ${NWROOT}/workflow/${RUN}_${expname}.xml <<EOF
 <!ENTITY GSI_RESERVATION 
    '<native>-m n</native>
     <queue>&QUEUE_DBG;</queue>
+    <account>&ACCOUNT;</account>'>
+
+<!ENTITY POST_CORES "96">
+<!ENTITY POST_OMP_STACKSIZE "512M">
+<!ENTITY POST_THREADS "1">
+<!ENTITY POST_RESOURCES
+   '<nodes>8:ppn=12</nodes>
+    <walltime>00:30:00</walltime>
+    <queue>&QUEUE_DBG;</queue>
+    <account>&ACCOUNT;</account>'>
+
+<!ENTITY PLOT_PROC "1">
+<!ENTITY PLOT_RESOURCES
+   '<cores>&PLOT_PROC;</cores>
+    <walltime>00:30:00</walltime>
+    <queue>&QUEUE_DBG;</queue>
+    <memory>3G</memory>
     <account>&ACCOUNT;</account>'>
 
 <!-- Variables in Namelist -->
@@ -371,8 +428,16 @@ cat > ${NWROOT}/workflow/${RUN}_${expname}.xml <<EOF
         <value>&FIX_GSI;</value>
    </envar>
    <envar>
-        <name>PARM_WRF</name>
-        <value>&PARM_WRF;</value>
+        <name>PARMwps</name>
+        <value>&PARMwps;</value>
+   </envar>
+   <envar>
+        <name>PARMwrf</name>
+        <value>&PARMwrf;</value>
+   </envar>
+   <envar>
+        <name>PARMupp</name>
+        <value>&PARMupp;</value>
    </envar>
    <envar>
         <name>OBS_USELIST</name>
@@ -447,6 +512,10 @@ cat > ${NWROOT}/workflow/${RUN}_${expname}.xml <<EOF
         <value><cyclestr>@M</cyclestr></value>
    </envar>
    <envar>
+        <name>PROD_HEAD</name>
+        <value>&RUN;.t<cyclestr>@H</cyclestr>z</value>
+   </envar>
+   <envar>
         <name>GESROOT</name>
         <value>&GESROOT;</value>
    </envar>
@@ -463,8 +532,32 @@ cat > ${NWROOT}/workflow/${RUN}_${expname}.xml <<EOF
       <value><cyclestr>&DATA_GSIANL;</cyclestr></value>
    </envar>
    <envar>
+      <name>DATA_POST</name>
+      <value><cyclestr>&DATA_POST;</cyclestr></value>
+   </envar>
+   <envar>
+      <name>DATA_POST4FGS</name>
+      <value><cyclestr>&DATA_POST4FGS;</cyclestr></value>
+   </envar>
+   <envar>
+      <name>DATA_PLOTGRADS</name>
+      <value><cyclestr>&DATA_PLOTGRADS;</cyclestr></value>
+   </envar>
+   <envar>
       <name>DATA_OBSPRD</name>
       <value><cyclestr>&DATA_OBSPRD;</cyclestr></value>
+   </envar>
+   <envar>
+      <name>DATA_OBSPREP_LGHTN</name>
+      <value><cyclestr>&DATA_OBSPREP_LGHTN;</cyclestr></value>
+   </envar>
+   <envar>
+      <name>DATA_OBSPREP_RADAR</name>
+      <value><cyclestr>&DATA_OBSPREP_RADAR;</cyclestr></value>
+   </envar>
+   <envar>
+      <name>DATA_OBSPREP_CLOUD</name>
+      <value><cyclestr>&DATA_OBSPREP_CLOUD;</cyclestr></value>
    </envar>
    <envar>
       <name>DATA_FGSPRD</name>
@@ -642,6 +735,62 @@ cat > ${NWROOT}/workflow/${RUN}_${expname}.xml <<EOF
       <value>&JJOB_PREPFGS;</value>
     </envar>'>
 
+<!ENTITY ENVARS_POST
+    '<envar>
+      <name>START_TIME</name>
+      <value><cyclestr>@Y@m@d@H</cyclestr></value>
+    </envar>
+    <envar>
+      <name>UPP_CNTRL</name>
+      <value>&UPP_CNTRL;</value>
+    </envar>
+    <envar>
+      <name>DATABASE_DIR</name>
+      <value>&DATABASE_DIR;</value>
+    </envar>
+    <envar>
+      <name>RUNDIR_GSD</name>
+      <value><cyclestr>&DATAROOT;/&RUN;_@Y@m@d@H@M</cyclestr></value>
+    </envar>
+    <envar>
+      <name>exSCR_POST4FGS</name>
+      <value>&exSCR_POST4FGS;</value>
+    </envar>
+    <envar>
+      <name>JJOB_POST4FGS</name>
+      <value>&JJOB_POST4FGS;</value>
+    </envar>
+    <envar>
+      <name>exSCR_POST</name>
+      <value>&exSCR_POST;</value>
+    </envar>
+    <envar>
+      <name>JJOB_POST</name>
+      <value>&JJOB_POST;</value>
+    </envar>'>
+
+<!ENTITY ENVARS_PLOT
+    '<envar>
+      <name>START_TIME</name>
+      <value><cyclestr>@Y@m@d@H</cyclestr></value>
+    </envar>
+    <envar>
+      <name>DATABASE_DIR</name>
+      <value>&DATABASE_DIR;</value>
+    </envar>
+    <envar>
+      <name>RUNDIR_GSD</name>
+      <value><cyclestr>&DATAROOT;/&RUN;_@Y@m@d@H@M</cyclestr></value>
+    </envar>
+    <envar>
+      <name>exSCR_PLOTGRADS</name>
+      <value>&exSCR_PLOTGRADS;</value>
+    </envar>
+    <envar>
+      <name>JJOB_PLOTGRADS</name>
+      <value>&JJOB_PLOTGRADS;</value>
+    </envar>'>
+
 <!-- Set of system(LINUX, MPI, etc.) commands -->
 <!ENTITY SYS_COMMANDS 
    '<envar>
@@ -710,7 +859,7 @@ cat > ${NWROOT}/workflow/${RUN}_${expname}.xml <<EOF
    </envar>'>
 ]>
 
-<workflow realtime="F" scheduler="moabtorque" cyclethrottle="1" taskthrottle="350" cyclelifespan="01:00:00:00">
+<workflow realtime="F" scheduler="moabtorque" cyclethrottle="1" taskthrottle="350" cyclelifespan="03:00:00:00">
 
   <log>
     <cyclestr>&LOG_WRKFLW;/&NET;_workflow_&envir;_@Y@m@d@H.log</cyclestr>
@@ -745,6 +894,10 @@ cat >> ${NWROOT}/workflow/${RUN}_${expname}.xml <<EOF
 
     &ENVARS;
     &SYS_COMMANDS;
+    <envar>
+       <name>rundir_task</name>
+       <value><cyclestr>&DATA_OBSPREP_RADAR;</cyclestr></value>
+    </envar>
 
     <command>&JJOB_DIR;/launch.sh &JJOB_DIR;/J&CAP_NET;_OBSPREP_RADAR</command>
     <jobname><cyclestr>&NET;_obsprep_radar_@H</cyclestr></jobname>
@@ -771,6 +924,10 @@ cat >> ${NWROOT}/workflow/${RUN}_${expname}.xml <<EOF
 
     &ENVARS;
     &SYS_COMMANDS;
+    <envar>
+       <name>rundir_task</name>
+       <value><cyclestr>&DATA_OBSPREP_LGHTN;</cyclestr></value>
+    </envar>
 
     <command>&JJOB_DIR;/launch.sh &JJOB_DIR;/J&CAP_NET;_OBSPREP_LGHTN</command>
     <jobname><cyclestr>&NET;_obsprep_lghtn_@H</cyclestr></jobname>
@@ -797,6 +954,10 @@ cat >> ${NWROOT}/workflow/${RUN}_${expname}.xml <<EOF
 
     &ENVARS;
     &SYS_COMMANDS;
+    <envar>
+       <name>rundir_task</name>
+       <value><cyclestr>&DATA_OBSPREP_CLOUD;</cyclestr></value>
+    </envar>
 
     <command>&JJOB_DIR;/launch.sh &JJOB_DIR;/J&CAP_NET;_OBSPREP_CLOUD</command>
     <jobname><cyclestr>&NET;_obsprep_cloud_@H</cyclestr></jobname>
@@ -911,7 +1072,92 @@ cat >> ${NWROOT}/workflow/${RUN}_${expname}.xml <<EOF
 
   </task>
 
+  <task name="&NET;_post" cycledefs="&time_int;" maxtries="&maxtries;">
+
+    &ENVARS;
+    &POST_RESOURCES;
+    &SYS_COMMANDS;
+    <envar>
+       <name>rundir_task</name>
+       <value><cyclestr>&DATA_POST;</cyclestr></value>
+    </envar>
+
+    <command>&JJOB_DIR;/launch.sh &JJOB_DIR;/J&CAP_NET;_POST</command>
+    <jobname><cyclestr>&NET;_post_@H</cyclestr></jobname>
+    <join><cyclestr>&LOG_SCHDLR;/&NET;_&envir;_post_@Y@m@d@H@M.log\${PBS_JOBID}</cyclestr></join>
+
+    &ENVARS_POST;
+
+    <dependency>
+      <and>
+          <taskdep task="&NET;_gsianl"/>
+      </and>
+    </dependency>
+
+  </task>
+
+EOF
+
+# if running the step to plot (with GrADS)
+if [ ${run_plt} -eq 100 ] ; then
+cat >> ${NWROOT}/workflow/${RUN}_${expname}.xml <<EOF 
+
+  <task name="&NET;_post4fgs" cycledefs="&time_int;" maxtries="&maxtries;">
+
+    &ENVARS;
+    &POST_RESOURCES;
+    &SYS_COMMANDS;
+    <envar>
+       <name>rundir_task</name>
+       <value><cyclestr>&DATA_POST4FGS;</cyclestr></value>
+    </envar>
+
+    <command>&JJOB_DIR;/launch.sh &JJOB_DIR;/J&CAP_NET;_POST4FGS</command>
+    <jobname><cyclestr>&NET;_post4fgs_@H</cyclestr></jobname>
+    <join><cyclestr>&LOG_SCHDLR;/&NET;_&envir;_post4fgs_@Y@m@d@H@M.log\${PBS_JOBID}</cyclestr></join>
+
+    &ENVARS_POST;
+
+    <dependency>
+      <and>
+          <taskdep task="&NET;_gsianl"/>
+      </and>
+    </dependency>
+
+  </task>
+
+  <task name="&NET;_plotgrads" cycledefs="&time_int;" maxtries="&maxtries;">
+
+    &ENVARS;
+    &PLOT_RESOURCES;
+    &SYS_COMMANDS;
+    <envar>
+       <name>rundir_task</name>
+       <value><cyclestr>&DATA_PLOTGRADS;</cyclestr></value>
+    </envar>
+
+    <command>&JJOB_DIR;/launch.sh &JJOB_DIR;/J&CAP_NET;_PLOTGRADS</command>
+    <jobname><cyclestr>&NET;_plotgrads_@H</cyclestr></jobname>
+    <join><cyclestr>&LOG_SCHDLR;/&NET;_&envir;_plotgrads_@Y@m@d@H@M.log\${PBS_JOBID}</cyclestr></join>
+
+    &ENVARS_PLOT;
+
+    <dependency>
+      <and>
+          <taskdep task="&NET;_post"/>
+          <taskdep task="&NET;_post4fgs"/>
+      </and>
+    </dependency>
+
+  </task>
+
+EOF
+fi
+
+cat >> ${NWROOT}/workflow/${RUN}_${expname}.xml <<EOF 
+
 </workflow>
+
 EOF
 
 ########################################################################################

@@ -1,6 +1,6 @@
 #!/bin/sh -l
 ##================================================================#
-#PBS -l nodes=8:ppn=12
+#PBS -l nodes=4:ppn=12
 #PBS -l walltime=0:30:00
 #PBS -A da-cpu                        # <---- define the cpu account
 #PBS -N rtma3d_gsi_test               # <---- define the job name
@@ -51,7 +51,6 @@ LN=/bin/ln
 RM=/bin/rm
 TAIL=/usr/bin/tail
 
-CNVGRIB=/apps/cnvgrib/1.2.3/bin/cnvgrib
 MPIRUN=mpirun
 NCDUMP=ncdump
 

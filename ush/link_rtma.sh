@@ -68,26 +68,52 @@ if [ ! -d ${TOP_FIX} ] ; then mkdir -p ${TOP_FIX} ; fi
 #
 cd ${TOP_FIX}
 if [ $target = theia ]; then
-  echo " linking fixed data on $target"
+  echo " linking fixed data on $target for GSI analysis"
   GSI_fix="/scratch4/NCEPDEV/meso/save/Gang.Zhao/FixData/GSI-fix_rtma3d_emc_test"
   CRTM_fix="/scratch4/NCEPDEV/meso/save/Gang.Zhao/FixData/CRTM-fix_rtma3d"
   ObsUseList="/scratch4/NCEPDEV/meso/save/Gang.Zhao/FixData/ObsUseList_rtma3d"
-  WRF_parm="/scratch4/NCEPDEV/meso/save/Gang.Zhao/FixData/WRF-parm"
+  WPS="/scratch4/NCEPDEV/meso/save/Gang.Zhao/FixData/WPS"
   echo " ln -sf ${GSI_fix}        ./GSI-fix"
   ln -sf ${GSI_fix}        ./GSI-fix
   echo " ln -sf ${CRTM_fix}       ./CRTM-fix"
   ln -sf ${CRTM_fix}       ./CRTM-fix
   echo " ln -sf ${ObsUseList}     ./ObsUseList"
   ln -sf ${ObsUseList}     ./ObsUseList
-  echo " ln -sf ${WRF_parm}       ./WRF-parm"
-  ln -sf ${WRF_parm}       ./WRF_parm
+  echo " ln -sf ${WPS}            ./WPS"
+  ln -sf ${WPS}            ./WPS
+
 else
-  echo " this fix directories have not set up yet for machine $target."
+  echo " the fixed data directories have not set up yet for machine $target."
   echo " Abort linking task."
   exit 9
 fi
 echo
 ls -ltr $TOP_FIX
+echo
+echo
+
+TOP_PARM=${TOP_RTMA}/parm
+if [ ! -d ${TOP_PARM} ] ; then mkdir -p ${TOP_PARM} ; fi
+cd ${TOP_PARM}
+if [ $target = theia ]; then
+  echo "linking parameters data (parm/) on $target for UPP (uni-post)"
+  UPP="/scratch4/NCEPDEV/meso/save/Gang.Zhao/FixData/static_gsd_rtma3d_gge/UPP"
+# UPP="${TOP_RTMA}/sorc/rtma_post.fd/parm"
+  WRF="/scratch4/NCEPDEV/meso/save/Gang.Zhao/FixData/static_gsd_rtma3d_gge/WRF"
+
+  echo " ln -sf ${UPP}        ./UPP"
+  rm -f ./UPP .WRF
+  ln -sf ${UPP}             ./UPP
+  echo " ln -sf ${WRF}        ./WRF"
+  ln -sf ${WRF}             ./WRF
+
+else
+  echo " the parm directories have not set up yet for machine $target."
+  echo " Abort linking task."
+  exit 9
+fi
+echo
+ls -ltr $TOP_PARM
 echo
 echo
 
@@ -108,7 +134,22 @@ do
   cp -p  $GSI_BIN/$fn  ./$fn
 done
 
-echo
+POST_BIN=${TOP_SORC}/rtma_post.fd/exec
+EXEC=${TOP_RTMA}/exec
+
+echo " linking UNI-POST executable files ... "
+cd ${POST_BIN}
+exe_fnames=`ls *`
+cd $EXEC
+for fn in $exe_fnames
+do
+  echo " cp -p  $POST_BIN/$fn  ./$fn "
+# ln -sf $POST_BIN/$fn  ./$fn
+  cp -p  $POST_BIN/$fn  ./$fn
+done
+
+echo 
+echo " ====> list out te executable files in exec/"
 ls -ltr $EXEC
 
 #

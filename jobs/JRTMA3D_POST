@@ -95,20 +95,18 @@ export COMOUT=${COMOUT:-${COMROOT}/${NET}/${envir}/${RUN}.${PDY}}
 
 ### Observations Products/Input for the RTMA3D (prepbufr files) 
 export COMINobsproc_rtma3d=${COMINobsproc_rtma3d:-"${COMIN}/obsprd.${cycle}"}
-if [ ! -d "${COMINobsproc_rtma3d}" ] ; then
-  echo " Directory of obs data does NOT exist. Job abort!"
-  err_exit
-fi
 
-### Firstguess Products/Input for the RTMA3D (netcdf files) 
+### Firstguess Products/Input for the RTMA3D (netcdf) 
 export GESINhrrr_rtma3d=${GESINhrrr_rtma3d:-"${COMIN}/fgsprd.${cycle}"}
-if [ ! -d "${GESINhrrr_rtma3d}" ] ; then
-  echo " Directory of HRRRs fgs data does NOT exist. Job abort!"
-  err_exit
-fi
 
 ### 3DRTMA GSIANL Products (netcdf)
 export COMOUTgsi_rtma3d=${COMOUTgsi_rtma3d:-"${COMOUT}/gsiprd.${cycle}"}
+
+### 3DRTMA UNI-POST Products (grib2)
+export COMOUTpost_rtma3d=${COMOUTpost_rtma3d:-"${COMOUT}/postprd.${cycle}"}
+
+### 3DRTMA PLOT Products (figures)
+export COMOUTplot_rtma3d=${COMOUTpost_rtma3d:-"${COMOUT}/gradsprd.${cycle}"}
 
 if [ ! -d "${COMIN}" ] ; then
    mkdir -p $COMIN
@@ -117,13 +115,13 @@ if [ ! -d "${COMOUT}" ] ; then
    mkdir -p $COMOUT
 fi
 
-if [ ! -d "${COMOUTgsi_rtma3d}" ] ; then
-   mkdir -p ${COMOUTgsi_rtma3d}
+if [ ! -d "${COMOUTpost_rtma3d}" ] ; then
+   mkdir -p ${COMOUTpost_rtma3d}
 fi
 
 ###########################################################
 #
-# The following variables are used in exrtma3d_gsianl.sh
+# The following variables are used in exrtma3d_post.sh
 #
 ###########################################################
 #   set the file name of the final analysis file for archive
@@ -135,29 +133,17 @@ fi
       export FGSrtma3d_FNAME="${PROD_HEAD}.firstguess.nc"
     fi
 
-#   Set the path to the working/obs/ges directories
-    RUNDIR_GSD=${RUNDIR_GSD:-"${DATAROOT}/${RUN}_${PDY}${cyc}${subcyc}"}
-    if [ ! -d "${RUNDIR_GSD}" ] ; then
-        mkdir -p ${RUNDIR_GSD}
-    fi
-    export DATAHOME=${RUNDIR_GSD}/gsiprd
-    ${RM} -rf ${DATAHOME}
-    ${LN} -s  ${DATA}  ${DATAHOME}
+#   Set the path to the post executable
+    export UPP_EXEC=${EXECrtma3d:?} 
+    export UPPEXE=${UPPEXE:-"rtma3d_post"}
+    export pgm=${UPP_EXEC}/${UPPEXE}
 
-    export DATAOBSHOME=${RUNDIR_GSD}/obsprd
-    ${RM} -rf ${DATAOBSHOME}
-    ${LN} -s  ${COMINobsproc_rtma3d}  ${DATAOBSHOME}
+#   Set and Check the option to select the control parm data set for UPP
+    export UPP_CNTRL=${UPP_CNTRL:-1}    # 0: UPP default set for hrrr 
+                                        # 1: GSD
+                                        # 2: operational hrrr
 
-    export DATAHOME_BK=${RUNDIR_GSD}/fgsprd
-    ${RM} -rf ${DATAHOME_BK}
-    ${LN} -s  ${GESINhrrr_rtma3d}  ${DATAHOME_BK}
-
-
-#   Set the path to the gsi executable
-    export GSI_ROOT=${EXECrtma3d:?} 
-    export GSI=${GSI_ROOT}/gsi.x
-
-#   Set the path to the GSI static files
+#   Set the path to the fix/ and parm/ files
 #   export FIX_ROOT=${FIXrtma3d:?} 
     export fixdir=${FIX_GSI:-"${FIXrtma3d}/GSI-fix"}
     export CRTMFIX=${FIX_CRTM:-"${FIXrtma3d}/CRTM-fix"}
@@ -177,7 +163,7 @@ fi
 ######################
 # Execute the script.
 ######################
-${exSCR_GSIANL:-$HOMErtma3d/scripts/${RUN}/ex${RUN}_gsianl.sh}
+${exSCR_POST:-$HOMErtma3d/scripts/${RUN}/ex${RUN}_post.sh}
 export err=$?; err_chk
 
 msg="$0 of $job completed normally"

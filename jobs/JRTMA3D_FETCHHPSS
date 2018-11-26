@@ -66,6 +66,9 @@ if [ ! -d ${LOG_PGMOUT} ] ; then
    mkdir -p ${LOG_PGMOUT}
 fi
 
+# specify the file head for the file names of the archived data files
+export PROD_HEAD=${PROD_HEAD:-"${RUN}.t${cyc}z"}
+
 # Specify Execution Areas
 export HOMErtma3d=${HOMErtma3d:-$NWROOT/rtma.${rtma_ver}}
 export EXECrtma3d=${EXECrtma3d:-$HOMErtma3d/exec}
