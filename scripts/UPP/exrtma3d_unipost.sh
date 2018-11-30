@@ -26,7 +26,7 @@ cd $DATA
 # set up of Analysis Time 
 #
 ANLS_TIME="$PDYHH"        # <-- define analysis date and time (YYYYMMDDHH)
-FCST_TIME="$cyc"
+FCST_TIME="00"
 FCST_TIME_fgs="$FCST_TIME"
 
 START_TIME=$ANLS_TIME

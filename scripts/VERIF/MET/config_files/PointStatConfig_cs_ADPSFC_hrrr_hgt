@@ -53,13 +53,8 @@ fcst = {
         name       = "HGT";
         level      = [ "Z0" ];
         cat_thresh = [ >0.0 ];
-      },
-
-      {
-        name       = "PRMSL";
-        level      = [ "Z0" ];
-        cat_thresh = [ >0.0 ];
       }
+
 
    ];
 
@@ -205,6 +200,6 @@ output_flag = {
 rank_corr_flag = FALSE;
 tmp_dir        = "/tmp";
 output_prefix  = "${MODEL}_F${fcsthrs}_ADPSFC_${dom}_${expnam}";
-version        = "V6.1";
+version        = "V7.0";
 
 ////////////////////////////////////////////////////////////////////////////////

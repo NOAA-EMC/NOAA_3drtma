@@ -91,7 +91,6 @@ export COMINnamm1=${COMINnamm1:-$COMROOT/$NET/$envir/$RUN.${PDYm1}}
 ###########################################################
 #   Set the path to the gsi executable
     export VERIF_ROOT=${EXECrtma3d:?}
-#    export VERIF=${POST_ROOT}/post.x
 
 ########################################################
 # Execute the script.

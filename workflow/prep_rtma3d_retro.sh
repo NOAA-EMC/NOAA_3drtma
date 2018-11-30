@@ -224,7 +224,7 @@ cat > ${NWROOT}/workflow/${RUN}_${expname}.xml <<EOF
 <!ENTITY VERIF_PROC "1">
 <!ENTITY VERIF_RESOURCES
    '<cores>&VERIF_PROC;</cores>
-    <walltime>00:05:00</walltime>
+    <walltime>00:15:00</walltime>
     <queue>&QUEUE_DBG;</queue>
     <account>&ACCOUNT;</account>'>
 

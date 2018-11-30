@@ -18,28 +18,22 @@ set -x
 
 msg="JOB $job HAS BEGUN"
 postmsg "$jlogfile" "$msg"
-export cycle=t${cyc}z
 setpdy.sh
 . PDY
 
-CDATE=$PDY$cyc
-YYYYMMDD=$PDY
-YYYYMM=`echo $CDATE | cut -c 1-6`
-YYYY=`echo $CDATE | cut -c 1-4`
 
 cd $MET_DIR
 
-# must run after URMA 06Z cycle from current day completes
-# usually completed by 12:35Z; set cron to run at 13Z
 
-
-
+CYCLE=${PDY}${cyc}
+HH=`echo $CYCLE | cut -c 9-10`
+export fcsthrs=$HH
 export mod=rap
 # uncomment if running in realtime
 
-export hrs="01"
-export MODEL=DNG
-export exps="hrrr"
+export MODEL=RAP
+export exps="rap"
+export expnam=$exps
 export dom_check=$RUN
 
 # NAM grid definitions; new RAP and HRRR definitions (can't use with the old RAP)
@@ -51,56 +45,58 @@ export wgrib2def_cs_hrrr="lambert:265:25.0:25.0 238.445999:2145:2539.703 20.1919
 
 # Do not need to do because the winds MET already does this.
 
- $HOMErtma3d/scripts/VERIF/MET/pb2nc.ksh
 
 for dom1 in $dom_check; do
-  
   if [ $dom1 = rtma2p5 ];then
     export dom=conus
     export dom_out="cs"
     export ext="_wexp"
-    export bdom="conusnest"
     export compress="c3 -set_bitmap 1"
     export wgrib2def=$wgrib2def_cs
   elif [ $dom1 = rtma3d ];then
     export dom=conus
     export dom_out="cs"
     export ext="_wexp"
-    export bdom="conusnest"
     export compress="c3 -set_bitmap 1"
     export wgrib2def=$wgrib2def_cs
   elif [ $dom1 = akrtma ];then
     export dom=ak
     export dom_out="ak"
     export ext=""
-    export bdom="alaskanest"
     export compress="c3 -set_bitmap 1"
     export wgrib2def=$wgrib2def_ak
   elif [ $dom1 = prrtma ];then
     export dom=pr
     export dom_out=$dom
     export ext=""
-    export bdom="priconest"
     export compress="jpeg -set_bitmap 1"
     export wgrib2def=$wgrib2def_pr
   elif [ $dom1 = hirtma ];then
     export dom=hi
     export dom_out=$dom
     export ext=""
-    export bdom="hawaiinest"
     export compress="jpeg -set_bitmap 1"
     export wgrib2def=$wgrib2def_hi
   fi
 
-#  mkdir -p $stat_dir/${dom_out}
-  export dom
 
-  export dng_dir=$DATA_POST  
+pb2nc ${urma_dir_ops}/${mod}.t${HH}z.prepbufr.tm00 \
+      ${urma_dir}/${mod}.t${HH}z.prepbufr.tm00.nr.nc ${config_dir}/PB2NCConfig_DNG_new -v 2
 
-  $HOMErtma3d/scripts/VERIF/MET/point_stat_hrrr.ksh
+#flds="winds tmp spfh hgt"
+flds="CandV"
+for fld in $flds; do
+  for exp in $exps; do
+    mkdir -p $stat_dir/${dom_out}/${exp}/${fld}
+        point_stat ${DATA_POST}/wrfprs_hrconus_00.grib2 \
+          ${urma_dir}/${mod}.t${HH}z.prepbufr.tm00.nr.nc \
+          ${config_dir}/PointStatConfig_${dom_out}_ADPSFC_${mod}_${fld} -outdir $stat_dir/${dom_out}/${exp}/${fld} -v 2
+  done
+done
+exit
 
-# only need for WCOSS scripts
+
+$HOMErtma3d/scripts/VERIF/MET/point_stat_hrrr.ksh
 
 done
-
 exit
