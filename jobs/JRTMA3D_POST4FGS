@@ -77,14 +77,8 @@ export PARMrtma3d=${PARMrtma3d:-$HOMErtma3d/parm/${RUN}}
 export USHrtma3d=${USHrtma3d:-$HOMErtma3d/ush/${RUN}}
 
 # date and time for previous and next cycle
-export PDYHH_cycm1=`$EXECrtma3d/ndate.x -1 "${PDYHH}"`
 export PDYHH_cycm1=$($NDATE -01  "${PDYHH}")
-export PDYHH_cycp1=`$EXECrtma3d/ndate.x +1 "${PDYHH}"`
 export PDYHH_cycp1=$($NDATE +01  "${PDYHH}")
-echo $PDYHH
-echo ${PDYHH_cycm1}
-echo ${PDYHH_cycp1}
-
 export FGS_OPT=${FGS_OPT:-1}
 
 #################################################

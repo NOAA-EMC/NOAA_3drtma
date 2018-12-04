@@ -85,11 +85,7 @@ export COMOUT=${COMOUT:-${COMROOT}/${NET}/${envir}/${RUN}.${PDY}}
 
 # Directory to store the firstguess as input for the RTMA3D (NETCDF?) 
 export GESINhrrr_rtma3d=${GESINhrrr_rtma3d:-"${COMIN}/fgsprd.${cycle}"}
-
-export prev_cyc_PDYHH=`$EXECrtma3d/ndate.x -1 "${PDYHH}"`
 export prev_cyc_PDYHH=$($NDATE -01  "${PDYHH}")
-echo $PDYHH
-echo ${prev_cyc_PDYHH}
 export HRRR_DIR_CYCLE=${DATA_GES:-"${HRRR_DIR}/${prev_cyc_PDYHH}/wrfprd"}
 
 if [ ! -d "${COMIN}" ] ; then

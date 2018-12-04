@@ -88,14 +88,8 @@ export COMOUT=${COMOUT:-${COMROOT}/${NET}/${envir}/${RUN}.${PDY}}
 export COMINrap=${COMIN}/rap.${PDY}
 export COMINhrrr=${COMIN}/hrrr.${PDY}/${domain}
 export GESINhrrr_rtma3d=${GESINhrrr_rtma3d:-"${COMIN}/fgsprd.${cycle}"}
-
-export PDYHH_cycm1=`$EXECrtma3d/ndate.x -1 "${PDYHH}"`
 export PDYHH_cycm1=$($NDATE -01  "${PDYHH}")
-export PDYHH_cycp1=`$EXECrtma3d/ndate.x +1 "${PDYHH}"`
 export PDYHH_cycp1=$($NDATE +01  "${PDYHH}")
-echo $PDYHH
-echo ${PDYHH_cycm1}
-echo ${PDYHH_cycp1}
 
 PDY_cycp1=`echo ${PDYHH_cycp1} | cut -c 1-8`
 
