@@ -44,7 +44,7 @@ export NWROOT=${TOP_RTMA}                   #root directory for RTMA/URMA j-job 
 export QUEUE="batch"                        #user-specified processing queue
 export QUEUE_DBG="debug"                    #user-specified processing queue -- debug
 export QUEUE_SVC="service"                  #user-specified transfer queue
-export ACCOUNT="da-cpu"                    #Theia account for CPU resources :  da-cpu; fv3-cpu; fv3-cam;
+export ACCOUNT="nems"                    #Theia account for CPU resources :  da-cpu; fv3-cpu; fv3-cam;
 
 # detect the machine/platform
 if [ `grep -c 'E5-2690 v3' /proc/cpuinfo` -gt 0 ]; then
