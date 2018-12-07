@@ -73,6 +73,11 @@ HH=`${DATE} +"%H" -d "${START_TIME}"`
 
 HH_cycp1=`echo ${PDYHH_cycp1} | cut -c 9-10`
 
+# No "hrrr.tHHz.wrfguess" archived from operational hrrr after 18Z of 07/11/2018.
+if [ $YYYYMMDDHH -ge "2018071118" ] && [ $FGS_OPT -eq "2"  ] ; then
+  export FGS_OPT=1
+fi
+
 #############################################################################
 
 # Create the working directory and cd into it
@@ -94,25 +99,31 @@ msg="***********************************************************"
 postmsg "$jlogfile" "$msg"
 
 # Look for bqckground from pre-forecast background
-FGS_FNAME1="hrrr.t${HH_cycp1}z.wrfguess_rap"
-FGS_FNAME2="hrrr.t${HH}z.wrfguess"
-if [ -r ${COMINhrrr_cycp1}/${FGS_FNAME1} ] && [ $FGS_OPT -eq "1" ] ; then
-  ${ECHO} " Cycled run using ${COMINhrrr_cycp1}/${FGS_FNAME1}"
-  # cpfs ${COMINhrrr_cycp1}/${FGS_FNAME1}     ${GESINhrrr_rtma3d}
-  ${LN} -sf ${COMINhrrr_cycp1}/${FGS_FNAME1}            ${GESINhrrr_rtma3d}/${FGS_FNAME1}
-  ${LN} -sf ${GESINhrrr_rtma3d}/${FGS_FNAME1}     ${DATA}/${FGS_FNAME1}
-  ${ECHO} " Cycle ${YYYYMMDDHH}: PREPFGS background=${COMINhrrr_cycp1}/${FGS_FNAME1} "
+FGShrrr_FNAME0="wrfout_d01_${time_str}"
+FGShrrr_FNAME1="hrrr.t${HH_cycp1}z.wrfguess_rap"
+FGShrrr_FNAME2="hrrr.t${HH}z.wrfguess"
 
-elif [ -r ${COMINhrrr}/${FGS_FNAME2} ] && [ $FGS_OPT -eq "2"  ] ; then
-  ${ECHO} " Cycled run using ${COMINhrrr}/${FGS_FNAME2}"
-  # cpfs ${COMINhrrr}/${FGS_FNAME2}     ${GESINhrrr_rtma3d}
-  ${LN} -sf ${COMINhrrr}/${FGS_FNAME2}            ${GESINhrrr_rtma3d}/${FGS_FNAME2}
-  ${LN} -sf ${GESINhrrr_rtma3d}/${FGS_FNAME2}     ${DATA}/${FGS_FNAME2}
-  ${ECHO} " Cycle ${YYYYMMDDHH}: PREPFGS background=${COMINhrrr}/${FGS_FNAME2} "
+if [ -r ${COMINhrrr_cycp1}/${FGShrrr_FNAME1} ] && [ $FGS_OPT -eq "1" ] ; then
+  # cpfs ${COMINhrrr_cycp1}/${FGShrrr_FNAME1}          ${GESINhrrr_rtma3d}/${FGSrtma3d_FNAME}
+  ${LN} -sf ${COMINhrrr_cycp1}/${FGShrrr_FNAME1}       ${GESINhrrr_rtma3d}/${FGSrtma3d_FNAME}
+  ${LN} -sf ${GESINhrrr_rtma3d}/${FGSrtma3d_FNAME}     ${DATA}/${FGSrtma3d_FNAME}
+  ${ECHO} " Cycle ${YYYYMMDDHH}: PREPFGS background --> ${COMINhrrr_cycp1}/${FGShrrr_FNAME1} "
+
+elif [ -r ${COMINhrrr}/${FGShrrr_FNAME2} ] && [ $FGS_OPT -eq "2"  ] ; then
+  # cpfs ${COMINhrrr}/${FGShrrr_FNAME2}                ${GESINhrrr_rtma3d}/${FGSrtma3d_FNAME}
+  ${LN} -sf ${COMINhrrr}/${FGShrrr_FNAME2}             ${GESINhrrr_rtma3d}/${FGSrtma3d_FNAME}
+  ${LN} -sf ${GESINhrrr_rtma3d}/${FGSrtma3d_FNAME}     ${DATA}/${FGSrtma3d_FNAME}
+  ${ECHO} " Cycle ${YYYYMMDDHH}: PREPFGS background --> ${COMINhrrr}/${FGShrrr_FNAME2} "
+
+elif [ -r ${COMINhrrr_cycp1}/${FGShrrr_FNAME0} ] && [ $FGS_OPT -eq "0" ] ; then
+  # cpfs ${COMINhrrr_cycp1}/${FGShrrr_FNAME0}          ${GESINhrrr_rtma3d}/${FGSrtma3d_FNAME}
+  ${LN} -sf ${COMINhrrr_cycp1}/${FGShrrr_FNAME0}       ${GESINhrrr_rtma3d}/${FGSrtma3d_FNAME}
+  ${LN} -sf ${GESINhrrr_rtma3d}/${FGSrtma3d_FNAME}     ${DATA}/${FGSrtma3d_FNAME}
+  ${ECHO} " Cycle ${YYYYMMDDHH}: PREPFGS background --> ${COMINhrrr_cycp1}/${FGShrrr_FNAME0} "
 
 # No background available so abort
 else
-  ${ECHO} "${COMINhrrr}/${FGS_FNAME} does not exist!!"
+  ${ECHO} "either ${FGShrrr_FNAME1}, ${FGShrrr_FNAME2} or ${FGShrrr_FNAME0} does not exist!!"
   ${ECHO} "ERROR: No background file for analysis at ${time_run}!!!!"
   ${ECHO} " Cycle ${YYYYMMDDHH}: PREPFGS failed because of no background" >> ${pgmout} 
   exit 1

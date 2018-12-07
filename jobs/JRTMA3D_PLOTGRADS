@@ -52,7 +52,7 @@ setpdy.sh
 
 export subcyc=${subcyc} #Note: Must define subcyc in upper level script. Can be 00, 15, 30, or 45 /MPondeca, 30Jun2017
                          #only used for rurtma2p5
-
+export PDYHH="${PDY}${cyc}"
 ####################################
 # Determine Job Output Name on System
 ####################################
@@ -76,15 +76,32 @@ export FIXrtma3d=${FIXrtma3d:-$HOMErtma3d/fix/${RUN}}
 export PARMrtma3d=${PARMrtma3d:-$HOMErtma3d/parm/${RUN}}
 export USHrtma3d=${USHrtma3d:-$HOMErtma3d/ush/${RUN}}
 
+# date and time for previous and next cycle
+export PDYHH_cycm1=$($NDATE -01  "${PDYHH}")
+export PDYHH_cycp1=$($NDATE +01  "${PDYHH}")
+
+export FGS_OPT=${FGS_OPT:-1}
+
 #################################################
 # Set up the INPUT and OUTPUT directories
 #################################################
 export COMIN=${COMIN:-${COMROOT}/${NET}/${envir}/${RUN}.${PDY}}
 export COMOUT=${COMOUT:-${COMROOT}/${NET}/${envir}/${RUN}.${PDY}}
 
-# Directory to store the Pre-processed obs and ready as input for the RTMA3D (BUFR?) 
+### Observations Products/Input for the RTMA3D (prepbufr files) 
 export COMINobsproc_rtma3d=${COMINobsproc_rtma3d:-"${COMIN}/obsprd.${cycle}"}
-export OBS_DIR_CYCLE=${OBS_DIR}/${PDY}${cyc}
+
+### Firstguess Products/Input for the RTMA3D (netcdf) 
+export GESINhrrr_rtma3d=${GESINhrrr_rtma3d:-"${COMIN}/fgsprd.${cycle}"}
+
+### 3DRTMA GSIANL Products (netcdf)
+export COMOUTgsi_rtma3d=${COMOUTgsi_rtma3d:-"${COMOUT}/gsiprd.${cycle}"}
+
+### 3DRTMA UNI-POST Products (grib2)
+export COMOUTpost_rtma3d=${COMOUTpost_rtma3d:-"${COMOUT}/postprd.${cycle}"}
+
+### 3DRTMA PLOT Products (figures)
+export COMOUTplot_rtma3d=${COMOUTplot_rtma3d:-"${COMOUT}/plotprd.${cycle}"}
 
 if [ ! -d "${COMIN}" ] ; then
    mkdir -p $COMIN
@@ -93,23 +110,56 @@ if [ ! -d "${COMOUT}" ] ; then
    mkdir -p $COMOUT
 fi
 
-if [ ! -d "${COMINobsproc_rtma3d}" ] ; then
-   mkdir -p $COMINobsproc_rtma3d
+if [ ! -d "${COMOUTplot_rtma3d}" ] ; then
+   mkdir -p ${COMOUTplot_rtma3d}
 fi
-
-if [ ! -d "${OBS_DIR_CYCLE}" ]; then
-  ${ECHO} "ERROR: $OBS_DIR_CYCLE does not exist!"
-  exit 1
-fi
-
 
 ###########################################################
+#
+# The following variables are used in exrtma3d_post.sh
+#
+###########################################################
+#   set the file name of the final analysis file for archive
+    if [ ! "${PROD_HEAD}" ] ; then
+      export ANLrtma3d_FNAME="${RUN}.t${cyc}z.wrf_inout.nc"
+      export FGSrtma3d_FNAME="${RUN}.t${cyc}z.firstguess.nc"
+    else
+      export ANLrtma3d_FNAME="${PROD_HEAD}.wrf_inout.nc"
+      export FGSrtma3d_FNAME="${PROD_HEAD}.firstguess.nc"
+    fi
+
+#   Set the path to the post executable
+    export UPP_EXEC=${EXECrtma3d:?} 
+    export UPPEXE=${UPPEXE:-"rtma3d_post"}
+    export pgm=${UPP_EXEC}/${UPPEXE}
+
+#   Set and Check the option to select the control parm data set for UPP
+    export UPP_CNTRL=${UPP_CNTRL:-1}    # 0: UPP default set for hrrr 
+                                        # 1: GSD
+                                        # 2: operational hrrr
+
+#   Set the path to the fix/ and parm/ files
+#   export FIX_ROOT=${FIXrtma3d:?} 
+    export fixdir=${FIX_GSI:-"${FIXrtma3d}/GSI-fix"}
+    export CRTMFIX=${FIX_CRTM:-"${FIXrtma3d}/CRTM-fix"}
+    export PARMwps=${PARMwps:-"${FIXrtma3d}/WPS"}
+
+    export PARMupp=${PARMupp:-"${PARMrtma3d}/UPP"}
+    export PARMwrf=${PARMwrf:-"${PARMrtma3d}/WRF"}
+
+    export OBS_USELIST=${OBS_USELIST:-"${FIXrtma3d}/GSI-fix"}
+
+    export SFCOBS_USELIST=${SFCOBS_USELIST:-"${FIXrtma3d}/ObsUseList/gsd/mesonet_uselists"}
+    export AIRCRAFT_REJECT=${AIRCRAFT_REJECT:-"${FIXrtma3d}/ObsUseList/gsd/amdar_reject_lists"}
+    export SFCOBS_PROVIDER=${SFCOBS_PROVIDER:-"${FIXrtma3d}/GSI-fix"}
+
+##########################################################
 
 ######################
 # Execute the script.
 ######################
-${exSCR_COPY_OBS:-$HOMErtma3d/scripts/${RUN}/ex${RUN}_copy_obs.sh}
-export err=$?; err_chk
+${exSCR_PLOTGRADS:-$HOMErtma3d/scripts/${RUN}/ex${RUN}_plotgrads.sh}
+# export err=$?; err_chk
 
 msg="$0 of $job completed normally"
 postmsg $jlogfile "$msg"

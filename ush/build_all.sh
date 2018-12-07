@@ -69,6 +69,20 @@ echo " running build_rtma_process_lightning.sh to build obs process ENLTN lightn
 ./build_rtma_process_lightning.sh
 
 #
+#--- check out uni-post package(UPP:EMC_post)
+#
+cd ${USH_DIR}
+echo " running checkout_rtma_post.sh to check out uni-post package...  "
+./checkout_rtma_post.sh
+
+#
+#--- build uni-post (UPP)
+#
+cd ${USH_DIR}
+echo " running build_rtma_post.sh to build uni-post code ..."
+./build_rtma_post.sh
+
+#
 #--- link exe, fixed data, etc.
 #
 cd ${USH_DIR}

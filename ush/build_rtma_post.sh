@@ -94,21 +94,26 @@ if [ ! -d ${EXEC} ]; then mkdir -p ${EXEC}; fi
 
 cd ${TOP_SORC}
 # all the building POST jobs is to be done under sub-direvtory build_post
-BUILD_POST=${TOP_SORC}/build_post
-BUILD_LOG=${BUILD_POST}/build_log
 DIRNAME_POST="rtma_post.fd"
-SORCDIR_POST=${TOP_SORC}/${DIRNAME_POST}
-if [ ! -d ${BUILD_POST} ] ; then mkdir -p ${BUILD_POST} ; fi
-if [ ! -d ${BUILD_LOG} ] ; then mkdir -p ${BUILD_LOG} ; fi
+TOPSORC_POST=${TOP_SORC}/${DIRNAME_POST}
+SORCDIR_POST=${TOPSORC_POST}/sorc
+BUILD_POST=${SORCDIR_POST}
+BUILD_LOG=${SORCDIR_POST}/build_log
+if [ ! -d ${BUILD_LOG} ]; then
+  mkdir -p ${BUILD_LOG}
+fi
+if [ ! -d ${TOPSORC_POST}/exec ]; then
+  mkdir -p ${TOPSORC_POST}/exec
+fi
 
 #
 #--- detecting the existence of the directory of POST source package
 #
 cd ${TOP_SORC}
-if [ ! -d ${SORCDIR_POST} ]
+if [ ! -d ${TOPSORC_POST} ]
 then
-  echo " ====> WARNING: POST source code directory: ${SORCDIR_POST}  does NOT exist."
-  echo " ====> WARNING: please check out a local copy of POST to ${SORCDIR_POST}"
+  echo " ====> WARNING: POST source code directory: ${TOPSORC_POST}  does NOT exist."
+  echo " ====> WARNING: please check out a local copy of POST to ${TOPSORC_POST}"
   echo " ====> Warning: abort compilation of POST for RTMA3D."
   exit 2
 fi
@@ -118,7 +123,7 @@ fi
 #
 # working branch
 wrking_branch=${branch_post_source}
-cd ${SORCDIR_POST}
+cd ${TOPSORC_POST}
 echo " ----> check out working branch "
 echo " ----> git checkout ${wrking_branch} "
 git checkout ${wrking_branch}
@@ -130,22 +135,22 @@ fi
 
 #==================#
 # compiling post
-echo " ====>  compiling POST under building directory: ${SORCDIR_POST}/sorc/ "
+echo " ====>  compiling POST under building directory: ${BUILD_POST} "
 
-cd ${SORCDIR_POST}/sorc/
-build_ncep_post.sh >& ${BUILD_LOG}/log.make.${DIRNAME_POST}.txt
+cd ${BUILD_POST}
+build_ncep_post.sh >& ${BUILD_LOG}/log.build_ncep_post.txt  2>&1
 
 if [ $? -eq 0 ] ; then
-  echo " POST code and utility codes were built successfully."
-  echo " cp -p ${SORCDIR_POST}/exec/ncep_post   ${EXEC}/rtma3d_post "
-  cp -p ${SORCDIR_POST}/exec/ncep_post  ${EXEC}/rtma3d_post
+  echo " NCEP-POST code was built successfully."
+  echo " cp -p ${TOPSORC_POST}/exec/ncep_post   ${EXEC}/rtma3d_post "
+  cp -p ${TOPSORC_POST}/exec/ncep_post          ${EXEC}/rtma3d_post
+  cp -p ${TOPSORC_POST}/exec/ncep_post          ${EXEC}/
   ls -l ${EXEC}/rtma3d_post
 else
   echo " ================ WARNING =============== " 
   echo " Compilation of POST code was failed."
-  echo " Check up with the log file under build_post/build_log/"
-  echo "   ----> log.cmake.${DIRNAME_POST}.txt : "
-  echo "   ----> log.make.${DIRNAME_POST}.txt  : "
+  echo " Check up with the log file under build_log/"
+  echo "   ----> log.build_ncep_post.txt  : "
   echo " ================ WARNING =============== " 
 fi
 

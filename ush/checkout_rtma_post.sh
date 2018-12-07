@@ -10,10 +10,10 @@ date
 branch_post_gsd="master"
 
 # branch_post_source: source branch  # the user-specified branch to check out.
-                                    # if not specified by user, 
-                                    #   it is branch_master by default.
+                                     # if not specified by user, 
+                                     # it is branch_master by default.
 
-# branch_post_source="<specify_your_source_branch_name_here>"
+# branch_post_source="<specify_your_source_branch_name_here>"    # e.g.: RAPHRRR_201706_R94737
 branch_post_source=${branch_post_source:-"$branch_post_gsd"}
 
 #=========================================================================#
@@ -75,8 +75,15 @@ cd ./${DIRNAME_POST}
 scp -p gerrit:hooks/commit-msg  .git/hooks
 
 echo " check out the source branch --> ${branch_post_source}"
-echo " ====> git checkout ${branch_post_source} "
-git checkout ${branch_post_source}
+if [ ${branch_post_source} = "master" ] ; then
+  echo " ====> master branch is checked out already as default. No need to git checkout again."
+else
+  echo " ====> git checkout ${branch_post_source} "
+  git checkout ${branch_post_source}
+fi
+
+echo " ====> check up with the git status "
+git status
 
 if [ $? -ne 0 ] ; then
   echo " WARNING: checking branch ${branch_post_source} failed!"
@@ -89,16 +96,16 @@ fi
 #
 #--- link modulefiles used in POST
 #
-MODULEFILES=${TOP_RTMA}/modulefiles
-SORCDIR_POST=${TOP_SORC}/rtma_post.fd
-echo " --> linking POST modulefiles to RTMA3D modulefiles (used for compilation of POST)  "
-cd ${MODULEFILES}
-mfiles="modulefile.POST.wcoss modulefile.POST.theia modulefile.global_post.theia"
-for modfile in $mfiles
-do
-  echo " ----> ln -sf ${MODULEFILES}/$modfile ${SORCDIR_POST}/modulefiles/$modfile "
-  ln -sf ${SORCDIR_POST}/modulefiles/$modfile ${MODULEFILES}/$modfile 
-done
+# MODULEFILES=${TOP_RTMA}/modulefiles
+# SORCDIR_POST=${TOP_SORC}/rtma_post.fd
+# echo " --> linking POST modulefiles to RTMA3D modulefiles (used for compilation of POST)  "
+# cd ${MODULEFILES}
+# mfiles="modulefile.POST.wcoss modulefile.POST.theia modulefile.global_post.theia"
+# for modfile in $mfiles
+# do
+#   echo " ----> ln -sf ${MODULEFILES}/$modfile ${SORCDIR_POST}/modulefiles/$modfile "
+#   ln -sf ${SORCDIR_POST}/modulefiles/$modfile ${MODULEFILES}/$modfile 
+# done
 
 # set +x
 

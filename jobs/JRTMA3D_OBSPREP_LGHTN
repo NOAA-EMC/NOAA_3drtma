@@ -66,6 +66,9 @@ if [ ! -d ${LOG_PGMOUT} ] ; then
    mkdir -p ${LOG_PGMOUT}
 fi
 
+# specify the file head for the file names of the archived data files
+export PROD_HEAD=${PROD_HEAD:-"${RUN}.t${cyc}z"}
+
 # Specify Execution Areas
 export HOMErtma3d=${HOMErtma3d:-$NWROOT/rtma.${rtma_ver}}
 export EXECrtma3d=${EXECrtma3d:-$HOMErtma3d/exec}
@@ -74,13 +77,8 @@ export PARMrtma3d=${PARMrtma3d:-$HOMErtma3d/parm/${RUN}}
 export USHrtma3d=${USHrtma3d:-$HOMErtma3d/ush/${RUN}}
 
 # date and time for previous and next cycle
-export PDYHH_cycm1=`$EXECrtma3d/ndate.x -1 "${PDYHH}"`
 export PDYHH_cycm1=$($NDATE -01  "${PDYHH}")
-export PDYHH_cycp1=`$EXECrtma3d/ndate.x +1 "${PDYHH}"`
 export PDYHH_cycp1=$($NDATE +01  "${PDYHH}")
-echo $PDYHH
-echo ${PDYHH_cycm1}
-echo ${PDYHH_cycp1}
 
 export FGS_OPT=${FGS_OPT:-1}
 
@@ -137,8 +135,12 @@ fi
 #   export FIX_ROOT=${FIXrtma3d:?} 
     export fixdir=${FIX_GSI:-"${FIXrtma3d}/GSI-fix"}
     export CRTMFIX=${FIX_CRTM:-"${FIXrtma3d}/CRTM-fix"}
-    export WRFPARM=${PARM_WRF:-"${FIXrtma3d}/WRF-parm"}
-    export OBS_USELIST=${OBS_USELIST:-"${FIXrtma3d}/CRTM-fix"}
+    export PARMwps=${PARMwps:-"${FIXrtma3d}/WPS"}
+
+    export PARMupp=${PARMupp:-"${PARMrtma3d}/UPP"}
+    export PARMwrf=${PARMwrf:-"${PARMrtma3d}/WRF"}
+
+    export OBS_USELIST=${OBS_USELIST:-"${FIXrtma3d}/GSI-fix"}
 
 ##########################################################
 

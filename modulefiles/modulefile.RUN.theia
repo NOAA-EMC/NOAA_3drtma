@@ -36,6 +36,7 @@
 #   export PATH=${PATH}:$GADDIR
  
 #   export CNVGRIB=${CNVGRIB:-/apps/cnvgrib/1.4.0/bin/cnvgrib}
-    export CNVGRIB=${CNVGRIB:-cnvgrib}
+    export CNVGRIB=${CNVGRIB:-"cnvgrib"}
+    export WGRIB2=${WGRIB2:-"wgrib2"}
     export MPIRUN=${MPIRUN:-"mpirun"}
     echo "done loading modules"
