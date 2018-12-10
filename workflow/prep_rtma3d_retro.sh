@@ -193,6 +193,7 @@ cat > ${NWROOT}/workflow/${RUN}_${expname}.xml <<EOF
 <!ENTITY DATA_OBSPRD    "&DATA_RUNDIR;/obsprd">
 <!ENTITY DATA_FGSPRD    "&DATA_RUNDIR;/fgsprd">
 <!ENTITY DATA_POST      "&DATA_RUNDIR;/postprd">
+<!ENTITY DATA_VERIF     "&DATA_RUNDIR;/verif">
 <!ENTITY DATA_POST4FGS  "&DATA_RUNDIR;/postprd4fgs">
 <!ENTITY DATA_PLOTGRADS "&DATA_RUNDIR;/plotgrads">
 <!ENTITY DATA_FETCHHPSS "&DATA_RUNDIR;/fetchhpss">
@@ -249,6 +250,9 @@ cat > ${NWROOT}/workflow/${RUN}_${expname}.xml <<EOF
 <!ENTITY exSCR_POST4FGS  "&SCRIPT_DIR;/ex&RUN;_post4fgs.sh">
 <!ENTITY JJOB_PLOTGRADS  "&JJOB_DIR;/J&CAP_RUN;_PLOTGRADS">
 <!ENTITY exSCR_PLOTGRADS "&SCRIPT_DIR;/ex&RUN;_plotgrads.sh">
+<!ENTITY JJOB_VERIF     "&JJOB_DIR;/J&CAP_RUN;_VERIF">
+<!ENTITY exSCR_VERIF    "&SCRIPT_DIR;/ex&RUN;_verif.sh">
+
 
 <!-- Resources -->
 
@@ -301,6 +305,14 @@ cat > ${NWROOT}/workflow/${RUN}_${expname}.xml <<EOF
     <walltime>00:15:00</walltime>
     <queue>&QUEUE_DBG;</queue>
     <account>&ACCOUNT;</account>'>
+<!ENTITY VERIF_PROC "1">
+<!ENTITY VERIF_RESOURCES
+   '<cores>&VERIF_PROC;</cores>
+    <walltime>00:15:00</walltime>
+    <queue>&QUEUE_DBG;</queue>
+    <account>&ACCOUNT;</account>'>
+
+
 
 <!ENTITY GSI_CORES "96">
 <!ENTITY GSI_THREADS "4">
@@ -536,6 +548,10 @@ cat > ${NWROOT}/workflow/${RUN}_${expname}.xml <<EOF
       <value><cyclestr>&DATA_POST;</cyclestr></value>
    </envar>
    <envar>
+      <name>DATA_VERIF</name>
+      <value><cyclestr>&DATA_VERIF;</cyclestr></value>
+   </envar>
+   <envar>
       <name>DATA_POST4FGS</name>
       <value><cyclestr>&DATA_POST4FGS;</cyclestr></value>
    </envar>
@@ -768,6 +784,21 @@ cat > ${NWROOT}/workflow/${RUN}_${expname}.xml <<EOF
       <name>JJOB_POST</name>
       <value>&JJOB_POST;</value>
     </envar>'>
+
+<!ENTITY ENVARS_VERIF
+    '<envar>
+      <name>START_TIME</name>
+      <value><cyclestr>@Y@m@d@H</cyclestr></value>
+    </envar>
+    <envar>
+      <name>exSCR_VERIF</name>
+      <value>&exSCR_VERIF;</value>
+    </envar>
+    <envar>
+      <name>JJOB_VERIF</name>
+      <value>&JJOB_VERIF;</value>
+    </envar>'>
+
 
 <!ENTITY ENVARS_PLOT
     '<envar>
@@ -1095,6 +1126,23 @@ cat >> ${NWROOT}/workflow/${RUN}_${expname}.xml <<EOF
     </dependency>
 
   </task>
+
+
+  <task name="&NET;_verif" cycledefs="&time_int;" maxtries="&maxtries;">
+    &ENVARS;
+    &VERIF_RESOURCES;
+    &SYS_COMMANDS;
+    <envar>
+       <name>rundir_task</name>
+       <value><cyclestr>&DATA_VERIF;</cyclestr></value>
+    </envar>
+    <command>&JJOB_DIR;/launch.sh &JJOB_DIR;/J&CAP_NET;_VERIF</command>
+    <jobname><cyclestr>&NET;_verif_@H</cyclestr></jobname>
+    <join><cyclestr>&LOG_SCHDLR;/&NET;_submit_verif_@Y@m@d@H@M.log\${PBS_JOBID}</cyclestr></join>
+    &ENVARS_VERIF;
+    <dependency>
+          <taskdep task="&NET;_post"/>
+    </dependency>
 
 EOF
 
