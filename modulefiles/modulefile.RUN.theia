@@ -23,6 +23,7 @@
     module load cairo
     module load ncl
     module load ncview
+    module load met/7.0
 
 #   module load xxdiff
 #   module load rocoto
