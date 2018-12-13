@@ -35,8 +35,7 @@ export startCDATE=201810230000              #yyyymmddhhmm - Starting day of retr
 export endCDATE=201810252300                #yyyymmddhhmm - Ending day of RTMA3D run (needed for both RETRO and REAL TIME). 
 export NET=rtma3d                           #selection of rtma3d (or rtma,urma)
 export RUN=rtma3d                           #selection of rtma3d (or rtma,urma)
-# export envir="retro"                      #environment (test, prod, dev, etc.)
-  export envir="retro10"                    #environment (test, prod, dev, etc.)
+export envir="retro"                        #environment (test, prod, dev, etc.)
 export run_envir="dev"                      #
 export expname="${envir}"
 export ptmp_base="/scratch3/NCEPDEV/stmp1/${USER}/wrkdir_${NET}"  #base subdirectory for all subsequent working and storage directories
@@ -44,7 +43,7 @@ export NWROOT=${TOP_RTMA}                   #root directory for RTMA/URMA j-job 
 export QUEUE="batch"                        #user-specified processing queue
 export QUEUE_DBG="debug"                    #user-specified processing queue -- debug
 export QUEUE_SVC="service"                  #user-specified transfer queue
-export ACCOUNT="nems"                    #Theia account for CPU resources :  da-cpu; fv3-cpu; fv3-cam;
+export ACCOUNT="nems"                     #Theia account for CPU resources
 
 # detect the machine/platform
 if [ `grep -c 'E5-2690 v3' /proc/cpuinfo` -gt 0 ]; then
@@ -91,6 +90,7 @@ export CAP_RUN_ENVIR=`echo ${run_envir} | tr '[:lower:]' '[:upper:]'`
   export PARMrtma3d="${NWROOT}/parm"
   export PARMupp="${PARMrtma3d}/UPP"
   export PARMwrf="${PARMrtma3d}/WRF"
+  export PARMverf="${PARMrtma3d}/VERIF"
 
 #
 #--- option control for obs pre-processing (esp. for obs used in cloud analysis)
@@ -113,7 +113,7 @@ export CAP_RUN_ENVIR=`echo ${run_envir} | tr '[:lower:]' '[:upper:]'`
 
 #
   option_plt=$1
-  export run_plt=${option_plt:-0}  # 1:    plot (and    post-process of firstguess fields)
+  export run_plt=${option_plt:-0}  # 100:    plot (and    post-process of firstguess fields)
                     # any other number: no plot (and no post-process of firstguess fields)
 # control option for using hrrr wrfguess(_rap) as firstguess for rtma3d
   export fgshrrr_opt=1    # 1: wrfguess_rap (init made from RAP at 1 hr before analysis time)
@@ -182,6 +182,7 @@ cat > ${NWROOT}/workflow/${RUN}_${expname}.xml <<EOF
 <!ENTITY PARMwps        "${PARMwps}">
 <!ENTITY PARMwrf        "${PARMwrf}">
 <!ENTITY PARMupp        "${PARMupp}">
+<!ENTITY PARMverf        "${PARMverf}">
 
 <!ENTITY LOG_WRKFLW	"&LOG_DIR;">
 <!ENTITY LOG_JJOB	"&LOG_DIR;/jlogfiles">
@@ -196,6 +197,7 @@ cat > ${NWROOT}/workflow/${RUN}_${expname}.xml <<EOF
 <!ENTITY DATA_POST4FGS  "&DATA_RUNDIR;/postprd4fgs">
 <!ENTITY DATA_PLOTGRADS "&DATA_RUNDIR;/plotgrads">
 <!ENTITY DATA_FETCHHPSS "&DATA_RUNDIR;/fetchhpss">
+<!ENTITY DATA_VERIF     "&DATA_RUNDIR;/verif">
 <!ENTITY DATA_OBSPREP_LGHTN    "&DATA_RUNDIR;/obsprep_lghtn">
 <!ENTITY DATA_OBSPREP_RADAR    "&DATA_RUNDIR;/obsprep_radar">
 <!ENTITY DATA_OBSPREP_CLOUD    "&DATA_RUNDIR;/obsprep_cloud">
@@ -213,7 +215,6 @@ cat > ${NWROOT}/workflow/${RUN}_${expname}.xml <<EOF
 
 <!-- for upp control/config parameter dataset -->
 <!ENTITY UPP_CNTRL      "${upp_cntrl}">
-
 
 <!-- Variables used in GSD scripts -->
 <!ENTITY HOMEBASE_DIR	"&NWROOT;">
@@ -249,6 +250,8 @@ cat > ${NWROOT}/workflow/${RUN}_${expname}.xml <<EOF
 <!ENTITY exSCR_POST4FGS  "&SCRIPT_DIR;/ex&RUN;_post4fgs.sh">
 <!ENTITY JJOB_PLOTGRADS  "&JJOB_DIR;/J&CAP_RUN;_PLOTGRADS">
 <!ENTITY exSCR_PLOTGRADS "&SCRIPT_DIR;/ex&RUN;_plotgrads.sh">
+<!ENTITY JJOB_VERIF     "&JJOB_DIR;/J&CAP_RUN;_VERIF">
+<!ENTITY exSCR_VERIF    "&SCRIPT_DIR;/ex&RUN;_verif.sh">
 
 <!-- Resources -->
 
@@ -334,6 +337,14 @@ cat > ${NWROOT}/workflow/${RUN}_${expname}.xml <<EOF
     <queue>&QUEUE_DBG;</queue>
     <memory>3G</memory>
     <account>&ACCOUNT;</account>'>
+
+<!ENTITY VERIF_PROC "1">
+<!ENTITY VERIF_RESOURCES
+   '<cores>&VERIF_PROC;</cores>
+    <walltime>00:15:00</walltime>
+    <queue>&QUEUE_DBG;</queue>
+    <account>&ACCOUNT;</account>'>
+
 
 <!-- Variables in Namelist -->
 <!ENTITY GSI_grid_ratio_in_var       "1">
@@ -440,6 +451,10 @@ cat > ${NWROOT}/workflow/${RUN}_${expname}.xml <<EOF
         <value>&PARMupp;</value>
    </envar>
    <envar>
+        <name>PARMverf</name>
+        <value>&PARMverf;</value>
+   </envar>
+   <envar>
         <name>OBS_USELIST</name>
         <value>&OBS_USELIST;</value>
    </envar>
@@ -538,6 +553,10 @@ cat > ${NWROOT}/workflow/${RUN}_${expname}.xml <<EOF
    <envar>
       <name>DATA_POST4FGS</name>
       <value><cyclestr>&DATA_POST4FGS;</cyclestr></value>
+   </envar>
+   <envar>
+      <name>DATA_VERIF</name>
+      <value><cyclestr>&DATA_VERIF;</cyclestr></value>
    </envar>
    <envar>
       <name>DATA_PLOTGRADS</name>
@@ -768,6 +787,21 @@ cat > ${NWROOT}/workflow/${RUN}_${expname}.xml <<EOF
       <name>JJOB_POST</name>
       <value>&JJOB_POST;</value>
     </envar>'>
+
+<!ENTITY ENVARS_VERIF
+    '<envar>
+      <name>START_TIME</name>
+      <value><cyclestr>@Y@m@d@H</cyclestr></value>
+    </envar>
+    <envar>
+      <name>exSCR_VERIF</name>
+      <value>&exSCR_VERIF;</value>
+    </envar>
+    <envar>
+      <name>JJOB_VERIF</name>
+      <value>&JJOB_VERIF;</value>
+    </envar>'>
+
 
 <!ENTITY ENVARS_PLOT
     '<envar>
@@ -1095,6 +1129,25 @@ cat >> ${NWROOT}/workflow/${RUN}_${expname}.xml <<EOF
     </dependency>
 
   </task>
+
+  <task name="&NET;_verif" cycledefs="&time_int;" maxtries="&maxtries;">
+    &ENVARS;
+    &VERIF_RESOURCES;
+    &SYS_COMMANDS;
+    <envar>
+       <name>rundir_task</name>
+       <value><cyclestr>&DATA_VERIF;</cyclestr></value>
+    </envar>
+    <command>&JJOB_DIR;/launch.sh &JJOB_DIR;/J&CAP_NET;_VERIF</command>
+    <jobname><cyclestr>&NET;_verif_@H</cyclestr></jobname>
+    <join><cyclestr>&LOG_SCHDLR;/&NET;_submit_verif_@Y@m@d@H@M.log\${PBS_JOBID}</cyclestr></join>
+    &ENVARS_VERIF;
+    <dependency>
+          <taskdep task="&NET;_post"/>
+    </dependency>
+
+  </task>
+
 
 EOF
 

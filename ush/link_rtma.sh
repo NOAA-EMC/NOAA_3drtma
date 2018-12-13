@@ -73,6 +73,7 @@ if [ $target = theia ]; then
   CRTM_fix="/scratch4/NCEPDEV/meso/save/Gang.Zhao/FixData/CRTM-fix_rtma3d"
   ObsUseList="/scratch4/NCEPDEV/meso/save/Gang.Zhao/FixData/ObsUseList_rtma3d"
   WPS="/scratch4/NCEPDEV/meso/save/Gang.Zhao/FixData/WPS"
+
   echo " ln -sf ${GSI_fix}        ./GSI-fix"
   ln -sf ${GSI_fix}        ./GSI-fix
   echo " ln -sf ${CRTM_fix}       ./CRTM-fix"
@@ -100,12 +101,15 @@ if [ $target = theia ]; then
   UPP="/scratch4/NCEPDEV/meso/save/Gang.Zhao/FixData/static_gsd_rtma3d_gge/UPP"
 # UPP="${TOP_RTMA}/sorc/rtma_post.fd/parm"
   WRF="/scratch4/NCEPDEV/meso/save/Gang.Zhao/FixData/static_gsd_rtma3d_gge/WRF"
-
+  VERIF="/scratch4/NCEPDEV/fv3-cam/save/Edward.Colon/FixData/VERIF-fix"
+  rm -f ./UPP ./WRF ./VERIF
   echo " ln -sf ${UPP}        ./UPP"
-  rm -f ./UPP .WRF
   ln -sf ${UPP}             ./UPP
   echo " ln -sf ${WRF}        ./WRF"
   ln -sf ${WRF}             ./WRF
+  echo " ln -sf ${VERIF}      ./VERIF"
+  ln -sf ${VERIF}            ./VERIF
+  
 
 else
   echo " the parm directories have not set up yet for machine $target."
