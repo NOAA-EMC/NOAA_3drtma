@@ -28,7 +28,6 @@ sorc/**/*.mod
 **/rtma_post.fd/
 
 # ignore directory of static data ('fix/', 'parm/')
-fix/
 parm/
 
 # ignore the link files under directory modulefiles
