@@ -366,6 +366,8 @@ done
 EYYYYMMDD=$(echo ${availtime} | cut -c1-8)
 EHH=$(echo ${availtime} | cut -c9-10)
 ${LS} ${ENKF_FCST}/${enkfcstname}.mem???.nemsio > filelist03
+#${LS} ${ENKF_FCST}/${enkfcstname}.mem???.nemsio > filelist.tmp
+#head -n 40 filelist.tmp > filelist03
 
 ## 
 ## Link to pre-processed GFS EnKF forecast members
