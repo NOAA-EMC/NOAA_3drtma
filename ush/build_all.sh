@@ -85,9 +85,9 @@ echo " running build_rtma_post.sh to build uni-post code ..."
 #
 #--- link exe, fixed data, etc.
 #
-cd ${USH_DIR}
-echo " running link_rtma.sh to link fixed dta , executables, etc. ... "
-./link_rtma.sh
+# cd ${USH_DIR}
+# echo " running link_rtma.sh to link fixed dta , executables, etc. ... "
+# ./link_rtma.sh
 
 #===================================================================#
 date

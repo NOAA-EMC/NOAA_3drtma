@@ -3,6 +3,12 @@
 
 set -x
 
+# make sure executable exists
+if [ ! -f ${EXECrtma3d}/${exefile_name_radar} ] ; then
+  ${ECHO} "ERROR: mosaic radar obs prcoessing executable '${EXECrtma3d}/${exefile_name_radar}' does not exist!"
+  exit 1
+fi
+
 # working directory
 workdir=${DATA}
 cd ${workdir}
@@ -56,9 +62,9 @@ ymdh=${YYYYMMDDHH}
 hh=$HH
 
 # BUFR Table includingthe description for HREF
-${CP} -p ${FIX_GSI}/prepobs_prep_RAP.bufrtable   ./prepobs_prep.bufrtable
+${CP} -p ${FIXgsi}/prepobs_prep_RAP.bufrtable   ./prepobs_prep.bufrtable
 # WPS GEO_GRID Data
-${LN} -s ${PARMwps}/hrrr_geo_em.d01.nc           ./geo_em.d01.nc 
+${LN} -s ${FIXwps}/hrrr_geo_em.d01.nc           ./geo_em.d01.nc 
 
 # find NSSL grib2 mosaic files
 COM_MOSAIC_GRIB2=${COMINmosaic}/mrms.t${HH}z/conus
@@ -173,9 +179,6 @@ cat << EOF > mosaic.namelist
 
 EOF
 
-# copy the excutable file of processing mosaic data
-export pgm=${MOSAIC_EXE:-"process_NSSL_mosaic.exe"}
-${CP} ${MOSAIC_EXEDIR}/${MOSAIC_EXE}   ./${pgm}
 if [ -f errfile ] ; then 
   rm -f errfile
 fi
@@ -191,7 +194,10 @@ msg="***********************************************************"
 postmsg "$jlogfile" "$msg"
 
 # Run Process_mosaic
-runline="${MPIRUN}  -np ${np}  ./${pgm}"
+# copy the excutable file of processing mosaic data
+${CP} ${EXECrtma3d}/${exefile_name_radar}   ./rtma3d_process_mosaic
+
+runline="${MPIRUN}  -np ${np}  ./rtma3d_process_mosaic"
 $runline > ${pgmout} 2>errfile
 export err=$?; err_chk
 

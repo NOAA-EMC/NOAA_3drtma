@@ -28,15 +28,10 @@ sorc/**/*.mod
 **/rtma_post.fd/
 
 # ignore directory of static data ('fix/', 'parm/')
-parm/
+
 
 # ignore the link files under directory modulefiles
-modulefiles/modulefile.ProdGSI.wcoss
-modulefiles/modulefile.ProdGSI.theia
-modulefiles/modulefile.POST.wcoss
-modulefiles/modulefile.POST.theia
-modulefiles/modulefile.global_gsi.theia
-modulefiles/modulefile.global_post.theia
+
 
 # ignore directory of development ('dev')
 **/dev/
@@ -51,7 +46,5 @@ workflow/*.db
 
 !workflow/prep_*.sh
 !workflow/prep_*.ksh
-!workflow/rtma3d_retro.xml
-!workflow/run_rtma3d_retro.sh
 
 # exceptional pattern is led by sign "!"

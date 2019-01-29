@@ -37,23 +37,23 @@ export NET=rtma3d                           #selection of rtma3d (or rtma,urma)
 export RUN=rtma3d                           #selection of rtma3d (or rtma,urma)
 export envir="retro"                        #environment (test, prod, dev, etc.)
 export run_envir="dev"                      #
-export expname="${envir}"
+export expname="${envir}"                   # experiment name
 export ptmp_base="/scratch3/NCEPDEV/stmp1/${USER}/wrkdir_${NET}"  #base subdirectory for all subsequent working and storage directories
 export NWROOT=${TOP_RTMA}                   #root directory for RTMA/URMA j-job scripts, scripts, parm files, etc. 
 export QUEUE="batch"                        #user-specified processing queue
 export QUEUE_DBG="debug"                    #user-specified processing queue -- debug
 export QUEUE_SVC="service"                  #user-specified transfer queue
-export ACCOUNT="nems"                     #Theia account for CPU resources
+export ACCOUNT="da"                         #Theia account for CPU resources
 
 # detect the machine/platform
 if [ `grep -c 'E5-2690 v3' /proc/cpuinfo` -gt 0 ]; then
   # Look for the Haswell chip
-  echo 'Running on Theia'
   MACHINE=theia
+  echo 'Running on $MACHINE '
 else
-  echo 'Running on wcoss'
-  MACHINE=wcoss
-  echo ' $machine is ready for running $NET.'
+  MACHINE="unknown"
+  echo 'Running on $MACHINE '
+  echo ' Machine $machine is NOT ready for running $NET.'
   exit 1
 fi
 
@@ -62,35 +62,119 @@ export CAP_RUN=`echo ${RUN} | tr '[:lower:]' '[:upper:]'`
 export CAP_ENVIR=`echo ${envir} | tr '[:lower:]' '[:upper:]'`
 export CAP_RUN_ENVIR=`echo ${run_envir} | tr '[:lower:]' '[:upper:]'`
 
+#########################################################
 #
+# User defined file name for executable
+#
+#########################################################
+export exefile_name_gsi="rtma3d_gsi"
+export exefile_name_post="rtma3d_wrfpost"
+export exefile_name_radar="rtma3d_process_mosaic"
+export exefile_name_lightning="rtma3d_process_lightning"
+export exefile_name_cloud="rtma3d_process_cloud"
+#export exefile_name_verif="rtma3d_verif"
+
+#########################################################
 #--- define the path to the static data
+#    fix/
+#      gsi/
+#      crtm/
+#      wrf/
+#      wps/
 #
+#    parm/
+#      upp/
+#      verif/
+#      wrf/
+#
+#########################################################
 # Note: the following absolute path for static data are only valid for Theia.
 #       User can specify the path to use user's static data.
-# export Fixrtma3d="/scratch4/NCEPDEV/fv3-cam/save/Gang.Zhao/FixData"
-# export FIX_GSI="/scratch4/NCEPDEV/fv3-cam/save/Gang.Zhao/FixData/GSI-fix_rtma3d_emc_test"
-# export FIX_CRTM="/scratch4/NCEPDEV/fv3-cam/save/Gang.Zhao/FixData/CRTM-fix_rtma3d"
-# export OBS_USELIST="/scratch4/NCEPDEV/fv3-cam/save/Gang.Zhao/FixData/ObsUseList_rtma3d"
-# export SFCOBS_USELIST="/scratch4/NCEPDEV/fv3-cam/save/Gang.Zhao/FixData/ObsUseList_rtma3d/gsd/mesonet_uselists"
-# export AIRCRAFT_REJECT="/scratch4/NCEPDEV/fv3-cam/save/Gang.Zhao/FixData/ObsUseList_rtma3d/gsd/amdar_reject_lists"
-# export SFCOBS_PROVIDER="/scratch4/NCEPDEV/fv3-cam/save/Gang.Zhao/FixData/GSI-fix_rtma3d_emc_test"
-# export PARMwps="/scratch4/NCEPDEV/fv3-cam/save/Gang.Zhao/FixData/WPS"
-# export PARMupp="/scratch4/NCEPDEV/fv3-cam/save/Gang.Zhao/FixData/static_gsd_rtma3d_gge/UPP"
-# export PARMwrf="/scratch4/NCEPDEV/fv3-cam/save/Gang.Zhao/FixData/static_gsd_rtma3d_gge/WRF"
+#       The variable name with "_udef" means: user may define the path to their
+#       specific static data, 
+#       then link these paths to the symbol links under fix/ and parm/.
+#
+# export Fixrtma3d_udef="/scratch4/NCEPDEV/fv3-cam/save/Gang.Zhao/FixData"
+  export FIXgsi_udef="/scratch4/NCEPDEV/fv3-cam/save/Gang.Zhao/FixData/GSI-fix_rtma3d_emc_test"
+  export FIXcrtm_udef="/scratch4/NCEPDEV/fv3-cam/save/Gang.Zhao/FixData/CRTM-fix_rtma3d"
+  export FIXwps_udef="/scratch4/NCEPDEV/fv3-cam/save/Gang.Zhao/FixData/WPS"
 
+  export OBS_USELIST_udef="/scratch4/NCEPDEV/fv3-cam/save/Gang.Zhao/FixData/ObsUseList_rtma3d"
+  export SFCOBS_USELIST_udef="/scratch4/NCEPDEV/fv3-cam/save/Gang.Zhao/FixData/ObsUseList_rtma3d/gsd/mesonet_uselists"
+  export AIRCRAFT_REJECT_udef="/scratch4/NCEPDEV/fv3-cam/save/Gang.Zhao/FixData/ObsUseList_rtma3d/gsd/amdar_reject_lists"
+  export SFCOBS_PROVIDER_udef="/scratch4/NCEPDEV/fv3-cam/save/Gang.Zhao/FixData/GSI-fix_rtma3d_emc_test"
+
+  export PARMupp_udef="/scratch4/NCEPDEV/fv3-cam/save/Gang.Zhao/FixData/static_gsd_rtma3d_gge/UPP"
+  export PARMwrf_udef="/scratch4/NCEPDEV/fv3-cam/save/Gang.Zhao/FixData/static_gsd_rtma3d_gge/WRF"
+  export PARMverf_udef="/scratch4/NCEPDEV/fv3-cam/save/Edward.Colon/FixData/VERIF-fix"
+
+#       define the variable names for symbol links under fix/ and parm/
   export FIXrtma3d="${NWROOT}/fix"
-  export FIX_GSI="${FIXrtma3d}/GSI-fix"
-  export FIX_CRTM="${FIXrtma3d}/CRTM-fix"
-  export OBS_USELIST="${FIXrtma3d}/ObsUseList"
+  export FIXgsi="${FIXrtma3d}/gsi"
+  export FIXcrtm="${FIXrtma3d}/crtm"
+  export Fixwps="${FIXrtma3d}/wps"
+
+  export OBS_USELIST="${FIXrtma3d}/obsuselist"
   export SFCOBS_USELIST="${OBS_USELIST}/mesonet_uselists"
   export AIRCRAFT_REJECT="${OBS_USELIST}/amdar_reject_lists"
-  export SFCOBS_PROVIDER="${FIX_GSI}"
-  export PARMwps="${FIXrtma3d}/WPS"
+  export SFCOBS_PROVIDER="${OBS_USELIST}/sfcobs_provider"
 
   export PARMrtma3d="${NWROOT}/parm"
-  export PARMupp="${PARMrtma3d}/UPP"
-  export PARMwrf="${PARMrtma3d}/WRF"
-  export PARMverf="${PARMrtma3d}/VERIF"
+  export PARMupp="${PARMrtma3d}/upp"
+  export PARMwrf="${PARMrtma3d}/wrf"
+  export PARMverf="${PARMrtma3d}/verif"
+
+#
+#        link to the symbol links
+#
+  if [ ! -d ${FIXrtma3d}   ] ; then mkdir -p ${FIXrtma3d}   ; fi
+  if [ ! -d ${OBS_USELIST} ] ; then mkdir -p ${OBS_USELIST} ; fi
+  if [ ! -d ${PARMrtma3d}  ] ; then mkdir -p ${PARMrtma3d}  ; fi
+  if [ $target = theia ]; then
+    cd ${FIXrtma3d}
+    echo " linking fixed data on $target for GSI analysis"
+    rm -rf $FIXgsi
+    echo " ln -sf ${FIXgsi_udef}        ${FIXgsi}"
+    ln -sf ${FIXgsi_udef}        ${FIXgsi}
+    rm -rf $FIXcrtm
+    echo " ln -sf ${FIXcrtm_udef}       ${FIXcrtm}"
+    ln -sf ${FIXcrtm_udef}       ${FIXcrtm}
+    rm -rf $FIXwps
+    echo " ln -sf ${FIXwps_udef}        ${FIXwps}"
+    ln -sf ${FIXwps_udef}        ${FIXwps}
+
+    rm -rf $SFCOBS_USELIST
+    echo " ln -sf ${SFCOBS_USELIST_udef}        ${SFCOBS_USELIST}"
+    ln -sf ${SFCOBS_USELIST_udef}        ${SFCOBS_USELIST}
+    rm -rf $AIRCRAFT_REJECT
+    echo " ln -sf ${AIRCRAFT_REJECT_udef}       ${AIRCRAFT_REJECT}"
+    ln -sf ${AIRCRAFT_REJECT_udef}       ${AIRCRAFT_REJECT}
+    rm -rf $SFCOBS_PROVIDER
+    echo " ln -sf ${SFCOBS_PROVIDER_udef}       ${SFCOBS_PROVIDER}"
+    ln -sf ${SFCOBS_PROVIDER_udef}       ${SFCOBS_PROVIDER}
+
+    rm -rf $PARMupp
+    echo " ln -sf ${PARMupp_udef}        ${PARMupp}"
+    ln -sf ${PARMupp_udef}     i         ${PARMupp}
+    rm -rf $PARMverf
+    echo " ln -sf ${PARMverf_udef}       ${PARMverf}"
+    ln -sf ${PARMverf_udef}              ${PARMverf}
+    rm -rf $PARMwrf
+    echo " ln -sf ${PARMwrf_udef}        ${PARMwrf}"
+    ln -sf ${PARMwrf_udef}     i         ${PARMwrf}
+
+  else
+    echo " the fixed data directories have not set up yet for machine $target."
+    echo " Abort linking task."
+    exit 9
+  fi
+  echo
+  ls -ltr $FIXrtma3d
+  echo
+  echo
+  ls -ltr $PARMrtma3d
+  echo
+  echo
 
 #
 #--- option control for obs pre-processing (esp. for obs used in cloud analysis)
@@ -99,8 +183,6 @@ export CAP_RUN_ENVIR=`echo ${run_envir} | tr '[:lower:]' '[:upper:]'`
                           # 1: pre-processing MRMS grib2 radar reflectivity obs
   export obsprep_lghtn=1  # 0: No pre-processing lightning obs data
                           # 1: processing bufr data from rap run
-                          # 2: processing entln data
-                          # 3: processing Vaisala data
   export obsprep_cloud=0  # 0: No (using processed CloudInGSI.bufr_d of hrrr)
                           # 1: processing bufr data from rap run
 
@@ -120,6 +202,11 @@ export CAP_RUN_ENVIR=`echo ${run_envir} | tr '[:lower:]' '[:upper:]'`
                           # 2: wrfguess     (1 hr forecast to analysis time with wrfguess_rap)
 
 ########################################################################################
+#
+#             User definition section ends here.
+#             User definition section ends here.
+#             User definition section ends here.
+#
 # Workflow is specified using user-derived settings in xml format    
 ########################################################################################
 
@@ -169,20 +256,20 @@ cat > ${NWROOT}/workflow/${RUN}_${expname}.xml <<EOF
 <!ENTITY USHrtma3d	"&HOMErtma3d;/ush">
 <!ENTITY MODULEFILES	"&HOMErtma3d;/modulefiles">
 <!ENTITY EXECrtma3d	"&HOMErtma3d;/exec">
-<!ENTITY PARMrtma3d	"&HOMErtma3d;/parm">
+<!ENTITY PARMrtma3d	"${PARMrtma3d}">
+<!ENTITY FIXrtma3d	"${FIXrtma3d}">
 
 <!-- Specific Definition for static data -->
-<!ENTITY FIXrtma3d	"${FIXrtma3d}">
-<!ENTITY FIX_CRTM       "${FIX_CRTM}">
-<!ENTITY FIX_GSI        "${FIX_GSI}">
+<!ENTITY FIXcrtm        "${FIXcrtm}">
+<!ENTITY FIXgsi         "${FIXgsi}">
+<!ENTITY FIXwps         "${FIXwps}">
 <!ENTITY OBS_USELIST    "${OBS_USELIST}">
 <!ENTITY AIRCRAFT_REJECT        "${AIRCRAFT_REJECT}">
 <!ENTITY SFCOBS_USELIST         "${SFCOBS_USELIST}">
 <!ENTITY SFCOBS_PROVIDER        "${SFCOBS_PROVIDER}">
-<!ENTITY PARMwps        "${PARMwps}">
 <!ENTITY PARMwrf        "${PARMwrf}">
 <!ENTITY PARMupp        "${PARMupp}">
-<!ENTITY PARMverf        "${PARMverf}">
+<!ENTITY PARMverf       "${PARMverf}">
 
 <!ENTITY LOG_WRKFLW	"&LOG_DIR;">
 <!ENTITY LOG_JJOB	"&LOG_DIR;/jlogfiles">
@@ -234,24 +321,30 @@ cat > ${NWROOT}/workflow/${RUN}_${expname}.xml <<EOF
 <!ENTITY exSCR_FETCHHPSS "&SCRIPT_DIR;/ex&RUN;_fetchhpss.sh">
 <!ENTITY JJOB_OBSPREP_RADAR    "&JJOB_DIR;/J&CAP_RUN;_OBSPREP_RADAR">
 <!ENTITY exSCR_OBSPREP_RADAR   "&SCRIPT_DIR;/ex&RUN;_obsprep_radar.sh">
+<!ENTITY exefile_name_mosaic   "${exefile_name_mosaic}">
 <!ENTITY JJOB_OBSPREP_LGHTN    "&JJOB_DIR;/J&CAP_RUN;_OBSPREP_LGHTN">
 <!ENTITY exSCR_OBSPREP_LGHTN   "&SCRIPT_DIR;/ex&RUN;_obsprep_lghtn.sh">
+<!ENTITY exefile_name_lighting "${exefile_name_lightning}">
 <!ENTITY JJOB_OBSPREP_CLOUD    "&JJOB_DIR;/J&CAP_RUN;_OBSPREP_CLOUD">
 <!ENTITY exSCR_OBSPREP_CLOUD   "&SCRIPT_DIR;/ex&RUN;_obsprep_cloud.sh">
+<!ENTITY exefile_name_cloud    "${exefile_name_cloud}">
 <!ENTITY JJOB_PREPOBS    "&JJOB_DIR;/J&CAP_RUN;_PREPOBS">
 <!ENTITY exSCR_PREPOBS   "&SCRIPT_DIR;/ex&RUN;_prepobs.sh">
 <!ENTITY JJOB_PREPFGS    "&JJOB_DIR;/J&CAP_RUN;_PREPFGS">
 <!ENTITY exSCR_PREPFGS   "&SCRIPT_DIR;/ex&RUN;_prepfgs.sh">
 <!ENTITY JJOB_GSIANL	 "&JJOB_DIR;/J&CAP_RUN;_GSIANL">
 <!ENTITY exSCR_GSIANL	 "&SCRIPT_DIR;/ex&RUN;_gsianl.sh">
+<!ENTITY exefile_name_gsi      "${exefile_name_gsi}">
 <!ENTITY JJOB_POST  	 "&JJOB_DIR;/J&CAP_RUN;_POST">
 <!ENTITY exSCR_POST      "&SCRIPT_DIR;/ex&RUN;_post.sh">
+<!ENTITY exefile_name_post     "${exefile_name_post}">
 <!ENTITY JJOB_POST4FGS   "&JJOB_DIR;/J&CAP_RUN;_POST4FGS">
 <!ENTITY exSCR_POST4FGS  "&SCRIPT_DIR;/ex&RUN;_post4fgs.sh">
 <!ENTITY JJOB_PLOTGRADS  "&JJOB_DIR;/J&CAP_RUN;_PLOTGRADS">
 <!ENTITY exSCR_PLOTGRADS "&SCRIPT_DIR;/ex&RUN;_plotgrads.sh">
 <!ENTITY JJOB_VERIF     "&JJOB_DIR;/J&CAP_RUN;_VERIF">
 <!ENTITY exSCR_VERIF    "&SCRIPT_DIR;/ex&RUN;_verif.sh">
+<!ENTITY exefile_name_verif    "${exefile_name_verif}">
 
 <!-- Resources -->
 
@@ -431,16 +524,16 @@ cat > ${NWROOT}/workflow/${RUN}_${expname}.xml <<EOF
         <value>&PARMrtma3d;</value>
    </envar>
    <envar>
-        <name>FIX_CRTM</name>
-        <value>&FIX_CRTM;</value>
+        <name>FIXcrtm</name>
+        <value>&FIXcrtm;</value>
    </envar>
    <envar>
-        <name>FIX_GSI</name>
-        <value>&FIX_GSI;</value>
+        <name>FIXgsi</name>
+        <value>&FIXgsi;</value>
    </envar>
    <envar>
-        <name>PARMwps</name>
-        <value>&PARMwps;</value>
+        <name>FIXwps</name>
+        <value>&FIXwps;</value>
    </envar>
    <envar>
         <name>PARMwrf</name>
@@ -585,6 +678,30 @@ cat > ${NWROOT}/workflow/${RUN}_${expname}.xml <<EOF
    <envar>
       <name>DATA_FETCHHPSS</name>
       <value><cyclestr>&DATA_FETCHHPSS;</cyclestr></value>
+   </envar>
+   <envar>
+      <name>exefile_name_gsi</name>
+      <value><cyclestr>&exefile_name_gsi;</cyclestr></value>
+   </envar>
+   <envar>
+      <name>exefile_name_post</name>
+      <value><cyclestr>&exefile_name_post;</cyclestr></value>
+   </envar>
+   <envar>
+      <name>exefile_name_mosaic</name>
+      <value><cyclestr>&exefile_name_mosaic;</cyclestr></value>
+   </envar>
+   <envar>
+      <name>exefile_name_lightning</name>
+      <value><cyclestr>&exefile_name_lightning;</cyclestr></value>
+   </envar>
+   <envar>
+      <name>exefile_name_cloud</name>
+      <value><cyclestr>&exefile_name_cloud;</cyclestr></value>
+   </envar>
+   <envar>
+      <name>exefile_name_verif</name>
+      <value><cyclestr>&exefile_name_verif;</cyclestr></value>
    </envar>
    <envar>
         <name>SENDCOM</name>
@@ -950,7 +1067,7 @@ EOF
 
 fi
 
-if [ ${obsprep_lghtn} -eq 1 ] || [ ${obsprep_lghtn} -eq 2 ] || [ ${obsprep_lghtn} -eq 3 ] ; then
+if [ ${obsprep_lghtn} -eq 1 ] ; then
 
 cat >> ${NWROOT}/workflow/${RUN}_${expname}.xml <<EOF 
 
@@ -1039,7 +1156,7 @@ cat >> ${NWROOT}/workflow/${RUN}_${expname}.xml <<EOF
 EOF
 fi
 
-if [ $obsprep_lghtn -eq 1 ] || [ $obsprep_lghtn -eq 2 ] || [ $obsprep_lghtn -eq 3 ] ; then
+if [ $obsprep_lghtn -eq 1 ] ; then
 cat >> ${NWROOT}/workflow/${RUN}_${expname}.xml <<EOF 
         <taskdep task="&NET;_obsprep_lghtn"/>
 EOF
@@ -1246,6 +1363,13 @@ export PGMOUT=$LOGDIR/pgmout
 if [ ! -d $PGMOUT ] ; then
   mkdir -p $PGMOUT
 fi
+#
+#--- set up the log directory for rocoto workflow running job
+#
+WORKFLOW_DIR=${TOP_RTMA}/workflow
+mkdir -p ${WORKFLOW_DIR}/logs
+mkdir -p ${WORKFLOW_DIR}/logs/jlogfiles
+mkdir -p ${WORKFLOW_DIR}/logs/pgmout
 
 ########################################################################################
 #   Creating RTMA3D run script

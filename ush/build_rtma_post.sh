@@ -19,6 +19,7 @@ branch_post_source=${branch_post_source:-"$branch_post_gsd"}
 build_corelibs="OFF"   # OFF: using installed corelibs (bacio, bufr, etc.)
 # build_type="DEBUG"   # option: DEBUG, or PRODUCTION(default)
 
+exefile_name_post="rtma3d_wrfpost"
 #=========================================================================#
 
 echo "*==================================================================*"
@@ -87,6 +88,7 @@ then
 fi
 
 USH_DIR=${TOP_RTMA}/ush
+MODULEFILES_DIR=${TOP_RTMA}/modulefiles
 
 cd $TOP_RTMA
 EXEC=${TOP_RTMA}/exec
@@ -134,6 +136,43 @@ if [ $? -ne 0 ] ; then
 fi
 
 #==================#
+# load modules (using module file under modulefiles/${target}/build)
+#
+
+modules_dir=${MODULEFILES_DIR}/${target}/build
+modules_fname=modulefile.build.${target}
+
+if [ $target = wcoss -o $target = cray ]; then
+    module purge
+    module load $modules_dir/${modules_fname}
+elif [ $target = theia ]; then
+    module purge
+    source $modules_dir/${modules_fname}
+    module list
+elif [ $target = dell ]; then
+    module purge
+    source $modules_dir/${modules_fname}
+    export NETCDF_INCLUDE=-I/usrx/local/prod/packages/ips/18.0.1/netcdf/4.5.0/include
+    export NETCDF_CFLAGS=-I/usrx/local/prod/packages/ips/18.0.1/netcdf/4.5.0/include
+    export NETCDF_LDFLAGS_CXX="-L/usrx/local/prod/packages/ips/18.0.1/netcdf/4.5.0/lib -lnetcdf -lnetcdf_c++"
+    export NETCDF_LDFLAGS_CXX4="-L/usrx/local/prod/packages/ips/18.0.1/netcdf/4.5.0/lib -lnetcdf -lnetcdf_c++4"
+    export NETCDF_CXXFLAGS=-I/usrx/local/prod/packages/ips/18.0.1/netcdf/4.5.0/include
+    export NETCDF_FFLAGS=-I/usrx/local/prod/packages/ips/18.0.1/netcdf/4.5.0/include
+    export NETCDF_ROOT=/usrx/local/prod/packages/ips/18.0.1/netcdf/4.5.0
+    export NETCDF_LIB=/usrx/local/prod/packages/ips/18.0.1/netcdf/4.5.0/lib
+    export NETCDF_LDFLAGS_F="-L/usrx/local/prod/packages/ips/18.0.1/netcdf/4.5.0/lib -lnetcdff"
+    export NETCDF_LDFLAGS_C="-L/usrx/local/prod/packages/ips/18.0.1/netcdf/4.5.0/lib -lnetcdf"
+    export NETCDF_LDFLAGS="-L/usrx/local/prod/packages/ips/18.0.1/netcdf/4.5.0/lib -lnetcdff"
+    export NETCDF=/usrx/local/prod/packages/ips/18.0.1/netcdf/4.5.0
+    export NETCDF_INC=/usrx/local/prod/packages/ips/18.0.1/netcdf/4.5.0/include
+    export NETCDF_CXX4FLAGS=-I/usrx/local/prod/packages/ips/18.0.1/netcdf/4.5.0/include
+else
+    echo " ----> WARNING: module file has not been configured for this machine: $target "
+    echo " ----> warning: abort compilation "
+    exit 9
+fi
+
+#==================#
 # compiling post
 echo " ====>  compiling POST under building directory: ${BUILD_POST} "
 
@@ -142,10 +181,11 @@ build_ncep_post.sh >& ${BUILD_LOG}/log.build_ncep_post.txt  2>&1
 
 if [ $? -eq 0 ] ; then
   echo " NCEP-POST code was built successfully."
-  echo " cp -p ${TOPSORC_POST}/exec/ncep_post   ${EXEC}/rtma3d_post "
-  cp -p ${TOPSORC_POST}/exec/ncep_post          ${EXEC}/rtma3d_post
-  cp -p ${TOPSORC_POST}/exec/ncep_post          ${EXEC}/
-  ls -l ${EXEC}/rtma3d_post
+
+  echo " cp -p ${TOPSORC_POST}/exec/ncep_post   ${EXEC}/${exefile_name_post} "
+  cp -p ${TOPSORC_POST}/exec/ncep_post          ${EXEC}/${exefile_name_post}
+  ls -l ${EXEC}/${exefile_name_post}
+
 else
   echo " ================ WARNING =============== " 
   echo " Compilation of POST code was failed."

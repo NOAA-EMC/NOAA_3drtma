@@ -300,7 +300,10 @@ while [ $CYCLE_3 -le $CYCLE_LAST ] ; do
         
 #==================================================================================================
 
-    if [ "$i" -eq 1 ] ; then
+    if [ "$i" -eq 1 ] && [ 1 -eq 2 ] ; then
+      echo "======================================================================================="
+      echo "======== retrieving raw lightning data from GSD retrieval dataset on HPSS ============="
+      echo "======================================================================================="
       cd $wrkdir_lightning
 
       for lghtn_dir in $lghtn_entln_dir $lghtn_vaisala_dir

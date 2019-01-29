@@ -48,13 +48,9 @@ fi
 
 #  NCEPSNOW
 
-# Make sure GSI_ROOT is defined and exists
-if [ ! "${GSI_ROOT}" ]; then
-  ${ECHO} "ERROR: \$GSI_ROOT is not defined!"
-  exit 1
-fi
-if [ ! -d "${GSI_ROOT}" ]; then
-  ${ECHO} "ERROR: GSI_ROOT directory '${GSI_ROOT}' does not exist!"
+# Make sure the GSI executable exists
+if [ ! -f "${EXECrtma3d}/${exefile_name_gsi}" ]; then
+  ${ECHO} "ERROR: GSI Analysis executable '${EXECrtma3d}/${exefile_name_gsi}' does not exist!"
   exit 1
 fi
 
@@ -65,10 +61,6 @@ if [ -z "${GSIPROC}" ]; then
 fi
 
 # Check to make sure that fix direcory exists
-if [ ! -d ${fix_dir} ]; then
-  ${ECHO} "ERROR: ${fix_dir} does not exist"
-  exit 1
-fi
 
 # Check to make sure that ENKF_FCST exists
 
@@ -104,12 +96,6 @@ else
 fi
 echo $START_TIME
 
-# Make sure the GSI executable exists
-if [ ! -x "${GSI}" ]; then
-  ${ECHO} "ERROR: ${GSI} does not exist!"
-  exit 1
-fi
-
 # Compute date & time components for the analysis time
 YYYYJJJHH00=`${DATE} +"%Y%j%H00" -d "${START_TIME}"`
 YYYYMMDDHH=`${DATE} +"%Y%m%d%H" -d "${START_TIME}"`
@@ -131,9 +117,6 @@ cd ${workdir}
 
 # Define the output log file depending on if this is the full or partial cycle
 ifsoilnudge=.true.
-
-# Save a copy of the GSI executable in the workdir
-${CP} ${GSI} .
 
 # Bring over background field (it's modified by GSI so we can't link to it)
 time_str=`${DATE} "+%Y-%m-%d_%H_%M_%S" -d "${START_TIME}"`
@@ -245,15 +228,15 @@ fi
 #   bufrtable= text file ONLY needed for single obs test (oneobstest=.true.)
 #   bftab_sst= bufr table for sst ONLY needed for sst retrieval (retrieval=.true.)
 
-anavinfo=${fixdir}/anavinfo_arw_netcdf
-BERROR=${fixdir}/rap_berror_stats_global_RAP_tune
-SATANGL=${fixdir}/global_satangbias.txt
-#SATINFO=${fixdir}/global_satinfo.txt
-SATINFO=${fixdir}/rap_global_satinfo.txt
-CONVINFO=${fixdir}/nam_regional_convinfo_RAP.txt
-OZINFO=${fixdir}/global_ozinfo.txt    
-PCPINFO=${fixdir}/global_pcpinfo.txt
-OBERROR=${fixdir}/nam_errtable.r3dv
+anavinfo=${FIXgsi}/anavinfo_arw_netcdf
+BERROR=${FIXgsi}/rap_berror_stats_global_RAP_tune
+SATANGL=${FIXgsi}/global_satangbias.txt
+#SATINFO=${FIXgsi}/global_satinfo.txt
+SATINFO=${FIXgsi}/rap_global_satinfo.txt
+CONVINFO=${FIXgsi}/nam_regional_convinfo_RAP.txt
+OZINFO=${FIXgsi}/global_ozinfo.txt    
+PCPINFO=${FIXgsi}/global_pcpinfo.txt
+OBERROR=${FIXgsi}/nam_errtable.r3dv
 
 
 # Fixed fields
@@ -267,19 +250,17 @@ cp $PCPINFO  pcpinfo
 cp $OBERROR  errtable
 
 # CRTM Spectral and Transmittance coefficients
-# CRTMFIX=${FIX_CRTM:-${fixdir}/CRTM_Coefficients}
-CRTMFIX=${FIX_CRTM:?}
-emiscoef_IRwater=${CRTMFIX}/Nalli.IRwater.EmisCoeff.bin
-emiscoef_IRice=${CRTMFIX}/NPOESS.IRice.EmisCoeff.bin
-emiscoef_IRland=${CRTMFIX}/NPOESS.IRland.EmisCoeff.bin
-emiscoef_IRsnow=${CRTMFIX}/NPOESS.IRsnow.EmisCoeff.bin
-emiscoef_VISice=${CRTMFIX}/NPOESS.VISice.EmisCoeff.bin
-emiscoef_VISland=${CRTMFIX}/NPOESS.VISland.EmisCoeff.bin
-emiscoef_VISsnow=${CRTMFIX}/NPOESS.VISsnow.EmisCoeff.bin
-emiscoef_VISwater=${CRTMFIX}/NPOESS.VISwater.EmisCoeff.bin
-emiscoef_MWwater=${CRTMFIX}/FASTEM5.MWwater.EmisCoeff.bin
-aercoef=${CRTMFIX}/AerosolCoeff.bin
-cldcoef=${CRTMFIX}/CloudCoeff.bin
+emiscoef_IRwater=${FIXcrtm}/Nalli.IRwater.EmisCoeff.bin
+emiscoef_IRice=${FIXcrtm}/NPOESS.IRice.EmisCoeff.bin
+emiscoef_IRland=${FIXcrtm}/NPOESS.IRland.EmisCoeff.bin
+emiscoef_IRsnow=${FIXcrtm}/NPOESS.IRsnow.EmisCoeff.bin
+emiscoef_VISice=${FIXcrtm}/NPOESS.VISice.EmisCoeff.bin
+emiscoef_VISland=${FIXcrtm}/NPOESS.VISland.EmisCoeff.bin
+emiscoef_VISsnow=${FIXcrtm}/NPOESS.VISsnow.EmisCoeff.bin
+emiscoef_VISwater=${FIXcrtm}/NPOESS.VISwater.EmisCoeff.bin
+emiscoef_MWwater=${FIXcrtm}/FASTEM5.MWwater.EmisCoeff.bin
+aercoef=${FIXcrtm}/AerosolCoeff.bin
+cldcoef=${FIXcrtm}/CloudCoeff.bin
 
 ln -s $emiscoef_IRwater ./Nalli.IRwater.EmisCoeff.bin
 ln -s $emiscoef_IRice ./NPOESS.IRice.EmisCoeff.bin
@@ -295,8 +276,8 @@ ln -s $cldcoef  ./CloudCoeff.bin
 
 # Copy CRTM coefficient files based on entries in satinfo file
 for file in `awk '{if($1!~"!"){print $1}}' ./satinfo | sort | uniq` ;do 
-   ln -s ${CRTMFIX}/${file}.SpcCoeff.bin ./
-   ln -s ${CRTMFIX}/${file}.TauCoeff.bin ./
+   ln -s ${FIXcrtm}/${file}.SpcCoeff.bin ./
+   ln -s ${FIXcrtm}/${file}.TauCoeff.bin ./
 done
 
 # Get aircraft reject list
@@ -310,7 +291,7 @@ cp ${sfcuselists_path}/${sfcuselists} gsd_sfcobs_uselist.txt
 cp ${SFCOBS_PROVIDER}/gsd_sfcobs_provider.txt gsd_sfcobs_provider.txt
 
 # Only need this file for single obs test
-bufrtable=${fixdir}/prepobs_prep.bufrtable
+bufrtable=${FIXgsi}/prepobs_prep.bufrtable
 cp $bufrtable ./prepobs_prep.bufrtable
 
 # Set some parameters for use by the GSI executable and to build the namelist
@@ -351,13 +332,11 @@ $gsi_namelist
 EOF
 
 ## satellite bias correction
-cp ${fixdir}/rap_satbias_starting_file.txt ./satbias_in
-cp ${fixdir}/rap_satbias_pc_starting_file.txt ./satbias_pc
+cp ${FIXgsi}/rap_satbias_starting_file.txt ./satbias_in
+cp ${FIXgsi}/rap_satbias_pc_starting_file.txt ./satbias_pc
 
 # Run GSI
 
-#export pgm=${RUN}_gsianl
-export pgm=${GSI:-"${RUN}_gsianl"}
 if [ -f errfile ] ; then
     rm -f errfile
 fi
@@ -372,9 +351,12 @@ postmsg "$jlogfile" "$msg"
 msg="***********************************************************"
 postmsg "$jlogfile" "$msg"
 
+# Save a copy of the GSI executable in the workdir
+${CP} ${EXECrtma3d}/${exefile_name_gsi}   ./rtma3d_gsi
+
 #runline="${MPIRUN} -np $np ${GSI} < gsiparm.anl > stdout 2>&1"
 #runline="${MPIRUN} -np $np ${pgm} < gsiparm.anl >> ${pgmout} 2>errfile"
- runline="${MPIRUN} -np $np ${pgm}"
+ runline="${MPIRUN} -np $np ./rtma3d_gsi"
 $runline < gsiparm.anl >> ${pgmout} 2>errfile
 export err=$? ; err_chk
 

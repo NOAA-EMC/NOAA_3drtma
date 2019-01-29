@@ -127,10 +127,8 @@ fi
       export FGSrtma3d_FNAME="${PROD_HEAD}.firstguess.nc"
     fi
 
-#   Set the path to the post executable
-    export UPP_EXEC=${EXECrtma3d:?} 
-    export UPPEXE=${UPPEXE:-"rtma3d_post"}
-    export pgm=${UPP_EXEC}/${UPPEXE}
+#   Set the name to the post executable
+    export exefile_name_post=${exefile_name_post:-"rtma3d_wrfpost"}
 
 #   Set and Check the option to select the control parm data set for UPP
     export UPP_CNTRL=${UPP_CNTRL:-1}    # 0: UPP default set for hrrr 
@@ -138,19 +136,17 @@ fi
                                         # 2: operational hrrr
 
 #   Set the path to the fix/ and parm/ files
-#   export FIX_ROOT=${FIXrtma3d:?} 
-    export fixdir=${FIX_GSI:-"${FIXrtma3d}/GSI-fix"}
-    export CRTMFIX=${FIX_CRTM:-"${FIXrtma3d}/CRTM-fix"}
-    export PARMwps=${PARMwps:-"${FIXrtma3d}/WPS"}
+    export FIXgsi=${FIXgsi:-"${FIXrtma3d}/gsi"}
+    export FIXcrtm=${FIXcrtm:-"${FIXrtma3d}/crtm"}
+    export FIXwps=${FIXwps:-"${FIXrtma3d}/wps"}
 
-    export PARMupp=${PARMupp:-"${PARMrtma3d}/UPP"}
-    export PARMwrf=${PARMwrf:-"${PARMrtma3d}/WRF"}
+    export PARMupp=${PARMupp:-"${PARMrtma3d}/upp"}
+    export PARMwrf=${PARMwrf:-"${PARMrtma3d}/wrf"}
 
-    export OBS_USELIST=${OBS_USELIST:-"${FIXrtma3d}/GSI-fix"}
-
-    export SFCOBS_USELIST=${SFCOBS_USELIST:-"${FIXrtma3d}/ObsUseList/gsd/mesonet_uselists"}
-    export AIRCRAFT_REJECT=${AIRCRAFT_REJECT:-"${FIXrtma3d}/ObsUseList/gsd/amdar_reject_lists"}
-    export SFCOBS_PROVIDER=${SFCOBS_PROVIDER:-"${FIXrtma3d}/GSI-fix"}
+    export OBS_USELIST=${OBS_USELIST:-"${FIXrtma3d}/gsi"}
+    export SFCOBS_USELIST=${SFCOBS_USELIST:-"${FIXrtma3d}/gsi"}
+    export AIRCRAFT_REJECT=${AIRCRAFT_REJECT:-"${FIXrtma3d}/gsi"}
+    export SFCOBS_PROVIDER=${SFCOBS_PROVIDER:-"${FIXrtma3d}/gsi"}
 
 ##########################################################
 

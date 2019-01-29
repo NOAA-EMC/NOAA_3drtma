@@ -18,6 +18,31 @@ branch_gsi_source=${branch_gsi_source:-"$branch_gsi_gsd"}
 
 #=========================================================================#
 
+#
+#--- detect the machine/platform
+#
+if [[ -d /dcom && -d /hwrf ]] ; then
+    . /usrx/local/Modules/3.2.10/init/sh
+    target=wcoss
+    . $MODULESHOME/init/sh
+elif [[ -d /cm ]] ; then
+    . $MODULESHOME/init/sh
+    conf_target=nco
+    target=cray
+elif [[ -d /ioddev_dell ]]; then
+    . $MODULESHOME/init/sh
+    conf_target=nco
+    target=dell
+elif [[ -d /scratch3 ]] ; then
+    . /apps/lmod/lmod/init/sh
+    target=theia
+else
+    echo "unknown target = $target"
+    exit 9
+fi
+echo " This machine is $target ."
+#===================================================================#
+
 echo "*==================================================================*"
 echo " this script is going to clone a local repository of ProdGSI "
 echo " to sub-directory of sorc/rtma_gsi.fd for RTMA3D system and "
@@ -93,19 +118,25 @@ git submodule update --init libsrc
 echo
 
 #
-#--- link modulefiles used in GSI
+#--- If no modulefile specified for 3DRTMA on this machine to build GSI,
+#--- then adopting the modulefile used in GSI.
 #
 MODULEFILES=${TOP_RTMA}/modulefiles
 SORCDIR_GSI=${TOP_SORC}/rtma_gsi.fd
-echo " --> linking GSI modulefiles to RTMA3D modulefiles (used for compilation of GSI)  "
-cd ${MODULEFILES}
-mfiles="modulefile.ProdGSI.wcoss modulefile.ProdGSI.theia modulefile.global_gsi.theia"
-for modfile in $mfiles
-do
-  echo " ----> ln -sf ${MODULEFILES}/$modfile ${SORCDIR_GSI}/modulefiles/$modfile "
-  ln -sf ${SORCDIR_GSI}/modulefiles/$modfile ${MODULEFILES}/$modfile 
-done
-
+if [ ! -f ${MODULEFILES}/${target}/build/modulefile.build.${target} ] ; then
+  echo " --> Using GSI modulefile as RTMA3D modulefile (used for building 3DRTMA)  "
+  mfiles="modulefile.ProdGSI.${target}"
+  for modfile in $mfiles
+  do
+    if [ ! -f ${SORCDIR_GSI}/modulefiles/${modfile} ] ; then
+      echo " ----> No GSI modulefile found for this ${target}. Abort! "
+      exit 1
+    else
+      cp -p ${SORCDIR_GSI}/modulefiles/${modfile}   ${MODULEFILES}/${target}/build/modulefile.build.${target}
+    fi
+  done
+fi
+  
 # set +x
 
 date

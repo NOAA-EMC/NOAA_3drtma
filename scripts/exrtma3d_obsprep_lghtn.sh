@@ -3,6 +3,12 @@
 
 set -x
 
+# make sure executable exists
+if [ ! -f ${EXECrtma3d}/${exefile_name_lightning} ] ; then
+  ${ECHO} "ERROR: lightning obs prcoessing executable '${EXECrtma3d}/${exefile_name_lightning}' does not exist!"
+  exit 1
+fi
+
 # working directory
 workdir=${DATA}
 cd ${workdir}
@@ -68,9 +74,9 @@ ymdh=${YYYYMMDDHH}
 hh=$HH
 
 # BUFR Table includingthe description for HREF
-${CP} -p ${FIX_GSI}/prepobs_prep_RAP.bufrtable   ./prepobs_prep.bufrtable
+${CP} -p ${FIXgsi}/prepobs_prep_RAP.bufrtable   ./prepobs_prep.bufrtable
 # WPS GEO_GRID Data
-${LN} -s ${PARMwps}/hrrr_geo_em.d01.nc           ./geo_em.d01.nc 
+${LN} -s ${FIXwps}/hrrr_geo_em.d01.nc           ./geo_em.d01.nc 
 
 #
 #--- 
@@ -78,9 +84,6 @@ ${LN} -s ${PARMwps}/hrrr_geo_em.d01.nc           ./geo_em.d01.nc
 if [ ${obsprep_lghtn} -eq 1 ] ; then
 
   ${ECHO} " processing NCEP BUFR Lightning Data"
-# copy the excutable file of processing RAP BUFR format lightning data
-  export  pgm=${LGHTN_EXE:-"process_Lightning_bufr"}
-  ${CP} ${LGHTN_EXEDIR}/${LGHTN_EXE}   ./${pgm}
 
 # find lightning bufr file
   if [ -s $COMINrap/rap.t${cyc}z.lghtng.tm00.bufr_d ] ; then
@@ -109,107 +112,6 @@ if [ ${obsprep_lghtn} -eq 1 ] ; then
  /
 EOF
 
-elif [ ${obsprep_lghtn} -eq 2 ] || [ ${obsprep_lghtn} -eq 3 ]; then
-# precossing ENTLN or Vaisala netcdf lightning data
-  if [ ${obsprep_lghtn} -eq 2 ] ; then
-    ${ECHO} " processing ENTLN NETCDF Lightning Data"
-#   copy the excutable file of processing ENTLN lightning data
-    export pgm=${LGHTN_EXE:-"process_Lightning_entln"}
-    ${CP} ${LGHTN_EXEDIR}/${LGHTN_EXE}   ./${pgm}
-#   LIGHTNING_FILE=${LIGHTNING_ROOT}/nldn/netcdf
-#   LIGHTNING_FILE=${LIGHTNING_ROOT}/gld360/netcdf
-    LIGHTNING_FILE=${COMINlightning}/entln.t${cyc}z
-  elif [ ${obsprep_lghtn} -eq 3 ] ; then
-    ${ECHO} " processing NETCDF(Vaisala) Lightning Data"
-#   copy the excutable file of processing NETCDF (Vailsala) lightning data
-    export pgm=${LGHTN_EXE:-"process_Lightning"}
-    ${CP} ${LGHTN_EXEDIR}/${LGHTN_EXE}   ./${pgm}
-#   LIGHTNING_FILE=${LIGHTNING_ROOT}/nldn/netcdf
-#   LIGHTNING_FILE=${LIGHTNING_ROOT}/gld360/netcdf
-    LIGHTNING_FILE=${COMINlightning}/vaisala.t${cyc}z
-  else
-    echo "Wrong set up for \$obsprep_lghtn. Exit"
-    err_exit 1
-  fi
-
-# Link to the NLDN data
-  filenum=0
-
-  if [ -r "${LIGHTNING_FILE}/${YYJJJHH}050005r" ]; then
-    ((filenum += 1 ))
-    ${LN} -sf ${LIGHTNING_FILE}/${YYJJJHH}050005r ./NLDN_lightning_${filenum}
-  else
-     ${ECHO} " ${LIGHTNING_FILE}/${YYJJJHH}050005r does not exist"
-  fi
-  if [ -r "${LIGHTNING_FILE}/${YYJJJHH}000005r" ]; then
-    ((filenum += 1 ))
-    ${LN} -sf ${LIGHTNING_FILE}/${YYJJJHH}000005r ./NLDN_lightning_${filenum}
-  else
-     ${ECHO} " ${LIGHTNING_FILE}/${YYJJJHH}000005r does not exist"
-  fi
-  if [ -r "${LIGHTNING_FILE}/${PREYYJJJHH}550005r" ]; then
-    ((filenum += 1 ))
-    ${LN} -sf ${LIGHTNING_FILE}/${PREYYJJJHH}550005r ./NLDN_lightning_${filenum}
-  else
-     ${ECHO} " ${LIGHTNING_FILE}/${PREYYJJJHH}550005r does not exist"
-  fi
-  if [ -r "${LIGHTNING_FILE}/${PREYYJJJHH}500005r" ]; then
-    ((filenum += 1 ))
-    ls ${LIGHTNING_FILE}/${PREYYJJJHH}500005r
-    ${LN} -sf ${LIGHTNING_FILE}/${PREYYJJJHH}500005r ./NLDN_lightning_${filenum}
-  else
-     ${ECHO} " ${LIGHTNING_FILE}/${PREYYJJJHH}500005r does not exist"
-  fi
-# wider time window of lightning obs data
-  if [ ! 0 ] ; then
-    if [ -r "${LIGHTNING_FILE}/${PREYYJJJHH}450005r" ]; then
-    ((filenum += 1 ))
-    ${LN} -sf ${LIGHTNING_FILE}/${PREYYJJJHH}450005r ./NLDN_lightning_${filenum}
-    else
-     ${ECHO} " ${LIGHTNING_FILE}/${PREYYJJJHH}450005r does not exist"
-    fi
-    if [ -r "${LIGHTNING_FILE}/${PREYYJJJHH}400005r" ]; then
-    ((filenum += 1 ))
-    ${LN} -sf ${LIGHTNING_FILE}/${PREYYJJJHH}400005r ./NLDN_lightning_${filenum}
-    else
-     ${ECHO} " ${LIGHTNING_FILE}/${PREYYJJJHH}400005r does not exist"
-    fi
-    if [ -r "${LIGHTNING_FILE}/${PREYYJJJHH}350005r" ]; then
-      ((filenum += 1 ))
-      ${LN} -sf ${LIGHTNING_FILE}/${PREYYJJJHH}350005r ./NLDN_lightning_${filenum}
-    else
-      ${ECHO} " ${LIGHTNING_FILE}/${PREYYJJJHH}350005r does not exist"
-    fi
-  fi
-
-  echo "found GLD360 files: ${filenum}"
-#
-# Alaska lightning data
-#
-  ifalaska=false
-  if [ -r "${COMINlghtn}/alaska/ascii/${YYYYMMDDHH}0100" ]; then
-    ${LN} -sf ${COMINlghtn}/alaska/ascii/${YYYYMMDDHH}0100 ./ALSKA_lightning
-    ifalaska=true
-  else
-    if  [ -r "${COMINlghtn}/alaska/ascii/${YYYYMMDDHH}0101" ]; then
-      ${LN} -sf ${COMINlghtn}/alaska/ascii/${YYYYMMDDHH}0101 ./ALSKA_lightning
-      ifalaska=true
-    fi
-  fi
-
-  rm -f ./filelist_lightning
-  ls    ./NLDN_lightning_* > ./filelist_lightning
-
-# Build the namelist on-the-fly
-  rm -f ./lightning.namelist
-  cat << EOF > lightning.namelist
- &SETUP
-   analysis_time = ${YYYYMMDDHH},
-   NLDN_filenum  = ${filenum},
-   IfAlaska    = ${ifalaska},
- /
-EOF
-
 fi
 
 # Run process lightning
@@ -225,17 +127,16 @@ msg="***********************************************************"
 postmsg "$jlogfile" "$msg"
 if [ $obsprep_lghtn -eq 1 ] ; then  
   msg="  begin pre-processing NCEP BUFR lightning data"
-elif [ $obsprep_lghtn -eq 2 ] ; then  
-  msg="  begin pre-processing ENTLN netcdf lightning data"
-elif [ $obsprep_lghtn -eq 3 ] ; then  
-  msg="  begin pre-processing netcdf (Vaisala) lightning data"
 fi
 postmsg "$jlogfile" "$msg"
 msg="***********************************************************"
 postmsg "$jlogfile" "$msg"
 
 # Run Processing lightning
-runline="${MPIRUN}  -np ${np}  ./${pgm}"
+# copy the excutable file of processing RAP BUFR format lightning data
+${CP} ${EXECrtma3d}/${exefile_name_lightning}  ./rtma3d_process_lightning
+
+runline="${MPIRUN}  -np ${np}  ./rtma3d_process_lightning"
 if [ ${obsprep_lghtn} -eq 1 ] ; then
   $runline  > ${pgmout} 2>errfile
 else

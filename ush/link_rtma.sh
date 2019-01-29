@@ -60,64 +60,6 @@ fi
 
 USH_DIR=${TOP_RTMA}/ush
 
-TOP_FIX=${TOP_RTMA}/fix
-if [ ! -d ${TOP_FIX} ] ; then mkdir -p ${TOP_FIX} ; fi
-
-#
-#--- link fix directories
-#
-cd ${TOP_FIX}
-if [ $target = theia ]; then
-  echo " linking fixed data on $target for GSI analysis"
-  GSI_fix="/scratch4/NCEPDEV/meso/save/Gang.Zhao/FixData/GSI-fix_rtma3d_emc_test"
-  CRTM_fix="/scratch4/NCEPDEV/meso/save/Gang.Zhao/FixData/CRTM-fix_rtma3d"
-  ObsUseList="/scratch4/NCEPDEV/meso/save/Gang.Zhao/FixData/ObsUseList_rtma3d"
-  WPS="/scratch4/NCEPDEV/meso/save/Gang.Zhao/FixData/WPS"
-
-  echo " ln -sf ${GSI_fix}        ./GSI-fix"
-  ln -sf ${GSI_fix}        ./GSI-fix
-  echo " ln -sf ${CRTM_fix}       ./CRTM-fix"
-  ln -sf ${CRTM_fix}       ./CRTM-fix
-  echo " ln -sf ${ObsUseList}     ./ObsUseList"
-  ln -sf ${ObsUseList}     ./ObsUseList
-  echo " ln -sf ${WPS}            ./WPS"
-  ln -sf ${WPS}            ./WPS
-
-else
-  echo " the fixed data directories have not set up yet for machine $target."
-  echo " Abort linking task."
-  exit 9
-fi
-echo
-ls -ltr $TOP_FIX
-echo
-echo
-
-TOP_PARM=${TOP_RTMA}/parm
-if [ ! -d ${TOP_PARM} ] ; then mkdir -p ${TOP_PARM} ; fi
-cd ${TOP_PARM}
-if [ $target = theia ]; then
-  echo "linking parameters data (parm/) on $target for UPP (uni-post)"
-  UPP="/scratch4/NCEPDEV/meso/save/Gang.Zhao/FixData/static_gsd_rtma3d_gge/UPP"
-# UPP="${TOP_RTMA}/sorc/rtma_post.fd/parm"
-  WRF="/scratch4/NCEPDEV/meso/save/Gang.Zhao/FixData/static_gsd_rtma3d_gge/WRF"
-  VERIF="/scratch4/NCEPDEV/fv3-cam/save/Edward.Colon/FixData/VERIF-fix"
-  rm -f ./UPP ./WRF ./VERIF
-  echo " ln -sf ${UPP}        ./UPP"
-  ln -sf ${UPP}             ./UPP
-  echo " ln -sf ${WRF}        ./WRF"
-  ln -sf ${WRF}             ./WRF
-  echo " ln -sf ${VERIF}      ./VERIF"
-  ln -sf ${VERIF}            ./VERIF
-  
-
-else
-  echo " the parm directories have not set up yet for machine $target."
-  echo " Abort linking task."
-  exit 9
-fi
-echo
-ls -ltr $TOP_PARM
 echo
 echo
 
@@ -155,15 +97,6 @@ done
 echo 
 echo " ====> list out te executable files in exec/"
 ls -ltr $EXEC
-
-#
-#--- set up the log directory for rocoto workflow running job
-#
-WORKFLOW_DIR=${TOP_RTMA}/workflow
-cd $WORKFLOW_DIR
-mkdir -p logs
-mkdir -p logs/jlogfiles
-mkdir -p logs/pgmout
 
 #set +x
 

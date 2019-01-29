@@ -96,16 +96,21 @@ fi
 #
 #--- link modulefiles used in POST
 #
-# MODULEFILES=${TOP_RTMA}/modulefiles
-# SORCDIR_POST=${TOP_SORC}/rtma_post.fd
-# echo " --> linking POST modulefiles to RTMA3D modulefiles (used for compilation of POST)  "
-# cd ${MODULEFILES}
-# mfiles="modulefile.POST.wcoss modulefile.POST.theia modulefile.global_post.theia"
-# for modfile in $mfiles
-# do
-#   echo " ----> ln -sf ${MODULEFILES}/$modfile ${SORCDIR_POST}/modulefiles/$modfile "
-#   ln -sf ${SORCDIR_POST}/modulefiles/$modfile ${MODULEFILES}/$modfile 
-# done
+MODULEFILES=${TOP_RTMA}/modulefiles
+SORCDIR_POST=${TOP_SORC}/rtma_post.fd
+if [ ! -f ${MODULEFILES}/${target}/build/modulefile.build.post.${target} ] ; then
+  echo " --> Using UPP modulefile to building post-processing code of 3DRTMA)  "
+  mfiles="v8.0.0-${target}"
+  for modfile in $mfiles
+  do
+    if [ ! -f ${SORCDIR_POST}/modulefiles/post/${modfile} ] ; then
+      echo " ----> No UPP modulefile found for this ${target}. Abort! "
+      exit 1
+    else
+      cp -p ${SORCDIR_POST}/modulefiles/post/${modfile}   ${MODULEFILES}/${target}/build/modulefile.build.post.${target}
+    fi
+  done
+fi
 
 # set +x
 

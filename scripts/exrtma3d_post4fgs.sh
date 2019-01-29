@@ -54,14 +54,6 @@ time_run=${time_str}
 HH_fcstinit=`${ECHO} ${FCST_INI_TIME} | cut -c9-10 `
 #------------------------------------------------------------------#
 
-CRTMFIX=${CRTMFIX:-"${FIXrtma3d}/CRTM-fix"}
-FIXCRTM=$CRTMFIX
-CRTM=$CRTMFIX
-
-
-export pgm=${pgm:-"${EXECrtma3d}/rtma3d_post"}
-export POST=${pgm}
-
 export DATAHOME=$DATA
 export MODEL="RAP"
 
@@ -75,8 +67,8 @@ export PARMwrf=${WRFPARM:-"${PARMrtma3d}/WRF"}
 ##########################################################################
 
 # Check to make sure the post executable exists
-if [ ! -x ${POST} ]; then
-  ${ECHO} "ERROR: ${POST} does not exist, or is not executable"
+if [ ! -x ${EXECrtma3d}/${exefile_name_post} ]; then
+  ${ECHO} "ERROR: ${EXECrtma3d}/${exefile_name_post} does not exist, or is not executable"
   exit 1
 fi
 
@@ -203,7 +195,7 @@ case ${UPP_CNTRL} in
 esac
 
 ################################################################################
-# ln -s ${CRTM}/EmisCoeff/Big_Endian/Nalli.EK-PDF.W_W-RefInd.EmisCoeff.bin EmisCoeff.bin
+# ln -s ${FIXcrtm}/EmisCoeff/Big_Endian/Nalli.EK-PDF.W_W-RefInd.EmisCoeff.bin EmisCoeff.bin
 ################################################################################
 
 for what in "amsre_aqua" "imgr_g11" "imgr_g12" "imgr_g13" \
@@ -211,15 +203,15 @@ for what in "amsre_aqua" "imgr_g11" "imgr_g12" "imgr_g13" \
     "ssmi_f13" "ssmi_f14" "ssmi_f15" "ssmis_f16" \
     "ssmis_f17" "ssmis_f18" "ssmis_f19" "ssmis_f20" \
     "tmi_trmm" "v.seviri_m10" "imgr_insat3d" ; do
-    ln -s "$FIXCRTM/$what.TauCoeff.bin" .
-    ln -s "$FIXCRTM/$what.SpcCoeff.bin" .
+    ln -s "$FIXcrtm/$what.TauCoeff.bin" .
+    ln -s "$FIXcrtm/$what.SpcCoeff.bin" .
 done
 
 for what in 'Aerosol' 'Cloud' ; do
-    ln -s "$FIXCRTM/${what}Coeff.bin" .
+    ln -s "$FIXcrtm/${what}Coeff.bin" .
 done
 
-for what in  $FIXCRTM/*Emis* ; do
+for what in  $FIXcrtm/*Emis* ; do
     ln -s $what .
 done
 
@@ -236,18 +228,22 @@ fi
 startmsg
 msg="***********************************************************"
 postmsg "$jlogfile" "$msg"
-msg="  begin Uni-Post step for 3DRTMA GSI Analysis"
+msg="  begin Uni-Post step for 3DRTMA First Guess"
 postmsg "$jlogfile" "$msg"
 msg="***********************************************************"
 postmsg "$jlogfile" "$msg"
 
+
+#copy executable to running directory
+${CP} ${EXECrtma3d}/${exefile_name_post} ./rtma3d_wrfpost
+
 #runline="${MPIRUN} -np $np ${pgm}< itag"
- runline="${MPIRUN} -np $np ${pgm}"
+ runline="${MPIRUN} -np $np ./rtma3d_wrfpost"
 $runline < itag > ${pgmout} 2>errfile
 export err=$? ; err_chk
 
 if [ ${err} -ne 0 ]; then
-  ${ECHO} "${pgm} crashed!  Exit status=${err}"
+  ${ECHO} "rtma3d_wrfpost crashed!  Exit status=${err}"
   exit ${err}
 fi
 

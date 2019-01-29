@@ -19,6 +19,8 @@ branch_gsi_source=${branch_gsi_source:-"$branch_gsi_gsd"}
 build_corelibs="OFF"   # OFF: using installed corelibs (bacio, bufr, etc.)
 # build_type="DEBUG"   # option: DEBUG, or PRODUCTION(default)
 
+exefile_name_gsi="rtma3d_gsi"
+
 #=========================================================================#
 
 echo "*==================================================================*"
@@ -87,6 +89,7 @@ then
 fi
 
 USH_DIR=${TOP_RTMA}/ush
+MODULEFILES_DIR=${TOP_RTMA}/modulefiles
 
 cd $TOP_RTMA
 EXEC=${TOP_RTMA}/exec
@@ -129,18 +132,24 @@ if [ $? -ne 0 ] ; then
 fi
 
 #==================#
-# load modules
-modules_dir=${SORCDIR_GSI}/modulefiles
+# load modules (using module file under modulefiles/${target}/build)
+#
+
+# modules_dir=${SORCDIR_GSI}/modulefiles
+# modules_fname=modulefile.ProdGSI.$target
+modules_dir=${MODULEFILES_DIR}/${target}/build
+modules_fname=modulefile.build.${target}
+
 if [ $target = wcoss -o $target = cray ]; then
     module purge
-    module load $modules_dir/modulefile.ProdGSI.$target
+    module load $modules_dir/${modules_fname}
 elif [ $target = theia ]; then
     module purge
-    source $modules_dir/modulefile.ProdGSI.$target
+    source $modules_dir/${modules_fname}
     module list
 elif [ $target = dell ]; then
     module purge
-    source $modules_dir/modulefile.ProdGSI.$target
+    source $modules_dir/${modules_fname}
     export NETCDF_INCLUDE=-I/usrx/local/prod/packages/ips/18.0.1/netcdf/4.5.0/include
     export NETCDF_CFLAGS=-I/usrx/local/prod/packages/ips/18.0.1/netcdf/4.5.0/include
     export NETCDF_LDFLAGS_CXX="-L/usrx/local/prod/packages/ips/18.0.1/netcdf/4.5.0/lib -lnetcdf -lnetcdf_c++"
@@ -182,9 +191,21 @@ make VERBOSE=1 -j 8 >& ./build_log/log.make.${DIRNAME_GSI}.${BUILD_TYPE}.txt
 
 if [ $? -eq 0 ] ; then
   echo " GSI code and utility codes were built successfully."
-  echo " cp -p ${BUILD_GSI}/bin/gsi.x   ${EXEC}/rtma3d_gsi "
-  cp -p ${BUILD_GSI}/bin/gsi.x   ${EXEC}/rtma3d_gsi
-  ls -l ${EXEC}/rtma3d_gsi
+
+  echo " cp -p ${BUILD_GSI}/bin/gsi.x   ${EXEC}/${exefile_name_gsi} "
+  cp -p ${BUILD_GSI}/bin/gsi.x   ${EXEC}/${exefile_name_gsi}
+  cp -p ${BUILD_GSI}/bin/ndate.x ${EXEC}/ndate.x
+  ls -l ${EXEC}/${exefile_name_gsi}
+
+  cd ${BUILD_GSI}/bin
+  exe_fnames=`ls *`
+  cd ${BUILD_GSI}
+  for fn in $exe_fnames
+  do
+    echo " cp -p  ${BUILD_GSI}/bin/$fn  ${EXEC}/$fn "
+    cp -p  ${BUILD_GSI}/bin/$fn  ${EXEC}/$fn
+  done
+
 else
   echo " ================ WARNING =============== " 
   echo " Compilation of GSI code was failed."

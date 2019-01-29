@@ -26,17 +26,14 @@
     module load met/7.0
 
 #   module load xxdiff
-#   module load rocoto
+    module load rocoto
 #   module load anaconda
 #   module load imagemagick
 #   module load gempak
 #   module load udunits
 #   module load cdo
-#   module load grads
-#   export GADDIR=/scratch4/NCEPDEV/meso/save/Ting.Lei/grads_scripts
-#   export PATH=${PATH}:$GADDIR
+    module load grads
  
-#   export CNVGRIB=${CNVGRIB:-/apps/cnvgrib/1.4.0/bin/cnvgrib}
     export CNVGRIB=${CNVGRIB:-"cnvgrib"}
     export WGRIB2=${WGRIB2:-"wgrib2"}
     export MPIRUN=${MPIRUN:-"mpirun"}

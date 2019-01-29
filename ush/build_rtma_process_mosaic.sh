@@ -8,6 +8,8 @@ date
 
 dirname_source="rtma_process_mosaic.fd"
 
+exefile_name_mosaic="rtma3d_process_mosaic"
+
 #=========================================================================#
 
 echo "*==================================================================*"
@@ -68,6 +70,7 @@ then
 fi
 
 USH_DIR=${TOP_RTMA}/ush
+MODULEFILES_DIR=${TOP_RTMA}/modulefiles
 
 cd $TOP_RTMA
 EXEC=${TOP_RTMA}/exec
@@ -104,18 +107,22 @@ fi
 #
 
 #==================#
-# load modules
-modules_dir=${TOP_RTMA}/modulefiles
+# load modules (using module file under modulefiles/${target}/build)
+#
+
+modules_dir=${MODULEFILES_DIR}/${target}/build
+modules_fname=modulefile.build.${target}
+
 if [ $target = wcoss -o $target = cray ]; then
     module purge
-    module load $modules_dir/modulefile.ProdGSI.$target
+    module load $modules_dir/${modules_fname}
 elif [ $target = theia ]; then
     module purge
-    source $modules_dir/modulefile.ProdGSI.$target
+    source $modules_dir/${modules_fname}
     module list
 elif [ $target = dell ]; then
     module purge
-    source $modules_dir/modulefile.ProdGSI.$target
+    source $modules_dir/${modules_fname}
     export NETCDF_INCLUDE=-I/usrx/local/prod/packages/ips/18.0.1/netcdf/4.5.0/include
     export NETCDF_CFLAGS=-I/usrx/local/prod/packages/ips/18.0.1/netcdf/4.5.0/include
     export NETCDF_LDFLAGS_CXX="-L/usrx/local/prod/packages/ips/18.0.1/netcdf/4.5.0/lib -lnetcdf -lnetcdf_c++"
@@ -147,9 +154,11 @@ make -f makefile_${target}  >& ./log.make.process_NSSL_mosaic
 
 if [ $? -eq 0 ] ; then
   echo " code was built successfully."
-  echo " cp -p ${BUILD_DIR}/process_NSSL_mosaic.exe   ${EXEC}/process_NSSL_mosaic.exe "
-  cp -p ${BUILD_DIR}/process_NSSL_mosaic.exe   ${EXEC}/process_NSSL_mosaic.exe
-  ls -l ${EXEC}/process_NSSL_mosaic.exe
+
+  echo " cp -p ${BUILD_DIR}/process_NSSL_mosaic.exe   ${EXEC}/${exefile_name_mosaic} "
+  cp -p ${BUILD_DIR}/process_NSSL_mosaic.exe   ${EXEC}/${exefile_name_mosaic}
+  ls -l ${EXEC}/${exefile_name_mosaic}
+
 else
   echo " ================ WARNING =============== " 
   echo " Compilation of process_NSSL_mosaic code was failed."

@@ -3,6 +3,12 @@
 
 set -x
 
+# make sure executable exists
+if [ ! -f ${EXECrtma3d}/${exefile_name_cloud} ] ; then
+  ${ECHO} "ERROR: NASA cloud obs prcoessing executable '${EXECrtma3d}/${exefile_name_cloud}' does not exist!"
+  exit 1
+fi
+
 # working directory
 workdir=${DATA}
 cd ${workdir}
@@ -50,16 +56,13 @@ ymdh=${YYYYMMDDHH}
 hh=$HH
 
 # BUFR Table includingthe description for HREF
-${CP} -p ${FIX_GSI}/prepobs_prep_RAP.bufrtable   ./prepobs_prep.bufrtable
+${CP} -p ${FIXgsi}/prepobs_prep_RAP.bufrtable   ./prepobs_prep.bufrtable
 # WPS GEO_GRID Data
-${LN} -s ${PARMwps}/hrrr_geo_em.d01.nc           ./geo_em.d01.nc 
+${LN} -s ${FIXwps}/hrrr_geo_em.d01.nc           ./geo_em.d01.nc 
 
 #
 #--- 
 #
-# copy the excutable file of processing NASA LaRC Cloud data
-  export pgm=${NASACLOUD_EXE:-"rap_process_cloud"}
-  ${CP} ${NASACLOUD_EXEDIR}/${NASACLOUD_EXE}   ./${pgm}
 
 # find rap bufr lgycld data file and link to the bufr file
   if [ -s $COMINrap/rap.t${cyc}z.lgycld.tm00.bufr_d ] ; then
@@ -89,7 +92,10 @@ ${LN} -s ${PARMwps}/hrrr_geo_em.d01.nc           ./geo_em.d01.nc
   postmsg "$jlogfile" "$msg"
 
 # Run Processing lightning
-  runline="${MPIRUN}  -np ${np}  ./${pgm}"
+# copy the excutable file of processing NASA LaRC Cloud data
+  ${CP} ${EXECrtma3d}/${exefile_name_cloud}   ./rtma3d_process_cloud
+
+  runline="${MPIRUN}  -np ${np}  ./rtma3d_process_cloud"
   $runline >> ${pgmout} 2>errfile
   export err=$?; err_chk
 

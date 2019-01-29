@@ -11,7 +11,7 @@ COMMAND=$1
 # load modulefile and set up the environment for job runnning
 #############################################################
 MODULEFILES=${MODULEFILES:-${HOMErtma3d}/modulefiles}
-target=${ENV_MODULES:-"ProdGSI"}
+# target=${ENV_MODULES:-"ProdGSI"}
 
 if [ "${machine}" = "theia" ] ; then
 
@@ -20,20 +20,21 @@ if [ "${machine}" = "theia" ] ; then
   module purge
 
 # load modules used when compiling the code
-  modulefile=${modulefile:-"${MODULEFILES}/modulefile.${target}.${machine}"}
+  modulefile=${modulefile:-"${MODULEFILES}/${machine}/build/modulefile.build.${machine}"}
   source $modulefile
 # load extra modules to run the job
-  modulefile_run=${modulefile_run:-"${MODULEFILES}/modulefile.RUN.${machine}"}
+  modulefile_run=${modulefile_run:-"${MODULEFILES}/${machine}/run/modulefile.run.${machine}"}
   source $modulefile_run
+#
   module list
 else
   echo "modulefile has not set up for this unknow machine. Job abort!"
   exit 1
 fi
 
-##########################################################
-# obtain unique process id (pid) and make temp directories
-##########################################################
+###########################################################################
+# obtain unique process id (pid) and define the name of  temp directories
+###########################################################################
 if [ "${machine}" = "theia" ] ; then    ### PBS job Scheduler
   export job=${job:-"${PBS_JOBNAME}"}    # job is defined as job name
   export jid=`echo ${PBS_JOBID} | cut -f1 -d.`  # removal of tailing sub-server string
