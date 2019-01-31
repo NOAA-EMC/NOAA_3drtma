@@ -4,7 +4,6 @@
 # ignore building directory ('build/'), directory of executable files ('exec/','bin/')
 **/exec/
 **/bin/
-**/build*/
 **/build_log/
 sorc/**/log.*
 sorc/**/log_*

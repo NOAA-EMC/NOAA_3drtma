@@ -55,9 +55,9 @@ module load bacio/v2.0.2
 module load crtm/v2.2.3
 
 # Loading contrib/da modules (some special/updated tools, esp. for JEDI and DA)
-module use -a /contrib/da/modulefiles	
+# module use -a /contrib/da/modulefiles	
 
-module load cmake
+# module load cmake
 
 #
 # Section 2: loading modules used to run the specific tools/utilities
