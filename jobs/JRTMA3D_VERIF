@@ -140,7 +140,7 @@ export COMOUTpost_rtma3d=${COMOUTpost_rtma3d:-${COMOUT}/postprd.${cycle}}
 
 # Execute the script.
 
-${exSCR_VERIF:-$HOMErtma3d/scripts/${RUN}/rtma3d_verif.sh}
+${exSCR_VERIF:-$HOMErtma3d/scripts/${RUN}/rtma3d_verif.ksh}
 
 export err=$?; err_chk
 

@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/ksh
 
 # --- for debug --- #
 date
@@ -133,7 +133,7 @@ fi
 ######################
 # Execute the script.
 ######################
-${exSCR_OBSPREP_CLOUD:-$HOMErtma3d/scripts/${RUN}/ex${RUN}_cloud.sh}
+${exSCR_OBSPREP_CLOUD:-$HOMErtma3d/scripts/${RUN}/ex${RUN}_cloud.ksh}
 export err=$?; err_chk
 
 msg="$0 of $job completed normally"

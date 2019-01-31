@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/ksh
 
 # --- for debug --- #
 date
@@ -153,7 +153,7 @@ fi
 ######################
 # Execute the script.
 ######################
-${exSCR_POST:-$HOMErtma3d/scripts/${RUN}/ex${RUN}_post.sh}
+${exSCR_POST:-$HOMErtma3d/scripts/${RUN}/ex${RUN}_post.ksh}
 export err=$?; err_chk
 
 msg="$0 of $job completed normally"

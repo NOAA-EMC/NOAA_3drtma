@@ -1,16 +1,75 @@
 #   load modules for running gsi anl
+###########################################################
+#                                                         #
+# This module file for running 3DRTMA package             #
+# is basically including two parts:                       #
+# 1. first part is same as the module file for building,  #
+#    so these same modules used in compilation will be    #
+#    used to support running the code.                    #
+#    (see ../build/modulefile.build.machine)              #
+#                                                         #
+# 2. second part is to load specific modules for running  #
+#    specific tools/utilities, like wgrib, MET, etc.      #
+#                                                         #
+###########################################################
+
 #
+# Section 1: loading modules used in building RTMA package
 #
+#%Module######################################################################
+##                                                       Russ.Treadon@noaa.gov
+##                                                           NOAA/NWS/NCEP/EMC
+## GDAS_ENKF v6.2.3
+##_____________________________________________________
+#set ver v6.2.3
 
-    echo " modules used for compiling the code (like the following) should be already loaded. "
-    echo " modules : compiler, mpi, netcdf, pnetcdf, hdf, etc.   "
+set COMP ifort
+set COMP_MP mpfort
+set COMP_MPI mpiifort
 
-#   add module path for prod_util and esmf libs
-    module use -a /scratch4/NCEPDEV/nems/noscrub/emc.nemspara/soft/modulefiles
-    module load contrib
-#   module use -a /contrib/modulefiles	# if module load contrib, then do not need to do "module use /contrib/modulefiles "
+set C_COMP icc
+set C_COMP_MP mpcc
 
+# Known conflicts
+
+# Loading Intel Compiler Suite
+module load intel/15.6.233
+
+# Loading impi
+module load impi/5.1.2.150
+
+# Loading netcdf and hdf5
+module load hdf5/1.8.14
+module load netcdf/4.3.0
+
+# Loading nceplibs modules
+module use -a /scratch3/NCEPDEV/nwprod/lib/modulefiles
+module load bufr/v10.2.5
+module load nemsio/v2.2.1
+module load sfcio/v1.0.0
+module load sigio/v2.0.1
+module load sp/v2.0.2
+module load w3nco/v2.0.6
+module load w3emc/v2.3.0
+module load bacio/v2.0.2
+module load crtm/v2.2.3
+
+# Loading contrib/da modules (some special/updated tools, esp. for JEDI and DA)
+module use -a /contrib/da/modulefiles	
+
+module load cmake
+
+#
+# Section 2: loading modules used to run the specific tools/utilities
+#
+# Loading production utilities
+#   adding module path for prod_util (e.g., ndate)  and esmf libs
+    module use /scratch4/NCEPDEV/nems/noscrub/emc.nemspara/soft/modulefiles
     module load prod_util
+
+# Loading contrib modules (e.g., anaconda, cmake, met for verification, etc.)
+    module use -a /contrib/modulefiles	
+#   module load contrib     # not use this line if use the command just above
 
     module load nco
     module load hpss
@@ -20,21 +79,17 @@
     module load wgrib
     module load wgrib2
 
-    module load cairo
+#   module load cairo
     module load ncl
-    module load ncview
+#   module load ncview
     module load met/7.0
 
-#   module load xxdiff
     module load rocoto
 #   module load anaconda
-#   module load imagemagick
-#   module load gempak
-#   module load udunits
-#   module load cdo
     module load grads
  
     export CNVGRIB=${CNVGRIB:-"cnvgrib"}
     export WGRIB2=${WGRIB2:-"wgrib2"}
     export MPIRUN=${MPIRUN:-"mpirun"}
-    echo "done loading modules"
+
+echo "done loading modules"

@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/ksh
 
 # --- for debug --- #
 date
@@ -138,7 +138,7 @@ fi
 ######################
 # Execute the script.
 ######################
-${exSCR_OBSPREP_LGHTN:-$HOMErtma3d/scripts/${RUN}/ex${RUN}_obsprep_lghtn.sh}
+${exSCR_OBSPREP_LGHTN:-$HOMErtma3d/scripts/${RUN}/ex${RUN}_obsprep_lghtn.ksh}
 export err=$?; err_chk
 
 msg="$0 of $job completed normally"

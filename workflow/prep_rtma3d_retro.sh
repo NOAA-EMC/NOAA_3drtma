@@ -318,32 +318,32 @@ cat > ${NWROOT}/workflow/${RUN}_${expname}.xml <<EOF
 
 <!-- ex-shell and J-job script name -->
 <!ENTITY JJOB_FETCHHPSS  "&JJOB_DIR;/J&CAP_RUN;_FETCHHPSS">
-<!ENTITY exSCR_FETCHHPSS "&SCRIPT_DIR;/ex&RUN;_fetchhpss.sh">
+<!ENTITY exSCR_FETCHHPSS "&SCRIPT_DIR;/ex&RUN;_fetchhpss.ksh">
 <!ENTITY JJOB_OBSPREP_RADAR    "&JJOB_DIR;/J&CAP_RUN;_OBSPREP_RADAR">
-<!ENTITY exSCR_OBSPREP_RADAR   "&SCRIPT_DIR;/ex&RUN;_obsprep_radar.sh">
+<!ENTITY exSCR_OBSPREP_RADAR   "&SCRIPT_DIR;/ex&RUN;_obsprep_radar.ksh">
 <!ENTITY exefile_name_mosaic   "${exefile_name_mosaic}">
 <!ENTITY JJOB_OBSPREP_LGHTN    "&JJOB_DIR;/J&CAP_RUN;_OBSPREP_LGHTN">
-<!ENTITY exSCR_OBSPREP_LGHTN   "&SCRIPT_DIR;/ex&RUN;_obsprep_lghtn.sh">
+<!ENTITY exSCR_OBSPREP_LGHTN   "&SCRIPT_DIR;/ex&RUN;_obsprep_lghtn.ksh">
 <!ENTITY exefile_name_lighting "${exefile_name_lightning}">
 <!ENTITY JJOB_OBSPREP_CLOUD    "&JJOB_DIR;/J&CAP_RUN;_OBSPREP_CLOUD">
-<!ENTITY exSCR_OBSPREP_CLOUD   "&SCRIPT_DIR;/ex&RUN;_obsprep_cloud.sh">
+<!ENTITY exSCR_OBSPREP_CLOUD   "&SCRIPT_DIR;/ex&RUN;_obsprep_cloud.ksh">
 <!ENTITY exefile_name_cloud    "${exefile_name_cloud}">
 <!ENTITY JJOB_PREPOBS    "&JJOB_DIR;/J&CAP_RUN;_PREPOBS">
-<!ENTITY exSCR_PREPOBS   "&SCRIPT_DIR;/ex&RUN;_prepobs.sh">
+<!ENTITY exSCR_PREPOBS   "&SCRIPT_DIR;/ex&RUN;_prepobs.ksh">
 <!ENTITY JJOB_PREPFGS    "&JJOB_DIR;/J&CAP_RUN;_PREPFGS">
-<!ENTITY exSCR_PREPFGS   "&SCRIPT_DIR;/ex&RUN;_prepfgs.sh">
+<!ENTITY exSCR_PREPFGS   "&SCRIPT_DIR;/ex&RUN;_prepfgs.ksh">
 <!ENTITY JJOB_GSIANL	 "&JJOB_DIR;/J&CAP_RUN;_GSIANL">
-<!ENTITY exSCR_GSIANL	 "&SCRIPT_DIR;/ex&RUN;_gsianl.sh">
+<!ENTITY exSCR_GSIANL	 "&SCRIPT_DIR;/ex&RUN;_gsianl.ksh">
 <!ENTITY exefile_name_gsi      "${exefile_name_gsi}">
 <!ENTITY JJOB_POST  	 "&JJOB_DIR;/J&CAP_RUN;_POST">
-<!ENTITY exSCR_POST      "&SCRIPT_DIR;/ex&RUN;_post.sh">
+<!ENTITY exSCR_POST      "&SCRIPT_DIR;/ex&RUN;_post.ksh">
 <!ENTITY exefile_name_post     "${exefile_name_post}">
 <!ENTITY JJOB_POST4FGS   "&JJOB_DIR;/J&CAP_RUN;_POST4FGS">
-<!ENTITY exSCR_POST4FGS  "&SCRIPT_DIR;/ex&RUN;_post4fgs.sh">
+<!ENTITY exSCR_POST4FGS  "&SCRIPT_DIR;/ex&RUN;_post4fgs.ksh">
 <!ENTITY JJOB_PLOTGRADS  "&JJOB_DIR;/J&CAP_RUN;_PLOTGRADS">
-<!ENTITY exSCR_PLOTGRADS "&SCRIPT_DIR;/ex&RUN;_plotgrads.sh">
+<!ENTITY exSCR_PLOTGRADS "&SCRIPT_DIR;/ex&RUN;_plotgrads.ksh">
 <!ENTITY JJOB_VERIF     "&JJOB_DIR;/J&CAP_RUN;_VERIF">
-<!ENTITY exSCR_VERIF    "&SCRIPT_DIR;/ex&RUN;_verif.sh">
+<!ENTITY exSCR_VERIF    "&SCRIPT_DIR;/ex&RUN;_verif.ksh">
 <!ENTITY exefile_name_verif    "${exefile_name_verif}">
 
 <!-- Resources -->
@@ -1027,7 +1027,7 @@ cat > ${NWROOT}/workflow/${RUN}_${expname}.xml <<EOF
        <value><cyclestr>&DATA_FETCHHPSS;</cyclestr></value>
     </envar>
 
-    <command>&JJOB_DIR;/launch.sh &JJOB_DIR;/J&CAP_NET;_FETCHHPSS</command>
+    <command>&JJOB_DIR;/launch.ksh &JJOB_DIR;/J&CAP_NET;_FETCHHPSS</command>
     <jobname><cyclestr>&NET;_fetchhpss_@H</cyclestr></jobname>
     <join><cyclestr>&LOG_SCHDLR;/&NET;_&envir;_fetchhpss_@Y@m@d@H@M.log\${PBS_JOBID}</cyclestr></join>
 
@@ -1050,7 +1050,7 @@ cat >> ${NWROOT}/workflow/${RUN}_${expname}.xml <<EOF
        <value><cyclestr>&DATA_OBSPREP_RADAR;</cyclestr></value>
     </envar>
 
-    <command>&JJOB_DIR;/launch.sh &JJOB_DIR;/J&CAP_NET;_OBSPREP_RADAR</command>
+    <command>&JJOB_DIR;/launch.ksh &JJOB_DIR;/J&CAP_NET;_OBSPREP_RADAR</command>
     <jobname><cyclestr>&NET;_obsprep_radar_@H</cyclestr></jobname>
     <join><cyclestr>&LOG_SCHDLR;/&NET;_&envir;_obsprep_radar_@Y@m@d@H@M.log\${PBS_JOBID}</cyclestr></join>
 
@@ -1080,7 +1080,7 @@ cat >> ${NWROOT}/workflow/${RUN}_${expname}.xml <<EOF
        <value><cyclestr>&DATA_OBSPREP_LGHTN;</cyclestr></value>
     </envar>
 
-    <command>&JJOB_DIR;/launch.sh &JJOB_DIR;/J&CAP_NET;_OBSPREP_LGHTN</command>
+    <command>&JJOB_DIR;/launch.ksh &JJOB_DIR;/J&CAP_NET;_OBSPREP_LGHTN</command>
     <jobname><cyclestr>&NET;_obsprep_lghtn_@H</cyclestr></jobname>
     <join><cyclestr>&LOG_SCHDLR;/&NET;_&envir;_obsprep_lghtn_@Y@m@d@H@M.log\${PBS_JOBID}</cyclestr></join>
 
@@ -1110,7 +1110,7 @@ cat >> ${NWROOT}/workflow/${RUN}_${expname}.xml <<EOF
        <value><cyclestr>&DATA_OBSPREP_CLOUD;</cyclestr></value>
     </envar>
 
-    <command>&JJOB_DIR;/launch.sh &JJOB_DIR;/J&CAP_NET;_OBSPREP_CLOUD</command>
+    <command>&JJOB_DIR;/launch.ksh &JJOB_DIR;/J&CAP_NET;_OBSPREP_CLOUD</command>
     <jobname><cyclestr>&NET;_obsprep_cloud_@H</cyclestr></jobname>
     <join><cyclestr>&LOG_SCHDLR;/&NET;_&envir;_obsprep_cloud_@Y@m@d@H@M.log\${PBS_JOBID}</cyclestr></join>
 
@@ -1138,7 +1138,7 @@ cat >> ${NWROOT}/workflow/${RUN}_${expname}.xml <<EOF
        <value><cyclestr>&DATA_OBSPRD;</cyclestr></value>
     </envar>
 
-    <command>&JJOB_DIR;/launch.sh &JJOB_DIR;/J&CAP_NET;_PREPOBS</command>
+    <command>&JJOB_DIR;/launch.ksh &JJOB_DIR;/J&CAP_NET;_PREPOBS</command>
     <jobname><cyclestr>&NET;_prepobs_@H</cyclestr></jobname>
     <join><cyclestr>&LOG_SCHDLR;/&NET;_&envir;_prepobs_@Y@m@d@H@M.log\${PBS_JOBID}</cyclestr></join>
 
@@ -1183,7 +1183,7 @@ cat >> ${NWROOT}/workflow/${RUN}_${expname}.xml <<EOF
        <value><cyclestr>&DATA_FGSPRD;</cyclestr></value>
     </envar>
 
-    <command>&JJOB_DIR;/launch.sh &JJOB_DIR;/J&CAP_NET;_PREPFGS</command>
+    <command>&JJOB_DIR;/launch.ksh &JJOB_DIR;/J&CAP_NET;_PREPFGS</command>
     <jobname><cyclestr>&NET;_prepfgs_@H</cyclestr></jobname>
     <join><cyclestr>&LOG_SCHDLR;/&NET;_&envir;_prepfgs_@Y@m@d@H@M.log\${PBS_JOBID}</cyclestr></join>
 
@@ -1208,7 +1208,7 @@ cat >> ${NWROOT}/workflow/${RUN}_${expname}.xml <<EOF
        <value><cyclestr>&DATA_GSIANL;</cyclestr></value>
     </envar>
 
-    <command>&JJOB_DIR;/launch.sh &JJOB_DIR;/J&CAP_NET;_GSIANL</command>
+    <command>&JJOB_DIR;/launch.ksh &JJOB_DIR;/J&CAP_NET;_GSIANL</command>
     <jobname><cyclestr>&NET;_gsianl_@H</cyclestr></jobname>
     <join><cyclestr>&LOG_SCHDLR;/&NET;_&envir;_gsianl_@Y@m@d@H@M.log\${PBS_JOBID}</cyclestr></join>
 
@@ -1233,7 +1233,7 @@ cat >> ${NWROOT}/workflow/${RUN}_${expname}.xml <<EOF
        <value><cyclestr>&DATA_POST;</cyclestr></value>
     </envar>
 
-    <command>&JJOB_DIR;/launch.sh &JJOB_DIR;/J&CAP_NET;_POST</command>
+    <command>&JJOB_DIR;/launch.ksh &JJOB_DIR;/J&CAP_NET;_POST</command>
     <jobname><cyclestr>&NET;_post_@H</cyclestr></jobname>
     <join><cyclestr>&LOG_SCHDLR;/&NET;_&envir;_post_@Y@m@d@H@M.log\${PBS_JOBID}</cyclestr></join>
 
@@ -1255,7 +1255,7 @@ cat >> ${NWROOT}/workflow/${RUN}_${expname}.xml <<EOF
        <name>rundir_task</name>
        <value><cyclestr>&DATA_VERIF;</cyclestr></value>
     </envar>
-    <command>&JJOB_DIR;/launch.sh &JJOB_DIR;/J&CAP_NET;_VERIF</command>
+    <command>&JJOB_DIR;/launch.ksh &JJOB_DIR;/J&CAP_NET;_VERIF</command>
     <jobname><cyclestr>&NET;_verif_@H</cyclestr></jobname>
     <join><cyclestr>&LOG_SCHDLR;/&NET;_submit_verif_@Y@m@d@H@M.log\${PBS_JOBID}</cyclestr></join>
     &ENVARS_VERIF;
@@ -1282,7 +1282,7 @@ cat >> ${NWROOT}/workflow/${RUN}_${expname}.xml <<EOF
        <value><cyclestr>&DATA_POST4FGS;</cyclestr></value>
     </envar>
 
-    <command>&JJOB_DIR;/launch.sh &JJOB_DIR;/J&CAP_NET;_POST4FGS</command>
+    <command>&JJOB_DIR;/launch.ksh &JJOB_DIR;/J&CAP_NET;_POST4FGS</command>
     <jobname><cyclestr>&NET;_post4fgs_@H</cyclestr></jobname>
     <join><cyclestr>&LOG_SCHDLR;/&NET;_&envir;_post4fgs_@Y@m@d@H@M.log\${PBS_JOBID}</cyclestr></join>
 
@@ -1306,7 +1306,7 @@ cat >> ${NWROOT}/workflow/${RUN}_${expname}.xml <<EOF
        <value><cyclestr>&DATA_PLOTGRADS;</cyclestr></value>
     </envar>
 
-    <command>&JJOB_DIR;/launch.sh &JJOB_DIR;/J&CAP_NET;_PLOTGRADS</command>
+    <command>&JJOB_DIR;/launch.ksh &JJOB_DIR;/J&CAP_NET;_PLOTGRADS</command>
     <jobname><cyclestr>&NET;_plotgrads_@H</cyclestr></jobname>
     <join><cyclestr>&LOG_SCHDLR;/&NET;_&envir;_plotgrads_@Y@m@d@H@M.log\${PBS_JOBID}</cyclestr></join>
 
@@ -1376,7 +1376,7 @@ mkdir -p ${WORKFLOW_DIR}/logs/pgmout
 ########################################################################################
 
 
-# Now make the run_NAMRR.sh script that can be invoked from a crontab
+# Now make the run_rtma3d.sh script that can be invoked from a crontab
 
 if [ ${MACHINE} = 'theia' ]; then
 cat > ${NWROOT}/workflow/run_${RUN}_${expname}.sh <<EOF 

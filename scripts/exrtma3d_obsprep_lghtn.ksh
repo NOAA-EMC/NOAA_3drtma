@@ -1,4 +1,4 @@
-#!/bin/sh --login
+#!/bin/ksh --login
 ############################################################################
 
 set -x
@@ -59,15 +59,15 @@ echo $PREVCYC_TIME
 YYJJJHH=`${DATE} +"%y%j%H" -d "${START_TIME}"`
 PREYYJJJHH=`${DATE} +"%y%j%H" -d "${PREVCYC_TIME}"`
 
-# typeset -Z2 mm mmp1 mmp2 mmp3              # <<-- "-Z2" only work for K-Shell
+typeset -Z2 mm mmp1 mmp2 mmp3              # <<-- "-Z2" only work for K-Shell
 mm=`${DATE} +"%M" -d "${START_TIME}"`
 mmp1=$((${mm}+1))
 mmp2=$((${mm}+2))
 mmp3=$((${mm}+3))
-mm=`printf "%2.2i\n" $mm`
-mmp1=`printf "%2.2i\n" $mmp1`
-mmp2=`printf "%2.2i\n" $mmp2`
-mmp3=`printf "%2.2i\n" $mmp3`
+# mm=`printf "%2.2i\n" $mm`
+# mmp1=`printf "%2.2i\n" $mmp1`
+# mmp2=`printf "%2.2i\n" $mmp2`
+# mmp3=`printf "%2.2i\n" $mmp3`
 
 ymd=`${DATE} +"%Y%m%d" -d "${START_TIME}"`
 ymdh=${YYYYMMDDHH}

@@ -1,4 +1,4 @@
-#!/bin/sh -l
+#!/bin/ksh -l
 
 # --- for debug --- #
 date
@@ -11,18 +11,14 @@ COMMAND=$1
 # load modulefile and set up the environment for job runnning
 #############################################################
 MODULEFILES=${MODULEFILES:-${HOMErtma3d}/modulefiles}
-# target=${ENV_MODULES:-"ProdGSI"}
 
 if [ "${machine}" = "theia" ] ; then
 
-  # . /etc/profile
-  # . /apps/lmod/lmod/init/sh >/dev/null # Module Support
+# . /etc/profile
+# . /apps/lmod/lmod/init/sh >/dev/null # Module Support
   module purge
 
-# load modules used when compiling the code
-  modulefile=${modulefile:-"${MODULEFILES}/${machine}/build/modulefile.build.${machine}"}
-  source $modulefile
-# load extra modules to run the job
+# load modules to run the job
   modulefile_run=${modulefile_run:-"${MODULEFILES}/${machine}/run/modulefile.run.${machine}"}
   source $modulefile_run
 #
@@ -58,22 +54,11 @@ else
 fi
 
 ############################################################
-# Notice: this is not used for NCO                         #
-#         pre-defined running directory                    #
+# Notice: the following part is not used for NCO.          #
+#         TO name the running directory with job name.     #
 ############################################################
 if [ "${rundir_task}" ]; then
   export DATA=${rundir_task}.${jid}
 fi
-
-# if [ $RUN_ENVIR == 'dev' ]; then
-#   if [ $MACHINE = 'theia' ]; then
-#     . /etc/profile
-#     . /apps/lmod/lmod/init/ksh >/dev/null # Module Support
-#   else
-#     . /usrx/local/Modules/3.2.9/init/ksh
-#   fi
-#   module use -a ${MODULEFILES}
-#   module load run/v2.7.0
-# fi
 
 $COMMAND
