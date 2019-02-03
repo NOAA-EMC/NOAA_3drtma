@@ -7,8 +7,8 @@ date
 # User define the following variables:
 
 # branch_gsi_gsd: GSD RAP/HRRR-based GSI branch in repository of ProdGSI
-branch_gsi_gsd="feature/gsd_raphrrr_july2018"
-
+#branch_gsi_gsd="feature/gsd_raphrrr_july2018"
+branch_gsi_gsd="master"
 # branch_gsi_source: source branch  # the user-specified branch to build on.
                                     # if not specified by user, 
                                     #   it is branch_gsi_gsd by default.
@@ -51,6 +51,9 @@ elif [[ -d /ioddev_dell ]]; then
 elif [[ -d /scratch3 ]] ; then
     . /apps/lmod/lmod/init/sh
     target=theia
+elif [[ -d /mnt/lfs3/projects ]] ; then
+    . /apps/lmod/lmod/init/sh
+    target=jet
 else
     echo "unknown target = $target"
     exit 9
@@ -135,6 +138,10 @@ if [ $target = wcoss -o $target = cray ]; then
     module purge
     module load $modules_dir/modulefile.ProdGSI.$target
 elif [ $target = theia ]; then
+    module purge
+    source $modules_dir/modulefile.ProdGSI.$target
+    module list
+elif [ $target = jet ]; then
     module purge
     source $modules_dir/modulefile.ProdGSI.$target
     module list

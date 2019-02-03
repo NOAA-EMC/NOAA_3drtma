@@ -1,7 +1,7 @@
 #!/bin/sh
 
 date
-# set -x
+set -x
 
 #=========================================================================#
 # User define the following variables:
@@ -32,6 +32,9 @@ elif [[ -d /ioddev_dell ]]; then
 elif [[ -d /scratch3 ]] ; then
     . /apps/lmod/lmod/init/sh
     target=theia
+elif [[ -d /jetmon ]] ; then
+    . /apps/lmod/lmod/init/sh
+    target=jet
 else
     echo "unknown target = $target"
     exit 9
@@ -113,6 +116,10 @@ elif [ $target = theia ]; then
     module purge
     source $modules_dir/modulefile.ProdGSI.$target
     module list
+elif [ $target = jet ]; then
+    module purge
+    source $modules_dir/modulefile.ProdGSI.$target
+    module list
 elif [ $target = dell ]; then
     module purge
     source $modules_dir/modulefile.ProdGSI.$target
@@ -147,8 +154,8 @@ make -f makefile_${target}  >& ./log.make.process_NASA_cloud
 
 if [ $? -eq 0 ] ; then
   echo " code was built successfully."
-  echo " cp -p ${BUILD_DIR}/rap_process_cloud.exe   ${EXEC}/rap_process_cloud.exe "
-  cp -p ${BUILD_DIR}/rap_process_cloud.exe   ${EXEC}/rap_process_cloud.exe
+  echo " cp -p ${BUILD_DIR}/rap_process_cloud   ${EXEC}/rap_process_cloud.exe "
+  cp -p ${BUILD_DIR}/rap_process_cloud   ${EXEC}/rap_process_cloud.exe
   ls -l ${EXEC}/rap_process_cloud.exe
 else
   echo " ================ WARNING =============== " 

@@ -36,6 +36,9 @@ elif [[ -d /ioddev_dell ]]; then
 elif [[ -d /scratch3 ]] ; then
     . /apps/lmod/lmod/init/sh
     target=theia
+elif [[ -d /jetmon ]] ; then
+    . /apps/lmod/lmod/init/sh
+    target=jet
 else
     echo "unknown target = $target"
     exit 9
@@ -119,6 +122,10 @@ if [ $target = wcoss -o $target = cray ]; then
     module purge
     module load $modules_dir/modulefile.ProdGSI.$target
 elif [ $target = theia ]; then
+    module purge
+    source $modules_dir/modulefile.ProdGSI.$target
+    module list
+elif [ $target = jet ]; then
     module purge
     source $modules_dir/modulefile.ProdGSI.$target
     module list
