@@ -25,6 +25,9 @@ elif [[ -d /ioddev_dell ]]; then
 elif [[ -d /scratch3 ]] ; then
     . /apps/lmod/lmod/init/sh
     target=theia
+elif [[ -d /jetmon ]] ; then
+    . /apps/lmod/lmod/init/sh
+    target=jet
 else
     echo "unknown target = $target"
     exit 9
@@ -83,6 +86,22 @@ if [ $target = theia ]; then
   echo " ln -sf ${WPS}            ./WPS"
   ln -sf ${WPS}            ./WPS
 
+elif [ $target = jet ]; then
+  echo " linking fixed data on $target for GSI analysis"
+  GSI_fix="/mnt/lfs3/projects/hfv3gfs/Edward.Colon/3drtma_fixfiles/GSI-fix_rtma3d_emc_test"
+  CRTM_fix="/mnt/lfs3/projects/hfv3gfs/Edward.Colon/3drtma_fixfiles/CRTM-fix_rtma3d"
+  ObsUseList="/mnt/lfs3/projects/hfv3gfs/Edward.Colon/3drtma_fixfiles/ObsUseList_rtma3d"
+  WPS="/mnt/lfs3/projects/hfv3gfs/Edward.Colon/3drtma_fixfiles/WPS"
+
+  echo " ln -sf ${GSI_fix}        ./GSI-fix"
+  ln -sf ${GSI_fix}        ./GSI-fix
+  echo " ln -sf ${CRTM_fix}       ./CRTM-fix"
+  ln -sf ${CRTM_fix}       ./CRTM-fix
+  echo " ln -sf ${ObsUseList}     ./ObsUseList"
+  ln -sf ${ObsUseList}     ./ObsUseList
+  echo " ln -sf ${WPS}            ./WPS"
+  ln -sf ${WPS}            ./WPS
+
 else
   echo " the fixed data directories have not set up yet for machine $target."
   echo " Abort linking task."
@@ -109,7 +128,20 @@ if [ $target = theia ]; then
   ln -sf ${WRF}             ./WRF
   echo " ln -sf ${VERIF}      ./VERIF"
   ln -sf ${VERIF}            ./VERIF
-  
+
+elif [ $target = jet ]; then
+  echo "linking parameters data (parm/) on $target for UPP (uni-post)"
+  UPP="/mnt/lfs3/projects/hfv3gfs/Edward.Colon/3drtma_fixfiles/UPP"
+# UPP="${TOP_RTMA}/sorc/rtma_post.fd/parm"
+  WRF="/mnt/lfs3/projects/hfv3gfs/Edward.Colon/3drtma_fixfiles/WRF"
+  VERIF="/mnt/lfs3/projects/hfv3gfs/Edward.Colon/3drtma_fixfiles/VERIF-fix"
+  rm -f ./UPP ./WRF ./VERIF
+  echo " ln -sf ${UPP}        ./UPP"
+  ln -sf ${UPP}             ./UPP
+  echo " ln -sf ${WRF}        ./WRF"
+  ln -sf ${WRF}             ./WRF
+  echo " ln -sf ${VERIF}      ./VERIF"
+  ln -sf ${VERIF}            ./VERIF
 
 else
   echo " the parm directories have not set up yet for machine $target."

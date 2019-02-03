@@ -7,8 +7,8 @@ date
 # User define the following variables:
 
 # branch_gsi_gsd: GSD RAP/HRRR-based GSI branch in repository of ProdGSI
-branch_gsi_gsd="feature/gsd_raphrrr_july2018"
-
+#branch_gsi_gsd="feature/gsd_raphrrr_july2018"
+branch_gsi_gsd="master"
 # branch_gsi_source: source branch  # the user-specified branch to check out.
                                     # if not specified by user, 
                                     #   it is branch_gsi_gsd by default.
@@ -99,7 +99,7 @@ MODULEFILES=${TOP_RTMA}/modulefiles
 SORCDIR_GSI=${TOP_SORC}/rtma_gsi.fd
 echo " --> linking GSI modulefiles to RTMA3D modulefiles (used for compilation of GSI)  "
 cd ${MODULEFILES}
-mfiles="modulefile.ProdGSI.wcoss modulefile.ProdGSI.theia modulefile.global_gsi.theia"
+mfiles="modulefile.ProdGSI.wcoss modulefile.ProdGSI.theia modulefile.ProdGSI.jet modulefile.global_gsi.theia modulefile.global_gsi.jet"
 for modfile in $mfiles
 do
   echo " ----> ln -sf ${MODULEFILES}/$modfile ${SORCDIR_GSI}/modulefiles/$modfile "
