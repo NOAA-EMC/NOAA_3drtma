@@ -96,7 +96,9 @@ export urma_dir_ops=${urma_dir_ops:-$DATA_OBSPRD}
 
 export urma_dir=${urma_dir:-$DATA_OBSPRD}
 
-export stat_dir=${stat_dir:-$DATAHOME}
+export RUNDIR_GSD=${RUNDIR_GSD:-${DATAROOT}/${RUN}_${PDY}${cyc}${subcyc}}
+
+export stat_dir=${stat_dir:-$RUNDIR_GSD/verifprd}
 
 export MASKS=${MASKS:-$PARMverf/masks}
 
