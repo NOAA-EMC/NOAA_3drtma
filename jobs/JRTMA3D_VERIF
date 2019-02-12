@@ -1,4 +1,4 @@
-#!/bin/ksh
+#!/bin/bash
 
 ########################################
 
@@ -90,13 +90,18 @@ export PARMrtma3d=${PARMrtma3d:-$HOMErtma/parm/${RUN}}
 
 export USHrtma3d=${USHrtma3d:-$HOMErtma/ush/${RUN}}
 
+export UTILrtma3d=${UTILrtma3d:-$HOMErtma3d/util/${RUN}}
+
 export config_dir=${config_dir:-$PARMverf/config_files}
 
 export urma_dir_ops=${urma_dir_ops:-$DATA_OBSPRD}
 
 export urma_dir=${urma_dir:-$DATA_OBSPRD}
 
-export stat_dir=${stat_dir:-$DATAHOME}
+export DATA_RUNDIR=${DATA_RUNDIR:-"${DATAROOT}/${envir}/${RUN}.${PDY}${cyc}${subcyc}"}
+
+export DATA_VERIF=${DATA_VERIF:-"${DATA_RUNDIR}/verifprd"}
+export stat_dir=${stat_dir:-"${DATA_VERIF}"}
 
 export MASKS=${MASKS:-$PARMverf/masks}
 
@@ -118,9 +123,17 @@ export MASKS=${MASKS:-$PARMverf/masks}
 
 export COMOUT=${COMOUT:-$COMROOT/${NET}/${envir}}/${RUN}.${PDY}
 
-mkdir -p $COMOUT
+if [ ! -d "${COMOUT}" ] ; then
+   mkdir -p $COMOUT
+fi
 
 export COMOUTpost_rtma3d=${COMOUTpost_rtma3d:-${COMOUT}/postprd.${cycle}}
+
+### 3DRTMA Verification Products
+export COMOUTverif_rtma3d=${COMOUTverif_rtma3d:-"${COMOUT}/verifprd.${cycle}"}
+if [ ! -d "${COMOUTverif_rtma3d}" ] ; then
+   mkdir -p ${COMOUTverif_rtma3d}
+fi
 
 ###########################################################
 
@@ -140,7 +153,7 @@ export COMOUTpost_rtma3d=${COMOUTpost_rtma3d:-${COMOUT}/postprd.${cycle}}
 
 # Execute the script.
 
-${exSCR_VERIF:-$HOMErtma3d/scripts/${RUN}/rtma3d_verif.ksh}
+${exSCR_VERIF:-$HOMErtma3d/scripts/${RUN}/rtma3d_verif.sh}
 
 export err=$?; err_chk
 

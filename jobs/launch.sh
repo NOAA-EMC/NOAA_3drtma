@@ -1,4 +1,4 @@
-#!/bin/ksh -l
+#!/bin/bash -l
 
 # --- for debug --- #
 date
@@ -14,9 +14,9 @@ MODULEFILES=${MODULEFILES:-${HOMErtma3d}/modulefiles}
 
 if [ "${machine}" = "theia" ] ; then
 
-# . /etc/profile
-# . /apps/lmod/lmod/init/sh >/dev/null # Module Support
   module purge
+  . /etc/profile
+  . /apps/lmod/lmod/init/bash >/dev/null # Module Support
 
 # load modules to run the job
   modulefile_run=${modulefile_run:-"${MODULEFILES}/${machine}/run/modulefile.run.${machine}"}
@@ -54,8 +54,9 @@ else
 fi
 
 ############################################################
-# Notice: the following part is not used for NCO.          #
-#         TO name the running directory with job name.     #
+# Notice: the following line is to                         #
+#            name the running directory with job name.     #
+#                              (not used for NCO.)         #
 ############################################################
 if [ "${rundir_task}" ]; then
   export DATA=${rundir_task}.${jid}

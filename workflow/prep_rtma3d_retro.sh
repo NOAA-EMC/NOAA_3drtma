@@ -3,15 +3,15 @@
 #This script preps directories for ROCOTO-controlled RTMA/URMA real time and retro runs.
 
 #
-#--- detect existence of directory sorc/
+#--- detect existence of directory scripts/
 #
 i_max=4; i=0;
 while [ "$i" -lt "$i_max" ]
 do
   let "i=$i+1"
-  if [ -d ./sorc ]
+  if [ -d ./scripts ]
   then
-    cd ./sorc
+    cd ./scripts
     TOP_RTMA=`dirname $(readlink -f .)`
     TOP_0000=`dirname ${TOP_RTMA}`
     TOP_BASE=`basename ${TOP_RTMA}`
@@ -31,11 +31,11 @@ fi
 #--- User defined variables                         #
 #####################################################
 set -x
-export startCDATE=201810230000              #yyyymmddhhmm - Starting day of retro run 
-export endCDATE=201810252300                #yyyymmddhhmm - Ending day of RTMA3D run (needed for both RETRO and REAL TIME). 
+export startCDATE=201805011800              #yyyymmddhhmm - Starting day of retro run 
+export endCDATE=201805011800                #yyyymmddhhmm - Ending day of RTMA3D run (needed for both RETRO and REAL TIME). 
 export NET=rtma3d                           #selection of rtma3d (or rtma,urma)
 export RUN=rtma3d                           #selection of rtma3d (or rtma,urma)
-export envir="retro"                        #environment (test, prod, dev, etc.)
+export envir="UppEmcHrrr04"                 #environment (test, prod, dev, etc.)
 export run_envir="dev"                      #
 export expname="${envir}"                   # experiment name
 export ptmp_base="/scratch3/NCEPDEV/stmp1/${USER}/wrkdir_${NET}"  #base subdirectory for all subsequent working and storage directories
@@ -43,7 +43,7 @@ export NWROOT=${TOP_RTMA}                   #root directory for RTMA/URMA j-job 
 export QUEUE="batch"                        #user-specified processing queue
 export QUEUE_DBG="debug"                    #user-specified processing queue -- debug
 export QUEUE_SVC="service"                  #user-specified transfer queue
-export ACCOUNT="da"                         #Theia account for CPU resources
+export ACCOUNT="da-cpu"                     #Theia account for CPU resources
 
 # detect the machine/platform
 if [ `grep -c 'E5-2690 v3' /proc/cpuinfo` -gt 0 ]; then
@@ -64,7 +64,7 @@ export CAP_RUN_ENVIR=`echo ${run_envir} | tr '[:lower:]' '[:upper:]'`
 
 #########################################################
 #
-# User defined file name for executable
+# User defined executable file name for each task
 #
 #########################################################
 export exefile_name_gsi="rtma3d_gsi"
@@ -72,18 +72,23 @@ export exefile_name_post="rtma3d_wrfpost"
 export exefile_name_radar="rtma3d_process_mosaic"
 export exefile_name_lightning="rtma3d_process_lightning"
 export exefile_name_cloud="rtma3d_process_cloud"
-#export exefile_name_verif="rtma3d_verif"
+export exefile_name_verif=""    # executable of verification (MET) is defined by loading module met
 
 #########################################################
 #--- define the path to the static data
 #    fix/
-#      gsi/
-#      crtm/
+#      gsi/: fixed data, e.g., statistical file of B-Matrix)
+#      crtm/: (CRTM coefficients)
 #      wrf/
-#      wps/
+#      wps/: e.g., geo_em.d01.nc used in obs pre-processing to model grid.
+#      obsuselist/
+#		amdar_reject_lists/
+#		mesonet_uselists/
+#		sfcobs_provider/
 #
 #    parm/
-#      upp/
+#      gsi/: namelist file, e.g., gsiparm.anl.sh)
+#      upp/: configuration fiile for upp, like postcntrl-NT.txt)
 #      verif/
 #      wrf/
 #
@@ -104,7 +109,9 @@ export exefile_name_cloud="rtma3d_process_cloud"
   export AIRCRAFT_REJECT_udef="/scratch4/NCEPDEV/fv3-cam/save/Gang.Zhao/FixData/ObsUseList_rtma3d/gsd/amdar_reject_lists"
   export SFCOBS_PROVIDER_udef="/scratch4/NCEPDEV/fv3-cam/save/Gang.Zhao/FixData/GSI-fix_rtma3d_emc_test"
 
-  export PARMupp_udef="/scratch4/NCEPDEV/fv3-cam/save/Gang.Zhao/FixData/static_gsd_rtma3d_gge/UPP"
+  export PARMgsi_udef=""
+# export PARMupp_udef="/scratch4/NCEPDEV/fv3-cam/save/Gang.Zhao/FixData/parm/upp_gsd_test_mhu_rap_20"
+  export PARMupp_udef="/scratch4/NCEPDEV/fv3-cam/save/Gang.Zhao/FixData/parm/upp_gsd_test_mhu_hrrr_04"
   export PARMwrf_udef="/scratch4/NCEPDEV/fv3-cam/save/Gang.Zhao/FixData/static_gsd_rtma3d_gge/WRF"
   export PARMverf_udef="/scratch4/NCEPDEV/fv3-cam/save/Edward.Colon/FixData/VERIF-fix"
 
@@ -112,7 +119,7 @@ export exefile_name_cloud="rtma3d_process_cloud"
   export FIXrtma3d="${NWROOT}/fix"
   export FIXgsi="${FIXrtma3d}/gsi"
   export FIXcrtm="${FIXrtma3d}/crtm"
-  export Fixwps="${FIXrtma3d}/wps"
+  export FIXwps="${FIXrtma3d}/wps"
 
   export OBS_USELIST="${FIXrtma3d}/obsuselist"
   export SFCOBS_USELIST="${OBS_USELIST}/mesonet_uselists"
@@ -120,6 +127,7 @@ export exefile_name_cloud="rtma3d_process_cloud"
   export SFCOBS_PROVIDER="${OBS_USELIST}/sfcobs_provider"
 
   export PARMrtma3d="${NWROOT}/parm"
+  export PARMgsi="${PARMrtma3d}/gsi"
   export PARMupp="${PARMrtma3d}/upp"
   export PARMwrf="${PARMrtma3d}/wrf"
   export PARMverf="${PARMrtma3d}/verif"
@@ -128,11 +136,11 @@ export exefile_name_cloud="rtma3d_process_cloud"
 #        link to the symbol links
 #
   if [ ! -d ${FIXrtma3d}   ] ; then mkdir -p ${FIXrtma3d}   ; fi
-  if [ ! -d ${OBS_USELIST} ] ; then mkdir -p ${OBS_USELIST} ; fi
   if [ ! -d ${PARMrtma3d}  ] ; then mkdir -p ${PARMrtma3d}  ; fi
-  if [ $target = theia ]; then
+  if [ ! -d ${OBS_USELIST} ] ; then mkdir -p ${OBS_USELIST} ; fi
+  if [ ${MACHINE} = 'theia' ]; then
     cd ${FIXrtma3d}
-    echo " linking fixed data on $target for GSI analysis"
+    echo " linking fixed data on ${MACHINE} for GSI analysis"
     rm -rf $FIXgsi
     echo " ln -sf ${FIXgsi_udef}        ${FIXgsi}"
     ln -sf ${FIXgsi_udef}        ${FIXgsi}
@@ -143,6 +151,7 @@ export exefile_name_cloud="rtma3d_process_cloud"
     echo " ln -sf ${FIXwps_udef}        ${FIXwps}"
     ln -sf ${FIXwps_udef}        ${FIXwps}
 
+    cd ${OBS_USELIST}
     rm -rf $SFCOBS_USELIST
     echo " ln -sf ${SFCOBS_USELIST_udef}        ${SFCOBS_USELIST}"
     ln -sf ${SFCOBS_USELIST_udef}        ${SFCOBS_USELIST}
@@ -153,23 +162,32 @@ export exefile_name_cloud="rtma3d_process_cloud"
     echo " ln -sf ${SFCOBS_PROVIDER_udef}       ${SFCOBS_PROVIDER}"
     ln -sf ${SFCOBS_PROVIDER_udef}       ${SFCOBS_PROVIDER}
 
+    cd ${PARMrtma3d}
+    if [ ! -d $PARMgsi ] && [ ! -f ${PARMgsi}/gsiparm.anl.sh ]  
+    then
+      echo " WARNING ---- ${PARMgsi} does NOT exist. Check and Abort this task! ---- WARNING ! "
+      exit 1
+    fi
     rm -rf $PARMupp
     echo " ln -sf ${PARMupp_udef}        ${PARMupp}"
-    ln -sf ${PARMupp_udef}     i         ${PARMupp}
+    ln -sf ${PARMupp_udef}               ${PARMupp}
     rm -rf $PARMverf
     echo " ln -sf ${PARMverf_udef}       ${PARMverf}"
     ln -sf ${PARMverf_udef}              ${PARMverf}
     rm -rf $PARMwrf
     echo " ln -sf ${PARMwrf_udef}        ${PARMwrf}"
-    ln -sf ${PARMwrf_udef}     i         ${PARMwrf}
+    ln -sf ${PARMwrf_udef}               ${PARMwrf}
 
   else
-    echo " the fixed data directories have not set up yet for machine $target."
+    echo " the fixed data directories have not set up yet for machine ${MACHINE}."
     echo " Abort linking task."
     exit 9
   fi
   echo
   ls -ltr $FIXrtma3d
+  echo
+  echo
+  ls -ltr $OBS_USELIST
   echo
   echo
   ls -ltr $PARMrtma3d
@@ -179,27 +197,45 @@ export exefile_name_cloud="rtma3d_process_cloud"
 #
 #--- option control for obs pre-processing (esp. for obs used in cloud analysis)
 #
-  export obsprep_radar=0  # 0: No (using processed ReflInGSI.bufr_d of hrrr)
+  export obsprep_radar=0  # 0: No (using archived hrrr.t{HH}z.NSSLRefInGSI.bufr processed in operational hrrr run)
                           # 1: pre-processing MRMS grib2 radar reflectivity obs
+
   export obsprep_lghtn=1  # 0: No pre-processing lightning obs data
-                          # 1: processing bufr data from rap run
-  export obsprep_cloud=0  # 0: No (using processed CloudInGSI.bufr_d of hrrr)
+                          # 1: mapping the archived bufr data (rap.t{HH}z.lghtng.tm00.bufr_d) from operation RAP run to HRRR grid
+
+  export obsprep_cloud=0  # 0: No (using archived hrrr.t{HH}z.NASALaRCCloudInGSI.bufr processed in operational hrrr)
                           # 1: processing bufr data from rap run
 
 #
-#--- option control for UPP control parameter data set 
-#
-  export upp_cntrl=1      # 0: UPP default set for hrrr 
-                          # 1: GSD
-                          # 2: operational hrrr
+#--- option to plot the firstguess/analysis/increment
+  export run_plt=1        # default is 1 to plot with GrADS
+                          # >0: plot (and post-process of firstguess fields)
+                          # =1: plot with GrADS 
+                          # =2: plot with NCL (not available yet)
+                          # =3: plot with Python (not available yet)
+                          #<=0: no plot (and no post-process of firstguess fields)
+
+# control option for using hrrr forecast as firstguess for rtma3d
+  export fgs_opt=1        # 1: hrrr.t{HH}z.wrfguess   (1 hr forecast to analysis time from wrfguess_rap)
+                          # 1: recommended and default
+                          # 2: wrfguess_rap (directly downscaled from RAP to HRRR grid  at 1 hr before analysis time)
+                          # 2: Not recommended (missing some hydrometer information and leading to failure of UPP on CEIL)
 
 #
-  option_plt=$1
-  export run_plt=${option_plt:-0}  # 100:    plot (and    post-process of firstguess fields)
-                    # any other number: no plot (and no post-process of firstguess fields)
-# control option for using hrrr wrfguess(_rap) as firstguess for rtma3d
-  export fgshrrr_opt=1    # 1: wrfguess_rap (init made from RAP at 1 hr before analysis time)
-                          # 2: wrfguess     (1 hr forecast to analysis time with wrfguess_rap)
+#--- option for two-step gsi analysis (var + cloud analysis in two steps)
+#
+  export gsi_2steps=0     # default is single step (var + cloud anl in one step)
+                          # 1: two-step analysis
+
+  export gsi2=""
+  export gsi_grid_ratio_in_var=1
+  export gsi_grid_rario_in_cldanl=1
+  if [ $gsi_2steps -eq 1 ]
+  then
+    export gsi2="2"
+    export gsi_grid_ratio_in_var=1   # can be 4 if running hybrid to save time
+    export gsi_grid_rario_in_cldanl=1
+  fi 
 
 ########################################################################################
 #
@@ -254,6 +290,8 @@ cat > ${NWROOT}/workflow/${RUN}_${expname}.xml <<EOF
 <!ENTITY JJOB_DIR	"&HOMErtma3d;/jobs">
 <!ENTITY SCRIPT_DIR	"&HOMErtma3d;/scripts/">
 <!ENTITY USHrtma3d	"&HOMErtma3d;/ush">
+<!ENTITY UTILrtma3d	"&HOMErtma3d;/util">
+<!ENTITY UTILrtma3d_dev	"&HOMErtma3d;/util_dev">
 <!ENTITY MODULEFILES	"&HOMErtma3d;/modulefiles">
 <!ENTITY EXECrtma3d	"&HOMErtma3d;/exec">
 <!ENTITY PARMrtma3d	"${PARMrtma3d}">
@@ -269,6 +307,7 @@ cat > ${NWROOT}/workflow/${RUN}_${expname}.xml <<EOF
 <!ENTITY SFCOBS_PROVIDER        "${SFCOBS_PROVIDER}">
 <!ENTITY PARMwrf        "${PARMwrf}">
 <!ENTITY PARMupp        "${PARMupp}">
+<!ENTITY PARMgsi        "${PARMgsi}">
 <!ENTITY PARMverf       "${PARMverf}">
 
 <!ENTITY LOG_WRKFLW	"&LOG_DIR;">
@@ -276,7 +315,11 @@ cat > ${NWROOT}/workflow/${RUN}_${expname}.xml <<EOF
 <!ENTITY LOG_SCHDLR	"&LOG_DIR;">
 <!ENTITY LOG_PGMOUT     "&LOG_DIR;/pgmout">
 
+<!-- definition of name of the top running directory for all tasks -->
 <!ENTITY DATA_RUNDIR    "&DATAROOT;/&envir;/&RUN;.@Y@m@d@H@M">
+<!--               names of the running directory for each task -->
+<!-- Note: -->
+<!--      these directories are just links pointing to real running directories -->
 <!ENTITY DATA_GSIANL    "&DATA_RUNDIR;/gsiprd">
 <!ENTITY DATA_OBSPRD    "&DATA_RUNDIR;/obsprd">
 <!ENTITY DATA_FGSPRD    "&DATA_RUNDIR;/fgsprd">
@@ -284,7 +327,7 @@ cat > ${NWROOT}/workflow/${RUN}_${expname}.xml <<EOF
 <!ENTITY DATA_POST4FGS  "&DATA_RUNDIR;/postprd4fgs">
 <!ENTITY DATA_PLOTGRADS "&DATA_RUNDIR;/plotgrads">
 <!ENTITY DATA_FETCHHPSS "&DATA_RUNDIR;/fetchhpss">
-<!ENTITY DATA_VERIF     "&DATA_RUNDIR;/verif">
+<!ENTITY DATA_VERIF     "&DATA_RUNDIR;/verifprd">
 <!ENTITY DATA_OBSPREP_LGHTN    "&DATA_RUNDIR;/obsprep_lghtn">
 <!ENTITY DATA_OBSPREP_RADAR    "&DATA_RUNDIR;/obsprep_radar">
 <!ENTITY DATA_OBSPREP_CLOUD    "&DATA_RUNDIR;/obsprep_cloud">
@@ -292,16 +335,14 @@ cat > ${NWROOT}/workflow/${RUN}_${expname}.xml <<EOF
 <!ENTITY hpsspath1      "/NCEPPROD/hpssprod/runhistory">
 <!ENTITY hpsspath1_1yr  "/NCEPPROD/1year/hpssprod/runhistory">
 <!ENTITY hpsspath1_gsd  "/BMC/fdr/Permanent">
+<!ENTITY hpsspath1_AGibbs  "/NCEPDEV/emc-meso/1year/Annette.Gibbs/">
 
-<!ENTITY FGS_OPT        "${fgshrrr_opt}">
+<!ENTITY FGS_OPT        "${fgs_opt}">
 
 <!-- for obs pre-processing -->
 <!ENTITY obsprep_radar  "${obsprep_radar}">
 <!ENTITY obsprep_lghtn  "${obsprep_lghtn}">
 <!ENTITY obsprep_cloud  "${obsprep_cloud}">
-
-<!-- for upp control/config parameter dataset -->
-<!ENTITY UPP_CNTRL      "${upp_cntrl}">
 
 <!-- Variables used in GSD scripts -->
 <!ENTITY HOMEBASE_DIR	"&NWROOT;">
@@ -318,32 +359,32 @@ cat > ${NWROOT}/workflow/${RUN}_${expname}.xml <<EOF
 
 <!-- ex-shell and J-job script name -->
 <!ENTITY JJOB_FETCHHPSS  "&JJOB_DIR;/J&CAP_RUN;_FETCHHPSS">
-<!ENTITY exSCR_FETCHHPSS "&SCRIPT_DIR;/ex&RUN;_fetchhpss.ksh">
+<!ENTITY exSCR_FETCHHPSS "&SCRIPT_DIR;/ex&RUN;_fetchhpss.sh">
 <!ENTITY JJOB_OBSPREP_RADAR    "&JJOB_DIR;/J&CAP_RUN;_OBSPREP_RADAR">
-<!ENTITY exSCR_OBSPREP_RADAR   "&SCRIPT_DIR;/ex&RUN;_obsprep_radar.ksh">
+<!ENTITY exSCR_OBSPREP_RADAR   "&SCRIPT_DIR;/ex&RUN;_obsprep_radar.sh">
 <!ENTITY exefile_name_mosaic   "${exefile_name_mosaic}">
 <!ENTITY JJOB_OBSPREP_LGHTN    "&JJOB_DIR;/J&CAP_RUN;_OBSPREP_LGHTN">
-<!ENTITY exSCR_OBSPREP_LGHTN   "&SCRIPT_DIR;/ex&RUN;_obsprep_lghtn.ksh">
-<!ENTITY exefile_name_lighting "${exefile_name_lightning}">
+<!ENTITY exSCR_OBSPREP_LGHTN   "&SCRIPT_DIR;/ex&RUN;_obsprep_lghtn.sh">
+<!ENTITY exefile_name_lightning "${exefile_name_lightning}">
 <!ENTITY JJOB_OBSPREP_CLOUD    "&JJOB_DIR;/J&CAP_RUN;_OBSPREP_CLOUD">
-<!ENTITY exSCR_OBSPREP_CLOUD   "&SCRIPT_DIR;/ex&RUN;_obsprep_cloud.ksh">
+<!ENTITY exSCR_OBSPREP_CLOUD   "&SCRIPT_DIR;/ex&RUN;_obsprep_cloud.sh">
 <!ENTITY exefile_name_cloud    "${exefile_name_cloud}">
 <!ENTITY JJOB_PREPOBS    "&JJOB_DIR;/J&CAP_RUN;_PREPOBS">
-<!ENTITY exSCR_PREPOBS   "&SCRIPT_DIR;/ex&RUN;_prepobs.ksh">
+<!ENTITY exSCR_PREPOBS   "&SCRIPT_DIR;/ex&RUN;_prepobs.sh">
 <!ENTITY JJOB_PREPFGS    "&JJOB_DIR;/J&CAP_RUN;_PREPFGS">
-<!ENTITY exSCR_PREPFGS   "&SCRIPT_DIR;/ex&RUN;_prepfgs.ksh">
-<!ENTITY JJOB_GSIANL	 "&JJOB_DIR;/J&CAP_RUN;_GSIANL">
-<!ENTITY exSCR_GSIANL	 "&SCRIPT_DIR;/ex&RUN;_gsianl.ksh">
+<!ENTITY exSCR_PREPFGS   "&SCRIPT_DIR;/ex&RUN;_prepfgs.sh">
+<!ENTITY JJOB_GSIANL	 "&JJOB_DIR;/J&CAP_RUN;_GSIANL${gsi2}">
+<!ENTITY exSCR_GSIANL	 "&SCRIPT_DIR;/ex&RUN;_gsianl${gsi2}.sh">
 <!ENTITY exefile_name_gsi      "${exefile_name_gsi}">
 <!ENTITY JJOB_POST  	 "&JJOB_DIR;/J&CAP_RUN;_POST">
-<!ENTITY exSCR_POST      "&SCRIPT_DIR;/ex&RUN;_post.ksh">
+<!ENTITY exSCR_POST      "&SCRIPT_DIR;/ex&RUN;_post.sh">
 <!ENTITY exefile_name_post     "${exefile_name_post}">
 <!ENTITY JJOB_POST4FGS   "&JJOB_DIR;/J&CAP_RUN;_POST4FGS">
-<!ENTITY exSCR_POST4FGS  "&SCRIPT_DIR;/ex&RUN;_post4fgs.ksh">
+<!ENTITY exSCR_POST4FGS  "&SCRIPT_DIR;/ex&RUN;_post4fgs.sh">
 <!ENTITY JJOB_PLOTGRADS  "&JJOB_DIR;/J&CAP_RUN;_PLOTGRADS">
-<!ENTITY exSCR_PLOTGRADS "&SCRIPT_DIR;/ex&RUN;_plotgrads.ksh">
+<!ENTITY exSCR_PLOTGRADS "&SCRIPT_DIR;/ex&RUN;_plotgrads.sh">
 <!ENTITY JJOB_VERIF     "&JJOB_DIR;/J&CAP_RUN;_VERIF">
-<!ENTITY exSCR_VERIF    "&SCRIPT_DIR;/ex&RUN;_verif.ksh">
+<!ENTITY exSCR_VERIF    "&SCRIPT_DIR;/ex&RUN;_verif.sh">
 <!ENTITY exefile_name_verif    "${exefile_name_verif}">
 
 <!-- Resources -->
@@ -360,7 +401,7 @@ cat > ${NWROOT}/workflow/${RUN}_${expname}.xml <<EOF
 <!ENTITY FETCHHPSS_PROC "1">
 <!ENTITY FETCHHPSS_RESOURCES
    '<cores>&FETCHHPSS_PROC;</cores>
-    <walltime>01:30:00</walltime>
+    <walltime>03:00:00</walltime>
     <queue>&QUEUE_SVC;</queue>
     <account>&ACCOUNT;</account>'>
 
@@ -440,8 +481,8 @@ cat > ${NWROOT}/workflow/${RUN}_${expname}.xml <<EOF
 
 
 <!-- Variables in Namelist -->
-<!ENTITY GSI_grid_ratio_in_var       "1">
-<!ENTITY GSI_grid_ratio_in_cldanl    "1">
+<!ENTITY GSI_grid_ratio_in_var       "${gsi_grid_ratio_in_var}">
+<!ENTITY GSI_grid_ratio_in_cldanl    "${gsi_grid_rario_in_cldanl}">
 
 
 <!-- Block of Variables passed to workflow and tasks -->
@@ -520,6 +561,14 @@ cat > ${NWROOT}/workflow/${RUN}_${expname}.xml <<EOF
         <value>&USHrtma3d;</value>
    </envar>
    <envar>
+        <name>UTILrtma3d</name>
+        <value>&UTILrtma3d;</value>
+   </envar>
+   <envar>
+        <name>UTILrtma3d_dev</name>
+        <value>&UTILrtma3d_dev;</value>
+   </envar>
+   <envar>
         <name>PARMrtma3d</name>
         <value>&PARMrtma3d;</value>
    </envar>
@@ -542,6 +591,10 @@ cat > ${NWROOT}/workflow/${RUN}_${expname}.xml <<EOF
    <envar>
         <name>PARMupp</name>
         <value>&PARMupp;</value>
+   </envar>
+   <envar>
+        <name>PARMgsi</name>
+        <value>&PARMgsi;</value>
    </envar>
    <envar>
         <name>PARMverf</name>
@@ -738,10 +791,6 @@ cat > ${NWROOT}/workflow/${RUN}_${expname}.xml <<EOF
       <value>&DATABASE_DIR;</value>
     </envar>
     <envar>
-      <name>RUNDIR_GSD</name>
-      <value><cyclestr>&DATA_RUNDIR;</cyclestr></value>
-    </envar>
-    <envar>
       <name>DATA_GES</name>
       <value>&HRRR_DIR;/<cyclestr offset="-1:00:00">@Y@m@d@H</cyclestr>/wrfprd</value>
     </envar>
@@ -792,6 +841,10 @@ cat > ${NWROOT}/workflow/${RUN}_${expname}.xml <<EOF
       <value>&hpsspath1_gsd;</value>
     </envar>
     <envar>
+      <name>hpsspath1_AGibbs</name>
+      <value>&hpsspath1_AGibbs;</value>
+    </envar>
+    <envar>
       <name>exSCR_FETCHHPSS</name>
       <value>&exSCR_FETCHHPSS;</value>
     </envar>
@@ -825,10 +878,6 @@ cat > ${NWROOT}/workflow/${RUN}_${expname}.xml <<EOF
     <envar>
       <name>DATABASE_DIR</name>
       <value>&DATABASE_DIR;</value>
-    </envar>
-    <envar>
-      <name>RUNDIR_GSD</name>
-      <value><cyclestr>&DATAROOT;/&RUN;_@Y@m@d@H@M</cyclestr></value>
     </envar>
     <envar>
       <name>exSCR_OBSPREP_RADAR</name>
@@ -877,16 +926,8 @@ cat > ${NWROOT}/workflow/${RUN}_${expname}.xml <<EOF
       <value><cyclestr>@Y@m@d@H</cyclestr></value>
     </envar>
     <envar>
-      <name>UPP_CNTRL</name>
-      <value>&UPP_CNTRL;</value>
-    </envar>
-    <envar>
       <name>DATABASE_DIR</name>
       <value>&DATABASE_DIR;</value>
-    </envar>
-    <envar>
-      <name>RUNDIR_GSD</name>
-      <value><cyclestr>&DATAROOT;/&RUN;_@Y@m@d@H@M</cyclestr></value>
     </envar>
     <envar>
       <name>exSCR_POST4FGS</name>
@@ -928,10 +969,6 @@ cat > ${NWROOT}/workflow/${RUN}_${expname}.xml <<EOF
     <envar>
       <name>DATABASE_DIR</name>
       <value>&DATABASE_DIR;</value>
-    </envar>
-    <envar>
-      <name>RUNDIR_GSD</name>
-      <value><cyclestr>&DATAROOT;/&RUN;_@Y@m@d@H@M</cyclestr></value>
     </envar>
     <envar>
       <name>exSCR_PLOTGRADS</name>
@@ -1027,7 +1064,7 @@ cat > ${NWROOT}/workflow/${RUN}_${expname}.xml <<EOF
        <value><cyclestr>&DATA_FETCHHPSS;</cyclestr></value>
     </envar>
 
-    <command>&JJOB_DIR;/launch.ksh &JJOB_DIR;/J&CAP_NET;_FETCHHPSS</command>
+    <command>&JJOB_DIR;/launch.sh &JJOB_FETCHHPSS;</command>
     <jobname><cyclestr>&NET;_fetchhpss_@H</cyclestr></jobname>
     <join><cyclestr>&LOG_SCHDLR;/&NET;_&envir;_fetchhpss_@Y@m@d@H@M.log\${PBS_JOBID}</cyclestr></join>
 
@@ -1050,7 +1087,7 @@ cat >> ${NWROOT}/workflow/${RUN}_${expname}.xml <<EOF
        <value><cyclestr>&DATA_OBSPREP_RADAR;</cyclestr></value>
     </envar>
 
-    <command>&JJOB_DIR;/launch.ksh &JJOB_DIR;/J&CAP_NET;_OBSPREP_RADAR</command>
+    <command>&JJOB_DIR;/launch.sh &JJOB_OBSPREP_RADAR;</command>
     <jobname><cyclestr>&NET;_obsprep_radar_@H</cyclestr></jobname>
     <join><cyclestr>&LOG_SCHDLR;/&NET;_&envir;_obsprep_radar_@Y@m@d@H@M.log\${PBS_JOBID}</cyclestr></join>
 
@@ -1080,7 +1117,7 @@ cat >> ${NWROOT}/workflow/${RUN}_${expname}.xml <<EOF
        <value><cyclestr>&DATA_OBSPREP_LGHTN;</cyclestr></value>
     </envar>
 
-    <command>&JJOB_DIR;/launch.ksh &JJOB_DIR;/J&CAP_NET;_OBSPREP_LGHTN</command>
+    <command>&JJOB_DIR;/launch.sh &JJOB_OBSPREP_LGHTN;</command>
     <jobname><cyclestr>&NET;_obsprep_lghtn_@H</cyclestr></jobname>
     <join><cyclestr>&LOG_SCHDLR;/&NET;_&envir;_obsprep_lghtn_@Y@m@d@H@M.log\${PBS_JOBID}</cyclestr></join>
 
@@ -1110,7 +1147,7 @@ cat >> ${NWROOT}/workflow/${RUN}_${expname}.xml <<EOF
        <value><cyclestr>&DATA_OBSPREP_CLOUD;</cyclestr></value>
     </envar>
 
-    <command>&JJOB_DIR;/launch.ksh &JJOB_DIR;/J&CAP_NET;_OBSPREP_CLOUD</command>
+    <command>&JJOB_DIR;/launch.sh &JJOB_OBSPREP_CLOUD;</command>
     <jobname><cyclestr>&NET;_obsprep_cloud_@H</cyclestr></jobname>
     <join><cyclestr>&LOG_SCHDLR;/&NET;_&envir;_obsprep_cloud_@Y@m@d@H@M.log\${PBS_JOBID}</cyclestr></join>
 
@@ -1138,7 +1175,7 @@ cat >> ${NWROOT}/workflow/${RUN}_${expname}.xml <<EOF
        <value><cyclestr>&DATA_OBSPRD;</cyclestr></value>
     </envar>
 
-    <command>&JJOB_DIR;/launch.ksh &JJOB_DIR;/J&CAP_NET;_PREPOBS</command>
+    <command>&JJOB_DIR;/launch.sh &JJOB_PREPOBS;</command>
     <jobname><cyclestr>&NET;_prepobs_@H</cyclestr></jobname>
     <join><cyclestr>&LOG_SCHDLR;/&NET;_&envir;_prepobs_@Y@m@d@H@M.log\${PBS_JOBID}</cyclestr></join>
 
@@ -1183,7 +1220,7 @@ cat >> ${NWROOT}/workflow/${RUN}_${expname}.xml <<EOF
        <value><cyclestr>&DATA_FGSPRD;</cyclestr></value>
     </envar>
 
-    <command>&JJOB_DIR;/launch.ksh &JJOB_DIR;/J&CAP_NET;_PREPFGS</command>
+    <command>&JJOB_DIR;/launch.sh &JJOB_PREPFGS;</command>
     <jobname><cyclestr>&NET;_prepfgs_@H</cyclestr></jobname>
     <join><cyclestr>&LOG_SCHDLR;/&NET;_&envir;_prepfgs_@Y@m@d@H@M.log\${PBS_JOBID}</cyclestr></join>
 
@@ -1208,7 +1245,7 @@ cat >> ${NWROOT}/workflow/${RUN}_${expname}.xml <<EOF
        <value><cyclestr>&DATA_GSIANL;</cyclestr></value>
     </envar>
 
-    <command>&JJOB_DIR;/launch.ksh &JJOB_DIR;/J&CAP_NET;_GSIANL</command>
+    <command>&JJOB_DIR;/launch.sh &JJOB_GSIANL;</command>
     <jobname><cyclestr>&NET;_gsianl_@H</cyclestr></jobname>
     <join><cyclestr>&LOG_SCHDLR;/&NET;_&envir;_gsianl_@Y@m@d@H@M.log\${PBS_JOBID}</cyclestr></join>
 
@@ -1233,7 +1270,7 @@ cat >> ${NWROOT}/workflow/${RUN}_${expname}.xml <<EOF
        <value><cyclestr>&DATA_POST;</cyclestr></value>
     </envar>
 
-    <command>&JJOB_DIR;/launch.ksh &JJOB_DIR;/J&CAP_NET;_POST</command>
+    <command>&JJOB_DIR;/launch.sh &JJOB_POST;</command>
     <jobname><cyclestr>&NET;_post_@H</cyclestr></jobname>
     <join><cyclestr>&LOG_SCHDLR;/&NET;_&envir;_post_@Y@m@d@H@M.log\${PBS_JOBID}</cyclestr></join>
 
@@ -1255,9 +1292,9 @@ cat >> ${NWROOT}/workflow/${RUN}_${expname}.xml <<EOF
        <name>rundir_task</name>
        <value><cyclestr>&DATA_VERIF;</cyclestr></value>
     </envar>
-    <command>&JJOB_DIR;/launch.ksh &JJOB_DIR;/J&CAP_NET;_VERIF</command>
+    <command>&JJOB_DIR;/launch.sh &JJOB_VERIF;</command>
     <jobname><cyclestr>&NET;_verif_@H</cyclestr></jobname>
-    <join><cyclestr>&LOG_SCHDLR;/&NET;_submit_verif_@Y@m@d@H@M.log\${PBS_JOBID}</cyclestr></join>
+    <join><cyclestr>&LOG_SCHDLR;/&NET;_&envir;_verif_@Y@m@d@H@M.log\${PBS_JOBID}</cyclestr></join>
     &ENVARS_VERIF;
     <dependency>
           <taskdep task="&NET;_post"/>
@@ -1269,7 +1306,7 @@ cat >> ${NWROOT}/workflow/${RUN}_${expname}.xml <<EOF
 EOF
 
 # if running the step to plot (with GrADS)
-if [ ${run_plt} -eq 100 ] ; then
+if [ ${run_plt} -gt 0 ] ; then
 cat >> ${NWROOT}/workflow/${RUN}_${expname}.xml <<EOF 
 
   <task name="&NET;_post4fgs" cycledefs="&time_int;" maxtries="&maxtries;">
@@ -1282,7 +1319,7 @@ cat >> ${NWROOT}/workflow/${RUN}_${expname}.xml <<EOF
        <value><cyclestr>&DATA_POST4FGS;</cyclestr></value>
     </envar>
 
-    <command>&JJOB_DIR;/launch.ksh &JJOB_DIR;/J&CAP_NET;_POST4FGS</command>
+    <command>&JJOB_DIR;/launch.sh &JJOB_POST4FGS;</command>
     <jobname><cyclestr>&NET;_post4fgs_@H</cyclestr></jobname>
     <join><cyclestr>&LOG_SCHDLR;/&NET;_&envir;_post4fgs_@Y@m@d@H@M.log\${PBS_JOBID}</cyclestr></join>
 
@@ -1306,7 +1343,7 @@ cat >> ${NWROOT}/workflow/${RUN}_${expname}.xml <<EOF
        <value><cyclestr>&DATA_PLOTGRADS;</cyclestr></value>
     </envar>
 
-    <command>&JJOB_DIR;/launch.ksh &JJOB_DIR;/J&CAP_NET;_PLOTGRADS</command>
+    <command>&JJOB_DIR;/launch.sh &JJOB_PLOTGRADS;</command>
     <jobname><cyclestr>&NET;_plotgrads_@H</cyclestr></jobname>
     <join><cyclestr>&LOG_SCHDLR;/&NET;_&envir;_plotgrads_@Y@m@d@H@M.log\${PBS_JOBID}</cyclestr></join>
 
@@ -1366,24 +1403,23 @@ fi
 #
 #--- set up the log directory for rocoto workflow running job
 #
-WORKFLOW_DIR=${TOP_RTMA}/workflow
-mkdir -p ${WORKFLOW_DIR}/logs
-mkdir -p ${WORKFLOW_DIR}/logs/jlogfiles
-mkdir -p ${WORKFLOW_DIR}/logs/pgmout
+# WORKFLOW_DIR=${TOP_RTMA}/workflow
+# mkdir -p ${WORKFLOW_DIR}/logs
+# mkdir -p ${WORKFLOW_DIR}/logs/jlogfiles
+# mkdir -p ${WORKFLOW_DIR}/logs/pgmout
 
-########################################################################################
-#   Creating RTMA3D run script
-########################################################################################
-
-
+######################################################
+#   Creating script to submit the workflow of 3DRTMA #
+######################################################
 # Now make the run_rtma3d.sh script that can be invoked from a crontab
 
 if [ ${MACHINE} = 'theia' ]; then
 cat > ${NWROOT}/workflow/run_${RUN}_${expname}.sh <<EOF 
-#!/bin/sh -l
+#!/bin/bash
 
-# . /etc/profile
-# . /apps/lmod/lmod/init/ksh >/dev/null # Module Support
+module purge
+. /etc/profile
+. /apps/lmod/lmod/init/bash >/dev/null # Module Support
 
 module load intel
 module load rocoto
@@ -1397,13 +1433,16 @@ EOF
 chmod 744 ${NWROOT}/workflow/run_${RUN}_${expname}.sh
 echo "RTMA3D is ready to go! Run using run_${RUN}_${expname}.sh.  Make sure your xml file has consistent directory settings!"
 
-# script to check the workflow running status
+#####################################################
+# script to check the running status of workflow    #
+#####################################################
 if [ ${MACHINE} = 'theia' ]; then
 cat > ${NWROOT}/workflow/chk_${RUN}_${expname}.sh <<EOF 
-#!/bin/sh -l
+#!/bin/bash
 
-# . /etc/profile
-# . /apps/lmod/lmod/init/ksh >/dev/null # Module Support
+module purge
+. /etc/profile
+. /apps/lmod/lmod/init/bash >/dev/null # Module Support
 
 module load intel
 module load rocoto

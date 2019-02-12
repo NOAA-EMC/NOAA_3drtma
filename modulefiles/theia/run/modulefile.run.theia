@@ -23,12 +23,17 @@
 ##_____________________________________________________
 #set ver v6.2.3
 
-set COMP ifort
-set COMP_MP mpfort
-set COMP_MPI mpiifort
+# set COMP ifort
+export COMP=ifort
+# set COMP_MP mpfort
+export COMP_MP=mpfort
+# set COMP_MPI mpiifort
+export COMP_MPI=mpiifort
 
-set C_COMP icc
-set C_COMP_MP mpcc
+# set C_COMP icc
+export C_COMP=icc
+# set C_COMP_MP mpcc
+export C_COMP_MP=mpcc
 
 # Known conflicts
 
@@ -71,6 +76,8 @@ module load crtm/v2.2.3
     module use -a /contrib/modulefiles	
 #   module load contrib     # not use this line if use the command just above
 
+#   module load rocoto
+
     module load nco
     module load hpss
     module load gsd
@@ -79,14 +86,13 @@ module load crtm/v2.2.3
     module load wgrib
     module load wgrib2
 
-#   module load cairo
-    module load ncl
-#   module load ncview
     module load met/7.0
 
-    module load rocoto
-#   module load anaconda
-    module load grads
+    module load anaconda       # Python
+    module load grads          # GrADS
+    module load cairo          # NCL
+    module load ncl            # NCL
+    module load ncview         # ncview tools
  
     export CNVGRIB=${CNVGRIB:-"cnvgrib"}
     export WGRIB2=${WGRIB2:-"wgrib2"}

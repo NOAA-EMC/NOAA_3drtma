@@ -1,0 +1,17 @@
+VISsfc		VisibiSFC		0.001	1	0	km
+CEIL		CloudCeilingHgt		0.001	1	0	km
+HGTclb		CloudBaseHgt		0.001	1	0	km
+TMP2m		Temp2m			1.0	1	0	K
+RH2m		RelHumi2m		1.0	1	0	%
+UGRD10m		UWind10m		1.0	1	0	m/s
+VGRD10m		VWind10m		1.0	1	0	m/s
+WINDVECTOR10m	Windvector10m		1.0	1	1	m/s
+UGRDhlev	UWindZ=1		1.0	1	0	m/s
+VGRDhlev	VWindZ=1		1.0	1	0	m/s
+WINDVECTORhlev	WindvectorZ=1		1.0	1	1	m/s
+UGRDhlev	UWindZ=2		1.0	2	0	m/s
+VGRDhlev	VWindZ=2		1.0	2	0	m/s
+*UGRDhlev	UWindZ=49		1.0	49	0	m/s
+*VGRDhlev	VWindZ=49		1.0	49	0	m/s
+!UGRDhlev	UWindZ=50		1.0	50	0	m/s
+!VGRDhlev	VWindZ=50		1.0	50	0	m/s

@@ -4,7 +4,7 @@
 # ignore building directory ('build/'), directory of executable files ('exec/','bin/')
 **/exec/
 **/bin/
-**/build_log/
+**/build_*/
 sorc/**/log.*
 sorc/**/log_*
 
@@ -27,7 +27,9 @@ sorc/**/*.mod
 **/rtma_post.fd/
 
 # ignore directory of static data ('fix/', 'parm/')
-
+parm/*
+fix/*
+!parm/gsi
 
 # ignore the link files under directory modulefiles
 

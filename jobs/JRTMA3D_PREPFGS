@@ -1,4 +1,4 @@
-#!/bin/ksh
+#!/bin/bash
 
 # --- for debug --- #
 date
@@ -77,6 +77,7 @@ export EXECrtma3d=${EXECrtma3d:-$HOMErtma3d/exec}
 export FIXrtma3d=${FIXrtma3d:-$HOMErtma3d/fix/${RUN}}
 export PARMrtma3d=${PARMrtma3d:-$HOMErtma3d/parm/${RUN}}
 export USHrtma3d=${USHrtma3d:-$HOMErtma3d/ush/${RUN}}
+export UTILrtma3d=${UTILrtma3d:-$HOMErtma3d/util/${RUN}}
 
 #################################################
 # Set up the INPUT and OUTPUT directories
@@ -129,7 +130,7 @@ fi
 ######################
 # Execute the script.
 ######################
-${exSCR_PREPFGS:-$HOMErtma3d/scripts/${RUN}/ex${RUN}_prepfgs.ksh}
+${exSCR_PREPFGS:-$HOMErtma3d/scripts/${RUN}/ex${RUN}_prepfgs.sh}
 export err=$?; err_chk
 
 msg="$0 of $job completed normally"

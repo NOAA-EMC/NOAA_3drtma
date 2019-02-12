@@ -1,4 +1,4 @@
-#!/bin/ksh
+#!/bin/bash
 
 ##########################################################################
 ####  UNIX Script Documentation Block                                    #
@@ -103,6 +103,10 @@ for fld in $flds; do
           fi
   done
 done
+
+
+# COPY statistics data file of verification to COM2 for archive
+cp -p $stat_dir/${dom_out}/${exp}/${fld}/* ${COMOUTverif_rtma3d}/
 
 done
 exit ${err}

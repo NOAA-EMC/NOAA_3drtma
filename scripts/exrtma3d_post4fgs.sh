@@ -1,4 +1,4 @@
-#!/bin/ksh -l
+#!/bin/bash -l
 
 set -x
 
@@ -60,9 +60,6 @@ export MODEL="RAP"
 export DATAWRFHOME=${GESINhrrr_rtma3d:-"$COMIN"}
 export DATAWRFFILE=${FGSrtma3d_FNAME:-"${RUN}.t${cyc}z.firstguess.nc"}
 export PROD_HEAD2="${PROD_HEAD}.fgs"
-
-export PARMupp=${UPPPARM:-"${PARMrtma3d}/UPP"}
-export PARMwrf=${WRFPARM:-"${PARMrtma3d}/WRF"}
 
 ##########################################################################
 
@@ -152,47 +149,24 @@ EOF
 
 ${RM} -f fort.*
 ${RM} -f post_avblflds.xml params_grib2_tbl_new postcntrl.xml postxconfig-NT.txt eta_micro_lookup.dat
+${RM} -f WRF???.GrbF??
 
 # set up the namelist/control/config input files
-case ${UPP_CNTRL} in
-  0)
-  ln -s ${PARMupp}/hrrr_post_avblflds.xml      post_avblflds.xml
-  ln -s ${PARMupp}/hrrr_params_grib2_tbl_new   params_grib2_tbl_new
-  ln -s ${PARMupp}/hrrr_postcntrl.xml          postcntrl.xml
-  ln -s ${PARMupp}/postxconfig-NT-HRRR.txt     postxconfig-NT.txt
-  if [ "${MODEL}" == "RAP" ]; then
-    ln -s ${PARMupp}/rap_micro_lookup.dat      eta_micro_lookup.dat
-  elif [ "${MODEL}" == "WRF-RR NMM" ]; then
-    ln -s ${PARMupp}/nam_micro_lookup.dat      eta_micro_lookup.dat
-  fi
-  ;;
-  1)
-  ln -s ${PARMupp}/post_avblflds.xml           post_avblflds.xml
-  ln -s ${PARMupp}/params_grib2_tbl_new        params_grib2_tbl_new
-  ln -s ${PARMupp}/postcntrl.xml               postcntrl.xml
-  ln -s ${PARMupp}/postxconfig-NT.txt          postxconfig-NT.txt
-  if [ "${MODEL}" == "RAP" ]; then
-    ln -s ${PARMwrf}/ETAMPNEW_DATA             eta_micro_lookup.dat
-  elif [ "${MODEL}" == "WRF-RR NMM" ]; then
-    ln -s ${PARMwrf}/ETAMPNEW_DATA             eta_micro_lookup.dat
-  fi
-  ;;
-  2)
-  ln -s ${PARMupp}/hrrr_post_avblflds.xml      post_avblflds.xml
-  ln -s ${PARMupp}/hrrr_params_grib2_tbl_new   params_grib2_tbl_new
-  ln -s ${PARMupp}/hrrr_postcntrl.xml          postcntrl.xml
-  ln -s ${PARMupp}/hrrr_postxconfig-NT.txt     postxconfig-NT.txt
-  if [ "${MODEL}" == "RAP" ]; then
-    ln -s ${PARMupp}/rap_micro_lookup.dat      eta_micro_lookup.dat
-  elif [ "${MODEL}" == "WRF-RR NMM" ]; then
-    ln -s ${PARMupp}/nam_micro_lookup.dat      eta_micro_lookup.dat
-  fi
-  ;;
-  *)
-  echo "Unknown dataset option for UPP control/config. Abort!"
+
+cp -p ${PARMupp}/hrrr_post_avblflds.xml      post_avblflds.xml
+cp -p ${PARMupp}/hrrr_params_grib2_tbl_new   params_grib2_tbl_new
+cp -p ${PARMupp}/hrrr_postcntrl.xml          postcntrl.xml
+if [ -f ${PARMupp}/hrrr_postxconfig-NT.txt ] ; then
+  cp -p ${PARMupp}/hrrr_postxconfig-NT.txt     postxconfig-NT.txt
+else
+  echo " Warning: No postxconfig-NT.txt file. UPP Abort!"
   exit 1
-  ;;
-esac
+fi
+if [ "${MODEL}" == "RAP" ]; then
+  cp -p ${PARMupp}/rap_micro_lookup.dat      eta_micro_lookup.dat
+elif [ "${MODEL}" == "WRF-RR NMM" ]; then
+  cp -p ${PARMupp}/nam_micro_lookup.dat      eta_micro_lookup.dat
+fi
 
 ################################################################################
 # ln -s ${FIXcrtm}/EmisCoeff/Big_Endian/Nalli.EK-PDF.W_W-RefInd.EmisCoeff.bin EmisCoeff.bin
@@ -246,6 +220,18 @@ if [ ${err} -ne 0 ]; then
   ${ECHO} "rtma3d_wrfpost crashed!  Exit status=${err}"
   exit ${err}
 fi
+
+# Linking GrbF{HH} to GrbF00 (esp. for firstguess which is from WRF forecast)
+GrbFiles=`ls WRF???.GrbF??`
+for i in ${GrbFiles}
+do
+  i_fname=`echo "$i" | cut -d '.' -f 1`
+  i_extname=`echo "$i" | cut -d '.' -f 2`
+  if [[ "${i_extname}" != "GrbF${FCST_TIME}" ]]
+  then
+    ln -sf $i    ./${i_fname}.GrbF${FCST_TIME}
+  fi
+done
 
 # Append entire wrftwo to wrfprs
 ${CAT} ${workdir}/WRFPRS.GrbF${FCST_TIME}     ${workdir}/WRFTWO.GrbF${FCST_TIME} > ${workdir}/WRFPRS.GrbF${FCST_TIME}.new

@@ -147,7 +147,6 @@ fi
 # compiling lightning (bufr)
 BUILD_DIR=${SOURCE_DIR}/${ltn_bufr}
 cd ${BUILD_DIR}
-#exefile=process_Lightning_bufr.exe
 echo " ====>  compiling (bufr lightning)  is under directory: ${BUILD_DIR} "
 
 make clean  -f makefile_${target}
@@ -157,13 +156,13 @@ make -f makefile_${target}  >& ./log.make.process_lightning_bufr
 if [ $? -eq 0 ] ; then
   echo " code was built successfully."
 
-  echo " cp -p ${BUILD_DIR}/process_Lightning_bufr.exe    ${EXEC}/${exefile_name_cloud} "
-  cp -p ${BUILD_DIR}/process_Lightning_bufr.exe    ${EXEC}/${exefile_name_cloud}
-  ls -l ${EXEC}/${exefile_name_cloud}
+  echo " cp -p ${BUILD_DIR}/process_Lightning_bufr.exe    ${EXEC}/${exefile_name_lightning} "
+  cp -p ${BUILD_DIR}/process_Lightning_bufr.exe    ${EXEC}/${exefile_name_lightning}
+  ls -l ${EXEC}/${exefile_name_lightning}
 
 else
   echo " ================ WARNING =============== " 
-  echo " Compilation of ${exefile} code was failed."
+  echo " Compilation of code to pre-process lightning obs was failed."
   echo " Check up with the log file under ${BUILD_DIR}"
   echo "   ----> log.make.process_lightning_bufr: "
   echo " ================ WARNING =============== " 

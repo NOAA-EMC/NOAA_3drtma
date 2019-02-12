@@ -1,6 +1,11 @@
-#!/bin/ksh
+#!/bin/bash
 
 set -x 
+
+#
+#-- This script is goint to run GSI analysis (3DVar and Cloud analysis) in one-step
+#
+echo " This script is goint to run GSI analysis (3DVar and Cloud analysis) in one-step"
 
 #-- Testing the status of some important variables. --#
 # Make sure DATAHOME is defined and exists
@@ -33,8 +38,8 @@ fi
 
 
 # test the existence of script genating namelist file for gsi
-if [ ! -f ${USHrtma3d}/namelist/gsiparm.anl.sh ] ; then
-  ${ECHO} "ERROR: ${USHrtma3d}/namelist/gsiparm.anl.sh does not exist!"
+if [ ! -f ${PARMgsi}/gsiparm.anl.sh ] ; then
+  ${ECHO} "ERROR: ${PARMgsi}/gsiparm.anl.sh does not exist!"
    exit 1
 fi
 
@@ -192,25 +197,10 @@ fi
 ## 
 ## Link to pre-processed GFS EnKF forecast members
 ##
-for mem in `ls ${DATAROOT}/gfsenkf/enspreproc_arw_mem???`
-do
-  memname=`basename ${mem}`
-  ${LN} -s ${mem} ${memname}
-done
-
-${LS} enspreproc_arw_mem??? > filelist
 
 # Determine if hybrid option is available
 beta1_inv=1.0
 ifhyb=.false.
-nummem=`more filelist | wc -l`
-nummem=$((nummem - 3 ))
-if [[ ${nummem} -eq 80 ]]; then
-  echo "Do hybrid with ${memname}"
-  beta1_inv=0.25
-  ifhyb=.true.
-  ${ECHO} " Cycle ${YYYYMMDDHH}: GSI hybrid uses ${memname} with n_ens=${nummem}" >> ${logfile}
-fi
 
 # Set fixed files
 #   berror   = forecast model background error statistics
@@ -299,9 +289,11 @@ export JCAP=${JCAP:-62}
 export LEVS=${LEVS:-60}
 export DELTIM=${DELTIM:-$((3600/($JCAP/20)))}
 
-ndatrap=62
+ndatrap=67  #62 ?
+
+# 3DVar and Cloud analysis in one-step
 grid_ratio=${GSI_grid_ratio_in_var:-1}
-cloudanalysistype=5
+cloudanalysistype=1
 
 # option for hybrid vertical coordinate (HVC) in WRF-ARW
 
@@ -325,7 +317,7 @@ fi
 echo "HVC option is $hybridcord"
 
 # Build the GSI namelist on-the-fly
-cp ${USHrtma3d}/namelist/gsiparm.anl.sh ./
+cp ${PARMgsi}/gsiparm.anl.sh ./
 . ./gsiparm.anl.sh
 cat << EOF > gsiparm.anl
 $gsi_namelist
@@ -344,11 +336,11 @@ fi
 . prep_step
 
 startmsg
-msg="***********************************************************"
+msg="***************************************************************************"
 postmsg "$jlogfile" "$msg"
-msg="  begin gsi analysis for 1st pass: variational analysis"
+msg="  begin gsi analysis  : variational + cloud analysis in one-step"
 postmsg "$jlogfile" "$msg"
-msg="***********************************************************"
+msg="***************************************************************************"
 postmsg "$jlogfile" "$msg"
 
 # Save a copy of the GSI executable in the workdir
@@ -363,7 +355,7 @@ export err=$? ; err_chk
 #===========================================================#
 # error checking used in GSD script
 #===========================================================#
-export pgmout_stdout="stdout_var"
+export pgmout_stdout="stdout"
 cat ${pgmout} > ${pgmout_stdout}
 if [ -f errfile ] ; then
     cat errfile >> ${pgmout_stdout}
@@ -434,76 +426,7 @@ ${CP} ${pgmout_stdout}  ${COMOUT}/${pgmout_stdout}_gsianl.${YYYYMMDDHH}
 # cat fort.* > ${DATABASE_DIR}/log/fits_${YYYYMMDDHH}.txt
 cat fort.* > ${COMOUT}/fits_${YYYYMMDDHH}.txt
 
-## second GSI run
-
-mv gsiparm.anl gsiparm.anl_var
-mv sigf03 sigf03_step1
-mv siganl sigf03
-
-ndatrap=67
-grid_ratio=${GSI_grid_ratio_in_cldanl:-1}
-cloudanalysistype=6
-ifhyb=.false.
-
-# Build the GSI namelist on-the-fly
-cp ${USHrtma3d}/namelist/gsiparm.anl.sh ./
-. ./gsiparm.anl.sh
-cat << EOF > gsiparm.anl
-$gsi_namelist
-EOF
-
-if [ -f errfile ] ; then
-    rm -f errfile
-fi
-
-. prep_step
-
-startmsg
-msg="***********************************************************"
-postmsg "$jlogfile" "$msg"
-msg="  begin gsi analysis for 2nd pass: cloud analysis"
-postmsg "$jlogfile" "$msg"
-msg="***********************************************************"
-postmsg "$jlogfile" "$msg"
-
-# Run GSI
-#runline="${MPIRUN} -np $np ${GSI} < gsiparm.anl > stdout 2>&1"
-#runline="${MPIRUN} -np $np ${pgm} < gsiparm.anl >> ${pgmout} 2>errfile"
- runline="${MPIRUN} -np $np ${pgm}"
-$runline < gsiparm.anl >> ${pgmout}  2>errfile
-export err=$? ; err_chk
-
-#===========================================================#
-# error checking used in GSD script
-#===========================================================#
-export pgmout_stdout="stdout_cloud"
-cat ${pgmout} > ${pgmout_stdout}
-if [ -f errfile ] ; then
-    cat errfile >> ${pgmout_stdout}
-fi
-
-export error=$err
-if [ ${error} -ne 0 ]; then
-  ${ECHO} "ERROR: ${GSI} crashed  Exit status=${error}"
-  cp ${pgmout_stdout}  ../.
-  exit ${error}
-fi
-ls -l > GSI_workdir_list_cloud
-
-# Look for successful completion messages in rsl files
-nsuccess=`${TAIL} -200 ${pgmout_stdout} | ${AWK} '/PROGRAM GSI_ANL HAS ENDED/' | ${WC} -l`
-ntotal=1
-${ECHO} "Found ${nsuccess} of ${ntotal} completion messages"
-if [ ${nsuccess} -ne ${ntotal} ]; then
-   ${ECHO} "ERROR: ${GSI} did not complete sucessfully  Exit status=${error}"
-   cp ${pgmout_stdout}  ../.
-   cp GSI_workdir_list_cloud ../.
-   if [ ${error} -ne 0 ]; then
-     exit ${error}
-   else
-     exit 1
-   fi
-fi
+# Saving the running log file
 ${CP} -p  ${pgmout_stdout}  ${COMOUT}/${pgmout_stdout}_gsianl.${YYYYMMDDHH}
 
 # COPY ANALYSIS TO COM2 DIRECTORY AS PRODUCT

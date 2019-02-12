@@ -1,4 +1,4 @@
-#!/bin/ksh
+#!/bin/bash
 
 # --- for debug --- #
 date
@@ -75,6 +75,8 @@ export EXECrtma3d=${EXECrtma3d:-$HOMErtma3d/exec}
 export FIXrtma3d=${FIXrtma3d:-$HOMErtma3d/fix/${RUN}}
 export PARMrtma3d=${PARMrtma3d:-$HOMErtma3d/parm/${RUN}}
 export USHrtma3d=${USHrtma3d:-$HOMErtma3d/ush/${RUN}}
+export UTILrtma3d=${UTILrtma3d:-$HOMErtma3d/util/${RUN}}
+export UTILrtma3d_dev=${UTILrtma3d_dev:-$HOMErtma3d/util_dev/${RUN}}
 
 # date and time for previous and next cycle
 export PDYHH_cycm1=$($NDATE -01  "${PDYHH}")
@@ -133,11 +135,6 @@ fi
     export UPPEXE=${UPPEXE:-"rtma3d_post"}
     export pgm=${UPP_EXEC}/${UPPEXE}
 
-#   Set and Check the option to select the control parm data set for UPP
-    export UPP_CNTRL=${UPP_CNTRL:-1}    # 0: UPP default set for hrrr 
-                                        # 1: GSD
-                                        # 2: operational hrrr
-
 #   Set the path to the fix/ and parm/ files
 #   export FIX_ROOT=${FIXrtma3d:?} 
     export fixdir=${FIXgsi:-"${FIXrtma3d}/gsi"}
@@ -154,11 +151,23 @@ fi
 
 ##########################################################
 
+#   Link the path to the working directory
+    export DATA_RUNDIR=${DATA_RUNDIR:-"${DATAROOT}/${envir}/${RUN}.${PDY}${cyc}${subcyc}"}
+    if [ ! -d "${DATA_RUNDIR}" ] ; then
+        mkdir -p ${DATA_RUNDIR}
+    fi
+    export DATA_PLOTGRADS=${DATA_PLOTGRADS:-"${DATA_RUNDIR}/plotgrads"}
+    ${RM} -rf ${DATA_PLOTGRADS}
+    ${LN} -s  ${DATA}  ${DATA_PLOTGRADS}
+
 ######################
 # Execute the script.
 ######################
-${exSCR_PLOTGRADS:-$HOMErtma3d/scripts/${RUN}/ex${RUN}_plotgrads.ksh}
+${exSCR_PLOTGRADS:-$HOMErtma3d/scripts/${RUN}/ex${RUN}_plotgrads.sh}
 # export err=$?; err_chk
+if [ $? -eq 111 ] ; then
+  export err=$?; err_chk
+fi
 
 msg="$0 of $job completed normally"
 postmsg $jlogfile "$msg"

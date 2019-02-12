@@ -1,4 +1,4 @@
-#!/bin/ksh
+#!/bin/bash
 
 set -x 
 
@@ -74,8 +74,8 @@ HH=`${DATE} +"%H" -d "${START_TIME}"`
 HH_cycp1=`echo ${PDYHH_cycp1} | cut -c 9-10`
 
 # No "hrrr.tHHz.wrfguess" archived from operational hrrr after 18Z of 07/11/2018.
-if [ $YYYYMMDDHH -ge "2018071118" ] && [ $FGS_OPT -eq "2"  ] ; then
-  export FGS_OPT=1
+if [ $YYYYMMDDHH -ge "2018071118" ] && [ $FGS_OPT -eq "1"  ] ; then
+  export FGS_OPT=2
 fi
 
 #############################################################################
@@ -100,8 +100,9 @@ postmsg "$jlogfile" "$msg"
 
 # Look for bqckground from pre-forecast background
 FGShrrr_FNAME0="wrfout_d01_${time_str}"
-FGShrrr_FNAME1="hrrr.t${HH_cycp1}z.wrfguess_rap"
-FGShrrr_FNAME2="hrrr.t${HH}z.wrfguess"
+FGShrrr_FNAME1="hrrr.t${HH}z.wrfguess"
+FGShrrr_FNAME2="hrrr.t${HH_cycp1}z.wrfguess_rap"
+# FGShrrr_FNAME3="hrrr_*f001"
 
 if [ -r ${COMINhrrr_cycp1}/${FGShrrr_FNAME1} ] && [ $FGS_OPT -eq "1" ] ; then
   # cpfs ${COMINhrrr_cycp1}/${FGShrrr_FNAME1}          ${GESINhrrr_rtma3d}/${FGSrtma3d_FNAME}

@@ -1,4 +1,5 @@
-#!/bin/ksh
+#!/bin/bash
+## #!/bin/bash -l
 
 date
 
@@ -24,13 +25,13 @@ START_TIME=$ANLS_TIME
 # Make sure START_TIME is defined and in the correct format (YYYYMMDD HH)
 if [ ! "${START_TIME}" ]; then
   ${ECHO} "ERROR: \$START_TIME is not defined!"
-  exit 1
+  exit 111
 else
   if [ `${ECHO} "${START_TIME}" | ${AWK} '/^[[:digit:]]{10}$/'` ]; then
     START_TIME=`${ECHO} "${START_TIME}" | ${SED} 's/\([[:digit:]]\{2\}\)$/ \1/'`
   elif [ ! "`${ECHO} "${START_TIME}" | ${AWK} '/^[[:digit:]]{8}[[:blank:]]{1}[[:digit:]]{2}$/'`" ]; then
     ${ECHO} "ERROR: start time, '${START_TIME}', is not in 'yyyymmddhh' or 'yyyymmdd hh' format"
-    exit 1
+    exit 111
   fi
   START_TIME=`${DATE} -d "${START_TIME} ${subcyc} minutes"`
 fi
@@ -55,11 +56,12 @@ time_run=${time_str}
 #------------------------------------------------------------------#
 
 export PLTDIR=$DATA
-export myg2tool="/home/Gang.Zhao/local/grib/g2ctl"
+# export myg2tool="/home/Gang.Zhao/local/grib/g2ctl"
+export myg2tool="${UTILrtma3d_dev}/plot/grads/g2ctl"
 
 if [ ! -d ${PLTDIR} ] ; then
   echo " running/plotting directory is not found. Abort!"
-  exit 1
+  exit 111
 fi
 cd $PLTDIR
 
@@ -99,7 +101,7 @@ do
   gribmap -0 -i $ctlfile
   if [ ! -f $ctlfile ] || [ ! -f $idxfile ] ; then
     echo "g2ctl step failed. Abort!"
-    exit 1
+    exit 111
   fi
 done
 
@@ -113,8 +115,8 @@ export adate="${YYYY}${MM}${DD}${HH}${mm}"
 ulimit -S -s unlimited
 
 rm -f ./plt_fai.gs      ./variables_list_for_plot.txt
-cp -p ${USHrtma3d}/dev/grads/plt_fai.tmplt.gs			./plt_fai.gs
-cp -p ${USHrtma3d}/dev/grads/variables_list_for_plot.txt	./variables_list_for_plot.txt
+cp -p ${UTILrtma3d_dev}/plot/grads/script/plt_fai.tmplt.gs			./plt_fai.gs
+cp -p ${UTILrtma3d_dev}/plot/grads/script/variables_list_for_plot.txt	        ./variables_list_for_plot.txt
 sed -i 's/GMFNAME/'${gmf_fhead}'/g' ./plt_fai.gs
 sed -i 's/Y4M2D2H2M2/'${adate}'/g'  ./plt_fai.gs
 
@@ -143,7 +145,7 @@ do
     cp -p ./${i_fn}.png  ${COMOUTplot_rtma3d}/${PROD_HEAD}.${i_fn}.png
   else
     echo "picture format conversion crashed. No png or pdf file generated for gmf file ${i}."
-    exit 1
+    exit 111
   fi
   
 done
