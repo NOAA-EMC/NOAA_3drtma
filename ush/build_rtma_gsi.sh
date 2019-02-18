@@ -147,7 +147,7 @@ elif [ $target = jet ]; then
     module list
 elif [ $target = dell ]; then
     module purge
-    source $modules_dir/modulefile.ProdGSI.$target
+    source $modules_dir/modulefile.ProdGSI.wcoss_d
     export NETCDF_INCLUDE=-I/usrx/local/prod/packages/ips/18.0.1/netcdf/4.5.0/include
     export NETCDF_CFLAGS=-I/usrx/local/prod/packages/ips/18.0.1/netcdf/4.5.0/include
     export NETCDF_LDFLAGS_CXX="-L/usrx/local/prod/packages/ips/18.0.1/netcdf/4.5.0/lib -lnetcdf -lnetcdf_c++"
