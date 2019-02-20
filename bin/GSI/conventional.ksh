@@ -28,6 +28,9 @@ SSRC=${GSI_ROOT}/ssrc.exe
 
 # Set the path to the gsi executable
 ENCODE_TAMDAR=${GSI_ROOT}/process_tamdar_netcdf.exe
+APPEND_VSESONDE=${GSI_ROOT}/prepbufr_append_vessonndes.exe
+APPEND_CLAMPS=${GSI_ROOT}/prepbufr_append_clamps.exe
+APPEND_STICKNET=${GSI_ROOT}/prepbufr_append_sticknet.exe
 
 # Make sure DATAHOME is defined
 if [ ! "${DATAHOME}" ]; then
@@ -266,6 +269,104 @@ if [ ${error} -ne 0 ]; then
   exit ${error}
 fi
 
+# Append VSE sondes to prepbufr
+if [[ ${HH} -eq '01' || ${HH} -eq '07' || ${HH} -eq '13' || ${HH} -eq '19' ]]; then
+
+  VSESONDEPATH=/mnt/lfs3/projects/wrfruc/dturner/vse/sonde_outgoing/
+  ${LS} ${VSESONDEPATH}/sonde.*.${YYYYMMDD}${PREHH}00.txt > filelist_vsesonde
+  numsonde=`more filelist_vsesonde | wc -l`
+  numsonde=$((numsonde - 3 ))
+
+cat << EOF > namelist_vsesonde
+ &setup
+  sondefilelist='filelist_vsesonde'
+  numSondes=${numsonde}
+  cycledate=${YYYYMMDD}
+  cyclehour=${HH}
+  /
+EOF
+
+  if [[ ${numsonde} -gt 00 ]]; then
+     ${CP} newgblav.${YYYYMMDD}.rap.t${HH}z.prepbufr prepbufr_vsesondes
+     ${APPEND_VSESONDE} > stdout_append_vsedonde 2>&1
+     error=$?
+     if [ ${error} -ne 0 ]; then
+       ${ECHO} "ERROR: ${APPEND_VSESONDE} crashed  status=${error}"
+     #  exit ${error}   # we should continue data process even this step has problem
+     fi
+  else
+     echo "cannot find SVE sondes at this time ${YYYYMMDD}${PREHH}"
+  fi
+
+fi
+
+# Append VSE CLAMPS data to prepbufr
+CLAMPSPATH=/mnt/lfs1/projects/public/data/vortex-se/clamps1
+${LS} ${CLAMPSPATH}/clamps1.*.${PREYYYYMMDD}.${PREHH}55.txt > filelist_clamps
+numclamps=`more filelist_clamps | wc -l`
+numclamps=$((numclamps - 3 ))
+
+cat << EOF > namelist_clamps
+ &setup
+  sondefilelist='filelist_clamps'
+  numSondes=${numclamps}
+  cycledate=${YYYYMMDD}
+  cyclehour=${HH}
+  /
+EOF
+
+if [[ ${numclamps} -gt 00 ]]; then
+
+   if [ -r "prepbufr_vsesondes" ]; then
+     ${CP} prepbufr_vsesondes prepbufr_clamps
+   else
+     ${CP} newgblav.${YYYYMMDD}.rap.t${HH}z.prepbufr prepbufr_clamps
+   fi
+
+   ${APPEND_CLAMPS} > stdout_append_clamps 2>&1
+   error=$?
+   if [ ${error} -ne 0 ]; then
+     ${ECHO} "ERROR: ${APPEND_CLAMPS} crashed  status=${error}"
+   #  exit ${error}   # we should continue data process even this step has problem
+   fi
+else
+   echo "cannot find CLAMPS data at this time ${PREYYYYMMDD}${PREHH}"
+fi
+
+# Append VSE Stesonet observations to prepbufr
+if [ "${STICKNET}" ]; then
+
+  ${ECHO} "StickNet directory = ${STICKNET}"
+
+  if [ -r "${STICKNET}/${YYYYMMDD}_${HH}0000.csv" ]; then
+
+    ${ECHO} "copying StickNet data ${YYYYMMDD}_${HH}0000.csv"
+    ${CP} ${STICKNET}/${YYYYMMDD}_${HH}0000.csv .
+    ${LN} -s ${YYYYMMDD}_${HH}0000.csv sticknet_obs.input
+    ${ECHO} ${YYYYMMDD}${HH} > idate.input
+
+    if [ -r "prepbufr_clamps" ]; then
+      ${CP} prepbufr_clamps prepbufr_sticknet
+    elif [ -r "prepbufr_vsesondes" ]; then
+      ${CP} prepbufr_vsesondes prepbufr_sticknet
+    else
+      ${CP} newgblav.${YYYYMMDD}.rap.t${HH}z.prepbufr prepbufr_sticknet
+    fi
+
+    ${LN} -s prepbufr_sticknet prepbufr
+    if [ ! -x ${APPEND_STICKNET} ]; then
+      ${ECHO} "Executable for appending StickNet data not found:  ${APPEND_STICKNET}"
+    else
+      ${APPEND_STICKNET} > stdout_append_sticknet 2>&1
+    fi
+    ${RM} -f prepbufr
+
+  else
+    ${ECHO} "StickNet data at current time not found:  ${YYYYMMDD}_${HH}0000.csv"
+  fi
+
+fi
+
 # Add nacelle, tower and sodar observations if available
 ${CP} newgblav.${YYYYMMDD}.rap.t${HH}z.prepbufr prepbufr_wfip
 if [ -r "${NACELLE_RSD}/${YYJJJHH}000010o" ]; then
@@ -308,4 +409,5 @@ else
   ${ECHO} "Warning: ${SODAR_NRSD}/${YYJJJHH}000015o does not exist!"
 fi
 
+${ECHO} "End of conventional.ksh"
 exit 0
