@@ -3,8 +3,8 @@
 username=`logname`
 echo $username
 
-git config user.email "${username}@noaa.gov"
 git config user.name "${username}"
+git config user.email "guoqing.ge@noaa.gov"
 
 git commit "$@"
 echo "Do you want to push the commit to the server (y/n)?"

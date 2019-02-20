@@ -120,6 +120,8 @@ YYYY=`${DATE} +"%Y" -d "${START_TIME}"`
 MM=`${DATE} +"%m" -d "${START_TIME}"`
 DD=`${DATE} +"%d" -d "${START_TIME}"`
 HH=`${DATE} +"%H" -d "${START_TIME}"`
+PREYYYYMMDD=`${DATE} +"%Y%m%d" -d "${START_TIME} 1 hour ago"`
+PREHH=`${DATE} +"%H" -d "${START_TIME} 1 hour ago"`
 
 # Copy the prepbufr to obs directory so we never do I/O to /public directly
 if [ ${EARLY} -eq 0 ]; then
@@ -270,12 +272,10 @@ if [ ${error} -ne 0 ]; then
 fi
 
 # Append VSE sondes to prepbufr
-if [[ ${HH} -eq '01' || ${HH} -eq '07' || ${HH} -eq '13' || ${HH} -eq '19' ]]; then
-
-  VSESONDEPATH=/mnt/lfs3/projects/wrfruc/dturner/vse/sonde_outgoing/
-  ${LS} ${VSESONDEPATH}/sonde.*.${YYYYMMDD}${PREHH}00.txt > filelist_vsesonde
-  numsonde=`more filelist_vsesonde | wc -l`
-  numsonde=$((numsonde - 3 ))
+VSESONDEPATH=/mnt/lfs3/projects/wrfruc/dturner/vse/sonde_outgoing
+${LS} ${VSESONDEPATH}/sonde.*.${PREYYYYMMDD}${PREHH}??.txt > filelist_vsesonde
+numsonde=`more filelist_vsesonde | wc -l`
+numsonde=$((numsonde - 3 ))
 
 cat << EOF > namelist_vsesonde
  &setup
@@ -286,23 +286,24 @@ cat << EOF > namelist_vsesonde
   /
 EOF
 
-  if [[ ${numsonde} -gt 00 ]]; then
-     ${CP} newgblav.${YYYYMMDD}.rap.t${HH}z.prepbufr prepbufr_vsesondes
-     ${APPEND_VSESONDE} > stdout_append_vsedonde 2>&1
-     error=$?
-     if [ ${error} -ne 0 ]; then
-       ${ECHO} "ERROR: ${APPEND_VSESONDE} crashed  status=${error}"
-     #  exit ${error}   # we should continue data process even this step has problem
-     fi
-  else
-     echo "cannot find SVE sondes at this time ${YYYYMMDD}${PREHH}"
-  fi
-
+if [[ ${numsonde} -gt 00 ]]; then
+   ${CP} newgblav.${YYYYMMDD}.rap.t${HH}z.prepbufr prepbufr_vsesondes
+   ${APPEND_VSESONDE} > stdout_append_vsedonde 2>&1
+   error=$?
+   if [ ${error} -ne 0 ]; then
+     ${ECHO} "ERROR: ${APPEND_VSESONDE} crashed  status=${error}"
+   #  exit ${error}   # we should continue data process even this step has problem
+   else
+     ${ECHO} "${numsonde} VSE sondes have been appended to prepbufr"
+   fi
+else
+   echo "cannot find VSE sondes at this time ${YYYYMMDD}${PREHH}"
 fi
 
 # Append VSE CLAMPS data to prepbufr
 CLAMPSPATH=/mnt/lfs1/projects/public/data/vortex-se/clamps1
-${LS} ${CLAMPSPATH}/clamps1.*.${PREYYYYMMDD}.${PREHH}55.txt > filelist_clamps
+${LS} ${CLAMPSPATH}/clamps1.*.${YYYYMMDD}.${HH}05.txt > filelist_clamps
+#${LS} ${CLAMPSPATH}/clamps1.*.${PREYYYYMMDD}.${PREHH}55.txt > filelist_clamps
 numclamps=`more filelist_clamps | wc -l`
 numclamps=$((numclamps - 3 ))
 
@@ -328,9 +329,12 @@ if [[ ${numclamps} -gt 00 ]]; then
    if [ ${error} -ne 0 ]; then
      ${ECHO} "ERROR: ${APPEND_CLAMPS} crashed  status=${error}"
    #  exit ${error}   # we should continue data process even this step has problem
+   else
+     ${ECHO} "${numclamps} CLAMPS profiles have been appended to prepbufr"
    fi
 else
-   echo "cannot find CLAMPS data at this time ${PREYYYYMMDD}${PREHH}"
+   echo "cannot find CLAMPS data at this time ${YYYYMMDD}${HH}"
+#   echo "cannot find CLAMPS data at this time ${PREYYYYMMDD}${PREHH}"
 fi
 
 # Append VSE Stesonet observations to prepbufr
