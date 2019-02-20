@@ -1,7 +1,7 @@
 #!/bin/bash
 
-echo "Input your user name:"
-read username
+username=`logname`
+echo $username
 
 git config user.email "${username}@noaa.gov"
 git config user.name "${username}"
