@@ -56,6 +56,7 @@
 <!ENTITY HIGHRES_SST_DIR "&OBS_DIR;/grids/ncep/sst/0p083deg/grib2">
 <!ENTITY HIGHRES_SST14KM_DIR "&OBS_DIR;/grids/ncep/sst/grib">
 <!ENTITY TCVITALS_DIR "&OBS_DIR;/nhc/tcvitals">
+<!ENTITY STICKNET_DIR "&OBS_DIR;/vortex-se/stesonet">
 
 <!ENTITY LOG_DIR "&DATABASE_DIR;/log">
 <!ENTITY DATAROOT_ENS "&DATABASE_DIR;/gfsenkf">
@@ -417,6 +418,10 @@
       <name>TCVITALS_DIR</name>
       <value>&TCVITALS_DIR;</value>
     </envar>
+    <envar>
+      <name>STICKNET</name>
+      <value>&STICKNET_DIR;</value>
+    </envar>
 
     <dependency>
       <or>
@@ -504,6 +509,10 @@
     <envar>
       <name>TCVITALS_DIR</name>
       <value>&TCVITALS_DIR;</value>
+    </envar>
+    <envar>
+      <name>STICKNET</name>
+      <value>&STICKNET_DIR;</value>
     </envar>
 
     <dependency>
