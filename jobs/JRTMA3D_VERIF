@@ -49,6 +49,12 @@ export NET=rtma3d
 export jobid=${jobid:-"${outid}.o$$"}
 
 export DATA=${DATA:-${DATAROOT:?}/${jobid:?}}  #jobid ($job.$LSB_JOBID MUST BE DEFINED IN TERNS OF $RUN IN UPPER LEVEL SCRIPT /MPondeca, 26Jul2015
+if [ -d $DATA ] ; then
+   rm  -rf $DATA/*
+else
+   mkdir -p $DATA
+fi
+cd $DATA
 
 ####################################
 
@@ -99,11 +105,18 @@ export urma_dir_ops=${urma_dir_ops:-$DATA_OBSPRD}
 export urma_dir=${urma_dir:-$DATA_OBSPRD}
 
 export DATA_RUNDIR=${DATA_RUNDIR:-"${DATAROOT}/${envir}/${RUN}.${PDY}${cyc}${subcyc}"}
-
+# stat_dir and MET_DIR are both used in verification MET script
+# MET_DIR: as MET running dir
+# stat_dir: as statistics results output dir (could be same as MET_DIR?)
 export DATA_VERIF=${DATA_VERIF:-"${DATA_RUNDIR}/verifprd"}
 export stat_dir=${stat_dir:-"${DATA_VERIF}"}
+export MET_DIR=${MET_DIR:-"$DATA"}
+if [ ! -d $MET_DIR ] ; then
+   mkdir -p $MET_DIR
+fi
 
 export MASKS=${MASKS:-$PARMverf/masks}
+
 
 ###########################################
 

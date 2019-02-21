@@ -1,4 +1,5 @@
-#!/bin/bash
+#!/bin/ksh
+# #!/bin/bash
 
 ##########################################################################
 ####  UNIX Script Documentation Block                                    #
@@ -15,13 +16,15 @@
 set -x
 
 
+cd ${DATA} 
 
 msg="JOB $job HAS BEGUN"
 postmsg "$jlogfile" "$msg"
 setpdy.sh
-. PDY
+# . PDY
+. ${DATA}/PDY
 
-
+# MET_DIR is same as DATA (running directory)
 cd $MET_DIR
 
 

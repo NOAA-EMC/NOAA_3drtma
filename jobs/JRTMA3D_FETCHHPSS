@@ -99,7 +99,10 @@ if [ ! -d "${GESINhrrr_rtma3d}" ] ; then
    mkdir -p $GESINhrrr_rtma3d
 fi
 
-
+###########################################################
+export obsprep_radar=${obsprep_radar:-1}
+export obsprep_lghtn=${obsprep_lghtn:-1}
+export obsprep_cloud=${obsprep_cloud:-1}
 ###########################################################
 
 ######################

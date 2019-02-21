@@ -1,4 +1,5 @@
-#!/bin/bash
+#!/bin/ksh
+# #!/bin/bash
 ##########################################################################
 ####  UNIX Script Documentation Block                                    #
 #                                                                        #
@@ -63,6 +64,8 @@ while [ $CYCLE_3 -le $CYCLE_LAST ] ; do
     hpsspath=$hpsspath1/rh${YYYY}/${YYYYMM}/${YYYYMMDD}
     hpsspath_1yr=$hpsspath1_1yr/rh${YYYY}/${YYYYMM}/${YYYYMMDD}
 
+    hpsspath_AGibbs=$hpsspath1_AGibbs/rh${YYYY_m1hr}/${YYYYMM_m1hr}/${YYYYMMDD_m1hr}
+
     hpsspath_gsd=$hpsspath1_gsd/${YYYY}/${MM}/${DD}
     radar_gsd_dir=$hpsspath_gsd/data/radar
     mrmsradar_dir=$radar_gsd_dir/mrms
@@ -86,8 +89,13 @@ while [ $CYCLE_3 -le $CYCLE_LAST ] ; do
        fi
     fi
 
+    prefix_hrrr_AGibbs="gpfs_hps_nco_ops_nwges_prod_hrrr_hrrrges_sfc_conus"
+    hpsspath_hrrr_AGibbs=$hpsspath_AGibbs
+    tarfile_hrrr_AGibbs=${prefix_hrrr_AGibbs}.netcdf.${YYYYMMDD_m1hr}.tar
 
-    if (((${HH} >= 00) && (${HH} <=  05))) ; then
+#   if [ ${HH} -ge 00 ] && [ ${HH} -le 05 ] ; then   # Good with Bash and Ksh
+#   if (((10#${HH} >= 00) && (10#${HH} <=  05))) ; then # Good with Bash and Ksh
+    if (((${HH} >= 00) && (${HH} <=  05))) ; then    # NOT recommended for BASH, but work well with ksh.
 #      tarfile_rap=${prefix}_${NET}_${envir}_${RUN}.${YYYYMMDD}00-05.tar
        tarfile_rap_bufr=${prefix}_rap_prod_rap.${YYYYMMDD}00-05.bufr.tar
        tarfile_hrrr_init=${prefix}_hrrr_prod_hrrr.${YYYYMMDD}${domain_hrrr}00-05.init.tar
@@ -230,6 +238,7 @@ while [ $CYCLE_3 -le $CYCLE_LAST ] ; do
     /bin/rm -rf select_list_1.txt_tmp
     /bin/rm -rf select_list_1.txt
 
+
     htar -tvf ${hpsspath_hrrr}/${tarfile_hrrr_init}  > list_all_1.txt
 
     if [ "$i" -eq 1 ] ; then
@@ -239,7 +248,9 @@ while [ $CYCLE_3 -le $CYCLE_LAST ] ; do
 #     cat list_all_1.txt | grep "\<hrrr.t${HH}z.wrfguess\>"  >> select_list_1.txt_tmp
       cat list_all_1.txt | grep -w hrrr.t${HH}z.wrfguess  >> select_list_1.txt_tmp
     else
-      cat list_all_1.txt | grep -w hrrr.t${HH}z.wrfguess_rap >> select_list_1.txt_tmp
+      if [ $YYYYMMDDHH -ge "2018071118"  ] && [ $YYYYMMDDHH -lt "2018102001" ] ; then
+        cat list_all_1.txt | grep -w hrrr.t${HH}z.wrfguess_rap >> select_list_1.txt_tmp
+      fi
     fi
 
     nlines=`wc -l select_list_1.txt_tmp`
@@ -253,9 +264,36 @@ while [ $CYCLE_3 -le $CYCLE_LAST ] ; do
       let "it=it+1"
     done
     htar -xvf ${hpsspath_hrrr}/${tarfile_hrrr_init} -L select_list_1.txt
+
+#
+
+    if [ "$i" -eq 1 ] && [ $YYYYMMDDHH -ge "2018102001" ] ; then
+      
+#     /bin/rm -rf select_list_1_AGibbs.txt_tmp
+#     /bin/rm -rf select_list_1_AGibbs.txt
+#     /bin/rm -rf list_all_1_AGibbs.txt
+    
+#     htar -tvf ${hpsspath_hrrr_AGibbs}/${tarfile_hrrr_AGibbs}  > list_all_1_AGibbs.txt
+
+#     cat list_all_1_AGibbs.txt | grep hrrr_${YYYYMMDDHH_m1hr}f001 >> select_list_1_AGibbs.txt_tmp
+
+#     nlines=`wc -l select_list_1_AGibbs.txt_tmp`
+#     nlines=${nlines% select*}
+#     echo "nlines ="$nlines
+
+#     it=1
+#     while [ $it -le $nlines ] ; do
+#       var="`cat select_list_1_AGibbs.txt_tmp | head -n $it | tail  -1`" 
+#       echo "./"${var#* ./} >> select_list_1_AGibbs.txt
+#       let "it=it+1"
+#     done
+#     htar -xvf ${hpsspath_hrrr_AGibbs}/${tarfile_hrrr_AGibbs} -L select_list_1_AGibbs.txt
+      htar -xvf ${hpsspath_hrrr_AGibbs}/${tarfile_hrrr_AGibbs} hrrr_${YYYYMMDDHH_m1hr}f001  ./
+
+    fi
         
 #==================================================================================================
-    if [ "$i" -eq 1 ] ; then
+    if [ "$i" -eq 1 ] && [ ${obsprep_radar} -eq 1 ] ; then
       cd $wrkdir_radar
       rm -rf $mrmsradar_grib2_dir
       if [ ! -d $mrmsradar_grib2_dir ] ; then

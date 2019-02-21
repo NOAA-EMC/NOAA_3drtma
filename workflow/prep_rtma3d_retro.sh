@@ -31,11 +31,11 @@ fi
 #--- User defined variables                         #
 #####################################################
 set -x
-export startCDATE=201805011800              #yyyymmddhhmm - Starting day of retro run 
-export endCDATE=201805011800                #yyyymmddhhmm - Ending day of RTMA3D run (needed for both RETRO and REAL TIME). 
+export startCDATE=201902120600              #yyyymmddhhmm - Starting day of retro run 
+export endCDATE=201902121100                #yyyymmddhhmm - Ending day of RTMA3D run (needed for both RETRO and REAL TIME). 
 export NET=rtma3d                           #selection of rtma3d (or rtma,urma)
 export RUN=rtma3d                           #selection of rtma3d (or rtma,urma)
-export envir="UppEmcHrrr04"                 #environment (test, prod, dev, etc.)
+export envir="Feb2019"                      #environment (test, prod, dev, etc.)
 export run_envir="dev"                      #
 export expname="${envir}"                   # experiment name
 export ptmp_base="/scratch3/NCEPDEV/stmp1/${USER}/wrkdir_${NET}"  #base subdirectory for all subsequent working and storage directories
@@ -43,7 +43,7 @@ export NWROOT=${TOP_RTMA}                   #root directory for RTMA/URMA j-job 
 export QUEUE="batch"                        #user-specified processing queue
 export QUEUE_DBG="debug"                    #user-specified processing queue -- debug
 export QUEUE_SVC="service"                  #user-specified transfer queue
-export ACCOUNT="da-cpu"                     #Theia account for CPU resources
+export ACCOUNT="fv3-cpu"                     #Theia account for CPU resources
 
 # detect the machine/platform
 if [ `grep -c 'E5-2690 v3' /proc/cpuinfo` -gt 0 ]; then
@@ -111,7 +111,8 @@ export exefile_name_verif=""    # executable of verification (MET) is defined by
 
   export PARMgsi_udef=""
 # export PARMupp_udef="/scratch4/NCEPDEV/fv3-cam/save/Gang.Zhao/FixData/parm/upp_gsd_test_mhu_rap_20"
-  export PARMupp_udef="/scratch4/NCEPDEV/fv3-cam/save/Gang.Zhao/FixData/parm/upp_gsd_test_mhu_hrrr_04"
+# export PARMupp_udef="/scratch4/NCEPDEV/fv3-cam/save/Gang.Zhao/FixData/parm/upp_gsd_test_mhu_hrrr_04"
+  export PARMupp_udef="/scratch4/NCEPDEV/fv3-cam/save/Gang.Zhao/FixData/parm/upp_emc_raphrrr_5.0"
   export PARMwrf_udef="/scratch4/NCEPDEV/fv3-cam/save/Gang.Zhao/FixData/static_gsd_rtma3d_gge/WRF"
   export PARMverf_udef="/scratch4/NCEPDEV/fv3-cam/save/Edward.Colon/FixData/VERIF-fix"
 
@@ -135,6 +136,7 @@ export exefile_name_verif=""    # executable of verification (MET) is defined by
 #
 #        link to the symbol links
 #
+
   if [ ! -d ${FIXrtma3d}   ] ; then mkdir -p ${FIXrtma3d}   ; fi
   if [ ! -d ${PARMrtma3d}  ] ; then mkdir -p ${PARMrtma3d}  ; fi
   if [ ! -d ${OBS_USELIST} ] ; then mkdir -p ${OBS_USELIST} ; fi
@@ -183,6 +185,8 @@ export exefile_name_verif=""    # executable of verification (MET) is defined by
     echo " Abort linking task."
     exit 9
   fi
+
+
   echo
   ls -ltr $FIXrtma3d
   echo
@@ -335,7 +339,7 @@ cat > ${NWROOT}/workflow/${RUN}_${expname}.xml <<EOF
 <!ENTITY hpsspath1      "/NCEPPROD/hpssprod/runhistory">
 <!ENTITY hpsspath1_1yr  "/NCEPPROD/1year/hpssprod/runhistory">
 <!ENTITY hpsspath1_gsd  "/BMC/fdr/Permanent">
-<!ENTITY hpsspath1_AGibbs  "/NCEPDEV/emc-meso/1year/Annette.Gibbs/">
+<!ENTITY hpsspath1_AGibbs  "/NCEPDEV/emc-meso/1year/Annette.Gibbs">
 
 <!ENTITY FGS_OPT        "${fgs_opt}">
 
@@ -351,7 +355,7 @@ cat > ${NWROOT}/workflow/${RUN}_${expname}.xml <<EOF
 
 <!-- for workflow -->
 
-<!ENTITY maxtries	"5">
+<!ENTITY maxtries	"10">
 <!ENTITY KEEPDATA	"YES">
 <!ENTITY SENDCOM	"YES">
 
@@ -1047,7 +1051,7 @@ cat > ${NWROOT}/workflow/${RUN}_${expname}.xml <<EOF
    </envar>'>
 ]>
 
-<workflow realtime="F" scheduler="moabtorque" cyclethrottle="1" taskthrottle="350" cyclelifespan="03:00:00:00">
+<workflow realtime="F" scheduler="moabtorque" cyclethrottle="1" taskthrottle="350" cyclelifespan="15:00:00:00">
 
   <log>
     <cyclestr>&LOG_WRKFLW;/&NET;_workflow_&envir;_@Y@m@d@H.log</cyclestr>

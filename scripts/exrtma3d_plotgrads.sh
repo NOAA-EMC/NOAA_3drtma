@@ -70,26 +70,32 @@ cd $PLTDIR
 #
 #   linking grib2 data file for UPP post-processed firstguess
 if [ ! "${PROD_HEAD}" ] ; then
-  NAT_FGS_FNAME="${RUN}.t{cyc}z.fgs.wrfnat_hrconus_00.grib2"
+  FGS_NAT_FNAME="${RUN}.t{cyc}z.fgs.wrfnat_hrconus_00.grib2"
+  FGS_PRS_FNAME="${RUN}.t{cyc}z.fgs.wrfprs_hrconus_00.grib2"
 else
-  NAT_FGS_FNAME="${PROD_HEAD}.fgs.wrfnat_hrconus_00.grib2"
+  FGS_NAT_FNAME="${PROD_HEAD}.fgs.wrfnat_hrconus_00.grib2"
+  FGS_PRS_FNAME="${PROD_HEAD}.fgs.wrfprs_hrconus_00.grib2"
 fi
-rm -f ./fgs.grib2
-ln -sf ${COMOUTpost_rtma3d}/${NAT_FGS_FNAME}  ./fgs.grib2
+rm -f ./fgs_nat.grib2 ./fgs_prs.grib2
+ln -sf ${COMOUTpost_rtma3d}/${FGS_NAT_FNAME}  ./fgs_nat.grib2
+ln -sf ${COMOUTpost_rtma3d}/${FGS_PRS_FNAME}  ./fgs_prs.grib2
 
 #   linking grib2 data file for UPP post-processed analysis
 if [ ! "${PROD_HEAD}" ] ; then
-  NAT_ANL_FNAME="${RUN}.t{cyc}z.wrfnat_hrconus_00.grib2"
+  ANL_NAT_FNAME="${RUN}.t{cyc}z.wrfnat_hrconus_00.grib2"
+  ANL_PRS_FNAME="${RUN}.t{cyc}z.wrfprs_hrconus_00.grib2"
 else
-  NAT_FGS_FNAME="${PROD_HEAD}.wrfnat_hrconus_00.grib2"
+  ANL_NAT_FNAME="${PROD_HEAD}.wrfnat_hrconus_00.grib2"
+  ANL_PRS_FNAME="${PROD_HEAD}.wrfprs_hrconus_00.grib2"
 fi
-rm -f ./anl.grib2
-ln -sf ${COMOUTpost_rtma3d}/${NAT_FGS_FNAME}  ./anl.grib2
+rm -f ./anl_nat.grib2 ./anl_prs.grib2
+ln -sf ${COMOUTpost_rtma3d}/${ANL_NAT_FNAME}  ./anl_nat.grib2
+ln -sf ${COMOUTpost_rtma3d}/${ANL_PRS_FNAME}  ./anl_prs.grib2
 
 #
 # g2ctl
 #
-fnames="fgs anl"
+fnames="fgs_nat fgs_prs anl_nat anl_prs"
 for fn in $fnames
 do
   g2file="${fn}.grib2"

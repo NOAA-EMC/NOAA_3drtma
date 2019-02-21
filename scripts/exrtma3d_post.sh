@@ -151,16 +151,24 @@ ${RM} -f post_avblflds.xml params_grib2_tbl_new postcntrl.xml postxconfig-NT.txt
 ${RM} -f WRF???.GrbF??
 
 # set up the namelist/control/config input files
+# hrrr"x": means experimental testing.
+# cp -p ${PARMupp}/hrrr_post_avblflds.xml          post_avblflds.xml
+  cp -p ${PARMupp}/post_avblflds_raphrrr.xml       post_avblflds.xml
+# cp -p ${PARMupp}/hrrr_params_grib2_tbl_new       params_grib2_tbl_new
+  cp -p ${PARMupp}/params_grib2_tbl_new_raphrrr    params_grib2_tbl_new
+# cp -p ${PARMupp}/hrrr_postcntrl.xml              postcntrl.xml
+# cp -p ${PARMupp}/postcntrl_hrrr.xml              postcntrl.xml
+  cp -p ${PARMupp}/postcntrl_hrrrx.xml             postcntrl.xml
 
-cp -p ${PARMupp}/hrrr_post_avblflds.xml      post_avblflds.xml
-cp -p ${PARMupp}/hrrr_params_grib2_tbl_new   params_grib2_tbl_new
-cp -p ${PARMupp}/hrrr_postcntrl.xml          postcntrl.xml
-if [ -f ${PARMupp}/hrrr_postxconfig-NT.txt ] ; then
-  cp -p ${PARMupp}/hrrr_postxconfig-NT.txt     postxconfig-NT.txt
+# if [ -f ${PARMupp}/hrrr_postxconfig-NT.txt ] ; then
+#   cp -p ${PARMupp}/hrrr_postxconfig-NT.txt       postxconfig-NT.txt
+if [ -f ${PARMupp}/postxconfig-NT-hrrrx.txt ] ; then
+  cp -p ${PARMupp}/postxconfig-NT-hrrrx.txt        postxconfig-NT.txt
 else
   echo " Warning: No postxconfig-NT.txt file. UPP Abort!"
   exit 1
 fi
+
 if [ "${MODEL}" == "RAP" ]; then
   cp -p ${PARMupp}/rap_micro_lookup.dat      eta_micro_lookup.dat
 elif [ "${MODEL}" == "WRF-RR NMM" ]; then
@@ -275,17 +283,19 @@ ${LN} -sf ${COMOUTpost_rtma3d}/${PROD_HEAD}.wrftwo_hrconus_${FCST_TIME}.grib2 ${
 # The following data transferr is used in GSD old unipost script
 #  (Should be removed for NCO usage)
 # Move the output files to postprd under $COMOUTpost_rtma3d
-${MV} ${workdir}/wrfprs_hrconus_${FCST_TIME}.grib2 ${DATAHOME}/wrfprs_hrconus_${FCST_TIME}.grib2
-${MV} ${workdir}/wrftwo_hrconus_${FCST_TIME}.grib2 ${DATAHOME}/wrftwo_hrconus_${FCST_TIME}.grib2
-${MV} ${workdir}/wrfnat_hrconus_${FCST_TIME}.grib2 ${DATAHOME}/wrfnat_hrconus_${FCST_TIME}.grib2
+# ${MV} ${workdir}/wrfprs_hrconus_${FCST_TIME}.grib2 ${DATAHOME}/wrfprs_hrconus_${FCST_TIME}.grib2
+# ${MV} ${workdir}/wrftwo_hrconus_${FCST_TIME}.grib2 ${DATAHOME}/wrftwo_hrconus_${FCST_TIME}.grib2
+# ${MV} ${workdir}/wrfnat_hrconus_${FCST_TIME}.grib2 ${DATAHOME}/wrfnat_hrconus_${FCST_TIME}.grib2
 
 # ${RM} -rf ${workdir}
+  ${RM} -f  ${workdir}/wrf???_hrconus_*.grib2
+  ${RM} -f  ${workdir}/WRF???.GrbF??
 
 # Create softlinks for transfer
-basetime=`${DATE} +%y%j%H%M -d "${START_TIME}"`
-ln -s ${DATAHOME}/wrfprs_hrconus_${FCST_TIME}.grib2 ${DATAHOME}/wrfprs_${basetime}${FCST_TIME}00
-ln -s ${DATAHOME}/wrftwo_hrconus_${FCST_TIME}.grib2 ${DATAHOME}/wrftwo_${basetime}${FCST_TIME}00
-ln -s ${DATAHOME}/wrfnat_hrconus_${FCST_TIME}.grib2 ${DATAHOME}/wrfnat_${basetime}${FCST_TIME}00
+# basetime=`${DATE} +%y%j%H%M -d "${START_TIME}"`
+# ln -s ${DATAHOME}/wrfprs_hrconus_${FCST_TIME}.grib2 ${DATAHOME}/wrfprs_${basetime}${FCST_TIME}00
+# ln -s ${DATAHOME}/wrftwo_hrconus_${FCST_TIME}.grib2 ${DATAHOME}/wrftwo_${basetime}${FCST_TIME}00
+# ln -s ${DATAHOME}/wrfnat_hrconus_${FCST_TIME}.grib2 ${DATAHOME}/wrfnat_${basetime}${FCST_TIME}00
 #================================================================================#
 
 ${ECHO} "unipost completed at `${DATE}`"

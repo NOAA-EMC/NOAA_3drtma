@@ -502,4 +502,9 @@ ${CP} -p  ${pgmout_stdout}  ${COMOUT}/${pgmout_stdout}_gsianl.${YYYYMMDDHH}
 ${CP} -p   ${DATA}/wrf_inout                        ${COMOUTgsi_rtma3d}/${ANLrtma3d_FNAME}
 ${LN} -sf  ${COMOUTgsi_rtma3d}/${ANLrtma3d_FNAME}   ${COMIN}/${ANLrtma3d_FNAME}
 
+/bin/rm -f ${DATA}/wrf_inout
+/bin/rm -f ${DATA}/sig*
+/bin/rm -f ${DATA}/obs*
+/bin/rm -f ${DATA}/pe*
+
 exit 0

@@ -30,8 +30,10 @@ if(wid != '')
   say "    Its Window ID :"wid
 endif
 
-'open fgs.ctl'
-'open anl.ctl'
+'open fgs_nat.ctl'
+'open anl_nat.ctl'
+* 'open fgs_prs.ctl'
+* 'open anl_prs.ctl'
 *'reset'
 
 * set vpage with grads function panels 
@@ -146,7 +148,31 @@ while(nv<=icount)
         endif
       else
 *       scalar variables
-        'd 'vname.nv'.'p'*'factor.nv
+        if(vname.nv="VISsfc")
+*         Visibility (in unit of mile)
+          'set clevs 0 1.0 3.0 5.0'
+          'set ccols 0 2 8 3 4'
+          'd 'vname.nv'.'p'*'factor.nv
+        else
+          if(vname.nv="CEIL")
+*           Cloud Ceiling Height (in unit of ft)
+            'set clevs 0 500.0 1000.0 3000.0'
+            'set ccols 0 2 8 3 4'
+            'd 'vname.nv'.'p'*'factor.nv
+          else
+            if(vname.nv="CEIL215")
+*             Cloud Ceiling Height=L215-Lsfc (in unit of ft)
+              if(p=1); vnm="cl215fgs"; endif
+              if(p=2); vnm="cl215anl"; endif
+              'define 'vnm'=HGTL215.'p'-HGTsfc.'p
+              'set clevs 0 500.0 1000.0 3000.0'
+              'set ccols 0 2 8 3 4'
+              'd 'vnm'*'factor.nv
+            else
+              'd 'vname.nv'.'p'*'factor.nv
+            endif
+          endif
+        endif
       endif
     else
 *     inc
@@ -160,7 +186,12 @@ while(nv<=icount)
           'd skip((UGRDhlev.2-UGRDhlev.1),40,25); skip((VGRDhlev.2-VGRDhlev.1),40,25)'
         endif
       else
-        'd 'vname.nv'.2 * 'factor.nv' - 'vname.nv'.1 * 'factor.nv
+        if(vname.nv="CEIL215")
+*         Cloud Ceiling Height=L215-Lsfc (in unit of ft)
+          'd (cl215anl-cl215fgs) * 'factor.nv
+        else
+          'd 'vname.nv'.2 * 'factor.nv' - 'vname.nv'.1 * 'factor.nv
+        endif
       endif
 
     endif
@@ -181,6 +212,11 @@ while(nv<=icount)
 
   'c'
   'disable print'
+
+  if(vname.nv="CEIL215")
+    'undefine cl215fgs'
+    'undefine cl215anl'
+  endif
 
   nv = nv + 1
 
