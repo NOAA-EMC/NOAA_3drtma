@@ -1,7 +1,7 @@
 #!/bin/sh
 
 date
-# set -x
+set -x
 
 #=========================================================================#
 # User define the following variables:
@@ -34,6 +34,9 @@ elif [[ -d /ioddev_dell ]]; then
 elif [[ -d /scratch3 ]] ; then
     . /apps/lmod/lmod/init/sh
     target=theia
+elif [[ -d /jetmon ]] ; then
+    . /apps/lmod/lmod/init/sh
+    target=jet
 else
     echo "unknown target = $target"
     exit 9
@@ -111,12 +114,16 @@ fi
 #
 
 modules_dir=${MODULEFILES_DIR}/${target}/build
-modules_fname=modulefile.build.${target}
+modules_fname=modulefile.build.gsi.${target}
 
 if [ $target = wcoss -o $target = cray ]; then
     module purge
     module load $modules_dir/${modules_fname}
 elif [ $target = theia ]; then
+    module purge
+    source $modules_dir/${modules_fname}
+    module list
+elif [ $target = jet ]; then
     module purge
     source $modules_dir/${modules_fname}
     module list

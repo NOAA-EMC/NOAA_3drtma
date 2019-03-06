@@ -1,4 +1,4 @@
-# makefile for nasacloud_porcess
+# makefile for nasacloud_process
 #! /bin/sh -v
 
 # Define the fortran compiler and options

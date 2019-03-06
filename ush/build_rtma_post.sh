@@ -52,6 +52,9 @@ elif [[ -d /ioddev_dell ]]; then
 elif [[ -d /scratch3 ]] ; then
     . /apps/lmod/lmod/init/sh
     target=theia
+elif [[ -d /mnt/lfs3/projects ]] ; then
+    . /apps/lmod/lmod/init/sh
+    target=jet
 else
     echo "unknown target = $target"
     exit 9
@@ -177,7 +180,7 @@ fi
 echo " ====>  compiling POST under building directory: ${BUILD_POST} "
 
 cd ${BUILD_POST}
-build_ncep_post.sh >& ${BUILD_LOG}/log.build_ncep_post.txt  2>&1
+build_ncep_post.sh >& ${BUILD_LOG}/log.build_ncep_post_native.txt  2>&1
 
 if [ $? -eq 0 ] ; then
   echo " NCEP-POST code was built successfully."

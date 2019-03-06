@@ -1,4 +1,4 @@
-# makefile for nssl_porcess
+# makefile for nssl_process
 #! /bin/sh -v
 
 # Define the fortran compiler and options

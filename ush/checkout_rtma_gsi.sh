@@ -8,7 +8,7 @@ date
 
 # branch_gsi_gsd: GSD RAP/HRRR-based GSI branch in repository of ProdGSI
 branch_gsi_gsd="feature/gsd_raphrrr_july2018"
-
+# branch_gsi_gsd="master"
 # branch_gsi_source: source branch  # the user-specified branch to check out.
                                     # if not specified by user, 
                                     #   it is branch_gsi_gsd by default.
@@ -36,6 +36,9 @@ elif [[ -d /ioddev_dell ]]; then
 elif [[ -d /scratch3 ]] ; then
     . /apps/lmod/lmod/init/sh
     target=theia
+elif [[ -d /mnt/lfs3/projects ]] ; then
+    . /apps/lmod/lmod/init/sh
+    target=jet
 else
     echo "unknown target = $target"
     exit 9
@@ -123,20 +126,21 @@ echo
 #
 MODULEFILES=${TOP_RTMA}/modulefiles
 SORCDIR_GSI=${TOP_SORC}/rtma_gsi.fd
-if [ ! -f ${MODULEFILES}/${target}/build/modulefile.build.${target} ] ; then
-  echo " --> Using GSI modulefile as RTMA3D modulefile (used for building 3DRTMA)  "
-  mfiles="modulefile.ProdGSI.${target}"
-  for modfile in $mfiles
+modules_fname=modulefile.build.gsi.${target}
+if [ ! -f ${MODULEFILES}/${target}/build/${modules_fname} ] ; then
+  echo " --> There is no pre-defined modulefile for building 3DRTMA on this ${target}.  "
+  echo " --> Using modulefile in ProdGSI package to build 3DRTMA  "
+  mfiles_gsi="modulefile.ProdGSI.${target}"
+  for modfile in ${mfiles_gsi}
   do
     if [ ! -f ${SORCDIR_GSI}/modulefiles/${modfile} ] ; then
-      echo " ----> No GSI modulefile found for this ${target}. Abort! "
+      echo " ----> ProdGSI also does NOT have modulefile for this ${target}. Abort! "
       exit 1
     else
-      cp -p ${SORCDIR_GSI}/modulefiles/${modfile}   ${MODULEFILES}/${target}/build/modulefile.build.${target}
+      cp -p ${SORCDIR_GSI}/modulefiles/${modfile}   ${MODULEFILES}/${target}/build/${modules_fname}
     fi
   done
 fi
-  
 # set +x
 
 date
