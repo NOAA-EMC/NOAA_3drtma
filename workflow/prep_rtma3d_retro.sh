@@ -40,18 +40,20 @@ export RUN=rtma3d                           #selection of rtma3d (or rtma,urma)
 # export envir="retro10"                    #environment (test, prod, dev, etc.)
 export run_envir="dev"                      #
 export expname="${envir}"
-export ptmp_base="/scratch3/NCEPDEV/stmp1/${USER}/wrkdir_${NET}"  #base subdirectory for all subsequent working and storage directories
+export ptmp_base="/mnt/lfs3/projects/hfv3gfs/Edward.Colon/stmp1/wrkdir_${NET}"  #base subdirectory for all subsequent working and storage directories
 export NWROOT=${TOP_RTMA}                   #root directory for RTMA/URMA j-job scripts, scripts, parm files, etc. 
 export QUEUE="batch"                        #user-specified processing queue
 export QUEUE_DBG="debug"                    #user-specified processing queue -- debug
 export QUEUE_SVC="service"                  #user-specified transfer queue
-export ACCOUNT="nems"                     #Theia account for CPU resources
+export ACCOUNT="hfv3gfs"                     #Theia account for CPU resources
 
 # detect the machine/platform
 if [ `grep -c 'E5-2690 v3' /proc/cpuinfo` -gt 0 ]; then
   # Look for the Haswell chip
   echo 'Running on Theia'
   MACHINE=theia
+elif [[ -d /jetmon ]] ; then
+  MACHINE=jet
 else
   echo 'Running on wcoss'
   MACHINE=wcoss
@@ -276,6 +278,7 @@ cat > ${NWROOT}/workflow/${RUN}_${expname}.xml <<EOF
 <!ENTITY FETCHHPSS_RESOURCES
    '<cores>&FETCHHPSS_PROC;</cores>
     <walltime>01:30:00</walltime>
+    <native>-l partition=xjet</native>
     <queue>&QUEUE_SVC;</queue>
     <account>&ACCOUNT;</account>'>
 
@@ -283,6 +286,7 @@ cat > ${NWROOT}/workflow/${RUN}_${expname}.xml <<EOF
 <!ENTITY OBSPREP_RADAR_RESOURCES
    '<cores>&OBSPREP_RADAR_PROC;</cores>
     <walltime>00:15:00</walltime>
+    <native>-l partition=xjet</native>
     <queue>&QUEUE_DBG;</queue>
     <account>&ACCOUNT;</account>'>
 
@@ -290,6 +294,7 @@ cat > ${NWROOT}/workflow/${RUN}_${expname}.xml <<EOF
 <!ENTITY OBSPREP_LGHTN_RESOURCES
    '<cores>&OBSPREP_LGHTN_PROC;</cores>
     <walltime>00:15:00</walltime>
+    <native>-l partition=xjet</native>
     <queue>&QUEUE_DBG;</queue>
     <account>&ACCOUNT;</account>'>
 
@@ -297,6 +302,7 @@ cat > ${NWROOT}/workflow/${RUN}_${expname}.xml <<EOF
 <!ENTITY OBSPREP_CLOUD_RESOURCES
    '<cores>&OBSPREP_CLOUD_PROC;</cores>
     <walltime>00:15:00</walltime>
+    <native>-l partition=xjet</native>
     <queue>&QUEUE_DBG;</queue>
     <account>&ACCOUNT;</account>'>
 
@@ -304,12 +310,14 @@ cat > ${NWROOT}/workflow/${RUN}_${expname}.xml <<EOF
 <!ENTITY PREPOBS_RESOURCES
    '<cores>&PREPOBS_PROC;</cores>
     <walltime>00:15:00</walltime>
+    <native>-l partition=xjet</native>
     <queue>&QUEUE_DBG;</queue>
     <account>&ACCOUNT;</account>'>
 <!ENTITY PREPFGS_PROC "1">
 <!ENTITY PREPFGS_RESOURCES
    '<cores>&PREPFGS_PROC;</cores>
     <walltime>00:15:00</walltime>
+    <native>-l partition=xjet</native>
     <queue>&QUEUE_DBG;</queue>
     <account>&ACCOUNT;</account>'>
 
@@ -318,6 +326,7 @@ cat > ${NWROOT}/workflow/${RUN}_${expname}.xml <<EOF
 <!ENTITY GSI_RESOURCES  
    "<nodes>8:ppn=12</nodes>
     <walltime>00:30:00</walltime>">
+    <native>-l partition=xjet</native>
 <!ENTITY GSI_OMP_STACKSIZE "512M">
 
 <!ENTITY GSI_START_TIME "00:40:00">
@@ -335,6 +344,7 @@ cat > ${NWROOT}/workflow/${RUN}_${expname}.xml <<EOF
 <!ENTITY POST_RESOURCES
    '<nodes>8:ppn=12</nodes>
     <walltime>00:30:00</walltime>
+    <native>-l partition=xjet</native>
     <queue>&QUEUE_DBG;</queue>
     <account>&ACCOUNT;</account>'>
 
@@ -343,6 +353,7 @@ cat > ${NWROOT}/workflow/${RUN}_${expname}.xml <<EOF
    '<cores>&PLOT_PROC;</cores>
     <walltime>00:30:00</walltime>
     <queue>&QUEUE_DBG;</queue>
+    <native>-l partition=xjet</native>
     <memory>3G</memory>
     <account>&ACCOUNT;</account>'>
 
@@ -350,6 +361,7 @@ cat > ${NWROOT}/workflow/${RUN}_${expname}.xml <<EOF
 <!ENTITY VERIF_RESOURCES
    '<cores>&VERIF_PROC;</cores>
     <walltime>00:15:00</walltime>
+    <native>-l partition=xjet</native>
     <queue>&QUEUE_DBG;</queue>
     <account>&ACCOUNT;</account>'>
 
@@ -1262,7 +1274,7 @@ fi
 
 # Now make the run_NAMRR.sh script that can be invoked from a crontab
 
-if [ ${MACHINE} = 'theia' ]; then
+if [[ ${MACHINE} = 'theia'  ||  ${MACHINE} = 'jet' ]] ; then
 cat > ${NWROOT}/workflow/run_${RUN}_${expname}.sh <<EOF 
 #!/bin/sh -l
 
@@ -1282,7 +1294,7 @@ chmod 744 ${NWROOT}/workflow/run_${RUN}_${expname}.sh
 echo "RTMA3D is ready to go! Run using run_${RUN}_${expname}.sh.  Make sure your xml file has consistent directory settings!"
 
 # script to check the workflow running status
-if [ ${MACHINE} = 'theia' ]; then
+if [[ ${MACHINE} = 'theia'  ||  ${MACHINE} = 'jet' ]] ; then
 cat > ${NWROOT}/workflow/chk_${RUN}_${expname}.sh <<EOF 
 #!/bin/sh -l
 

@@ -13,7 +13,7 @@ COMMAND=$1
 MODULEFILES=${MODULEFILES:-${HOMErtma3d}/modulefiles}
 target=${ENV_MODULES:-"ProdGSI"}
 
-if [ "${machine}" = "theia" ] ; then
+if [[ "${machine}" = "theia" || "${machine}" = "jet" ]] ; then
 
   # . /etc/profile
   # . /apps/lmod/lmod/init/sh >/dev/null # Module Support
@@ -34,7 +34,7 @@ fi
 ##########################################################
 # obtain unique process id (pid) and make temp directories
 ##########################################################
-if [ "${machine}" = "theia" ] ; then    ### PBS job Scheduler
+if [[ "${machine}" = "theia" || "${machine}" = "jet" ]] ; then    ### PBS job Scheduler
   export job=${job:-"${PBS_JOBNAME}"}    # job is defined as job name
   export jid=`echo ${PBS_JOBID} | cut -f1 -d.`  # removal of tailing sub-server string
 # export jid=`echo ${PBS_JOBID} | awk -F'.' '{print $1}'`

@@ -269,7 +269,7 @@ while [ $CYCLE_3 -le $CYCLE_LAST ] ; do
       /bin/rm -rf list_all_1.txt
       /bin/rm -rf select_list_1.txt_total
 
-      /bin/unzip -v ${zipfile_mrms_3hr} > list_all_1.txt
+      /usr/bin/unzip -v ${zipfile_mrms_3hr} > list_all_1.txt
 
       zfiles="${zipfile_mrms_1mi} ${zipfile_mrms_1mip1} ${zipfile_mrms_1mip2}"
       for zf in $zfiles
@@ -277,11 +277,11 @@ while [ $CYCLE_3 -le $CYCLE_LAST ] ; do
         nlines=`cat list_all_1.txt | awk {'print $8'} | grep "${zf}" | wc -l`
         if [ $nlines -eq 1 ]
         then
-          /bin/unzip ${zipfile_mrms_3hr} "${zf}" -d ${mrmsradar_grib2_dir}
+          /usr/bin/unzip ${zipfile_mrms_3hr} "${zf}" -d ${mrmsradar_grib2_dir}
 
           /bin/rm -rf select_list_1.txt_tmp
           /bin/rm -rf select_list_1.txt
-          /bin/unzip -v ${mrmsradar_grib2_dir}/${zf} > select_list_1.txt_tmp
+          /usr/bin/unzip -v ${mrmsradar_grib2_dir}/${zf} > select_list_1.txt_tmp
           cat select_list_1.txt_tmp | grep "MRMS_MergedReflectivityQC_" | awk {'if($8 !~ /conusPlus/) print $8'} > select_list_1.txt
           nl=`cat select_list_1.txt | wc -l `
           if [ $nl -ge 1 ]
@@ -321,7 +321,7 @@ while [ $CYCLE_3 -le $CYCLE_LAST ] ; do
         /bin/rm -rf list_all_1.txt
         /bin/rm -rf select_list_1.txt_total
 
-        /bin/unzip -v ${zipfile_lghtn_1dd} > list_all_1.txt
+        /usr/bin/unzip -v ${zipfile_lghtn_1dd} > list_all_1.txt
 
         if [ "${fnmhead_lghtn}" = "${fnmhead_lghtn_m1hr}" ] ; then
           fheads="${fnmhead_lghtn}"
