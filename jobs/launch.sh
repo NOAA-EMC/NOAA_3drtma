@@ -14,32 +14,38 @@ kwd_task="POST"
 MODULEFILES=${MODULEFILES:-${HOMErtma3d}/modulefiles}
 
 if [ "${machine}" = "theia" ] ; then
+  . /etc/profile
+  . /apps/lmod/lmod/init/bash >/dev/null # Module Support
   module purge
-# . /etc/profile
-# . /apps/lmod/lmod/init/bash >/dev/null # Module Support
   case "$COMMAND" in
     *"${kwd_task}"*)
       modulefile_run=${modulefile_run:-"${MODULEFILES}/${machine}/run/modulefile.run.post.${machine}"}
+      moduledir=`dirname $(readlink -f ${modulefile_run})`
+      module use ${moduledir}
+      module load modulefile.run.post.${machine}
       ;;
     *)
       modulefile_run=${modulefile_run:-"${MODULEFILES}/${machine}/run/modulefile.run.gsi.${machine}"}
+      source $modulefile_run
       ;;
   esac
-  source $modulefile_run
   module list
 elif [ "${machine}" = "jet" ] ; then
+  . /etc/profile
+  . /apps/lmod/lmod/init/bash >/dev/null # Module Support
   module purge
-# . /etc/profile
-# . /apps/lmod/lmod/init/bash >/dev/null # Module Support
   case "$COMMAND" in
     *"${kwd_task}"*)
       modulefile_run=${modulefile_run:-"${MODULEFILES}/${machine}/run/modulefile.run.post.${machine}"}
+      moduledir=`dirname $(readlink -f ${modulefile_run})`
+      module use ${moduledir}
+      module load modulefile.run.post.${machine}
       ;;
     *)
       modulefile_run=${modulefile_run:-"${MODULEFILES}/${machine}/run/modulefile.run.gsi.${machine}"}
+      source $modulefile_run
       ;;
   esac
-  source $modulefile_run
   module list
 else
   echo "modulefile has not set up for this unknow machine. Job abort!"

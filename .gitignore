@@ -11,6 +11,7 @@ sorc/**/log_*
 # ignore directory of log files ('log/', 'logs/')
 **/log/
 **/logs/
+**/log.*
  
 # ignore rocoto database files ('*.db')
 *.db

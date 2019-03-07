@@ -143,22 +143,35 @@ if [ $? -ne 0 ] ; then
 fi
 
 #==================#
+# NOTE:
+# for current version, using building script in emc_post package.
+# so the following step to load modules is useless. 
 # load modules (using module file under modulefiles/${target}/build)
 #
 
 modules_dir=${MODULEFILES_DIR}/${target}/build
-modules_fname=modulefile.build.${target}
+modules_fname=modulefile.build.post.${target}
 
 if [ $target = wcoss -o $target = cray ]; then
     module purge
-    module load $modules_dir/${modules_fname}
+    module use $modules_dir
+    module load ${modules_fname}
 elif [ $target = theia ]; then
     module purge
-    source $modules_dir/${modules_fname}
+#   source $modules_dir/${modules_fname}
+    module use $modules_dir
+    module load ${modules_fname}
+    module list
+elif [ $target = jet ]; then
+    module purge
+#   source $modules_dir/${modules_fname}
+    module use $modules_dir
+    module load ${modules_fname}
     module list
 elif [ $target = dell ]; then
     module purge
-    source $modules_dir/${modules_fname}
+#   source $modules_dir/${modules_fname}
+    module load $modules_dir/${modules_fname}
     export NETCDF_INCLUDE=-I/usrx/local/prod/packages/ips/18.0.1/netcdf/4.5.0/include
     export NETCDF_CFLAGS=-I/usrx/local/prod/packages/ips/18.0.1/netcdf/4.5.0/include
     export NETCDF_LDFLAGS_CXX="-L/usrx/local/prod/packages/ips/18.0.1/netcdf/4.5.0/lib -lnetcdf -lnetcdf_c++"

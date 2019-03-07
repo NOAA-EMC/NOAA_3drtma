@@ -101,6 +101,11 @@ SORCDIR_POST=${TOP_SORC}/${DIRNAME_POST}
 cd ${TOP_SORC}
 
 echo " make a local clone of the EMC_post repository under ${TOP_SORC}/${DIRNAME_POST} ... "
+
+if [ -d ${DIRNAME_POST} ] ; then
+    rm -rf ${DIRNAME_POST}
+fi
+
 echo " ====> git clone gerrit:EMC_post  ./${DIRNAME_POST} "
 git clone gerrit:EMC_post  ./${DIRNAME_POST}
 cd ./${DIRNAME_POST}
@@ -135,33 +140,31 @@ SORCDIR_POST=${TOP_SORC}/rtma_post.fd
 modules_fname=modulefile.build.post.${target}
 modules_fname2=modulefile.run.post.${target}
 
-if [ ! -f ${MODULEFILES}/${target}/build/modulefile.build.post.${target} ] ; then
-
-echo " --> Using UPP modulefile to building post-processing code of 3DRTMA  "
+  echo " --> Using UPP modulefile to building post-processing code of 3DRTMA  "
   mfiles="v8.0.0-${target}"
   for modfile in $mfiles
   do
     if [ -f ${SORCDIR_POST}/modulefiles/post/${modfile} ] ; then
-      if [ -f ${MODULEFILES}/${target}/build/${module_fname} ] ; then
-        /bin/diff ${SORCDIR_POST}/modulefiles/post/${modfile} ${MODULEFILES}/${target}/build/${module_fname} > ${MODULEFILES}/${target}/build/diff_tmp_post.txt
-        diff_word=` /bin/wc -w ${MODULEFILES}/${target}/build/diff_tmp_post.txt | /bin/awk '{print $1}' `
+      if [ -f ${MODULEFILES}/${target}/build/${modules_fname} ] ; then
+        /bin/diff ${SORCDIR_POST}/modulefiles/post/${modfile} ${MODULEFILES}/${target}/build/${modules_fname} > ${MODULEFILES}/${target}/build/log.diff_modulefile_post
+        diff_word=` /bin/wc -w ${MODULEFILES}/${target}/build/log.diff_modulefile_post | /bin/awk '{print $1}' `
         if [ "${diff_word}" != "0" ] ; then
-          echo "       ----> UPP package has ${modfile} different to 3DRTMA ${module_fname} <----  "
-          mv    ${MODULEFILES}/${target}/build/${module_fname} ${MODULEFILES}/${target}/build/${module_fname}.orig
-          cp -p ${SORCDIR_POST}/modulefiles/post/${modfile}    ${MODULEFILES}/${target}/build/${module_fname}
-          mv    ${MODULEFILES}/${target}/run/${module_fname}   ${MODULEFILES}/${target}/run/${module_fname2}.orig
-          cp -p ${SORCDIR_POST}/modulefiles/post/${modfile}    ${MODULEFILES}/${target}/run/${module_fname2}
+          echo "       ----> UPP package has ${modfile} different to 3DRTMA ${modules_fname} <----  "
+          mv    ${MODULEFILES}/${target}/build/${modules_fname} ${MODULEFILES}/${target}/build/${modules_fname}.orig
+          cp -p ${SORCDIR_POST}/modulefiles/post/${modfile}    ${MODULEFILES}/${target}/build/${modules_fname}
+          mv    ${MODULEFILES}/${target}/run/${modules_fname}   ${MODULEFILES}/${target}/run/${modules_fname2}.orig
+          cp -p ${SORCDIR_POST}/modulefiles/post/${modfile}    ${MODULEFILES}/${target}/run/${modules_fname2}
         else
-          rm -f ${MODULEFILES}/${target}/build/diff_tmp_post.txt
+          echo "       ----> UPP package has ${modfile} SAME as 3DRTMA ${modules_fname} <----  "
         fi
       else
-        cp -p ${SORCDIR_POST}/modulefiles/post/${modfile}   ${MODULEFILES}/${target}/build/${module_fname}
-        cp -p ${SORCDIR_POST}/modulefiles/post/${modfile}   ${MODULEFILES}/${target}/run/${module_fname2}
+        cp -p ${SORCDIR_POST}/modulefiles/post/${modfile}   ${MODULEFILES}/${target}/build/${modules_fname}
+        cp -p ${SORCDIR_POST}/modulefiles/post/${modfile}   ${MODULEFILES}/${target}/run/${modules_fname2}
       fi
     else
-      if [ -f ${MODULEFILES}/${target}/build/${module_fname} ] ; then
+      if [ -f ${MODULEFILES}/${target}/build/${modules_fname} ] ; then
         echo "         ----> using pre-defined 3DRTMA modulefile for this machine: ${target}"
-        cp -p ${MODULEFILES}/${target}/build/${module_fname}  ${SORCDIR_POST}/modulefiles/post/${modfile} 
+        cp -p ${MODULEFILES}/${target}/build/${modules_fname}  ${SORCDIR_POST}/modulefiles/post/${modfile} 
         echo "         ----> adding lines in ${SORCDIR_POST}/sorc/build_ncep_post.sh for machine ${target}"
         cp -p ${SORCDIR_POST}/sorc/build_ncep_post.sh   ${MODULEFILES}/${target}/build/build_ncep_post.sh
         cp -p ${SORCDIR_POST}/sorc/build_ncep_post.sh   ${MODULEFILES}/${target}/build/build_ncep_post.sh.orig
@@ -180,7 +183,6 @@ echo " --> Using UPP modulefile to building post-processing code of 3DRTMA  "
       fi
     fi
   done
-fi
 
 # set +x
 

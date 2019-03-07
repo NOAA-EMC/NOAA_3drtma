@@ -100,6 +100,10 @@ SORCDIR_GSI=${TOP_SORC}/${DIRNAME_GSI}
 #
 cd ${TOP_SORC}
 
+if [ -d ${DIRNAME_GSI} ] ; then
+    rm -rf ${DIRNAME_GSI}
+fi
+
 echo " make a local clone of the ProdGSI repository under ${TOP_SORC}/${DIRNAME_GSI} ... "
 echo " ====> git clone gerrit:ProdGSI  ./${DIRNAME_GSI} "
 git clone gerrit:ProdGSI  ./${DIRNAME_GSI}

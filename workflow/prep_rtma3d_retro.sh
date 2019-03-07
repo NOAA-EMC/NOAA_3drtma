@@ -42,7 +42,7 @@ export expname="${envir}"                   # experiment name
 export NWROOT=${TOP_RTMA}                   #root directory for RTMA/URMA j-job scripts, scripts, parm files, etc. 
 
 # Note: the definition for the following variables depends on the machine.
-export ptmp_base="/scratch1/NCEPDEV/stmp1/${USER}/wrkdir_${NET}"  #base subdirectory for all subsequent working and storage directories
+export ptmp_base="/scratch3/NCEPDEV/stmp1/${USER}/wrkdir_${NET}"  #base subdirectory for all subsequent working and storage directories
 export QUEUE="batch"                        #user-specified processing queue
 export QUEUE_DBG="debug"                    #user-specified processing queue -- debug
 export QUEUE_SVC="service"                  #user-specified transfer queue
