@@ -31,30 +31,65 @@ fi
 #--- User defined variables                         #
 #####################################################
 set -x
-export startCDATE=201902120600              #yyyymmddhhmm - Starting day of retro run 
-export endCDATE=201902121100                #yyyymmddhhmm - Ending day of RTMA3D run (needed for both RETRO and REAL TIME). 
+export startCDATE=201902130000              #yyyymmddhhmm - Starting day of retro run 
+export endCDATE=201902130000                #yyyymmddhhmm - Ending day of RTMA3D run (needed for both RETRO and REAL TIME). 
 export NET=rtma3d                           #selection of rtma3d (or rtma,urma)
 export RUN=rtma3d                           #selection of rtma3d (or rtma,urma)
 export envir="Feb2019"                      #environment (test, prod, dev, etc.)
 export run_envir="dev"                      #
 export expname="${envir}"                   # experiment name
-export ptmp_base="/scratch3/NCEPDEV/stmp1/${USER}/wrkdir_${NET}"  #base subdirectory for all subsequent working and storage directories
+
 export NWROOT=${TOP_RTMA}                   #root directory for RTMA/URMA j-job scripts, scripts, parm files, etc. 
+
+# Note: the definition for the following variables depends on the machine.
+export ptmp_base="/scratch1/NCEPDEV/stmp1/${USER}/wrkdir_${NET}"  #base subdirectory for all subsequent working and storage directories
 export QUEUE="batch"                        #user-specified processing queue
 export QUEUE_DBG="debug"                    #user-specified processing queue -- debug
 export QUEUE_SVC="service"                  #user-specified transfer queue
 export ACCOUNT="fv3-cpu"                     #Theia account for CPU resources
 
+#
 # detect the machine/platform
-if [ `grep -c 'E5-2690 v3' /proc/cpuinfo` -gt 0 ]; then
-  # Look for the Haswell chip
-  MACHINE=theia
-  echo 'Running on $MACHINE '
+#   Note: either the unique filesystem
+#                ( if -d /scratch, /mnt/lfs, etc.)
+#             or the unique cpu info in /proc/cpuinfo (Haswell chip E5-2690 v3) 
+#                ( if `grep -c 'E5-2690 v3' /proc/cpuinfo` -gt 0 )
+#
+if [[ -d /dcom && -d /hwrf ]] ; then
+    . /usrx/local/Modules/3.2.10/init/sh
+#   MODULESHOME="/usrx/local/Modules/3.2.10"
+#   . $MODULESHOME/init/sh
+    MACHINE=wcoss
+elif [[ -d /cm ]] ; then
+#   MODULESHOME="/usrx/local/Modules/3.2.10"
+#   . $MODULESHOME/init/sh
+    conf_target=nco
+    MACHINE=cray
+elif [[ -d /ioddev_dell ]]; then
+#   MODULESHOME="/usrx/local/Modules/3.2.10"
+#   . $MODULESHOME/init/sh
+    conf_target=nco
+    MACHINE=dell
+elif [[ -d /scratch3 ]] ; then
+    . /apps/lmod/lmod/init/sh
+    MACHINE=theia
+elif [[ -d /mnt/lfs3/projects ]] ; then
+    . /apps/lmod/lmod/init/sh
+    MACHINE=jet
 else
-  MACHINE="unknown"
-  echo 'Running on $MACHINE '
-  echo ' Machine $machine is NOT ready for running $NET.'
-  exit 1
+    MACHINE="unknown"
+    echo 'Running on $MACHINE '
+    echo ' ---------> Warning Warning Warning Warning <--------- '
+    echo '     Machine $machine is NOT ready for running $NET.'
+    exit 9
+fi
+echo 'Running on $MACHINE '
+
+if [[ ! -d ${ptmp_base} ]] ; then
+    echo " ${ptmp_base} does NOT exist !"
+    echo " Please define the variable and create this directory."
+    echo " Abort! "
+    exit 1
 fi
 
 export CAP_NET=`echo ${NET} | tr '[:lower:]' '[:upper:]'`

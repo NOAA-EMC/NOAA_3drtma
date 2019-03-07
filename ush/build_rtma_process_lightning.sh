@@ -21,14 +21,17 @@ echo "*==================================================================*"
 #
 if [[ -d /dcom && -d /hwrf ]] ; then
     . /usrx/local/Modules/3.2.10/init/sh
+#   MODULESHOME="/usrx/local/Modules/3.2.10"
+#   . $MODULESHOME/init/sh
     target=wcoss
-    . $MODULESHOME/init/sh
 elif [[ -d /cm ]] ; then
-    . $MODULESHOME/init/sh
+#   MODULESHOME="/usrx/local/Modules/3.2.10"
+#   . $MODULESHOME/init/sh
     conf_target=nco
     target=cray
 elif [[ -d /ioddev_dell ]]; then
-    . $MODULESHOME/init/sh
+#   MODULESHOME="/usrx/local/Modules/3.2.10"
+#   . $MODULESHOME/init/sh
     conf_target=nco
     target=dell
 elif [[ -d /scratch3 ]] ; then

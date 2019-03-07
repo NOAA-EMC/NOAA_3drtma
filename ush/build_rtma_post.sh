@@ -7,7 +7,8 @@ date
 # User define the following variables:
 
 # branch_post_gsd: GSD RAP/HRRR-based POST branch in repository of POST
-branch_post_gsd="master"
+# branch_post_gsd="master"
+branch_post_gsd="ncep_post_raphrrr.v5.0"
 
 # branch_post_source: source branch  # the user-specified branch to build on.
                                     # if not specified by user, 
@@ -39,14 +40,17 @@ echo "*==================================================================*"
 #
 if [[ -d /dcom && -d /hwrf ]] ; then
     . /usrx/local/Modules/3.2.10/init/sh
+#   MODULESHOME="/usrx/local/Modules/3.2.10"
+#   . $MODULESHOME/init/sh
     target=wcoss
-    . $MODULESHOME/init/sh
 elif [[ -d /cm ]] ; then
-    . $MODULESHOME/init/sh
+#   MODULESHOME="/usrx/local/Modules/3.2.10"
+#   . $MODULESHOME/init/sh
     conf_target=nco
     target=cray
 elif [[ -d /ioddev_dell ]]; then
-    . $MODULESHOME/init/sh
+#   MODULESHOME="/usrx/local/Modules/3.2.10"
+#   . $MODULESHOME/init/sh
     conf_target=nco
     target=dell
 elif [[ -d /scratch3 ]] ; then

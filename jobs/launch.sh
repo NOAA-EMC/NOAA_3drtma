@@ -6,6 +6,7 @@ export PS4=' $SECONDS + '
 set -x
 
 COMMAND=$1
+kwd_task="POST"
 
 #############################################################
 # load modulefile and set up the environment for job runnning
@@ -13,15 +14,32 @@ COMMAND=$1
 MODULEFILES=${MODULEFILES:-${HOMErtma3d}/modulefiles}
 
 if [ "${machine}" = "theia" ] ; then
-
   module purge
-  . /etc/profile
-  . /apps/lmod/lmod/init/bash >/dev/null # Module Support
-
-# load modules to run the job
-  modulefile_run=${modulefile_run:-"${MODULEFILES}/${machine}/run/modulefile.run.${machine}"}
+# . /etc/profile
+# . /apps/lmod/lmod/init/bash >/dev/null # Module Support
+  case "$COMMAND" in
+    *"${kwd_task}"*)
+      modulefile_run=${modulefile_run:-"${MODULEFILES}/${machine}/run/modulefile.run.post.${machine}"}
+      ;;
+    *)
+      modulefile_run=${modulefile_run:-"${MODULEFILES}/${machine}/run/modulefile.run.gsi.${machine}"}
+      ;;
+  esac
   source $modulefile_run
-#
+  module list
+elif [ "${machine}" = "jet" ] ; then
+  module purge
+# . /etc/profile
+# . /apps/lmod/lmod/init/bash >/dev/null # Module Support
+  case "$COMMAND" in
+    *"${kwd_task}"*)
+      modulefile_run=${modulefile_run:-"${MODULEFILES}/${machine}/run/modulefile.run.post.${machine}"}
+      ;;
+    *)
+      modulefile_run=${modulefile_run:-"${MODULEFILES}/${machine}/run/modulefile.run.gsi.${machine}"}
+      ;;
+  esac
+  source $modulefile_run
   module list
 else
   echo "modulefile has not set up for this unknow machine. Job abort!"
@@ -32,6 +50,15 @@ fi
 # obtain unique process id (pid) and define the name of  temp directories
 ###########################################################################
 if [ "${machine}" = "theia" ] ; then    ### PBS job Scheduler
+  export job=${job:-"${PBS_JOBNAME}"}    # job is defined as job name
+  export jid=`echo ${PBS_JOBID} | cut -f1 -d.`  # removal of tailing sub-server string
+# export jid=`echo ${PBS_JOBID} | awk -F'.' '{print $1}'`
+  export jobid=${jobid:-"${job}.${jid}"}
+  export np=`cat $PBS_NODEFILE | wc -l`
+  export NCDUMP="ncdump"
+  export MPIRUN=${MPIRUN:-"mpirun -np $np"}
+  echo " number of cores : $np for job $job with id as $jobid "
+elif [ "${machine}" = "jet" ] ;  then    ### PBS job Scheduler
   export job=${job:-"${PBS_JOBNAME}"}    # job is defined as job name
   export jid=`echo ${PBS_JOBID} | cut -f1 -d.`  # removal of tailing sub-server string
 # export jid=`echo ${PBS_JOBID} | awk -F'.' '{print $1}'`
