@@ -88,10 +88,10 @@ if [ $target = theia ]; then
 
 elif [ $target = jet ]; then
   echo " linking fixed data on $target for GSI analysis"
-  GSI_fix="/mnt/lfs3/projects/hfv3gfs/Edward.Colon/3drtma_fixfiles/GSI-fix_rtma3d_emc_test"
-  CRTM_fix="/mnt/lfs3/projects/hfv3gfs/Edward.Colon/3drtma_fixfiles/CRTM-fix_rtma3d"
-  ObsUseList="/mnt/lfs3/projects/hfv3gfs/Edward.Colon/3drtma_fixfiles/ObsUseList_rtma3d"
-  WPS="/mnt/lfs3/projects/hfv3gfs/Edward.Colon/3drtma_fixfiles/WPS"
+  GSI_fix="/mnt/lfs3/projects/hfv3gfs/Edward.Colon/FixData/GSI-fix_rtma3d_emc_test"
+  CRTM_fix="/mnt/lfs3/projects/hfv3gfs/Edward.Colon/FixData/CRTM-fix_rtma3d"
+  ObsUseList="/mnt/lfs3/projects/hfv3gfs/Edward.Colon/FixData/ObsUseList_rtma3d"
+  WPS="/mnt/lfs3/projects/hfv3gfs/Edward.Colon/FixData/WPS"
 
   echo " ln -sf ${GSI_fix}        ./GSI-fix"
   ln -sf ${GSI_fix}        ./GSI-fix
@@ -131,10 +131,10 @@ if [ $target = theia ]; then
 
 elif [ $target = jet ]; then
   echo "linking parameters data (parm/) on $target for UPP (uni-post)"
-  UPP="/mnt/lfs3/projects/hfv3gfs/Edward.Colon/3drtma_fixfiles/UPP"
+  UPP="/mnt/lfs3/projects/hfv3gfs/Edward.Colon/FixData/UPP"
 # UPP="${TOP_RTMA}/sorc/rtma_post.fd/parm"
-  WRF="/mnt/lfs3/projects/hfv3gfs/Edward.Colon/3drtma_fixfiles/WRF"
-  VERIF="/mnt/lfs3/projects/hfv3gfs/Edward.Colon/3drtma_fixfiles/VERIF-fix"
+  WRF="/mnt/lfs3/projects/hfv3gfs/Edward.Colon/FixData/WRF"
+  VERIF="/mnt/lfs3/projects/hfv3gfs/Edward.Colon/FixData/VERIF-fix"
   rm -f ./UPP ./WRF ./VERIF
   echo " ln -sf ${UPP}        ./UPP"
   ln -sf ${UPP}             ./UPP

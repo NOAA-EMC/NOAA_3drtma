@@ -101,7 +101,7 @@ export CAP_RUN_ENVIR=`echo ${run_envir} | tr '[:lower:]' '[:upper:]'`
 #
   export obsprep_radar=0  # 0: No (using processed ReflInGSI.bufr_d of hrrr)
                           # 1: pre-processing MRMS grib2 radar reflectivity obs
-  export obsprep_lghtn=1  # 0: No pre-processing lightning obs data
+  export obsprep_lghtn=0  # 0: No pre-processing lightning obs data
                           # 1: processing bufr data from rap run
                           # 2: processing entln data
                           # 3: processing Vaisala data
@@ -325,8 +325,8 @@ cat > ${NWROOT}/workflow/${RUN}_${expname}.xml <<EOF
 <!ENTITY GSI_THREADS "4">
 <!ENTITY GSI_RESOURCES  
    "<nodes>8:ppn=12</nodes>
-    <walltime>00:30:00</walltime>">
     <native>-l partition=xjet</native>
+    <walltime>00:30:00</walltime>">
 <!ENTITY GSI_OMP_STACKSIZE "512M">
 
 <!ENTITY GSI_START_TIME "00:40:00">
