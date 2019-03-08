@@ -1,7 +1,7 @@
 #!/bin/sh
 
 date
-set -x
+# set -x
 
 #=========================================================================#
 # User define the following variables:

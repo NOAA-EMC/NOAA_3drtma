@@ -420,9 +420,11 @@ ${CP} fort.202    fit_w1.${YYYYMMDDHH}
 ${CP} fort.203    fit_t1.${YYYYMMDDHH}
 ${CP} fort.204    fit_q1.${YYYYMMDDHH}
 ${CP} fort.207    fit_rad1.${YYYYMMDDHH}
-${CP} ${pgmout_stdout}  ${COMOUT}/${pgmout_stdout}_gsianl.${YYYYMMDDHH}
-# cat fort.* > ${DATABASE_DIR}/log/fits_${YYYYMMDDHH}.txt
-cat fort.* > ${COMOUT}/fits_${YYYYMMDDHH}.txt
+${CP} ${pgmout_stdout}  ${COMOUTgsi_rtma3d}/${pgmout_stdout}_gsianl.${YYYYMMDDHH}
+cat   fort.* >    fits_${YYYYMMDDHH}.txt
+${CP} -p fort.220 minimization_fort220.${YYYYMMDDHH}
+# cat fort.* > ${COMOUT}/fits_${YYYYMMDDHH}.txt
+#${CP} -p  ${pgmout_stdout} ${COMOUT}/${pgmout_stdout}_gsianl.${YYYYMMDDHH}
 
 ## second GSI run
 
@@ -498,9 +500,27 @@ fi
 # Saving the running log file
 ${CP} -p  ${pgmout_stdout}  ${COMOUT}/${pgmout_stdout}_gsianl.${YYYYMMDDHH}
 
-# COPY ANALYSIS TO COM2 DIRECTORY AS PRODUCT
-${CP} -p   ${DATA}/wrf_inout                        ${COMOUTgsi_rtma3d}/${ANLrtma3d_FNAME}
-${LN} -sf  ${COMOUTgsi_rtma3d}/${ANLrtma3d_FNAME}   ${COMIN}/${ANLrtma3d_FNAME}
+# Saving ANALYSIS, DIAG, Obs-Fitting files TO COM2 DIRECTORY AS PRODUCT for archive
+${CP} -p ${DATA}/wrf_inout                  ${COMOUTgsi_rtma3d}/${ANLrtma3d_FNAME}
+${CP} -p ${pgmout_stdout}                   ${COMOUTgsi_rtma3d}/${pgmout_stdout}_gsianl.${YYYYMMDDHH}
+${CP} -p fits_${YYYYMMDDHH}.txt             ${COMOUTgsi_rtma3d}
+${CP} -p minimization_fort220.${YYYYMMDDHH} ${COMOUTgsi_rtma3d}
+${CP} -p gsiparm.anl                        ${COMOUTgsi_rtma3d}/gsiparm.anl.${YYYYMMDDHH}
+${CP} -p gsiparm.anl_var                    ${COMOUTgsi_rtma3d}/gsiparm.anl_var.${YYYYMMDDHH}
+${CP} -p diag_*                             ${COMOUTgsi_rtma3d}
+
+tar -zcvf obsfit_fort220.tgz  ./fort.* ./fit_*
+${CP} -p  obsfit_fort220.tgz                 ${COMOUTgsi_rtma3d}
+tar -zcvf misc_info.tgz       ./*info ./errtable ./prepobs_prep.bufrtable  ./*bias*  ./current_bad_aircraft ./gsd_sfcobs_uselist.txt ./gsd_sfcobs_provider.txt ./GSI_workdir_list
+${CP} -p  misc_info.tgz                      ${COMOUTgsi_rtma3d}
+gzip ${COMOUTgsi_rtma3d}/diag_*
+
+
+
+# extra backup (NOT necessary)
+#${LN} -sf ${COMOUTgsi_rtma3d}/${ANLrtma3d_FNAME} ${COMOUT}/${ANLrtma3d_FNAME}
+#${CP} -p  ${pgmout_stdout}                       ${COMOUT}/${pgmout_stdout}_gsianl.${YYYYMMDDHH}
+#${CP} -p  fits_${YYYYMMDDHH}.txt                 ${COMOUT}/fits_${YYYYMMDDHH}.txt
 
 /bin/rm -f ${DATA}/wrf_inout
 /bin/rm -f ${DATA}/sig*
