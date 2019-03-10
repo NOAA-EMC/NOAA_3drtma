@@ -96,7 +96,10 @@ export urma_dir_ops=${urma_dir_ops:-$DATA_OBSPRD}
 
 export urma_dir=${urma_dir:-$DATA_OBSPRD}
 
-export stat_dir=${stat_dir:-$DATAHOME}
+export RUNDIR_GSD=${RUNDIR_GSD:-${DATAROOT}/${RUN}_${PDY}${cyc}${subcyc}}
+
+export stat_dir=${stat_dir:-$RUNDIR_GSD/verifprd}
+
 
 export MASKS=${MASKS:-$PARMverf/masks}
 
@@ -140,7 +143,7 @@ export COMOUTpost_rtma3d=${COMOUTpost_rtma3d:-${COMOUT}/postprd.${cycle}}
 
 # Execute the script.
 
-${exSCR_VERIF:-$HOMErtma3d/scripts/${RUN}/rtma3d_verif.sh}
+${exSCR_VERIF:-$HOMErtma3d/scripts/rtma3d_verif.sh}
 
 export err=$?; err_chk
 
