@@ -273,7 +273,8 @@ fi
 
 # Append VSE sondes to prepbufr
 VSESONDEPATH=/mnt/lfs3/projects/wrfruc/dturner/vse/sonde_outgoing
-${LS} ${VSESONDEPATH}/sonde.*.${PREYYYYMMDD}${PREHH}??.txt > filelist_vsesonde
+${LS} ${VSESONDEPATH}/sonde.*.${YYYYMMDD}${HH}??.txt > filelist_vsesonde
+#${LS} ${VSESONDEPATH}/sonde.*.${PREYYYYMMDD}${PREHH}??.txt > filelist_vsesonde
 numsonde=`more filelist_vsesonde | wc -l`
 numsonde=$((numsonde - 3 ))
 
@@ -297,13 +298,17 @@ if [[ ${numsonde} -gt 00 ]]; then
      ${ECHO} "${numsonde} VSE sondes have been appended to prepbufr"
    fi
 else
-   echo "cannot find VSE sondes at this time ${YYYYMMDD}${PREHH}"
+   echo "cannot find VSE sondes at this time ${YYYYMMDD}${HH}"
 fi
 
 # Append VSE CLAMPS data to prepbufr
 CLAMPSPATH=/mnt/lfs1/projects/public/data/vortex-se/clamps1
 ${LS} ${CLAMPSPATH}/clamps1.*.${YYYYMMDD}.${HH}05.txt > filelist_clamps
 #${LS} ${CLAMPSPATH}/clamps1.*.${PREYYYYMMDD}.${PREHH}55.txt > filelist_clamps
+
+CLAMPSPATH=/mnt/lfs1/projects/public/data/vortex-se/clamps2
+${LS} ${CLAMPSPATH}/clamps2.*.${PREYYYYMMDD}.${PREHH}55.txt >> filelist_clamps
+
 numclamps=`more filelist_clamps | wc -l`
 numclamps=$((numclamps - 3 ))
 
