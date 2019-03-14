@@ -321,13 +321,13 @@ cat > ${NWROOT}/workflow/${RUN}_${expname}.xml <<EOF
     <queue>&QUEUE_DBG;</queue>
     <account>&ACCOUNT;</account>'>
 
-<!ENTITY GSI_CORES "96">
-<!ENTITY GSI_THREADS "4">
+<!ENTITY GSI_CORES "192">
+<!ENTITY GSI_THREADS "1">
 <!ENTITY GSI_RESOURCES  
-   "<nodes>8:ppn=12</nodes>
+   "<nodes>16:ppn=12</nodes>
     <native>-l partition=xjet</native>
     <walltime>00:30:00</walltime>">
-<!ENTITY GSI_OMP_STACKSIZE "512M">
+<!ENTITY GSI_OMP_STACKSIZE "1G">
 
 <!ENTITY GSI_START_TIME "00:40:00">
 <!ENTITY GSI_DEADLINE   "01:30:00">
@@ -360,7 +360,7 @@ cat > ${NWROOT}/workflow/${RUN}_${expname}.xml <<EOF
 <!ENTITY VERIF_PROC "1">
 <!ENTITY VERIF_RESOURCES
    '<cores>&VERIF_PROC;</cores>
-    <walltime>00:15:00</walltime>
+    <walltime>00:30:00</walltime>
     <native>-l partition=xjet</native>
     <queue>&QUEUE_DBG;</queue>
     <account>&ACCOUNT;</account>'>

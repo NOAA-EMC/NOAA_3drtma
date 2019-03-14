@@ -1,7 +1,7 @@
 #!/bin/sh
 
 date
-# set -x
+set -x
 
 #=========================================================================#
 # User define the following variables:
@@ -66,7 +66,7 @@ echo " This machine is $target ."
 #
 BASE=`pwd`;
 echo " current directory is $BASE "
-
+TOP=${BASE}/..
 # detect existence of directory sorc/
 i_max=5; i=0;
 while [ "$i" -lt "$i_max" ]
@@ -109,6 +109,8 @@ if [ ! -d ${TOPSORC_POST}/exec ]; then
   mkdir -p ${TOPSORC_POST}/exec
 fi
 
+cp ${TOP}/modulefiles/jet_files/v8.0.0-$target ${TOPSORC_POST}/modulefiles/post
+cp ${TOP}/modulefiles/jet_files/build_ncep_post.sh ${TOPSORC_POST}/sorc
 #
 #--- detecting the existence of the directory of POST source package
 #

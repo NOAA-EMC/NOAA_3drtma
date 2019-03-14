@@ -1,7 +1,6 @@
 #!/bin/sh
-
 date
-# set -x
+set -x
 
 #=========================================================================#
 # User define the following variables:
@@ -16,8 +15,8 @@ branch_gsi_gsd="feature/gsd_raphrrr_july2018"
 # branch_gsi_source="<specify_your_source_branch_name_here>"
 branch_gsi_source=${branch_gsi_source:-"$branch_gsi_gsd"}
 
-build_corelibs="OFF"   # OFF: using installed corelibs (bacio, bufr, etc.)
-# build_type="DEBUG"   # option: DEBUG, or PRODUCTION(default)
+build_corelibs="ON"   # OFF: using installed corelibs (bacio, bufr, etc.)
+build_type=   # option: DEBUG, or PRODUCTION(default)
 
 #=========================================================================#
 
@@ -61,93 +60,48 @@ fi
 echo " This machine is $target ."
 #===================================================================#
 
-#
-#--- Finding the RTMA ROOT DIRECTORY --- #
-#
-BASE=`pwd`;
-echo " current directory is $BASE "
 
-# detect existence of directory sorc/
-i_max=5; i=0;
-while [ "$i" -lt "$i_max" ]
-do
-  let "i=$i+1"
-  if [ -d ./sorc ]
-  then
-    cd ./sorc
-    TOP_SORC=`pwd`
-    TOP_RTMA=`dirname $(readlink -f .)`
-    echo " found sorc/ is under $TOP_RTMA"
-    break
-  else
-    cd ..
-  fi
-done
-if [ "$i" -ge "$i_max" ]
-then
-  echo ' directory sorc/ could not be found. Abort the task of compilation.'
-  exit 1
+cd ..
+BASE=$(pwd)
+
+dir_root=$BASE/sorc/rtma_gsi.fd
+exec=$BASE/exec
+build_type=
+build_corelibs="ON"
+dir_build=$BASE/sorc/build_gsi
+
+echo
+echo "machine is $target"
+echo
+
+dir_modules=$dir_root/modulefiles
+if [ ! -d $dir_modules ]; then
+    echo "modulefiles does not exist in $dir_modules"
+    exit 10
 fi
+[ -d $dir_root/exec ] || mkdir -p $dir_root/exec
 
-USH_DIR=${TOP_RTMA}/ush
+rm -rf $dir_build
+mkdir -p $dir_build/build_log
+cd $dir_build
 
-cd $TOP_RTMA
-EXEC=${TOP_RTMA}/exec
-if [ ! -d ${EXEC} ]; then mkdir -p ${EXEC}; fi
-
-cd ${TOP_SORC}
-# all the building GSI jobs is to be done under sub-direvtory build_gsi
-BUILD_GSI=${TOP_SORC}/build_gsi
-BUILD_LOG=${BUILD_GSI}/build_log
-DIRNAME_GSI="rtma_gsi.fd"
-SORCDIR_GSI=${TOP_SORC}/${DIRNAME_GSI}
-if [ ! -d ${BUILD_GSI} ] ; then mkdir -p ${BUILD_GSI} ; fi
-if [ ! -d ${BUILD_LOG} ] ; then mkdir -p ${BUILD_LOG} ; fi
-
-#
-#--- detecting the existence of the directory of GSI source package
-#
-cd ${TOP_SORC}
-if [ ! -d ${SORCDIR_GSI} ]
-then
-  echo " ====> WARNING: GSI source code directory: ${SORCDIR_GSI}  does NOT exist."
-  echo " ====> WARNING: please check out a local copy of ProdGSI to ${SORCDIR_GSI}"
-  echo " ====> Warning: abort compilation of GSI for RTMA3D."
-  exit 2
-fi
-
-#
-#--- compilation of GSI
-#
-# working branch
-wrking_branch=${branch_gsi_source}
-cd ${SORCDIR_GSI}
-echo " ----> check out working branch "
-echo " ----> git checkout ${wrking_branch} "
-git checkout ${wrking_branch}
-
-if [ $? -ne 0 ] ; then
-  echo " failed to check out the branch ${wrking_branch} and abort "
-  exit 1
-fi
-
-#==================#
-# load modules
-modules_dir=${SORCDIR_GSI}/modulefiles
 if [ $target = wcoss -o $target = cray ]; then
     module purge
-    module load $modules_dir/modulefile.ProdGSI.$target
+    module load $dir_modules/modulefile.ProdGSI.$target
 elif [ $target = theia ]; then
     module purge
-    source $modules_dir/modulefile.ProdGSI.$target
-    module list
+    source $dir_modules/modulefile.ProdGSI.$target
 elif [ $target = jet ]; then
     module purge
-    source $modules_dir/modulefile.ProdGSI.$target
-    module list
+    if [ -f $dir_modules/modulefile.ProdGSI_LIBON.$target ] ; then
+      source $dir_modules/modulefile.ProdGSI_LIBON.$target
+    else
+      echo "module file missing"
+      exit 1
+    fi
 elif [ $target = dell ]; then
     module purge
-    source $modules_dir/modulefile.ProdGSI.$target
+    source $dir_modules/modulefile.ProdGSI.$target
     export NETCDF_INCLUDE=-I/usrx/local/prod/packages/ips/18.0.1/netcdf/4.5.0/include
     export NETCDF_CFLAGS=-I/usrx/local/prod/packages/ips/18.0.1/netcdf/4.5.0/include
     export NETCDF_LDFLAGS_CXX="-L/usrx/local/prod/packages/ips/18.0.1/netcdf/4.5.0/lib -lnetcdf -lnetcdf_c++"
@@ -162,42 +116,37 @@ elif [ $target = dell ]; then
     export NETCDF=/usrx/local/prod/packages/ips/18.0.1/netcdf/4.5.0
     export NETCDF_INC=/usrx/local/prod/packages/ips/18.0.1/netcdf/4.5.0/include
     export NETCDF_CXX4FLAGS=-I/usrx/local/prod/packages/ips/18.0.1/netcdf/4.5.0/include
-else
-    echo " ----> WARNING: module file has not been configured for this machine: $target "
-    echo " ----> warning: abort compilation "
-    exit 9
 fi
+module list >& log.modulelist 2>&1
 
 #==================#
 # compiling gsi
-echo " ====>  compiling GSI under building directory: ${BUILD_GSI} "
-cd ${BUILD_GSI}
 
-echo " cmake -DBUILD_UTIL=ON -DCMAKE_BUILD_TYPE=${BUILD_TYPE} -DBUILD_CORELIBS=${build_corelibs}  ../${DIRNAME_GSI}  >& ./build_log/log.cmake.${DIRNAME_GSI}.${BUILD_TYPE}.txt "
-cmake -DBUILD_UTIL=ON -DCMAKE_BUILD_TYPE=${BUILD_TYPE} -DBUILD_CORELIBS=${build_corelibs}  ../${DIRNAME_GSI}  >& ./build_log/log.cmake.${DIRNAME_GSI}.${BUILD_TYPE}.txt
+echo " cmake -DBUILD_UTIL=ON -DCMAKE_BUILD_TYPE=${BUILD_TYPE} -DBUILD_CORELIBS=${build_corelibs}  ${dir_root}  >& $dir_build/build_log/log.cmake.rtma_gsi.${BUILD_TYPE}.txt "
+cmake -DBUILD_UTIL=ON -DCMAKE_BUILD_TYPE=${BUILD_TYPE} -DBUILD_CORELIBS=${build_corelibs}  ${dir_root}  >& $dir_build/build_log/log.cmake.rtma_gsi.${BUILD_TYPE}.txt
 
 if [ $? -ne 0 ] ; then
   echo " ================ WARNING =============== " 
   echo " CMake step failed."
   echo " Check up with the log.cmake file under build_gsi/build_log/"
-  echo "   ----> log.cmake.${DIRNAME_GSI}.${BUILD_TYPE}.txt : "
+  echo "   ----> log.cmake.rtma_gsi.${BUILD_TYPE}.txt : "
   echo " ================ WARNING =============== " 
 fi
 
-echo " make VERBOSE=1 -j 8 >& ./build_log/log.make.${DIRNAME_GSI}.${BUILD_TYPE}.txt "
-make VERBOSE=1 -j 8 >& ./build_log/log.make.${DIRNAME_GSI}.${BUILD_TYPE}.txt
+echo " make VERBOSE=1 -j 8 >& ./build_log/log.make.rtma_gsi.${BUILD_TYPE}.txt "
+make VERBOSE=1 -j 8 >& ./build_log/log.make.rtma_gsi.${BUILD_TYPE}.txt
 
 if [ $? -eq 0 ] ; then
   echo " GSI code and utility codes were built successfully."
-  echo " cp -p ${BUILD_GSI}/bin/gsi.x   ${EXEC}/rtma3d_gsi "
-  cp -p ${BUILD_GSI}/bin/gsi.x   ${EXEC}/rtma3d_gsi
-  ls -l ${EXEC}/rtma3d_gsi
+  echo " cp -p ${dir_build}/bin/gsi.x   ${exec}/rtma3d_gsi "
+  cp -p ${dir_build}/bin/gsi.x   ${exec}/rtma3d_gsi
+  ls -l ${exec}/rtma3d_gsi
 else
   echo " ================ WARNING =============== " 
   echo " Compilation of GSI code was failed."
   echo " Check up with the log file under build_gsi/build_log/"
-  echo "   ----> log.cmake.${DIRNAME_GSI}.${BUILD_TYPE}.txt : "
-  echo "   ----> log.make.${DIRNAME_GSI}.${BUILD_TYPE}.txt  : "
+  echo "   ----> log.cmake.rtma_gsi.${BUILD_TYPE}.txt : "
+  echo "   ----> log.make.rtma_gsi.${BUILD_TYPE}.txt  : "
   echo " ================ WARNING =============== " 
 fi
 

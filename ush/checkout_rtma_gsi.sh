@@ -1,7 +1,7 @@
 #!/bin/sh
 
 date
-# set -x
+set -x
 
 #=========================================================================#
 # User define the following variables:
@@ -30,6 +30,30 @@ echo " if it is not, abort and change the definition of branch_gsi_source in thi
 read -p " Press [Enter] key to continue (or Press Ctrl-C to abort) "
 echo
 echo "*==================================================================*"
+
+if [[ -d /dcom && -d /hwrf ]] ; then
+    . /usrx/local/Modules/3.2.10/init/sh
+    target=wcoss
+    . $MODULESHOME/init/sh
+elif [[ -d /cm ]] ; then
+    . $MODULESHOME/init/sh
+    conf_target=nco
+    target=cray
+elif [[ -d /ioddev_dell ]]; then
+    . $MODULESHOME/init/sh
+    conf_target=nco
+    target=dell
+elif [[ -d /scratch3 ]] ; then
+    . /apps/lmod/lmod/init/sh
+    target=theia
+elif [[ -d /mnt/lfs3/projects ]] ; then
+    . /apps/lmod/lmod/init/sh
+    target=jet
+else
+    echo "unknown target = $target"
+    exit 9
+fi
+echo " This machine is $target ."
 
 #
 # --- Finding the RTMA ROOT DIRECTORY --- #
@@ -98,15 +122,23 @@ echo
 MODULEFILES=${TOP_RTMA}/modulefiles
 SORCDIR_GSI=${TOP_SORC}/rtma_gsi.fd
 echo " --> linking GSI modulefiles to RTMA3D modulefiles (used for compilation of GSI)  "
-cd ${MODULEFILES}
-mfiles="modulefile.ProdGSI.wcoss modulefile.ProdGSI.theia modulefile.ProdGSI.jet modulefile.global_gsi.theia modulefile.global_gsi.jet"
+echo $target
+
+if [ $target = jet ] ; then
+   cp ${MODULEFILES}/jet_files/modulefile.ProdGSI_LIBON.$target ${SORCDIR_GSI}/modulefiles
+   cp ${MODULEFILES}/jet_files/modulefile.global_gsi.$target ${SORCDIR_GSI}/modulefiles
+   cp ${MODULEFILES}/jet_files/modulefile.ProdGSI.$target ${MODULEFILES}
+   mfiles="modulefile.ProdGSI_LIBON.$target modulefile.global_gsi.$target"
+else 
+   mfiles="modulefile.ProdGSI.$machine modulefile.global_gsi.$target"
+fi
+
 for modfile in $mfiles
 do
   echo " ----> ln -sf ${MODULEFILES}/$modfile ${SORCDIR_GSI}/modulefiles/$modfile "
   ln -sf ${SORCDIR_GSI}/modulefiles/$modfile ${MODULEFILES}/$modfile 
 done
 
-# set +x
 
 date
 

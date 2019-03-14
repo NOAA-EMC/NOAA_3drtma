@@ -34,6 +34,30 @@ echo "*==================================================================*"
 #
 # --- Finding the RTMA ROOT DIRECTORY --- #
 #
+if [[ -d /dcom && -d /hwrf ]] ; then
+    . /usrx/local/Modules/3.2.10/init/sh
+    target=wcoss
+    . $MODULESHOME/init/sh
+elif [[ -d /cm ]] ; then
+    . $MODULESHOME/init/sh
+    conf_target=nco
+    target=cray
+elif [[ -d /ioddev_dell ]]; then
+    . $MODULESHOME/init/sh
+    conf_target=nco
+    target=dell
+elif [[ -d /scratch3 ]] ; then
+    . /apps/lmod/lmod/init/sh
+    target=theia
+elif [[ -d /mnt/lfs3/projects ]] ; then
+    . /apps/lmod/lmod/init/sh
+    target=jet
+else
+    echo "unknown target = $target"
+    exit 9
+fi
+echo " This machine is $target ."
+
 BASE=`pwd`;
 echo " current directory is $BASE "
 
@@ -96,18 +120,13 @@ fi
 #
 #--- link modulefiles used in POST
 #
-# MODULEFILES=${TOP_RTMA}/modulefiles
-# SORCDIR_POST=${TOP_SORC}/rtma_post.fd
-# echo " --> linking POST modulefiles to RTMA3D modulefiles (used for compilation of POST)  "
-# cd ${MODULEFILES}
-# mfiles="modulefile.POST.wcoss modulefile.POST.theia modulefile.global_post.theia"
-# for modfile in $mfiles
-# do
-#   echo " ----> ln -sf ${MODULEFILES}/$modfile ${SORCDIR_POST}/modulefiles/$modfile "
-#   ln -sf ${SORCDIR_POST}/modulefiles/$modfile ${MODULEFILES}/$modfile 
-# done
+ MODULEFILES=${TOP_RTMA}/modulefiles
+ SORCDIR_POST=${TOP_SORC}/rtma_post.fd
+ echo " --> copying POST modulefile and build script to appropriate UPP directories "
 
-# set +x
+cp ${MODULEFILES}/jet_files/v8.0.0-$target ${SORCDIR_POST}/modulefiles/post
+cp ${MODULEFILES}/jet_files/build_ncep_post.sh ${SORCDIR_POST}/sorc
+
 
 date
 
