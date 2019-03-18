@@ -17,40 +17,49 @@ if [ "${machine}" = "theia" ] ; then
   . /etc/profile
   . /apps/lmod/lmod/init/bash >/dev/null # Module Support
   module purge
+# loading modules used when building the code
   case "$COMMAND" in
     *"${kwd_task}"*)
-      modulefile_run=${modulefile_run:-"${MODULEFILES}/${machine}/run/modulefile.run.post.${machine}"}
-      moduledir=`dirname $(readlink -f ${modulefile_run})`
+      modulefile_build=${modulefile_build:-"${MODULEFILES}/${machine}/build/modulefile.build.post.${machine}"}
+      moduledir=`dirname $(readlink -f ${modulefile_build})`
       module use ${moduledir}
-      module load modulefile.run.post.${machine}
+      module load modulefile.build.post.${machine}
       ;;
     *)
-      modulefile_run=${modulefile_run:-"${MODULEFILES}/${machine}/run/modulefile.run.gsi.${machine}"}
-      source $modulefile_run
+      modulefile_build=${modulefile_build:-"${MODULEFILES}/${machine}/build/modulefile.build.gsi.${machine}"}
+      source $modulefile_build
       ;;
   esac
+# loading modules for running
+  modulefile_run=${modulefile_run:-"${MODULEFILES}/${machine}/run/modulefile.run.${machine}"}
+  source ${modulefile_run}
   module list
 elif [ "${machine}" = "jet" ] ; then
   . /etc/profile
   . /apps/lmod/lmod/init/bash >/dev/null # Module Support
   module purge
+# loading modules used when building the code
   case "$COMMAND" in
     *"${kwd_task}"*)
-      modulefile_run=${modulefile_run:-"${MODULEFILES}/${machine}/run/modulefile.run.post.${machine}"}
-      moduledir=`dirname $(readlink -f ${modulefile_run})`
+      modulefile_build=${modulefile_build:-"${MODULEFILES}/${machine}/build/modulefile.build.post.${machine}"}
+      moduledir=`dirname $(readlink -f ${modulefile_build})`
       module use ${moduledir}
-      module load modulefile.run.post.${machine}
+      module load modulefile.build.post.${machine}
       ;;
     *)
-      modulefile_run=${modulefile_run:-"${MODULEFILES}/${machine}/run/modulefile.run.gsi.${machine}"}
-      source $modulefile_run
+      modulefile_build=${modulefile_build:-"${MODULEFILES}/${machine}/build/modulefile.build.gsi.${machine}"}
+      source $modulefile_build
       ;;
   esac
+# loading modules for running
+  modulefile_run=${modulefile_run:-"${MODULEFILES}/${machine}/run/modulefile.run.${machine}"}
+  source ${modulefile_run}
   module list
 else
   echo "modulefile has not set up for this unknow machine. Job abort!"
   exit 1
 fi
+
 
 ###########################################################################
 # obtain unique process id (pid) and define the name of  temp directories

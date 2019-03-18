@@ -1,0 +1,13 @@
+#%Module######################################################################
+##                                                       Russ.Treadon@noaa.gov
+##                                                           NOAA/NWS/NCEP/EMC
+## GDAS_ENKF v6.2.3
+##_____________________________________________________
+#proc ModulesHelp { } {
+#puts stderr "Set environment veriables for GSI build with CMake"
+#puts stderr "This module initializes the environment "
+#puts stderr "for the Intel Compiler Suite $version\n"
+#}
+#module-whatis " GDAS_ENKF whatis description"
+#
+#

@@ -7,8 +7,8 @@ date
 # User define the following variables:
 
 # branch_post: POST master branch in repository EMC_post
-# branch_post_gsd="master"
-branch_post_gsd="ncep_post_raphrrr.v5.0"
+  branch_post_gsd="master"
+# branch_post_gsd="ncep_post_raphrrr.v5.0"
 
 # branch_post_source: source branch  # the user-specified branch to check out.
                                      # if not specified by user, 
@@ -53,9 +53,11 @@ elif [[ -d /ioddev_dell ]]; then
 elif [[ -d /scratch3 ]] ; then
     . /apps/lmod/lmod/init/sh
     target=theia
+    nwprod_path="/scratch3/NCEPDEV/nwprod/lib/modulefiles"
 elif [[ -d /jetmon ]] ; then
     . /apps/lmod/lmod/init/sh
     target=jet
+    nwprod_path="/lfs3/projects/hfv3gfs/nwprod/lib/modulefiles"
 else
     echo "unknown target = $target"
     exit 9
@@ -145,6 +147,25 @@ modules_fname2=modulefile.run.post.${target}
   for modfile in $mfiles
   do
     if [ -f ${SORCDIR_POST}/modulefiles/post/${modfile} ] ; then
+
+#     # check whether the module file sets up the module path to nwprod libs (used to be missed for theia module file.)
+      if [ ${target} = "theia" ] ; then
+        line_nwprod=`/usr/bin/sed -n '/module.*use.*nwprod/p' ${SORCDIR_POST}/modulefiles/post/${modfile} | wc -l`
+        if [ ${line_nwprod} -eq 0 ] ; then
+          echo "EMC post module file does NOT have have the line to use nwprod modules"
+          echo " need to add the following line"
+          echo " ---> module use -a ???/nwprod/lib/modulefiles <--- "
+          cp -p ${SORCDIR_POST}/modulefiles/post/${modfile} ${SORCDIR_POST}/modulefiles/post/${modfile}.orig
+          /usr/bin/sed -i -e '/set .*ver /a module use -a ${nwprod_path}\n' ${SORCDIR_POST}/modulefiles/post/${modfile}
+          cp -p ${SORCDIR_POST}/sorc/build_ncep_post.sh            ${MODULEFILES}/${target}/build/build_ncep_post.sh
+          /usr/bin/sed -i '/elif.*Dell/i\ module purge\'           ${MODULEFILES}/${target}/build/build_ncep_post.sh
+          mv    ${SORCDIR_POST}/sorc/build_ncep_post.sh            ${SORCDIR_POST}/sorc/build_ncep_post.sh.orig
+          cp -p ${SORCDIR_POST}/sorc/build_ncep_post.sh.orig       ${MODULEFILES}/${target}/build/build_ncep_post.sh.orig
+          cp -p ${MODULEFILES}/${target}/build/build_ncep_post.sh  ${SORCDIR_POST}/sorc/build_ncep_post.sh
+        fi
+      fi
+
+#     # comparing the modulefile of EMC post with modulefile of 3DRTMA for post (if not same, use the one for EMC post)
       if [ -f ${MODULEFILES}/${target}/build/${modules_fname} ] ; then
         /bin/diff ${SORCDIR_POST}/modulefiles/post/${modfile} ${MODULEFILES}/${target}/build/${modules_fname} > ${MODULEFILES}/${target}/build/log.diff_modulefile_post
         diff_word=` /bin/wc -w ${MODULEFILES}/${target}/build/log.diff_modulefile_post | /bin/awk '{print $1}' `
@@ -152,35 +173,40 @@ modules_fname2=modulefile.run.post.${target}
           echo "       ----> UPP package has ${modfile} different to 3DRTMA ${modules_fname} <----  "
           mv    ${MODULEFILES}/${target}/build/${modules_fname} ${MODULEFILES}/${target}/build/${modules_fname}.orig
           cp -p ${SORCDIR_POST}/modulefiles/post/${modfile}    ${MODULEFILES}/${target}/build/${modules_fname}
-          mv    ${MODULEFILES}/${target}/run/${modules_fname}   ${MODULEFILES}/${target}/run/${modules_fname2}.orig
-          cp -p ${SORCDIR_POST}/modulefiles/post/${modfile}    ${MODULEFILES}/${target}/run/${modules_fname2}
+#         mv    ${MODULEFILES}/${target}/run/${modules_fname}   ${MODULEFILES}/${target}/run/${modules_fname2}.orig
+#         cp -p ${SORCDIR_POST}/modulefiles/post/${modfile}    ${MODULEFILES}/${target}/run/${modules_fname2}
         else
           echo "       ----> UPP package has ${modfile} SAME as 3DRTMA ${modules_fname} <----  "
         fi
       else
         cp -p ${SORCDIR_POST}/modulefiles/post/${modfile}   ${MODULEFILES}/${target}/build/${modules_fname}
-        cp -p ${SORCDIR_POST}/modulefiles/post/${modfile}   ${MODULEFILES}/${target}/run/${modules_fname2}
+#       cp -p ${SORCDIR_POST}/modulefiles/post/${modfile}   ${MODULEFILES}/${target}/run/${modules_fname2}
       fi
+
     else
+
       if [ -f ${MODULEFILES}/${target}/build/${modules_fname} ] ; then
         echo "         ----> using pre-defined 3DRTMA modulefile for this machine: ${target}"
         cp -p ${MODULEFILES}/${target}/build/${modules_fname}  ${SORCDIR_POST}/modulefiles/post/${modfile} 
         echo "         ----> adding lines in ${SORCDIR_POST}/sorc/build_ncep_post.sh for machine ${target}"
         cp -p ${SORCDIR_POST}/sorc/build_ncep_post.sh   ${MODULEFILES}/${target}/build/build_ncep_post.sh
-        cp -p ${SORCDIR_POST}/sorc/build_ncep_post.sh   ${MODULEFILES}/${target}/build/build_ncep_post.sh.orig
-#       /bin/sed -i '/elif.*WCOSS/i\elif [ $mac2 = fe  ] ; then                      # For Jet\n . /etc/profile\n . /etc/profile.d/modules.sh\n export NCEPLIBS=/mnt/lfs3/projects/hfv3gfs/nwprod/lib\n export machine=jet' ${MODULEFILES}/${target}/build/build_ncep_post.sh
-        /bin/sed -i '/elif.*WCOSS/i\elif [ $mac2 = fe  ] ; then                      # For Jet\' ${MODULEFILES}/${target}/build/build_ncep_post.sh
-        /bin/sed -i '/elif.*WCOSS/i\ . /etc/profile\' ${MODULEFILES}/${target}/build/build_ncep_post.sh
-        /bin/sed -i '/elif.*WCOSS/i\ . /etc/profile.d/modules.sh\' ${MODULEFILES}/${target}/build/build_ncep_post.sh
-        /bin/sed -i '/elif.*WCOSS/i\ export NCEPLIBS=/mnt/lfs3/projects/hfv3gfs/nwprod/lib\' ${MODULEFILES}/${target}/build/build_ncep_post.sh
-        /bin/sed -i '/elif.*WCOSS/i\ export machine=jet\' ${MODULEFILES}/${target}/build/build_ncep_post.sh
+#       /usr/bin/sed -i '/elif.*WCOSS/i\elif [ $mac2 = fe  ] ; then                      # For Jet\n . /etc/profile\n . /etc/profile.d/modules.sh\n export NCEPLIBS=/mnt/lfs3/projects/hfv3gfs/nwprod/lib\n export machine=jet' ${MODULEFILES}/${target}/build/build_ncep_post.sh
+        /usr/bin/sed -i '/elif.*WCOSS/i\elif [ $mac2 = fe  ] ; then                      # For Jet\' ${MODULEFILES}/${target}/build/build_ncep_post.sh
+        /usr/bin/sed -i '/elif.*WCOSS/i\ . /etc/profile\' ${MODULEFILES}/${target}/build/build_ncep_post.sh
+        /usr/bin/sed -i '/elif.*WCOSS/i\ . /etc/profile.d/modules.sh\' ${MODULEFILES}/${target}/build/build_ncep_post.sh
+        /usr/bin/sed -i '/elif.*WCOSS/i\ module purge\' ${MODULEFILES}/${target}/build/build_ncep_post.sh
+        /usr/bin/sed -i '/elif.*WCOSS/i\ export NCEPLIBS=/mnt/lfs3/projects/hfv3gfs/nwprod/lib\' ${MODULEFILES}/${target}/build/build_ncep_post.sh
+        /usr/bin/sed -i '/elif.*WCOSS/i\ export machine=jet\' ${MODULEFILES}/${target}/build/build_ncep_post.sh
+        /usr/bin/sed -i '/07\/18 Wen Meng:/a\# 03/19 Edward Colon:   update to use modules on ${target}' ${MODULEFILES}/${target}/build/build_ncep_post.sh
         mv    ${SORCDIR_POST}/sorc/build_ncep_post.sh            ${SORCDIR_POST}/sorc/build_ncep_post.sh.orig
+        cp -p ${SORCDIR_POST}/sorc/build_ncep_post.sh.orig       ${MODULEFILES}/${target}/build/build_ncep_post.sh.orig
         cp -p ${MODULEFILES}/${target}/build/build_ncep_post.sh  ${SORCDIR_POST}/sorc/build_ncep_post.sh
       else
         echo " ----> Neither UPP modulefile nor 3DRTMA modulefile found for this ${target} to build unipost code. "
         echo " ---->  Abort! Abort! Abort! Abort! Abort! Abort! "
         exit 1
       fi
+
     fi
   done
 

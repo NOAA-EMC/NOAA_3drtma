@@ -152,52 +152,12 @@ fi
 modules_dir=${MODULEFILES_DIR}/${target}/build
 modules_fname=modulefile.build.post.${target}
 
-if [ $target = wcoss -o $target = cray ]; then
-    module purge
-    module use $modules_dir
-    module load ${modules_fname}
-elif [ $target = theia ]; then
-    module purge
-#   source $modules_dir/${modules_fname}
-    module use $modules_dir
-    module load ${modules_fname}
-    module list
-elif [ $target = jet ]; then
-    module purge
-#   source $modules_dir/${modules_fname}
-    module use $modules_dir
-    module load ${modules_fname}
-    module list
-elif [ $target = dell ]; then
-    module purge
-#   source $modules_dir/${modules_fname}
-    module load $modules_dir/${modules_fname}
-    export NETCDF_INCLUDE=-I/usrx/local/prod/packages/ips/18.0.1/netcdf/4.5.0/include
-    export NETCDF_CFLAGS=-I/usrx/local/prod/packages/ips/18.0.1/netcdf/4.5.0/include
-    export NETCDF_LDFLAGS_CXX="-L/usrx/local/prod/packages/ips/18.0.1/netcdf/4.5.0/lib -lnetcdf -lnetcdf_c++"
-    export NETCDF_LDFLAGS_CXX4="-L/usrx/local/prod/packages/ips/18.0.1/netcdf/4.5.0/lib -lnetcdf -lnetcdf_c++4"
-    export NETCDF_CXXFLAGS=-I/usrx/local/prod/packages/ips/18.0.1/netcdf/4.5.0/include
-    export NETCDF_FFLAGS=-I/usrx/local/prod/packages/ips/18.0.1/netcdf/4.5.0/include
-    export NETCDF_ROOT=/usrx/local/prod/packages/ips/18.0.1/netcdf/4.5.0
-    export NETCDF_LIB=/usrx/local/prod/packages/ips/18.0.1/netcdf/4.5.0/lib
-    export NETCDF_LDFLAGS_F="-L/usrx/local/prod/packages/ips/18.0.1/netcdf/4.5.0/lib -lnetcdff"
-    export NETCDF_LDFLAGS_C="-L/usrx/local/prod/packages/ips/18.0.1/netcdf/4.5.0/lib -lnetcdf"
-    export NETCDF_LDFLAGS="-L/usrx/local/prod/packages/ips/18.0.1/netcdf/4.5.0/lib -lnetcdff"
-    export NETCDF=/usrx/local/prod/packages/ips/18.0.1/netcdf/4.5.0
-    export NETCDF_INC=/usrx/local/prod/packages/ips/18.0.1/netcdf/4.5.0/include
-    export NETCDF_CXX4FLAGS=-I/usrx/local/prod/packages/ips/18.0.1/netcdf/4.5.0/include
-else
-    echo " ----> WARNING: module file has not been configured for this machine: $target "
-    echo " ----> warning: abort compilation "
-    exit 9
-fi
-
 #==================#
 # compiling post
 echo " ====>  compiling POST under building directory: ${BUILD_POST} "
 
 cd ${BUILD_POST}
-build_ncep_post.sh >& ${BUILD_LOG}/log.build_ncep_post_native.txt  2>&1
+/bin/sh build_ncep_post.sh >& ${BUILD_LOG}/log.build_ncep_post_native.txt  2>&1
 
 if [ $? -eq 0 ] ; then
   echo " NCEP-POST code was built successfully."

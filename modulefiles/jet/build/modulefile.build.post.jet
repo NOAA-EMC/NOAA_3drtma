@@ -4,6 +4,9 @@
 ## EMC
 ## post v7.0.0 
 ## Wen Meng 07/2018: set post to v8.0.0 for fv3gfs
+#
+#  Edward Colon 03/2019: add this module file for Jet
+#
 #############################################################
 proc ModulesHelp { } {
 puts stderr "Set environment veriables for post"

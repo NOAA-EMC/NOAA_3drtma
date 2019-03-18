@@ -1,6 +1,49 @@
 #!/bin/sh
 
 #This script preps directories for ROCOTO-controlled RTMA/URMA real time and retro runs.
+#
+####################################################################################################
+#
+#                                     Detect the Machine/Platform
+#   Note: either by testing the unique filesystem
+#                ( if -d /scratch, /mnt/lfs, etc.)
+#             or by testing the unique cpu info in /proc/cpuinfo (Haswell chip E5-2690 v3) 
+#                ( if `grep -c 'E5-2690 v3' /proc/cpuinfo` -gt 0 )
+#
+####################################################################################################
+if [[ -d /dcom && -d /hwrf ]] ; then
+    . /usrx/local/Modules/3.2.10/init/sh
+#   MODULESHOME="/usrx/local/Modules/3.2.10"
+#   . $MODULESHOME/init/sh
+    MACHINE=wcoss
+elif [[ -d /cm ]] ; then
+#   MODULESHOME="/usrx/local/Modules/3.2.10"
+#   . $MODULESHOME/init/sh
+    conf_target=nco
+    MACHINE=cray
+elif [[ -d /ioddev_dell ]]; then
+#   MODULESHOME="/usrx/local/Modules/3.2.10"
+#   . $MODULESHOME/init/sh
+    conf_target=nco
+    MACHINE=dell
+elif [[ -d /scratch3 ]] ; then
+    . /apps/lmod/lmod/init/sh
+    MACHINE=theia
+    nwprod_path="/scratch3/NCEPDEV/nwprod/lib/modulefiles"
+    produtil_path="/scratch4/NCEPDEV/nems/noscrub/emc.nemspara/soft/NCEPLIBS-prod_util"
+elif [[ -d /mnt/lfs3/projects ]] ; then
+    . /apps/lmod/lmod/init/sh
+    MACHINE=jet
+    nwprod_path="/mnt/lfs3/projects/hfv3gfs/nwprod/lib/modulefiles"
+    produtil_path="/mnt/lfs3/projects/hfv3gfs/emc.nemspara/soft/NCEPLIBS-prod_util"
+else
+    MACHINE="unknown"
+    echo 'Running on $MACHINE '
+    echo ' ---------> Warning Warning Warning Warning <--------- '
+    echo '     Machine $machine is NOT ready for running $NET.'
+    exit 9
+fi
+echo 'Running on $MACHINE '
 
 #
 #--- detect existence of directory scripts/
@@ -42,49 +85,15 @@ export expname="${envir}"                   # experiment name
 export NWROOT=${TOP_RTMA}                   #root directory for RTMA/URMA j-job scripts, scripts, parm files, etc. 
 
 # Note: the definition for the following variables depends on the machine.
-export ptmp_base="/scratch3/NCEPDEV/stmp1/${USER}/wrkdir_${NET}"  #base subdirectory for all subsequent working and storage directories
 export QUEUE="batch"                        #user-specified processing queue
 export QUEUE_DBG="debug"                    #user-specified processing queue -- debug
 export QUEUE_SVC="service"                  #user-specified transfer queue
-export ACCOUNT="fv3-cpu"                     #Theia account for CPU resources
+export ACCOUNT="fv3-cpu"                    #account for CPU resources
 
 #
-# detect the machine/platform
-#   Note: either the unique filesystem
-#                ( if -d /scratch, /mnt/lfs, etc.)
-#             or the unique cpu info in /proc/cpuinfo (Haswell chip E5-2690 v3) 
-#                ( if `grep -c 'E5-2690 v3' /proc/cpuinfo` -gt 0 )
+#--- ptmp_base: top running and arching directory
 #
-if [[ -d /dcom && -d /hwrf ]] ; then
-    . /usrx/local/Modules/3.2.10/init/sh
-#   MODULESHOME="/usrx/local/Modules/3.2.10"
-#   . $MODULESHOME/init/sh
-    MACHINE=wcoss
-elif [[ -d /cm ]] ; then
-#   MODULESHOME="/usrx/local/Modules/3.2.10"
-#   . $MODULESHOME/init/sh
-    conf_target=nco
-    MACHINE=cray
-elif [[ -d /ioddev_dell ]]; then
-#   MODULESHOME="/usrx/local/Modules/3.2.10"
-#   . $MODULESHOME/init/sh
-    conf_target=nco
-    MACHINE=dell
-elif [[ -d /scratch3 ]] ; then
-    . /apps/lmod/lmod/init/sh
-    MACHINE=theia
-elif [[ -d /mnt/lfs3/projects ]] ; then
-    . /apps/lmod/lmod/init/sh
-    MACHINE=jet
-else
-    MACHINE="unknown"
-    echo 'Running on $MACHINE '
-    echo ' ---------> Warning Warning Warning Warning <--------- '
-    echo '     Machine $machine is NOT ready for running $NET.'
-    exit 9
-fi
-echo 'Running on $MACHINE '
-
+export ptmp_base="/scratch3/NCEPDEV/stmp1/${USER}/wrkdir_${NET}"  #base subdirectory for all subsequent working and storage directories
 if [[ ! -d ${ptmp_base} ]] ; then
     echo " ${ptmp_base} does NOT exist !"
     echo " Please define the variable and create this directory."
@@ -275,6 +284,37 @@ export exefile_name_verif=""    # executable of verification (MET) is defined by
     export gsi_grid_ratio_in_var=1   # can be 4 if running hybrid to save time
     export gsi_grid_rario_in_cldanl=1
   fi 
+
+#
+#--- Definition for common Linux commands and tools
+#
+  linux_cmd_list="rm cp mv ln mkdir cat echo ls cut date wc sed awk tail cnvgrib mpirun cpfs unzip "
+  LINUX_CMD_LIST=`echo ${linux_cmd_list} | tr '[:lower:]' '[:upper:]'`
+  cmdpath_list=""
+  for lnxcmd in ${linux_cmd_list}
+  do
+    case ${lnxcmd} in
+      cpfs)
+        if [ -f ${produtil_path}/ush/${lnxcmd} ] ; then
+          cmdpath_list="${cmdpath_list} ${lnxcmd}"
+        else
+          cmdpath_list="${cmdpath_list} cp"
+        fi
+        ;;
+      cnvgrib/mpirun)
+         cmdpath_list="${cmdpath_list} ${lnxcmd}"
+        ;;
+      *)
+        if [ -f /bin/${lnxcmd} ] ; then
+          cmdpath_list="${cmdpath_list} /bin/${lnxcmd}"
+        elif [ -f /usr/bin/${lnxcmd} ] ; then
+          cmdpath_list="${cmdpath_list} /usr/bin/${lnxcmd}"
+        else
+          cmdpath_list="${cmdpath_list} CommandNotExist"
+        fi
+        ;;
+    esac
+  done
 
 ########################################################################################
 #
@@ -1017,75 +1057,63 @@ cat > ${NWROOT}/workflow/${RUN}_${expname}.xml <<EOF
       <name>JJOB_PLOTGRADS</name>
       <value>&JJOB_PLOTGRADS;</value>
     </envar>'>
+EOF
 
+#
+#--- Definition for common Linux commands and tools
+#
+cat >> ${NWROOT}/workflow/${RUN}_${expname}.xml <<EOF 
 <!-- Set of system(LINUX, MPI, etc.) commands -->
 <!ENTITY SYS_COMMANDS 
-   '<envar>
-        <name>RM</name>
-        <value>/bin/rm</value>
-   </envar>
-   <envar>
-        <name>CP</name>
-        <value>/bin/cp</value>
-   </envar>
-   <envar>
-        <name>MV</name>
-        <value>/bin/mv</value>
-   </envar>
-   <envar>
-        <name>LN</name>
-        <value>/bin/ln</value>
-   </envar>
-   <envar>
-        <name>MKDIR</name>
-        <value>/bin/mkdir</value>
-   </envar>
-   <envar>
-        <name>CAT</name>
-        <value>/bin/cat</value>
-   </envar>
-   <envar>
-        <name>ECHO</name>
-        <value>/bin/echo</value>
-   </envar>
-   <envar>
-        <name>LS</name>
-        <value>/bin/ls</value>
-   </envar>
-   <envar>
-        <name>CUT</name>
-        <value>/bin/cut</value>
-   </envar>
-   <envar>
-        <name>DATE</name>
-        <value>/bin/date</value>
-   </envar>
-   <envar>
-        <name>WC</name>
-        <value>/bin/wc</value>
-   </envar>
-   <envar>
-        <name>SED</name>
-        <value>/bin/sed</value>
-   </envar>
-   <envar>
-        <name>AWK</name>
-        <value>/bin/awk --posix</value>
-   </envar>
-   <envar>
-        <name>TAIL</name>
-        <value>/bin/tail</value>
-   </envar>
-   <envar>
-        <name>CNVGRIB</name>
-        <value>cnvgrib</value>
-   </envar>
-   <envar>
-        <name>MPIRUN</name>
-        <value>mpirun</value>
-   </envar>'>
-]>
+   '
+EOF
 
+for lnxcmd in ${linux_cmd_list}
+do
+  case ${lnxcmd} in
+    cpfs)
+      if [ -f ${produtil_path}/ush/${lnxcmd} ] ; then
+        cmdpath="${lnxcmd}"
+      else
+        cmdpath="cp"
+      fi
+      ;;
+    cnvgrib/mpirun)
+       cmdpath="${lnxcmd}"
+      ;;
+    *)
+      if [ -f /bin/${lnxcmd} ] ; then
+        cmdpath="/bin/${lnxcmd}"
+      elif [ -f /usr/bin/${lnxcmd} ] ; then
+        cmdpath="usr/bin/${lnxcmd}"
+      else
+        cmdpath=""
+      fi
+      ;;
+  esac
+
+  LNXCMD=`echo ${lnxcmd} | tr '[:lower:]' '[:upper:]'`
+  
+  cat >> ${NWROOT}/workflow/${RUN}_${expname}.xml <<EOF 
+   <envar>
+        <name>${LNXCMD}}</name>
+        <value>${cmdpath}</value>
+   </envar>
+EOF
+done
+
+#  '<envar>
+#       <name>RM</name>
+#       <value>/bin/rm</value>
+#  </envar>'>
+
+cat >> ${NWROOT}/workflow/${RUN}_${expname}.xml <<EOF 
+   '>
+
+]>
+EOF
+
+cat >> ${NWROOT}/workflow/${RUN}_${expname}.xml <<EOF 
 <workflow realtime="F" scheduler="moabtorque" cyclethrottle="1" taskthrottle="350" cyclelifespan="15:00:00:00">
 
   <log>
