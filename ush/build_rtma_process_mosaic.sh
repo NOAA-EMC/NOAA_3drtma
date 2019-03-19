@@ -95,7 +95,7 @@ echo "   ----> ${SOURCE_DIR}"
 echo
 echo " please look at the source code directory name and make sure it is the name you want to build code on "
 echo " if it is not, abort and change the definition of 'dirname_source' in this script ($0)  "
-read -p " Press [Enter] key to continue (or Press Ctrl-C to abort) "
+# read -p " Press [Enter] key to continue (or Press Ctrl-C to abort) "
 echo
 echo "*==================================================================*"
 #

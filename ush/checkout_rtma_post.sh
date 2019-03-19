@@ -28,7 +28,7 @@ echo "     ----> ${branch_post_source}"
 echo
 echo " please look at the branch name and make sure it is the branch you want to check out "
 echo " if it is not, abort and change the definition of branch_post_source in this script ($0)  "
-read -p " Press [Enter] key to continue (or Press Ctrl-C to abort) "
+# read -p " Press [Enter] key to continue (or Press Ctrl-C to abort) "
 echo
 echo "*==================================================================*"
 
