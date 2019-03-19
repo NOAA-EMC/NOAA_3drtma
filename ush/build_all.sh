@@ -76,50 +76,51 @@ export USH_DIR=${TOP_RTMA}/ush
 #
 cd ${USH_DIR}
 echo " running checkout_rtma_gsi.sh to check out GSI package...  "
-if 
-./checkout_rtma_gsi.sh  >& log.checkout_rtma_gsi 2>&1
+# ./checkout_rtma_gsi.sh  >& log.checkout_rtma_gsi 2>&1
+./checkout_rtma_gsi.sh
 
 #
 #--- build GSI
 #
 cd ${USH_DIR}
 echo " running build_rtma_gsi.sh to build GSI code ..."
-./build_rtma_gsi.sh >& log.build_rtma_gsi 2>&1
+./build_rtma_gsi.sh > log.build_rtma_gsi 2>&1
 
 #
 #--- build obs pre-process code for MOSAIC Radar data
 #
 cd ${USH_DIR}
 echo " running build_rtma_process_mosaic.sh to build obs process MOSAIC code ..."
-./build_rtma_process_mosaic.sh >& log.build_rtma_process_mosaic 2>&1
+./build_rtma_process_mosaic.sh > log.build_rtma_process_mosaic 2>&1
 
 #
 #--- build obs pre-process code for NASA Cloud data
 #
 cd ${USH_DIR}
 echo " running build_rtma_process_cloud.sh to build obs process NASA Cloud code ..."
-./build_rtma_process_cloud.sh >& log.build_rtma_process_cloud 2>&1
+./build_rtma_process_cloud.sh > log.build_rtma_process_cloud 2>&1
 
 #
 #--- build obs pre-process code for ENLTN GLM lightning data
 #
 cd ${USH_DIR}
 echo " running build_rtma_process_lightning.sh to build obs process ENLTN lightning code ..."
-./build_rtma_process_lightning.sh >& log.build_rtma_process_lightning 2>&1
+./build_rtma_process_lightning.sh > log.build_rtma_process_lightning 2>&1
 
 #
 #--- check out uni-post package(UPP:EMC_post)
 #
 cd ${USH_DIR}
 echo " running checkout_rtma_post.sh to check out uni-post package...  "
-./checkout_rtma_post.sh >& log.checkout_rtma_post 2>&1
+# ./checkout_rtma_post.sh >& log.checkout_rtma_post 2>&1
+./checkout_rtma_post.sh
 
 #
 #--- build uni-post (UPP)
 #
 cd ${USH_DIR}
 echo " running build_rtma_post.sh to build uni-post code ..."
-./build_rtma_post.sh >& log.build_rtma_post 2>&1
+./build_rtma_post.sh > log.build_rtma_post 2>&1
 
 #===================================================================#
 date
