@@ -156,7 +156,7 @@ modules_fname2=modulefile.run.post.${target}
           echo " need to add the following line"
           echo " ---> module use -a ???/nwprod/lib/modulefiles <--- "
           cp -p ${SORCDIR_POST}/modulefiles/post/${modfile} ${SORCDIR_POST}/modulefiles/post/${modfile}.orig
-          /usr/bin/sed -i -e '/set .*ver /a module use -a ${nwprod_path}\n' ${SORCDIR_POST}/modulefiles/post/${modfile}
+          /usr/bin/sed -i -e "/set .*ver /a module use -a ${nwprod_path}\n" ${SORCDIR_POST}/modulefiles/post/${modfile}
           cp -p ${SORCDIR_POST}/sorc/build_ncep_post.sh            ${MODULEFILES}/${target}/build/build_ncep_post.sh
           /usr/bin/sed -i '/elif.*Dell/i\ module purge\'           ${MODULEFILES}/${target}/build/build_ncep_post.sh
           mv    ${SORCDIR_POST}/sorc/build_ncep_post.sh            ${SORCDIR_POST}/sorc/build_ncep_post.sh.orig
