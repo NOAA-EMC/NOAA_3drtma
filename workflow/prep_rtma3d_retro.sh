@@ -1063,6 +1063,7 @@ EOF
 #--- Definition for common Linux commands and tools
 #
 cat >> ${NWROOT}/workflow/${RUN}_${expname}.xml <<EOF 
+
 <!-- Set of system(LINUX, MPI, etc.) commands -->
 <!ENTITY SYS_COMMANDS 
    '
@@ -1096,7 +1097,7 @@ do
   
   cat >> ${NWROOT}/workflow/${RUN}_${expname}.xml <<EOF 
    <envar>
-        <name>${LNXCMD}}</name>
+        <name>${LNXCMD}</name>
         <value>${cmdpath}</value>
    </envar>
 EOF
