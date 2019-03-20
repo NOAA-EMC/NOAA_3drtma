@@ -308,4 +308,5 @@ else
   ${ECHO} "Warning: ${SODAR_NRSD}/${YYJJJHH}000015o does not exist!"
 fi
 
+${ECHO} "End of conventional.ksh"
 exit 0

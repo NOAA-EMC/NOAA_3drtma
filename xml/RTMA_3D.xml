@@ -667,7 +667,6 @@
 
   </task>
 
-<!--
   <task name="smartinit_bl" cycledefs="02-11hr,02hr,03hr,04hr,05hr,06hr,07hr,08hr,09hr,10hr,11hr,00hr" maxtries="3">
 
     &SMARTINIT_RESOURCES;
@@ -767,7 +766,6 @@
     </dependency>
 
    </task>
--->
 
   <task name="post_00" cycledefs="02-11hr,00hr,01hr" maxtries="3">
 

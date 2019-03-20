@@ -1,12 +1,19 @@
 #!/bin/bash
 
-echo "Input your user name:"
-read username
+username=`logname`
+echo $username
 
-git config user.email "${username}@noaa.gov"
 git config user.name "${username}"
+git config user.email "guoqing.ge@noaa.gov"
 
 git commit "$@"
+echo "Do you want to push the commit to the server (y/n)?"
+read YN
+if [[ "$YN"="y" ]]; then
+   ./rtrrpush
+else
+   "The commit is not pushed to server. Run './rtrrpush' to do the push"
+fi
 
 git config --unset user.name
 git config --unset user.email

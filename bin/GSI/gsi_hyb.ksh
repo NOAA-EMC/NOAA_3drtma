@@ -365,7 +365,9 @@ for loop in $loops; do
 done
 EYYYYMMDD=$(echo ${availtime} | cut -c1-8)
 EHH=$(echo ${availtime} | cut -c9-10)
-touch filelist03
+${LS} ${ENKF_FCST}/${enkfcstname}.mem???.nemsio > filelist03
+#${LS} ${ENKF_FCST}/${enkfcstname}.mem???.nemsio > filelist.tmp
+#head -n 40 filelist.tmp > filelist03
 
 ## 
 ## Link to pre-processed GFS EnKF forecast members
@@ -581,6 +583,7 @@ if [ ${error} -ne 0 ]; then
   exit ${error}
 fi
 ls -l > GSI_workdir_list_cloud
+cp gsiparm.anl gsiparm.anl_cloud
 
 # Look for successful completion messages in rsl files
 nsuccess=`${TAIL} -20 stdout | ${AWK} '/PROGRAM GSI_ANL HAS ENDED/' | ${WC} -l`
