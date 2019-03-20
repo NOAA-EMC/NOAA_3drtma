@@ -3,11 +3,11 @@
 np=`cat $PBS_NODEFILE | wc -l`
 
 module load newdefaults
-module load intel/15.0.3.187
-module load impi/5.1.1.109
+module load intel/18.0.5.274
+module load impi/2018.4.274
 module load szip
 module load hdf5
-module load netcdf4
+module load netcdf
 
 # Set up paths to unix commands
 RM=/bin/rm
