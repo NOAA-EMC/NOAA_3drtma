@@ -139,7 +139,7 @@ OBS_INPUT::
    beta_s0=${beta1_inv},s_ens_h=40,s_ens_v=3,
    regional_ensemble_option=1,
    pseudo_hybens = .false.,
-   grid_ratio_ens = 1,
+   grid_ratio_ens = 12,
    l_ens_in_diff_time=.true.,
    ensemble_path='',
  /
