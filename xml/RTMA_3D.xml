@@ -28,7 +28,7 @@
 <!ENTITY GSI_ROOT "&HOMEBASE_DIR;/exec/GSI">
 <!ENTITY FIX_ROOT "&STATIC_DIR;/GSI">
 
-<!ENTITY HRRR_DIR "/home/rtrr/hrrr">
+<!ENTITY HRRR_DIR "/home/rtrr/hrrr_ak">
 <!ENTITY SST_DIR "&OBS_DIR;/grids/ncep/sst/0p083deg/grib2">
 
 <!ENTITY GFS_DIR "&OBS_DIR;/grids/gfs/0p5deg/grib2">
@@ -41,7 +41,7 @@
 <!ENTITY PREPBUFR_SAT_DIR "&OBS_DIR;/grids/rap/radiance">
 <!ENTITY LIGHTNING_DIR "&OBS_DIR;/lightning">
 <!ENTITY BUFRLIGHTNING_DIR "/mnt/lfs1/projects/rtwbl/mhu/rapobs/radiance">
-<!ENTITY RADAR_DIR "&OBS_DIR;/radar/mrms">
+<!ENTITY RADAR_DIR "&OBS_DIR;/radar/nssl/mrms/alaska">
 <!ENTITY SATELLITE_DIR "&OBS_DIR;/sat/nasa">
 <!ENTITY LANGLEY_BUFR_DIR "&OBS_DIR;/grids/rap/langley">
 <!ENTITY RADVELLEV2_DIR "&OBS_DIR;/grids/rap/nexrad">
