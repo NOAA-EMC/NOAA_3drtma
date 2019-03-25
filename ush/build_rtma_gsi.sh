@@ -2,39 +2,8 @@
 
 date
 # set -x
-
+#
 #=========================================================================#
-# User define the following variables:
-
-# branch_gsi_gsd: GSD RAP/HRRR-based GSI branch in repository of ProdGSI
-branch_gsi_gsd="feature/gsd_raphrrr_july2018"
-# branch_gsi_gsd="master"
-# branch_gsi_source: source branch  # the user-specified branch to build on.
-                                    # if not specified by user, 
-                                    #   it is branch_gsi_gsd by default.
-
-# branch_gsi_source="<specify_your_source_branch_name_here>"
-branch_gsi_source=${branch_gsi_source:-"$branch_gsi_gsd"}
-
-build_corelibs="OFF"   # OFF: using installed corelibs (bacio, bufr, etc.)
-# build_type="DEBUG"   # option: DEBUG, or PRODUCTION(default)
-
-exefile_name_gsi="rtma3d_gsi"
-
-#=========================================================================#
-
-echo "*==================================================================*"
-echo " this script is going to build/make the GSI code for RTMA3D " 
-echo "  building process is under sorc/build_gsi/ "
-echo "   the branch is "
-echo
-echo "   ----> ${branch_gsi_source}"
-echo
-echo " please look at the branch name and make sure it is the branch you want to build GSI code on "
-echo " if it is not, abort and change the definition of branch_gsi_source in this script ($0)  "
-# read -p " Press [Enter] key to continue (or Press Ctrl-C to abort) "
-echo
-echo "*==================================================================*"
 #
 #--- detect the machine/platform
 #
@@ -64,7 +33,50 @@ else
     exit 9
 fi
 echo " This machine is $target ."
-#===================================================================#
+
+#=========================================================================#
+# User define the following variables:
+
+# branch_gsi_gsd: GSD RAP/HRRR-based GSI branch in repository of ProdGSI
+branch_gsi_gsd="feature/gsd_raphrrr_july2018"
+# branch_gsi_gsd="master"
+# branch_gsi_source: source branch  # the user-specified branch to build on.
+                                    # if not specified by user, 
+                                    #   it is branch_gsi_gsd by default.
+
+# branch_gsi_source="<specify_your_source_branch_name_here>"
+branch_gsi_source=${branch_gsi_source:-"$branch_gsi_gsd"}
+
+if [ ${target} = jet ] ; then
+  build_corelibs="ON"   # ON: Not using installed corelibs, building all corelibs with GSI together
+                        # OFF: using installed corelibs (bacio, bufr, etc.)
+  build_type=""         # option: DEBUG, or PRODUCTION(default)
+else
+  build_corelibs="OFF"  # OFF: using installed corelibs (bacio, bufr, etc.)
+  build_type=""         # option: DEBUG, or PRODUCTION(default)
+fi
+
+echo "option of build_corelibs = ${build_corelibs}"
+echo "option of build_type     = ${build_type}"
+
+exefile_name_gsi="rtma3d_gsi"
+
+#=========================================================================#
+
+echo "*==================================================================*"
+echo " this script is going to build/make the GSI code for RTMA3D " 
+echo "  building process is under sorc/build_gsi/ "
+echo "   the branch is "
+echo
+echo "   ----> ${branch_gsi_source}"
+echo
+echo " please look at the branch name and make sure it is the branch you want to build GSI code on "
+echo " if it is not, abort and change the definition of branch_gsi_source in this script ($0)  "
+# read -p " Press [Enter] key to continue (or Press Ctrl-C to abort) "
+echo
+echo "*==================================================================*"
+#
+#=========================================================================#
 
 #
 #--- Finding the RTMA ROOT DIRECTORY --- #
@@ -145,6 +157,7 @@ fi
 # modules_fname=modulefile.ProdGSI.$target
 modules_dir=${MODULEFILES_DIR}/${target}/build
 modules_fname=modulefile.build.gsi.${target}
+# modules_fname=modulefile.build.gsi_NoPreInstalledLibs.${target}
 
 if [ $target = wcoss -o $target = cray ]; then
     module purge

@@ -134,6 +134,7 @@ echo
 MODULEFILES=${TOP_RTMA}/modulefiles
 SORCDIR_GSI=${TOP_SORC}/rtma_gsi.fd
 modules_fname=modulefile.build.gsi.${target}
+# modules_fname=modulefile.build.gsi_NoPreInstalledLibs.${target}
 if [ ! -f ${MODULEFILES}/${target}/build/${modules_fname} ] ; then
   echo " --> There is no pre-defined modulefile for building 3DRTMA on this ${target}.  "
   echo " --> Using modulefile in ProdGSI package to build 3DRTMA  "

@@ -127,6 +127,7 @@ elif [ $target = theia ]; then
     source $modules_dir/${modules_fname}
     module list
 elif [ $target = jet ]; then
+    modules_fname=modulefile.build.gsi.PreInstalledLibs.${target}
     module purge
     source $modules_dir/${modules_fname}
     module list

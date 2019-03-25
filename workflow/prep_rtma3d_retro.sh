@@ -88,12 +88,13 @@ export NWROOT=${TOP_RTMA}                   #root directory for RTMA/URMA j-job 
 export QUEUE="batch"                        #user-specified processing queue
 export QUEUE_DBG="debug"                    #user-specified processing queue -- debug
 export QUEUE_SVC="service"                  #user-specified transfer queue
-export ACCOUNT="fv3-cpu"                    #account for CPU resources
+export ACCOUNT="hfv3gfs"                    #account for CPU resources
 
 #
 #--- ptmp_base: top running and arching directory
 #
-export ptmp_base="/scratch3/NCEPDEV/stmp1/${USER}/wrkdir_${NET}"  #base subdirectory for all subsequent working and storage directories
+# export ptmp_base="/scratch3/NCEPDEV/stmp1/${USER}/wrkdir_${NET}"  #base subdirectory for all subsequent working and storage directories
+export ptmp_base="/mnt/lfs3/projects/hfv3gfs/${USER}/wrkdir_${NET}"  #base subdirectory for all subsequent working and storage directories
 if [[ ! -d ${ptmp_base} ]] ; then
     echo " ${ptmp_base} does NOT exist !"
     echo " Please define the variable and create this directory."
@@ -143,22 +144,45 @@ export exefile_name_verif=""    # executable of verification (MET) is defined by
 #       specific static data, 
 #       then link these paths to the symbol links under fix/ and parm/.
 #
-# export Fixrtma3d_udef="/scratch4/NCEPDEV/fv3-cam/save/Gang.Zhao/FixData"
-  export FIXgsi_udef="/scratch4/NCEPDEV/fv3-cam/save/Gang.Zhao/FixData/GSI-fix_rtma3d_emc_test"
-  export FIXcrtm_udef="/scratch4/NCEPDEV/fv3-cam/save/Gang.Zhao/FixData/CRTM-fix_rtma3d"
-  export FIXwps_udef="/scratch4/NCEPDEV/fv3-cam/save/Gang.Zhao/FixData/WPS"
+  if [ $MACHINE = theia ] ; then
 
-  export OBS_USELIST_udef="/scratch4/NCEPDEV/fv3-cam/save/Gang.Zhao/FixData/ObsUseList_rtma3d"
-  export SFCOBS_USELIST_udef="/scratch4/NCEPDEV/fv3-cam/save/Gang.Zhao/FixData/ObsUseList_rtma3d/gsd/mesonet_uselists"
-  export AIRCRAFT_REJECT_udef="/scratch4/NCEPDEV/fv3-cam/save/Gang.Zhao/FixData/ObsUseList_rtma3d/gsd/amdar_reject_lists"
-  export SFCOBS_PROVIDER_udef="/scratch4/NCEPDEV/fv3-cam/save/Gang.Zhao/FixData/GSI-fix_rtma3d_emc_test"
+#   export Fixrtma3d_udef="/scratch4/NCEPDEV/fv3-cam/save/Gang.Zhao/FixData"
+    export FIXgsi_udef="/scratch4/NCEPDEV/fv3-cam/save/Gang.Zhao/FixData/GSI-fix_rtma3d_emc_test"
+    export FIXcrtm_udef="/scratch4/NCEPDEV/fv3-cam/save/Gang.Zhao/FixData/CRTM-fix_rtma3d"
+    export FIXwps_udef="/scratch4/NCEPDEV/fv3-cam/save/Gang.Zhao/FixData/WPS"
 
-  export PARMgsi_udef=""
-# export PARMupp_udef="/scratch4/NCEPDEV/fv3-cam/save/Gang.Zhao/FixData/parm/upp_gsd_test_mhu_rap_20"
-# export PARMupp_udef="/scratch4/NCEPDEV/fv3-cam/save/Gang.Zhao/FixData/parm/upp_gsd_test_mhu_hrrr_04"
-  export PARMupp_udef="/scratch4/NCEPDEV/fv3-cam/save/Gang.Zhao/FixData/parm/upp_emc_raphrrr_5.0"
-  export PARMwrf_udef="/scratch4/NCEPDEV/fv3-cam/save/Gang.Zhao/FixData/static_gsd_rtma3d_gge/WRF"
-  export PARMverf_udef="/scratch4/NCEPDEV/fv3-cam/save/Edward.Colon/FixData/VERIF-fix"
+    export OBS_USELIST_udef="/scratch4/NCEPDEV/fv3-cam/save/Gang.Zhao/FixData/ObsUseList_rtma3d"
+    export SFCOBS_USELIST_udef="/scratch4/NCEPDEV/fv3-cam/save/Gang.Zhao/FixData/ObsUseList_rtma3d/gsd/mesonet_uselists"
+    export AIRCRAFT_REJECT_udef="/scratch4/NCEPDEV/fv3-cam/save/Gang.Zhao/FixData/ObsUseList_rtma3d/gsd/amdar_reject_lists"
+    export SFCOBS_PROVIDER_udef="/scratch4/NCEPDEV/fv3-cam/save/Gang.Zhao/FixData/GSI-fix_rtma3d_emc_test"
+
+    export PARMgsi_udef=""
+#   export PARMupp_udef="/scratch4/NCEPDEV/fv3-cam/save/Gang.Zhao/FixData/parm/upp_gsd_test_mhu_rap_20"
+#   export PARMupp_udef="/scratch4/NCEPDEV/fv3-cam/save/Gang.Zhao/FixData/parm/upp_gsd_test_mhu_hrrr_04"
+    export PARMupp_udef="/scratch4/NCEPDEV/fv3-cam/save/Gang.Zhao/FixData/parm/upp_emc_raphrrr_5.0"
+    export PARMwrf_udef="/scratch4/NCEPDEV/fv3-cam/save/Gang.Zhao/FixData/static_gsd_rtma3d_gge/WRF"
+    export PARMverf_udef="/scratch4/NCEPDEV/fv3-cam/save/Edward.Colon/FixData/VERIF-fix"
+
+  elif [ $MACHINE = jet ] ; then
+
+#   export Fixrtma3d_udef="/mnt/lfs3/projects/hfv3gfs/Gang.Zhao/FixData"
+    export FIXgsi_udef="/mnt/lfs3/projects/hfv3gfs/Gang.Zhao/FixData/GSI-fix_rtma3d_emc_test"
+    export FIXcrtm_udef="/mnt/lfs3/projects/hfv3gfs/Gang.Zhao/FixData/CRTM-fix_rtma3d"
+    export FIXwps_udef="/mnt/lfs3/projects/hfv3gfs/Gang.Zhao/FixData/WPS"
+
+    export OBS_USELIST_udef="/mnt/lfs3/projects/hfv3gfs/Gang.Zhao/FixData/ObsUseList_rtma3d"
+    export SFCOBS_USELIST_udef="/mnt/lfs3/projects/hfv3gfs/Gang.Zhao/FixData/ObsUseList_rtma3d/gsd/mesonet_uselists"
+    export AIRCRAFT_REJECT_udef="/mnt/lfs3/projects/hfv3gfs/Gang.Zhao/FixData/ObsUseList_rtma3d/gsd/amdar_reject_lists"
+    export SFCOBS_PROVIDER_udef="/mnt/lfs3/projects/hfv3gfs/Gang.Zhao/FixData/GSI-fix_rtma3d_emc_test"
+
+    export PARMgsi_udef=""
+#   export PARMupp_udef="/mnt/lfs3/projects/hfv3gfs/Gang.Zhao/FixData/parm/upp_gsd_test_mhu_rap_20"
+#   export PARMupp_udef="/mnt/lfs3/projects/hfv3gfs/Gang.Zhao/FixData/parm/upp_gsd_test_mhu_hrrr_04"
+    export PARMupp_udef="/mnt/lfs3/projects/hfv3gfs/Gang.Zhao/FixData/parm/upp_emc_raphrrr_5.0"
+    export PARMwrf_udef="/mnt/lfs3/projects/hfv3gfs/Gang.Zhao/FixData/static_gsd_rtma3d_gge/WRF"
+    export PARMverf_udef="/mnt/lfs3/projects/hfv3gfs/Edward.Colon/FixData/VERIF-fix"
+
+  fi
 
 #       define the variable names for symbol links under fix/ and parm/
   export FIXrtma3d="${NWROOT}/fix"
@@ -184,7 +208,7 @@ export exefile_name_verif=""    # executable of verification (MET) is defined by
   if [ ! -d ${FIXrtma3d}   ] ; then mkdir -p ${FIXrtma3d}   ; fi
   if [ ! -d ${PARMrtma3d}  ] ; then mkdir -p ${PARMrtma3d}  ; fi
   if [ ! -d ${OBS_USELIST} ] ; then mkdir -p ${OBS_USELIST} ; fi
-  if [ ${MACHINE} = 'theia' ]; then
+  if [ ${MACHINE} = 'theia' ] || [ ${MACHINE} = 'jet' ] ; then
     cd ${FIXrtma3d}
     echo " linking fixed data on ${MACHINE} for GSI analysis"
     rm -rf $FIXgsi
@@ -290,32 +314,15 @@ export exefile_name_verif=""    # executable of verification (MET) is defined by
 #
   linux_cmd_list="rm cp mv ln mkdir cat echo ls cut date wc sed awk tail cnvgrib mpirun cpfs unzip "
   LINUX_CMD_LIST=`echo ${linux_cmd_list} | tr '[:lower:]' '[:upper:]'`
-  cmdpath_list=""
-  for lnxcmd in ${linux_cmd_list}
-  do
-    case ${lnxcmd} in
-      cpfs)
-        if [ -f ${produtil_path}/ush/${lnxcmd} ] ; then
-          cmdpath_list="${cmdpath_list} ${lnxcmd}"
-        else
-          cmdpath_list="${cmdpath_list} cp"
-        fi
-        ;;
-      cnvgrib/mpirun)
-         cmdpath_list="${cmdpath_list} ${lnxcmd}"
-        ;;
-      *)
-        if [ -f /bin/${lnxcmd} ] ; then
-          cmdpath_list="${cmdpath_list} /bin/${lnxcmd}"
-        elif [ -f /usr/bin/${lnxcmd} ] ; then
-          cmdpath_list="${cmdpath_list} /usr/bin/${lnxcmd}"
-        else
-          cmdpath_list="${cmdpath_list} CommandNotExist"
-        fi
-        ;;
-    esac
-  done
 
+#
+#--- Computational Resources
+#
+  if [ $MACHINE = jet ] ; then
+    export PARTITION_udef="<native>-l partition=xjet</native>"
+  else
+    export PARTITION_udef=""
+  fi
 ########################################################################################
 #
 #             User definition section ends here.
@@ -481,40 +488,46 @@ cat > ${NWROOT}/workflow/${RUN}_${expname}.xml <<EOF
 <!ENTITY FETCHHPSS_RESOURCES
    '<cores>&FETCHHPSS_PROC;</cores>
     <walltime>03:00:00</walltime>
+    ${PARTITION_udef}
     <queue>&QUEUE_SVC;</queue>
     <account>&ACCOUNT;</account>'>
 
 <!ENTITY OBSPREP_RADAR_PROC "36">
 <!ENTITY OBSPREP_RADAR_RESOURCES
    '<cores>&OBSPREP_RADAR_PROC;</cores>
-    <walltime>00:15:00</walltime>
+    <walltime>00:30:00</walltime>
+    ${PARTITION_udef}
     <queue>&QUEUE_DBG;</queue>
     <account>&ACCOUNT;</account>'>
 
 <!ENTITY OBSPREP_LGHTN_PROC "1">
 <!ENTITY OBSPREP_LGHTN_RESOURCES
    '<cores>&OBSPREP_LGHTN_PROC;</cores>
-    <walltime>00:15:00</walltime>
+    <walltime>00:30:00</walltime>
+    ${PARTITION_udef}
     <queue>&QUEUE_DBG;</queue>
     <account>&ACCOUNT;</account>'>
 
 <!ENTITY OBSPREP_CLOUD_PROC "4">
 <!ENTITY OBSPREP_CLOUD_RESOURCES
    '<cores>&OBSPREP_CLOUD_PROC;</cores>
-    <walltime>00:15:00</walltime>
+    <walltime>00:30:00</walltime>
+    ${PARTITION_udef}
     <queue>&QUEUE_DBG;</queue>
     <account>&ACCOUNT;</account>'>
 
 <!ENTITY PREPOBS_PROC "1">
 <!ENTITY PREPOBS_RESOURCES
    '<cores>&PREPOBS_PROC;</cores>
-    <walltime>00:15:00</walltime>
+    <walltime>00:30:00</walltime>
+    ${PARTITION_udef}
     <queue>&QUEUE_DBG;</queue>
     <account>&ACCOUNT;</account>'>
 <!ENTITY PREPFGS_PROC "1">
 <!ENTITY PREPFGS_RESOURCES
    '<cores>&PREPFGS_PROC;</cores>
-    <walltime>00:15:00</walltime>
+    <walltime>00:30:00</walltime>
+    ${PARTITION_udef}
     <queue>&QUEUE_DBG;</queue>
     <account>&ACCOUNT;</account>'>
 
@@ -522,6 +535,7 @@ cat > ${NWROOT}/workflow/${RUN}_${expname}.xml <<EOF
 <!ENTITY GSI_THREADS "4">
 <!ENTITY GSI_RESOURCES  
    "<nodes>8:ppn=12</nodes>
+    ${PARTITION_udef}
     <walltime>00:30:00</walltime>">
 <!ENTITY GSI_OMP_STACKSIZE "512M">
 
@@ -540,6 +554,7 @@ cat > ${NWROOT}/workflow/${RUN}_${expname}.xml <<EOF
 <!ENTITY POST_RESOURCES
    '<nodes>8:ppn=12</nodes>
     <walltime>00:30:00</walltime>
+    ${PARTITION_udef}
     <queue>&QUEUE_DBG;</queue>
     <account>&ACCOUNT;</account>'>
 
@@ -548,13 +563,15 @@ cat > ${NWROOT}/workflow/${RUN}_${expname}.xml <<EOF
    '<cores>&PLOT_PROC;</cores>
     <walltime>00:30:00</walltime>
     <queue>&QUEUE_DBG;</queue>
+    ${PARTITION_udef}
     <memory>3G</memory>
     <account>&ACCOUNT;</account>'>
 
 <!ENTITY VERIF_PROC "1">
 <!ENTITY VERIF_RESOURCES
    '<cores>&VERIF_PROC;</cores>
-    <walltime>00:15:00</walltime>
+    <walltime>00:30:00</walltime>
+    ${PARTITION_udef}
     <queue>&QUEUE_DBG;</queue>
     <account>&ACCOUNT;</account>'>
 
@@ -1481,7 +1498,7 @@ fi
 ######################################################
 # Now make the run_rtma3d.sh script that can be invoked from a crontab
 
-if [ ${MACHINE} = 'theia' ]; then
+if [ ${MACHINE} = 'theia' ] || [ ${MACHINE} = 'jet' ]; then
 cat > ${NWROOT}/workflow/run_${RUN}_${expname}.sh <<EOF 
 #!/bin/bash
 
@@ -1504,7 +1521,7 @@ echo "RTMA3D is ready to go! Run using run_${RUN}_${expname}.sh.  Make sure your
 #####################################################
 # script to check the running status of workflow    #
 #####################################################
-if [ ${MACHINE} = 'theia' ]; then
+if [ ${MACHINE} = 'theia' ] || [ ${MACHINE} = 'jet' ] ; then
 cat > ${NWROOT}/workflow/chk_${RUN}_${expname}.sh <<EOF 
 #!/bin/bash
 

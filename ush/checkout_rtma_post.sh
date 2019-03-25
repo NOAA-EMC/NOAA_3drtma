@@ -7,8 +7,8 @@ date
 # User define the following variables:
 
 # branch_post: POST master branch in repository EMC_post
-  branch_post_gsd="master"
-# branch_post_gsd="ncep_post_raphrrr.v5.0"
+# branch_post_gsd="master"
+  branch_post_gsd="ncep_post_raphrrr.v5.0"
 
 # branch_post_source: source branch  # the user-specified branch to check out.
                                      # if not specified by user, 
@@ -148,17 +148,17 @@ modules_fname2=modulefile.run.post.${target}
   do
     if [ -f ${SORCDIR_POST}/modulefiles/post/${modfile} ] ; then
 
-#     # check whether the module file sets up the module path to nwprod libs (used to be missed for theia module file.)
+#     # check whether the module file sets up the module path to nwprod libs (missed for theia module file.)
       if [ ${target} = "theia" ] ; then
-        line_nwprod=`/usr/bin/sed -n '/module.*use.*nwprod/p' ${SORCDIR_POST}/modulefiles/post/${modfile} | wc -l`
+        line_nwprod=`sed -n '/module.*use.*nwprod/p' ${SORCDIR_POST}/modulefiles/post/${modfile} | wc -l`
         if [ ${line_nwprod} -eq 0 ] ; then
           echo "EMC post module file does NOT have have the line to use nwprod modules"
           echo " need to add the following line"
           echo " ---> module use -a ???/nwprod/lib/modulefiles <--- "
           cp -p ${SORCDIR_POST}/modulefiles/post/${modfile} ${SORCDIR_POST}/modulefiles/post/${modfile}.orig
-          /usr/bin/sed -i -e "/set .*ver /a module use -a ${nwprod_path}\n" ${SORCDIR_POST}/modulefiles/post/${modfile}
+          sed -i -e "/set .*ver /a module use -a ${nwprod_path}\n" ${SORCDIR_POST}/modulefiles/post/${modfile}
           cp -p ${SORCDIR_POST}/sorc/build_ncep_post.sh            ${MODULEFILES}/${target}/build/build_ncep_post.sh
-          /usr/bin/sed -i '/elif.*Dell/i\ module purge\'           ${MODULEFILES}/${target}/build/build_ncep_post.sh
+          sed -i '/elif.*Dell/i\ module purge\'           ${MODULEFILES}/${target}/build/build_ncep_post.sh
           mv    ${SORCDIR_POST}/sorc/build_ncep_post.sh            ${SORCDIR_POST}/sorc/build_ncep_post.sh.orig
           cp -p ${SORCDIR_POST}/sorc/build_ncep_post.sh.orig       ${MODULEFILES}/${target}/build/build_ncep_post.sh.orig
           cp -p ${MODULEFILES}/${target}/build/build_ncep_post.sh  ${SORCDIR_POST}/sorc/build_ncep_post.sh
@@ -190,14 +190,14 @@ modules_fname2=modulefile.run.post.${target}
         cp -p ${MODULEFILES}/${target}/build/${modules_fname}  ${SORCDIR_POST}/modulefiles/post/${modfile} 
         echo "         ----> adding lines in ${SORCDIR_POST}/sorc/build_ncep_post.sh for machine ${target}"
         cp -p ${SORCDIR_POST}/sorc/build_ncep_post.sh   ${MODULEFILES}/${target}/build/build_ncep_post.sh
-#       /usr/bin/sed -i '/elif.*WCOSS/i\elif [ $mac2 = fe  ] ; then                      # For Jet\n . /etc/profile\n . /etc/profile.d/modules.sh\n export NCEPLIBS=/mnt/lfs3/projects/hfv3gfs/nwprod/lib\n export machine=jet' ${MODULEFILES}/${target}/build/build_ncep_post.sh
-        /usr/bin/sed -i '/elif.*WCOSS/i\elif [ $mac2 = fe  ] ; then                      # For Jet\' ${MODULEFILES}/${target}/build/build_ncep_post.sh
-        /usr/bin/sed -i '/elif.*WCOSS/i\ . /etc/profile\' ${MODULEFILES}/${target}/build/build_ncep_post.sh
-        /usr/bin/sed -i '/elif.*WCOSS/i\ . /etc/profile.d/modules.sh\' ${MODULEFILES}/${target}/build/build_ncep_post.sh
-        /usr/bin/sed -i '/elif.*WCOSS/i\ module purge\' ${MODULEFILES}/${target}/build/build_ncep_post.sh
-        /usr/bin/sed -i '/elif.*WCOSS/i\ export NCEPLIBS=/mnt/lfs3/projects/hfv3gfs/nwprod/lib\' ${MODULEFILES}/${target}/build/build_ncep_post.sh
-        /usr/bin/sed -i '/elif.*WCOSS/i\ export machine=jet\' ${MODULEFILES}/${target}/build/build_ncep_post.sh
-        /usr/bin/sed -i '/07\/18 Wen Meng:/a\# 03/19 Edward Colon:   update to use modules on ${target}' ${MODULEFILES}/${target}/build/build_ncep_post.sh
+#       sed -i '/elif.*WCOSS/i\elif [ $mac2 = fe  ] ; then                      # For Jet\n . /etc/profile\n . /etc/profile.d/modules.sh\n export NCEPLIBS=/mnt/lfs3/projects/hfv3gfs/nwprod/lib\n export machine=jet' ${MODULEFILES}/${target}/build/build_ncep_post.sh
+        sed -i '/elif.*WCOSS/i\elif [ $mac2 = fe  ] ; then                      # For Jet\' ${MODULEFILES}/${target}/build/build_ncep_post.sh
+        sed -i '/elif.*WCOSS/i\ . /etc/profile\' ${MODULEFILES}/${target}/build/build_ncep_post.sh
+        sed -i '/elif.*WCOSS/i\ . /etc/profile.d/modules.sh\' ${MODULEFILES}/${target}/build/build_ncep_post.sh
+        sed -i '/elif.*WCOSS/i\ module purge\' ${MODULEFILES}/${target}/build/build_ncep_post.sh
+        sed -i '/elif.*WCOSS/i\ export NCEPLIBS=/mnt/lfs3/projects/hfv3gfs/nwprod/lib\' ${MODULEFILES}/${target}/build/build_ncep_post.sh
+        sed -i '/elif.*WCOSS/i\ export machine=jet\' ${MODULEFILES}/${target}/build/build_ncep_post.sh
+        sed -i '/07\/18 Wen Meng:/a\# 03/19 Edward Colon:   update to use modules on ${target}' ${MODULEFILES}/${target}/build/build_ncep_post.sh
         mv    ${SORCDIR_POST}/sorc/build_ncep_post.sh            ${SORCDIR_POST}/sorc/build_ncep_post.sh.orig
         cp -p ${SORCDIR_POST}/sorc/build_ncep_post.sh.orig       ${MODULEFILES}/${target}/build/build_ncep_post.sh.orig
         cp -p ${MODULEFILES}/${target}/build/build_ncep_post.sh  ${SORCDIR_POST}/sorc/build_ncep_post.sh

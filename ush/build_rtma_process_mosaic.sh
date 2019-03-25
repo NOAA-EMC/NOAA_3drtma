@@ -2,20 +2,6 @@
 
 date
 # set -x
-
-#=========================================================================#
-# User define the following variables:
-
-dirname_source="rtma_process_mosaic.fd"
-
-exefile_name_mosaic="rtma3d_process_mosaic"
-
-#=========================================================================#
-
-echo "*==================================================================*"
-echo " this script is going to build/make the executable code of observation pre-process " 
-echo "   of MOSAIC radar data used for RTMA3D " 
-echo "*==================================================================*"
 #
 #--- detect the machine/platform
 #
@@ -45,7 +31,20 @@ else
     exit 9
 fi
 echo " This machine is $target ."
-#===================================================================#
+
+#=========================================================================#
+# User define the following variables:
+
+dirname_source="rtma_process_mosaic.fd"
+
+exefile_name_mosaic="rtma3d_process_mosaic"
+
+#=========================================================================#
+
+echo "*==================================================================*"
+echo " this script is going to build/make the executable code of observation pre-process " 
+echo "   of MOSAIC radar data used for RTMA3D " 
+echo "*==================================================================*"
 
 #
 #--- Finding the RTMA ROOT DIRECTORY --- #
@@ -127,6 +126,7 @@ elif [ $target = theia ]; then
     source $modules_dir/${modules_fname}
     module list
 elif [ $target = jet ]; then
+    modules_fname=modulefile.build.gsi.PreInstalledLibs.${target}
     module purge
     source $modules_dir/${modules_fname}
     module list

@@ -1,3 +1,26 @@
+#   load modules for running gsi anl
+###########################################################
+#                                                         #
+# This module file for running 3DRTMA package             #
+# is basically including two parts:                       #
+# 1. first part is same as the module file for building,  #
+#    so these same modules used in compilation will be    #
+#    used to support running the code.                    #
+#    (see ../build/modulefile.build.machine)              #
+#    This part is in build module file, so skipped here.  #
+#                                                         #
+# 2. second part is to load specific modules for running  #
+#    specific tools/utilities, like wgrib, MET, etc.      #
+#                                                         #
+###########################################################
+
+#
+# Section 1: loading modules used in building RTMA package
+#            This section is skipped here.
+#            In jobs/launch.sh, 
+#              it loads building modules first,
+#              then load this module file.
+#
 #%Module######################################################################
 ##                                                       Russ.Treadon@noaa.gov
 ##                                                           NOAA/NWS/NCEP/EMC
@@ -10,4 +33,61 @@
 #}
 #module-whatis " GDAS_ENKF whatis description"
 #
+#set ver v6.2.3
 #
+#
+# Section 2: loading modules used to run the specific tools/utilities
+#
+# Loading production utilities
+#   adding module path for prod_util (e.g., ndate)  and esmf libs
+    module use -a /mnt/lfs3/projects/hfv3gfs/emc.nemspara/soft/modulefiles       # Jet
+    module load prod_util
+
+# Loading contrib modules (e.g., anaconda, cmake, met for verification, etc.)
+    module use -a /contrib/modulefiles	
+#   module load contrib     # not use this line if use the command just above
+
+    module load nco
+
+# Access to archiving system
+    module load hpss
+    module load hsms
+#   module load gsd                       # not available on Jet
+
+# Grib
+    module load cnvgrib                   # 1.2.3 default on Jet
+                                          # 1.4.0 default on Theia (available on Jet)
+    module load wgrib
+    module load wgrib2
+ 
+# GrADS
+    module load grads
+
+# NCL
+#   module load cairo
+#   module load ncl
+#   module load ncview
+ 
+    module load imagemagick               # image file format conversion
+
+#   module load xxdiff
+
+#   module load rocoto                    # default 1.2.4
+#   module load rocoto/1.3.0-RC3          # to support SLURM
+
+#   module load udunits
+#   module load cdo
+
+# MET verification tool support
+    module use /mnt/lfs1/projects/dtc-hurr/MET/MET_releases/modulefiles
+    module load met/7.0                   # met 7.0, 8.0 require inte/14.0.3 for current MET installation on Jet
+#   module switch intel/14.0.3     intel/15.0.3.187
+ 
+# Python
+    module load anaconda
+ 
+    export CNVGRIB=${CNVGRIB:-"cnvgrib"}
+    export WGRIB2=${WGRIB2:-"wgrib2"}
+    export MPIRUN=${MPIRUN:-"mpirun"}
+
+echo "done loading modules"

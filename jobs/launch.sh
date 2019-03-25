@@ -40,13 +40,18 @@ elif [ "${machine}" = "jet" ] ; then
   module purge
 # loading modules used when building the code
   case "$COMMAND" in
-    *"${kwd_task}"*)
+    *POST*)
       modulefile_build=${modulefile_build:-"${MODULEFILES}/${machine}/build/modulefile.build.post.${machine}"}
       moduledir=`dirname $(readlink -f ${modulefile_build})`
       module use ${moduledir}
       module load modulefile.build.post.${machine}
       ;;
+    *GSIANL*)
+      modulefile_build=${modulefile_build:-"${MODULEFILES}/${machine}/build/modulefile.build.gsi.${machine}"}
+      source $modulefile_build
+      ;;
     *)
+#     modulefile_build=${modulefile_build:-"${MODULEFILES}/${machine}/build/modulefile.build.gsi.PreInstalledLibs.${machine}"}
       modulefile_build=${modulefile_build:-"${MODULEFILES}/${machine}/build/modulefile.build.gsi.${machine}"}
       source $modulefile_build
       ;;
