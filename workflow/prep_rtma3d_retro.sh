@@ -32,7 +32,7 @@ fi
 #####################################################
 set -x
 export startCDATE=201810230000              #yyyymmddhhmm - Starting day of retro run 
-export endCDATE=201810280000                #yyyymmddhhmm - Ending day of RTMA3D run (needed for both RETRO and REAL TIME). 
+export endCDATE=201810252300                #yyyymmddhhmm - Ending day of RTMA3D run (needed for both RETRO and REAL TIME). 
 export NET=rtma3d                           #selection of rtma3d (or rtma,urma)
 export RUN=rtma3d                           #selection of rtma3d (or rtma,urma)
 =======
@@ -42,6 +42,7 @@ export run_envir="dev"                      #
 export expname="${envir}"
 export ptmp_base="/scratch3/NCEPDEV/stmp1/${USER}/wrkdir_${NET}"  #base subdirectory for all subsequent working and storage directories
 export NWROOT=${TOP_RTMA}                   #root directory for RTMA/URMA j-job scripts, scripts, parm files, etc. 
+export hpsspath0=/NCEPDEV/emc-meso/5year/${USER}/${envir}_${RUN} #user specified location for data archiving
 export QUEUE="batch"                        #user-specified processing queue
 export QUEUE_DBG="debug"                    #user-specified processing queue -- debug
 export QUEUE_SVC="service"                  #user-specified transfer queue
@@ -153,6 +154,7 @@ cat > ${NWROOT}/workflow/${RUN}_${expname}.xml <<EOF
 
 <!ENTITY ptmp_base	"${ptmp_base}">
 <!ENTITY NWROOT		"${NWROOT}">
+<!ENTITY hpsspath0  	"$hpsspath0">
 
 <!ENTITY OBS_DIR	"/scratch4/NCEPDEV/fv3-cam/save/Gang.Zhao/Data/GSD_GSI_Case/obs">
 <!ENTITY HRRR_DIR	"/scratch4/NCEPDEV/fv3-cam/save/Gang.Zhao/Data/GSD_GSI_Case/fgs">
@@ -200,6 +202,7 @@ cat > ${NWROOT}/workflow/${RUN}_${expname}.xml <<EOF
 <!ENTITY DATA_PLOTGRADS "&DATA_RUNDIR;/plotgrads">
 <!ENTITY DATA_FETCHHPSS "&DATA_RUNDIR;/fetchhpss">
 <!ENTITY DATA_VERIF     "&DATA_RUNDIR;/verif">
+<!ENTITY DATA_ARCH      "&DATA_RUNDIR;/arch">
 <!ENTITY DATA_OBSPREP_LGHTN    "&DATA_RUNDIR;/obsprep_lghtn">
 <!ENTITY DATA_OBSPREP_RADAR    "&DATA_RUNDIR;/obsprep_radar">
 <!ENTITY DATA_OBSPREP_CLOUD    "&DATA_RUNDIR;/obsprep_cloud">
@@ -260,6 +263,9 @@ cat > ${NWROOT}/workflow/${RUN}_${expname}.xml <<EOF
 <!ENTITY exSCR_PLOTGRADS "&SCRIPT_DIR;/ex&RUN;_plotgrads.sh">
 <!ENTITY JJOB_VERIF     "&JJOB_DIR;/J&CAP_RUN;_VERIF">
 <!ENTITY exSCR_VERIF    "&SCRIPT_DIR;/ex&RUN;_verif.sh">
+<!ENTITY JJOB_ARCH      "&JJOB_DIR;/J&CAP_RUN;_ARCH">
+<!ENTITY exSCR_ARCH     "&SCRIPT_DIR;/ex&RUN;_transfer.sh">
+
 
 <!-- Resources -->
 
@@ -352,6 +358,14 @@ cat > ${NWROOT}/workflow/${RUN}_${expname}.xml <<EOF
     <walltime>00:15:00</walltime>
     <queue>&QUEUE_DBG;</queue>
     <account>&ACCOUNT;</account>'>
+
+<!ENTITY ARCH_PROC "1">
+<!ENTITY ARCH_RESOURCES
+   '<cores>&ARCH_PROC;</cores>
+    <walltime>00:15:00</walltime>
+    <queue>&QUEUE_SVC;</queue>
+    <account>&ACCOUNT;</account>'>
+
 
 
 <!-- Variables in Namelist -->
@@ -565,6 +579,10 @@ cat > ${NWROOT}/workflow/${RUN}_${expname}.xml <<EOF
    <envar>
       <name>DATA_VERIF</name>
       <value><cyclestr>&DATA_VERIF;</cyclestr></value>
+   </envar>
+   <envar>
+      <name>DATA_ARCH</name>
+      <value><cyclestr>&DATA_ARCH;</cyclestr></value>
    </envar>
    <envar>
       <name>DATA_PLOTGRADS</name>
@@ -809,6 +827,34 @@ cat > ${NWROOT}/workflow/${RUN}_${expname}.xml <<EOF
       <name>JJOB_VERIF</name>
       <value>&JJOB_VERIF;</value>
     </envar>'>
+
+
+<!ENTITY ENVARS_ARCH
+    '<envar>
+      <name>START_TIME</name>
+      <value><cyclestr>@Y@m@d@H</cyclestr></value>
+    </envar>
+    <envar>
+      <name>exSCR_ARCH</name>
+      <value>&exSCR_ARCH;</value>
+    </envar>
+    <envar>
+        <name>write_to_rzdm</name>
+        <value>no</value>
+    </envar>
+    <envar>
+        <name>hpss_save</name>
+        <value>yes</value>
+    </envar>
+    <envar>
+        <name>hpsspath0</name>
+        <value>&hpsspath0;</value>
+    </envar>
+    <envar>
+      <name>JJOB_ARCH</name>
+      <value>&JJOB_ARCH;</value>
+    </envar>'>
+
 
 
 <!ENTITY ENVARS_PLOT
@@ -1155,6 +1201,25 @@ cat >> ${NWROOT}/workflow/${RUN}_${expname}.xml <<EOF
     </dependency>
 
   </task>
+
+  <task name="&NET;_arch" cycledefs="&time_int;" maxtries="&maxtries;">
+    &ENVARS;
+    &ARCH_RESOURCES;
+    &SYS_COMMANDS;
+    <envar>
+       <name>rundir_task</name>
+       <value><cyclestr>&DATA_ARCH;</cyclestr></value>
+    </envar>
+    <command>&JJOB_DIR;/launch.sh &JJOB_DIR;/J&CAP_NET;_ARCH</command>
+    <jobname><cyclestr>&NET;_arch_@H</cyclestr></jobname>
+    <join><cyclestr>&LOG_SCHDLR;/&NET;_submit_arch_@Y@m@d@H@M.log\${PBS_JOBID}</cyclestr></join>
+    &ENVARS_ARCH;
+    <dependency>
+          <taskdep task="&NET;_verif"/>
+    </dependency>
+
+  </task>
+
 
 
 EOF

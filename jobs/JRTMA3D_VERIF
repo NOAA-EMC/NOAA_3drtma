@@ -92,8 +92,6 @@ export USHrtma3d=${USHrtma3d:-$HOMErtma/ush/${RUN}}
 
 export config_dir=${config_dir:-$PARMverf/config_files}
 
-export urma_dir_ops=${urma_dir_ops:-$DATA_OBSPRD}
-
 export urma_dir=${urma_dir:-$DATA_OBSPRD}
 
 export RUNDIR_GSD=${RUNDIR_GSD:-${DATAROOT}/${RUN}_${PDY}${cyc}${subcyc}}
@@ -123,6 +121,10 @@ export COMOUT=${COMOUT:-$COMROOT/${NET}/${envir}}/${RUN}.${PDY}
 mkdir -p $COMOUT
 
 export COMOUTpost_rtma3d=${COMOUTpost_rtma3d:-${COMOUT}/postprd.${cycle}}
+
+export COMOUTverif_rtma3d=${COMOUTverif_rtma3d:-${COMOUT}/verif.${cycle}}
+
+mkdir -p $COMOUTverif_rtma3d
 
 ###########################################################
 

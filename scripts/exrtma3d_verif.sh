@@ -80,8 +80,8 @@ for dom1 in $dom_check; do
   fi
 
 
-pb2nc ${urma_dir_ops}/${mod}.t${HH}z.prepbufr.tm00 \
-      ${urma_dir}/${mod}.t${HH}z.prepbufr.tm00.nr.nc ${config_dir}/PB2NCConfig_DNG_new -v 2
+pb2nc ${urma_dir}/${mod}.t${HH}z.prepbufr.tm00 \
+      ${COMOUTverif_rtma3d}/${mod}.t${HH}z.prepbufr.tm00.nr.nc ${config_dir}/PB2NCConfig_DNG_new -v 2
       export err=$? ; err_chk
       if [ ${err} -ne 0 ]; then
             ${ECHO} "pb2nc crashed!  Exit status=${err}"
@@ -90,19 +90,14 @@ pb2nc ${urma_dir_ops}/${mod}.t${HH}z.prepbufr.tm00 \
 
 
 flds="CandV"
-for fld in $flds; do
-  for exp in $exps; do
-    mkdir -p $stat_dir/${dom_out}/${exp}/${fld}
         point_stat ${COMOUTpost_rtma3d}/${PROD_HEAD}.wrfprs_hrconus_00.grib2 \
-          ${urma_dir}/${mod}.t${HH}z.prepbufr.tm00.nr.nc \
-          ${config_dir}/PointStatConfig_${dom_out}_ADPSFC_${mod}_${fld} -outdir $stat_dir/${dom_out}/${exp}/${fld} -v 2
+          ${COMOUTverif_rtma3d}/${mod}.t${HH}z.prepbufr.tm00.nr.nc \
+          ${config_dir}/PointStatConfig_${dom_out}_ADPSFC_${mod}_${flds} -outdir $COMOUTverif_rtma3d -v 2
           export err=$? ; err_chk
           if [ ${err} -ne 0 ]; then
               ${ECHO} "point_stat crashed! Occurred at exp=${exp} and fld=${fld}.  Exit status=${err}"
               exit ${err}
           fi
-  done
-done
 
 done
 exit ${err}
