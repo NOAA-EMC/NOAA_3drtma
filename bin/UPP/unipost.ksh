@@ -21,6 +21,7 @@
 #             START_TIME = The cycle time to use for the initial time. 
 #                          If not set, the system clock is used.
 #              FCST_TIME = The two-digit forecast that is to be posted
+#              POST_NAME = GRIB-2 file naming convention, e.g., "hrconus"
 # 
 # A short and simple "control" script could be written to call this script
 # or to submit this  script to a batch queueing  system.  Such a "control" 
@@ -36,12 +37,12 @@ np=`cat $PBS_NODEFILE | wc -l`
 # Load modules
 module purge
 module load newdefaults
-module load intel
-module load impi
+module load intel/18.0.5.274
+module load impi/2018.4.274
 module load szip
-module load hdf5
-module load netcdf4/4.2.1.1
-module load ncep
+module load hdf5/1.8.9
+module load netcdf/4.2.1.1
+module load nco
 
 # Make sure we are using GMT time zone for time computations
 export TZ="GMT"
@@ -97,6 +98,12 @@ fi
 # Check to make sure that the DATAHOME exists
 if [ ! ${DATAHOME} ]; then
   ${ECHO} "ERROR: DATAHOME, \$DATAHOME, is not defined"
+  exit 1
+fi
+
+# Check to make sure that the POST_NAME exists
+if [ ! ${POST_NAME} ]; then
+  ${ECHO} "ERROR: POST_NAME, \$POST_NAME, is not defined"
   exit 1
 fi
 
@@ -216,7 +223,6 @@ ln -s ${CRTM}/NPOESS.IRice.EmisCoeff.bin NPOESS.IRice.EmisCoeff.bin
 ln -s ${CRTM}/NPOESS.IRland.EmisCoeff.bin NPOESS.IRland.EmisCoeff.bin
 ln -s ${CRTM}/NPOESS.IRsnow.EmisCoeff.bin NPOESS.IRsnow.EmisCoeff.bin
 
-
 # Run unipost
 ${MPIRUN} -np $np ${POST}< itag
 error=$?
@@ -227,39 +233,39 @@ fi
 
 # Append entire wrftwo to wrfprs
 ${CAT} ${workdir}/WRFPRS.GrbF${FCST_TIME} ${workdir}/WRFTWO.GrbF${FCST_TIME} > ${workdir}/WRFPRS.GrbF${FCST_TIME}.new
-${MV} ${workdir}/WRFPRS.GrbF${FCST_TIME}.new ${workdir}/wrfprs_hrconus_${FCST_TIME}.grib2
+${MV} ${workdir}/WRFPRS.GrbF${FCST_TIME}.new ${workdir}/wrfprs_${POST_NAME}_${FCST_TIME}.grib2
 
 # Append entire wrftwo to wrfnat
 ${CAT} WRFNAT.GrbF${FCST_TIME} WRFTWO.GrbF${FCST_TIME} > ${workdir}/WRFNAT.GrbF${FCST_TIME}.new
-${MV} WRFNAT.GrbF${FCST_TIME}.new ${workdir}/wrfnat_hrconus_${FCST_TIME}.grib2
+${MV} WRFNAT.GrbF${FCST_TIME}.new ${workdir}/wrfnat_${POST_NAME}_${FCST_TIME}.grib2
 
-${MV} ${workdir}/WRFTWO.GrbF${FCST_TIME} ${workdir}/wrftwo_hrconus_${FCST_TIME}.grib2
+${MV} ${workdir}/WRFTWO.GrbF${FCST_TIME} ${workdir}/wrftwo_${POST_NAME}_${FCST_TIME}.grib2
 
 # Check to make sure all Post  output files were produced
-if [ ! -s "${workdir}/wrfprs_hrconus_${FCST_TIME}.grib2" ]; then
-  ${ECHO} "unipost crashed! wrfprs_hrconus_${FCST_TIME}.grib2 is missing"
+if [ ! -s "${workdir}/wrfprs_${POST_NAME}_${FCST_TIME}.grib2" ]; then
+  ${ECHO} "unipost crashed! wrfprs_${POST_NAME}_${FCST_TIME}.grib2 is missing"
   exit 1
 fi
-if [ ! -s "${workdir}/wrftwo_hrconus_${FCST_TIME}.grib2" ]; then
-  ${ECHO} "unipost crashed! wrftwo_hrconus_${FCST_TIME}.grib2 is missing"
+if [ ! -s "${workdir}/wrftwo_${POST_NAME}_${FCST_TIME}.grib2" ]; then
+  ${ECHO} "unipost crashed! wrftwo_${POST_NAME}_${FCST_TIME}.grib2 is missing"
   exit 1
 fi
-if [ ! -s "${workdir}/wrfnat_hrconus_${FCST_TIME}.grib2" ]; then
-  ${ECHO} "unipost crashed! wrfnat_hrconus_${FCST_TIME}.grib2 is missing"
+if [ ! -s "${workdir}/wrfnat_${POST_NAME}_${FCST_TIME}.grib2" ]; then
+  ${ECHO} "unipost crashed! wrfnat_${POST_NAME}_${FCST_TIME}.grib2 is missing"
   exit 1
 fi
 
 # Move the output files to postprd
-${MV} ${workdir}/wrfprs_hrconus_${FCST_TIME}.grib2 ${DATAHOME}
-${MV} ${workdir}/wrftwo_hrconus_${FCST_TIME}.grib2 ${DATAHOME}
-${MV} ${workdir}/wrfnat_hrconus_${FCST_TIME}.grib2 ${DATAHOME}
+${MV} ${workdir}/wrfprs_${POST_NAME}_${FCST_TIME}.grib2 ${DATAHOME}
+${MV} ${workdir}/wrftwo_${POST_NAME}_${FCST_TIME}.grib2 ${DATAHOME}
+${MV} ${workdir}/wrfnat_${POST_NAME}_${FCST_TIME}.grib2 ${DATAHOME}
 ${RM} -rf ${workdir}
 
 # Create softlinks for transfer
 basetime=`${DATE} +%y%j%H%M -d "${START_TIME}"`
-ln -s ${DATAHOME}/wrfprs_hrconus_${FCST_TIME}.grib2 ${DATAHOME}/wrfprs_${basetime}${FCST_TIME}00
-ln -s ${DATAHOME}/wrftwo_hrconus_${FCST_TIME}.grib2 ${DATAHOME}/wrftwo_${basetime}${FCST_TIME}00
-ln -s ${DATAHOME}/wrfnat_hrconus_${FCST_TIME}.grib2 ${DATAHOME}/wrfnat_${basetime}${FCST_TIME}00
+ln -s ${DATAHOME}/wrfprs_${POST_NAME}_${FCST_TIME}.grib2 ${DATAHOME}/wrfprs_${basetime}${FCST_TIME}00
+ln -s ${DATAHOME}/wrftwo_${POST_NAME}_${FCST_TIME}.grib2 ${DATAHOME}/wrftwo_${basetime}${FCST_TIME}00
+ln -s ${DATAHOME}/wrfnat_${POST_NAME}_${FCST_TIME}.grib2 ${DATAHOME}/wrfnat_${basetime}${FCST_TIME}00
 
 ${ECHO} "unipost.ksh completed at `${DATE}`"
 

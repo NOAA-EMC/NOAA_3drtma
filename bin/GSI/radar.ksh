@@ -4,10 +4,12 @@ np=`cat $PBS_NODEFILE | wc -l`
 
 # Load modules
 module purge
-module load newdefaults
-module load intel
-module load impi
-module load netcdf
+module load szip/2.1
+module load intel/18.0.5.274
+module load impi/2018.4.274
+module load hdf5/1.8.9
+module load netcdf/4.2.1.1
+module load pnetcdf/1.6.1
 
 # Vars used for testing.  Should be commented out for production mode
 
@@ -41,7 +43,7 @@ if [ ! "${DATAHOME}" ]; then
   exit 1
 fi
 if [ ! -d "${DATAHOME}" ]; then
-  ${ECHO} "NOTE: DATAHOME directory '${DATAHOME}' does not exist! make one!"
+  ${ECHO} "NOTE: DATAHOME directory '${DATAHOME}' does not exist!"
 fi
 
 if [ ! "${DATAROOT}" ]; then
@@ -69,11 +71,6 @@ if [ ! "${SUBH_TIME}" ]; then
   exit 1
 fi
 
-if [ ! "${MOSAICTILENUM}" ]; then
-  ${ECHO} "ERROR: \$MOSAICTILENUM is not defined!"
-  exit 1
-fi
-
 # Make sure START_TIME is defined and in the correct format
 if [ ! "${START_TIME}" ]; then
   ${ECHO} "ERROR: \$START_TIME is not defined!"
@@ -88,8 +85,8 @@ else
   START_TIME=`${DATE} -d "${START_TIME} ${SUBH_TIME} minutes"`
 fi
 
-if [ ! -d "${NSSLMOSAIC}" ]; then
-  ${ECHO} "ERROR: directory '${NSSLMOSAIC}' does not exist!"
+if [ ! -d "${NSSL}" ]; then
+  ${ECHO} "ERROR: directory '${NSSL}' does not exist!"
   exit 1
 fi
 
@@ -111,32 +108,6 @@ fi
 if [ -s "RefInGSI.dat" ]; then
   ${RM} RefInGSI.dat
 fi
-if [ -s "mosaic_t1" ]; then
-  ${RM} mosaic_t1
-fi
-if [ -s "mosaic_t2" ]; then
-  ${RM} mosaic_t2
-fi
-if [ -s "mosaic_t3" ]; then
-  ${RM} mosaic_t3
-fi
-if [ -s "mosaic_t4" ]; then
-  ${RM} mosaic_t4
-fi
-if [ -s "mosaic_t5" ]; then
-  ${RM} mosaic_t5
-fi
-if [ -s "mosaic_t6" ]; then
-  ${RM} mosaic_t6
-fi
-if [ -s "mosaic_t7" ]; then
-  ${RM} mosaic_t7
-fi
-if [ -s "mosaic_t8" ]; then
-  ${RM} mosaic_t8
-fi
-
-numtiles=${MOSAICTILENUM}
 
 # Compute date & time components for the analysis time
 YYYYJJJHH00=`${DATE} +"%Y%j%H00" -d "${START_TIME}"`
@@ -159,67 +130,19 @@ ${CP} ${MOSAIC} .
 
 ${LN} -s ${STATIC_DIR}/geo_em.d01.nc .
 
-# Link to the prepbufr data
-if [ ${numtiles} -eq 8 ]; then
-  ${CP} ${NSSLMOSAIC}/tile1/${YYYY}${MM}${DD}-${HH}0000.netcdf.gz ./mosaic_t1.gz
-  ${CP} ${NSSLMOSAIC}/tile2/${YYYY}${MM}${DD}-${HH}0000.netcdf.gz ./mosaic_t2.gz
-  ${CP} ${NSSLMOSAIC}/tile3/${YYYY}${MM}${DD}-${HH}0000.netcdf.gz ./mosaic_t3.gz
-  ${CP} ${NSSLMOSAIC}/tile4/${YYYY}${MM}${DD}-${HH}0000.netcdf.gz ./mosaic_t4.gz
-  ${CP} ${NSSLMOSAIC}/tile5/${YYYY}${MM}${DD}-${HH}0000.netcdf.gz ./mosaic_t5.gz
-  ${CP} ${NSSLMOSAIC}/tile6/${YYYY}${MM}${DD}-${HH}0000.netcdf.gz ./mosaic_t6.gz
-  ${CP} ${NSSLMOSAIC}/tile7/${YYYY}${MM}${DD}-${HH}0000.netcdf.gz ./mosaic_t7.gz
-  ${CP} ${NSSLMOSAIC}/tile8/${YYYY}${MM}${DD}-${HH}0000.netcdf.gz ./mosaic_t8.gz
-elif [ ${numtiles} -eq 4 ]; then
-  ${CP} ${NSSLMOSAIC}/tile1/mrefl/MREF3D33L.${YYYY}${MM}${DD}.${HH}0000.gz ./mosaic_t1.gz
-  ${CP} ${NSSLMOSAIC}/tile2/mrefl/MREF3D33L.${YYYY}${MM}${DD}.${HH}0000.gz ./mosaic_t2.gz
-  ${CP} ${NSSLMOSAIC}/tile3/mrefl/MREF3D33L.${YYYY}${MM}${DD}.${HH}0000.gz ./mosaic_t3.gz
-  ${CP} ${NSSLMOSAIC}/tile4/mrefl/MREF3D33L.${YYYY}${MM}${DD}.${HH}0000.gz ./mosaic_t4.gz
-elif [ ${numtiles} -eq 1 ]; then
-  numgrib2_00=`ls ${NSSLMOSAIC}/${YYYY}${MM}${DD}-${HH}${mm}??.MRMS_MergedReflectivityQC_*_${YYYY}${MM}${DD}-${HH}${mm}??.grib2 | wc -l`
-  numgrib2_01=`ls ${NSSLMOSAIC}/${YYYY}${MM}${DD}-${HH}${mm1}??.MRMS_MergedReflectivityQC_*_${YYYY}${MM}${DD}-${HH}${mm1}??.grib2 | wc -l`
-  numgrib2_02=`ls ${NSSLMOSAIC}/${YYYY}${MM}${DD}-${HH}${mm2}??.MRMS_MergedReflectivityQC_*_${YYYY}${MM}${DD}-${HH}${mm2}??.grib2 | wc -l`
-  numgrib2_03=`ls ${NSSLMOSAIC}/${YYYY}${MM}${DD}-${HH}${mm3}??.MRMS_MergedReflectivityQC_*_${YYYY}${MM}${DD}-${HH}${mm3}??.grib2 | wc -l`
-
-  if [ ${numgrib2_00} -ge 10 ]; then
-    ln -sf ${NSSLMOSAIC}/${YYYY}${MM}${DD}-${HH}${mm}??.MRMS_MergedReflectivityQC_*_${YYYY}${MM}${DD}-${HH}${mm}??.grib2 . 
-    ls ${YYYY}${MM}${DD}-${HH}${mm}??.MRMS_MergedReflectivityQC_*_${YYYY}${MM}${DD}-${HH}${mm}??.grib2 > filelist_mrms
-  elif [ ${numgrib2_01} -ge 10 ]; then
-    ln -sf ${NSSLMOSAIC}/${YYYY}${MM}${DD}-${HH}${mm1}??.MRMS_MergedReflectivityQC_*_${YYYY}${MM}${DD}-${HH}${mm1}??.grib2 .
-    ls ${YYYY}${MM}${DD}-${HH}${mm1}??.MRMS_MergedReflectivityQC_*_${YYYY}${MM}${DD}-${HH}${mm1}??.grib2 > filelist_mrms
-  elif [ ${numgrib2_02} -ge 10 ]; then
-    ln -sf ${NSSLMOSAIC}/${YYYY}${MM}${DD}-${HH}${mm2}??.MRMS_MergedReflectivityQC_*_${YYYY}${MM}${DD}-${HH}${mm2}??.grib2 .
-    ls ${YYYY}${MM}${DD}-${HH}${mm2}??.MRMS_MergedReflectivityQC_*_${YYYY}${MM}${DD}-${HH}${mm2}??.grib2 > filelist_mrms
-  elif [ ${numgrib2_03} -ge 10 ]; then
-    ln -sf ${NSSLMOSAIC}/${YYYY}${MM}${DD}-${HH}${mm3}??.MRMS_MergedReflectivityQC_*_${YYYY}${MM}${DD}-${HH}${mm3}??.grib2 .
-    ls ${YYYY}${MM}${DD}-${HH}${mm3}??.MRMS_MergedReflectivityQC_*_${YYYY}${MM}${DD}-${HH}${mm3}??.grib2 > filelist_mrms
-  elif [ -s filelist_mrms ]; then
-    rm -f filelist_mrms
-  else
-    echo "ERROR: Not enough GRIB2 radar reflectivity files in ${NSSLMOSAIC} available at ${START_TIME}."
-    exit 1
-  fi  
+if [ -s filelist_mrms ]; then
+   numgrib2=`more filelist_mrms | wc -l`
+   echo "Using radar data from: `head -1 filelist_mrms | cut -c10-15`"
+   echo "NSSL grib2 file levels = $numgrib2"
 else
-  echo "ERROR: Unknown number of tiles: ${numtiles} specified."
-  exit 1
-fi
-
-if [ ${numtiles} -eq 1 ]; then
-  if [ -s filelist_mrms ]; then
-     numgrib2=`more filelist_mrms | wc -l`
-     echo "Using radar data from: `head -1 filelist_mrms | cut -c10-15`"
-     echo "NSSL grib2 file levels = $numgrib2"
-  else
-     echo "ERROR: Not enough radar reflectivity files available."
-     exit 1
-  fi
-else
-  gzip -d *.gz
+   echo "ERROR: Not enough radar reflectivity files available."
+   exit 1
 fi
 
 ## echo ${YYYYMMDDHH} > mosaic_cycle_date
 cat << EOF > mosaic.namelist
  &setup
-  tversion=${numtiles},
+  tversion=1,
   analysis_time = ${YYYYMMDDHH},
   dataPath = './',
  /
