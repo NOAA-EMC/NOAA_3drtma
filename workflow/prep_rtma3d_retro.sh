@@ -74,8 +74,8 @@ fi
 #--- User defined variables                         #
 #####################################################
 set -x
-export startCDATE=201902130000              #yyyymmddhhmm - Starting day of retro run 
-export endCDATE=201902130000                #yyyymmddhhmm - Ending day of RTMA3D run (needed for both RETRO and REAL TIME). 
+export startCDATE=201902130300              #yyyymmddhhmm - Starting day of retro run 
+export endCDATE=201902130300                #yyyymmddhhmm - Ending day of RTMA3D run (needed for both RETRO and REAL TIME). 
 export NET=rtma3d                           #selection of rtma3d (or rtma,urma)
 export RUN=rtma3d                           #selection of rtma3d (or rtma,urma)
 export envir="Feb2019"                      #environment (test, prod, dev, etc.)
@@ -88,13 +88,14 @@ export NWROOT=${TOP_RTMA}                   #root directory for RTMA/URMA j-job 
 export QUEUE="batch"                        #user-specified processing queue
 export QUEUE_DBG="debug"                    #user-specified processing queue -- debug
 export QUEUE_SVC="service"                  #user-specified transfer queue
-export ACCOUNT="hfv3gfs"                    #account for CPU resources
+export ACCOUNT="fv3-cpu"                    #account for CPU resources
+# export ACCOUNT="hfv3gfs"                    #account for CPU resources
 
 #
 #--- ptmp_base: top running and arching directory
 #
-# export ptmp_base="/scratch3/NCEPDEV/stmp1/${USER}/wrkdir_${NET}"  #base subdirectory for all subsequent working and storage directories
-export ptmp_base="/mnt/lfs3/projects/hfv3gfs/${USER}/wrkdir_${NET}"  #base subdirectory for all subsequent working and storage directories
+export ptmp_base="/scratch3/NCEPDEV/stmp1/${USER}/wrkdir_${NET}"  #base subdirectory for all subsequent working and storage directories
+# export ptmp_base="/mnt/lfs3/projects/hfv3gfs/${USER}/wrkdir_${NET}"  #base subdirectory for all subsequent working and storage directories
 if [[ ! -d ${ptmp_base} ]] ; then
     echo " ${ptmp_base} does NOT exist !"
     echo " Please define the variable and create this directory."
@@ -535,7 +536,6 @@ cat > ${NWROOT}/workflow/${RUN}_${expname}.xml <<EOF
 <!ENTITY GSI_THREADS "4">
 <!ENTITY GSI_RESOURCES  
    "<nodes>8:ppn=12</nodes>
-    ${PARTITION_udef}
     <walltime>00:30:00</walltime>">
 <!ENTITY GSI_OMP_STACKSIZE "512M">
 
@@ -545,6 +545,7 @@ cat > ${NWROOT}/workflow/${RUN}_${expname}.xml <<EOF
    '<deadline><cyclestr offset="&GSI_DEADLINE;">@Y@m@d@H@M</cyclestr></deadline>'>
 <!ENTITY GSI_RESERVATION 
    '<native>-m n</native>
+    ${PARTITION_udef}
     <queue>&QUEUE_DBG;</queue>
     <account>&ACCOUNT;</account>'>
 
@@ -562,8 +563,8 @@ cat > ${NWROOT}/workflow/${RUN}_${expname}.xml <<EOF
 <!ENTITY PLOT_RESOURCES
    '<cores>&PLOT_PROC;</cores>
     <walltime>00:30:00</walltime>
-    <queue>&QUEUE_DBG;</queue>
     ${PARTITION_udef}
+    <queue>&QUEUE_DBG;</queue>
     <memory>3G</memory>
     <account>&ACCOUNT;</account>'>
 
@@ -1099,6 +1100,17 @@ do
     cnvgrib/mpirun)
        cmdpath="${lnxcmd}"
       ;;
+    awk)
+      if [ -f /bin/${lnxcmd} ] ; then
+        cmdpath="/bin/${lnxcmd}"
+        [ "${MACHINE}" = "jet" ] && cmapath="${cmdpath} --posix"
+      elif [ -f /usr/bin/${lnxcmd} ] ; then
+        cmdpath="usr/bin/${lnxcmd}"
+        [ "${MACHINE}" = "jet" ] && cmapath="${cmdpath} --posix"
+      else
+        cmdpath=""
+      fi
+      ;;
     *)
       if [ -f /bin/${lnxcmd} ] ; then
         cmdpath="/bin/${lnxcmd}"
@@ -1154,6 +1166,7 @@ cat >> ${NWROOT}/workflow/${RUN}_${expname}.xml <<EOF
     <join><cyclestr>&LOG_SCHDLR;/&NET;_&envir;_fetchhpss_@Y@m@d@H@M.log\${PBS_JOBID}</cyclestr></join>
 
     &FETCHHPSS_RESOURCES;
+
     &ENVARS_FETCHHPSS;
 
   </task>
@@ -1177,6 +1190,7 @@ cat >> ${NWROOT}/workflow/${RUN}_${expname}.xml <<EOF
     <join><cyclestr>&LOG_SCHDLR;/&NET;_&envir;_obsprep_radar_@Y@m@d@H@M.log\${PBS_JOBID}</cyclestr></join>
 
     &OBSPREP_RADAR_RESOURCES;
+
     &ENVARS_PREPJOB;
 
     <dependency>
@@ -1207,6 +1221,7 @@ cat >> ${NWROOT}/workflow/${RUN}_${expname}.xml <<EOF
     <join><cyclestr>&LOG_SCHDLR;/&NET;_&envir;_obsprep_lghtn_@Y@m@d@H@M.log\${PBS_JOBID}</cyclestr></join>
 
     &OBSPREP_LGHTN_RESOURCES;
+
     &ENVARS_PREPJOB;
 
     <dependency>
@@ -1237,6 +1252,7 @@ cat >> ${NWROOT}/workflow/${RUN}_${expname}.xml <<EOF
     <join><cyclestr>&LOG_SCHDLR;/&NET;_&envir;_obsprep_cloud_@Y@m@d@H@M.log\${PBS_JOBID}</cyclestr></join>
 
     &OBSPREP_CLOUD_RESOURCES;
+
     &ENVARS_PREPJOB;
 
     <dependency>
@@ -1265,6 +1281,7 @@ cat >> ${NWROOT}/workflow/${RUN}_${expname}.xml <<EOF
     <join><cyclestr>&LOG_SCHDLR;/&NET;_&envir;_prepobs_@Y@m@d@H@M.log\${PBS_JOBID}</cyclestr></join>
 
     &PREPOBS_RESOURCES;
+
     &ENVARS_PREPJOB;
 
     <dependency>
@@ -1310,6 +1327,7 @@ cat >> ${NWROOT}/workflow/${RUN}_${expname}.xml <<EOF
     <join><cyclestr>&LOG_SCHDLR;/&NET;_&envir;_prepfgs_@Y@m@d@H@M.log\${PBS_JOBID}</cyclestr></join>
 
     &PREPFGS_RESOURCES;
+
     &ENVARS_PREPJOB;
 
     <dependency>
@@ -1502,10 +1520,10 @@ if [ ${MACHINE} = 'theia' ] || [ ${MACHINE} = 'jet' ]; then
 cat > ${NWROOT}/workflow/run_${RUN}_${expname}.sh <<EOF 
 #!/bin/bash
 
-module purge
 . /etc/profile
 . /apps/lmod/lmod/init/bash >/dev/null # Module Support
 
+module purge
 module load intel
 module load rocoto
 EOF
@@ -1525,10 +1543,10 @@ if [ ${MACHINE} = 'theia' ] || [ ${MACHINE} = 'jet' ] ; then
 cat > ${NWROOT}/workflow/chk_${RUN}_${expname}.sh <<EOF 
 #!/bin/bash
 
-module purge
 . /etc/profile
 . /apps/lmod/lmod/init/bash >/dev/null # Module Support
 
+module purge
 module load intel
 module load rocoto
 EOF
