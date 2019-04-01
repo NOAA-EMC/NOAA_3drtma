@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/ksh
 
 # --- for debug --- #
 date
@@ -118,7 +118,7 @@ fi
 
 ###########################################################
 #
-# The following variables are used in exrtma3d_post.sh
+# The following variables are used in exrtma3d_post.ksh
 #
 ###########################################################
 #   set the file name of the final analysis file for archive
@@ -163,7 +163,7 @@ fi
 ######################
 # Execute the script.
 ######################
-${exSCR_PLOTGRADS:-$HOMErtma3d/scripts/${RUN}/ex${RUN}_plotgrads.sh}
+${exSCR_PLOTGRADS:-$HOMErtma3d/scripts/${RUN}/ex${RUN}_plotgrads.ksh}
 # export err=$?; err_chk
 if [ $? -eq 111 ] ; then
   export err=$?; err_chk

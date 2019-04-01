@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/ksh
 
 # --- for debug --- #
 date
@@ -109,7 +109,7 @@ fi
 ######################
 # Execute the script.
 ######################
-${exSCR_COPY_FGS:-$HOMErtma3d/scripts/${RUN}/ex${RUN}_copy_fgs.sh}
+${exSCR_COPY_FGS:-$HOMErtma3d/scripts/${RUN}/ex${RUN}_copy_fgs.ksh}
 export err=$?; err_chk
 
 msg="$0 of $job completed normally"

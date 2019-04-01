@@ -1,4 +1,4 @@
-#!/bin/bash -l
+#!/bin/ksh -l
 
 set -x
 
@@ -57,9 +57,8 @@ HH_fcstinit=`${ECHO} ${FCST_INI_TIME} | cut -c9-10 `
 export DATAHOME=$DATA
 export MODEL="RAP"
 
-export DATAWRFHOME=${GESINhrrr_rtma3d:-"$COMIN"}
-export DATAWRFFILE=${FGSrtma3d_FNAME:-"${RUN}.t${cyc}z.firstguess.nc"}
-export PROD_HEAD2="${PROD_HEAD}.fgs"
+export DATAWRFHOME=${COMOUTgsi_rtma3d:-"$COMIN"}
+export DATAWRFFILE=${ANLrtma3d_FNAME:-"${RUN}.t${cyc}z.anl.wrf_inout.nc"}
 
 ##########################################################################
 
@@ -210,7 +209,7 @@ fi
 startmsg
 msg="***********************************************************"
 postmsg "$jlogfile" "$msg"
-msg="  begin Uni-Post step for 3DRTMA First Guess"
+msg="  begin Uni-Post step for 3DRTMA GSI Analysis"
 postmsg "$jlogfile" "$msg"
 msg="***********************************************************"
 postmsg "$jlogfile" "$msg"
@@ -266,19 +265,19 @@ if [ ! -s "${workdir}/wrfnat_hrconus_${FCST_TIME}.grib2" ]; then
 fi
 
 # transfer the output grib2 files to $COMOUTpost_rtma3d
-${CP} ${workdir}/wrfprs_hrconus_${FCST_TIME}.grib2 ${COMOUTpost_rtma3d}/${PROD_HEAD2}.wrfprs_hrconus_${FCST_TIME}.grib2
-${CP} ${workdir}/wrftwo_hrconus_${FCST_TIME}.grib2 ${COMOUTpost_rtma3d}/${PROD_HEAD2}.wrftwo_hrconus_${FCST_TIME}.grib2
-${CP} ${workdir}/wrfnat_hrconus_${FCST_TIME}.grib2 ${COMOUTpost_rtma3d}/${PROD_HEAD2}.wrfnat_hrconus_${FCST_TIME}.grib2
+${CP} ${workdir}/wrfprs_hrconus_${FCST_TIME}.grib2 ${COMOUTpost_rtma3d}/${PROD_HEAD}.wrfprs_hrconus_${FCST_TIME}.grib2
+${CP} ${workdir}/wrftwo_hrconus_${FCST_TIME}.grib2 ${COMOUTpost_rtma3d}/${PROD_HEAD}.wrftwo_hrconus_${FCST_TIME}.grib2
+${CP} ${workdir}/wrfnat_hrconus_${FCST_TIME}.grib2 ${COMOUTpost_rtma3d}/${PROD_HEAD}.wrfnat_hrconus_${FCST_TIME}.grib2
 
 # softlinks with Julian date
 basetime=`${DATE} +%y%j%H%M -d "${START_TIME}"`
-${LN} -sf ${COMOUTpost_rtma3d}/${PROD_HEAD2}.wrfprs_hrconus_${FCST_TIME}.grib2 ${COMOUTpost_rtma3d}/${PROD_HEAD2}.wrfprs_${basetime}${FCST_TIME}00
-${LN} -sf ${COMOUTpost_rtma3d}/${PROD_HEAD2}.wrftwo_hrconus_${FCST_TIME}.grib2 ${COMOUTpost_rtma3d}/${PROD_HEAD2}.wrftwo_${basetime}${FCST_TIME}00
-${LN} -sf ${COMOUTpost_rtma3d}/${PROD_HEAD2}.wrfnat_hrconus_${FCST_TIME}.grib2 ${COMOUTpost_rtma3d}/${PROD_HEAD2}.wrfnat_${basetime}${FCST_TIME}00
+${LN} -sf ${COMOUTpost_rtma3d}/${PROD_HEAD}.wrfprs_hrconus_${FCST_TIME}.grib2 ${COMOUTpost_rtma3d}/${PROD_HEAD}.wrfprs_${basetime}${FCST_TIME}00
+${LN} -sf ${COMOUTpost_rtma3d}/${PROD_HEAD}.wrftwo_hrconus_${FCST_TIME}.grib2 ${COMOUTpost_rtma3d}/${PROD_HEAD}.wrftwo_${basetime}${FCST_TIME}00
+${LN} -sf ${COMOUTpost_rtma3d}/${PROD_HEAD}.wrfnat_hrconus_${FCST_TIME}.grib2 ${COMOUTpost_rtma3d}/${PROD_HEAD}.wrfnat_${basetime}${FCST_TIME}00
 
-${LN} -sf ${COMOUTpost_rtma3d}/${PROD_HEAD2}.wrfprs_hrconus_${FCST_TIME}.grib2 ${COMIN}/${PROD_HEAD2}.wrfprs_hrconus_${FCST_TIME}.grib2
-${LN} -sf ${COMOUTpost_rtma3d}/${PROD_HEAD2}.wrfnat_hrconus_${FCST_TIME}.grib2 ${COMIN}/${PROD_HEAD2}.wrfnat_hrconus_${FCST_TIME}.grib2
-${LN} -sf ${COMOUTpost_rtma3d}/${PROD_HEAD2}.wrftwo_hrconus_${FCST_TIME}.grib2 ${COMIN}/${PROD_HEAD2}.wrftwo_hrconus_${FCST_TIME}.grib2
+${LN} -sf ${COMOUTpost_rtma3d}/${PROD_HEAD}.wrfprs_hrconus_${FCST_TIME}.grib2 ${COMIN}/${PROD_HEAD}.wrfprs_hrconus_${FCST_TIME}.grib2
+${LN} -sf ${COMOUTpost_rtma3d}/${PROD_HEAD}.wrfnat_hrconus_${FCST_TIME}.grib2 ${COMIN}/${PROD_HEAD}.wrfnat_hrconus_${FCST_TIME}.grib2
+${LN} -sf ${COMOUTpost_rtma3d}/${PROD_HEAD}.wrftwo_hrconus_${FCST_TIME}.grib2 ${COMIN}/${PROD_HEAD}.wrftwo_hrconus_${FCST_TIME}.grib2
 
 #================================================================================#
 # The following data transferr is used in GSD old unipost script

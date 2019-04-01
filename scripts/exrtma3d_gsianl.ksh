@@ -1,11 +1,11 @@
-#!/bin/bash
+#!/bin/ksh
 
 set -x 
 
 #
-#-- This script is goint to run GSI analysis (3DVar and Cloud analysis) in two-step
+#-- This script is goint to run GSI analysis (3DVar and Cloud analysis) in one-step
 #
-echo " This script is goint to run GSI analysis (3DVar and Cloud analysis) in two-step"
+echo " This script is goint to run GSI analysis (3DVar and Cloud analysis) in one-step"
 
 #-- Testing the status of some important variables. --#
 # Make sure DATAHOME is defined and exists
@@ -289,9 +289,11 @@ export JCAP=${JCAP:-62}
 export LEVS=${LEVS:-60}
 export DELTIM=${DELTIM:-$((3600/($JCAP/20)))}
 
-ndatrap=62
+ndatrap=67  #62 ?
+
+# 3DVar and Cloud analysis in one-step
 grid_ratio=${GSI_grid_ratio_in_var:-1}
-cloudanalysistype=5
+cloudanalysistype=1
 
 # option for hybrid vertical coordinate (HVC) in WRF-ARW
 
@@ -334,11 +336,11 @@ fi
 . prep_step
 
 startmsg
-msg="***********************************************************"
+msg="***************************************************************************"
 postmsg "$jlogfile" "$msg"
-msg="  begin gsi analysis for 1st pass: variational analysis"
+msg="  begin gsi analysis  : variational + cloud analysis in one-step"
 postmsg "$jlogfile" "$msg"
-msg="***********************************************************"
+msg="***************************************************************************"
 postmsg "$jlogfile" "$msg"
 
 # Save a copy of the GSI executable in the workdir
@@ -353,7 +355,7 @@ export err=$? ; err_chk
 #===========================================================#
 # error checking used in GSD script
 #===========================================================#
-export pgmout_stdout="stdout_var"
+export pgmout_stdout="stdout"
 cat ${pgmout} > ${pgmout_stdout}
 if [ -f errfile ] ; then
     cat errfile >> ${pgmout_stdout}
@@ -420,85 +422,10 @@ ${CP} fort.202    fit_w1.${YYYYMMDDHH}
 ${CP} fort.203    fit_t1.${YYYYMMDDHH}
 ${CP} fort.204    fit_q1.${YYYYMMDDHH}
 ${CP} fort.207    fit_rad1.${YYYYMMDDHH}
-${CP} ${pgmout_stdout}  ${COMOUTgsi_rtma3d}/${pgmout_stdout}_gsianl.${YYYYMMDDHH}
 cat   fort.* >    fits_${YYYYMMDDHH}.txt
 ${CP} -p fort.220 minimization_fort220.${YYYYMMDDHH}
 # cat fort.* > ${COMOUT}/fits_${YYYYMMDDHH}.txt
-#${CP} -p  ${pgmout_stdout} ${COMOUT}/${pgmout_stdout}_gsianl.${YYYYMMDDHH}
 
-## second GSI run
-
-mv gsiparm.anl gsiparm.anl_var
-mv sigf03 sigf03_step1
-mv siganl sigf03
-
-ndatrap=67
-grid_ratio=${GSI_grid_ratio_in_cldanl:-1}
-cloudanalysistype=6
-ifhyb=.false.
-
-# Build the GSI namelist on-the-fly
-cp ${PARMgsi}/gsiparm.anl.sh ./
-. ./gsiparm.anl.sh
-cat << EOF > gsiparm.anl
-$gsi_namelist
-EOF
-
-if [ -f errfile ] ; then
-    rm -f errfile
-fi
-
-. prep_step
-
-startmsg
-msg="***********************************************************"
-postmsg "$jlogfile" "$msg"
-msg="  begin gsi analysis for 2nd pass: cloud analysis"
-postmsg "$jlogfile" "$msg"
-msg="***********************************************************"
-postmsg "$jlogfile" "$msg"
-
-# Run GSI
-#runline="${MPIRUN} -np $np ${GSI} < gsiparm.anl > stdout 2>&1"
-#runline="${MPIRUN} -np $np ${pgm} < gsiparm.anl >> ${pgmout} 2>errfile"
- runline="${MPIRUN} -np $np ./rtma3d_gsi"
-$runline < gsiparm.anl >> ${pgmout}  2>errfile
-export err=$? ; err_chk
-
-#===========================================================#
-# error checking used in GSD script
-#===========================================================#
-export pgmout_stdout="stdout_cloud"
-cat ${pgmout} > ${pgmout_stdout}
-if [ -f errfile ] ; then
-    cat errfile >> ${pgmout_stdout}
-fi
-
-export error=$err
-if [ ${error} -ne 0 ]; then
-  ${ECHO} "ERROR: ${GSI} crashed  Exit status=${error}"
-  cp ${pgmout_stdout}  ../.
-  exit ${error}
-fi
-ls -l > GSI_workdir_list_cloud
-
-# Look for successful completion messages in rsl files
-nsuccess=`${TAIL} -200 ${pgmout_stdout} | ${AWK} '/PROGRAM GSI_ANL HAS ENDED/' | ${WC} -l`
-ntotal=1
-${ECHO} "Found ${nsuccess} of ${ntotal} completion messages"
-if [ ${nsuccess} -ne ${ntotal} ]; then
-   ${ECHO} "ERROR: ${GSI} did not complete sucessfully  Exit status=${error}"
-   cp ${pgmout_stdout}  ../.
-   cp GSI_workdir_list_cloud ../.
-   if [ ${error} -ne 0 ]; then
-     exit ${error}
-   else
-     exit 1
-   fi
-fi
-
-# Saving the running log file
-${CP} -p  ${pgmout_stdout}  ${COMOUT}/${pgmout_stdout}_gsianl.${YYYYMMDDHH}
 
 # Saving ANALYSIS, DIAG, Obs-Fitting files TO COM2 DIRECTORY AS PRODUCT for archive
 ${CP} -p ${DATA}/wrf_inout                  ${COMOUTgsi_rtma3d}/${ANLrtma3d_FNAME}
@@ -506,7 +433,6 @@ ${CP} -p ${pgmout_stdout}                   ${COMOUTgsi_rtma3d}/${pgmout_stdout}
 ${CP} -p fits_${YYYYMMDDHH}.txt             ${COMOUTgsi_rtma3d}
 ${CP} -p minimization_fort220.${YYYYMMDDHH} ${COMOUTgsi_rtma3d}
 ${CP} -p gsiparm.anl                        ${COMOUTgsi_rtma3d}/gsiparm.anl.${YYYYMMDDHH}
-${CP} -p gsiparm.anl_var                    ${COMOUTgsi_rtma3d}/gsiparm.anl_var.${YYYYMMDDHH}
 ${CP} -p diag_*                             ${COMOUTgsi_rtma3d}
 
 tar -zcvf obsfit_fort220.tgz  ./fort.* ./fit_*
@@ -514,8 +440,6 @@ ${CP} -p  obsfit_fort220.tgz                 ${COMOUTgsi_rtma3d}
 tar -zcvf misc_info.tgz       ./*info ./errtable ./prepobs_prep.bufrtable  ./*bias*  ./current_bad_aircraft ./gsd_sfcobs_uselist.txt ./gsd_sfcobs_provider.txt ./GSI_workdir_list
 ${CP} -p  misc_info.tgz                      ${COMOUTgsi_rtma3d}
 gzip ${COMOUTgsi_rtma3d}/diag_*
-
-
 
 # extra backup (NOT necessary)
 #${LN} -sf ${COMOUTgsi_rtma3d}/${ANLrtma3d_FNAME} ${COMOUT}/${ANLrtma3d_FNAME}

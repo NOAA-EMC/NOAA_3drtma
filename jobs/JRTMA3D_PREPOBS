@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/ksh
 
 # --- for debug --- #
 date
@@ -113,7 +113,7 @@ fi
 ######################
 # Execute the script.
 ######################
-${exSCR_PREPOBS:-$HOMErtma3d/scripts/${RUN}/ex${RUN}_prepobs.sh}
+${exSCR_PREPOBS:-$HOMErtma3d/scripts/${RUN}/ex${RUN}_prepobs.ksh}
 export err=$?; err_chk
 
 msg="$0 of $job completed normally"

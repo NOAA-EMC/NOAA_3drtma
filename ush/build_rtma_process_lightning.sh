@@ -1,21 +1,8 @@
-#!/bin/sh
+#!/bin/bash
 
 date
 # set -x
-
 #=========================================================================#
-# User define the following variables:
-
-dirname_source="rtma_process_lightning.fd"
-ltn_bufr="netcdf_bufr"
-exefile_name_lightning="rtma3d_process_lightning"
-
-#=========================================================================#
-
-echo "*==================================================================*"
-echo " this script is going to build/make the executable code of observation pre-process " 
-echo "   of ENLTN (lighning for glm) data used for RTMA3D " 
-echo "*==================================================================*"
 #
 #--- detect the machine/platform
 #
@@ -35,16 +22,31 @@ elif [[ -d /ioddev_dell ]]; then
     conf_target=nco
     target=dell
 elif [[ -d /scratch3 ]] ; then
-    . /apps/lmod/lmod/init/sh
+    . /etc/profile
+    . /etc/profile.d/modules.sh >/dev/null # Module Support
     target=theia
 elif [[ -d /jetmon ]] ; then
-    . /apps/lmod/lmod/init/sh
+    . /etc/profile
+    . /etc/profile.d/modules.sh >/dev/null # Module Support
     target=jet
 else
     echo "unknown target = $target"
     exit 9
 fi
 echo " This machine is $target ."
+#=========================================================================#
+# User define the following variables:
+
+dirname_source="rtma_process_lightning.fd"
+ltn_bufr="netcdf_bufr"
+exefile_name_lightning="rtma3d_process_lightning"
+
+#=========================================================================#
+
+echo "*==================================================================*"
+echo " this script is going to build/make the executable code of observation pre-process " 
+echo "   of ENLTN (lighning for glm) data used for RTMA3D " 
+echo "*==================================================================*"
 #===================================================================#
 
 #

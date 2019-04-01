@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/ksh
 
 # --- for debug --- #
 date
@@ -119,7 +119,7 @@ fi
 
 ###########################################################
 #
-# The following variables are used in exrtma3d_gsianl.sh
+# The following variables are used in exrtma3d_gsianl.ksh
 #
 ###########################################################
 #   set the file name of the final analysis file for archive
@@ -171,7 +171,7 @@ fi
 ######################
 # Execute the script.
 ######################
-${exSCR_GSIANL:-$HOMErtma3d/scripts/${RUN}/ex${RUN}_gsianl2.sh}
+${exSCR_GSIANL:-$HOMErtma3d/scripts/${RUN}/ex${RUN}_gsianl2.ksh}
 export err=$?; err_chk
 
 msg="$0 of $job completed normally"

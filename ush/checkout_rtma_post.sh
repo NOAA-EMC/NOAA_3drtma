@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 date
 # set -x
@@ -51,11 +51,13 @@ elif [[ -d /ioddev_dell ]]; then
     conf_target=nco
     target=dell
 elif [[ -d /scratch3 ]] ; then
-    . /apps/lmod/lmod/init/sh
+    . /etc/profile
+    . /etc/profile.d/modules.sh >/dev/null # Module Support
     target=theia
     nwprod_path="/scratch3/NCEPDEV/nwprod/lib/modulefiles"
 elif [[ -d /jetmon ]] ; then
-    . /apps/lmod/lmod/init/sh
+    . /etc/profile
+    . /etc/profile.d/modules.sh >/dev/null # Module Support
     target=jet
     nwprod_path="/lfs3/projects/hfv3gfs/nwprod/lib/modulefiles"
 else

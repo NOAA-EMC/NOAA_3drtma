@@ -1,4 +1,4 @@
-#!/bin/bash -l
+#!/bin/ksh -l
 
 # --- for debug --- #
 date
@@ -15,7 +15,8 @@ MODULEFILES=${MODULEFILES:-${HOMErtma3d}/modulefiles}
 
 if [ "${machine}" = "theia" ] ; then
   . /etc/profile
-  . /apps/lmod/lmod/init/bash >/dev/null # Module Support
+  . /etc/profile.d/modules.sh >/dev/null # Module Support
+# . /apps/lmod/lmod/init/bash >/dev/null # Module Support
   module purge
 # loading modules used when building the code
   case "$COMMAND" in
@@ -36,7 +37,8 @@ if [ "${machine}" = "theia" ] ; then
   module list
 elif [ "${machine}" = "jet" ] ; then
   . /etc/profile
-  . /apps/lmod/lmod/init/bash >/dev/null # Module Support
+  . /etc/profile.d/modules.sh >/dev/null # Module Support
+# . /apps/lmod/lmod/init/bash >/dev/null # Module Support
   module purge
 # loading modules used when building the code
   case "$COMMAND" in

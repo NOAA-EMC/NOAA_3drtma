@@ -1,5 +1,4 @@
 #!/bin/ksh
-# #!/bin/bash
 ##########################################################################
 ####  UNIX Script Documentation Block                                    #
 #                                                                        #
@@ -11,7 +10,7 @@
 # Script history log:                                                    #
 ##########################################################################
 
-set -x 
+# set -x 
 
 msg="JOB $job HAS BEGUN"
 postmsg "$jlogfile" "$msg"
@@ -20,19 +19,12 @@ postmsg "$jlogfile" "$msg"
 #========================= begin changes =======================================================
 envir=${envir}
 CYCLE=${PDY}${cyc}
-CYCLE_LAST=${CYCLE}
 CYCLE_p1=${CYCLE}
 mynoscrub=${COMIN}
 mynoscrubm1=${COMINm1}
 CYCLE_3=`$NDATE -0 $CYCLE`
-CYCLE_LAST=`$NDATE +1 $CYCLE`
 YYYYMMDDm1=`$NDATE -24 ${CYCLE} | cut -c 1-8`
 #=========================  end changes  =======================================================
-
-i=0
-while [ $CYCLE_3 -le $CYCLE_LAST ] ; do
-
-    let "i=i+1"
 
     YYYY=`echo $CYCLE_3 | cut -c 1-4`
     YYYYMM=`echo $CYCLE_3 | cut -c 1-6`
@@ -46,7 +38,6 @@ while [ $CYCLE_3 -le $CYCLE_LAST ] ; do
     MNp2="02"
 
     YY2=`echo $CYCLE_3 | cut -c 3-4`
-    # JJJ=`/bin/date --date="${MM}/${DD}/${YYYY}" +"%j" `
     JJJ=`/bin/date --date="${YYYYMMDD}" +"%j" `
 
     CYCLE_3_m1hr=`$NDATE -1 $CYCLE_3`
@@ -58,12 +49,23 @@ while [ $CYCLE_3 -le $CYCLE_LAST ] ; do
     DD_m1hr=`echo $CYCLE_3_m1hr | cut -c 7-8`
     HH_m1hr=`echo $CYCLE_3_m1hr | cut -c 9-10`
     YY2_m1hr=`echo $CYCLE_3_m1hr | cut -c 3-4`
-    # JJJ_m1hr=`/bin/date --date="${MM_m1hr}/${DD_m1hr}/${YYYY_m1hr}" +"%j" `
     JJJ_m1hr=`/bin/date --date="${YYYYMMDD_m1hr}" +"%j" `
+
+    CYCLE_3_p1hr=`$NDATE +1 $CYCLE_3`
+    YYYY_p1hr=`echo $CYCLE_3_p1hr | cut -c 1-4`
+    YYYYMM_p1hr=`echo $CYCLE_3_p1hr | cut -c 1-6`
+    YYYYMMDD_p1hr=`echo $CYCLE_3_p1hr | cut -c 1-8`
+    YYYYMMDDHH_p1hr=`echo $CYCLE_3_p1hr | cut -c 1-10`
+    MM_p1hr=`echo $CYCLE_3_p1hr | cut -c 5-6`
+    DD_p1hr=`echo $CYCLE_3_p1hr | cut -c 7-8`
+    HH_p1hr=`echo $CYCLE_3_p1hr | cut -c 9-10`
+    YY2_p1hr=`echo $CYCLE_3_p1hr | cut -c 3-4`
+    JJJ_p1hr=`/bin/date --date="${YYYYMMDD_p1hr}" +"%j" `
 
     hpsspath=$hpsspath1/rh${YYYY}/${YYYYMM}/${YYYYMMDD}
     hpsspath_1yr=$hpsspath1_1yr/rh${YYYY}/${YYYYMM}/${YYYYMMDD}
 
+    hpsspath_1yr_p1hr=$hpsspath1_1yr/rh${YYYY_p1hr}/${YYYYMM_p1hr}/${YYYYMMDD_p1hr}
     hpsspath_AGibbs=$hpsspath1_AGibbs/rh${YYYY_m1hr}/${YYYYMM_m1hr}/${YYYYMMDD_m1hr}
 
     hpsspath_gsd=$hpsspath1_gsd/${YYYY}/${MM}/${DD}
@@ -88,6 +90,8 @@ while [ $CYCLE_3 -le $CYCLE_LAST ] ; do
 	 hpsspath_hrrr=$hpsspath_1yr
        fi
     fi
+
+#   hpsspath_hrrr_p1hr=$hpsspath_1yr_p1hr
 
     prefix_hrrr_AGibbs="gpfs_hps_nco_ops_nwges_prod_hrrr_hrrrges_sfc_conus"
     hpsspath_hrrr_AGibbs=$hpsspath_AGibbs
@@ -207,7 +211,7 @@ while [ $CYCLE_3 -le $CYCLE_LAST ] ; do
 #==================================================================================================
 
 #==================================================================================================
-    if [ "$i" -eq 1 ] ; then
+      echo " ---- >   Retrieving Obs (prepbufr/nexrad/lgycld/lghtng) from archive of operational RAP"
       cd $wrkdir_rap
 
       /bin/rm -rf select_list_1.txt_tmp
@@ -230,28 +234,20 @@ while [ $CYCLE_3 -le $CYCLE_LAST ] ; do
         let "it=it+1"
       done
       htar -xvf ${hpsspath}/${tarfile_rap_bufr} -L select_list_1.txt
-    fi
         
 #==================================================================================================
     cd $wrkdir_hrrr
+    echo " ---- >   Retrieving Obs (mosaic_radar/nasa_satcloud) from archived dataset of operational HRRR"
+    echo " ---- >   Retrieving fgs (wrfguess if exists) from archived dataset of operational HRRR"
 
     /bin/rm -rf select_list_1.txt_tmp
     /bin/rm -rf select_list_1.txt
-
+    /bin/rm -rf list_all_1.txt
 
     htar -tvf ${hpsspath_hrrr}/${tarfile_hrrr_init}  > list_all_1.txt
-
-    if [ "$i" -eq 1 ] ; then
-      cat list_all_1.txt | grep hrrr.t${HH}z.NSSLRefInGSI.bufr >> select_list_1.txt_tmp
-      cat list_all_1.txt | grep hrrr.t${HH}z.NASALaRCCloudInGSI.bufr >> select_list_1.txt_tmp
-#     cat list_all_1.txt | grep "\bhrrr.t${HH}z.wrfguess\b"  >> select_list_1.txt_tmp
-#     cat list_all_1.txt | grep "\<hrrr.t${HH}z.wrfguess\>"  >> select_list_1.txt_tmp
-      cat list_all_1.txt | grep -w hrrr.t${HH}z.wrfguess  >> select_list_1.txt_tmp
-    else
-      if [ $YYYYMMDDHH -ge "2018071118"  ] && [ $YYYYMMDDHH -lt "2018102001" ] ; then
-        cat list_all_1.txt | grep -w hrrr.t${HH}z.wrfguess_rap >> select_list_1.txt_tmp
-      fi
-    fi
+    cat list_all_1.txt | grep hrrr.t${HH}z.NSSLRefInGSI.bufr >> select_list_1.txt_tmp
+    cat list_all_1.txt | grep hrrr.t${HH}z.NASALaRCCloudInGSI.bufr >> select_list_1.txt_tmp
+    cat list_all_1.txt | grep -w hrrr.t${HH}z.wrfguess  >> select_list_1.txt_tmp
 
     nlines=`wc -l select_list_1.txt_tmp`
     nlines=${nlines% select*}
@@ -265,36 +261,58 @@ while [ $CYCLE_3 -le $CYCLE_LAST ] ; do
     done
     htar -xvf ${hpsspath_hrrr}/${tarfile_hrrr_init} -L select_list_1.txt
 
-#
 
-    if [ "$i" -eq 1 ] && [ $YYYYMMDDHH -ge "2018102001" ] ; then
-      
-#     /bin/rm -rf select_list_1_AGibbs.txt_tmp
-#     /bin/rm -rf select_list_1_AGibbs.txt
-#     /bin/rm -rf list_all_1_AGibbs.txt
-    
-#     htar -tvf ${hpsspath_hrrr_AGibbs}/${tarfile_hrrr_AGibbs}  > list_all_1_AGibbs.txt
+    if [ $YYYYMMDDHH -ge "2018071118"  ] && [ $YYYYMMDDHH -le "2018102000" ] ; then
+      echo " ---- >   Retrieving fgs (wrfguess_rap 20180711_18Z ~ 20181020_00z) from archive of operational HRRR"
+      /bin/rm -rf select_list_1.txt_tmp
+      /bin/rm -rf select_list_1.txt
+      /bin/rm -rf list_all_1.txt
 
-#     cat list_all_1_AGibbs.txt | grep hrrr_${YYYYMMDDHH_m1hr}f001 >> select_list_1_AGibbs.txt_tmp
+      hpsspath_hrrr_p1hr=$hpsspath_1yr_p1hr
+      prefix1="gpfs_hps_nco_ops_com"
+      domain_hrrr1="_conus"
+      if (((${HH_p1hr} >= 00) && (${HH_p1hr} <=  05))) ; then    # NOT recommended for BASH, but work well with ksh.
+        tarfile_hrrr_init_p1hr=${prefix1}_hrrr_prod_hrrr.${YYYYMMDD_p1hr}${domain_hrrr1}00-05.init.tar
+      fi
 
-#     nlines=`wc -l select_list_1_AGibbs.txt_tmp`
-#     nlines=${nlines% select*}
-#     echo "nlines ="$nlines
+      if (((${HH_p1hr} >= 06) && (${HH_p1hr} <=  11))) ; then
+        tarfile_hrrr_init_p1hr=${prefix1}_hrrr_prod_hrrr.${YYYYMMDD_p1hr}${domain_hrrr1}06-11.init.tar
+      fi
 
-#     it=1
-#     while [ $it -le $nlines ] ; do
-#       var="`cat select_list_1_AGibbs.txt_tmp | head -n $it | tail  -1`" 
-#       echo "./"${var#* ./} >> select_list_1_AGibbs.txt
-#       let "it=it+1"
-#     done
-#     htar -xvf ${hpsspath_hrrr_AGibbs}/${tarfile_hrrr_AGibbs} -L select_list_1_AGibbs.txt
+      if (((${HH_p1hr} >= 12) && (${HH_p1hr} <=  17))) ; then
+        tarfile_hrrr_init_p1hr=${prefix1}_hrrr_prod_hrrr.${YYYYMMDD_p1hr}${domain_hrrr1}12-17.init.tar
+      fi
+
+      if (((${HH_p1hr} >= 18) && (${HH_p1hr} <=  23))) ; then
+        tarfile_hrrr_init_p1hr=${prefix1}_hrrr_prod_hrrr.${YYYYMMDD_p1hr}${domain_hrrr1}18-23.init.tar
+      fi
+
+      htar -tvf ${hpsspath_hrrr_p1hr}/${tarfile_hrrr_init_p1hr}  > list_all_1.txt
+
+      cat list_all_1.txt | grep -w hrrr.t${HH_p1hr}z.wrfguess_rap > select_list_1.txt_tmp
+      nlines=`wc -l select_list_1.txt_tmp`
+      nlines=${nlines% select*}
+      echo "nlines ="$nlines
+
+      it=1
+      while [ $it -le $nlines ] ; do
+        var="`cat select_list_1.txt_tmp | head -n $it | tail  -1`" 
+        echo "./"${var#* ./} >> select_list_1.txt
+        let "it=it+1"
+      done
+      htar -xvf ${hpsspath_hrrr_p1hr}/${tarfile_hrrr_init_p1hr} -L select_list_1.txt
+
+    elif [ $YYYYMMDDHH -ge "2018102001" ] ; then
+
+      echo " ---- >   Retrieving fgs (hrrr_f001 1-hr forecast) from operational HRRR (archived by Annett Gibbs after 20181020_01Z)"
       htar -xvf ${hpsspath_hrrr_AGibbs}/${tarfile_hrrr_AGibbs} hrrr_${YYYYMMDDHH_m1hr}f001  ./
 
     fi
         
 #==================================================================================================
-    if [ "$i" -eq 1 ] && [ ${obsprep_radar} -eq 1 ] ; then
+    if [ ${obsprep_radar} -eq 1 ] ; then
       cd $wrkdir_radar
+      echo "=== Retrieving MRMS Radar mosaic Reflectivity from GSD Archived Dataset on HPSS"
       rm -rf $mrmsradar_grib2_dir
       if [ ! -d $mrmsradar_grib2_dir ] ; then
         mkdir -p $mrmsradar_grib2_dir
@@ -338,24 +356,35 @@ while [ $CYCLE_3 -le $CYCLE_LAST ] ; do
         
 #==================================================================================================
 
-    if [ "$i" -eq 1 ] && [ 1 -eq 2 ] ; then
-      echo "======================================================================================="
-      echo "======== retrieving raw lightning data from GSD retrieval dataset on HPSS ============="
-      echo "======================================================================================="
+    if [ ${obsprep_lghtn} -gt 1 ] ; then
+
       cd $wrkdir_lightning
 
-      for lghtn_dir in $lghtn_entln_dir $lghtn_vaisala_dir
-      do
-        rm -rf $lghtn_dir
-        if [ ! -d $lghtn_dir ] ; then
-          mkdir -p $lghtn_dir
-        fi
+      case ${obsprep_lghtn} in
+        2)
+          lghtn_dir=$lghtn_vaisala_dir
+          lghtn_resource="NDLN_vaisala"
+          lghtn_sourcedir=${vaisala_dir}
+          ;;
+        3)
+          lghtn_dir=$lghtn_entln_dir
+          lghtn_resource="entln"
+          lghtn_sourcedir=${entln_dir}
+          ;;
+        *)
+          echo "NOt defined value for obsprep_lghtn -- > ${obsprep_lghtn}"
+          echo "Not retrieving lighting data for thsi cycle."
+          ;;
+      esac
 
-        if [ $lghtn_dir = $lghtn_entln_dir ] ; then
-          hsi get "${entln_dir}/${zipfile_lghtn_1dd}"
-        elif [ $lghtn_dir = $lghtn_vaisala_dir ] ; then
-          hsi get "${vaisala_dir}/${zipfile_lghtn_1dd}"
-        fi
+      echo
+      echo "=== retrieving ${lghtn_resource} lightning data from GSD Archived dataset on HPSS ==="
+      echo
+
+        rm -rf $lghtn_dir
+        mkdir -p $lghtn_dir
+
+        hsi get "${lghtn_sourcedir}/${zipfile_lghtn_1dd}"
 
         /bin/rm -rf select_list_1.txt_tmp
         /bin/rm -rf select_list_1.txt
@@ -384,7 +413,6 @@ while [ $CYCLE_3 -le $CYCLE_LAST ] ; do
 
         /bin/rm -f ${zipfile_lghtn_1dd}
 
-      done
       
     fi
         
@@ -398,9 +426,6 @@ while [ $CYCLE_3 -le $CYCLE_LAST ] ; do
 #==> rm tmp_1 directory + advance CYCLE
 #==================================================================================================
     cd ${mynoscrub}
-
-    CYCLE_3=`$NDATE +1 $CYCLE_3`
-done
 
 
 ################################################################################################

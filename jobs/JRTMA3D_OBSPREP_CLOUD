@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/ksh
 
 # --- for debug --- #
 date
@@ -112,7 +112,7 @@ fi
 
 ###########################################################
 #
-# The following variables are used in exrtma3d_obsprep_cloud.sh
+# The following variables are used in exrtma3d_obsprep_cloud.ksh
 #
 ###########################################################
 
@@ -134,7 +134,7 @@ fi
 ######################
 # Execute the script.
 ######################
-${exSCR_OBSPREP_CLOUD:-$HOMErtma3d/scripts/${RUN}/ex${RUN}_cloud.sh}
+${exSCR_OBSPREP_CLOUD:-$HOMErtma3d/scripts/${RUN}/ex${RUN}_cloud.ksh}
 export err=$?; err_chk
 
 msg="$0 of $job completed normally"

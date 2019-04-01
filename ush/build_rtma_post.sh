@@ -1,8 +1,38 @@
-#!/bin/sh
+#!/bin/bash
 
 date
 # set -x
 
+#=========================================================================#
+#
+#--- detect the machine/platform
+#
+if [[ -d /dcom && -d /hwrf ]] ; then
+    . /usrx/local/Modules/3.2.10/init/sh
+#   MODULESHOME="/usrx/local/Modules/3.2.10"
+#   . $MODULESHOME/init/sh
+    target=wcoss
+elif [[ -d /cm ]] ; then
+#   MODULESHOME="/usrx/local/Modules/3.2.10"
+#   . $MODULESHOME/init/sh
+    conf_target=nco
+    target=cray
+elif [[ -d /ioddev_dell ]]; then
+#   MODULESHOME="/usrx/local/Modules/3.2.10"
+#   . $MODULESHOME/init/sh
+    conf_target=nco
+    target=dell
+elif [[ -d /scratch3 ]] ; then
+    . /apps/lmod/lmod/init/sh
+    target=theia
+elif [[ -d /mnt/lfs3/projects ]] ; then
+    . /apps/lmod/lmod/init/sh
+    target=jet
+else
+    echo "unknown target = $target"
+    exit 9
+fi
+echo " This machine is $target ."
 #=========================================================================#
 # User define the following variables:
 
@@ -35,35 +65,6 @@ echo " if it is not, abort and change the definition of branch_post_source in th
 # read -p " Press [Enter] key to continue (or Press Ctrl-C to abort) "
 echo
 echo "*==================================================================*"
-#
-#--- detect the machine/platform
-#
-if [[ -d /dcom && -d /hwrf ]] ; then
-    . /usrx/local/Modules/3.2.10/init/sh
-#   MODULESHOME="/usrx/local/Modules/3.2.10"
-#   . $MODULESHOME/init/sh
-    target=wcoss
-elif [[ -d /cm ]] ; then
-#   MODULESHOME="/usrx/local/Modules/3.2.10"
-#   . $MODULESHOME/init/sh
-    conf_target=nco
-    target=cray
-elif [[ -d /ioddev_dell ]]; then
-#   MODULESHOME="/usrx/local/Modules/3.2.10"
-#   . $MODULESHOME/init/sh
-    conf_target=nco
-    target=dell
-elif [[ -d /scratch3 ]] ; then
-    . /apps/lmod/lmod/init/sh
-    target=theia
-elif [[ -d /mnt/lfs3/projects ]] ; then
-    . /apps/lmod/lmod/init/sh
-    target=jet
-else
-    echo "unknown target = $target"
-    exit 9
-fi
-echo " This machine is $target ."
 #===================================================================#
 
 #

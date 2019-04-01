@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/ksh
 
 ########################################
 
@@ -152,7 +152,7 @@ fi
 
 #
 
-# The following variables are used in exrtma3d_gsianl.sh
+# The following variables are used in exrtma3d_gsianl.ksh
 
 #
 
@@ -166,7 +166,7 @@ fi
 
 # Execute the script.
 
-${exSCR_VERIF:-$HOMErtma3d/scripts/${RUN}/rtma3d_verif.sh}
+${exSCR_VERIF:-$HOMErtma3d/scripts/${RUN}/rtma3d_verif.ksh}
 
 export err=$?; err_chk
 

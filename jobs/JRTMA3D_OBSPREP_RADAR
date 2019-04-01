@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/ksh
 
 # --- for debug --- #
 date
@@ -117,7 +117,7 @@ fi
 
 ###########################################################
 #
-# The following variables are used in exrtma3d_obsprep_radar.sh
+# The following variables are used in exrtma3d_obsprep_radar.ksh
 #
 ###########################################################
 
@@ -142,7 +142,7 @@ fi
 ######################
 # Execute the script.
 ######################
-${exSCR_OBSPREP_RADAR:-$HOMErtma3d/scripts/${RUN}/ex${RUN}_obsprep_radar.sh}
+${exSCR_OBSPREP_RADAR:-$HOMErtma3d/scripts/${RUN}/ex${RUN}_obsprep_radar.ksh}
 export err=$?; err_chk
 
 msg="$0 of $job completed normally"

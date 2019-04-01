@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 #This script preps directories for ROCOTO-controlled RTMA/URMA real time and retro runs.
 #
@@ -27,12 +27,14 @@ elif [[ -d /ioddev_dell ]]; then
     conf_target=nco
     MACHINE=dell
 elif [[ -d /scratch3 ]] ; then
-    . /apps/lmod/lmod/init/sh
+    . /etc/profile
+    . /etc/profile.d/modules.sh >/dev/null # Module Support
     MACHINE=theia
     nwprod_path="/scratch3/NCEPDEV/nwprod/lib/modulefiles"
     produtil_path="/scratch4/NCEPDEV/nems/noscrub/emc.nemspara/soft/NCEPLIBS-prod_util"
 elif [[ -d /mnt/lfs3/projects ]] ; then
-    . /apps/lmod/lmod/init/sh
+    . /etc/profile
+    . /etc/profile.d/modules.sh >/dev/null # Module Support
     MACHINE=jet
     nwprod_path="/mnt/lfs3/projects/hfv3gfs/nwprod/lib/modulefiles"
     produtil_path="/mnt/lfs3/projects/hfv3gfs/emc.nemspara/soft/NCEPLIBS-prod_util"
@@ -274,7 +276,9 @@ export exefile_name_verif=""    # executable of verification (MET) is defined by
                           # 1: pre-processing MRMS grib2 radar reflectivity obs
 
   export obsprep_lghtn=1  # 0: No pre-processing lightning obs data
-                          # 1: mapping the archived bufr data (rap.t{HH}z.lghtng.tm00.bufr_d) from operation RAP run to HRRR grid
+                          # 1: processing archived bufr data (rap.t{HH}z.lghtng.tm00.bufr_d) from operation RAP run to HRRR grid
+                          # 2: processing  NLDN lightning data (if retrospective run, also retrieving  NLDN data from HPSS)
+                          # 3: processing ENTLN lightning data (if retrospective run, also retrieving ENTLN data from HPSS)
 
   export obsprep_cloud=0  # 0: No (using archived hrrr.t{HH}z.NASALaRCCloudInGSI.bufr processed in operational hrrr)
                           # 1: processing bufr data from rap run
@@ -446,32 +450,32 @@ cat > ${NWROOT}/workflow/${RUN}_${expname}.xml <<EOF
 
 <!-- ex-shell and J-job script name -->
 <!ENTITY JJOB_FETCHHPSS  "&JJOB_DIR;/J&CAP_RUN;_FETCHHPSS">
-<!ENTITY exSCR_FETCHHPSS "&SCRIPT_DIR;/ex&RUN;_fetchhpss.sh">
+<!ENTITY exSCR_FETCHHPSS "&SCRIPT_DIR;/ex&RUN;_fetchhpss.ksh">
 <!ENTITY JJOB_OBSPREP_RADAR    "&JJOB_DIR;/J&CAP_RUN;_OBSPREP_RADAR">
-<!ENTITY exSCR_OBSPREP_RADAR   "&SCRIPT_DIR;/ex&RUN;_obsprep_radar.sh">
+<!ENTITY exSCR_OBSPREP_RADAR   "&SCRIPT_DIR;/ex&RUN;_obsprep_radar.ksh">
 <!ENTITY exefile_name_mosaic   "${exefile_name_mosaic}">
 <!ENTITY JJOB_OBSPREP_LGHTN    "&JJOB_DIR;/J&CAP_RUN;_OBSPREP_LGHTN">
-<!ENTITY exSCR_OBSPREP_LGHTN   "&SCRIPT_DIR;/ex&RUN;_obsprep_lghtn.sh">
+<!ENTITY exSCR_OBSPREP_LGHTN   "&SCRIPT_DIR;/ex&RUN;_obsprep_lghtn.ksh">
 <!ENTITY exefile_name_lightning "${exefile_name_lightning}">
 <!ENTITY JJOB_OBSPREP_CLOUD    "&JJOB_DIR;/J&CAP_RUN;_OBSPREP_CLOUD">
-<!ENTITY exSCR_OBSPREP_CLOUD   "&SCRIPT_DIR;/ex&RUN;_obsprep_cloud.sh">
+<!ENTITY exSCR_OBSPREP_CLOUD   "&SCRIPT_DIR;/ex&RUN;_obsprep_cloud.ksh">
 <!ENTITY exefile_name_cloud    "${exefile_name_cloud}">
 <!ENTITY JJOB_PREPOBS    "&JJOB_DIR;/J&CAP_RUN;_PREPOBS">
-<!ENTITY exSCR_PREPOBS   "&SCRIPT_DIR;/ex&RUN;_prepobs.sh">
+<!ENTITY exSCR_PREPOBS   "&SCRIPT_DIR;/ex&RUN;_prepobs.ksh">
 <!ENTITY JJOB_PREPFGS    "&JJOB_DIR;/J&CAP_RUN;_PREPFGS">
-<!ENTITY exSCR_PREPFGS   "&SCRIPT_DIR;/ex&RUN;_prepfgs.sh">
+<!ENTITY exSCR_PREPFGS   "&SCRIPT_DIR;/ex&RUN;_prepfgs.ksh">
 <!ENTITY JJOB_GSIANL	 "&JJOB_DIR;/J&CAP_RUN;_GSIANL${gsi2}">
-<!ENTITY exSCR_GSIANL	 "&SCRIPT_DIR;/ex&RUN;_gsianl${gsi2}.sh">
+<!ENTITY exSCR_GSIANL	 "&SCRIPT_DIR;/ex&RUN;_gsianl${gsi2}.ksh">
 <!ENTITY exefile_name_gsi      "${exefile_name_gsi}">
 <!ENTITY JJOB_POST  	 "&JJOB_DIR;/J&CAP_RUN;_POST">
-<!ENTITY exSCR_POST      "&SCRIPT_DIR;/ex&RUN;_post.sh">
+<!ENTITY exSCR_POST      "&SCRIPT_DIR;/ex&RUN;_post.ksh">
 <!ENTITY exefile_name_post     "${exefile_name_post}">
 <!ENTITY JJOB_POST4FGS   "&JJOB_DIR;/J&CAP_RUN;_POST4FGS">
-<!ENTITY exSCR_POST4FGS  "&SCRIPT_DIR;/ex&RUN;_post4fgs.sh">
+<!ENTITY exSCR_POST4FGS  "&SCRIPT_DIR;/ex&RUN;_post4fgs.ksh">
 <!ENTITY JJOB_PLOTGRADS  "&JJOB_DIR;/J&CAP_RUN;_PLOTGRADS">
-<!ENTITY exSCR_PLOTGRADS "&SCRIPT_DIR;/ex&RUN;_plotgrads.sh">
+<!ENTITY exSCR_PLOTGRADS "&SCRIPT_DIR;/ex&RUN;_plotgrads.ksh">
 <!ENTITY JJOB_VERIF     "&JJOB_DIR;/J&CAP_RUN;_VERIF">
-<!ENTITY exSCR_VERIF    "&SCRIPT_DIR;/ex&RUN;_verif.sh">
+<!ENTITY exSCR_VERIF    "&SCRIPT_DIR;/ex&RUN;_verif.ksh">
 <!ENTITY exefile_name_verif    "${exefile_name_verif}">
 
 <!-- Resources -->
@@ -1161,7 +1165,7 @@ cat >> ${NWROOT}/workflow/${RUN}_${expname}.xml <<EOF
        <value><cyclestr>&DATA_FETCHHPSS;</cyclestr></value>
     </envar>
 
-    <command>&JJOB_DIR;/launch.sh &JJOB_FETCHHPSS;</command>
+    <command>&JJOB_DIR;/launch.ksh &JJOB_FETCHHPSS;</command>
     <jobname><cyclestr>&NET;_fetchhpss_@H</cyclestr></jobname>
     <join><cyclestr>&LOG_SCHDLR;/&NET;_&envir;_fetchhpss_@Y@m@d@H@M.log\${PBS_JOBID}</cyclestr></join>
 
@@ -1185,7 +1189,7 @@ cat >> ${NWROOT}/workflow/${RUN}_${expname}.xml <<EOF
        <value><cyclestr>&DATA_OBSPREP_RADAR;</cyclestr></value>
     </envar>
 
-    <command>&JJOB_DIR;/launch.sh &JJOB_OBSPREP_RADAR;</command>
+    <command>&JJOB_DIR;/launch.ksh &JJOB_OBSPREP_RADAR;</command>
     <jobname><cyclestr>&NET;_obsprep_radar_@H</cyclestr></jobname>
     <join><cyclestr>&LOG_SCHDLR;/&NET;_&envir;_obsprep_radar_@Y@m@d@H@M.log\${PBS_JOBID}</cyclestr></join>
 
@@ -1216,7 +1220,7 @@ cat >> ${NWROOT}/workflow/${RUN}_${expname}.xml <<EOF
        <value><cyclestr>&DATA_OBSPREP_LGHTN;</cyclestr></value>
     </envar>
 
-    <command>&JJOB_DIR;/launch.sh &JJOB_OBSPREP_LGHTN;</command>
+    <command>&JJOB_DIR;/launch.ksh &JJOB_OBSPREP_LGHTN;</command>
     <jobname><cyclestr>&NET;_obsprep_lghtn_@H</cyclestr></jobname>
     <join><cyclestr>&LOG_SCHDLR;/&NET;_&envir;_obsprep_lghtn_@Y@m@d@H@M.log\${PBS_JOBID}</cyclestr></join>
 
@@ -1247,7 +1251,7 @@ cat >> ${NWROOT}/workflow/${RUN}_${expname}.xml <<EOF
        <value><cyclestr>&DATA_OBSPREP_CLOUD;</cyclestr></value>
     </envar>
 
-    <command>&JJOB_DIR;/launch.sh &JJOB_OBSPREP_CLOUD;</command>
+    <command>&JJOB_DIR;/launch.ksh &JJOB_OBSPREP_CLOUD;</command>
     <jobname><cyclestr>&NET;_obsprep_cloud_@H</cyclestr></jobname>
     <join><cyclestr>&LOG_SCHDLR;/&NET;_&envir;_obsprep_cloud_@Y@m@d@H@M.log\${PBS_JOBID}</cyclestr></join>
 
@@ -1276,7 +1280,7 @@ cat >> ${NWROOT}/workflow/${RUN}_${expname}.xml <<EOF
        <value><cyclestr>&DATA_OBSPRD;</cyclestr></value>
     </envar>
 
-    <command>&JJOB_DIR;/launch.sh &JJOB_PREPOBS;</command>
+    <command>&JJOB_DIR;/launch.ksh &JJOB_PREPOBS;</command>
     <jobname><cyclestr>&NET;_prepobs_@H</cyclestr></jobname>
     <join><cyclestr>&LOG_SCHDLR;/&NET;_&envir;_prepobs_@Y@m@d@H@M.log\${PBS_JOBID}</cyclestr></join>
 
@@ -1322,7 +1326,7 @@ cat >> ${NWROOT}/workflow/${RUN}_${expname}.xml <<EOF
        <value><cyclestr>&DATA_FGSPRD;</cyclestr></value>
     </envar>
 
-    <command>&JJOB_DIR;/launch.sh &JJOB_PREPFGS;</command>
+    <command>&JJOB_DIR;/launch.ksh &JJOB_PREPFGS;</command>
     <jobname><cyclestr>&NET;_prepfgs_@H</cyclestr></jobname>
     <join><cyclestr>&LOG_SCHDLR;/&NET;_&envir;_prepfgs_@Y@m@d@H@M.log\${PBS_JOBID}</cyclestr></join>
 
@@ -1348,7 +1352,7 @@ cat >> ${NWROOT}/workflow/${RUN}_${expname}.xml <<EOF
        <value><cyclestr>&DATA_GSIANL;</cyclestr></value>
     </envar>
 
-    <command>&JJOB_DIR;/launch.sh &JJOB_GSIANL;</command>
+    <command>&JJOB_DIR;/launch.ksh &JJOB_GSIANL;</command>
     <jobname><cyclestr>&NET;_gsianl_@H</cyclestr></jobname>
     <join><cyclestr>&LOG_SCHDLR;/&NET;_&envir;_gsianl_@Y@m@d@H@M.log\${PBS_JOBID}</cyclestr></join>
 
@@ -1373,7 +1377,7 @@ cat >> ${NWROOT}/workflow/${RUN}_${expname}.xml <<EOF
        <value><cyclestr>&DATA_POST;</cyclestr></value>
     </envar>
 
-    <command>&JJOB_DIR;/launch.sh &JJOB_POST;</command>
+    <command>&JJOB_DIR;/launch.ksh &JJOB_POST;</command>
     <jobname><cyclestr>&NET;_post_@H</cyclestr></jobname>
     <join><cyclestr>&LOG_SCHDLR;/&NET;_&envir;_post_@Y@m@d@H@M.log\${PBS_JOBID}</cyclestr></join>
 
@@ -1395,7 +1399,7 @@ cat >> ${NWROOT}/workflow/${RUN}_${expname}.xml <<EOF
        <name>rundir_task</name>
        <value><cyclestr>&DATA_VERIF;</cyclestr></value>
     </envar>
-    <command>&JJOB_DIR;/launch.sh &JJOB_VERIF;</command>
+    <command>&JJOB_DIR;/launch.ksh &JJOB_VERIF;</command>
     <jobname><cyclestr>&NET;_verif_@H</cyclestr></jobname>
     <join><cyclestr>&LOG_SCHDLR;/&NET;_&envir;_verif_@Y@m@d@H@M.log\${PBS_JOBID}</cyclestr></join>
     &ENVARS_VERIF;
@@ -1422,7 +1426,7 @@ cat >> ${NWROOT}/workflow/${RUN}_${expname}.xml <<EOF
        <value><cyclestr>&DATA_POST4FGS;</cyclestr></value>
     </envar>
 
-    <command>&JJOB_DIR;/launch.sh &JJOB_POST4FGS;</command>
+    <command>&JJOB_DIR;/launch.ksh &JJOB_POST4FGS;</command>
     <jobname><cyclestr>&NET;_post4fgs_@H</cyclestr></jobname>
     <join><cyclestr>&LOG_SCHDLR;/&NET;_&envir;_post4fgs_@Y@m@d@H@M.log\${PBS_JOBID}</cyclestr></join>
 
@@ -1446,7 +1450,7 @@ cat >> ${NWROOT}/workflow/${RUN}_${expname}.xml <<EOF
        <value><cyclestr>&DATA_PLOTGRADS;</cyclestr></value>
     </envar>
 
-    <command>&JJOB_DIR;/launch.sh &JJOB_PLOTGRADS;</command>
+    <command>&JJOB_DIR;/launch.ksh &JJOB_PLOTGRADS;</command>
     <jobname><cyclestr>&NET;_plotgrads_@H</cyclestr></jobname>
     <join><cyclestr>&LOG_SCHDLR;/&NET;_&envir;_plotgrads_@Y@m@d@H@M.log\${PBS_JOBID}</cyclestr></join>
 
@@ -1521,40 +1525,36 @@ cat > ${NWROOT}/workflow/run_${RUN}_${expname}.sh <<EOF
 #!/bin/bash
 
 . /etc/profile
-. /apps/lmod/lmod/init/bash >/dev/null # Module Support
+. /etc/profile.d/modules.sh >/dev/null # Module Support
 
 module purge
 module load intel
 module load rocoto
-EOF
-fi
 
-cat >> ${NWROOT}/workflow/run_${RUN}_${expname}.sh <<EOF
 rocotorun -v 10 -w ${NWROOT}/workflow/${RUN}_${expname}.xml -d ${NWROOT}/workflow/${RUN}_${expname}.db 
 EOF
+fi
 
 chmod 744 ${NWROOT}/workflow/run_${RUN}_${expname}.sh
 echo "RTMA3D is ready to go! Run using run_${RUN}_${expname}.sh.  Make sure your xml file has consistent directory settings!"
 
 #####################################################
-# script to check the running status of workflow    #
+# script to check the status of workflow            #
 #####################################################
 if [ ${MACHINE} = 'theia' ] || [ ${MACHINE} = 'jet' ] ; then
 cat > ${NWROOT}/workflow/chk_${RUN}_${expname}.sh <<EOF 
 #!/bin/bash
 
 . /etc/profile
-. /apps/lmod/lmod/init/bash >/dev/null # Module Support
+. /etc/profile.d/modules.sh >/dev/null # Module Support
 
 module purge
 module load intel
 module load rocoto
-EOF
-fi
 
-cat >> ${NWROOT}/workflow/chk_${RUN}_${expname}.sh <<EOF
 rocotostat -v 10 -w ${NWROOT}/workflow/${RUN}_${expname}.xml -d ${NWROOT}/workflow/${RUN}_${expname}.db 
 EOF
+fi
 
 chmod 744 ${NWROOT}/workflow/chk_${RUN}_${expname}.sh
 

@@ -23,10 +23,12 @@ elif [[ -d /ioddev_dell ]]; then
     conf_target=nco
     target=dell
 elif [[ -d /scratch3 ]] ; then
-    . /apps/lmod/lmod/init/sh
+    . /etc/profile
+    . /etc/profile.d/modules.sh >/dev/null # Module Support
     target=theia
 elif [[ -d /jetmon ]] ; then
-    . /apps/lmod/lmod/init/sh
+    . /etc/profile
+    . /etc/profile.d/modules.sh >/dev/null # Module Support
     target=jet
 else
     echo "unknown target = $target"
