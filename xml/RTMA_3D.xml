@@ -2,13 +2,14 @@
 
 <!DOCTYPE workflow [
 
-<!ENTITY ACCOUNT "nrtrr">
-<!ENTITY ACCOUNT_DA "nrtrr">
+<!ENTITY ACCOUNT "rtrr">
+<!ENTITY ACCOUNT_DA "rtrr">
 
-<!ENTITY PARTITION "xjet:vjet:sjet:tjet">
-<!ENTITY PARTITION_DA "xjet:vjet:sjet:tjet">
-<!ENTITY RES_DA "vjet">
+<!ENTITY PARTITION "kjet">
+<!ENTITY PARTITION_DA "kjet">
 <!ENTITY QUEUE "batch">
+<!ENTITY RES_DA "rtma-ket">
+<!ENTITY RES_POST "rtma-kjet">
 
 <!ENTITY SYSTEM_ID "RTMA_3D_AK"> 
 <!ENTITY HOMEBASE_DIR "/home/rtrr/RTMA_3D_AK">
@@ -63,15 +64,16 @@
 <!ENTITY DATAROOT_BC "&DATABASE_DIR;/run">
 <!ENTITY DATAROOT_PCYC "&DATABASE_DIR;/run">
 
-<!ENTITY MOSAIC_TILE_NUM "1">
+<!ENTITY POST_NAME "hrconus">
 
 <!ENTITY SMARTINIT_PROC "1">
 <!ENTITY CONVENTIONAL_PROC "1">
 <!ENTITY LIGHTNING_PROC "1">
 <!ENTITY RADAR_PROC "33">
 <!ENTITY SATELLITE_PROC "1">
-<!ENTITY GSI_HYB_PROC "184">
+<!ENTITY GSI_HYB_PROC "280">
 <!ENTITY GSI_DIAG_PROC "1">
+<!ENTITY RADARLINKS_PROC "1">
 
 <!ENTITY POST_PROC "32">
 <!ENTITY NCL_PROC "1">
@@ -94,6 +96,7 @@
 <!-- End gsi_hyb by 3 hr -->
 <!-- End all post-processing by 6 hrs -->
 
+<!ENTITY START_TIME_RADARLINKS "00:05:00">
 <!ENTITY START_TIME_RADAR "00:15:00">
 <!ENTITY START_TIME_CONVENTIONAL "00:37:00">
 <!ENTITY START_TIME_GSI "01:40:00">
@@ -104,8 +107,9 @@
 <!ENTITY WALL_LIMIT_PP '<deadline><cyclestr offset="&DEADLINE_PP;">@Y@m@d@H@M</cyclestr></deadline>'>
 
 <!ENTITY RESERVATION '<native>-l partition=&PARTITION; -W umask=022 -m n</native><queue>&QUEUE;</queue><account>&ACCOUNT;</account>'>
-<!ENTITY RESERVATION_DA '<native>-l partition=&PARTITION_DA; -W umask=022 -m n</native><queue>&QUEUE;</queue><account>&ACCOUNT_DA;</account>'>
+<!ENTITY RESERVATION_DA '<native>-l partition=&PARTITION_DA;,flags=ADVRES:&RES_DA; -W umask=022 -m n</native><queue>&QUEUE;</queue><account>&ACCOUNT_DA;</account>'>
 <!ENTITY RESERVATION_SMARTINIT '<native>-l partition=&PARTITION; -W umask=022 -m n</native><queue>&QUEUE;</queue><account>&ACCOUNT;</account>'>
+<!ENTITY RESERVATION_POST '<native>-l partition=&PARTITION;,flags=ADVRES:&RES_POST; -W umask=022 -m n</native><queue>&QUEUE;</queue><account>&ACCOUNT;</account>'>
 
 ]>
 
@@ -127,7 +131,7 @@
 
     &LIGHTNING_RESOURCES;
     &WALL_LIMIT_DA;
-    &RESERVATION;
+    &RESERVATION_DA;
 
     <command>&SCRIPTS;/GSI/lightning.ksh</command>
     <cores>&LIGHTNING_PROC;</cores>
@@ -177,127 +181,97 @@
   </task>
   </metatask>
 
-  <metatask>
-    <var name="min">00 01</var>
-
-    <metatask>
-      <var name="sec">00 01 02 03 04 05 06 07 08 09 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35 36 37 38 39 40 41 42 43 44 45 46 47 48 49 50 51 52 53 54 55 56 57 58 59</var>
-
-  <task name="radar_gsi_#min##sec#" cycledefs="02-11hr,00hr,01hr" maxtries="3">
+  <task name="radar_links" cycledefs="02-11hr,00hr,01hr" maxtries="3">
 
     &RADAR_RESOURCES;
     &WALL_LIMIT_DA;
-    &RESERVATION;
+    &RESERVATION_POST;
 
-    <command>&SCRIPTS;/GSI/radar.ksh</command>
-    <cores>&RADAR_PROC;</cores>
-    <jobname><cyclestr>HRRR_radar_@H</cyclestr></jobname>
-    <join><cyclestr>&LOG_DIR;/radar_gsi_@Y@m@d@H00.log</cyclestr></join>
+    <command>&SCRIPTS;/GSI/radar_links.ksh</command>
+    <cores>&RADARLINKS_PROC;</cores>
+    <jobname><cyclestr>HRRR_radarlinks_@H</cyclestr></jobname>
+    <join><cyclestr>&LOG_DIR;/radar_links_@Y@m@d@H00.log</cyclestr></join>
 
     <envar>
       <name>START_TIME</name>
-      <value><cyclestr>@Y@m@d@H</cyclestr></value>
-    </envar>
-    <envar>
-      <name>SUBH_TIME</name>
-      <value>00</value>
-    </envar>
-    <envar>
-      <name>DATAROOT</name>
-      <value>&DATAROOT;</value>
+      <value><cyclestr offset="-01:00:00">@Y@m@d@H</cyclestr></value>
     </envar>
     <envar>
       <name>DATAHOME</name>
       <value><cyclestr>&DATAROOT;/@Y@m@d@H/obsprd</cyclestr></value>
     </envar>
     <envar>
-      <name>GSI_ROOT</name>
-      <value>&GSI_ROOT;</value>
-    </envar>
-    <envar>
-      <name>FIX_ROOT</name>
-      <value>&FIX_ROOT;</value>
-    </envar>
-    <envar>
-      <name>STATIC_DIR</name>
-      <value>&STATIC_DIR;/WPS</value>
-    </envar>
-    <envar>
-      <name>NSSLMOSAIC</name>
+      <name>NSSL</name>
       <value>&RADAR_DIR;</value>
     </envar>
-    <envar>
-      <name>MOSAICTILENUM</name>
-      <value>&MOSAIC_TILE_NUM;</value>
-    </envar>
 
     <dependency>
-        <datadep><cyclestr>&RADAR_DIR;/@Y@m@d-@H#min##sec#.MRMS_MergedReflectivityQC_00.50_@Y@m@d-@H#min##sec#.grib2</cyclestr></datadep>
+      <timedep><cyclestr offset="&START_TIME_RADARLINKS;">@Y@m@d@H@M00</cyclestr></timedep>
     </dependency>
 
   </task>
 
-   </metatask>
+  <metatask>
+    <var name="subh">15 30 45 60</var>
+    <task name="radar_gsi_#subh#" cycledefs="02-11hr,00hr,01hr" maxtries="3">
+
+      &RADAR_RESOURCES;
+      &WALL_LIMIT_DA;
+      &RESERVATION_POST;
+
+      <command>&SCRIPTS;/GSI/radar.ksh</command>
+      <cores>&RADAR_PROC;</cores>
+      <jobname><cyclestr>HRRR_radar_@H_#subh#</cyclestr></jobname>
+      <join><cyclestr>&LOG_DIR;/radar_gsi_@Y@m@d@H00_#subh#.log</cyclestr></join>
+
+      <envar>
+        <name>START_TIME</name>
+        <value><cyclestr offset="-01:00:00">@Y@m@d@H</cyclestr></value>
+      </envar>
+      <envar>
+        <name>SUBH_TIME</name>
+        <value>#subh#</value>
+      </envar>
+      <envar>
+        <name>DATAROOT</name>
+        <value>&DATAROOT;</value>
+      </envar>
+      <envar>
+        <name>DATAHOME</name>
+        <value><cyclestr>&DATAROOT;/@Y@m@d@H/obsprd/#subh#</cyclestr></value>
+      </envar>
+      <envar>
+        <name>GSI_ROOT</name>
+        <value>&GSI_ROOT;</value>
+      </envar>
+      <envar>
+        <name>FIX_ROOT</name>
+        <value>&FIX_ROOT;</value>
+      </envar>
+      <envar>
+        <name>STATIC_DIR</name>
+        <value>&STATIC_DIR;/WPS</value>
+      </envar>
+      <envar>
+        <name>NSSL</name>
+        <value>&RADAR_DIR;</value>
+      </envar>
+
+      <dependency>
+        <or>
+          <datadep><cyclestr>&DATAROOT;/@Y@m@d@H/obsprd/#subh#/filelist_mrms</cyclestr></datadep>
+          <timedep><cyclestr offset="&START_TIME_RADAR;">@Y@m@d@H@M00</cyclestr></timedep>
+        </or>
+      </dependency>
+
+    </task>
   </metatask>
-
-
-  <task name="satellite_gsi" cycledefs="02-11hr,00hr,01hr" maxtries="1">
-
-    &SATELLITE_RESOURCES;
-    &WALL_LIMIT_DA;
-    &RESERVATION;
-
-    <command>&SCRIPTS;/GSI/satellite.ksh</command>
-    <cores>&SATELLITE_PROC;</cores>
-    <jobname><cyclestr>HRRR_satellite_@H</cyclestr></jobname>
-    <join><cyclestr>&LOG_DIR;/satellite_gsi_@Y@m@d@H00.log</cyclestr></join>
-
-    <envar>
-      <name>START_TIME</name>
-      <value><cyclestr>@Y@m@d@H</cyclestr></value>
-    </envar>
-    <envar>
-      <name>DATAROOT</name>
-      <value>&DATAROOT;</value>
-    </envar>
-    <envar>
-      <name>DATAHOME</name>
-      <value><cyclestr>&DATAROOT;/@Y@m@d@H/obsprd</cyclestr></value>
-    </envar>
-    <envar>
-      <name>GSI_ROOT</name>
-      <value>&GSI_ROOT;</value>
-    </envar>
-    <envar>
-      <name>FIX_ROOT</name>
-      <value>&FIX_ROOT;</value>
-    </envar>
-    <envar>
-      <name>STATIC_DIR</name>
-      <value>&STATIC_DIR;/WPS</value>
-    </envar>
-    <envar>
-      <name>NASALARC_DATA</name>
-      <value>&SATELLITE_DIR;</value>
-    </envar>
-
-    <dependency>
-      <or>
-        <and>
-          <datadep><cyclestr offset="-1:00:00">&SATELLITE_DIR;/goes-west/visst/rr/netcdf/G15V3.0.RR.@Y@j.@H30.PX.08K.CDF</cyclestr></datadep>
-          <datadep><cyclestr offset="-1:00:00">&SATELLITE_DIR;/goes-east/visst/rr/netcdf/G16V3.0.RR.@Y@j.@H45.PX.06K.CDF</cyclestr></datadep>
-        </and>
-        <timedep><cyclestr offset="&START_TIME_CONVENTIONAL;">@Y@m@d@H@M00</cyclestr></timedep>
-      </or>
-    </dependency>
-
-  </task>
 
   <task name="satellite_gsi_bufr" cycledefs="02-11hr,00hr,01hr" maxtries="3">
 
     &SATELLITE_RESOURCES;
     &WALL_LIMIT_DA;
-    &RESERVATION;
+    &RESERVATION_DA;
 
     <command>&SCRIPTS;/GSI/satellite_bufr.ksh</command>
     <cores>&SATELLITE_PROC;</cores>
@@ -346,7 +320,7 @@
 
     &CONVENTIONAL_RESOURCES;
     &WALL_LIMIT_DA;
-    &RESERVATION;
+    &RESERVATION_DA;
 
     <command>&SCRIPTS;/GSI/conventional.ksh</command>
     <cores>&CONVENTIONAL_PROC;</cores>
@@ -434,7 +408,7 @@
 
     &CONVENTIONAL_RESOURCES;
     &WALL_LIMIT_DA;
-    &RESERVATION;
+    &RESERVATION_DA;
 
     <command>&SCRIPTS;/GSI/conventional.ksh</command>
     <cores>&CONVENTIONAL_PROC;</cores>
@@ -645,7 +619,7 @@
 
     &GSI_DIAG_RESOURCES;
     &WALL_LIMIT_DA;
-    &RESERVATION;
+    &RESERVATION_DA;
 
     <command>&SCRIPTS;/GSI/gsi_diag.ksh</command>
     <cores>&GSI_DIAG_PROC;</cores>
@@ -783,7 +757,7 @@
 
     &POST_RESOURCES;
     &WALL_LIMIT_PP;
-    &RESERVATION;
+    &RESERVATION_POST;
 
     <command>&SCRIPTS;/UPP/unipost.ksh</command>
     <cores>&POST_PROC;</cores>
@@ -829,6 +803,10 @@
     <envar>
       <name>STATIC_DIR</name>
       <value>&STATIC_DIR;/UPP</value>
+    </envar>
+    <envar>
+      <name>POST_NAME</name>
+      <value>&POST_NAME;</value>
     </envar>
 
     <dependency>

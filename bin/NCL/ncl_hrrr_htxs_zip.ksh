@@ -48,7 +48,7 @@ i=0
 while [ ${i} -lt ${#domains[@]} ]; do
   dir=${DATAHOME}/nclprd/${domains[${i}]}
   cd ${dir}
-  zip -g -0 files.zip * -i \*${FCST_TIME}.png
+  zip -n .png files.zip * -i \*.png 
 
   (( i=i + 1 ))
 done

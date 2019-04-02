@@ -17,12 +17,12 @@ np=`cat $PBS_NODEFILE | wc -l`
 
 # Load modules
 module purge
-module load newdefaults
-module load intel/15.0.3.187
-module load impi
-module load netcdf
-module load cnvgrib
-module load ncep
+module load szip/2.1
+module load intel/18.0.5.274
+module load impi/2018.4.274
+module load netcdf/4.2.1.1
+module load pnetcdf/1.6.1
+module load cnvgrib/1.4.0
 
 # Set up paths to shell commands
 LS=/bin/ls

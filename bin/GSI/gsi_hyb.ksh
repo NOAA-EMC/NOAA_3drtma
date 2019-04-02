@@ -2,12 +2,13 @@
 
 np=`cat $PBS_NODEFILE | wc -l`
 
-module load newdefaults
-module load intel/15.0.3.187
-module load impi/5.1.1.109
-module load szip
-module load hdf5
-module load netcdf4
+module purge
+module load szip/2.1
+module load intel/18.0.5.274
+module load impi/2018.4.274
+module load hdf5/1.8.9
+module load netcdf/4.2.1.1
+module load pnetcdf/1.6.1
 
 # Set up paths to unix commands
 RM=/bin/rm
@@ -297,10 +298,10 @@ else
   ${ECHO} "Warning: ${DATAOBSHOME}/LightningInGSI.bufr does not exist!"
 fi
 
-if [ -r "${DATAOBSHOME}/NASALaRCCloudInGSI_bufr.bufr" ]; then
-  ${LN} -s ${DATAOBSHOME}/NASALaRCCloudInGSI_bufr.bufr ./larcInGSI
+if [ -r "${DATAOBSHOME}/NASALaRCCloudInGSI.bufr" ]; then
+  ${LN} -s ${DATAOBSHOME}/NASALaRCCloudInGSI.bufr ./larcInGSI
 else
-  ${ECHO} "Warning: ${DATAOBSHOME}/NASALaRCCloudInGSI_bufr.bufr does not exist!"
+  ${ECHO} "Warning: ${DATAOBSHOME}/NASALaRCCloudInGSI.bufr does not exist!"
 fi
 
 # Link statellite radiance data
@@ -506,8 +507,11 @@ export JCAP=62
 export LEVS=60
 export DELTIM=${DELTIM:-$((3600/($JCAP/20)))}
 ndatrap=62
-grid_ratio=4
-cloudanalysistype=5
+grid_ratio=4 #4
+grid_ratio_ens=3 #ensemble resolution=3 * grid_ratio * grid_ratio_ens
+cloudanalysistype=5 #5
+ens_h=40 #110
+ens_v=1 #3
 
 # Build the GSI namelist on-the-fly
 . ${fixdir}/gsiparm.anl.sh

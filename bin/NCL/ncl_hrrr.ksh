@@ -39,11 +39,14 @@ fi
 echo "Using $THREADS thread(s) for procesing."
 
 # Load modules
-module load intel
-module load mvapich2
-module load netcdf
-module load ncl/${NCL_VER}
-module load imagemagick/6.2.8
+module purge
+module load szip/2.1
+module load intel/18.0.5.274
+module load hdf5/1.8.9
+module load netcdf/4.2.1.1
+module load mvapich2/2.3
+module load ncl/6.5.0
+module load imagemagick/7.0.8-34
 
 # Make sure we are using GMT time zone for time computations
 # export NCL_VER=6.1.2  # for testing
@@ -51,8 +54,8 @@ module load imagemagick/6.2.8
 # export FCST_TIME=3  # for testing
 # export START_TIME=2014111719  # for testing
 export TZ="GMT"
-export NCARG_ROOT="/apps/ncl/${NCL_VER}"
-export NCARG_LIB="/apps/ncl/${NCL_VER}/lib"
+export NCARG_ROOT="/apps/ncl/6.5.0-CentOS6.10_64bit_nodap_gnu447"
+export NCARG_LIB="/apps/ncl/6.5.0-CentOS6.10_64bit_nodap_gnu447/lib"
 export NCL_HOME="/whome/Brian.D.Jamison/fim/svncode/ncl/fimall"
 export UDUNITS2_XML_PATH=$NCARG_ROOT/lib/ncarg/udunits/udunits2.xml
 
@@ -88,7 +91,7 @@ typeset -RZ2 FCST_TIME_BACK3
 
 ulimit -s 512000
 
-EXE_ROOT=/misc/whome/wrfruc/bin/ncl/nclhrrrak
+EXE_ROOT=/misc/whome/wrfruc/bin/ncl/nclhrrr
 
 # Print run parameters
 ${ECHO}
@@ -330,7 +333,7 @@ set -A websfx sfc 2m 2m 2m 2m 2ds 10m 80m 80m 850 250 500 sfc sfc sfc sfc sfc sf
               sfc sfc sfc sfc sfc sfc sfc sfc sfc sfc sfc sfc 500 700 850 925 sfc sfc nta sfc sfc \
               sfc 80m sfc sfc sfc sfc sat sat sat sat sfc sfc sfc m10 sfc sfc
 
-set -A tiles dum a1 a2 a3
+set -A tiles dum t1 t2 t3 t4 t5 t6 t7 t8 z0 z1 z2 z3 z4 z5 z6 z7
 
 set -A webmon montage
 
@@ -369,7 +372,6 @@ ncl_error=0
 # Run the NCL scripts for each plot
 cp /whome/wrfruc/bin/ncl/Airpor* .
 cp ${EXE_ROOT}/names_grib2.txt .
-cp ${EXE_ROOT}/hrrrak_tiles_loop.ncl .
 i=0
 echo "FIRST While, ${#ncgms[@]} items"
 CMDFN=/tmp/cmd.hrrr_part1.$$
@@ -487,21 +489,99 @@ while [ ${i} -lt ${#pngs[@]} ]; do
   ${MV} ${pngfile} ${webfile}
   (( i=i + 1 ))
   pngfile=${pngs[${i}]}
-  a1dir=${DATAHOME}/nclprd/a1
-  ${MKDIR} -p ${a1dir}
-  webfile=${a1dir}/${webnames[${i}]}_f${FCST_TIME}.png
+  t1dir=${DATAHOME}/nclprd/t1
+  ${MKDIR} -p ${t1dir}
+  webfile=${t1dir}/${webnames[${i}]}_f${FCST_TIME}.png
   ${MV} ${pngfile} ${webfile}
   (( i=i + 1 ))
   pngfile=${pngs[${i}]}
-  a2dir=${DATAHOME}/nclprd/a2
-  ${MKDIR} -p ${a2dir}
-  webfile=${a2dir}/${webnames[${i}]}_f${FCST_TIME}.png
+  t2dir=${DATAHOME}/nclprd/t2
+  ${MKDIR} -p ${t2dir}
+  webfile=${t2dir}/${webnames[${i}]}_f${FCST_TIME}.png
   ${MV} ${pngfile} ${webfile}
   (( i=i + 1 ))
   pngfile=${pngs[${i}]}
-  a3dir=${DATAHOME}/nclprd/a3
-  ${MKDIR} -p ${a3dir}
-  webfile=${a3dir}/${webnames[${i}]}_f${FCST_TIME}.png
+  t3dir=${DATAHOME}/nclprd/t3
+  ${MKDIR} -p ${t3dir}
+  webfile=${t3dir}/${webnames[${i}]}_f${FCST_TIME}.png
+  ${MV} ${pngfile} ${webfile}
+  (( i=i + 1 ))
+  pngfile=${pngs[${i}]}
+  t4dir=${DATAHOME}/nclprd/t4
+  ${MKDIR} -p ${t4dir}
+  webfile=${t4dir}/${webnames[${i}]}_f${FCST_TIME}.png
+  ${MV} ${pngfile} ${webfile}
+  (( i=i + 1 ))
+  pngfile=${pngs[${i}]}
+  t5dir=${DATAHOME}/nclprd/t5
+  ${MKDIR} -p ${t5dir}
+  webfile=${t5dir}/${webnames[${i}]}_f${FCST_TIME}.png
+  ${MV} ${pngfile} ${webfile}
+  (( i=i + 1 ))
+  pngfile=${pngs[${i}]}
+  t6dir=${DATAHOME}/nclprd/t6
+  ${MKDIR} -p ${t6dir}
+  webfile=${t6dir}/${webnames[${i}]}_f${FCST_TIME}.png
+  ${MV} ${pngfile} ${webfile}
+  (( i=i + 1 ))
+  pngfile=${pngs[${i}]}
+  t7dir=${DATAHOME}/nclprd/t7
+  ${MKDIR} -p ${t7dir}
+  webfile=${t7dir}/${webnames[${i}]}_f${FCST_TIME}.png
+  ${MV} ${pngfile} ${webfile}
+  (( i=i + 1 ))
+  pngfile=${pngs[${i}]}
+  t8dir=${DATAHOME}/nclprd/t8
+  ${MKDIR} -p ${t8dir}
+  webfile=${t8dir}/${webnames[${i}]}_f${FCST_TIME}.png
+  ${MV} ${pngfile} ${webfile}
+  (( i=i + 1 ))
+  pngfile=${pngs[${i}]}
+  z0dir=${DATAHOME}/nclprd/z0
+  ${MKDIR} -p ${z0dir}
+  webfile=${z0dir}/${webnames[${i}]}_f${FCST_TIME}.png
+  ${MV} ${pngfile} ${webfile}
+  (( i=i + 1 ))
+  pngfile=${pngs[${i}]}
+  z1dir=${DATAHOME}/nclprd/z1
+  ${MKDIR} -p ${z1dir}
+  webfile=${z1dir}/${webnames[${i}]}_f${FCST_TIME}.png
+  ${MV} ${pngfile} ${webfile}
+  (( i=i + 1 ))
+  pngfile=${pngs[${i}]}
+  z2dir=${DATAHOME}/nclprd/z2
+  ${MKDIR} -p ${z2dir}
+  webfile=${z2dir}/${webnames[${i}]}_f${FCST_TIME}.png
+  ${MV} ${pngfile} ${webfile}
+  (( i=i + 1 ))
+  pngfile=${pngs[${i}]}
+  z3dir=${DATAHOME}/nclprd/z3
+  ${MKDIR} -p ${z3dir}
+  webfile=${z3dir}/${webnames[${i}]}_f${FCST_TIME}.png
+  ${MV} ${pngfile} ${webfile}
+  (( i=i + 1 ))
+  pngfile=${pngs[${i}]}
+  z4dir=${DATAHOME}/nclprd/z4
+  ${MKDIR} -p ${z4dir}
+  webfile=${z4dir}/${webnames[${i}]}_f${FCST_TIME}.png
+  ${MV} ${pngfile} ${webfile}
+  (( i=i + 1 ))
+  pngfile=${pngs[${i}]}
+  z5dir=${DATAHOME}/nclprd/z5
+  ${MKDIR} -p ${z5dir}
+  webfile=${z5dir}/${webnames[${i}]}_f${FCST_TIME}.png
+  ${MV} ${pngfile} ${webfile}
+  (( i=i + 1 ))
+  pngfile=${pngs[${i}]}
+  z6dir=${DATAHOME}/nclprd/z6
+  ${MKDIR} -p ${z6dir}
+  webfile=${z6dir}/${webnames[${i}]}_f${FCST_TIME}.png
+  ${MV} ${pngfile} ${webfile}
+  (( i=i + 1 ))
+  pngfile=${pngs[${i}]}
+  z7dir=${DATAHOME}/nclprd/z7
+  ${MKDIR} -p ${z7dir}
+  webfile=${z7dir}/${webnames[${i}]}_f${FCST_TIME}.png
   ${MV} ${pngfile} ${webfile}
   (( i=i + 1 ))
 done

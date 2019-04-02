@@ -3,12 +3,13 @@
 np=`cat $PBS_NODEFILE | wc -l`
 
 # Load modules
-module load intel
-module load mvapich2
-module load szip
-module load hdf5
-module load netcdf4/4.2.1.1
-#module load netcdf
+module purge
+module load szip/2.1
+module load intel/18.0.5.274
+module load impi/2018.4.274
+module load hdf5/1.8.9
+module load netcdf/4.2.1.1
+module load pnetcdf/1.6.1
 
 # Vars used for testing.  Should be commented out for production mode
 
@@ -129,7 +130,7 @@ ${LN} -s ${NASALARC_DATA}/${YYYYJJJHH}00.rap.t${HH}z.lgycld.tm00.bufr_d ./NASA_L
 ${CAT} << EOF > namelist_nasalarc
 &SETUP
   analysis_time = ${YYYYMMDDHH},
-  bufrfile='NASALaRCCloudInGSI_bufr.bufr',
+  bufrfile='NASALaRCCloudInGSI.bufr',
   npts_rad=3,
   ioption = 2,
 /
