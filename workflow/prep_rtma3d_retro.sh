@@ -76,8 +76,8 @@ fi
 #--- User defined variables                         #
 #####################################################
 set -x
-export startCDATE=201902130300              #yyyymmddhhmm - Starting day of retro run 
-export endCDATE=201902130300                #yyyymmddhhmm - Ending day of RTMA3D run (needed for both RETRO and REAL TIME). 
+export startCDATE=201902131200              #yyyymmddhhmm - Starting day of retro run 
+export endCDATE=201902131200                #yyyymmddhhmm - Ending day of RTMA3D run (needed for both RETRO and REAL TIME). 
 export NET=rtma3d                           #selection of rtma3d (or rtma,urma)
 export RUN=rtma3d                           #selection of rtma3d (or rtma,urma)
 export envir="Feb2019"                      #environment (test, prod, dev, etc.)
@@ -1101,7 +1101,7 @@ do
         cmdpath="cp"
       fi
       ;;
-    cnvgrib/mpirun)
+    cnvgrib|mpirun)
        cmdpath="${lnxcmd}"
       ;;
     awk)

@@ -165,23 +165,17 @@ YYYYMMDDm1=`$NDATE -24 ${CYCLE} | cut -c 1-8`
 #   if [ ! -d $wrkdir_nam ]; then
 #    mkdir -p  $wrkdir_nam
 #   fi
-    if [ "$i" -eq 1 ] ; then 
-      wrkdir_rap=${mynoscrub}/rap.${YYYYMMDD}     
-      if [ ! -d  $wrkdir_rap ]; then
-       mkdir -p  $wrkdir_rap
-      fi
+    wrkdir_rap=${mynoscrub}/rap.${YYYYMMDD}     
+    if [ ! -d  $wrkdir_rap ]; then
+     mkdir -p  $wrkdir_rap
     fi
-    if [ "$i" -eq 1 ] ; then 
-      wrkdir_radar=${mynoscrub}/radar.${YYYYMMDD}     
-      if [ ! -d  $wrkdir_radar ]; then
-       mkdir -p  $wrkdir_radar
-      fi
+    wrkdir_radar=${mynoscrub}/radar.${YYYYMMDD}     
+    if [ ! -d  $wrkdir_radar ]; then
+     mkdir -p  $wrkdir_radar
     fi
-    if [ "$i" -eq 1 ] ; then 
-      wrkdir_lightning=${mynoscrub}/lightning.${YYYYMMDD}     
-      if [ ! -d  $wrkdir_lightning ]; then
-       mkdir -p  $wrkdir_lightning
-      fi
+    wrkdir_lightning=${mynoscrub}/lightning.${YYYYMMDD}     
+    if [ ! -d  $wrkdir_lightning ]; then
+     mkdir -p  $wrkdir_lightning
     fi
 #   wrkdir_rtma=${mynoscrub}/${NET}.${YYYYMMDD}   
 #   if [ ! -d  $wrkdir_rtma ]; then
@@ -311,26 +305,29 @@ YYYYMMDDm1=`$NDATE -24 ${CYCLE} | cut -c 1-8`
         
 #==================================================================================================
     if [ ${obsprep_radar} -eq 1 ] ; then
-      cd $wrkdir_radar
+      set -x
+      cd ${wrkdir_radar}
       echo "=== Retrieving MRMS Radar mosaic Reflectivity from GSD Archived Dataset on HPSS"
       rm -rf $mrmsradar_grib2_dir
-      if [ ! -d $mrmsradar_grib2_dir ] ; then
-        mkdir -p $mrmsradar_grib2_dir
-      fi
+      mkdir -p $mrmsradar_grib2_dir
+      rm -f ${wrkdir_radar}/${zipfile_mrms_3hr}
 
-      hsi get "${mrmsradar_dir}/${zipfile_mrms_3hr}"
+#     hsi get "${mrmsradar_dir}/${zipfile_mrms_3hr}"
+      hsi get ${wrkdir_radar}/${zipfile_mrms_3hr} : ${mrmsradar_dir}/${zipfile_mrms_3hr}
 
-      /bin/rm -rf select_list_1.txt_tmp
-      /bin/rm -rf select_list_1.txt
-      /bin/rm -rf list_all_1.txt
-      /bin/rm -rf select_list_1.txt_total
+      /bin/rm -f select_list_1.txt_tmp
+      /bin/rm -f select_list_1.txt
+      /bin/rm -f list_all_1.txt
+      /bin/rm -f select_list_1.txt_total
 
-      ${UNZIP} -v ${zipfile_mrms_3hr} > list_all_1.txt
+#     ${UNZIP} -v ${zipfile_mrms_3hr} >list_all_1.txt
+      ${UNZIP} -Z1 ${zipfile_mrms_3hr} >list_all_1.txt
 
       zfiles="${zipfile_mrms_1mi} ${zipfile_mrms_1mip1} ${zipfile_mrms_1mip2}"
       for zf in $zfiles
       do
-        nlines=`cat list_all_1.txt | awk {'print $8'} | grep "${zf}" | wc -l`
+#       nlines=`cat list_all_1.txt | awk {'print $8'} | grep "${zf}" | wc -l`
+        nlines=`cat list_all_1.txt | awk {'print $1'} | grep "${zf}" | wc -l`
         if [ $nlines -eq 1 ]
         then
           ${UNZIP} ${zipfile_mrms_3hr} "${zf}" -d ${mrmsradar_grib2_dir}
@@ -350,7 +347,8 @@ YYYYMMDDm1=`$NDATE -24 ${CYCLE} | cut -c 1-8`
         fi
       done
 
-      /bin/rm -f ${zipfile_mrms_3hr}
+#     /bin/rm -f ${zipfile_mrms_3hr}
+      set +x
       
     fi
         
