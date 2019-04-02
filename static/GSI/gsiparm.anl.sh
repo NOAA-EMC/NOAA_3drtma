@@ -136,10 +136,10 @@ OBS_INPUT::
    aniso_a_en=.false.,generate_ens=.false.,
    n_ens=${nummem},
 !  beta_s0=${beta1_inv},s_ens_h=110,s_ens_v=3,
-   beta_s0=${beta1_inv},s_ens_h=40,s_ens_v=3,
+   beta_s0=${beta1_inv},s_ens_h=${ens_h},s_ens_v=${ens_v},
    regional_ensemble_option=1,
    pseudo_hybens = .false.,
-   grid_ratio_ens = 1,
+   grid_ratio_ens = ${grid_ratio_ens},
    l_ens_in_diff_time=.true.,
    ensemble_path='',
  /

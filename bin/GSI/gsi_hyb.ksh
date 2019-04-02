@@ -503,7 +503,10 @@ export LEVS=60
 export DELTIM=${DELTIM:-$((3600/($JCAP/20)))}
 ndatrap=62
 grid_ratio=1 #4
+grid_ratio_ens=12 #ensemble resolution=3 * grid_ratio * grid_ratio_ens
 cloudanalysistype=1 #5
+ens_h=40 #110
+ens_v=3 #3
 
 # Build the GSI namelist on-the-fly
 . ${fixdir}/gsiparm.anl.sh
