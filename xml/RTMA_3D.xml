@@ -2,10 +2,10 @@
 
 <!DOCTYPE workflow [
 
-<!ENTITY ACCOUNT "nrtrr">
-<!ENTITY ACCOUNT_DA "nrtrr">
+<!ENTITY ACCOUNT "rtrr">
+<!ENTITY ACCOUNT_DA "rtrr">
 
-<!ENTITY PARTITION "xjet:vjet:sjet:tjet">
+<!ENTITY PARTITION "kjet">
 <!ENTITY PARTITION_DA "kjet">
 <!ENTITY QUEUE "batch">
 <!ENTITY RES_DA "rtma-ket">
@@ -132,7 +132,7 @@
 
     &LIGHTNING_RESOURCES;
     &WALL_LIMIT_DA;
-    &RESERVATION;
+    &RESERVATION_DA;
 
     <command>&SCRIPTS;/GSI/lightning.ksh</command>
     <cores>&LIGHTNING_PROC;</cores>
@@ -272,7 +272,7 @@
 
     &SATELLITE_RESOURCES;
     &WALL_LIMIT_DA;
-    &RESERVATION;
+    &RESERVATION_DA;
 
     <command>&SCRIPTS;/GSI/satellite_bufr.ksh</command>
     <cores>&SATELLITE_PROC;</cores>
@@ -321,7 +321,7 @@
 
     &CONVENTIONAL_RESOURCES;
     &WALL_LIMIT_DA;
-    &RESERVATION;
+    &RESERVATION_DA;
 
     <command>&SCRIPTS;/GSI/conventional.ksh</command>
     <cores>&CONVENTIONAL_PROC;</cores>
@@ -413,7 +413,7 @@
 
     &CONVENTIONAL_RESOURCES;
     &WALL_LIMIT_DA;
-    &RESERVATION;
+    &RESERVATION_DA;
 
     <command>&SCRIPTS;/GSI/conventional.ksh</command>
     <cores>&CONVENTIONAL_PROC;</cores>
@@ -616,7 +616,7 @@
 
     &GSI_DIAG_RESOURCES;
     &WALL_LIMIT_DA;
-    &RESERVATION;
+    &RESERVATION_DA;
 
     <command>&SCRIPTS;/GSI/gsi_diag.ksh</command>
     <cores>&GSI_DIAG_PROC;</cores>
@@ -754,7 +754,7 @@
 
     &POST_RESOURCES;
     &WALL_LIMIT_PP;
-    &RESERVATION;
+    &RESERVATION_POST;
 
     <command>&SCRIPTS;/UPP/unipost.ksh</command>
     <cores>&POST_PROC;</cores>
