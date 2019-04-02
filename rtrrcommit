@@ -3,10 +3,10 @@
 username=`logname`
 echo $username
 
-git config user.name "${username}"
-git config user.email "guoqing.ge@noaa.gov"
+/home/Guoqing.Ge/local/bin/git config user.name "${username}"
+/home/Guoqing.Ge/local/bin/git config user.email "guoqing.ge@noaa.gov"
 
-git commit "$@"
+/home/Guoqing.Ge/local/bin/git commit "$@"
 echo "Do you want to push the commit to the server (y/n)?"
 read YN
 if [[ "$YN"="y" ]]; then
@@ -15,5 +15,5 @@ else
    "The commit is not pushed to server. Run './rtrrpush' to do the push"
 fi
 
-git config --unset user.name
-git config --unset user.email
+/home/Guoqing.Ge/local/bin/git config --unset user.name
+/home/Guoqing.Ge/local/bin/git config --unset user.email

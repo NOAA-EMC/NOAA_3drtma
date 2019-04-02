@@ -2,12 +2,13 @@
 
 np=`cat $PBS_NODEFILE | wc -l`
 
-module load newdefaults
+module purge
+module load szip/2.1
 module load intel/18.0.5.274
 module load impi/2018.4.274
-module load szip
-module load hdf5
-module load netcdf
+module load hdf5/1.8.9
+module load netcdf/4.2.1.1
+module load pnetcdf/1.6.1
 
 # Set up paths to unix commands
 RM=/bin/rm
@@ -292,10 +293,10 @@ else
   ${ECHO} "Warning: ${DATAOBSHOME}/LightningInGSI.bufr does not exist!"
 fi
 
-if [ -r "${DATAOBSHOME}/NASALaRCCloudInGSI_bufr.bufr" ]; then
-  ${LN} -s ${DATAOBSHOME}/NASALaRCCloudInGSI_bufr.bufr ./larcInGSI
+if [ -r "${DATAOBSHOME}/NASALaRCCloudInGSI.bufr" ]; then
+  ${LN} -s ${DATAOBSHOME}/NASALaRCCloudInGSI.bufr ./larcInGSI
 else
-  ${ECHO} "Warning: ${DATAOBSHOME}/NASALaRCCloudInGSI_bufr.bufr does not exist!"
+  ${ECHO} "Warning: ${DATAOBSHOME}/NASALaRCCloudInGSI.bufr does not exist!"
 fi
 
 # Link statellite radiance data
@@ -387,9 +388,9 @@ for loop in $loops; do
 done
 EYYYYMMDD=$(echo ${availtime} | cut -c1-8)
 EHH=$(echo ${availtime} | cut -c9-10)
-#${LS} ${ENKF_FCST}/${enkfcstname}.mem???.nemsio > filelist03
-${LS} ${ENKF_FCST}/${enkfcstname}.mem???.nemsio > filelist.tmp
-head -n 36 filelist.tmp > filelist03
+${LS} ${ENKF_FCST}/${enkfcstname}.mem???.nemsio > filelist03
+#${LS} ${ENKF_FCST}/${enkfcstname}.mem???.nemsio > filelist.tmp
+#head -n 36 filelist.tmp > filelist03
 
 ## 
 ## Link to pre-processed GFS EnKF forecast members

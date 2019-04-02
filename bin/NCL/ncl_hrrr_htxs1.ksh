@@ -3,16 +3,19 @@
 np=`cat $PBS_NODEFILE | wc -l`
 
 # Load modules
-module load intel
-module load mvapich2
-module load netcdf
-module load ncl/${NCL_VER}
-module load imagemagick/6.2.8
+module purge
+module load szip/2.1
+module load intel/18.0.5.274
+module load hdf5/1.8.9
+module load netcdf/4.2.1.1
+module load mvapich2/2.3
+module load ncl/6.5.0
+module load imagemagick/7.0.8-34
 
 # Make sure we are using GMT time zone for time computations
 export TZ="GMT"
-export NCARG_ROOT="/apps/ncl/${NCL_VER}"
-export NCARG_LIB="/apps/ncl/${NCL_VER}/lib"
+export NCARG_ROOT="/apps/ncl/6.5.0-CentOS6.10_64bit_nodap_gnu447"
+export NCARG_LIB="/apps/ncl/6.5.0-CentOS6.10_64bit_nodap_gnu447/lib"
 export NCL_HOME="/whome/Brian.D.Jamison/fim/svncode/ncl/fimall"
 export UDUNITS2_XML_PATH=$NCARG_ROOT/lib/ncarg/udunits/udunits2.xml
 
