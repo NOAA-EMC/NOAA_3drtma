@@ -7,8 +7,9 @@
 
 <!ENTITY PARTITION "xjet:vjet:sjet:tjet">
 <!ENTITY PARTITION_DA "kjet">
-<!ENTITY RES_DA "vjet">
 <!ENTITY QUEUE "batch">
+<!ENTITY RES_DA "rtma-ket">
+<!ENTITY RES_POST "rtma-kjet">
 
 <!ENTITY SYSTEM_ID "RTMA_3D"> 
 <!ENTITY HOMEBASE_DIR "/home/rtrr/RTMA_3D">
@@ -73,6 +74,7 @@
 <!ENTITY SATELLITE_PROC "1">
 <!ENTITY GSI_HYB_PROC "200">
 <!ENTITY GSI_DIAG_PROC "1">
+<!ENTITY RADARLINKS_PROC "1">
 
 <!ENTITY POST_PROC "32">
 <!ENTITY NCL_PROC "1">
@@ -106,8 +108,9 @@
 <!ENTITY WALL_LIMIT_PP '<deadline><cyclestr offset="&DEADLINE_PP;">@Y@m@d@H@M</cyclestr></deadline>'>
 
 <!ENTITY RESERVATION '<native>-l partition=&PARTITION; -W umask=022 -m n</native><queue>&QUEUE;</queue><account>&ACCOUNT;</account>'>
-<!ENTITY RESERVATION_DA '<native>-l partition=&PARTITION_DA; -W umask=022 -m n</native><queue>&QUEUE;</queue><account>&ACCOUNT_DA;</account>'>
+<!ENTITY RESERVATION_DA '<native>-l partition=&PARTITION_DA;,flags=ADVRES:&RES_DA; -W umask=022 -m n</native><queue>&QUEUE;</queue><account>&ACCOUNT_DA;</account>'>
 <!ENTITY RESERVATION_SMARTINIT '<native>-l partition=&PARTITION; -W umask=022 -m n</native><queue>&QUEUE;</queue><account>&ACCOUNT;</account>'>
+<!ENTITY RESERVATION_POST '<native>-l partition=&PARTITION;,flags=ADVRES:&RES_POST; -W umask=022 -m n</native><queue>&QUEUE;</queue><account>&ACCOUNT;</account>'>
 
 ]>
 
@@ -179,7 +182,7 @@
   </task>
   </metatask>
 
-  <task name="radar_links" cycledefs="01hr,02hr,03hr,04hr,05hr,06hr,07hr,08hr,09hr,10hr,11hr,12hr" maxtries="3">
+  <task name="radar_links" cycledefs="02-11hr,00hr,01hr" maxtries="3">
 
     &RADAR_RESOURCES;
     &WALL_LIMIT_DA;
@@ -211,7 +214,7 @@
 
   <metatask>
     <var name="subh">15 30 45 60</var>
-    <task name="radar_gsi_#subh#" cycledefs="01hr,02hr,03hr,04hr,05hr,06hr,07hr,08hr,09hr,10hr,11hr,12hr" maxtries="3">
+    <task name="radar_gsi_#subh#" cycledefs="02-11hr,00hr,01hr" maxtries="3">
 
       &RADAR_RESOURCES;
       &WALL_LIMIT_DA;
