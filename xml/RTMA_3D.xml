@@ -529,7 +529,7 @@
     </envar>
     <envar>
       <name>DATAHOME_BK</name>
-      <value><cyclestr offset="-1:00:00">&HRRR_DIR;/@Y@m@d@H/wrfprd</cyclestr></value>
+      <value>&HRRR_DIR;</value>
     </envar>
     <envar>
       <name>DATAHOME</name>

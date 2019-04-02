@@ -187,35 +187,35 @@ time_05hago=`${DATE} +"%Y%m%d%H" -d "${START_TIME}  5 hours ago"`
 time_06hago=`${DATE} +"%Y%m%d%H" -d "${START_TIME}  6 hours ago"`
 
 # Look for bqckground from pre-forecast background
-if [ -r ${DATAHOME_BK}/wrfout_d01_${time_str} ]; then
-  ${ECHO} " Cycled run using ${DATAHOME_BK}/wrfout_d01_${time_str}"
-  cp ${DATAHOME_BK}/wrfout_d01_${time_str} ./wrf_inout
-  ${ECHO} " Cycle ${YYYYMMDDHH}: GSI background=${DATAHOME_BK}/wrfout_d01_${time_str}" >> ${logfile}
-elif [ -r ${DATAROOT}/${time_02hago}/wrfprd/wrfout_d01_${time_str} ]; then
+if [ -r ${DATAHOME_BK}/${time_01hago}/wrfprd/wrfout_d01_${time_str} ]; then
+  ${ECHO} " Cycled run using ${time_01hago}/wrfprd/wrfout_d01_${time_str}"
+  ${LN} -s ${DATAHOME_BK}/${time_01hago}/wrfprd/wrfout_d01_${time_str} ./wrf_inout
+  ${ECHO} " Cycle ${YYYYMMDDHH}: GSI background=${time_01hago}/wrfprd/wrfout_d01_${time_str}" >> ${logfile}
+elif [ -r ${DATAHOME_BK}/${time_02hago}/wrfprd/wrfout_d01_${time_str} ]; then
   ${ECHO} " Cycled run using ${time_02hago}/wrfprd/wrfout_d01_${time_str}"
-  ${LN} -s ${DATAROOT}/${time_02hago}/wrfprd/wrfout_d01_${time_str} ./wrf_inout
+  ${LN} -s ${DATAHOME_BK}/${time_02hago}/wrfprd/wrfout_d01_${time_str} ./wrf_inout
   ${ECHO} " Cycle ${YYYYMMDDHH}: GSI background=${time_02hago}/wrfprd/wrfout_d01_${time_str}" >> ${logfile}
-elif [ -r ${DATAROOT}/${time_03hago}/wrfprd/wrfout_d01_${time_str} ]; then
+elif [ -r ${DATAHOME_BK}/${time_03hago}/wrfprd/wrfout_d01_${time_str} ]; then
   ${ECHO} " Cycled run using ${time_03hago}/wrfprd/wrfout_d01_${time_str}"
-  ${LN} -s ${DATAROOT}/${time_03hago}/wrfprd/wrfout_d01_${time_str} ./wrf_inout
+  ${LN} -s ${DATAHOME_BK}/${time_03hago}/wrfprd/wrfout_d01_${time_str} ./wrf_inout
   ${ECHO} " Cycle ${YYYYMMDDHH}: GSI background=${time_03hago}/wrfprd/wrfout_d01_${time_str}" >> ${logfile}
-elif [ -r ${DATAROOT}/${time_04hago}/wrfprd/wrfout_d01_${time_str} ]; then
+elif [ -r ${DATAHOME_BK}/${time_04hago}/wrfprd/wrfout_d01_${time_str} ]; then
   ${ECHO} " Cycled run using ${time_04hago}/wrfprd/wrfout_d01_${time_str}"
-  ${LN} -s ${DATAROOT}/${time_04hago}/wrfprd/wrfout_d01_${time_str} ./wrf_inout
+  ${LN} -s ${DATAHOME_BK}/${time_04hago}/wrfprd/wrfout_d01_${time_str} ./wrf_inout
   ${ECHO} " Cycle ${YYYYMMDDHH}: GSI background=${time_04hago}/wrfprd/wrfout_d01_${time_str}" >> ${logfile}
-elif [ -r ${DATAROOT}/${time_05hago}/wrfprd/wrfout_d01_${time_str} ]; then
+elif [ -r ${DATAHOME_BK}/${time_05hago}/wrfprd/wrfout_d01_${time_str} ]; then
   ${ECHO} " Cycled run using ${time_05hago}/wrfprd/wrfout_d01_${time_str}"
-  ${LN} -s ${DATAROOT}/${time_05hago}/wrfprd/wrfout_d01_${time_str} ./wrf_inout
+  ${LN} -s ${DATAHOME_BK}/${time_05hago}/wrfprd/wrfout_d01_${time_str} ./wrf_inout
   ${ECHO} " Cycle ${YYYYMMDDHH}: GSI background=${time_05hago}/wrfprd/wrfout_d01_${time_str}" >> ${logfile}
-elif [ -r ${DATAROOT}/${time_06hago}/wrfprd/wrfout_d01_${time_str} ]; then
+elif [ -r ${DATAHOME_BK}/${time_06hago}/wrfprd/wrfout_d01_${time_str} ]; then
   ${ECHO} " Cycled run using ${time_06hago}/wrfprd/wrfout_d01_${time_str}"
-  ${LN} -s ${DATAROOT}/${time_06hago}/wrfprd/wrfout_d01_${time_str} ./wrf_inout
+  ${LN} -s ${DATAHOME_BK}/${time_06hago}/wrfprd/wrfout_d01_${time_str} ./wrf_inout
   ${ECHO} " Cycle ${YYYYMMDDHH}: GSI background=${time_06hago}/wrfprd/wrfout_d01_${time_str}" >> ${logfile}
 # No background available so abort
 else
-  ${ECHO} "${DATAHOME_BK}/wrfout_d01_${time_str} does not exist!!"
+  ${ECHO} "No wfout_d01_${time_str} availabe for cycle ${time_run}. Checked back up to 6h"
   ${ECHO} "ERROR: No background file for analysis at ${time_run}!!!!"
-  ${ECHO} " Cycle ${YYYYMMDDHH}: GSI failed because of no background" >> ${logfile} 
+  ${ECHO} "No wfout_d01_${time_str} availabe for cycle ${time_run}. Checked back up to 6h" >>${logfile}
   exit 1
 fi
 
