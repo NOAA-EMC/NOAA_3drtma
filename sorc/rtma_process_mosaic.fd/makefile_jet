@@ -11,8 +11,10 @@ CPPFLAGS =  -D_UNDERSCORE -DLINUX -Dfunder -DFortranByte=char -DFortranInt=int -
 GSI_BUILDDIR = ../build_gsi
 GSI_INCDIR   = ${GSI_BUILDDIR}/include
 
-G2_VER=v2.5.0
-G2TMPL_VER=v1.3.0
+# G2_VER=v2.5.0
+G2_VER=v2.5.2
+# G2TMPL_VER=v1.3.0
+G2TMPL_VER=v1.4.0
 JASPER_VER=v1.900.1
 PNG_VER=v1.2.44
 Z_VER=v1.2.6
@@ -26,8 +28,11 @@ G2TMPL_LIB  = ${CORELIB}/g2tmpl/$(G2TMPL_VER)/libg2tmpl_${G2TMPL_VER}.a
 JASPER_LIB  = ${CORELIB}/jasper/$(JASPER_VER)/libjasper_$(JASPER_VER).a
 PNG_LIB     = ${CORELIB}/png/$(PNG_VER)/libpng.a
 Z_LIB       = ${CORELIB}/z/$(Z_VER)/libz_$(Z_VER).a
-NETCDF      = /apps/netcdf/3.6.3-intel
-NETCDF4     = /apps/netcdf/4.2-intel
+
+# NETCDF 4 is default netcdf on Jet (03/26/2019)
+NETCDF3     = /apps/netcdf/3.6.3-intel
+NETCDF4     = /apps/netcdf/4.2.1.1-intel
+NETCDF      = /apps/netcdf/4.2.1.1-intel
 
 BUFR_VER=v11.1.0
 BUFR_LIBd   = ${CORELIB}/bufr/$(BUFR_VER)/libbufr_$(BUFR_VER)_d_64.a
