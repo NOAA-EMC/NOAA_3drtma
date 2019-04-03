@@ -8,7 +8,7 @@
 <!ENTITY PARTITION "kjet">
 <!ENTITY PARTITION_DA "kjet">
 <!ENTITY QUEUE "batch">
-<!ENTITY RES_DA "rtma-ket">
+<!ENTITY RES_DA "rtma-kjet">
 <!ENTITY RES_POST "rtma-kjet">
 
 <!ENTITY SYSTEM_ID "RTMA_3D_AK"> 
@@ -107,9 +107,9 @@
 <!ENTITY WALL_LIMIT_PP '<deadline><cyclestr offset="&DEADLINE_PP;">@Y@m@d@H@M</cyclestr></deadline>'>
 
 <!ENTITY RESERVATION '<native>-l partition=&PARTITION; -W umask=022 -m n</native><queue>&QUEUE;</queue><account>&ACCOUNT;</account>'>
-<!ENTITY RESERVATION_DA '<native>-l partition=&PARTITION_DA; -W umask=022 -m n</native><queue>&QUEUE;</queue><account>&ACCOUNT_DA;</account>'>
+<!ENTITY RESERVATION_DA '<native>-l partition=&PARTITION_DA;,flags=ADVRES:&RES_DA; -W umask=022 -m n</native><queue>&QUEUE;</queue><account>&ACCOUNT_DA;</account>'>
 <!ENTITY RESERVATION_SMARTINIT '<native>-l partition=&PARTITION; -W umask=022 -m n</native><queue>&QUEUE;</queue><account>&ACCOUNT;</account>'>
-<!ENTITY RESERVATION_POST '<native>-l partition=&PARTITION; -W umask=022 -m n</native><queue>&QUEUE;</queue><account>&ACCOUNT;</account>'>
+<!ENTITY RESERVATION_POST '<native>-l partition=&PARTITION;,flags=ADVRES:&RES_POST; -W umask=022 -m n</native><queue>&QUEUE;</queue><account>&ACCOUNT;</account>'>
 
 ]>
 
