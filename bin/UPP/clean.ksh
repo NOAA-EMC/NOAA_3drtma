@@ -4,14 +4,7 @@ ulimit -s 512000
 
 np=`cat $PBS_NODEFILE | wc -l`
 
-# Load modules
-module purge
-module load szip/2.1
-module load intel/18.0.5.274
-module load impi/2018.4.274
-module load hdf5/1.8.9
-module load netcdf/4.2.1.1
-module load pnetcdf/1.6.1
+source /home/rtrr/PARM_EXEC/modulefiles/modulefile.jet.GSI_UPP_WRF
 
 # Make sure WORK_ROOT is defined and exists
 if [ ! "${WORK_ROOT}" ]; then

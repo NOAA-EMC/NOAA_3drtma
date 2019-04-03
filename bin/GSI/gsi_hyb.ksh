@@ -2,13 +2,7 @@
 
 np=`cat $PBS_NODEFILE | wc -l`
 
-module purge
-module load szip/2.1
-module load intel/18.0.5.274
-module load impi/2018.4.274
-module load hdf5/1.8.9
-module load netcdf/4.2.1.1
-module load pnetcdf/1.6.1
+source /home/rtrr/PARM_EXEC/modulefiles/modulefile.jet.GSI_UPP_WRF
 
 # Set up paths to unix commands
 RM=/bin/rm
