@@ -16,6 +16,7 @@
 <!ENTITY DATABASE_DIR "/home/rtrr/rtma_3d_ak_databasedir">
 <!ENTITY OBS_DIR "/public/data">
 <!ENTITY NCL_VER "6.3.0">
+<!ENTITY JOBNAME_PRE "RTMA3D_AK">
 
 <!ENTITY SCRIPTS "&HOMEBASE_DIR;/bin">
 <!ENTITY STATIC_DIR "&HOMEBASE_DIR;/static">
@@ -107,9 +108,9 @@
 <!ENTITY WALL_LIMIT_PP '<deadline><cyclestr offset="&DEADLINE_PP;">@Y@m@d@H@M</cyclestr></deadline>'>
 
 <!ENTITY RESERVATION '<native>-l partition=&PARTITION; -W umask=022 -m n</native><queue>&QUEUE;</queue><account>&ACCOUNT;</account>'>
-<!ENTITY RESERVATION_DA '<native>-l partition=&PARTITION_DA;,flags=ADVRES:&RES_DA; -W umask=022 -m n</native><queue>&QUEUE;</queue><account>&ACCOUNT_DA;</account>'>
+<!ENTITY RESERVATION_DA '<native>-l partition=&PARTITION_DA; -W umask=022 -m n</native><queue>&QUEUE;</queue><account>&ACCOUNT_DA;</account>'>
 <!ENTITY RESERVATION_SMARTINIT '<native>-l partition=&PARTITION; -W umask=022 -m n</native><queue>&QUEUE;</queue><account>&ACCOUNT;</account>'>
-<!ENTITY RESERVATION_POST '<native>-l partition=&PARTITION;,flags=ADVRES:&RES_POST; -W umask=022 -m n</native><queue>&QUEUE;</queue><account>&ACCOUNT;</account>'>
+<!ENTITY RESERVATION_POST '<native>-l partition=&PARTITION; -W umask=022 -m n</native><queue>&QUEUE;</queue><account>&ACCOUNT;</account>'>
 
 ]>
 
@@ -135,7 +136,7 @@
 
     <command>&SCRIPTS;/GSI/lightning.ksh</command>
     <cores>&LIGHTNING_PROC;</cores>
-    <jobname><cyclestr>HRRR_lightning_@H_#min#</cyclestr></jobname>
+    <jobname><cyclestr>&JOBNAME_PRE;_lightning_@H_#min#</cyclestr></jobname>
     <join><cyclestr>&LOG_DIR;/lightning_gsi_@Y@m@d@H00_#min#.log</cyclestr></join>
 
     <envar>
@@ -189,7 +190,7 @@
 
     <command>&SCRIPTS;/GSI/radar_links.ksh</command>
     <cores>&RADARLINKS_PROC;</cores>
-    <jobname><cyclestr>HRRR_radarlinks_@H</cyclestr></jobname>
+    <jobname><cyclestr>&JOBNAME_PRE;_radarlinks_@H</cyclestr></jobname>
     <join><cyclestr>&LOG_DIR;/radar_links_@Y@m@d@H00.log</cyclestr></join>
 
     <envar>
@@ -221,7 +222,7 @@
 
       <command>&SCRIPTS;/GSI/radar.ksh</command>
       <cores>&RADAR_PROC;</cores>
-      <jobname><cyclestr>HRRR_radar_@H_#subh#</cyclestr></jobname>
+      <jobname><cyclestr>&JOBNAME_PRE;_radar_@H_#subh#</cyclestr></jobname>
       <join><cyclestr>&LOG_DIR;/radar_gsi_@Y@m@d@H00_#subh#.log</cyclestr></join>
 
       <envar>
@@ -275,7 +276,7 @@
 
     <command>&SCRIPTS;/GSI/satellite_bufr.ksh</command>
     <cores>&SATELLITE_PROC;</cores>
-    <jobname><cyclestr>HRRR_satellite_bufr_@H</cyclestr></jobname>
+    <jobname><cyclestr>&JOBNAME_PRE;_satellite_bufr_@H</cyclestr></jobname>
     <join><cyclestr>&LOG_DIR;/satellite_gsi_bufr_@Y@m@d@H00.log</cyclestr></join>
 
     <envar>
@@ -324,7 +325,7 @@
 
     <command>&SCRIPTS;/GSI/conventional.ksh</command>
     <cores>&CONVENTIONAL_PROC;</cores>
-    <jobname><cyclestr>HRRR_conventional_@H</cyclestr></jobname>
+    <jobname><cyclestr>&JOBNAME_PRE;_conventional_@H</cyclestr></jobname>
     <join><cyclestr>&LOG_DIR;/conventional_gsi_@Y@m@d@H00.log</cyclestr></join>
 
     <envar>
@@ -412,7 +413,7 @@
 
     <command>&SCRIPTS;/GSI/conventional.ksh</command>
     <cores>&CONVENTIONAL_PROC;</cores>
-    <jobname><cyclestr>HRRR_conventional_early_@H</cyclestr></jobname>
+    <jobname><cyclestr>&JOBNAME_PRE;_conventional_early_@H</cyclestr></jobname>
     <join><cyclestr>&LOG_DIR;/conventional_gsi_early_@Y@m@d@H00.log</cyclestr></join>
 
     <envar>
@@ -500,7 +501,7 @@
 
     <command>&SCRIPTS;/GSI/gsi_hyb.ksh</command>
     <cores>&GSI_HYB_PROC;</cores>
-    <jobname><cyclestr>HRRR_gsi_hyb_@H</cyclestr></jobname>
+    <jobname><cyclestr>&JOBNAME_PRE;_gsi_hyb_@H</cyclestr></jobname>
     <join><cyclestr>&LOG_DIR;/gsi_hyb_@Y@m@d@H00.log</cyclestr></join>
 
     <envar>
@@ -623,7 +624,7 @@
 
     <command>&SCRIPTS;/GSI/gsi_diag.ksh</command>
     <cores>&GSI_DIAG_PROC;</cores>
-    <jobname><cyclestr>gsi_diag_@H</cyclestr></jobname>
+    <jobname><cyclestr>&JOBNAME_PRE;_gsi_diag_@H</cyclestr></jobname>
     <join><cyclestr>&LOG_DIR;/gsi_diag_@Y@m@d@H00.log</cyclestr></join>
 
     <envar>
@@ -661,7 +662,7 @@
 
     <command>&SCRIPTS;/smartinit/hrrr_smartinit_bl.ksh</command>
     <cores>&SMARTINIT_PROC;</cores>
-    <jobname><cyclestr>HRRR_smartinit_@H_bl</cyclestr></jobname>
+    <jobname><cyclestr>&JOBNAME_PRE;_smartinit_@H_bl</cyclestr></jobname>
     <join><cyclestr>&LOG_DIR;/smartinit_@Y@m@d@H00_bl.log</cyclestr></join>
 
     <envar>
@@ -711,7 +712,7 @@
 
     <command>&SCRIPTS;/smartinit/hrrr_smartinit_nb.ksh</command>
     <cores>&SMARTINIT_PROC;</cores>
-    <jobname><cyclestr>HRRR_smartinit_@H_nb</cyclestr></jobname>
+    <jobname><cyclestr>&JOBNAME_PRE;_smartinit_@H_nb</cyclestr></jobname>
     <join><cyclestr>&LOG_DIR;/smartinit_@Y@m@d@H00_nb.log</cyclestr></join>
 
     <envar>
@@ -761,7 +762,7 @@
 
     <command>&SCRIPTS;/UPP/unipost.ksh</command>
     <cores>&POST_PROC;</cores>
-    <jobname><cyclestr>HRRR_post_@H_00</cyclestr></jobname>
+    <jobname><cyclestr>&JOBNAME_PRE;_post_@H_00</cyclestr></jobname>
     <join><cyclestr>&LOG_DIR;/post_@Y@m@d@H00_00.log</cyclestr></join>
 
     <envar>
@@ -823,7 +824,7 @@
 
     <command>&SCRIPTS;/NCL/ncl_hrrr.ksh</command>
     <cores>&NCL_MAIN_PROC;</cores>
-    <jobname><cyclestr>HRRR_ncl_@H_00</cyclestr></jobname>
+    <jobname><cyclestr>&JOBNAME_PRE;_ncl_@H_00</cyclestr></jobname>
     <join><cyclestr>&LOG_DIR;/ncl_@Y@m@d@H00_00.log</cyclestr></join>
 
     <envar>
@@ -868,7 +869,7 @@
 
       <command>&SCRIPTS;/NCL/ncl_hrrr_#skewt#.ksh</command>
       <cores>&NCL_PROC;</cores>
-      <jobname><cyclestr>HRRR_ncl_@H_00_#skewt#</cyclestr></jobname>
+      <jobname><cyclestr>&JOBNAME_PRE;_ncl_@H_00_#skewt#</cyclestr></jobname>
       <join><cyclestr>&LOG_DIR;/ncl_@Y@m@d@H00_00_#skewt#.log</cyclestr></join>
 
       <envar>
@@ -915,7 +916,7 @@
 
       <command>&SCRIPTS;/NCL/ncl_hrrr_#htxs#.ksh</command>
       <cores>&NCL_PROC;</cores>
-      <jobname><cyclestr>HRRR_ncl_@H_00_#htxs#</cyclestr></jobname>
+      <jobname><cyclestr>&JOBNAME_PRE;_ncl_@H_00_#htxs#</cyclestr></jobname>
       <join><cyclestr>&LOG_DIR;/ncl_@Y@m@d@H00_00_#htxs#.log</cyclestr></join>
 
       <envar>
@@ -959,7 +960,7 @@
 
     <command>&SCRIPTS;/NCL/ncl_hrrr_zip.ksh</command>
     <cores>&NCL_PROC;</cores>
-    <jobname><cyclestr>HRRR_ncl_@H_zip</cyclestr></jobname>
+    <jobname><cyclestr>&JOBNAME_PRE;_ncl_@H_zip</cyclestr></jobname>
     <join><cyclestr>&LOG_DIR;/ncl_@Y@m@d@H00_zip.log</cyclestr></join>
 
     <envar>
@@ -992,7 +993,7 @@
 
     <command>&SCRIPTS;/NCL/ncl_hrrr_skewt_zip.ksh</command>
     <cores>&NCL_PROC;</cores>
-    <jobname><cyclestr>HRRR_ncl_@H_skewt_zip</cyclestr></jobname>
+    <jobname><cyclestr>&JOBNAME_PRE;_ncl_@H_skewt_zip</cyclestr></jobname>
     <join><cyclestr>&LOG_DIR;/ncl_@Y@m@d@H00_skewt_zip.log</cyclestr></join>
 
     <envar>
@@ -1031,7 +1032,7 @@
 
     <command>&SCRIPTS;/NCL/ncl_hrrr_htxs_zip.ksh</command>
     <cores>&NCL_PROC;</cores>
-    <jobname><cyclestr>HRRR_ncl_@H_htxs_zip</cyclestr></jobname>
+    <jobname><cyclestr>&JOBNAME_PRE;_ncl_@H_htxs_zip</cyclestr></jobname>
     <join><cyclestr>&LOG_DIR;/ncl_@Y@m@d@H00_htxs_zip.log</cyclestr></join>
 
     <envar>
