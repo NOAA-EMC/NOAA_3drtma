@@ -2,12 +2,9 @@
 
 <!DOCTYPE workflow [
 
-<!-- ENTITY ACCOUNT "rtrr" -->
 <!ENTITY ACCOUNT "hfv3gfs">
-<!-- ENTITY ACCOUNT_DA "rtrr" -->
 <!ENTITY ACCOUNT_DA "hfv3gfs">
 
-<!-- ENTITY PARTITION "kjet" -->
 <!ENTITY PARTITION "xjet:vjet:sjet:tjet">
 <!ENTITY PARTITION_DA "kjet">
 <!ENTITY QUEUE "batch">
@@ -15,12 +12,9 @@
 <!ENTITY RES_POST "rtma-kjet">
 
 <!ENTITY SYSTEM_ID "RTMA_3D"> 
-<!-- ENTITY HOMEBASE_DIR "/home/rtrr/RTMA_3D_dev1" -->
-<!ENTITY HOMEBASE_DIR "/home/Gang.Zhao/rtma3d_repo/GSD_dev1_test">
-<!-- ENTITY DATABASE_DIR "/home/rtrr/rtma_3d_dev1_databasedir" -->
-<!ENTITY DATABASE_DIR "/mnt/lfs3/projects/hfv3gfs/Gang.Zhao/gsd_dev1_databasedir">
+<!ENTITY HOMEBASE_DIR "/misc/whome/Gang.Zhao/rtma3d_repo/GSD_dev1_jjob">
+<!ENTITY DATABASE_DIR "/mnt/lfs3/projects/hfv3gfs/Gang.Zhao/gsd_dev1_jjob_databasedir">
 <!ENTITY OBS_DIR "/public/data">
-<!-- ENTITY NCL_VER "6.3.0" -->
 <!ENTITY NCL_VER "6.5.0">
 
 <!ENTITY SCRIPTS "&HOMEBASE_DIR;/bin">
@@ -35,6 +29,16 @@
 <!ENTITY GSI_ROOT "&HOMEBASE_DIR;/exec/GSI">
 <!ENTITY FIX_ROOT "&STATIC_DIR;/GSI">
 
+<!ENTITY HOMErtma3d "&HOMEBASE_DIR;">
+<!ENTITY SCRIPT_DIR "&HOMEBASE_DIR;/scripts">
+<!ENTITY JJOB_DIR   "&HOMEBASE_DIR;/jobs">
+<!ENTITY WRKFLW_DIR "&HOMEBASE_DIR;/workflow">
+
+<!ENTITY MACHINE    "jet">
+<!ENTITY machine    "jet">
+
+<!-- Definition Block of Datasets for Real-Time RTMA3D on Jet -->
+<!--     (Better DO NOT TOUCH this Block)                     -->
 <!ENTITY HRRR_DIR "/home/rtrr/hrrr">
 <!ENTITY SST_DIR "&OBS_DIR;/grids/ncep/sst/0p083deg/grib2">
 
@@ -64,15 +68,19 @@
 <!ENTITY HIGHRES_SST14KM_DIR "&OBS_DIR;/grids/ncep/sst/grib">
 <!ENTITY TCVITALS_DIR "&OBS_DIR;/nhc/tcvitals">
 <!ENTITY STICKNET_DIR "&OBS_DIR;/vortex-se/stesonet">
+<!-- END OF BLOCK -->
 
+<!-- Definition Block of Top Directories for running Real-Time RTMA3D on Jet -->
 <!ENTITY LOG_DIR "&DATABASE_DIR;/log">
 <!ENTITY DATAROOT_ENS "&DATABASE_DIR;/gfsenkf">
 <!ENTITY DATAROOT "&DATABASE_DIR;/run">
 <!ENTITY DATAROOT_BC "&DATABASE_DIR;/run">
 <!ENTITY DATAROOT_PCYC "&DATABASE_DIR;/run">
+<!-- END OF BLOCK -->
 
 <!ENTITY POST_NAME "hrconus">
 
+<!-- Definition Block of RESOURCES used to run Real-Time RTMA3D on Jet -->
 <!ENTITY SMARTINIT_PROC "1">
 <!ENTITY CONVENTIONAL_PROC "1">
 <!ENTITY LIGHTNING_PROC "1">
@@ -117,7 +125,102 @@
 <!-- ENTITY RESERVATION_DA '<native>-l partition=&PARTITION_DA;,flags=ADVRES:&RES_DA; -W umask=022 -m n</native><queue>&QUEUE;</queue><account>&ACCOUNT_DA;</account>' -->
 <!ENTITY RESERVATION_DA '<native>-l partition=&PARTITION_DA; -W umask=022 -m n</native><queue>&QUEUE;</queue><account>&ACCOUNT_DA;</account>'>
 <!ENTITY RESERVATION_SMARTINIT '<native>-l partition=&PARTITION; -W umask=022 -m n</native><queue>&QUEUE;</queue><account>&ACCOUNT;</account>'>
-<!ENTITY RESERVATION_POST '<native>-l partition=&PARTITION;,flags=ADVRES:&RES_POST; -W umask=022 -m n</native><queue>&QUEUE;</queue><account>&ACCOUNT;</account>'>
+<!-- ENTITY RESERVATION_POST '<native>-l partition=&PARTITION;,flags=ADVRES:&RES_POST; -W umask=022 -m n</native><queue>&QUEUE;</queue><account>&ACCOUNT;</account>' -->
+<!ENTITY RESERVATION_POST '<native>-l partition=&PARTITION; -W umask=022 -m n</native><queue>&QUEUE;</queue><account>&ACCOUNT;</account>'>
+
+<!-- END OF BLOCK -->
+
+<!-- Definition Block of COMMON Variables used in all tasks -->
+<!ENTITY ENVARS
+   '<envar>
+      <name>HOMErtma3d</name>
+      <value>&HOMErtma3d;</value>
+    </envar>
+    <envar>
+      <name>MACHINE</name>
+      <value>&MACHINE;</value>
+    </envar>
+    <envar>
+      <name>machine</name>
+      <value>&machine;</value>
+    </envar>'>
+
+<!-- Definition Block of Common System Commands -->
+<!ENTITY SYS_COMMANDS 
+   '
+   <envar>
+        <name>RM</name>
+        <value>/bin/rm</value>
+   </envar>
+   <envar>
+        <name>CP</name>
+        <value>/bin/cp</value>
+   </envar>
+   <envar>
+        <name>MV</name>
+        <value>/bin/mv</value>
+   </envar>
+   <envar>
+        <name>LN</name>
+        <value>/bin/ln</value>
+   </envar>
+   <envar>
+        <name>MKDIR</name>
+        <value>/bin/mkdir</value>
+   </envar>
+   <envar>
+        <name>CAT</name>
+        <value>/bin/cat</value>
+   </envar>
+   <envar>
+        <name>ECHO</name>
+        <value>/bin/echo</value>
+   </envar>
+   <envar>
+        <name>LS</name>
+        <value>/bin/ls</value>
+   </envar>
+   <envar>
+        <name>CUT</name>
+        <value>/bin/cut</value>
+   </envar>
+   <envar>
+        <name>DATE</name>
+        <value>/bin/date</value>
+   </envar>
+   <envar>
+        <name>WC</name>
+        <value>/bin/wc</value>
+   </envar>
+   <envar>
+        <name>SED</name>
+        <value>/bin/sed</value>
+   </envar>
+   <envar>
+        <name>AWK</name>
+        <value>/bin/awk --posix</value>
+   </envar>
+   <envar>
+        <name>TAIL</name>
+        <value>/bin/tail</value>
+   </envar>
+   <envar>
+        <name>CNVGRIB</name>
+        <value>cnvgrib</value>
+   </envar>
+   <envar>
+        <name>MPIRUN</name>
+        <value>mpirun</value>
+   </envar>
+   <envar>
+        <name>CPFS</name>
+        <value>cpfs</value>
+   </envar>
+   <envar>
+        <name>UNZIP</name>
+        <value>/bin/unzip</value>
+   </envar>
+   '>
 
 ]>
 
@@ -127,9 +230,9 @@
     <cyclestr>&LOG_DIR;/workflow_@Y@m@d@H.log</cyclestr>
   </log>
 
-  <cycledef group="00hr">00 00,12 03 04 2019 *</cycledef>
-  <cycledef group="01hr">00 01,13 03 04 2019 *</cycledef>
-  <cycledef group="02-11hr">00 02-11,14-23 03 04 2019 *</cycledef>
+  <cycledef group="00hr">00 00,12 04 04 2019 *</cycledef>
+  <cycledef group="01hr">00 01,13 04 04 2019 *</cycledef>
+  <cycledef group="02-11hr">00 02-11,14-23 04 04 2019 *</cycledef>
 
   <metatask>
     <var name="min">15 30 45 60</var>
@@ -140,8 +243,10 @@
     &LIGHTNING_RESOURCES;
     &WALL_LIMIT_DA;
     &RESERVATION;
+    &SYS_COMMANDS;
+    &ENVARS;
 
-    <command>&SCRIPTS;/GSI/lightning.ksh</command>
+    <command>&JJOB_DIR;/launch.ksh &JJOB_DIR;/JRTMA3D_LIGHTNING</command>
     <cores>&LIGHTNING_PROC;</cores>
     <jobname><cyclestr>HRRR_lightning_@H_#min#</cyclestr></jobname>
     <join><cyclestr>&LOG_DIR;/lightning_gsi_@Y@m@d@H00_#min#.log</cyclestr></join>
@@ -194,8 +299,10 @@
     &RADAR_RESOURCES;
     &WALL_LIMIT_DA;
     &RESERVATION;
+    &SYS_COMMANDS;
+    &ENVARS;
 
-    <command>&SCRIPTS;/GSI/radar_links.ksh</command>
+    <command>&JJOB_DIR;/launch.ksh &JJOB_DIR;/JRTMA3D_RADAR_LINKS</command>
     <cores>&RADARLINKS_PROC;</cores>
     <jobname><cyclestr>HRRR_radarlinks_@H</cyclestr></jobname>
     <join><cyclestr>&LOG_DIR;/radar_links_@Y@m@d@H00.log</cyclestr></join>
@@ -226,8 +333,10 @@
       &RADAR_RESOURCES;
       &WALL_LIMIT_DA;
       &RESERVATION;
+      &SYS_COMMANDS;
+      &ENVARS;
 
-      <command>&SCRIPTS;/GSI/radar.ksh</command>
+      <command>&JJOB_DIR;/launch.ksh &JJOB_DIR;/JRTMA3D_RADAR</command>
       <cores>&RADAR_PROC;</cores>
       <jobname><cyclestr>HRRR_radar_@H_#subh#</cyclestr></jobname>
       <join><cyclestr>&LOG_DIR;/radar_gsi_@Y@m@d@H00_#subh#.log</cyclestr></join>
@@ -280,8 +389,10 @@
     &SATELLITE_RESOURCES;
     &WALL_LIMIT_DA;
     &RESERVATION;
+    &SYS_COMMANDS;
+    &ENVARS;
 
-    <command>&SCRIPTS;/GSI/satellite_bufr.ksh</command>
+    <command>&JJOB_DIR;/launch.ksh &JJOB_DIR;/JRTMA3D_SATELLITE_BUFR</command>
     <cores>&SATELLITE_PROC;</cores>
     <jobname><cyclestr>HRRR_satellite_bufr_@H</cyclestr></jobname>
     <join><cyclestr>&LOG_DIR;/satellite_gsi_bufr_@Y@m@d@H00.log</cyclestr></join>
@@ -329,8 +440,10 @@
     &CONVENTIONAL_RESOURCES;
     &WALL_LIMIT_DA;
     &RESERVATION;
+    &SYS_COMMANDS;
+    &ENVARS;
 
-    <command>&SCRIPTS;/GSI/conventional.ksh</command>
+    <command>&JJOB_DIR;/launch.ksh &JJOB_DIR;/JRTMA3D_CONVENTIONAL</command>
     <cores>&CONVENTIONAL_PROC;</cores>
     <jobname><cyclestr>HRRR_conventional_@H</cyclestr></jobname>
     <join><cyclestr>&LOG_DIR;/conventional_gsi_@Y@m@d@H00.log</cyclestr></join>
@@ -421,8 +534,10 @@
     &CONVENTIONAL_RESOURCES;
     &WALL_LIMIT_DA;
     &RESERVATION;
+    &SYS_COMMANDS;
+    &ENVARS;
 
-    <command>&SCRIPTS;/GSI/conventional.ksh</command>
+    <command>&JJOB_DIR;/launch.ksh &JJOB_DIR;/JRTMA3D_CONVENTIONAL</command>
     <cores>&CONVENTIONAL_PROC;</cores>
     <jobname><cyclestr>HRRR_conventional_early_@H</cyclestr></jobname>
     <join><cyclestr>&LOG_DIR;/conventional_gsi_early_@Y@m@d@H00.log</cyclestr></join>
@@ -513,8 +628,10 @@
     &GSI_HYB_RESOURCES;
     &WALL_LIMIT_DA;
     &RESERVATION_DA;
+    &SYS_COMMANDS;
+    &ENVARS;
 
-    <command>&SCRIPTS;/GSI/gsi_hyb.ksh</command>
+    <command>&JJOB_DIR;/launch.ksh &JJOB_DIR;/JRTMA3D_GSI_HYB</command>
     <cores>&GSI_HYB_PROC;</cores>
     <jobname><cyclestr>HRRR_gsi_hyb_@H</cyclestr></jobname>
     <join><cyclestr>&LOG_DIR;/gsi_hyb_@Y@m@d@H00.log</cyclestr></join>
@@ -624,8 +741,10 @@
     &GSI_DIAG_RESOURCES;
     &WALL_LIMIT_DA;
     &RESERVATION;
+    &SYS_COMMANDS;
+    &ENVARS;
 
-    <command>&SCRIPTS;/GSI/gsi_diag.ksh</command>
+    <command>&JJOB_DIR;/launch.ksh &JJOB_DIR;/JRTMA3D_GSI_DIAG</command>
     <cores>&GSI_DIAG_PROC;</cores>
     <jobname><cyclestr>gsi_diag_@H</cyclestr></jobname>
     <join><cyclestr>&LOG_DIR;/gsi_diag_@Y@m@d@H00.log</cyclestr></join>
@@ -657,113 +776,15 @@
 
   </task>
 
-  <task name="smartinit_bl" cycledefs="02-11hr,02hr,03hr,04hr,05hr,06hr,07hr,08hr,09hr,10hr,11hr,00hr" maxtries="3">
-
-    &SMARTINIT_RESOURCES;
-    &WALL_LIMIT_PP;
-    &RESERVATION_SMARTINIT;
-
-    <command>&SCRIPTS;/smartinit/hrrr_smartinit_bl.ksh</command>
-    <cores>&SMARTINIT_PROC;</cores>
-    <jobname><cyclestr>HRRR_smartinit_@H_bl</cyclestr></jobname>
-    <join><cyclestr>&LOG_DIR;/smartinit_@Y@m@d@H00_bl.log</cyclestr></join>
-
-    <envar>
-      <name>START_TIME</name>
-      <value><cyclestr>@Y@m@d@H</cyclestr></value>
-    </envar>
-    <envar>
-      <name>FCST_TIME</name>
-      <value>00</value>
-    </envar>
-    <envar>
-      <name>EXE_ROOT</name>
-      <value>&SMARTINIT_EXEC;</value>
-    </envar>
-    <envar>
-      <name>DATAROOT</name>
-      <value>&DATAROOT;</value>
-    </envar>
-    <envar>
-      <name>DATAHOME</name>
-      <value><cyclestr>&DATAROOT;/@Y@m@d@H/smtiprd</cyclestr></value>
-    </envar>
-    <envar>
-      <name>DATAPOSTHOME</name>
-      <value><cyclestr>&DATAROOT;/@Y@m@d@H/postprd</cyclestr></value>
-    </envar>
-    <envar>
-      <name>MODEL</name>
-      <value>HRRR</value>
-    </envar>
-    <envar>
-      <name>STATIC_DIR</name>
-      <value>&STATIC_DIR;/smartinit</value>
-    </envar>
-
-    <dependency>
-      <datadep age="00:02:00">&DATAROOT;/<cyclestr>@Y@m@d@H</cyclestr>/postprd<cyclestr>/wrfnat_hrconus_00.grib2</cyclestr></datadep>
-    </dependency>
-
-   </task>
-
-  <task name="smartinit_nb" cycledefs="02-11hr,02hr,03hr,04hr,05hr,06hr,07hr,08hr,09hr,10hr,11hr,00hr" maxtries="3">
-
-    &SMARTINIT_RESOURCES;
-    &WALL_LIMIT_PP;
-    &RESERVATION_SMARTINIT;
-
-    <command>&SCRIPTS;/smartinit/hrrr_smartinit_nb.ksh</command>
-    <cores>&SMARTINIT_PROC;</cores>
-    <jobname><cyclestr>HRRR_smartinit_@H_nb</cyclestr></jobname>
-    <join><cyclestr>&LOG_DIR;/smartinit_@Y@m@d@H00_nb.log</cyclestr></join>
-
-    <envar>
-      <name>START_TIME</name>
-      <value><cyclestr>@Y@m@d@H</cyclestr></value>
-    </envar>
-    <envar>
-      <name>FCST_TIME</name>
-      <value>00</value>
-    </envar>
-    <envar>
-      <name>EXE_ROOT</name>
-      <value>&SMARTINIT_EXEC;</value>
-    </envar>
-    <envar>
-      <name>DATAROOT</name>
-      <value>&DATAROOT;</value>
-    </envar>
-    <envar>
-      <name>DATAHOME</name>
-      <value><cyclestr>&DATAROOT;/@Y@m@d@H/smtiprd</cyclestr></value>
-    </envar>
-    <envar>
-      <name>DATAPOSTHOME</name>
-      <value><cyclestr>&DATAROOT;/@Y@m@d@H/postprd</cyclestr></value>
-    </envar>
-    <envar>
-      <name>MODEL</name>
-      <value>HRRR</value>
-    </envar>
-    <envar>
-      <name>STATIC_DIR</name>
-      <value>&STATIC_DIR;/smartinit</value>
-    </envar>
-
-    <dependency>
-      <datadep age="00:02:00">&DATAROOT;/<cyclestr>@Y@m@d@H</cyclestr>/postprd<cyclestr>/wrfnat_hrconus_00.grib2</cyclestr></datadep>
-    </dependency>
-
-   </task>
-
   <task name="post_00" cycledefs="02-11hr,00hr,01hr" maxtries="3">
 
     &POST_RESOURCES;
     &WALL_LIMIT_PP;
     &RESERVATION;
+    &SYS_COMMANDS;
+    &ENVARS;
 
-    <command>&SCRIPTS;/UPP/unipost.ksh</command>
+    <command>&JJOB_DIR;/launch.ksh &JJOB_DIR;/JRTMA3D_UNIPOST</command>
     <cores>&POST_PROC;</cores>
     <jobname><cyclestr>HRRR_post_@H_00</cyclestr></jobname>
     <join><cyclestr>&LOG_DIR;/post_@Y@m@d@H00_00.log</cyclestr></join>
@@ -819,247 +840,6 @@
 
   </task>
 
-  <task name="ncl_00" cycledefs="02-11hr,00hr,01hr" maxtries="3">
-
-    &NCL_RESOURCES;
-    &WALL_LIMIT_PP;
-    &RESERVATION;
-
-    <command>&SCRIPTS;/NCL/ncl_hrrr.ksh</command>
-    <cores>&NCL_MAIN_PROC;</cores>
-    <jobname><cyclestr>HRRR_ncl_@H_00</cyclestr></jobname>
-    <join><cyclestr>&LOG_DIR;/ncl_@Y@m@d@H00_00.log</cyclestr></join>
-
-    <envar>
-      <name>START_TIME</name>
-      <value><cyclestr>@Y@m@d@H</cyclestr></value>
-    </envar>
-    <envar>
-      <name>FCST_TIME</name>
-      <value>00</value>
-    </envar>
-    <envar>
-      <name>NCL_VER</name>
-      <value>&NCL_VER;</value>
-    </envar>
-    <envar>
-      <name>DATAROOT</name>
-      <value>&DATAROOT;</value>
-    </envar>
-    <envar>
-      <name>DATAHOME</name>
-      <value><cyclestr>&DATAROOT;/@Y@m@d@H</cyclestr></value>
-    </envar>
-    <envar>
-      <name>MODEL</name>
-      <value>RTMA_3D</value>
-    </envar>
-
-    <dependency>
-      <taskdep task="post_00"/>
-    </dependency>
-
-  </task>
-
-  <metatask>
-    <var name="skewt">skewt1 skewt2 skewt3 skewt4 skewt5</var>
-
-    <task name="ncl_00_#skewt#" cycledefs="02-11hr,00hr,01hr" maxtries="3">
-
-      &NCL_SKEWT_RESOURCES;
-      &WALL_LIMIT_PP;
-      &RESERVATION;
-
-      <command>&SCRIPTS;/NCL/ncl_hrrr_#skewt#.ksh</command>
-      <cores>&NCL_PROC;</cores>
-      <jobname><cyclestr>HRRR_ncl_@H_00_#skewt#</cyclestr></jobname>
-      <join><cyclestr>&LOG_DIR;/ncl_@Y@m@d@H00_00_#skewt#.log</cyclestr></join>
-
-      <envar>
-        <name>START_TIME</name>
-        <value><cyclestr>@Y@m@d@H</cyclestr></value>
-      </envar>
-      <envar>
-        <name>FCST_TIME</name>
-        <value>00</value>
-      </envar>
-      <envar>
-        <name>NCL_VER</name>
-        <value>&NCL_VER;</value>
-      </envar>
-      <envar>
-        <name>DATAROOT</name>
-        <value>&DATAROOT;</value>
-      </envar>
-      <envar>
-        <name>DATAHOME</name>
-        <value><cyclestr>&DATAROOT;/@Y@m@d@H</cyclestr></value>
-      </envar>
-      <envar>
-        <name>MODEL</name>
-        <value>RTMA_3D</value>
-      </envar>
-
-      <dependency>
-        <taskdep task="post_00"/>
-      </dependency>
-
-    </task>
-
-  </metatask>
-
-  <metatask>
-    <var name="htxs">htxs1</var>
-
-    <task name="ncl_00_#htxs#" cycledefs="02-11hr,00hr,01hr" maxtries="3">
-
-      &NCL_HTXS_RESOURCES;
-      &WALL_LIMIT_PP;
-      &RESERVATION;
-
-      <command>&SCRIPTS;/NCL/ncl_hrrr_#htxs#.ksh</command>
-      <cores>&NCL_PROC;</cores>
-      <jobname><cyclestr>HRRR_ncl_@H_00_#htxs#</cyclestr></jobname>
-      <join><cyclestr>&LOG_DIR;/ncl_@Y@m@d@H00_00_#htxs#.log</cyclestr></join>
-
-      <envar>
-        <name>START_TIME</name>
-        <value><cyclestr>@Y@m@d@H</cyclestr></value>
-      </envar>
-      <envar>
-        <name>FCST_TIME</name>
-        <value>00</value>
-      </envar>
-      <envar>
-        <name>NCL_VER</name>
-        <value>&NCL_VER;</value>
-      </envar>
-      <envar>
-        <name>DATAROOT</name>
-        <value>&DATAROOT;</value>
-      </envar>
-      <envar>
-        <name>DATAHOME</name>
-        <value><cyclestr>&DATAROOT;/@Y@m@d@H</cyclestr></value>
-      </envar>
-      <envar>
-        <name>MODEL</name>
-        <value>RTMA_3D</value>
-      </envar>
-
-      <dependency>
-        <taskdep task="post_00"/>
-      </dependency>
-
-    </task>
-
-  </metatask>
-
-  <task name="ncl_zip" cycledefs="02-11hr,00hr,01hr" maxtries="3">
-
-    &NCL_RESOURCES;
-    &WALL_LIMIT_PP;
-    &RESERVATION;
-
-    <command>&SCRIPTS;/NCL/ncl_hrrr_zip.ksh</command>
-    <cores>&NCL_PROC;</cores>
-    <jobname><cyclestr>HRRR_ncl_@H_zip</cyclestr></jobname>
-    <join><cyclestr>&LOG_DIR;/ncl_@Y@m@d@H00_zip.log</cyclestr></join>
-
-    <envar>
-      <name>START_TIME</name>
-      <value><cyclestr>@Y@m@d@H</cyclestr></value>
-    </envar>
-    <envar>
-      <name>DATAROOT</name>
-      <value>&DATAROOT;</value>
-    </envar>
-    <envar>
-      <name>DATAHOME</name>
-      <value><cyclestr>&DATAROOT;/@Y@m@d@H</cyclestr></value>
-    </envar>
-
-    <dependency>
-      <or>
-        <taskdep task="ncl_00"/>
-        <timedep><cyclestr offset="03:00:00">@Y@m@d@H@M00</cyclestr></timedep>
-      </or>
-    </dependency>
-    
-  </task>
-
-  <task name="ncl_skewt_zip" cycledefs="02-11hr,00hr,01hr" maxtries="3">
-
-    &NCL_RESOURCES;
-    &WALL_LIMIT_PP;
-    &RESERVATION;
-
-    <command>&SCRIPTS;/NCL/ncl_hrrr_skewt_zip.ksh</command>
-    <cores>&NCL_PROC;</cores>
-    <jobname><cyclestr>HRRR_ncl_@H_skewt_zip</cyclestr></jobname>
-    <join><cyclestr>&LOG_DIR;/ncl_@Y@m@d@H00_skewt_zip.log</cyclestr></join>
-
-    <envar>
-      <name>START_TIME</name>
-      <value><cyclestr>@Y@m@d@H</cyclestr></value>
-    </envar>
-    <envar>
-      <name>DATAROOT</name>
-      <value>&DATAROOT;</value>
-    </envar>
-    <envar>
-      <name>DATAHOME</name>
-      <value><cyclestr>&DATAROOT;/@Y@m@d@H</cyclestr></value>
-    </envar>
-
-    <dependency>
-      <or>
-        <and>
-          <taskdep task="ncl_00_skewt1"/>
-          <taskdep task="ncl_00_skewt2"/>
-          <taskdep task="ncl_00_skewt3"/>
-          <taskdep task="ncl_00_skewt4"/>
-          <taskdep task="ncl_00_skewt5"/>
-        </and>
-        <timedep><cyclestr offset="03:00:00">@Y@m@d@H@M00</cyclestr></timedep>
-      </or>
-    </dependency>
-    
-  </task>
-
-  <task name="ncl_htxs_zip" cycledefs="02-11hr,00hr,01hr" maxtries="3">
-
-    &NCL_RESOURCES;
-    &WALL_LIMIT_PP;
-    &RESERVATION;
-
-    <command>&SCRIPTS;/NCL/ncl_hrrr_htxs_zip.ksh</command>
-    <cores>&NCL_PROC;</cores>
-    <jobname><cyclestr>HRRR_ncl_@H_htxs_zip</cyclestr></jobname>
-    <join><cyclestr>&LOG_DIR;/ncl_@Y@m@d@H00_htxs_zip.log</cyclestr></join>
-
-    <envar>
-      <name>START_TIME</name>
-      <value><cyclestr>@Y@m@d@H</cyclestr></value>
-    </envar>
-    <envar>
-      <name>DATAROOT</name>
-      <value>&DATAROOT;</value>
-    </envar>
-    <envar>
-      <name>DATAHOME</name>
-      <value><cyclestr>&DATAROOT;/@Y@m@d@H</cyclestr></value>
-    </envar>
-
-    <dependency>
-      <or>
-        <and>
-          <taskdep task="ncl_00_htxs1"/>
-        </and>
-        <timedep><cyclestr offset="02:55:00">@Y@m@d@H@M00</cyclestr></timedep>
-      </or>
-    </dependency>
-    
-  </task>
 
 </workflow>
+
