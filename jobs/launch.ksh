@@ -22,6 +22,12 @@ if [ "${machine}" = "jet" ] ; then
   module load hdf5/1.8.9
   module load netcdf/4.2.1.1
   module load pnetcdf/1.6.1
+
+  module use -a /mnt/lfs3/projects/hfv3gfs/nwprod/lib/modulefiles  # Jet
+  module use -a /mnt/lfs3/projects/hfv3gfs/emc.nemspara/soft/modulefiles       # Jet
+  module use -a /contrib/modulefiles	# if module load contrib, then do not need to do "module use /contrib/modulefiles "
+  module load prod_util                 # 1.0.18 (D)
+
   export MPIRUN=mpirun
 # loading modules used when building the code
   case "$COMMAND" in
