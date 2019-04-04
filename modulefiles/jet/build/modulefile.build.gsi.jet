@@ -11,7 +11,7 @@
 #module-whatis " GDAS_ENKF whatis description"
 #
 #
-module load newdefaults
+#module load newdefaults
 module load intel/15.0.3.187          # compiler: (Used in Ming Hu's .tcshrc)
                                       #            jet  : 14.0.3 also available
                                       #            theia: 14.0.2

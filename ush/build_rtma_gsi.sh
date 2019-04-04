@@ -156,8 +156,8 @@ fi
 # modules_dir=${SORCDIR_GSI}/modulefiles
 # modules_fname=modulefile.ProdGSI.$target
 modules_dir=${MODULEFILES_DIR}/${target}/build
-modules_fname=modulefile.build.gsi.${target}
-# modules_fname=modulefile.build.gsi_NoPreInstalledLibs.${target}
+#modules_fname=modulefile.build.gsi.${target}
+modules_fname=modulefile.build.gsi.No_PreInstalledLibs.${target}
 
 if [ $target = wcoss -o $target = cray ]; then
     module purge
