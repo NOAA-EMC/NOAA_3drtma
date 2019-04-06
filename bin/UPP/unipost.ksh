@@ -34,15 +34,7 @@
 
 np=`cat $PBS_NODEFILE | wc -l`
 
-# Load modules
-module purge
-module load newdefaults
-module load intel/18.0.5.274
-module load impi/2018.4.274
-module load szip
-module load hdf5/1.8.9
-module load netcdf/4.2.1.1
-module load nco
+source /home/rtrr/PARM_EXEC/modulefiles/modulefile.jet.GSI_UPP_WRF
 
 # Make sure we are using GMT time zone for time computations
 export TZ="GMT"

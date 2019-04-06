@@ -83,11 +83,11 @@ CONVERT=`which convert`
 MONTAGE=`which montage`
 PATH=${NCARG_ROOT}/bin:${PATH}
 
-typeset -RZ2 FCST_TIME
-typeset -RZ2 FCST_TIME_AHEAD1
-typeset -RZ2 FCST_TIME_AHEAD2
-typeset -RZ2 FCST_TIME_BACK1
-typeset -RZ2 FCST_TIME_BACK3
+# typeset -RZ2 FCST_TIME
+# typeset -RZ2 FCST_TIME_AHEAD1
+# typeset -RZ2 FCST_TIME_AHEAD2
+# typeset -RZ2 FCST_TIME_BACK1
+# typeset -RZ2 FCST_TIME_BACK3
 
 ulimit -s 512000
 
