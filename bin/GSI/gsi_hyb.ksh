@@ -282,7 +282,7 @@ else
 fi
 
 if [ -r "${DATAOBSHOME}/LightningInGSI.bufr" ]; then
-  ${LN} -s ${DATAOBSHOME}/LightningInGSI.bufr ./lghtInGSI
+  ${LN} -s ${DATAOBSHOME}/60/LightningInGSI.bufr ./lghtInGSI
 else
   ${ECHO} "Warning: ${DATAOBSHOME}/LightningInGSI.bufr does not exist!"
 fi
