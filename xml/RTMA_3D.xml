@@ -125,8 +125,12 @@
   <cycledef group="02-11hr">00 02-11,14-23 * * 2018-2020 *</cycledef>
 
   <metatask>
+<!-- only need 60 for hourly running
     <var name="min">15 30 45 60</var>
     <var name="off">00:45:00 00:30:00 00:15:00 00:00:00</var>
+-->
+    <var name="min">60</var>
+    <var name="off">00:00:00</var>
 
   <task name="lightning_gsi_#min#" cycledefs="02-11hr,00hr,01hr" maxtries="3">
 
@@ -212,6 +216,60 @@
 
   </task>
 
+  <task name="radar_gsi" cycledefs="02-11hr,00hr,01hr" maxtries="3">
+
+    &RADAR_RESOURCES;
+    &WALL_LIMIT_DA;
+    &RESERVATION_POST;
+
+    <command>&SCRIPTS;/GSI/radar.ksh</command>
+    <cores>&RADAR_PROC;</cores>
+    <jobname><cyclestr>&JOBNAME_PRE;_radar_@H</cyclestr></jobname>
+    <join><cyclestr>&LOG_DIR;/radar_gsi_@Y@m@d@H00.log</cyclestr></join>
+
+    <envar>
+      <name>START_TIME</name>
+      <value><cyclestr>@Y@m@d@H</cyclestr></value>
+    </envar>
+    <envar>
+      <name>SUBH_TIME</name>
+      <value>00</value>
+    </envar>      
+    <envar>
+      <name>DATAROOT</name>
+      <value>&DATAROOT;</value>
+    </envar>
+    <envar>
+      <name>DATAHOME</name>
+      <value><cyclestr>&DATAROOT;/@Y@m@d@H/obsprd</cyclestr></value>
+    </envar>
+    <envar>
+      <name>GSI_ROOT</name>
+      <value>&GSI_ROOT;</value>
+    </envar>
+    <envar>
+      <name>FIX_ROOT</name>
+      <value>&FIX_ROOT;</value>
+    </envar>
+    <envar>
+      <name>STATIC_DIR</name>
+      <value>&STATIC_DIR;/WPS</value>
+    </envar>
+    <envar>
+      <name>NSSL</name>
+      <value>&RADAR_DIR;</value>
+    </envar>
+
+    <dependency>
+      <or>
+        <datadep><cyclestr>&DATAROOT;/@Y@m@d@H/obsprd/filelist_mrms</cyclestr></datadep>
+        <timedep><cyclestr offset="&START_TIME_RADAR;">@Y@m@d@H@M00</cyclestr></timedep>
+      </or>
+    </dependency>
+
+  </task>
+
+<!-- don't need subhour radar_gsi for hourly run
   <metatask>
     <var name="subh">15 30 45 60</var>
     <task name="radar_gsi_#subh#" cycledefs="02-11hr,00hr,01hr" maxtries="3">
@@ -267,6 +325,7 @@
 
     </task>
   </metatask>
+-->
 
   <task name="satellite_gsi_bufr" cycledefs="02-11hr,00hr,01hr" maxtries="3">
 
