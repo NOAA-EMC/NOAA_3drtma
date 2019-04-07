@@ -286,10 +286,10 @@ else
   ${ECHO} "Warning: ${DATAOBSHOME}/NSSLRefInGSI.bufr does not exist!"
 fi
 
-if [ -r "${DATAOBSHOME}/LightningInGSI.bufr" ]; then
+if [ -r "${DATAOBSHOME}/60/LightningInGSI.bufr" ]; then
   ${LN} -s ${DATAOBSHOME}/60/LightningInGSI.bufr ./lghtInGSI
 else
-  ${ECHO} "Warning: ${DATAOBSHOME}/LightningInGSI.bufr does not exist!"
+  ${ECHO} "Warning: ${DATAOBSHOME}/60/LightningInGSI.bufr does not exist!"
 fi
 
 if [ -r "${DATAOBSHOME}/NASALaRCCloudInGSI.bufr" ]; then
