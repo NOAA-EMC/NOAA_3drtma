@@ -10,26 +10,14 @@ COMMAND=$1
 #############################################################
 # load modulefile and set up the environment for job runnning
 #############################################################
-# MODULEFILES=${MODULEFILES:-${HOMErtma3d}/modulefiles}
+  MODULEFILES=${MODULEFILES:-${HOMErtma3d}/modulefiles}
 
 if [ "${machine}" = "jet" ] ; then
-  . /etc/profile
-  . /etc/profile.d/modules.sh >/dev/null # Module Support
-  module purge
-  module load intel/18.0.5.274
-  module load impi/2018.4.274
-  module load szip
-  module load hdf5/1.8.9
-  module load netcdf/4.2.1.1
-  module load pnetcdf/1.6.1
 
-  module use -a /mnt/lfs3/projects/hfv3gfs/nwprod/lib/modulefiles  # Jet
-  module use -a /mnt/lfs3/projects/hfv3gfs/emc.nemspara/soft/modulefiles       # Jet
-  module use -a /contrib/modulefiles	# if module load contrib, then do not need to do "module use /contrib/modulefiles "
-  module load prod_util                 # 1.0.18 (D)
+# loading modules in general module file
+  . ${MODULEFILES}/${machine}/run/modulefile.rtma3d_rt.run.${machine}
 
-  export MPIRUN=mpirun
-# loading modules used when building the code
+# Specific modules and configurations used in individual task 
   case "$COMMAND" in
     *LIGHTNING*|*SATELLITE*|*GSI_DIAG*)
       export TAIL=/usr/bin/tail
@@ -37,22 +25,28 @@ if [ "${machine}" = "jet" ] ; then
       ;;
     *GSI_HYB*)
       export TAIL=/usr/bin/tail
-      export CNVGRIB=/apps/cnvgrib/1.2.3/bin/cnvgrib
+      module load cnvgrib
+#     export CNVGRIB=/apps/cnvgrib/1.2.3/bin/cnvgrib     # not exist
+#     export CNVGRIB=/apps/cnvgrib/1.4.0/bin/cnvgrib
+      export CNVGRIB=${CNVGRIB:-"cnvgrib"}
       export MPIRUN=mpirun
       ;;
     *POST*)
-#     module load newdefaults
+#     module load newdefaults                            # not exist
       module load nco
       module load cnvgrib
       module load wgrib
-      module load wgrib2
+      module load wgrib2/2.0.8
       module unload pnetcdf/1.6.1
       export BC=/usr/bin/bc
+      export CNVGRIB=${CNVGRIB:-"cnvgrib"}
       export MPIRUN=mpirun
-      export WGRIB2=${EXE_ROOT}/wgrib2_new
+#     export WGRIB2=${EXE_ROOT}/wgrib2_new               # Not exist
+      export WGRIB2="/home/rtrr/HRRR/exec/UPP/wgrib2"    # 2.0.7 (used in GSD rap/hrrr)
+      export WGRIB2=${WGRIB2:-"wgrib"}
       ;;
     *)
-      export MPIRUN=mpirun
+      export MPIRUN=${MPIRUN:-"mpirun"}
       ;;
   esac
   module list

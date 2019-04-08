@@ -1,0 +1,40 @@
+#=========================================================#
+#                                                         #
+#     Loading modules and defining necessary env          #
+#        for running real-time RTMA3DD on Jet             #
+#                                                         #
+#=========================================================#
+
+#
+#--- modules
+#
+  . /etc/profile
+  . /etc/profile.d/modules.sh >/dev/null 2>&1 # Module Support
+  module purge
+  module load intel/18.0.5.274
+  module load impi/2018.4.274
+  module load szip
+  module load hdf5/1.8.9
+  module load netcdf/4.2.1.1
+  module load pnetcdf/1.6.1
+
+# If need to use pre-installed NCEP libs
+# module use -a /mnt/lfs3/projects/hfv3gfs/nwprod/lib/modulefiles
+
+  module use -a /mnt/lfs3/projects/hfv3gfs/emc.nemspara/soft/modulefiles 
+  module load prod_util                 # 1.0.18 (D)
+
+# if loading contrib, then do not need to do "module use /contrib/modulefiles "
+  module use -a /contrib/modulefiles
+# module load contrib
+
+#
+#--- ENV
+#
+# module load cnvgrib
+# module load wgrib
+# module load wgrib2/2.0.8
+# export CNVGRIB=${CNVGRIB:-"cnvgrib"}
+# export WGRIB2="/home/rtrr/HRRR/exec/UPP/wgrib2"            # 2.0.7 (GSD RAP/HRRR)
+# export WGRIB2=${WGRIB2:-"wgrib2"}
+# export MPIRUN=${MPIRUN:-"mpirun"}

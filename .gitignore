@@ -17,3 +17,8 @@ logs/
 # exceptional pattern is led by sign "!"
 hrrr_dir
 rtma_dir
+
+# ignoring working xml and shell scripts under workflow/
+workflow/*.xml
+workflow/*.sh
+!workflow/prep_*.sh

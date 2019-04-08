@@ -151,6 +151,12 @@ export exefile_name_lightning_bufr="rtma3d_process_lightning_bufr"
 ln -sf ${EXECrtrr_hrrr}/GSI/process_Lightning_bufr.exe ${EXEC_DIR}/${exefile_name_lightning_bufr}
 export exefile_name_cloud="rtma3d_process_NASALaRC_cloud"
 ln -sf ${EXECrtrr_hrrr}/GSI/process_NASALaRC_cloud.exe ${EXEC_DIR}/${exefile_name_cloud}
+export exefile_name_diagconv="rtma3d_read_diag_conv"
+ln -sf ${EXECrtrr_hrrr}/GSI/read_diag_conv.exe ${EXEC_DIR}/${exefile_name_diagconv}
+export exefile_name_diagrad="rtma3d_read_diag_rad"
+ln -sf ${EXECrtrr_hrrr}/GSI/read_diag_rad.exe ${EXEC_DIR}/${exefile_name_diagrad}
+export exefile_name_countobs="rtma3d_count_obs"
+ln -sf ${EXECrtrr_hrrr}/GSI/count_obs.exe ${EXEC_DIR}/${exefile_name_countobs}
 
 # UPP
 export exefile_name_post="rtma3d_ncep_post"
@@ -200,6 +206,10 @@ echo
 #          under fix/ and parm/.
 #
 ###########################################################
+
+# User also may use the static data under this 3DRTMA system home static/ (GSI/, UPP/, etc.)
+# then use $STATIC_mine to define the follwing FIXgsi_udef, Fixcrtm_udef, etc.
+  STATIC_mine=${NWROOT}/static
 
   if [ $MACHINE = jet ] ; then
 
@@ -1287,7 +1297,15 @@ module purge
 module load intel
 module load rocoto
 
-rocotostat -v 10 -w ${NWROOT}/workflow/${RUN}_${expname}.xml -d ${NWROOT}/workflow/${DB_FNAME}
+subhr="00"
+timewindow=\$1
+timewindow=\${timewindow:-"6"}
+date1=\`date +%Y%m%d%H -d "now"\`
+date1="\${date1}\${subhr}"
+date0=\`date +%Y%m%d%H -d "\${timewindow} hour ago"\`
+date0="\${date0}\${subhr}"
+
+rocotostat -v 10 -w ${NWROOT}/workflow/${RUN}_${expname}.xml -d ${NWROOT}/workflow/${DB_FNAME} -c \${date0}:\${date1}
 EOF
 fi
 
