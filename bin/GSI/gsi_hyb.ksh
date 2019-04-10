@@ -2,13 +2,7 @@
 
 np=`cat $PBS_NODEFILE | wc -l`
 
-module purge
-module load szip/2.1
-module load intel/18.0.5.274
-module load impi/2018.4.274
-module load hdf5/1.8.9
-module load netcdf/4.2.1.1
-module load pnetcdf/1.6.1
+source /home/rtrr/PARM_EXEC/modulefiles/modulefile.jet.GSI_UPP_WRF
 
 # Set up paths to unix commands
 RM=/bin/rm
@@ -287,10 +281,10 @@ else
   ${ECHO} "Warning: ${DATAOBSHOME}/NSSLRefInGSI.bufr does not exist!"
 fi
 
-if [ -r "${DATAOBSHOME}/LightningInGSI.bufr" ]; then
-  ${LN} -s ${DATAOBSHOME}/LightningInGSI.bufr ./lghtInGSI
+if [ -r "${DATAOBSHOME}/60/LightningInGSI.bufr" ]; then
+  ${LN} -s ${DATAOBSHOME}/60/LightningInGSI.bufr ./lghtInGSI
 else
-  ${ECHO} "Warning: ${DATAOBSHOME}/LightningInGSI.bufr does not exist!"
+  ${ECHO} "Warning: ${DATAOBSHOME}/60/LightningInGSI.bufr does not exist!"
 fi
 
 if [ -r "${DATAOBSHOME}/NASALaRCCloudInGSI.bufr" ]; then
