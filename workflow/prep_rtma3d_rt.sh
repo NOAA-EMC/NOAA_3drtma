@@ -73,13 +73,13 @@ set -x
 export startCDATE=201902131200              #yyyymmddhhmm - Starting day of retro run 
 export endCDATE=201902131200                #yyyymmddhhmm - Ending day of RTMA3D run (needed for both RETRO and REAL TIME). 
 
-export ExpDateWindows="04 04 2019 *"        # dd mm yyyy weekday (crontab-like date format)
+export ExpDateWindows="10 04 2019 *"        # dd mm yyyy weekday (crontab-like date format)
 
 export NET=rtma3d                           #selection of rtma3d (or rtma,urma)
-export RUN=rtma3d_rt_test                   #selection of rtma3d (or rtma,urma)
+export RUN=rtma3d_rt                        #selection of rtma3d (or rtma,urma)
 export envir=""                             #environment (test, prod, dev, etc.)
 export run_envir=""                         #
-export expname="rt_test"                    # experiment name
+export expname="test"                       # experiment name
 
 export NWROOT=${TOP_RTMA}                   #root directory for RTMA/URMA j-job scripts, scripts, parm files, etc. 
 
@@ -1230,6 +1230,8 @@ cat >> ${NWROOT}/workflow/${XML_FNAME} <<EOF
     &SMARTINIT_RESOURCES;
     &WALL_LIMIT_PP;
     &RESERVATION_SMARTINIT;
+    &SYS_COMMANDS;
+    &ENVARS;
 
     <command>&JJOB_DIR;/launch.ksh &JJOB_DIR;/JRTMA3D_SMARTINIT_BL</command>
     <cores>&SMARTINIT_PROC;</cores>
@@ -1280,6 +1282,8 @@ cat >> ${NWROOT}/workflow/${XML_FNAME} <<EOF
     &SMARTINIT_RESOURCES;
     &WALL_LIMIT_PP;
     &RESERVATION_SMARTINIT;
+    &SYS_COMMANDS;
+    &ENVARS;
 
     <command>&JJOB_DIR;/launch.ksh &JJOB_DIR;/JRTMA3D_SMARTINIT_NB</command>
     <cores>&SMARTINIT_PROC;</cores>
