@@ -16,8 +16,8 @@ set -x
 ######################
 # Execute the script.
 ######################
-# ${exSCR_RADAR:-$HOMErtma3d/scripts/${RUN}/ex${RUN}_radar.ksh}
-${HOMErtma3d}/scripts/exrtma3d_radar.ksh
+# ${exSCR_SMARTINIT_NB:-$HOMErtma3d/scripts/${RUN}/ex${RUN}_smartinit_nb.ksh}
+${HOMErtma3d}/scripts/exrtma3d_smartinit_nb.ksh
 export err=$?; err_chk
 
 msg="$0 of $job completed normally"

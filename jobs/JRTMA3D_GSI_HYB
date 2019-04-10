@@ -16,7 +16,7 @@ set -x
 ######################
 # Execute the script.
 ######################
-# ${exSCR_GSIANL:-$HOMErtma3d/scripts/${RUN}/ex${RUN}_gsianl.ksh}
+# ${exSCR_GSI_HYB:-$HOMErtma3d/scripts/${RUN}/ex${RUN}_gsi_hyb.ksh}
 ${HOMErtma3d}/scripts/exrtma3d_gsi_hyb.ksh
 export err=$?; err_chk
 

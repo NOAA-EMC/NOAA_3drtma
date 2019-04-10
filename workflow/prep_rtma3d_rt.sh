@@ -76,13 +76,23 @@ export endCDATE=201902131200                #yyyymmddhhmm - Ending day of RTMA3D
 export ExpDateWindows="04 04 2019 *"        # dd mm yyyy weekday (crontab-like date format)
 
 export NET=rtma3d                           #selection of rtma3d (or rtma,urma)
-export RUN=rtma3d                           #selection of rtma3d (or rtma,urma)
-export envir="rt_test"                      #environment (test, prod, dev, etc.)
-export run_envir="dev"                      #
+export RUN=rtma3d_rt_test                   #selection of rtma3d (or rtma,urma)
+export envir=""                             #environment (test, prod, dev, etc.)
+export run_envir=""                         #
 export expname="rt_test"                    # experiment name
 
 export NWROOT=${TOP_RTMA}                   #root directory for RTMA/URMA j-job scripts, scripts, parm files, etc. 
 
+export SCHEDULER="PBS"                      # SLURM (after 05/01/2019)
+                                            # PBS (no available after May 2019)
+if [ ${SCHEDULER} = "PBS" ] || [ ${SCHEDULER} = "MOAB" ]; then
+  SCHD_ATTRB="moabtorque"
+elif [ ${SCHEDULER} = "SLURM" ] || [ ${SCHEDULER} = "slurm" ]; then
+  SCHD_ATTRB="slurm"
+else
+  echo "user specified an Unknown Scheduler: ${SCHEDULER}. Please re-set : either PBS or SLURM "
+  exit 1
+fi
 
 # Note: the definition for the following variables depends on the machine.
 if [ ${MACHINE} = "jet" ] ; then
@@ -309,7 +319,7 @@ echo
 #
 #--- Definition for common Linux commands and tools
 #
-  linux_cmd_list="rm cp mv ln mkdir cat echo ls cut date wc sed awk tail cnvgrib mpirun cpfs unzip "
+  linux_cmd_list="rm cp mv ln mkdir cat echo ls cut date wc bc sed awk tail cnvgrib mpirun cpfs unzip "
   LINUX_CMD_LIST=`echo ${linux_cmd_list} | tr '[:lower:]' '[:upper:]'`
 
 #
@@ -363,8 +373,15 @@ cat > ${NWROOT}/workflow/${XML_FNAME} <<EOF
 
 <!DOCTYPE workflow [
 
+<!-- Block of NWP System Definition -->
+<!ENTITY NET "${NET}">
+<!ENTITY RUN "${RUN}">
+<!-- EOB -->
+
 <!ENTITY ACCOUNT "${ACCOUNT}">
 <!ENTITY ACCOUNT_DA "${ACCOUNT}">
+
+<!ENTITY SCHEDULER "${SCHEDULER}">
 
 <!ENTITY PARTITION "${PARTITION}">
 <!ENTITY PARTITION_DA "${PARTITION_DA}">
@@ -437,9 +454,12 @@ cat > ${NWROOT}/workflow/${XML_FNAME} <<EOF
 <!ENTITY DATAROOT "&DATABASE_DIR;/run">
 <!ENTITY DATAROOT_BC "&DATABASE_DIR;/run">
 <!ENTITY DATAROOT_PCYC "&DATABASE_DIR;/run">
-<!-- END OF BLOCK -->
+<!-- EOB -->
 
+<!-- Block of Job Definition -->
+<!ENTITY JOBNAME_PRE "&RUN;">
 <!ENTITY POST_NAME "hrconus">
+<!-- EOB -->
 
 <!-- Definition Block of RESOURCES used to run Real-Time RTMA3D on Jet -->
 <!ENTITY SMARTINIT_PROC "1">
@@ -496,6 +516,10 @@ cat > ${NWROOT}/workflow/${XML_FNAME} <<EOF
    '<envar>
       <name>HOMErtma3d</name>
       <value>&HOMErtma3d;</value>
+    </envar>
+    <envar>
+      <name>SCHEDULER</name>
+      <value>&SCHEDULER;</value>
     </envar>
     <envar>
       <name>MACHINE</name>
@@ -585,7 +609,7 @@ EOF
 #
 
 cat >> ${NWROOT}/workflow/${XML_FNAME} <<EOF 
-<workflow realtime="T" scheduler="moabtorque" cyclethrottle="30" cyclelifespan="01:00:00:00">
+<workflow realtime="T" scheduler="${SCHD_ATTRB}" cyclethrottle="30" cyclelifespan="01:00:00:00">
 
   <log>
     <cyclestr>&LOG_DIR;/workflow_@Y@m@d@H.log</cyclestr>
@@ -609,7 +633,7 @@ cat >> ${NWROOT}/workflow/${XML_FNAME} <<EOF
 
     <command>&JJOB_DIR;/launch.ksh &JJOB_DIR;/JRTMA3D_LIGHTNING</command>
     <cores>&LIGHTNING_PROC;</cores>
-    <jobname><cyclestr>HRRR_lightning_@H_#min#</cyclestr></jobname>
+    <jobname><cyclestr>&JOBNAME_PRE;_lightning_@H_#min#</cyclestr></jobname>
     <join><cyclestr>&LOG_DIR;/lightning_gsi_@Y@m@d@H00_#min#.log</cyclestr></join>
 
     <envar>
@@ -665,7 +689,7 @@ cat >> ${NWROOT}/workflow/${XML_FNAME} <<EOF
 
     <command>&JJOB_DIR;/launch.ksh &JJOB_DIR;/JRTMA3D_RADAR_LINKS</command>
     <cores>&RADARLINKS_PROC;</cores>
-    <jobname><cyclestr>HRRR_radarlinks_@H</cyclestr></jobname>
+    <jobname><cyclestr>&JOBNAME_PRE;_radarlinks_@H</cyclestr></jobname>
     <join><cyclestr>&LOG_DIR;/radar_links_@Y@m@d@H00.log</cyclestr></join>
 
     <envar>
@@ -699,7 +723,7 @@ cat >> ${NWROOT}/workflow/${XML_FNAME} <<EOF
 
       <command>&JJOB_DIR;/launch.ksh &JJOB_DIR;/JRTMA3D_RADAR</command>
       <cores>&RADAR_PROC;</cores>
-      <jobname><cyclestr>HRRR_radar_@H_#subh#</cyclestr></jobname>
+      <jobname><cyclestr>&JOBNAME_PRE;_radar_@H_#subh#</cyclestr></jobname>
       <join><cyclestr>&LOG_DIR;/radar_gsi_@Y@m@d@H00_#subh#.log</cyclestr></join>
 
       <envar>
@@ -755,7 +779,7 @@ cat >> ${NWROOT}/workflow/${XML_FNAME} <<EOF
 
     <command>&JJOB_DIR;/launch.ksh &JJOB_DIR;/JRTMA3D_SATELLITE_BUFR</command>
     <cores>&SATELLITE_PROC;</cores>
-    <jobname><cyclestr>HRRR_satellite_bufr_@H</cyclestr></jobname>
+    <jobname><cyclestr>&JOBNAME_PRE;_satellite_bufr_@H</cyclestr></jobname>
     <join><cyclestr>&LOG_DIR;/satellite_gsi_bufr_@Y@m@d@H00.log</cyclestr></join>
 
     <envar>
@@ -806,7 +830,7 @@ cat >> ${NWROOT}/workflow/${XML_FNAME} <<EOF
 
     <command>&JJOB_DIR;/launch.ksh &JJOB_DIR;/JRTMA3D_CONVENTIONAL</command>
     <cores>&CONVENTIONAL_PROC;</cores>
-    <jobname><cyclestr>HRRR_conventional_@H</cyclestr></jobname>
+    <jobname><cyclestr>&JOBNAME_PRE;_conventional_@H</cyclestr></jobname>
     <join><cyclestr>&LOG_DIR;/conventional_gsi_@Y@m@d@H00.log</cyclestr></join>
 
     <envar>
@@ -900,7 +924,7 @@ cat >> ${NWROOT}/workflow/${XML_FNAME} <<EOF
 
     <command>&JJOB_DIR;/launch.ksh &JJOB_DIR;/JRTMA3D_CONVENTIONAL</command>
     <cores>&CONVENTIONAL_PROC;</cores>
-    <jobname><cyclestr>HRRR_conventional_early_@H</cyclestr></jobname>
+    <jobname><cyclestr>&JOBNAME_PRE;_conventional_early_@H</cyclestr></jobname>
     <join><cyclestr>&LOG_DIR;/conventional_gsi_early_@Y@m@d@H00.log</cyclestr></join>
 
     <envar>
@@ -994,7 +1018,7 @@ cat >> ${NWROOT}/workflow/${XML_FNAME} <<EOF
 
     <command>&JJOB_DIR;/launch.ksh &JJOB_DIR;/JRTMA3D_GSI_HYB</command>
     <cores>&GSI_HYB_PROC;</cores>
-    <jobname><cyclestr>HRRR_gsi_hyb_@H</cyclestr></jobname>
+    <jobname><cyclestr>&JOBNAME_PRE;_gsi_hyb_@H</cyclestr></jobname>
     <join><cyclestr>&LOG_DIR;/gsi_hyb_@Y@m@d@H00.log</cyclestr></join>
 
     <envar>
@@ -1147,7 +1171,7 @@ cat >> ${NWROOT}/workflow/${XML_FNAME} <<EOF
 
     <command>&JJOB_DIR;/launch.ksh &JJOB_DIR;/JRTMA3D_UNIPOST</command>
     <cores>&POST_PROC;</cores>
-    <jobname><cyclestr>HRRR_post_@H_00</cyclestr></jobname>
+    <jobname><cyclestr>&JOBNAME_PRE;_post_@H_00</cyclestr></jobname>
     <join><cyclestr>&LOG_DIR;/post_@Y@m@d@H00_00.log</cyclestr></join>
 
     <envar>
@@ -1199,6 +1223,349 @@ cat >> ${NWROOT}/workflow/${XML_FNAME} <<EOF
       <taskdep task="gsi_hyb"/>
     </dependency>
 
+  </task>
+
+  <task name="smartinit_bl" cycledefs="02-11hr,02hr,03hr,04hr,05hr,06hr,07hr,08hr,09hr,10hr,11hr,00hr" maxtries="3">
+
+    &SMARTINIT_RESOURCES;
+    &WALL_LIMIT_PP;
+    &RESERVATION_SMARTINIT;
+
+    <command>&JJOB_DIR;/launch.ksh &JJOB_DIR;/JRTMA3D_SMARTINIT_BL</command>
+    <cores>&SMARTINIT_PROC;</cores>
+    <jobname><cyclestr>&JOBNAME_PRE;_smartinit_@H_bl</cyclestr></jobname>
+    <join><cyclestr>&LOG_DIR;/smartinit_@Y@m@d@H00_bl.log</cyclestr></join>
+
+    <envar>
+      <name>START_TIME</name>
+      <value><cyclestr>@Y@m@d@H</cyclestr></value>
+    </envar>
+    <envar>
+      <name>FCST_TIME</name>
+      <value>00</value>
+    </envar>
+    <envar>
+      <name>EXE_ROOT</name>
+      <value>&SMARTINIT_EXEC;</value>
+    </envar>
+    <envar>
+      <name>DATAROOT</name>
+      <value>&DATAROOT;</value>
+    </envar>
+    <envar>
+      <name>DATAHOME</name>
+      <value><cyclestr>&DATAROOT;/@Y@m@d@H/smtiprd</cyclestr></value>
+    </envar>
+    <envar>
+      <name>DATAPOSTHOME</name>
+      <value><cyclestr>&DATAROOT;/@Y@m@d@H/postprd</cyclestr></value>
+    </envar>
+    <envar>
+      <name>MODEL</name>
+      <value>HRRR</value>
+    </envar>
+    <envar>
+      <name>STATIC_DIR</name>
+      <value>&STATIC_DIR;/smartinit</value>
+    </envar>
+
+    <dependency>
+      <datadep age="00:02:00">&DATAROOT;/<cyclestr>@Y@m@d@H</cyclestr>/postprd<cyclestr>/wrfnat_hrconus_00.grib2</cyclestr></datadep>
+    </dependency>
+
+  </task>
+
+  <task name="smartinit_nb" cycledefs="02-11hr,02hr,03hr,04hr,05hr,06hr,07hr,08hr,09hr,10hr,11hr,00hr" maxtries="3">
+
+    &SMARTINIT_RESOURCES;
+    &WALL_LIMIT_PP;
+    &RESERVATION_SMARTINIT;
+
+    <command>&JJOB_DIR;/launch.ksh &JJOB_DIR;/JRTMA3D_SMARTINIT_NB</command>
+    <cores>&SMARTINIT_PROC;</cores>
+    <jobname><cyclestr>&JOBNAME_PRE;_smartinit_@H_nb</cyclestr></jobname>
+    <join><cyclestr>&LOG_DIR;/smartinit_@Y@m@d@H00_nb.log</cyclestr></join>
+
+    <envar>
+      <name>START_TIME</name>
+      <value><cyclestr>@Y@m@d@H</cyclestr></value>
+    </envar>
+    <envar>
+      <name>FCST_TIME</name>
+      <value>00</value>
+    </envar>
+    <envar>
+      <name>EXE_ROOT</name>
+      <value>&SMARTINIT_EXEC;</value>
+    </envar>
+    <envar>
+      <name>DATAROOT</name>
+      <value>&DATAROOT;</value>
+    </envar>
+    <envar>
+      <name>DATAHOME</name>
+      <value><cyclestr>&DATAROOT;/@Y@m@d@H/smtiprd</cyclestr></value>
+    </envar>
+    <envar>
+      <name>DATAPOSTHOME</name>
+      <value><cyclestr>&DATAROOT;/@Y@m@d@H/postprd</cyclestr></value>
+    </envar>
+    <envar>
+      <name>MODEL</name>
+      <value>HRRR</value>
+    </envar>
+    <envar>
+      <name>STATIC_DIR</name>
+      <value>&STATIC_DIR;/smartinit</value>
+    </envar>
+
+    <dependency>
+      <datadep age="00:02:00">&DATAROOT;/<cyclestr>@Y@m@d@H</cyclestr>/postprd<cyclestr>/wrfnat_hrconus_00.grib2</cyclestr></datadep>
+    </dependency>
+
+  </task>
+
+  <task name="ncl_00" cycledefs="02-11hr,00hr,01hr" maxtries="3">
+
+    &NCL_RESOURCES;
+    &WALL_LIMIT_PP;
+    &RESERVATION;
+
+    <command>&SCRIPTS;/NCL/ncl_hrrr.ksh</command>
+    <cores>&NCL_MAIN_PROC;</cores>
+    <jobname><cyclestr>&JOBNAME_PRE;_ncl_@H_00</cyclestr></jobname>
+    <join><cyclestr>&LOG_DIR;/ncl_@Y@m@d@H00_00.log</cyclestr></join>
+
+    <envar>
+      <name>START_TIME</name>
+      <value><cyclestr>@Y@m@d@H</cyclestr></value>
+    </envar>
+    <envar>
+      <name>FCST_TIME</name>
+      <value>00</value>
+    </envar>
+    <envar>
+      <name>NCL_VER</name>
+      <value>&NCL_VER;</value>
+    </envar>
+    <envar>
+      <name>DATAROOT</name>
+      <value>&DATAROOT;</value>
+    </envar>
+    <envar>
+      <name>DATAHOME</name>
+      <value><cyclestr>&DATAROOT;/@Y@m@d@H</cyclestr></value>
+    </envar>
+    <envar>
+      <name>MODEL</name>
+      <value>RTMA_3D</value>
+    </envar>
+
+    <dependency>
+      <taskdep task="post_00"/>
+    </dependency>
+
+  </task>
+
+  <metatask>
+    <var name="skewt">skewt1 skewt2 skewt3 skewt4 skewt5</var>
+
+    <task name="ncl_00_#skewt#" cycledefs="02-11hr,00hr,01hr" maxtries="3">
+
+      &NCL_SKEWT_RESOURCES;
+      &WALL_LIMIT_PP;
+      &RESERVATION;
+
+      <command>&SCRIPTS;/NCL/ncl_hrrr_#skewt#.ksh</command>
+      <cores>&NCL_PROC;</cores>
+      <jobname><cyclestr>&JOBNAME_PRE;_ncl_@H_00_#skewt#</cyclestr></jobname>
+      <join><cyclestr>&LOG_DIR;/ncl_@Y@m@d@H00_00_#skewt#.log</cyclestr></join>
+
+      <envar>
+        <name>START_TIME</name>
+        <value><cyclestr>@Y@m@d@H</cyclestr></value>
+      </envar>
+      <envar>
+        <name>FCST_TIME</name>
+        <value>00</value>
+      </envar>
+      <envar>
+        <name>NCL_VER</name>
+        <value>&NCL_VER;</value>
+      </envar>
+      <envar>
+        <name>DATAROOT</name>
+        <value>&DATAROOT;</value>
+      </envar>
+      <envar>
+        <name>DATAHOME</name>
+        <value><cyclestr>&DATAROOT;/@Y@m@d@H</cyclestr></value>
+      </envar>
+      <envar>
+        <name>MODEL</name>
+        <value>RTMA_3D</value>
+      </envar>
+
+      <dependency>
+        <taskdep task="post_00"/>
+      </dependency>
+
+    </task>
+
+  </metatask>
+
+  <metatask>
+    <var name="htxs">htxs1</var>
+
+    <task name="ncl_00_#htxs#" cycledefs="02-11hr,00hr,01hr" maxtries="3">
+
+      &NCL_HTXS_RESOURCES;
+      &WALL_LIMIT_PP;
+      &RESERVATION;
+
+      <command>&SCRIPTS;/NCL/ncl_hrrr_#htxs#.ksh</command>
+      <cores>&NCL_PROC;</cores>
+      <jobname><cyclestr>&JOBNAME_PRE;_ncl_@H_00_#htxs#</cyclestr></jobname>
+      <join><cyclestr>&LOG_DIR;/ncl_@Y@m@d@H00_00_#htxs#.log</cyclestr></join>
+
+      <envar>
+        <name>START_TIME</name>
+        <value><cyclestr>@Y@m@d@H</cyclestr></value>
+      </envar>
+      <envar>
+        <name>FCST_TIME</name>
+        <value>00</value>
+      </envar>
+      <envar>
+        <name>NCL_VER</name>
+        <value>&NCL_VER;</value>
+      </envar>
+      <envar>
+        <name>DATAROOT</name>
+        <value>&DATAROOT;</value>
+      </envar>
+      <envar>
+        <name>DATAHOME</name>
+        <value><cyclestr>&DATAROOT;/@Y@m@d@H</cyclestr></value>
+      </envar>
+      <envar>
+        <name>MODEL</name>
+        <value>RTMA_3D</value>
+      </envar>
+
+      <dependency>
+        <taskdep task="post_00"/>
+      </dependency>
+
+    </task>
+
+  </metatask>
+
+  <task name="ncl_zip" cycledefs="02-11hr,00hr,01hr" maxtries="3">
+
+    &NCL_RESOURCES;
+    &WALL_LIMIT_PP;
+    &RESERVATION;
+
+    <command>&SCRIPTS;/NCL/ncl_hrrr_zip.ksh</command>
+    <cores>&NCL_PROC;</cores>
+    <jobname><cyclestr>&JOBNAME_PRE;_ncl_@H_zip</cyclestr></jobname>
+    <join><cyclestr>&LOG_DIR;/ncl_@Y@m@d@H00_zip.log</cyclestr></join>
+
+    <envar>
+      <name>START_TIME</name>
+      <value><cyclestr>@Y@m@d@H</cyclestr></value>
+    </envar>
+    <envar>
+      <name>DATAROOT</name>
+      <value>&DATAROOT;</value>
+    </envar>
+    <envar>
+      <name>DATAHOME</name>
+      <value><cyclestr>&DATAROOT;/@Y@m@d@H</cyclestr></value>
+    </envar>
+
+    <dependency>
+      <or>
+        <taskdep task="ncl_00"/>
+        <timedep><cyclestr offset="03:00:00">@Y@m@d@H@M00</cyclestr></timedep>
+      </or>
+    </dependency>
+    
+  </task>
+
+  <task name="ncl_skewt_zip" cycledefs="02-11hr,00hr,01hr" maxtries="3">
+
+    &NCL_RESOURCES;
+    &WALL_LIMIT_PP;
+    &RESERVATION;
+
+    <command>&SCRIPTS;/NCL/ncl_hrrr_skewt_zip.ksh</command>
+    <cores>&NCL_PROC;</cores>
+    <jobname><cyclestr>&JOBNAME_PRE;_ncl_@H_skewt_zip</cyclestr></jobname>
+    <join><cyclestr>&LOG_DIR;/ncl_@Y@m@d@H00_skewt_zip.log</cyclestr></join>
+
+    <envar>
+      <name>START_TIME</name>
+      <value><cyclestr>@Y@m@d@H</cyclestr></value>
+    </envar>
+    <envar>
+      <name>DATAROOT</name>
+      <value>&DATAROOT;</value>
+    </envar>
+    <envar>
+      <name>DATAHOME</name>
+      <value><cyclestr>&DATAROOT;/@Y@m@d@H</cyclestr></value>
+    </envar>
+
+    <dependency>
+      <or>
+        <and>
+          <taskdep task="ncl_00_skewt1"/>
+          <taskdep task="ncl_00_skewt2"/>
+          <taskdep task="ncl_00_skewt3"/>
+          <taskdep task="ncl_00_skewt4"/>
+          <taskdep task="ncl_00_skewt5"/>
+        </and>
+        <timedep><cyclestr offset="03:00:00">@Y@m@d@H@M00</cyclestr></timedep>
+      </or>
+    </dependency>
+    
+  </task>
+
+  <task name="ncl_htxs_zip" cycledefs="02-11hr,00hr,01hr" maxtries="3">
+
+    &NCL_RESOURCES;
+    &WALL_LIMIT_PP;
+    &RESERVATION;
+
+    <command>&SCRIPTS;/NCL/ncl_hrrr_htxs_zip.ksh</command>
+    <cores>&NCL_PROC;</cores>
+    <jobname><cyclestr>&JOBNAME_PRE;_ncl_@H_htxs_zip</cyclestr></jobname>
+    <join><cyclestr>&LOG_DIR;/ncl_@Y@m@d@H00_htxs_zip.log</cyclestr></join>
+
+    <envar>
+      <name>START_TIME</name>
+      <value><cyclestr>@Y@m@d@H</cyclestr></value>
+    </envar>
+    <envar>
+      <name>DATAROOT</name>
+      <value>&DATAROOT;</value>
+    </envar>
+    <envar>
+      <name>DATAHOME</name>
+      <value><cyclestr>&DATAROOT;/@Y@m@d@H</cyclestr></value>
+    </envar>
+
+    <dependency>
+      <or>
+        <and>
+          <taskdep task="ncl_00_htxs1"/>
+        </and>
+        <timedep><cyclestr offset="02:55:00">@Y@m@d@H@M00</cyclestr></timedep>
+      </or>
+    </dependency>
+    
   </task>
 
 EOF

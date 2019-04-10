@@ -13,10 +13,14 @@
   module purge
   module load intel/18.0.5.274
   module load impi/2018.4.274
-  module load szip
+  module load szip/2.1
   module load hdf5/1.8.9
   module load netcdf/4.2.1.1
   module load pnetcdf/1.6.1
+  module load nco/4.1.0
+  module load cnvgrib/1.4.0
+# module load wgrib
+# module load wgrib2/2.0.8
 
 # If need to use pre-installed NCEP libs
 # module use -a /mnt/lfs3/projects/hfv3gfs/nwprod/lib/modulefiles
@@ -31,10 +35,7 @@
 #
 #--- ENV
 #
-# module load cnvgrib
-# module load wgrib
-# module load wgrib2/2.0.8
-# export CNVGRIB=${CNVGRIB:-"cnvgrib"}
+  export CNVGRIB=${CNVGRIB:-"cnvgrib"}
 # export WGRIB2="/home/rtrr/HRRR/exec/UPP/wgrib2"            # 2.0.7 (GSD RAP/HRRR)
 # export WGRIB2=${WGRIB2:-"wgrib2"}
 # export MPIRUN=${MPIRUN:-"mpirun"}

@@ -16,7 +16,7 @@ set -x
 ######################
 # Execute the script.
 ######################
-# ${exSCR_GSIANL:-$HOMErtma3d/scripts/${RUN}/ex${RUN}_gsianl.ksh}
+# ${exSCR_LIGHTNING:-$HOMErtma3d/scripts/${RUN}/ex${RUN}_lightning.ksh}
 ${HOMErtma3d}/scripts/exrtma3d_lightning.ksh
 export err=$?; err_chk
 

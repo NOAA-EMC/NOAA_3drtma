@@ -16,7 +16,7 @@ set -x
 ######################
 # Execute the script.
 ######################
-# ${exSCR_GSIANL:-$HOMErtma3d/scripts/${RUN}/ex${RUN}_gsianl.ksh}
+# ${exSCR_UNIPOST:-$HOMErtma3d/scripts/${RUN}/ex${RUN}_unipost.ksh}
 ${HOMErtma3d}/scripts/exrtma3d_unipost.ksh
 export err=$?; err_chk
 
