@@ -73,12 +73,12 @@ set -x
 export startCDATE=201902131200              #yyyymmddhhmm - Starting day of retro run 
 export endCDATE=201902131200                #yyyymmddhhmm - Ending day of RTMA3D run (needed for both RETRO and REAL TIME). 
 
-export ExpDateWindows="10 04 2019 *"        # dd mm yyyy weekday (crontab-like date format)
+export ExpDateWindows="12 04 2019 *"        # dd mm yyyy weekday (crontab-like date format)
 
 export NET=rtma3d                           #selection of rtma3d (or rtma,urma)
 export RUN=rtma3d_rt                        #selection of rtma3d (or rtma,urma)
-export envir=""                             #environment (test, prod, dev, etc.)
-export run_envir=""                         #
+export envir="rt_test"                             #environment (test, prod, dev, etc.)
+export run_envir="dev"                         #
 export expname="test"                       # experiment name
 
 export NWROOT=${TOP_RTMA}                   #root directory for RTMA/URMA j-job scripts, scripts, parm files, etc. 
@@ -103,7 +103,7 @@ if [ ${MACHINE} = "jet" ] ; then
   PARTITION="xjet:vjet:sjet:tjet"
   PARTITION_DA="kjet"
   HOMEBASE_DIR=${NWROOT}
-  DATABASE_DIR="/mnt/lfs3/projects/hfv3gfs/Gang.Zhao/gsd_dev1_jjob_databasedir"
+  DATABASE_DIR="/mnt/lfs3/projects/hfv3gfs/${USER}/gsd_dev1_jjob_databasedir"
 # DATABASE_DIR="/mnt/lfs3/projects/hfv3gfs/${USER}/wrkdir_${NET}"
 elif [ ${MACHINE} = "theia" ] ; then
   QUEUE="batch"                        #
@@ -117,7 +117,9 @@ fi
 #
 #--- ptmp_base: top running and archive directory
 #
-  export ptmp_base=${DATABASE_DIR}
+export ptmp_base=${DATABASE_DIR}
+
+export hpsspath0=/NCEPDEV/emc-meso/5year/${USER}/${envir}_${RUN} #user specified location for data archiving
 
 export CAP_NET=`echo ${NET} | tr '[:lower:]' '[:upper:]'`
 export CAP_RUN=`echo ${RUN} | tr '[:lower:]' '[:upper:]'`
@@ -376,6 +378,7 @@ cat > ${NWROOT}/workflow/${XML_FNAME} <<EOF
 <!-- Block of NWP System Definition -->
 <!ENTITY NET "${NET}">
 <!ENTITY RUN "${RUN}">
+<!ENTITY envir "${envir}">
 <!-- EOB -->
 
 <!ENTITY ACCOUNT "${ACCOUNT}">
@@ -386,6 +389,7 @@ cat > ${NWROOT}/workflow/${XML_FNAME} <<EOF
 <!ENTITY PARTITION "${PARTITION}">
 <!ENTITY PARTITION_DA "${PARTITION_DA}">
 <!ENTITY QUEUE "${QUEUE}">
+<!ENTITY QUEUE_SVC "${QUEUE_SVC}">
 <!ENTITY RES_DA "rtma-kjet">
 <!ENTITY RES_POST "rtma-kjet">
 
@@ -411,10 +415,9 @@ cat > ${NWROOT}/workflow/${XML_FNAME} <<EOF
 <!ENTITY SCRIPT_DIR "&HOMEBASE_DIR;/scripts">
 <!ENTITY JJOB_DIR   "&HOMEBASE_DIR;/jobs">
 <!ENTITY WRKFLW_DIR "&HOMEBASE_DIR;/workflow">
-
 <!ENTITY MACHINE    "${MACHINE}">
 <!ENTITY machine    "${machine}">
-
+<!ENTITY hpsspath0  "${hpsspath0}">
 <!-- Definition Block of Datasets for Real-Time RTMA3D on Jet -->
 <!--     (Better DO NOT TOUCH this Block)                     -->
 <!ENTITY HRRR_DIR "/home/rtrr/hrrr">
@@ -422,7 +425,6 @@ cat > ${NWROOT}/workflow/${XML_FNAME} <<EOF
 
 <!ENTITY GFS_DIR "&OBS_DIR;/grids/gfs/0p5deg/grib2">
 <!ENTITY ENKFFCST_DIR "&OBS_DIR;/grids/enkf/atm">
-
 <!ENTITY AIRCRAFT_REJECT "/home/rtruc/amdar_reject_lists">
 <!ENTITY SFCOBS_USELIST "/lfs3/projects/amb-verif/mesonet_uselists">
 <!ENTITY PREPBUFR_DIR "&OBS_DIR;/grids/rap/prepbufr">
@@ -451,9 +453,9 @@ cat > ${NWROOT}/workflow/${XML_FNAME} <<EOF
 <!-- Definition Block of Top Directories for running Real-Time RTMA3D on Jet -->
 <!ENTITY LOG_DIR "&DATABASE_DIR;/log">
 <!ENTITY DATAROOT_ENS "&DATABASE_DIR;/gfsenkf">
-<!ENTITY DATAROOT "&DATABASE_DIR;/run">
-<!ENTITY DATAROOT_BC "&DATABASE_DIR;/run">
-<!ENTITY DATAROOT_PCYC "&DATABASE_DIR;/run">
+<!ENTITY DATAROOT "&DATABASE_DIR;/com">
+<!ENTITY DATAROOT_BC "&DATABASE_DIR;/com">
+<!ENTITY DATAROOT_PCYC "&DATABASE_DIR;/com">
 <!-- EOB -->
 
 <!-- Block of Job Definition -->
@@ -470,7 +472,7 @@ cat > ${NWROOT}/workflow/${XML_FNAME} <<EOF
 <!ENTITY GSI_HYB_PROC "280">
 <!ENTITY GSI_DIAG_PROC "1">
 <!ENTITY RADARLINKS_PROC "1">
-
+<!ENTITY ARCH_PROC "1">
 <!ENTITY POST_PROC "32">
 <!ENTITY NCL_PROC "1">
 <!ENTITY NCL_MAIN_PROC "8">
@@ -485,6 +487,7 @@ cat > ${NWROOT}/workflow/${XML_FNAME} <<EOF
 <!ENTITY GSI_HYB_RESOURCES "<walltime>00:40:00</walltime>">
 <!ENTITY GSI_DIAG_RESOURCES "<walltime>00:05:00</walltime><memory>600M</memory>">
 <!ENTITY POST_RESOURCES "<walltime>00:45:00</walltime>">
+<!ENTITY ARCH_RESOURCES "<walltime>00:45:00</walltime>">
 <!ENTITY NCL_RESOURCES "<walltime>00:55:00</walltime>">
 <!ENTITY NCL_SKEWT_RESOURCES "<walltime>00:25:00</walltime><memory>9G</memory>">
 <!ENTITY NCL_HTXS_RESOURCES "<walltime>00:25:00</walltime><memory>9G</memory>">
@@ -505,6 +508,7 @@ cat > ${NWROOT}/workflow/${XML_FNAME} <<EOF
 <!ENTITY RESERVATION '<native>-l partition=&PARTITION; -W umask=022 -m n</native><queue>&QUEUE;</queue><account>&ACCOUNT;</account>'>
 <!-- ENTITY RESERVATION_DA '<native>-l partition=&PARTITION_DA;,flags=ADVRES:&RES_DA; -W umask=022 -m n</native><queue>&QUEUE;</queue><account>&ACCOUNT_DA;</account>' -->
 <!ENTITY RESERVATION_DA '<native>-l partition=&PARTITION_DA; -W umask=022 -m n</native><queue>&QUEUE;</queue><account>&ACCOUNT_DA;</account>'>
+<!ENTITY RESERVATION_SVC '<native>-l partition=&PARTITION_DA; -W umask=022 -m n</native><queue>&QUEUE_SVC;</queue><account>&ACCOUNT_DA;</account>'>
 <!ENTITY RESERVATION_SMARTINIT '<native>-l partition=&PARTITION; -W umask=022 -m n</native><queue>&QUEUE;</queue><account>&ACCOUNT;</account>'>
 <!-- ENTITY RESERVATION_POST '<native>-l partition=&PARTITION;,flags=ADVRES:&RES_POST; -W umask=022 -m n</native><queue>&QUEUE;</queue><account>&ACCOUNT;</account>' -->
 <!ENTITY RESERVATION_POST '<native>-l partition=&PARTITION; -W umask=022 -m n</native><queue>&QUEUE;</queue><account>&ACCOUNT;</account>'>
@@ -1571,6 +1575,78 @@ cat >> ${NWROOT}/workflow/${XML_FNAME} <<EOF
     </dependency>
     
   </task>
+
+  <task name="arch" cycledefs="02-11hr,00hr,01hr" maxtries="10">
+
+    &ARCH_RESOURCES;
+    &WALL_LIMIT_DA;
+    &RESERVATION_SVC;
+    &SYS_COMMANDS;
+    &ENVARS;
+
+    <command>&JJOB_DIR;/launch.ksh &JJOB_DIR;/JRTMA3D_ARCH</command>
+    <cores>&ARCH_PROC;</cores>
+    <jobname><cyclestr>archive_@H_00</cyclestr></jobname>
+    <join><cyclestr>&LOG_DIR;/archive_@Y@m@d@H00_00.log</cyclestr></join>
+
+    <envar>
+      <name>START_TIME</name>
+      <value><cyclestr>@Y@m@d@H</cyclestr></value>
+    </envar>
+    <envar>
+      <name>FCST_TIME</name>
+      <value>00</value>
+    </envar>
+    <envar>
+      <name>DATAROOT</name>
+      <value>&DATAROOT;</value>
+    </envar>
+    <envar>
+      <name>DATAOBS</name>
+      <value><cyclestr>&DATAROOT;/@Y@m@d@H/obsprd</cyclestr></value>
+    </envar>
+    <envar>
+      <name>DATAHOME</name>
+      <value><cyclestr>&DATAROOT;/@Y@m@d@H/postprd</cyclestr></value>
+    </envar>
+    <envar>
+      <name>DATAWRFHOME</name>
+      <value><cyclestr>&DATAROOT;/@Y@m@d@H/gsiprd</cyclestr></value>
+    </envar>
+    <envar>
+        <name>hpss_save</name>
+        <value>yes</value>
+    </envar>
+    <envar>
+        <name>hpsspath0</name>
+        <value>&hpsspath0;</value>
+    </envar>
+    <envar>
+        <name>write_to_rzdm</name>
+        <value>no</value>
+    </envar>
+    <envar>
+        <name>NET</name>
+        <value>&NET;</value>
+    </envar>
+    <envar>
+        <name>RUN</name>
+        <value>&RUN;</value>
+    </envar>
+    <envar>
+        <name>envir</name>
+        <value>&envir;</value>
+    </envar>
+    <envar>
+        <name>remove_archdir</name>
+        <value>no</value>
+    </envar>
+
+    <dependency>
+      <taskdep task="post_00"/>
+    </dependency>
+
+    </task>
 
 EOF
 

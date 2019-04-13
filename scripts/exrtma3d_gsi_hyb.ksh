@@ -556,6 +556,6 @@ esac
    done
 done
 
-cat fort.* > ${DATABASE_DIR}/log/fits_${YYYYMMDDHH}.txt
+cat fort.* > fits_${YYYYMMDDHH}.txt
 
 exit 0
