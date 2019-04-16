@@ -111,7 +111,7 @@
 <!ENTITY RESERVATION '<native>-l partition=&PARTITION; -W umask=022 -m n</native><queue>&QUEUE;</queue><account>&ACCOUNT;</account>'>
 <!ENTITY RESERVATION_DA '<native>-l partition=&PARTITION_DA;,flags=ADVRES:&RES_DA; -W umask=022 -m n</native><queue>&QUEUE;</queue><account>&ACCOUNT_DA;</account>'>
 <!ENTITY RESERVATION_SMARTINIT '<native>-l partition=&PARTITION; -W umask=022 -m n</native><queue>&QUEUE;</queue><account>&ACCOUNT;</account>'>
-<!ENTITY RESERVATION_POST '<native>-l partition=&PARTITION;,flags=ADVRES:&RES_POST; -W umask=022 -m n</native><queue>&QUEUE;</queue><account>&ACCOUNT;</account>'>
+<!ENTITY RESERVATION_POST '<native>-l partition=&PARTITION; -W umask=022 -m n</native><queue>&QUEUE;</queue><account>&ACCOUNT;</account>'>
 
 ]>
 
@@ -191,7 +191,7 @@
 
     &RADAR_RESOURCES;
     &WALL_LIMIT_DA;
-    &RESERVATION_POST;
+    &RESERVATION_DA;
 
     <command>&SCRIPTS;/GSI/radar_links.ksh</command>
     <cores>&RADARLINKS_PROC;</cores>
@@ -221,7 +221,7 @@
 
     &RADAR_RESOURCES;
     &WALL_LIMIT_DA;
-    &RESERVATION_POST;
+    &RESERVATION_DA;
 
     <command>&SCRIPTS;/GSI/radar.ksh</command>
     <cores>&RADAR_PROC;</cores>
@@ -277,7 +277,7 @@
 
       &RADAR_RESOURCES;
       &WALL_LIMIT_DA;
-      &RESERVATION_POST;
+      &RESERVATION_DA;
 
       <command>&SCRIPTS;/GSI/radar.ksh</command>
       <cores>&RADAR_PROC;</cores>
@@ -655,9 +655,6 @@
         <or> 
           <and>
             <datadep age="00:02:00"><cyclestr>&DATAROOT;/@Y@m@d@H/obsprd/NSSLRefInGSI.bufr</cyclestr></datadep>
-            <taskdep task="lightning_gsi_15"/>
-            <taskdep task="lightning_gsi_30"/>
-            <taskdep task="lightning_gsi_45"/>
             <taskdep task="lightning_gsi_60"/>
             <taskdep task="satellite_gsi_bufr"/>
             <or>
