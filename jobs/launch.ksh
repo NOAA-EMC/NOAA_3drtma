@@ -22,6 +22,8 @@ if [ "${MACHINE}" = "jet" ] ; then
 
 # loading  Specific modules and configurations used in individual task 
 #   and path to some specific command/tool used
+  export AWK="/bin/awk --posix"
+
   case "$COMMAND" in
     *LIGHTNING*|*SATELLITE*|*GSI_DIAG*)
       export TAIL=/usr/bin/tail

@@ -326,8 +326,8 @@ echo
 #
 #--- Definition for common Linux commands and tools
 #
-  linux_cmd_list="which grep rm cp mv ln mkdir cat echo ls cut date wc bc sed awk tail cnvgrib mpirun cpfs unzip "
-  LINUX_CMD_LIST=`echo ${linux_cmd_list} | tr '[:lower:]' '[:upper:]'`
+# linux_cmd_list="which grep rm cp mv ln mkdir cat echo ls cut date wc bc sed awk tail cnvgrib mpirun cpfs unzip "
+# LINUX_CMD_LIST=`echo ${linux_cmd_list} | tr '[:lower:]' '[:upper:]'`
 
 #
 #--- Computational Resources
@@ -494,8 +494,8 @@ cat > ${NWROOT}/workflow/${XML_FNAME} <<EOF
 <!-- End gsi_hyb by 3 hr -->
 <!-- End all post-processing by 6 hrs -->
 
-<!ENTITY START_TIME_RADARLINKS "00:05:00">
-<!ENTITY START_TIME_RADAR "00:15:00">
+<!ENTITY START_TIME_RADARLINKS "00:10:00">
+<!ENTITY START_TIME_RADAR "00:20:00">
 <!ENTITY START_TIME_CONVENTIONAL "00:37:00">
 <!ENTITY START_TIME_GSI "01:40:00">
 <!ENTITY DEADLINE_DA "03:00:00">
@@ -550,17 +550,6 @@ do
       ;;
     cnvgrib|mpirun)
        cmdpath="${lnxcmd}"
-      ;;
-    awk)
-      if [ -f /bin/${lnxcmd} ] ; then
-        cmdpath="/bin/${lnxcmd}"
-        [ "${MACHINE}" = "jet" ] && cmdpath="${cmdpath} --posix"
-      elif [ -f /usr/bin/${lnxcmd} ] ; then
-        cmdpath="usr/bin/${lnxcmd}"
-        [ "${MACHINE}" = "jet" ] && cmdpath="${cmdpath} --posix"
-      else
-        cmdpath=""
-      fi
       ;;
     *)
       if [ -f /bin/${lnxcmd} ] ; then
