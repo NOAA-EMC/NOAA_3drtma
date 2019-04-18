@@ -152,9 +152,9 @@
       <value>&MACHINE;</value>
     </envar>'>
 
-<!-- path to unix command NOT defined here in xml file (in module file and launch.ksh)
+<!-- path to unix command NOT defined here in xml file (in module file and launch.ksh) -->
 <!-- Definition Block of Common System Commands -->
-<!ENTITY SYS_COMMANDS 
+<!-- ENTITY SYS_COMMANDS 
    '
    <envar>
         <name>WHICH</name>
@@ -240,8 +240,7 @@
         <name>UNZIP</name>
         <value>/bin/unzip</value>
    </envar>
-   '>
--->
+   ' -->
 
 ]>
 

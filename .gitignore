@@ -24,8 +24,8 @@ workflow/*.sh
 workflow/*.ksh
 !workflow/prep_*.sh
 !workflow/rtma3d_rt_test.xml
-!workflow/run_rtma3d_rt_test.ksh
-!workflow/chk_rtma3d_rt_test.ksh
+!workflow/run_rtma3d_rt_test.sh
+!workflow/chk_rtma3d_rt_test.sh
 
 # ignoring working directory (under dev/)
 **/dev/

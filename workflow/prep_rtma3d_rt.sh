@@ -357,11 +357,11 @@ XML_FNAME="${RUN}_${expname}.xml"
 # workflow control database file -->  rtma3d_rt.db
 DB_FNAME="${RUN}_${expname}.db"
 
-# run_rtma3d.ksh (that can be used in crontab)
-run_scriptname="run_${RUN}_${expname}.ksh"
+# run_rtma3d.sh (that can be used in crontab)
+run_scriptname="run_${RUN}_${expname}.sh"
 
-# chk_rtma3d.ksh to check the status of workflow 
-chk_scriptname="chk_${RUN}_${expname}.ksh"
+# chk_rtma3d.sh to check the status of workflow 
+chk_scriptname="chk_${RUN}_${expname}.sh"
 
 rm -f ${NWROOT}/workflow/${XML_FNAME}
 #
@@ -532,9 +532,9 @@ EOF
 #--- Definition for common Linux commands and tools
 #
 cat >> ${NWROOT}/workflow/${XML_FNAME} <<EOF 
-<!-- path to unix command NOT defined here in xml file (in module file and launch.ksh)
+<!-- path to unix command NOT defined here in xml file (in module file and launch.ksh) -->
 <!-- Definition Block of Common System Commands -->
-<!ENTITY SYS_COMMANDS 
+<!-- ENTITY SYS_COMMANDS 
    '
 EOF
 
@@ -585,8 +585,7 @@ done
 
 # adding ending mark to this ENTITY definition just above
 cat >> ${NWROOT}/workflow/${RUN}_${expname}.xml <<EOF 
-   '>
--->
+   ' -->
 
 EOF
 
@@ -1682,7 +1681,7 @@ fi
 
 if [ ${MACHINE} = 'theia' ] || [ ${MACHINE} = 'jet' ]; then
   cat > ${NWROOT}/workflow/${run_scriptname} <<EOF 
-#!/bin/ksh
+#!/bin/bash
 
 . /etc/profile
 . /etc/profile.d/modules.sh >/dev/null # Module Support
@@ -1695,7 +1694,7 @@ rocotorun -v 10 -w ${NWROOT}/workflow/${XML_FNAME} -d ${NWROOT}/workflow/${DB_FN
 EOF
 
   cat > ${NWROOT}/workflow/${chk_scriptname} <<EOF 
-#!/bin/ksh
+#!/bin/bash
 
 . /etc/profile
 . /etc/profile.d/modules.sh >/dev/null # Module Support

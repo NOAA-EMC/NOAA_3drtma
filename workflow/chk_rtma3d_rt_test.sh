@@ -1,4 +1,4 @@
-#!/bin/ksh
+#!/bin/bash
 
 . /etc/profile
 . /etc/profile.d/modules.sh >/dev/null # Module Support
