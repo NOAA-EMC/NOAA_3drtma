@@ -23,7 +23,8 @@ gsi_namelist="
    wrf_mass_hybridcord=.true.,
  /
  &BKGERR
-   vs=1.0,
+   !vs=1.0,
+   vs=0.125,
    !hzscl=0.373,0.746,1.5,
    hzscl=0.046625,0.09325,0.1875 !hzscl/8
    bw=0.,fstat=.true.,
