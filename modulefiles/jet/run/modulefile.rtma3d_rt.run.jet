@@ -18,24 +18,57 @@
   module load netcdf/4.2.1.1
   module load pnetcdf/1.6.1
   module load nco/4.1.0
+
   module load cnvgrib/1.4.0
+  export CNVGRIB=${CNVGRIB:-"cnvgrib"}
+
 # module load wgrib
 # module load wgrib2/2.0.8
+# export WGRIB2="/home/rtrr/HRRR/exec/UPP/wgrib2"            # 2.0.7 (GSD RAP/HRRR)
+# export WGRIB2=${WGRIB2:-"wgrib2"}
 
 # If need to use pre-installed NCEP libs
 # module use -a /mnt/lfs3/projects/hfv3gfs/nwprod/lib/modulefiles
 
   module use -a /mnt/lfs3/projects/hfv3gfs/emc.nemspara/soft/modulefiles 
   module load prod_util                 # 1.0.18 (D)
+  export CPFS="/lfs3/projects/hfv3gfs/emc.nemspara/soft/NCEPLIBS-prod_util/ush/cpfs"
 
 # if loading contrib, then do not need to do "module use /contrib/modulefiles "
   module use -a /contrib/modulefiles
 # module load contrib
 
 #
-#--- ENV
+#--- Path to some common UNIX/LINUX commands and tools
 #
-  export CNVGRIB=${CNVGRIB:-"cnvgrib"}
-# export WGRIB2="/home/rtrr/HRRR/exec/UPP/wgrib2"            # 2.0.7 (GSD RAP/HRRR)
-# export WGRIB2=${WGRIB2:-"wgrib2"}
-# export MPIRUN=${MPIRUN:-"mpirun"}
+  export RM=/bin/rm
+  export CP=/bin/cp
+  export MV=/bin/mv
+  export LN=/bin/ln
+  export MKDIR=/bin/mkdir
+  export CAT=/bin/cat
+  export ECHO=/bin/echo
+  export LS=/bin/ls
+  export CUT=/bin/cut
+  export WC=/usr/bin/wc
+  export DATE=/bin/date
+  export AWK="/bin/awk --posix"
+  export SED=/bin/sed
+  export TAIL=/usr/bin/tail
+  export BC=/usr/bin/bc
+  export WHICH=/usr/bin/which
+  export GREP=/usr/bin/grep
+
+  export NCDUMP=ncdump
+
+  export MPIRUN=mpirun
+
+#--- for NCL (defined in ncl scripts)
+# XARGS=${XARGS:-/usr/bin/xargs}
+# BASH=${BASH:-/bin/bash}
+# NCL=`which ncl`
+# CTRANS=`which ctrans`
+# PS2PDF=/usr/bin/ps2pdf
+# CONVERT=`which convert`
+# MONTAGE=`which montage`
+

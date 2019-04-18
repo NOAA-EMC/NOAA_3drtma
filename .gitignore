@@ -21,7 +21,11 @@ rtma_dir
 # ignoring working xml and shell scripts under workflow/
 workflow/*.xml
 workflow/*.sh
+workflow/*.ksh
 !workflow/prep_*.sh
+!workflow/rtma3d_rt_test.xml
+!workflow/run_rtma3d_rt_test.ksh
+!workflow/chk_rtma3d_rt_test.ksh
 
 # ignoring working directory (under dev/)
 **/dev/
