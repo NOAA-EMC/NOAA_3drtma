@@ -4,6 +4,7 @@
 
 <!ENTITY ACCOUNT "rtrr">
 <!ENTITY ACCOUNT_DA "rtrr">
+<!ENTITY SCHEDULER "moabtorque">
 
 <!ENTITY PARTITION "kjet">
 <!ENTITY PARTITION_DA "kjet">
@@ -141,7 +142,7 @@
 
 ]>
 
-<workflow realtime="T" scheduler="moabtorque" cyclethrottle="30" cyclelifespan="01:00:00:00">
+<workflow realtime="T" scheduler="&SCHEDULER;" cyclethrottle="30" cyclelifespan="01:00:00:00">
 
   <log>
     <cyclestr>&LOG_DIR;/workflow_@Y@m@d@H.log</cyclestr>
