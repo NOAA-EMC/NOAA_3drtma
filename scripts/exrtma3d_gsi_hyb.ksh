@@ -261,18 +261,14 @@ fi
 
 if [ -r "${DATAOBSHOME}/NSSLRefInGSI.bufr" ]; then
   ${LN} -s ${DATAOBSHOME}/NSSLRefInGSI.bufr ./refInGSI
-elif [ -r "${DATAOBSHOME}/60/NSSLRefInGSI.bufr" ]; then
-  ${LN} -s ${DATAOBSHOME}/60/NSSLRefInGSI.bufr ./refInGSI
 else
   ${ECHO} "Warning: ${DATAOBSHOME}/NSSLRefInGSI.bufr does not exist!"
 fi
 
-if [ -r "${DATAOBSHOME}/LightningInGSI.bufr" ]; then
-  ${LN} -s ${DATAOBSHOME}/LightningInGSI.bufr ./lghtInGSI
-elif [ -r "${DATAOBSHOME}/60/LightningInGSI.bufr" ]; then
+if [ -r "${DATAOBSHOME}/60/LightningInGSI.bufr" ]; then
   ${LN} -s ${DATAOBSHOME}/60/LightningInGSI.bufr ./lghtInGSI
 else
-  ${ECHO} "Warning: ${DATAOBSHOME}/LightningInGSI.bufr does not exist!"
+  ${ECHO} "Warning: ${DATAOBSHOME}/60/LightningInGSI.bufr does not exist!"
 fi
 
 if [ -r "${DATAOBSHOME}/NASALaRCCloudInGSI.bufr" ]; then
@@ -392,7 +388,7 @@ nummem=`more filelist03 | wc -l`
 nummem=$((nummem - 3 ))
 if [[ ${nummem} -eq 80 ]]; then
   echo "Do hybrid with ${memname}"
-  beta1_inv=0.15
+  beta1_inv=0.50 ##0.15
   ifhyb=.true.
   ${ECHO} " Cycle ${YYYYMMDDHH}: GSI hybrid uses ${memname} with n_ens=${nummem}" >> ${logfile}
 fi
@@ -487,7 +483,7 @@ ndatrap=62
 grid_ratio=1 #4
 grid_ratio_ens=12 #ensemble resolution=3 * grid_ratio * grid_ratio_ens
 cloudanalysistype=1 #5
-ens_h=40 #110
+ens_h=20 #40 #110
 ens_v=1 #3
 
 # Build the GSI namelist on-the-fly
