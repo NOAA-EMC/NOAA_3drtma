@@ -1,3 +1,0 @@
-#!/bin/bash
-export GIT_SSH_COMMAND="ssh -F .sshconfig" 
-/home/Guoqing.Ge/local/bin/git fetch "$@"
