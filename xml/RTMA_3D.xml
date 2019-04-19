@@ -15,11 +15,11 @@
 <!ENTITY HOMEBASE_DIR "/home/rtrr/RTMA_3D_dev1">
 <!ENTITY DATABASE_DIR "/home/rtrr/rtma_3d_dev1_databasedir">
 <!ENTITY OBS_DIR "/public/data">
-<!ENTITY NCL_VER "6.3.0">
+<!ENTITY NCL_VER "6.5.0">
 <!ENTITY JOBNAME_PRE "RTMA3D_dev1">
 
 <!ENTITY SCRIPTS "&HOMEBASE_DIR;/bin">
-<!ENTITY STATIC_DIR "&HOMEBASE_DIR;/static">
+<!ENTITY STATIC_DIR "&HOMEBASE_DIR;/fix">
 
 <!ENTITY WPS_ROOT "&HOMEBASE_DIR;/exec/WPS">
 <!ENTITY WRF_ROOT "&HOMEBASE_DIR;/exec/WRF">
@@ -30,6 +30,13 @@
 <!ENTITY GSI_ROOT "&HOMEBASE_DIR;/exec/GSI">
 <!ENTITY FIX_ROOT "&STATIC_DIR;/GSI">
 
+<!ENTITY HOMErtma3d "&HOMEBASE_DIR;">
+<!ENTITY SCRIPT_DIR "&HOMEBASE_DIR;/scripts">
+<!ENTITY JJOB_DIR   "&HOMEBASE_DIR;/jobs">
+<!ENTITY WRKFLW_DIR "&HOMEBASE_DIR;/workflow">
+
+<!ENTITY MACHINE    "jet">
+<!ENTITY machine    "jet">
 <!ENTITY HRRR_DIR "/home/rtrr/hrrr">
 <!ENTITY SST_DIR "&OBS_DIR;/grids/ncep/sst/0p083deg/grib2">
 
@@ -113,6 +120,25 @@
 <!ENTITY RESERVATION_SMARTINIT '<native>-l partition=&PARTITION; -W umask=022 -m n</native><queue>&QUEUE;</queue><account>&ACCOUNT;</account>'>
 <!ENTITY RESERVATION_POST '<native>-l partition=&PARTITION; -W umask=022 -m n</native><queue>&QUEUE;</queue><account>&ACCOUNT;</account>'>
 
+<!ENTITY ENVARS
+   '<envar>
+      <name>HOMErtma3d</name>
+      <value>&HOMErtma3d;</value>
+    </envar>
+    <envar>
+      <name>SCHEDULER</name>
+      <value>&SCHEDULER;</value>
+    </envar>
+    <envar>
+      <name>MACHINE</name>
+      <value>&MACHINE;</value>
+    </envar>
+    <envar>
+      <name>machine</name>
+      <value>&machine;</value>
+    </envar>
+'>
+
 ]>
 
 <workflow realtime="T" scheduler="moabtorque" cyclethrottle="30" cyclelifespan="01:00:00:00">
@@ -121,9 +147,9 @@
     <cyclestr>&LOG_DIR;/workflow_@Y@m@d@H.log</cyclestr>
   </log>
 
-  <cycledef group="00hr">00 00,12 * * 2018-2020 *</cycledef>
-  <cycledef group="01hr">00 01,13 * * 2018-2020 *</cycledef>
-  <cycledef group="02-11hr">00 02-11,14-23 * * 2018-2020 *</cycledef>
+  <cycledef group="00hr">00 00,12 * * 2019-2020 *</cycledef>
+  <cycledef group="01hr">00 01,13 * * 2019-2020 *</cycledef>
+  <cycledef group="02-11hr">00 02-11,14-23 * * 2019-2020 *</cycledef>
 
   <metatask>
 <!-- only need 60 for hourly running
@@ -138,8 +164,9 @@
     &LIGHTNING_RESOURCES;
     &WALL_LIMIT_DA;
     &RESERVATION_DA;
+    &ENVARS;
 
-    <command>&SCRIPTS;/GSI/lightning.ksh</command>
+    <command>&JJOB_DIR;/launch.ksh &JJOB_DIR;/JRTMA3D_LIGHTNING</command>
     <cores>&LIGHTNING_PROC;</cores>
     <jobname><cyclestr>&JOBNAME_PRE;_lightning_@H_#min#</cyclestr></jobname>
     <join><cyclestr>&LOG_DIR;/lightning_gsi_@Y@m@d@H00_#min#.log</cyclestr></join>
@@ -192,8 +219,9 @@
     &RADAR_RESOURCES;
     &WALL_LIMIT_DA;
     &RESERVATION_DA;
+    &ENVARS;
 
-    <command>&SCRIPTS;/GSI/radar_links.ksh</command>
+    <command>&JJOB_DIR;/launch.ksh &JJOB_DIR;/JRTMA3D_RADAR_LINKS</command>
     <cores>&RADARLINKS_PROC;</cores>
     <jobname><cyclestr>&JOBNAME_PRE;_radarlinks_@H</cyclestr></jobname>
     <join><cyclestr>&LOG_DIR;/radar_links_@Y@m@d@H00.log</cyclestr></join>
@@ -222,8 +250,9 @@
     &RADAR_RESOURCES;
     &WALL_LIMIT_DA;
     &RESERVATION_DA;
+    &ENVARS;
 
-    <command>&SCRIPTS;/GSI/radar.ksh</command>
+    <command>&JJOB_DIR;/launch.ksh &JJOB_DIR;/JRTMA3D_RADAR</command>
     <cores>&RADAR_PROC;</cores>
     <jobname><cyclestr>&JOBNAME_PRE;_radar_@H</cyclestr></jobname>
     <join><cyclestr>&LOG_DIR;/radar_gsi_@Y@m@d@H00.log</cyclestr></join>
@@ -278,8 +307,9 @@
       &RADAR_RESOURCES;
       &WALL_LIMIT_DA;
       &RESERVATION_DA;
+      &ENVARS;
 
-      <command>&SCRIPTS;/GSI/radar.ksh</command>
+      <command>&JJOB_DIR;/launch.ksh &JJOB_DIR;/JRTMA3D_RADAR</command>
       <cores>&RADAR_PROC;</cores>
       <jobname><cyclestr>&JOBNAME_PRE;_radar_@H_#subh#</cyclestr></jobname>
       <join><cyclestr>&LOG_DIR;/radar_gsi_@Y@m@d@H00_#subh#.log</cyclestr></join>
@@ -333,8 +363,9 @@
     &SATELLITE_RESOURCES;
     &WALL_LIMIT_DA;
     &RESERVATION_DA;
+    &ENVARS;
 
-    <command>&SCRIPTS;/GSI/satellite_bufr.ksh</command>
+    <command>&JJOB_DIR;/launch.ksh &JJOB_DIR;/JRTMA3D_SATELLITE_BUFR</command>
     <cores>&SATELLITE_PROC;</cores>
     <jobname><cyclestr>&JOBNAME_PRE;_satellite_bufr_@H</cyclestr></jobname>
     <join><cyclestr>&LOG_DIR;/satellite_gsi_bufr_@Y@m@d@H00.log</cyclestr></join>
@@ -382,8 +413,9 @@
     &CONVENTIONAL_RESOURCES;
     &WALL_LIMIT_DA;
     &RESERVATION_DA;
+    &ENVARS;
 
-    <command>&SCRIPTS;/GSI/conventional.ksh</command>
+    <command>&JJOB_DIR;/launch.ksh &JJOB_DIR;/JRTMA3D_CONVENTIONAL</command>
     <cores>&CONVENTIONAL_PROC;</cores>
     <jobname><cyclestr>&JOBNAME_PRE;_conventional_@H</cyclestr></jobname>
     <join><cyclestr>&LOG_DIR;/conventional_gsi_@Y@m@d@H00.log</cyclestr></join>
@@ -474,8 +506,9 @@
     &CONVENTIONAL_RESOURCES;
     &WALL_LIMIT_DA;
     &RESERVATION_DA;
+    &ENVARS;
 
-    <command>&SCRIPTS;/GSI/conventional.ksh</command>
+    <command>&JJOB_DIR;/launch.ksh &JJOB_DIR;/JRTMA3D_CONVENTIONAL</command>
     <cores>&CONVENTIONAL_PROC;</cores>
     <jobname><cyclestr>&JOBNAME_PRE;_conventional_early_@H</cyclestr></jobname>
     <join><cyclestr>&LOG_DIR;/conventional_gsi_early_@Y@m@d@H00.log</cyclestr></join>
@@ -566,8 +599,9 @@
     &GSI_HYB_RESOURCES;
     &WALL_LIMIT_DA;
     &RESERVATION_DA;
+    &ENVARS;
 
-    <command>&SCRIPTS;/GSI/gsi_hyb.ksh</command>
+    <command>&JJOB_DIR;/launch.ksh &JJOB_DIR;/JRTMA3D_GSI_HYB</command>
     <cores>&GSI_HYB_PROC;</cores>
     <jobname><cyclestr>&JOBNAME_PRE;_gsi_hyb_@H</cyclestr></jobname>
     <join><cyclestr>&LOG_DIR;/gsi_hyb_@Y@m@d@H00.log</cyclestr></join>
@@ -674,8 +708,9 @@
     &GSI_DIAG_RESOURCES;
     &WALL_LIMIT_DA;
     &RESERVATION_DA;
+    &ENVARS;
 
-    <command>&SCRIPTS;/GSI/gsi_diag.ksh</command>
+    <command>&JJOB_DIR;/launch.ksh &JJOB_DIR;/JRTMA3D_GSI_DIAG</command>
     <cores>&GSI_DIAG_PROC;</cores>
     <jobname><cyclestr>&JOBNAME_PRE;_gsi_diag_@H</cyclestr></jobname>
     <join><cyclestr>&LOG_DIR;/gsi_diag_@Y@m@d@H00.log</cyclestr></join>
@@ -707,113 +742,14 @@
 
   </task>
 
-  <task name="smartinit_bl" cycledefs="02-11hr,02hr,03hr,04hr,05hr,06hr,07hr,08hr,09hr,10hr,11hr,00hr" maxtries="3">
-
-    &SMARTINIT_RESOURCES;
-    &WALL_LIMIT_PP;
-    &RESERVATION_SMARTINIT;
-
-    <command>&SCRIPTS;/smartinit/hrrr_smartinit_bl.ksh</command>
-    <cores>&SMARTINIT_PROC;</cores>
-    <jobname><cyclestr>&JOBNAME_PRE;_smartinit_@H_bl</cyclestr></jobname>
-    <join><cyclestr>&LOG_DIR;/smartinit_@Y@m@d@H00_bl.log</cyclestr></join>
-
-    <envar>
-      <name>START_TIME</name>
-      <value><cyclestr>@Y@m@d@H</cyclestr></value>
-    </envar>
-    <envar>
-      <name>FCST_TIME</name>
-      <value>00</value>
-    </envar>
-    <envar>
-      <name>EXE_ROOT</name>
-      <value>&SMARTINIT_EXEC;</value>
-    </envar>
-    <envar>
-      <name>DATAROOT</name>
-      <value>&DATAROOT;</value>
-    </envar>
-    <envar>
-      <name>DATAHOME</name>
-      <value><cyclestr>&DATAROOT;/@Y@m@d@H/smtiprd</cyclestr></value>
-    </envar>
-    <envar>
-      <name>DATAPOSTHOME</name>
-      <value><cyclestr>&DATAROOT;/@Y@m@d@H/postprd</cyclestr></value>
-    </envar>
-    <envar>
-      <name>MODEL</name>
-      <value>HRRR</value>
-    </envar>
-    <envar>
-      <name>STATIC_DIR</name>
-      <value>&STATIC_DIR;/smartinit</value>
-    </envar>
-
-    <dependency>
-      <datadep age="00:02:00">&DATAROOT;/<cyclestr>@Y@m@d@H</cyclestr>/postprd<cyclestr>/wrfnat_hrconus_00.grib2</cyclestr></datadep>
-    </dependency>
-
-   </task>
-
-  <task name="smartinit_nb" cycledefs="02-11hr,02hr,03hr,04hr,05hr,06hr,07hr,08hr,09hr,10hr,11hr,00hr" maxtries="3">
-
-    &SMARTINIT_RESOURCES;
-    &WALL_LIMIT_PP;
-    &RESERVATION_SMARTINIT;
-
-    <command>&SCRIPTS;/smartinit/hrrr_smartinit_nb.ksh</command>
-    <cores>&SMARTINIT_PROC;</cores>
-    <jobname><cyclestr>&JOBNAME_PRE;_smartinit_@H_nb</cyclestr></jobname>
-    <join><cyclestr>&LOG_DIR;/smartinit_@Y@m@d@H00_nb.log</cyclestr></join>
-
-    <envar>
-      <name>START_TIME</name>
-      <value><cyclestr>@Y@m@d@H</cyclestr></value>
-    </envar>
-    <envar>
-      <name>FCST_TIME</name>
-      <value>00</value>
-    </envar>
-    <envar>
-      <name>EXE_ROOT</name>
-      <value>&SMARTINIT_EXEC;</value>
-    </envar>
-    <envar>
-      <name>DATAROOT</name>
-      <value>&DATAROOT;</value>
-    </envar>
-    <envar>
-      <name>DATAHOME</name>
-      <value><cyclestr>&DATAROOT;/@Y@m@d@H/smtiprd</cyclestr></value>
-    </envar>
-    <envar>
-      <name>DATAPOSTHOME</name>
-      <value><cyclestr>&DATAROOT;/@Y@m@d@H/postprd</cyclestr></value>
-    </envar>
-    <envar>
-      <name>MODEL</name>
-      <value>HRRR</value>
-    </envar>
-    <envar>
-      <name>STATIC_DIR</name>
-      <value>&STATIC_DIR;/smartinit</value>
-    </envar>
-
-    <dependency>
-      <datadep age="00:02:00">&DATAROOT;/<cyclestr>@Y@m@d@H</cyclestr>/postprd<cyclestr>/wrfnat_hrconus_00.grib2</cyclestr></datadep>
-    </dependency>
-
-   </task>
-
   <task name="post_00" cycledefs="02-11hr,00hr,01hr" maxtries="3">
 
     &POST_RESOURCES;
     &WALL_LIMIT_PP;
     &RESERVATION_POST;
+    &ENVARS;
 
-    <command>&SCRIPTS;/UPP/unipost.ksh</command>
+    <command>&JJOB_DIR;/launch.ksh &JJOB_DIR;/JRTMA3D_UNIPOST</command>
     <cores>&POST_PROC;</cores>
     <jobname><cyclestr>&JOBNAME_PRE;_post_@H_00</cyclestr></jobname>
     <join><cyclestr>&LOG_DIR;/post_@Y@m@d@H00_00.log</cyclestr></join>
@@ -865,6 +801,108 @@
 
     <dependency>
       <taskdep task="gsi_hyb"/>
+    </dependency>
+
+  </task>
+
+  <task name="smartinit_bl" cycledefs="02-11hr,02hr,03hr,04hr,05hr,06hr,07hr,08hr,09hr,10hr,11hr,00hr" maxtries="3">
+
+    &SMARTINIT_RESOURCES;
+    &WALL_LIMIT_PP;
+    &RESERVATION_SMARTINIT;
+    &ENVARS;
+
+    <command>&JJOB_DIR;/launch.ksh &JJOB_DIR;/JRTMA3D_SMARTINIT_BL</command>
+    <cores>&SMARTINIT_PROC;</cores>
+    <jobname><cyclestr>&JOBNAME_PRE;_smartinit_@H_bl</cyclestr></jobname>
+    <join><cyclestr>&LOG_DIR;/smartinit_@Y@m@d@H00_bl.log</cyclestr></join>
+
+    <envar>
+      <name>START_TIME</name>
+      <value><cyclestr>@Y@m@d@H</cyclestr></value>
+    </envar>
+    <envar>
+      <name>FCST_TIME</name>
+      <value>00</value>
+    </envar>
+    <envar>
+      <name>EXE_ROOT</name>
+      <value>&SMARTINIT_EXEC;</value>
+    </envar>
+    <envar>
+      <name>DATAROOT</name>
+      <value>&DATAROOT;</value>
+    </envar>
+    <envar>
+      <name>DATAHOME</name>
+      <value><cyclestr>&DATAROOT;/@Y@m@d@H/smtiprd</cyclestr></value>
+    </envar>
+    <envar>
+      <name>DATAPOSTHOME</name>
+      <value><cyclestr>&DATAROOT;/@Y@m@d@H/postprd</cyclestr></value>
+    </envar>
+    <envar>
+      <name>MODEL</name>
+      <value>HRRR</value>
+    </envar>
+    <envar>
+      <name>STATIC_DIR</name>
+      <value>&STATIC_DIR;/smartinit</value>
+    </envar>
+
+    <dependency>
+      <datadep age="00:02:00">&DATAROOT;/<cyclestr>@Y@m@d@H</cyclestr>/postprd<cyclestr>/wrfnat_hrconus_00.grib2</cyclestr></datadep>
+    </dependency>
+
+  </task>
+
+  <task name="smartinit_nb" cycledefs="02-11hr,02hr,03hr,04hr,05hr,06hr,07hr,08hr,09hr,10hr,11hr,00hr" maxtries="3">
+
+    &SMARTINIT_RESOURCES;
+    &WALL_LIMIT_PP;
+    &RESERVATION_SMARTINIT;
+    &ENVARS;
+
+    <command>&JJOB_DIR;/launch.ksh &JJOB_DIR;/JRTMA3D_SMARTINIT_NB</command>
+    <cores>&SMARTINIT_PROC;</cores>
+    <jobname><cyclestr>&JOBNAME_PRE;_smartinit_@H_nb</cyclestr></jobname>
+    <join><cyclestr>&LOG_DIR;/smartinit_@Y@m@d@H00_nb.log</cyclestr></join>
+
+    <envar>
+      <name>START_TIME</name>
+      <value><cyclestr>@Y@m@d@H</cyclestr></value>
+    </envar>
+    <envar>
+      <name>FCST_TIME</name>
+      <value>00</value>
+    </envar>
+    <envar>
+      <name>EXE_ROOT</name>
+      <value>&SMARTINIT_EXEC;</value>
+    </envar>
+    <envar>
+      <name>DATAROOT</name>
+      <value>&DATAROOT;</value>
+    </envar>
+    <envar>
+      <name>DATAHOME</name>
+      <value><cyclestr>&DATAROOT;/@Y@m@d@H/smtiprd</cyclestr></value>
+    </envar>
+    <envar>
+      <name>DATAPOSTHOME</name>
+      <value><cyclestr>&DATAROOT;/@Y@m@d@H/postprd</cyclestr></value>
+    </envar>
+    <envar>
+      <name>MODEL</name>
+      <value>HRRR</value>
+    </envar>
+    <envar>
+      <name>STATIC_DIR</name>
+      <value>&STATIC_DIR;/smartinit</value>
+    </envar>
+
+    <dependency>
+      <datadep age="00:02:00">&DATAROOT;/<cyclestr>@Y@m@d@H</cyclestr>/postprd<cyclestr>/wrfnat_hrconus_00.grib2</cyclestr></datadep>
     </dependency>
 
   </task>
