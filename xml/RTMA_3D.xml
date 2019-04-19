@@ -2,23 +2,18 @@
 
 <!DOCTYPE workflow [
 
-<!-- ENTITY ACCOUNT "rtrr" -->
-<!ENTITY ACCOUNT "hfv3gfs">
-<!-- ENTITY ACCOUNT_DA "rtrr" -->
-<!ENTITY ACCOUNT_DA "hfv3gfs">
+<!ENTITY ACCOUNT "rtrr">
+<!ENTITY ACCOUNT_DA "rtrr">
 
-<!-- ENTITY PARTITION "kjet" -->
-<!ENTITY PARTITION "xjet:vjet:sjet:tjet">
+<!ENTITY PARTITION "kjet">
 <!ENTITY PARTITION_DA "kjet">
 <!ENTITY QUEUE "batch">
 <!ENTITY RES_DA "rtma-kjet">
 <!ENTITY RES_POST "rtma-kjet">
 
 <!ENTITY SYSTEM_ID "RTMA_3D"> 
-<!-- ENTITY HOMEBASE_DIR "/home/rtrr/RTMA_3D_dev1" -->
-<!ENTITY HOMEBASE_DIR "/home/Gang.Zhao/rtma3d_repo/GSD_dev1_test">
-<!-- ENTITY DATABASE_DIR "/home/rtrr/rtma_3d_dev1_databasedir" -->
-<!ENTITY DATABASE_DIR "/mnt/lfs3/projects/hfv3gfs/Gang.Zhao/gsd_dev1_databasedir">
+<!ENTITY HOMEBASE_DIR "/home/rtrr/RTMA_3D_dev1">
+<!ENTITY DATABASE_DIR "/home/rtrr/rtma_3d_dev1_databasedir">
 <!ENTITY OBS_DIR "/public/data">
 <!ENTITY NCL_VER "6.3.0">
 <!ENTITY JOBNAME_PRE "RTMA3D_dev1">
@@ -114,8 +109,7 @@
 <!ENTITY WALL_LIMIT_PP '<deadline><cyclestr offset="&DEADLINE_PP;">@Y@m@d@H@M</cyclestr></deadline>'>
 
 <!ENTITY RESERVATION '<native>-l partition=&PARTITION; -W umask=022 -m n</native><queue>&QUEUE;</queue><account>&ACCOUNT;</account>'>
-<!-- ENTITY RESERVATION_DA '<native>-l partition=&PARTITION_DA;,flags=ADVRES:&RES_DA; -W umask=022 -m n</native><queue>&QUEUE;</queue><account>&ACCOUNT_DA;</account>' -->
-<!ENTITY RESERVATION_DA '<native>-l partition=&PARTITION_DA; -W umask=022 -m n</native><queue>&QUEUE;</queue><account>&ACCOUNT_DA;</account>'>
+<!ENTITY RESERVATION_DA '<native>-l partition=&PARTITION_DA;,flags=ADVRES:&RES_DA; -W umask=022 -m n</native><queue>&QUEUE;</queue><account>&ACCOUNT_DA;</account>'>
 <!ENTITY RESERVATION_SMARTINIT '<native>-l partition=&PARTITION; -W umask=022 -m n</native><queue>&QUEUE;</queue><account>&ACCOUNT;</account>'>
 <!ENTITY RESERVATION_POST '<native>-l partition=&PARTITION; -W umask=022 -m n</native><queue>&QUEUE;</queue><account>&ACCOUNT;</account>'>
 
@@ -127,9 +121,9 @@
     <cyclestr>&LOG_DIR;/workflow_@Y@m@d@H.log</cyclestr>
   </log>
 
-  <cycledef group="00hr">00 00,12 03 04 2019 *</cycledef>
-  <cycledef group="01hr">00 01,13 03 04 2019 *</cycledef>
-  <cycledef group="02-11hr">00 02-11,14-23 03 04 2019 *</cycledef>
+  <cycledef group="00hr">00 00,12 * * 2018-2020 *</cycledef>
+  <cycledef group="01hr">00 01,13 * * 2018-2020 *</cycledef>
+  <cycledef group="02-11hr">00 02-11,14-23 * * 2018-2020 *</cycledef>
 
   <metatask>
 <!-- only need 60 for hourly running
@@ -143,7 +137,7 @@
 
     &LIGHTNING_RESOURCES;
     &WALL_LIMIT_DA;
-    &RESERVATION;
+    &RESERVATION_DA;
 
     <command>&SCRIPTS;/GSI/lightning.ksh</command>
     <cores>&LIGHTNING_PROC;</cores>
@@ -338,7 +332,7 @@
 
     &SATELLITE_RESOURCES;
     &WALL_LIMIT_DA;
-    &RESERVATION;
+    &RESERVATION_DA;
 
     <command>&SCRIPTS;/GSI/satellite_bufr.ksh</command>
     <cores>&SATELLITE_PROC;</cores>
@@ -387,7 +381,7 @@
 
     &CONVENTIONAL_RESOURCES;
     &WALL_LIMIT_DA;
-    &RESERVATION;
+    &RESERVATION_DA;
 
     <command>&SCRIPTS;/GSI/conventional.ksh</command>
     <cores>&CONVENTIONAL_PROC;</cores>
@@ -479,7 +473,7 @@
 
     &CONVENTIONAL_RESOURCES;
     &WALL_LIMIT_DA;
-    &RESERVATION;
+    &RESERVATION_DA;
 
     <command>&SCRIPTS;/GSI/conventional.ksh</command>
     <cores>&CONVENTIONAL_PROC;</cores>
@@ -679,7 +673,7 @@
 
     &GSI_DIAG_RESOURCES;
     &WALL_LIMIT_DA;
-    &RESERVATION;
+    &RESERVATION_DA;
 
     <command>&SCRIPTS;/GSI/gsi_diag.ksh</command>
     <cores>&GSI_DIAG_PROC;</cores>
@@ -817,7 +811,7 @@
 
     &POST_RESOURCES;
     &WALL_LIMIT_PP;
-    &RESERVATION;
+    &RESERVATION_POST;
 
     <command>&SCRIPTS;/UPP/unipost.ksh</command>
     <cores>&POST_PROC;</cores>
