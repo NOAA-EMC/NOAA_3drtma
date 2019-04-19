@@ -37,7 +37,6 @@
 <!ENTITY WRKFLW_DIR "&HOMEBASE_DIR;/workflow">
 
 <!ENTITY MACHINE    "jet">
-<!ENTITY machine    "jet">
 <!ENTITY HRRR_DIR "/home/rtrr/hrrr">
 <!ENTITY SST_DIR "&OBS_DIR;/grids/ncep/sst/0p083deg/grib2">
 
@@ -133,10 +132,6 @@
     <envar>
       <name>MACHINE</name>
       <value>&MACHINE;</value>
-    </envar>
-    <envar>
-      <name>machine</name>
-      <value>&machine;</value>
     </envar>
 '>
 
