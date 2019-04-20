@@ -3,7 +3,7 @@
 # --- for debug --- #
 date
 export PS4=' $SECONDS + ' 
-set -x
+#set -x ##too much outputs with this
 
 COMMAND=$1
 
@@ -18,50 +18,35 @@ if [ "${MACHINE}" = "jet" ] ; then
 # loading modules in the general module file
 #  (also including path definition of some common UNIX commands)
 
-  . ${MODULEFILES}/${MACHINE}/run/modulefile.rtma3d_rt.run.${MACHINE}
+  . ${MODULEFILES}/modulefile.rtma3d.${MACHINE}
 
 # loading  Specific modules and configurations used in individual task 
 #   and path to some specific command/tool used
-  export AWK="/bin/awk --posix"
 
   case "$COMMAND" in
     *LIGHTNING*|*SATELLITE*|*GSI_DIAG*)
-      export TAIL=/usr/bin/tail
-      export MPIRUN=mpiexec
       ;;
     *GSI_HYB*)
-      export TAIL=/usr/bin/tail
-      export MPIRUN=mpirun
       ;;
     *POST*)
-      module unload pnetcdf/1.6.1
-      module load wgrib
-      module load wgrib2/2.0.8
-#     export WGRIB2="/home/rtrr/HRRR/exec/UPP/wgrib2"    # 2.0.7 (used in GSD rap/hrrr)
-      export WGRIB2=${WGRIB2:-"wgrib"}
-      export BC=/usr/bin/bc
-      export MPIRUN=mpirun
       ;;
     *SMARTINIT*)
-      export AWK="/bin/gawk --posix"
-      export BC=/usr/bin/bc
-      export GREP=/bin/grep
       ;;
     *)
-      export MPIRUN=${MPIRUN:-"mpirun"}
       ;;
   esac
-  module list
 else
   echo "launch.ksh: modulefile is not set up yet for this machine-->${MACHINE}."
   echo "Job abort!"
   exit 1
 fi
 
+# print out loaded modules
+module list
 
 ############################################################
 #                                                          #
-#        obtain unique process id (pid)                    #
+#        different actions based on $SCHEDULER             #
 #                                                          #
 ############################################################
 if [ "${MACHINE}" = "theia" ] || [ "${MACHINE}" = "jet" ] ; then    ### PBS job Scheduler
@@ -72,8 +57,7 @@ if [ "${MACHINE}" = "theia" ] || [ "${MACHINE}" = "jet" ] ; then    ### PBS job 
 #     export jid=`echo ${PBS_JOBID} | awk -F'.' '{print $1}'`
       export jobid=${jobid:-"${job}.${jid}"}
       export np=`cat $PBS_NODEFILE | wc -l`
-      export MPIRUN=${MPIRUN:-"mpirun -np $np"}
-      echo " number of cores : $np for job $job with id as $jobid "
+      export MPIRUN="mpiexec -np $np"
       ;;
     SLURM|slum)                                       # SLURM
 #     Not working for this version
@@ -88,6 +72,8 @@ if [ "${MACHINE}" = "theia" ] || [ "${MACHINE}" = "jet" ] ; then    ### PBS job 
       ;;
   esac
 fi
+echo "MPIRUN command is: $MPIRUN"
+echo " number of cores : $np for job $job with id as $jobid "
 
 ############################################################
 #                                                          #
