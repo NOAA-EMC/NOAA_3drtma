@@ -31,7 +31,6 @@
 <!ENTITY GSI_ROOT "&HOMEBASE_DIR;/exec/GSI">
 <!ENTITY FIX_ROOT "&STATIC_DIR;/GSI">
 
-<!ENTITY HOMErtma3d "&HOMEBASE_DIR;">
 <!ENTITY SCRIPT_DIR "&HOMEBASE_DIR;/scripts">
 <!ENTITY JJOB_DIR   "&HOMEBASE_DIR;/jobs">
 <!ENTITY WRKFLW_DIR "&HOMEBASE_DIR;/workflow">
@@ -123,7 +122,7 @@
 <!ENTITY ENVARS
    '<envar>
       <name>HOMErtma3d</name>
-      <value>&HOMErtma3d;</value>
+      <value>&HOMEBASE_DIR;</value>
     </envar>
     <envar>
       <name>SCHEDULER</name>
