@@ -1,10 +1,7 @@
 #!/bin/ksh --login
 
-# Load modules (in jobs/launch.sh)
-
-# Vars used for testing.  Should be commented out for production mode
-
-# Set up paths to unix commands (in xml file)
+# loading modules and set common unix commands from outside
+#   in jobs/launch.sh and/or modulefile
 
 # for testing purposes
 #DATAHOME="/home/rtrr/hrrr/2019032720/obsprd"

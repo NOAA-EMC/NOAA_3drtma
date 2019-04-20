@@ -11,13 +11,10 @@
 # 2014-04-15  G Manikin  -- new script
 # 2017-04-11  B Blake    -- grib 2 version of script
 
-set -x
+# loading modules and set common unix commands from outside
+#   in jobs/launch.sh and/or modulefile
 
-np=`cat $PBS_NODEFILE | wc -l`
-
-# Load modules (in jobs/launch.sh)
-
-# Set up paths to shell commands (in xml file)
+#set -x
 
 # Print run parameters
 ${ECHO}

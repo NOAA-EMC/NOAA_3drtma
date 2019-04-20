@@ -1,12 +1,7 @@
 #!/bin/ksh --login
 
-np=`cat $PBS_NODEFILE | wc -l`
-
-# loading module (moved to jobs/launch.sh)
-
-# Vars used for testing.  Should be commented out for production mode
-
-# Set up paths to unix commands (moved to xml file)
+# loading modules and set common unix commands from outside
+#   in jobs/launch.sh and/or modulefile
 
 # Set endian conversion options for use with Intel compilers
 #export F_UFMTENDIAN="big;little:10,15,66" #not used, G.Ge 2018/9/4
@@ -155,7 +150,7 @@ EOF
 cp ${FIX_ROOT}/prepobs_prep_RAP.bufrtable ./prepobs_prep.bufrtable
 
 # Run obs pre-processor
-${MPIRUN} -envall -np ${np} ${LIGHTNING} < lightning.namelist > stdout_lighting 2>&1
+${MPIRUN} ${LIGHTNING} < lightning.namelist > stdout_lighting 2>&1
 error=$?
 if [ ${error} -ne 0 ]; then
   ${ECHO} "ERROR: ${LIGHTNING} crashed  Exit status=${error}"

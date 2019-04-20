@@ -1,14 +1,9 @@
 #!/bin/ksh --login
 
-np=`cat $PBS_NODEFILE | wc -l`
+# loading modules and set common unix commands from outside
+#   in jobs/launch.sh and/or modulefile
 
 ulimit -s 512000
-
-# Load modules (in jobs/launch.sh)
-
-# Vars used for testing.  Should be commented out for production mode
-
-# Set up paths to unix commands (in xml file)
 
 # Make sure DATAHOME is defined and exists
 if [ ! "${DATAHOME}" ]; then

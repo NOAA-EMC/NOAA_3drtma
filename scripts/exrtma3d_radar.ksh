@@ -1,12 +1,7 @@
 #!/bin/ksh --login
 
-np=`cat $PBS_NODEFILE | wc -l`
-
-# Load modules (in jobs/launch.sh)
-
-# Vars used for testing.  Should be commented out for production mode
-
-# Set up paths to unix commands (in xml file)
+# loading modules and set common unix commands from outside
+#   in jobs/launch.sh and/or modulefile
 
 # Set endian conversion options for use with Intel compilers
 # export F_UFMTENDIAN="big;little:10,15,66"
@@ -130,7 +125,7 @@ cat << EOF > mosaic.namelist
 EOF
 
 # Run obs pre-processor
-${MPIRUN} -envall -np ${np} ${MOSAIC} > stdout_radar 2>&1
+${MPIRUN} ${MOSAIC} > stdout_radar 2>&1
 error=$?
 if [ ${error} -ne 0 ]; then
   ${ECHO} "ERROR: ${MOSAIC} crashed  Exit status=${error}"
