@@ -194,10 +194,10 @@ fi
 # Radial velocity included
 if [ -r "${RADVELLEV2_DIR}/${YYYYJJJHH00}.rap.t${HH}z.nexrad.tm00.bufr_d" ]; then
   ${CP} ${RADVELLEV2_DIR}/${YYYYJJJHH00}.rap.t${HH}z.nexrad.tm00.bufr_d .
-  ${LN} -s ${YYYYJJJHH00}.rap.t${HH}z.nexrad.tm00.bufr_d newgblav.${YYYYMMDD}.rap.t${HH}z.nexrad
+  #${LN} -s ${YYYYJJJHH00}.rap.t${HH}z.nexrad.tm00.bufr_d newgblav.${YYYYMMDD}.rap.t${HH}z.nexrad
 elif [ -r "${RADVELLEV2_DIR}/${YYYYJJJHH00}.rap_e.t${HH}z.nexrad.tm00.bufr_d" ]; then
   ${CP} ${RADVELLEV2_DIR}/${YYYYJJJHH00}.rap_e.t${HH}z.nexrad.tm00.bufr_d .
-  ${LN} -s ${YYYYJJJHH00}.rap_e.t${HH}z.nexrad.tm00.bufr_d newgblav.${YYYYMMDD}.rap.t${HH}z.nexrad
+  #${LN} -s ${YYYYJJJHH00}.rap_e.t${HH}z.nexrad.tm00.bufr_d newgblav.${YYYYMMDD}.rap.t${HH}z.nexrad
 else
   ${ECHO} "Warning: ${RADVELLEV2_DIR}/${YYYYJJJHH00}.rap.t${HH}z.nexrad.tm00.bufr_d does not exist!"
 fi
