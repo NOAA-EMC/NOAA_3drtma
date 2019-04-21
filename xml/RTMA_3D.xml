@@ -13,9 +13,9 @@
 <!ENTITY RES_POST "rtma-kjet">
 
 <!ENTITY SYSTEM_ID "RTMA_3D"> 
-<!ENTITY HOMEBASE_DIR "/home/rtrr/RTMA_3D_dev1">
-<!ENTITY DATABASE_DIR "/home/rtrr/rtma_3d_dev1_databasedir">
-<!ENTITY JOBNAME_PRE "RTMA3D_dev1">
+<!ENTITY HOMEBASE_DIR "/home/rtrr/RTMA_3D">
+<!ENTITY DATABASE_DIR "/home/rtrr/rtma_3d_databasedir">
+<!ENTITY JOBNAME_PRE "RTMA3D_reg">
 
 <!ENTITY OBS_DIR "/public/data">
 <!ENTITY NCL_VER "6.5.0">
