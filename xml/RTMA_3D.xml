@@ -162,7 +162,7 @@
 
     &LIGHTNING_RESOURCES;
     &WALL_LIMIT_DA;
-    &RESERVATION_DA;
+    &RESERVATION;
     &ENVARS;
 
     <command>&JJOB_DIR;/launch.ksh &JJOB_DIR;/JRTMA3D_LIGHTNING</command>
@@ -213,17 +213,23 @@
   </task>
   </metatask>
 
-  <task name="radar_links" cycledefs="02-11hr,00hr,01hr" maxtries="3">
+  <metatask>
+  <var name="min">15 30 45 60 00 </var>
+  <var name="mm1">13 29 44 57 00 </var>
+  <var name="mm2">14 30 45 58 01 </var>
+  <var name="mm3">15 31 46 59 02 </var>
+  <var name="offset">-1:00:00 -1:00:00 -1:00:00 -1:00:00 00:00:00</var>
+  <task name="radar_link_#min#" cycledefs="02-11hr,00hr,01hr" maxtries="3">
 
     &RADAR_RESOURCES;
     &WALL_LIMIT_DA;
-    &RESERVATION_DA;
+    &RESERVATION;
     &ENVARS;
 
     <command>&JJOB_DIR;/launch.ksh &JJOB_DIR;/JRTMA3D_RADAR_LINKS</command>
     <cores>&RADARLINKS_PROC;</cores>
-    <jobname><cyclestr>&JOBNAME_PRE;_radarlinks_@H</cyclestr></jobname>
-    <join><cyclestr>&LOG_DIR;/radar_links_@Y@m@d@H00.log</cyclestr></join>
+    <jobname><cyclestr>&JOBNAME_PRE;_radarlink_#min#_@H</cyclestr></jobname>
+    <join><cyclestr>&LOG_DIR;/radar_link_#min#_@Y@m@d@H00.log</cyclestr></join>
 
     <envar>
       <name>START_TIME</name>
@@ -237,18 +243,30 @@
       <name>NSSL</name>
       <value>&RADAR_DIR;</value>
     </envar>
+    <envar>
+      <name>SUBH_TIME</name>
+      <value>#min#</value>
+    </envar>
 
     <dependency>
-      <timedep><cyclestr offset="&START_TIME_RADARLINKS;">@Y@m@d@H@M00</cyclestr></timedep>
+    <or>
+      <!-- for testing correctness of cyclestr in the ruby snippet
+      <sh> ls <cyclestr offset="-#offset#">&RADAR_DIR;/@Y@m@d-@H#mm1#*.MRMS_MergedReflectivityQC_00.50_@Y@m@d-@H*.grib2</cyclestr> </sh>
+      -->
+      <rb><cyclestr offset="#offset#">!Dir.glob('&RADAR_DIR;/@Y@m@d-@H#mm1#*.MRMS_MergedReflectivityQC_00.50_@Y@m@d-@H*.grib2').empty?</cyclestr></rb>
+      <rb><cyclestr offset="#offset#">!Dir.glob('&RADAR_DIR;/@Y@m@d-@H#mm2#*.MRMS_MergedReflectivityQC_00.50_@Y@m@d-@H*.grib2').empty?</cyclestr></rb>
+      <rb><cyclestr offset="#offset#">!Dir.glob('&RADAR_DIR;/@Y@m@d-@H#mm3#*.MRMS_MergedReflectivityQC_00.50_@Y@m@d-@H*.grib2').empty?</cyclestr></rb>
+    </or>
     </dependency>
 
   </task>
+  </metatask>
 
   <task name="radar_gsi" cycledefs="02-11hr,00hr,01hr" maxtries="3">
 
     &RADAR_RESOURCES;
     &WALL_LIMIT_DA;
-    &RESERVATION_DA;
+    &RESERVATION;
     &ENVARS;
 
     <command>&JJOB_DIR;/launch.ksh &JJOB_DIR;/JRTMA3D_RADAR</command>
@@ -291,7 +309,7 @@
 
     <dependency>
       <or>
-        <datadep><cyclestr>&DATAROOT;/@Y@m@d@H/obsprd/filelist_mrms</cyclestr></datadep>
+        <datadep minsize="128B"><cyclestr>&DATAROOT;/@Y@m@d@H/obsprd/filelist_mrms</cyclestr></datadep>
         <timedep><cyclestr offset="&START_TIME_RADAR;">@Y@m@d@H@M00</cyclestr></timedep>
       </or>
     </dependency>
@@ -305,7 +323,7 @@
 
       &RADAR_RESOURCES;
       &WALL_LIMIT_DA;
-      &RESERVATION_DA;
+      &RESERVATION;
       &ENVARS;
 
       <command>&JJOB_DIR;/launch.ksh &JJOB_DIR;/JRTMA3D_RADAR</command>
@@ -361,7 +379,7 @@
 
     &SATELLITE_RESOURCES;
     &WALL_LIMIT_DA;
-    &RESERVATION_DA;
+    &RESERVATION;
     &ENVARS;
 
     <command>&JJOB_DIR;/launch.ksh &JJOB_DIR;/JRTMA3D_SATELLITE_BUFR</command>
@@ -411,7 +429,7 @@
 
     &CONVENTIONAL_RESOURCES;
     &WALL_LIMIT_DA;
-    &RESERVATION_DA;
+    &RESERVATION;
     &ENVARS;
 
     <command>&JJOB_DIR;/launch.ksh &JJOB_DIR;/JRTMA3D_CONVENTIONAL</command>
@@ -504,7 +522,7 @@
 
     &CONVENTIONAL_RESOURCES;
     &WALL_LIMIT_DA;
-    &RESERVATION_DA;
+    &RESERVATION;
     &ENVARS;
 
     <command>&JJOB_DIR;/launch.ksh &JJOB_DIR;/JRTMA3D_CONVENTIONAL</command>
@@ -706,7 +724,7 @@
 
     &GSI_DIAG_RESOURCES;
     &WALL_LIMIT_DA;
-    &RESERVATION_DA;
+    &RESERVATION;
     &ENVARS;
 
     <command>&JJOB_DIR;/launch.ksh &JJOB_DIR;/JRTMA3D_GSI_DIAG</command>
