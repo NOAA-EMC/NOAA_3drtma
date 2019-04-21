@@ -132,6 +132,10 @@
       <name>MACHINE</name>
       <value>&MACHINE;</value>
     </envar>
+    <envar>
+      <name>jlogfile</name>
+      <value>&LOG_DIR;/jlogfiles</value>
+    </envar>
 '>
 
 ]>
