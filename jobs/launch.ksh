@@ -60,10 +60,7 @@ if [ "${MACHINE}" = "theia" ] || [ "${MACHINE}" = "jet" ] ; then    ### PBS job 
       export MPIRUN="mpiexec -np $np"
       ;;
     SLURM|slum)                                       # SLURM
-#     Not working for this version
-#     (need to remove "-envall -np $np" in the mpirun command line in low-level ex-shell scripts)
-      module load rocoto/1.3.0-RC3
-      module load slurm/18.08.6-2p1
+      module load slurm
       export MPIRUN="srun"
       ;;
     *)
