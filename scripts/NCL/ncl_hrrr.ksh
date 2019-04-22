@@ -1,0 +1,1 @@
+/home/rtrr/RTMA_3D/bin/NCL/ncl_hrrr.ksh
