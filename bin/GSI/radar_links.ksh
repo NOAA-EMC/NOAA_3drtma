@@ -47,6 +47,13 @@ if [ ! -d "${NSSL}" ]; then
   exit 1
 fi
 
+if [ ! "${SUBH_TIME}" ]; then
+  ${ECHO} "ERROR: \$SUBH_TIME is not defined!"
+  exit 1
+else
+  subh=${SUBH_TIME}
+fi
+
 # Create the obsprd directory if necessary and cd into it
 if [ ! -d "${DATAHOME}" ]; then
   ${MKDIR} -p ${DATAHOME}
@@ -65,8 +72,8 @@ MM2=`${DATE} +"%m" -d "${NEXT_HOUR}"`
 DD2=`${DATE} +"%d" -d "${NEXT_HOUR}"`
 HH2=`${DATE} +"%H" -d "${NEXT_HOUR}"`
 
-for subh in 00 15 30 45 60
-do
+#for subh in 00 15 30 45 60
+#do
   if [ $subh -ne 00 ]; then
     YYYY=$YYYY1
     MM=$MM1
@@ -83,9 +90,9 @@ do
   ${MKDIR} -p ${WORKDIR}
   cd ${WORKDIR}
   if [ $subh -eq 60 ]; then
-    mm1=57
+    mm1=59
     mm2=58
-    mm3=59
+    mm3=57
   elif [ $subh -eq 00 ]; then
     mm1=00
     mm2=01
@@ -108,10 +115,12 @@ do
       if [ -s $nsslfile ]; then
         echo 'Found '${nsslfile}
         numgrib2=`ls ${NSSL}/${YYYY}${MM}${DD}-${HH}${mm}*.MRMS_MergedReflectivityQC_*_${YYYY}${MM}${DD}-${HH}${mm}*.grib2 | wc -l`
-        if [ ${numgrib2} -ge 10 ] && [ ! -e filelist_mrms ]; then
+        if [ ${numgrib2} -ge 10 ]; then
+          ${RM} -f ${YYYY}${MM}${DD}-${HH}*.MRMS_MergedReflectivityQC*.grib2
           ln -sf ${NSSL}/${YYYY}${MM}${DD}-${HH}${mm}*.MRMS_MergedReflectivityQC_*_${YYYY}${MM}${DD}-${HH}${mm}*.grib2 . 
           ls ${YYYY}${MM}${DD}-${HH}${mm}*.MRMS_MergedReflectivityQC_*_${YYYY}${MM}${DD}-${HH}${mm}*.grib2 > filelist_mrms
           echo 'Creating links for SUBH: '${subh}
+          break 10
         fi
       fi
       ((s+=1))
@@ -120,6 +129,6 @@ do
   if [ ! -s filelist_mrms ]; then
     rm -f filelist_mrms
   fi
-done
+#done
 
 exit 0

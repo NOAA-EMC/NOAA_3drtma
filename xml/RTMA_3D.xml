@@ -137,7 +137,7 @@
 
     &LIGHTNING_RESOURCES;
     &WALL_LIMIT_DA;
-    &RESERVATION_DA;
+    &RESERVATION;
 
     <command>&SCRIPTS;/GSI/lightning.ksh</command>
     <cores>&LIGHTNING_PROC;</cores>
@@ -187,16 +187,22 @@
   </task>
   </metatask>
 
-  <task name="radar_links" cycledefs="02-11hr,00hr,01hr" maxtries="3">
+  <metatask>
+  <var name="min">15 30 45 60 00 </var>
+  <var name="mm1">13 29 44 57 00 </var>
+  <var name="mm2">14 30 45 58 01 </var>
+  <var name="mm3">15 31 46 59 02 </var>
+  <var name="offset">-1:00:00 -1:00:00 -1:00:00 -1:00:00 00:00:00</var>
+  <task name="radar_link_#min#" cycledefs="02-11hr,00hr,01hr" maxtries="3">
 
     &RADAR_RESOURCES;
     &WALL_LIMIT_DA;
-    &RESERVATION_DA;
+    &RESERVATION;
 
     <command>&SCRIPTS;/GSI/radar_links.ksh</command>
     <cores>&RADARLINKS_PROC;</cores>
-    <jobname><cyclestr>&JOBNAME_PRE;_radarlinks_@H</cyclestr></jobname>
-    <join><cyclestr>&LOG_DIR;/radar_links_@Y@m@d@H00.log</cyclestr></join>
+    <jobname><cyclestr>&JOBNAME_PRE;_radarlinks_#min#_@H</cyclestr></jobname>
+    <join><cyclestr>&LOG_DIR;/radar_links_#min#_@Y@m@d@H00.log</cyclestr></join>
 
     <envar>
       <name>START_TIME</name>
@@ -210,18 +216,30 @@
       <name>NSSL</name>
       <value>&RADAR_DIR;</value>
     </envar>
+    <envar>
+      <name>SUBH_TIME</name>
+      <value>#min#</value>
+    </envar>
 
     <dependency>
-      <timedep><cyclestr offset="&START_TIME_RADARLINKS;">@Y@m@d@H@M00</cyclestr></timedep>
+    <or>
+      <!-- for testing correctness of cyclestr in the ruby snippet
+      <sh> ls <cyclestr offset="-#offset#">&RADAR_DIR;/@Y@m@d-@H#mm1#*.MRMS_MergedReflectivityQC_00.50_@Y@m@d-@H*.grib2</cyclestr> </sh>
+      -->
+      <rb><cyclestr offset="#offset#">!Dir.glob('&RADAR_DIR;/@Y@m@d-@H#mm1#*.MRMS_MergedReflectivityQC_00.50_@Y@m@d-@H*.grib2').empty?</cyclestr></rb>
+      <rb><cyclestr offset="#offset#">!Dir.glob('&RADAR_DIR;/@Y@m@d-@H#mm2#*.MRMS_MergedReflectivityQC_00.50_@Y@m@d-@H*.grib2').empty?</cyclestr></rb>
+      <rb><cyclestr offset="#offset#">!Dir.glob('&RADAR_DIR;/@Y@m@d-@H#mm3#*.MRMS_MergedReflectivityQC_00.50_@Y@m@d-@H*.grib2').empty?</cyclestr></rb>
+    </or>
     </dependency>
 
   </task>
+  </metatask>
 
   <task name="radar_gsi" cycledefs="02-11hr,00hr,01hr" maxtries="3">
 
     &RADAR_RESOURCES;
     &WALL_LIMIT_DA;
-    &RESERVATION_DA;
+    &RESERVATION;
 
     <command>&SCRIPTS;/GSI/radar.ksh</command>
     <cores>&RADAR_PROC;</cores>
@@ -277,7 +295,7 @@
 
       &RADAR_RESOURCES;
       &WALL_LIMIT_DA;
-      &RESERVATION_DA;
+      &RESERVATION;
 
       <command>&SCRIPTS;/GSI/radar.ksh</command>
       <cores>&RADAR_PROC;</cores>
@@ -332,7 +350,7 @@
 
     &SATELLITE_RESOURCES;
     &WALL_LIMIT_DA;
-    &RESERVATION_DA;
+    &RESERVATION;
 
     <command>&SCRIPTS;/GSI/satellite_bufr.ksh</command>
     <cores>&SATELLITE_PROC;</cores>
@@ -381,7 +399,7 @@
 
     &CONVENTIONAL_RESOURCES;
     &WALL_LIMIT_DA;
-    &RESERVATION_DA;
+    &RESERVATION;
 
     <command>&SCRIPTS;/GSI/conventional.ksh</command>
     <cores>&CONVENTIONAL_PROC;</cores>
@@ -473,7 +491,7 @@
 
     &CONVENTIONAL_RESOURCES;
     &WALL_LIMIT_DA;
-    &RESERVATION_DA;
+    &RESERVATION;
 
     <command>&SCRIPTS;/GSI/conventional.ksh</command>
     <cores>&CONVENTIONAL_PROC;</cores>
@@ -673,7 +691,7 @@
 
     &GSI_DIAG_RESOURCES;
     &WALL_LIMIT_DA;
-    &RESERVATION_DA;
+    &RESERVATION;
 
     <command>&SCRIPTS;/GSI/gsi_diag.ksh</command>
     <cores>&GSI_DIAG_PROC;</cores>
