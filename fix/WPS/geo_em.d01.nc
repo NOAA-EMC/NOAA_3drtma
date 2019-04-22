@@ -1,1 +1,1 @@
-/home/rtrr/HRRR/static/WPS/geo_em.d01.nc
+/home/rtrr/HRRR_AK/static/WPS/geo_em.d01.nc
