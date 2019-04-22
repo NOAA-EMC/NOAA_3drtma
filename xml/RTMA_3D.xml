@@ -4,10 +4,10 @@
 
 <!ENTITY ACCOUNT "rtrr">
 <!ENTITY ACCOUNT_DA "rtrr">
-<!ENTITY SCHEDULER "moabtorque">
+<!ENTITY SCHEDULER "slurm">
 
-<!ENTITY PARTITION "kjet">
-<!ENTITY PARTITION_DA "kjet">
+<!ENTITY PARTITION "ujet">
+<!ENTITY PARTITION_DA "ujet">
 <!ENTITY QUEUE "batch">
 <!ENTITY RES_DA "rtma-kjet">
 <!ENTITY RES_POST "rtma-kjet">
