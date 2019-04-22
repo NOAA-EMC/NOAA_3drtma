@@ -1,1 +1,1 @@
-/home/rtrr/RTMA_3D/bin/NCL/ncl_hrrr_htxs1.ksh
+/home/rtrr/RTMA_3D/scripts/NCL/ncl_hrrr_htxs1.ksh

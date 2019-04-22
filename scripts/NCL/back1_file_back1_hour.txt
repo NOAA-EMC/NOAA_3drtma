@@ -1,1 +1,1 @@
-/home/rtrr/RTMA_3D/bin/NCL/back1_file_back1_hour.txt
+/home/rtrr/RTMA_3D/scripts/NCL/back1_file_back1_hour.txt

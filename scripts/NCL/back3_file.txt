@@ -1,1 +1,1 @@
-/home/rtrr/RTMA_3D/bin/NCL/back3_file.txt
+/home/rtrr/RTMA_3D/scripts/NCL/back3_file.txt
