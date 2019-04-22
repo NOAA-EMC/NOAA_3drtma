@@ -251,11 +251,11 @@
     <dependency>
     <or>
       <!-- for testing correctness of cyclestr in the ruby snippet
-      <sh> ls <cyclestr offset="-#offset#">&RADAR_DIR;/@Y@m@d-@H#mm1#*.MRMS_MergedReflectivityQC_00.50_@Y@m@d-@H*.grib2</cyclestr> </sh>
+      <sh> ls <cyclestr offset="-#offset#">&RADAR_DIR;/@Y@m@d-@H#mm1#*.MRMS_EXP_MergedReflectivityQC_00.50_@Y@m@d-@H*.grib2</cyclestr> </sh>
       -->
-      <rb><cyclestr offset="#offset#">!Dir.glob('&RADAR_DIR;/@Y@m@d-@H#mm1#*.MRMS_MergedReflectivityQC_00.50_@Y@m@d-@H*.grib2').empty?</cyclestr></rb>
-      <rb><cyclestr offset="#offset#">!Dir.glob('&RADAR_DIR;/@Y@m@d-@H#mm2#*.MRMS_MergedReflectivityQC_00.50_@Y@m@d-@H*.grib2').empty?</cyclestr></rb>
-      <rb><cyclestr offset="#offset#">!Dir.glob('&RADAR_DIR;/@Y@m@d-@H#mm3#*.MRMS_MergedReflectivityQC_00.50_@Y@m@d-@H*.grib2').empty?</cyclestr></rb>
+      <rb><cyclestr offset="#offset#">!Dir.glob('&RADAR_DIR;/@Y@m@d-@H#mm1#*.MRMS_EXP_MergedReflectivityQC_00.50_@Y@m@d-@H*.grib2').empty?</cyclestr></rb>
+      <rb><cyclestr offset="#offset#">!Dir.glob('&RADAR_DIR;/@Y@m@d-@H#mm2#*.MRMS_EXP_MergedReflectivityQC_00.50_@Y@m@d-@H*.grib2').empty?</cyclestr></rb>
+      <rb><cyclestr offset="#offset#">!Dir.glob('&RADAR_DIR;/@Y@m@d-@H#mm3#*.MRMS_EXP_MergedReflectivityQC_00.50_@Y@m@d-@H*.grib2').empty?</cyclestr></rb>
     </or>
     </dependency>
 
