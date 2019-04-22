@@ -7,7 +7,7 @@
 #DATAHOME="/tmp/obsprd" #/home/rtrr/hrrr/2019032720/obsprd"
 #START_TIME=2019042107
 #SUBH_TIME=$1
-#NSSL="/public/data/radar/mrms"
+#NSSL="/public/data/radar/nssl/mrms/alaska"
 #AWK="awk"; ECHO="echo"; SED="sed"; MKDIR="mkdir"; DATE="date"; RM="rm"
 
 # Make sure DATAHOME is defined and exists
@@ -98,14 +98,14 @@ HH2=`${DATE} +"%H" -d "${NEXT_HOUR}"`
       else
         ss=$s
       fi
-      nsslfile=${NSSL}/${YYYY}${MM}${DD}-${HH}${mm}${ss}.MRMS_MergedReflectivityQC_00.50_${YYYY}${MM}${DD}-${HH}${mm}${ss}.grib2
+      nsslfile=${NSSL}/${YYYY}${MM}${DD}-${HH}${mm}${ss}.MRMS_EXP_MergedReflectivityQC_00.50_${YYYY}${MM}${DD}-${HH}${mm}${ss}.grib2
       if [ -s $nsslfile ]; then
         echo 'Found '${nsslfile}
-        numgrib2=`ls ${NSSL}/${YYYY}${MM}${DD}-${HH}${mm}*.MRMS_MergedReflectivityQC_*_${YYYY}${MM}${DD}-${HH}${mm}*.grib2 | wc -l`
+        numgrib2=`ls ${NSSL}/${YYYY}${MM}${DD}-${HH}${mm}*.MRMS_EXP_MergedReflectivityQC_*_${YYYY}${MM}${DD}-${HH}${mm}*.grib2 | wc -l`
         if [ ${numgrib2} -ge 10 ]; then
           ${RM} -f ${YYYY}${MM}${DD}-${HH}*.MRMS_MergedReflectivityQC*.grib2
-          ln -sf ${NSSL}/${YYYY}${MM}${DD}-${HH}${mm}*.MRMS_MergedReflectivityQC_*_${YYYY}${MM}${DD}-${HH}${mm}*.grib2 . 
-          ls ${YYYY}${MM}${DD}-${HH}${mm}*.MRMS_MergedReflectivityQC_*_${YYYY}${MM}${DD}-${HH}${mm}*.grib2 > filelist_mrms
+          ln -sf ${NSSL}/${YYYY}${MM}${DD}-${HH}${mm}*.MRMS_EXP_MergedReflectivityQC_*_${YYYY}${MM}${DD}-${HH}${mm}*.grib2 . 
+          ls ${YYYY}${MM}${DD}-${HH}${mm}*.MRMS_EXP_MergedReflectivityQC_*_${YYYY}${MM}${DD}-${HH}${mm}*.grib2 > filelist_mrms
           echo 'Creating links for SUBH: '${subh}
           break 10
         fi
