@@ -2,18 +2,14 @@
 
 <!DOCTYPE workflow [
 
-<!ENTITY ACCOUNT "rtrr">
-<!ENTITY ACCOUNT_DA "rtrr">
+<!ENTITY ACCOUNT "RTMA-T2O">
+<!ENTITY ACCOUNT_DA "RTMA-T2O">
 <!ENTITY SCHEDULER "moabtorque">
 
-<!ENTITY PARTITION "kjet">
-<!ENTITY PARTITION_DA "kjet">
-<!ENTITY QUEUE "batch">
-<!ENTITY RES_DA "rtma-kjet">
-<!ENTITY RES_POST "rtma-kjet">
+<!ENTITY QUEUE "dev_shared">
 
 <!ENTITY SYSTEM_ID "RTMA_3D"> 
-<!ENTITY HOMEBASE_DIR "/home/rtrr/RTMA_3D">
+<!ENTITY HOMEBASE_DIR "/gpfs/dell2/stmp/Edward.Colon/RTMA_3D">
 <!ENTITY DATABASE_DIR "/home/rtrr/rtma_3d_databasedir">
 <!ENTITY JOBNAME_PRE "RTMA3D_reg">
 
