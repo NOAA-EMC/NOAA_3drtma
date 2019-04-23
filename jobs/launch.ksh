@@ -59,7 +59,7 @@ if [ "${MACHINE}" = "theia" ] || [ "${MACHINE}" = "jet" ] ; then    ### PBS job 
       export np=`cat $PBS_NODEFILE | wc -l`
       export MPIRUN="mpiexec -np $np"
       ;;
-    SLURM|slum)                                       # SLURM
+    SLURM|slurm)                                       # SLURM
       module load slurm
       export MPIRUN="srun"
       ;;
