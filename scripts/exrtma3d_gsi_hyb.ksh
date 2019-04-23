@@ -190,7 +190,8 @@ if [ ${HH} -eq ${update_SST} ]; then
   if [ -r "latest.SST" ]; then
     ${CP} ${STATIC_DIR}/UPP/RTG_SST_landmask.dat ./RTG_SST_landmask.dat
     ${CP} ${STATIC_DIR}/WPS/geo_em.d01.nc ./geo_em.d01.nc
-    ${MPIRUN} -np $np ${GSI_ROOT}/process_SST.exe > stdout_sstupdate 2>&1
+#   ${MPIRUN} -np $np ${GSI_ROOT}/process_SST.exe > stdout_sstupdate 2>&1
+    ${MPIRUN}         ${GSI_ROOT}/process_SST.exe > stdout_sstupdate 2>&1
   else
     ${ECHO} "ERROR: No latest SST file for update at ${time_str}!!!!"
   fi  
@@ -501,7 +502,8 @@ cp ${fixdir}/rap_satbias_starting_file.txt ./satbias_in
 cp ${fixdir}/rap_satbias_pc_starting_file.txt ./satbias_pc
 
 # Run GSI
-${MPIRUN} -np $np ${GSI} < gsiparm.anl > stdout 2>&1
+# ${MPIRUN} -np $np ${GSI} < gsiparm.anl > stdout 2>&1
+  ${MPIRUN}         ${GSI} < gsiparm.anl > stdout 2>&1
 error=$?
 if [ ${error} -ne 0 ]; then
   ${ECHO} "ERROR: ${GSI} crashed  Exit status=${error}"

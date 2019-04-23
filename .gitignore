@@ -22,6 +22,7 @@ rtma_dir
 workflow/*.xml
 workflow/*.sh
 workflow/*.ksh
+# excluding prep shell script
 !workflow/prep_*.sh
 
 # ignoring working directory (under dev/)

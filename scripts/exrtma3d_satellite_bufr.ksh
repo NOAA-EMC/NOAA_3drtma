@@ -118,7 +118,8 @@ EOF
 
 
 #  Run obs pre-processor
-${MPIRUN} -envall -np ${np} ${NASALARC} > stdout_satellite_bufr 2>&1
+# ${MPIRUN} -envall -np ${np} ${NASALARC} > stdout_satellite_bufr 2>&1
+  ${MPIRUN}                   ${NASALARC} > stdout_satellite_bufr 2>&1
 error=$?
 if [ ${error} -ne 0 ]; then
   ${ECHO} "ERROR: ${NASALARC} crashed  Exit status=${error}"

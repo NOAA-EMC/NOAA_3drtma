@@ -130,7 +130,8 @@ cat << EOF > mosaic.namelist
 EOF
 
 # Run obs pre-processor
-${MPIRUN} -envall -np ${np} ${MOSAIC} > stdout_radar 2>&1
+# ${MPIRUN} -envall -np ${np} ${MOSAIC} > stdout_radar 2>&1
+  ${MPIRUN}                   ${MOSAIC} > stdout_radar 2>&1
 error=$?
 if [ ${error} -ne 0 ]; then
   ${ECHO} "ERROR: ${MOSAIC} crashed  Exit status=${error}"
