@@ -200,7 +200,8 @@ ln -s ${CRTM}/NPOESS.IRland.EmisCoeff.bin NPOESS.IRland.EmisCoeff.bin
 ln -s ${CRTM}/NPOESS.IRsnow.EmisCoeff.bin NPOESS.IRsnow.EmisCoeff.bin
 
 # Run unipost
-${MPIRUN} -np $np ${POST}< itag
+# ${MPIRUN} -np $np ${POST}< itag
+  ${MPIRUN}         ${POST}< itag
 error=$?
 if [ ${error} -ne 0 ]; then
   ${ECHO} "${POST} crashed!  Exit status=${error}"

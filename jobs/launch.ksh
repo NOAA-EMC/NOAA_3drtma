@@ -22,16 +22,13 @@ if [ "${MACHINE}" = "jet" ] ; then
 
 # loading  Specific modules and configurations used in individual task 
 #   and path to some specific command/tool used
-  export AWK="/bin/awk --posix"
 
   case "$COMMAND" in
     *LIGHTNING*|*SATELLITE*|*GSI_DIAG*)
       export TAIL=/usr/bin/tail
-      export MPIRUN=mpiexec
       ;;
     *GSI_HYB*)
       export TAIL=/usr/bin/tail
-      export MPIRUN=mpirun
       ;;
     *POST*)
       module unload pnetcdf/1.6.1
@@ -40,15 +37,11 @@ if [ "${MACHINE}" = "jet" ] ; then
 #     export WGRIB2="/home/rtrr/HRRR/exec/UPP/wgrib2"    # 2.0.7 (used in GSD rap/hrrr)
       export WGRIB2=${WGRIB2:-"wgrib"}
       export BC=/usr/bin/bc
-      export MPIRUN=mpirun
       ;;
     *SMARTINIT*)
       export AWK="/bin/gawk --posix"
       export BC=/usr/bin/bc
       export GREP=/bin/grep
-      ;;
-    *)
-      export MPIRUN=${MPIRUN:-"mpirun"}
       ;;
   esac
   module list
@@ -72,14 +65,52 @@ if [ "${MACHINE}" = "theia" ] || [ "${MACHINE}" = "jet" ] ; then    ### PBS job 
 #     export jid=`echo ${PBS_JOBID} | awk -F'.' '{print $1}'`
       export jobid=${jobid:-"${job}.${jid}"}
       export np=`cat $PBS_NODEFILE | wc -l`
-      export MPIRUN=${MPIRUN:-"mpirun -np $np"}
       echo " number of cores : $np for job $job with id as $jobid "
+      export MPIRUN="mpiexec -np $np"
       ;;
     SLURM|slum)                                       # SLURM
-#     Not working for this version
-#     (need to remove "-envall -np $np" in the mpirun command line in low-level ex-shell scripts)
       module load rocoto/1.3.0-RC3
-      module load slurm/18.08.6-2p1
+#     module load slurm/18.08.6-2p1
+      module load slurm/18.08.7p1
+
+      export PBS_JOBID=${SLURM_JOB_ID}
+      export PBS_JOBNAME=${SLURM_JOB_NAME}
+      export PBS_NP=${SLURM_NTASKS}
+      export PBS_O_DIR=${SLURM_SUBMIT_DIR}
+      export job=${job:-"${PBS_JOBNAME}"}
+      export jid=`echo ${PBS_JOBID} | cut -f1 -d.`
+#     export jid=`echo ${PBS_JOBID} | awk -F'.' '{print $1}'`
+      export jobid=${jobid:-"${job}.${jid}"}
+      echo "$0 -->  jobid=$jobid"
+
+      cd ${SLURM_SUBMIT_DIR}
+      if [ ! -d ${SLURM_SUBMIT_DIR}/log ] ; then
+        mkdir -p ${SLURM_SUBMIT_DIR}/log
+      fi
+      slurm_hfile=${SLURM_SUBMIT_DIR}/log/hostfile.${SLURM_JOB_NAME}.${SLURM_JOB_ID}
+      export PBS_NODEFILE=${SLURM_SUBMIT_DIR}/log/pbs_nodefile.${SLURM_JOB_NAME}.${SLURM_JOB_ID}
+      scontrol show hostname $SLURM_NODELSIT > ${slurm_hfile}
+      cp ${slurm_hfile} $HOME/TestDir/PBS_NODEFILE
+      np=`cat ${slurm_hfile} | wc -l`
+      echo "launch.sh: ${SLURM_JOB_NAME} np=$np (in SLURM hostname)"
+      echo "launch.sh: ${SLURM_JOB_NAME} SLURM_NTASKS=${SLURM_NTASKS} "
+      echo "Launch.sh: ${SLURM_JOB_NAME} SLURM_JOB_NUM_NODES=${SLURM_JOB_NUM_NODES} "
+      echo "Launch.sh: ${SLURM_JOB_NAME} SLURM_TASKS_PER_NODE=${SLURM_TASKS_PER_NODE} "
+      echo "Launch.sh: ${SLURM_JOB_NAME} SLURM_JOB_NODELIST=$SLURM_JOB_NODELIST "
+      rm -f ${PBS_NODEFILE}
+      i=0
+      imax=${SLURM_NTASKS}
+      while [[ $i -lt ${SLURM_NTASKS} ]]
+      do
+        cat >> ${PBS_NODEFILE} << EOF
+ujet$i
+EOF
+        (( i += 1 ))
+      done
+      cp -p ${PBS_NODEFILE} $HOME/TestDir/PBS_NODEFILE
+      np=`cat $PBS_NODEFILE | wc -l`
+      echo "Launch.sh: ${SLURM_JOB_NAME} np=$np (in $PBS_NODEFILE)"
+#     export MPIRUN="srun -n ${np}"
       export MPIRUN="srun"
       ;;
     *)

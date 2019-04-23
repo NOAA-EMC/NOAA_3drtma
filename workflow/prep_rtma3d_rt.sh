@@ -73,18 +73,18 @@ set -x
 export startCDATE=201902131200              #yyyymmddhhmm - Starting day of RTMA3D run (mainly used for retrospective run)
 export endCDATE=201902131200                #yyyymmddhhmm - Ending day of RTMA3D run (mainly used for retrospective run) 
 
-export ExpDateWindows="* 04-06 2019 *"        # dd mm yyyy weekday (crontab-like date format, mainly used for real-time run)
+export ExpDateWindows="22-23 04 2019 *"        # dd mm yyyy weekday (crontab-like date format, mainly used for real-time run)
 
 export NET=rtma3d                           #selection of rtma3d (or rtma,urma)
 export RUN=rtma3d_rt                        #selection of rtma3d (or rtma,urma)
 export envir=""                             #environment (test, prod, dev, etc.)
 export run_envir=""                         #
-export expname="test"                       # experiment name
+export expname="slurm"                      # experiment name
 
 export NWROOT=${TOP_RTMA}                   #root directory for RTMA/URMA j-job scripts, scripts, parm files, etc. 
 
-export SCHEDULER="PBS"                      # SLURM (after 05/01/2019)
-                                            # PBS (no available after May 2019)
+export SCHEDULER="SLURM"                    # SLURM (after 05/01/2019)
+                                            # PBS (not available after May 2019)
 if [ ${SCHEDULER} = "PBS" ] || [ ${SCHEDULER} = "MOAB" ]; then
   SCHD_ATTRB="moabtorque"
 elif [ ${SCHEDULER} = "SLURM" ] || [ ${SCHEDULER} = "slurm" ]; then
@@ -105,7 +105,8 @@ if [ ${MACHINE} = "jet" ] ; then
   HOMEBASE_DIR=${NWROOT}               # path to system home directory
 
 # Path to top running directory
-  DATABASE_DIR="/mnt/lfs3/projects/hfv3gfs/Gang.Zhao/gsd_dev1_jjob_databasedir"
+# DATABASE_DIR="/mnt/lfs3/projects/hfv3gfs/Gang.Zhao/gsd_dev1_jjob_databasedir"
+  DATABASE_DIR="/mnt/lfs3/projects/hfv3gfs/Gang.Zhao/gsd_dev1_jjob_dbs4slurm"
 
 # Computational resources
   ACCOUNT="hfv3gfs"                    # account for CPU resources
@@ -115,7 +116,20 @@ if [ ${MACHINE} = "jet" ] ; then
   QUEUE_SVC="service"                  # queue/partition for transferring data
 
 
-  if [ ${SCHEDULER} = "PBS" ] || [ ${SCHEDULER} = "MOAB" ]; then
+  if [ ${SCHEDULER} = "SLURM" ] || [ ${SCHEDULER} = "slurm" ]; then
+
+    PARTITION="ujet"
+    PARTITION_DA="ujet"
+
+    RESERVATION="<native>--partition=&PARTITION; --export=ALL,SLURM_UMAK=022 --mail-type=NONE</native><queue>&QUEUE;</queue><account>&ACCOUNT;</account>"
+#   RESERVATION_DA="<native>--partition=&PARTITION_DA; --reservation=&RES_DA; --export=SLURM_UMAK=022 --mail-type=NONE</native><queue>&QUEUE;</queue><account>&ACCOUNT_DA;</account>"
+    RESERVATION_DA="<native>--partition=&PARTITION_DA; --export=ALL,SLURM_UMAK=022 --mail-type=NONE</native><queue>&QUEUE;</queue><account>&ACCOUNT_DA;</account>"
+    RESERVATION_SMARTINIT="<native>--partition=&PARTITION; --export=ALL,SLURM_UMAK=022 --mail-type=NONE</native><queue>&QUEUE;</queue><account>&ACCOUNT;</account>"
+#   RESERVATION_POST="<native>--partition=&PARTITION; --reservation=&RES_POST; --export=SLURM_UMAK=022 --mail-type=NONE</native><queue>&QUEUE;</queue><account>&ACCOUNT;</account>"
+    RESERVATION_POST="<native>--partition=&PARTITION; --export=ALL,SLURM_UMAK=022 --mail-type=NONE</native><queue>&QUEUE;</queue><account>&ACCOUNT;</account>"
+    RESERVATION_SERIAL="<native> --ntasks=1 --partition=&PARTITION; --export=ALL,SLURM_UMAK=022 --mail-type=NONE</native><queue>&QUEUE;</queue><account>&ACCOUNT;</account>"
+
+  elif [ ${SCHEDULER} = "PBS" ] || [ ${SCHEDULER} = "MOAB" ]; then
 
     PARTITION="xjet:vjet:sjet:tjet"
     PARTITION_DA="kjet"
@@ -488,7 +502,7 @@ cat > ${NWROOT}/workflow/${XML_FNAME} <<EOF
 <!ENTITY GSI_DIAG_RESOURCES "<walltime>00:05:00</walltime><memory>600M</memory>">
 <!ENTITY POST_RESOURCES "<walltime>00:45:00</walltime>">
 <!ENTITY NCL_RESOURCES "<walltime>00:55:00</walltime>">
-<!ENTITY NCL_SKEWT_RESOURCES "<walltime>00:25:00</walltime><memory>9G</memory>">
+<!ENTITY NCL_SKEWT_RESOURCES "<walltime>00:50:00</walltime><memory>9G</memory>">
 <!ENTITY NCL_HTXS_RESOURCES "<walltime>00:25:00</walltime><memory>9G</memory>">
 
 <!-- End gsi_hyb by 3 hr -->
@@ -531,52 +545,6 @@ EOF
 #
 #--- Definition for common Linux commands and tools
 #
-cat >> ${NWROOT}/workflow/${XML_FNAME} <<EOF 
-<!-- path to unix command NOT defined here in xml file (in module file and launch.ksh) -->
-<!-- Definition Block of Common System Commands -->
-<!-- ENTITY SYS_COMMANDS 
-   '
-EOF
-
-for lnxcmd in ${linux_cmd_list}
-do
-  case ${lnxcmd} in
-    cpfs)
-      if [ -f ${produtil_path}/ush/${lnxcmd} ] ; then
-        cmdpath="${lnxcmd}"
-      else
-        cmdpath="cp"
-      fi
-      ;;
-    cnvgrib|mpirun)
-       cmdpath="${lnxcmd}"
-      ;;
-    *)
-      if [ -f /bin/${lnxcmd} ] ; then
-        cmdpath="/bin/${lnxcmd}"
-      elif [ -f /usr/bin/${lnxcmd} ] ; then
-        cmdpath="usr/bin/${lnxcmd}"
-      else
-        cmdpath=""
-      fi
-      ;;
-  esac
-
-  LNXCMD=`echo ${lnxcmd} | tr '[:lower:]' '[:upper:]'`
-  
-  cat >> ${NWROOT}/workflow/${RUN}_${expname}.xml <<EOF 
-   <envar>
-        <name>${LNXCMD}</name>
-        <value>${cmdpath}</value>
-   </envar>
-EOF
-done
-
-# adding ending mark to this ENTITY definition just above
-cat >> ${NWROOT}/workflow/${RUN}_${expname}.xml <<EOF 
-   ' -->
-
-EOF
 
 #
 #--- adding the Ending Mark to end of whole ENTITY Definition Block
@@ -1370,8 +1338,9 @@ cat >> ${NWROOT}/workflow/${XML_FNAME} <<EOF
     &NCL_RESOURCES;
     &WALL_LIMIT_PP;
     &RESERVATION;
+    &ENVARS;
 
-    <command>&SCRIPTS;/NCL/ncl_hrrr.ksh</command>
+    <command>&JJOB_DIR;/launch.ksh &JJOB_DIR;/JRTMA3D_NCL_HRRR</command>
     <cores>&NCL_MAIN_PROC;</cores>
     <jobname><cyclestr>&JOBNAME_PRE;_ncl_@H_00</cyclestr></jobname>
     <join><cyclestr>&LOG_DIR;/ncl_@Y@m@d@H00_00.log</cyclestr></join>
@@ -1677,8 +1646,17 @@ if [ ${MACHINE} = 'theia' ] || [ ${MACHINE} = 'jet' ]; then
 
 module purge
 module load intel
-module load rocoto
+module load rocoto/1.3.0-RC3
+EOF
 
+  if [ ${SCHEDULER} = "SLURM" ] || [ ${SCHEDULER} = "slurm" ]; then
+    cat >> ${NWROOT}/workflow/${run_scriptname} <<EOF 
+module load slurm/18.08.7p1
+
+EOF
+  fi
+
+  cat >> ${NWROOT}/workflow/${run_scriptname} <<EOF 
 rocotorun -v 10 -w ${NWROOT}/workflow/${XML_FNAME} -d ${NWROOT}/workflow/${DB_FNAME}
 EOF
 
@@ -1690,8 +1668,17 @@ EOF
 
 module purge
 module load intel
-module load rocoto
+module load rocoto/1.3.0-RC3
+EOF
 
+  if [ ${SCHEDULER} = "SLURM" ] || [ ${SCHEDULER} = "slurm" ]; then
+    cat >> ${NWROOT}/workflow/${chk_scriptname} <<EOF 
+module load slurm/18.08.7p1
+
+EOF
+  fi
+
+  cat >> ${NWROOT}/workflow/${chk_scriptname} <<EOF 
 subhr="00"
 timewindow=\$1
 timewindow=\${timewindow:-"6"}

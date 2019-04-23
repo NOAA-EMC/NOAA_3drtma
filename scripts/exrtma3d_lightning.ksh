@@ -155,7 +155,8 @@ EOF
 cp ${FIX_ROOT}/prepobs_prep_RAP.bufrtable ./prepobs_prep.bufrtable
 
 # Run obs pre-processor
-${MPIRUN} -envall -np ${np} ${LIGHTNING} < lightning.namelist > stdout_lighting 2>&1
+# ${MPIRUN} -envall -np ${np} ${LIGHTNING} < lightning.namelist > stdout_lighting 2>&1
+  ${MPIRUN}                   ${LIGHTNING} < lightning.namelist > stdout_lighting 2>&1
 error=$?
 if [ ${error} -ne 0 ]; then
   ${ECHO} "ERROR: ${LIGHTNING} crashed  Exit status=${error}"
