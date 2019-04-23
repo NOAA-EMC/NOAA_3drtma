@@ -61,6 +61,10 @@ if [ "${MACHINE}" = "theia" ] || [ "${MACHINE}" = "jet" ] ; then    ### PBS job 
       ;;
     SLURM|slurm)                                       # SLURM
       module load slurm
+      export job=${job:-"${SLURM_JOB_NAME}"}
+      export jid=${SLURM_JOBID}
+      export jobid=${jobid:-"${job}.${jid}"}
+      export np=${SLURM_NNODES}
       export MPIRUN="srun"
       ;;
     *)
