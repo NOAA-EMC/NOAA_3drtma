@@ -6,8 +6,8 @@
 <!ENTITY ACCOUNT_DA "rtrr">
 <!ENTITY SCHEDULER "slurm">
 
-<!ENTITY PARTITION "ujet">
-<!ENTITY PARTITION_DA "ujet">
+<!ENTITY PARTITION "kjet">
+<!ENTITY PARTITION_DA "kjet">
 <!ENTITY QUEUE "batch">
 <!ENTITY RES_DA "rtma-kjet">
 <!ENTITY RES_POST "rtma-kjet">
