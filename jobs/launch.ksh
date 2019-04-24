@@ -59,11 +59,40 @@ if [ "${MACHINE}" = "theia" ] || [ "${MACHINE}" = "jet" ] ; then    ### PBS job 
       export np=`cat $PBS_NODEFILE | wc -l`
       export MPIRUN="mpiexec -np $np"
       ;;
-    SLURM|slum)                                       # SLURM
-#     Not working for this version
-#     (need to remove "-envall -np $np" in the mpirun command line in low-level ex-shell scripts)
-      module load rocoto/1.3.0-RC3
-      module load slurm/18.08.6-2p1
+    SLURM|slurm)                                      # SLURM
+      module load slurm
+      export job=${job:-"${SLURM_JOB_NAME}"}
+      export jid=${SLURM_JOBID}
+      export jobid=${jobid:-"${job}.${jid}"}
+
+      case "$COMMAND" in
+        *NCL_HRRR)
+          cd ${SLURM_SUBMIT_DIR}
+          if [ ! -d ${LOG_DIR}/nodefiles ] ; then
+            mkdir -p ${LOG_DIR}/nodefiles
+          fi
+          export PBS_NODEFILE=${LOG_DIR}/nodefiles/pbs_nodefile.${SLURM_JOB_NAME}.${SLURM_JOB_ID}
+          rm -f ${PBS_NODEFILE}
+          i=0
+          imax=${SLURM_NTASKS}
+          while [[ $i -lt ${SLURM_NTASKS} ]]
+          do
+            cat >> ${PBS_NODEFILE} << EOF
+jet$i
+EOF
+            (( i += 1 ))
+          done
+          np0=`cat $PBS_NODEFILE | wc -l`
+          export np=${SLURM_NTASKS}
+          if [[ $np != $np0 ]] ; then
+            echo "WARNING: launch.sh: wrong with setting up PBS_NODEFILE."
+          fi 
+          ;;
+        *)
+          export np=${SLURM_NTASKS}
+          ;;
+      esac
+#     export MPIRUN="srun -n ${np}"
       export MPIRUN="srun"
       ;;
     *)
