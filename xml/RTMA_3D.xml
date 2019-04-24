@@ -97,7 +97,7 @@
 <!ENTITY GSI_HYB_RESOURCES "<walltime>00:40:00</walltime>">
 <!ENTITY GSI_DIAG_RESOURCES "<walltime>00:05:00</walltime><memory>600M</memory>">
 <!ENTITY POST_RESOURCES "<walltime>00:45:00</walltime>">
-<!ENTITY NCL_RESOURCES "<walltime>00:55:00</walltime>">
+<!ENTITY NCL_RESOURCES "<walltime>01:15:00</walltime>">
 <!ENTITY NCL_SKEWT_RESOURCES "<walltime>00:25:00</walltime><memory>9G</memory>">
 <!ENTITY NCL_HTXS_RESOURCES "<walltime>00:25:00</walltime><memory>9G</memory>">
 
