@@ -59,11 +59,12 @@ if [ "${MACHINE}" = "theia" ] || [ "${MACHINE}" = "jet" ] ; then    ### PBS job 
       export np=`cat $PBS_NODEFILE | wc -l`
       export MPIRUN="mpiexec -np $np"
       ;;
-    SLURM|slum)                                       # SLURM
-#     Not working for this version
-#     (need to remove "-envall -np $np" in the mpirun command line in low-level ex-shell scripts)
-      module load rocoto/1.3.0-RC3
-      module load slurm/18.08.6-2p1
+    SLURM|slurm)                                       # SLURM
+      module load slurm
+      export job=${job:-"${SLURM_JOB_NAME}"}
+      export jid=${SLURM_JOBID}
+      export jobid=${jobid:-"${job}.${jid}"}
+      export np=${SLURM_NNODES}
       export MPIRUN="srun"
       ;;
     *)
