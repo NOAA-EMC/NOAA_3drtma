@@ -73,7 +73,7 @@ set -x
 export startCDATE=201902131200              #yyyymmddhhmm - Starting day of RTMA3D run (mainly used for retrospective run)
 export endCDATE=201902131200                #yyyymmddhhmm - Ending day of RTMA3D run (mainly used for retrospective run) 
 
-export ExpDateWindows="22-23 04 2019 *"        # dd mm yyyy weekday (crontab-like date format, mainly used for real-time run)
+export ExpDateWindows="22-24 04 2019 *"        # dd mm yyyy weekday (crontab-like date format, mainly used for real-time run)
 
 export NET=rtma3d                           #selection of rtma3d (or rtma,urma)
 export RUN=rtma3d_rt                        #selection of rtma3d (or rtma,urma)
@@ -118,8 +118,8 @@ if [ ${MACHINE} = "jet" ] ; then
 
   if [ ${SCHEDULER} = "SLURM" ] || [ ${SCHEDULER} = "slurm" ]; then
 
-    PARTITION="ujet"
-    PARTITION_DA="ujet"
+    PARTITION="ujet:vjet:xjet:kjet"
+    PARTITION_DA="kjet"
 
     RESERVATION="<native>--partition=&PARTITION; --export=ALL,SLURM_UMAK=022 --mail-type=NONE</native><queue>&QUEUE;</queue><account>&ACCOUNT;</account>"
 #   RESERVATION_DA="<native>--partition=&PARTITION_DA; --reservation=&RES_DA; --export=SLURM_UMAK=022 --mail-type=NONE</native><queue>&QUEUE;</queue><account>&ACCOUNT_DA;</account>"
@@ -131,8 +131,8 @@ if [ ${MACHINE} = "jet" ] ; then
 
   elif [ ${SCHEDULER} = "PBS" ] || [ ${SCHEDULER} = "MOAB" ]; then
 
-    PARTITION="xjet:vjet:sjet:tjet"
-    PARTITION_DA="kjet"
+    PARTITION="sjet:tjet"
+    PARTITION_DA="sjet:tjet"
 
     RESERVATION="<native>-l partition=&PARTITION; -W umask=022 -m n</native><queue>&QUEUE;</queue><account>&ACCOUNT;</account>"
 #   RESERVATION_DA="<native>-l partition=&PARTITION_DA;,flags=ADVRES:&RES_DA; -W umask=022 -m n</native><queue>&QUEUE;</queue><account>&ACCOUNT_DA;</account>"
@@ -1646,7 +1646,7 @@ if [ ${MACHINE} = 'theia' ] || [ ${MACHINE} = 'jet' ]; then
 
 module purge
 module load intel
-module load rocoto/1.3.0-RC3
+module load rocoto/1.3.0-RC4
 EOF
 
   if [ ${SCHEDULER} = "SLURM" ] || [ ${SCHEDULER} = "slurm" ]; then
@@ -1668,7 +1668,7 @@ EOF
 
 module purge
 module load intel
-module load rocoto/1.3.0-RC3
+module load rocoto/1.3.0-RC4
 EOF
 
   if [ ${SCHEDULER} = "SLURM" ] || [ ${SCHEDULER} = "slurm" ]; then
