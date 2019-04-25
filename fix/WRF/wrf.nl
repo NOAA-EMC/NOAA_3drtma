@@ -217,57 +217,6 @@
  stderr_logging                      = 0      ! disable output to stderr except for error messages
  /
 
- &chem
- chem_opt                            = 18,       0,
- chemdt                              = 0,        0,
- chem_in_opt                         = 1,        0,
- have_bcs_chem                       = .true.,  .false.,
-
- vertmix_onoff                       = 1,        1,
- enh_vermix                          = .true.,
- gas_drydep_opt                      = 0,        1,
- aer_drydep_opt                      = 111,      1,
- wetscav_onoff                       = -1,       0,
-
- biomass_burn_opt                    = 4,        0,
- bb_dcycle                           = .true.,  .true.,
- flam_part                           = 0.75,
- plumerise_flag                      = 2,
- plumerisefire_frq                   = 60,       0,
-
- chem_conv_tr                        = 0,        1,
- conv_tr_wetscav                     = 0,        1,
- conv_tr_aqchem                      = 0,        1,
-
- simple_dir_fdb                      = 0,
- simple_ind_fdb                      = 0,
-
- debug_chem                          = .false.,
- chemdiag                            = 111
-
- io_style_emissions                  = 0,
- emiss_opt                           = 0,        3,
- kemit                               = 0,
- emiss_opt_vol                       = 0,
- aircraft_emiss_opt                  = 0,
- phot_opt                            = 0,        3,
- photdt                              = 0,       30,
- bio_emiss_opt                       = 0,        1,
- ne_area                             = 0,
- bioemdt                             = 0,       30,
- gas_bc_opt                          = 0,        1,
- gas_ic_opt                          = 0,        1,
- aer_bc_opt                          = 0,        1,
- aer_ic_opt                          = 0,        1,
- seas_opt                            = 0,
- dust_opt                            = 0,
- dmsemis_opt                         = 0,
- aer_ra_feedback                     = 0,        0,
- aer_op_opt                          = 0,
- opt_pars_out                        = 0,
- diagnostic_chem                     = 0,
- /
-
  &namelist_quilt
  nio_tasks_per_group = 16,
  nio_groups = 1,
