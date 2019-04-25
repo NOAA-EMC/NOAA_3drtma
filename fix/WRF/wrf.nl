@@ -204,6 +204,8 @@
  relax_zone                          = 9,
  specified                           = .true., .false.,.false.,
  nested                              = .false., .true., .true.,
+ periodic_x                          = .true,
+ periodic_y                          = .true,
  /
 
  &grib2
