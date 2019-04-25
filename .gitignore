@@ -24,6 +24,14 @@ workflow/*.sh
 workflow/*.ksh
 !workflow/prep_*.sh
 
+# ignoring working xml and shell scripts under xml/
+xml/*.xml
+xml/*.sh
+xml/*.ksh
+!xml/prep_*.sh
+!xml/RTMA_3D.xml
+!xml/run_rtma_3d.ksh
+
 # ignoring working directory (under dev/)
 **/dev/
 

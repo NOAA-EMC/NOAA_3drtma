@@ -150,9 +150,9 @@
     <cyclestr>&LOG_DIR;/workflow_@Y@m@d@H.log</cyclestr>
   </log>
 
-  <cycledef group="00hr">00 00,12 24 04 2019 *</cycledef>
-  <cycledef group="01hr">00 01,13 24 04 2019 *</cycledef>
-  <cycledef group="02-11hr">00 02-11,14-23 24 04 2019 *</cycledef>
+  <cycledef group="00hr">00 00,12 24-26 04 2019 *</cycledef>
+  <cycledef group="01hr">00 01,13 24-26 04 2019 *</cycledef>
+  <cycledef group="02-11hr">00 02-11,14-23 24-26 04 2019 *</cycledef>
 
   <metatask>
 <!-- only need 60 for hourly running
