@@ -73,6 +73,7 @@
 <!ENTITY DATAROOT_PCYC "&DATABASE_DIR;/run">
 
 <!ENTITY POST_NAME "hrconus">
+<!ENTITY FCST_LENGTH "20"> <!--20 secconds -->
 
 <!ENTITY SMARTINIT_PROC "1">
 <!ENTITY CONVENTIONAL_PROC "1">
@@ -100,6 +101,7 @@
 <!ENTITY NCL_RESOURCES "<walltime>00:55:00</walltime>">
 <!ENTITY NCL_SKEWT_RESOURCES "<walltime>00:25:00</walltime><memory>9G</memory>">
 <!ENTITY NCL_HTXS_RESOURCES "<walltime>00:25:00</walltime><memory>9G</memory>">
+<!ENTITY UPDATE_VARS_RESOURCES "<walltime>00:08:00</walltime>">
 
 <!-- End gsi_hyb by 3 hr -->
 <!-- End all post-processing by 6 hrs -->
@@ -109,12 +111,15 @@
 <!ENTITY START_TIME_CONVENTIONAL "00:37:00">
 <!ENTITY START_TIME_GSI "01:40:00">
 <!ENTITY DEADLINE_DA "03:00:00">
+<!ENTITY DEADLINE_UV "03:00:00">
 <!ENTITY DEADLINE_PP "06:00:00">
 
 <!ENTITY WALL_LIMIT_DA '<deadline><cyclestr offset="&DEADLINE_DA;">@Y@m@d@H@M</cyclestr></deadline>'>
 <!ENTITY WALL_LIMIT_PP '<deadline><cyclestr offset="&DEADLINE_PP;">@Y@m@d@H@M</cyclestr></deadline>'>
+<!ENTITY WALL_LIMIT_UV '<deadline><cyclestr offset="&DEADLINE_UV;">@Y@m@d@H@M</cyclestr></deadline>'>
 
 <!ENTITY RESERVATION '<native>--mail-type=NONE</native><queue>&QUEUE;</queue><account>&ACCOUNT;</account><partition>&PARTITION;</partition>'>
+<!ENTITY RESERVATION_PRE '<native>--mail-type=NONE</native><queue>&QUEUE;</queue><account>&ACCOUNT;</account><partition>&PARTITION;</partition>'>
 <!ENTITY RESERVATION_DA '<native>--mail-type=NONE</native><queue>&QUEUE;</queue><account>&ACCOUNT_DA;</account><partition>&PARTITION_DA;</partition>'>
 <!ENTITY RESERVATION_SMARTINIT '<native>--mail-type=NONE</native><queue>&QUEUE;</queue><account>&ACCOUNT;</account><partition>&PARTITION;</partition>'>
 <!ENTITY RESERVATION_POST '<native>--mail-type=NONE</native><queue>&QUEUE;</queue><account>&ACCOUNT;</account><partition>&PARTITION;</partition>'>
@@ -162,7 +167,7 @@
 
     &LIGHTNING_RESOURCES;
     &WALL_LIMIT_DA;
-    &RESERVATION;
+    &RESERVATION_PRE;
     &ENVARS;
 
     <command>&JJOB_DIR;/launch.ksh &JJOB_DIR;/JRTMA3D_LIGHTNING</command>
@@ -223,7 +228,7 @@
 
     &RADAR_RESOURCES;
     &WALL_LIMIT_DA;
-    &RESERVATION;
+    &RESERVATION_PRE;
     &ENVARS;
 
     <command>&JJOB_DIR;/launch.ksh &JJOB_DIR;/JRTMA3D_RADAR_LINKS</command>
@@ -266,7 +271,7 @@
 
     &RADAR_RESOURCES;
     &WALL_LIMIT_DA;
-    &RESERVATION;
+    &RESERVATION_PRE;
     &ENVARS;
 
     <command>&JJOB_DIR;/launch.ksh &JJOB_DIR;/JRTMA3D_RADAR</command>
@@ -323,7 +328,7 @@
 
       &RADAR_RESOURCES;
       &WALL_LIMIT_DA;
-      &RESERVATION;
+      &RESERVATION_PRE;
       &ENVARS;
 
       <command>&JJOB_DIR;/launch.ksh &JJOB_DIR;/JRTMA3D_RADAR</command>
@@ -379,7 +384,7 @@
 
     &SATELLITE_RESOURCES;
     &WALL_LIMIT_DA;
-    &RESERVATION;
+    &RESERVATION_PRE;
     &ENVARS;
 
     <command>&JJOB_DIR;/launch.ksh &JJOB_DIR;/JRTMA3D_SATELLITE_BUFR</command>
@@ -429,7 +434,7 @@
 
     &CONVENTIONAL_RESOURCES;
     &WALL_LIMIT_DA;
-    &RESERVATION;
+    &RESERVATION_PRE;
     &ENVARS;
 
     <command>&JJOB_DIR;/launch.ksh &JJOB_DIR;/JRTMA3D_CONVENTIONAL</command>
@@ -522,7 +527,7 @@
 
     &CONVENTIONAL_RESOURCES;
     &WALL_LIMIT_DA;
-    &RESERVATION;
+    &RESERVATION_PRE;
     &ENVARS;
 
     <command>&JJOB_DIR;/launch.ksh &JJOB_DIR;/JRTMA3D_CONVENTIONAL</command>
@@ -771,6 +776,61 @@
 
   </task>
 
+  <task name="update_vars" cycledefs="02-11hr,00hr,01hr" maxtries="3">
+
+    &UPDATE_VARS_RESOURCES;
+    &WALL_LIMIT_UV;
+    &RESERVATION_DA;
+    &ENVARS;
+
+    <command>&JJOB_DIR;/launch.ksh &JJOB_DIR;/JRTMA3D_UPDATE_VARS</command>
+    <cores>&GSI_HYB_PROC;</cores>
+    <jobname><cyclestr>&JOBNAME_PRE;_update_vars_@H</cyclestr></jobname>
+    <join><cyclestr>&LOG_DIR;/update_vars_@Y@m@d@H00.log</cyclestr></join>
+
+    <envar>
+      <name>START_TIME</name>
+      <value><cyclestr>@Y@m@d@H</cyclestr></value>
+    </envar>
+    <envar>
+      <name>DATABASE_DIR</name>
+      <value>&DATABASE_DIR;</value>
+    </envar>
+    <envar>
+      <name>GSI_ROOT</name>
+      <value>&GSI_ROOT;</value>
+    </envar>
+    <envar>
+      <name>FCST_LENGTH</name>
+      <value>&FCST_LENGTH;</value>
+    </envar>
+    <envar>
+      <name>WRF_ROOT</name>
+      <value>&WRF_ROOT;</value>
+    </envar>
+    <envar>
+      <name>STATIC_DIR</name>
+      <value>&STATIC_DIR;/WRF</value>
+    </envar>
+    <envar>
+      <name>DATAROOT</name>
+      <value>&DATAROOT;</value>
+    </envar>
+    <envar>
+      <name>DATAGSIHOME</name>
+      <value><cyclestr>&DATAROOT;/@Y@m@d@H/gsiprd</cyclestr></value>
+    </envar>
+    <envar>
+      <name>DATAHOME</name>
+      <value><cyclestr>&DATAROOT;/@Y@m@d@H/wrfprd</cyclestr></value>
+    </envar>
+
+    <dependency>
+        <taskdep task="gsi_hyb"/>
+    </dependency>
+
+  </task>
+
   <task name="post_00" cycledefs="02-11hr,00hr,01hr" maxtries="3">
 
     &POST_RESOURCES;
@@ -829,7 +889,7 @@
     </envar>
 
     <dependency>
-      <taskdep task="gsi_hyb"/>
+      <taskdep task="update_vars"/>
     </dependency>
 
   </task>
