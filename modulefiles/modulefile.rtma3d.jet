@@ -58,10 +58,9 @@
   export BC=/usr/bin/bc
   export WHICH=/usr/bin/which
   export GREP=/usr/bin/grep
+  export NCKS=ncks
 
   export NCDUMP=ncdump
-
-  export MPIRUN=mpirun
 
 #--- NCL only runs at Jet to generate web graphics
 #  It will not run at operation. Porting to other platform is not availabe yet.
