@@ -101,7 +101,7 @@
 <!ENTITY NCL_RESOURCES "<walltime>00:55:00</walltime>">
 <!ENTITY NCL_SKEWT_RESOURCES "<walltime>00:25:00</walltime><memory>9G</memory>">
 <!ENTITY NCL_HTXS_RESOURCES "<walltime>00:25:00</walltime><memory>9G</memory>">
-<!ENTITY UPDATE_VARS_RESOURCES "<walltime>00:20:00</walltime>">
+<!ENTITY UPDATE_VARS_RESOURCES "<walltime>00:08:00</walltime>">
 
 <!-- End gsi_hyb by 3 hr -->
 <!-- End all post-processing by 6 hrs -->
