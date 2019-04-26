@@ -202,7 +202,7 @@
  spec_bdy_width                      = 10,
  spec_zone                           = 1,
  relax_zone                          = 9,
- specified                           = .true., .false.,.false.,
+ specified                           = .false., .false.,.false.,
  nested                              = .false., .true., .true.,
  periodic_x                          = .true,
  periodic_y                          = .true,
