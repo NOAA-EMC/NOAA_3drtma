@@ -2,19 +2,18 @@
 
 <!DOCTYPE workflow [
 
-<!ENTITY ACCOUNT "rtrr">
-<!ENTITY ACCOUNT_DA "rtrr">
+<!ENTITY ACCOUNT "hfv3gfs">
+<!ENTITY ACCOUNT_DA "hfv3gfs">
 <!ENTITY SCHEDULER "slurm">
 
 <!ENTITY PARTITION "kjet">
 <!ENTITY PARTITION_DA "kjet">
 <!ENTITY QUEUE "batch">
-<!ENTITY RES_DA "rtma-kjet">
-<!ENTITY RES_POST "rtma-kjet">
+<!ENTITY RES_DA "kjet">
 
 <!ENTITY SYSTEM_ID "RTMA_3D"> 
-<!ENTITY HOMEBASE_DIR "/home/rtrr/RTMA_3D">
-<!ENTITY DATABASE_DIR "/home/rtrr/rtma_3d_databasedir">
+<!ENTITY HOMEBASE_DIR "/home/Edward.Colon/EMC_noaa-3drtma">
+<!ENTITY DATABASE_DIR "/mnt/lfs3/projects/hfv3gfs/Edward.Colon/rtma_3d_databasedir">
 <!ENTITY JOBNAME_PRE "RTMA3D_reg">
 
 <!ENTITY OBS_DIR "/public/data">
@@ -68,9 +67,9 @@
 
 <!ENTITY LOG_DIR "&DATABASE_DIR;/log">
 <!ENTITY DATAROOT_ENS "&DATABASE_DIR;/gfsenkf">
-<!ENTITY DATAROOT "&DATABASE_DIR;/run">
-<!ENTITY DATAROOT_BC "&DATABASE_DIR;/run">
-<!ENTITY DATAROOT_PCYC "&DATABASE_DIR;/run">
+<!ENTITY DATAROOT "&DATABASE_DIR;/data">
+<!ENTITY DATAROOT_BC "&DATABASE_DIR;/data">
+<!ENTITY DATAROOT_PCYC "&DATABASE_DIR;/data">
 
 <!ENTITY POST_NAME "hrconus">
 
@@ -114,8 +113,8 @@
 <!ENTITY WALL_LIMIT_DA '<deadline><cyclestr offset="&DEADLINE_DA;">@Y@m@d@H@M</cyclestr></deadline>'>
 <!ENTITY WALL_LIMIT_PP '<deadline><cyclestr offset="&DEADLINE_PP;">@Y@m@d@H@M</cyclestr></deadline>'>
 
-<!ENTITY RESERVATION '<native>--mail-type=NONE --reservation=&RES_DA;</native><queue>&QUEUE;</queue><account>&ACCOUNT;</account><partition>&PARTITION;</partition>'>
-<!ENTITY RESERVATION_DA '<native>--mail-type=NONE --reservation=&RES_DA;</native><queue>&QUEUE;</queue><account>&ACCOUNT_DA;</account><partition>&PARTITION_DA;</partition>'>
+<!ENTITY RESERVATION '<native>--mail-type=NONE</native><queue>&QUEUE;</queue><account>&ACCOUNT;</account><partition>&PARTITION;</partition>'>
+<!ENTITY RESERVATION_DA '<native>--mail-type=NONE</native><queue>&QUEUE;</queue><account>&ACCOUNT_DA;</account><partition>&PARTITION_DA;</partition>'>
 <!ENTITY RESERVATION_SMARTINIT '<native>--mail-type=NONE</native><queue>&QUEUE;</queue><account>&ACCOUNT;</account><partition>&PARTITION;</partition>'>
 <!ENTITY RESERVATION_POST '<native>--mail-type=NONE</native><queue>&QUEUE;</queue><account>&ACCOUNT;</account><partition>&PARTITION;</partition>'>
 
