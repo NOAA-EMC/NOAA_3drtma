@@ -58,6 +58,7 @@
   export BC=/usr/bin/bc
   export WHICH=/usr/bin/which
   export GREP=/usr/bin/grep
+  export NCKS=ncks
 
   export NCDUMP=ncdump
 
