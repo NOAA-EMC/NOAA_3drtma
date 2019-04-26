@@ -120,34 +120,16 @@ if [ "`stat -f -c %T ${workdir}`" == "lustre" ]; then
   lfs setstripe --count 8 ${workdir}
 fi
 cd ${workdir}
+
 ${CP} ${STATIC_DIR}/wrf.nl ${WRF_NAMELIST}
 
 # Check to make sure the wrfinput_d01 file exists
 if [ -r ${DATAGSIHOME}/wrf_inout ]; then
   ${ECHO} " Initial condition ${DATAGSIHOME}/wrf_inout "
-  ${LN} -s ${DATAGSIHOME}/wrf_inout . #to insert land surface variables
   ${LN} -s ${DATAGSIHOME}/wrf_inout ${DATAHOME}/wrfinput_d01
   #${LN} -s ${DATAHOME}/wrfinput_d01 ${DATAHOME}/wrfvar_output
 else
   ${ECHO} "ERROR: ${DATAGSIHOME}/wrf_inout does not exist, or is not readable"
-  exit 1
-fi
-
-# Insert land surface variables into the wrf_inout file
-HH=`echo ${time_str} | cut -c12-13`
-HRRR_DIR="/home/rtrr/hrrr"
-if [ -r "${HRRR_DIR}/surface/wrfout_sfc_${HH}" ]; then
-  echo "insert Surface fields based on ${HRRR_DIR}/surface/wrfout_sfc_${HH} "
-  ${LN} -s ${HRRR_DIR}/surface/wrfout_sfc_${HH} ./wrfout_d01_save
-  ${MPIRUN} ${GSI_ROOT}/full_cycle_surface.exe > stdout_cycleSurface 2>&1
-  error=$?
-  if [ ${error} -ne 0 ]; then
-    ${ECHO} "ERROR: full_cycle_surface.exe crashed  Exit status=${error}"
-  fi
-# No time matched HRRR land surface file available
-else
-  ${ECHO} "${HRRR_DIR}/surface/wrfout_sfc_${HH} does not exist!!"
-  ${ECHO} "ERROR: No land surface data avaialable for background at ${time_str}!!!!"
   exit 1
 fi
 
