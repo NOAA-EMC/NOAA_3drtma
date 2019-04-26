@@ -229,16 +229,16 @@ if [ ${error} -ne 0 ]; then
   ${ECHO} "ERROR: ${WRF} exited with status: ${error}"
   exit ${error}
 else
-  # Check to see if the output is there:
-  endtime_str=`${DATE} +%Y-%m-%d_%H_%M_%S -d "${START_TIME}  ${FCST_LENGTH} seconds"`
-  if [ ! -e "wrfout_d01_${endtime_str}" ]; then
-    ${ECHO} "${WRF} failed to complete"
+  # Check to see if the 0h output is there:
+  if [ ! -e "wrfout_d01_${time_str}" ]; then
+    ${ECHO} "${WRF} failed at the first time step!"
     exit 1
   fi 
   
   # Output successful so write status to log
-  ${ECHO} " Cycle ${YYYYMMDDHH}: ARW finished successfully at `${DATE}`" >> ${DATABASE_DIR}/loghistory/update_vars.log
-  ${NCKS} -A -H -v REFL_10CM,U10,V10 wrfout_d01_${endtime_str} ${DATAGSIHOME}/wrf_inout
+  #${ECHO} " Cycle ${YYYYMMDDHH}: ARW finished successfully at `${DATE}`" >> ${DATABASE_DIR}/loghistory/update_vars.log
+  ${ECHO} "Assemble  REFL_10CM,U10,V10 back into wrf_inout"
+  ${NCKS} -A -H -v REFL_10CM,U10,V10 wrfout_d01_${time_str} ${DATAGSIHOME}/wrf_inout
 
   ${ECHO} "update_vars.ksh completed successfully at `${DATE}`"
 fi
