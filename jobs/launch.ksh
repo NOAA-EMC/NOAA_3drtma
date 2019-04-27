@@ -69,8 +69,7 @@ if [ "${MACHINE}" = "theia" ] || [ "${MACHINE}" = "jet" ] ; then    ### PBS job 
       export MPIRUN="mpiexec -np $np"
       ;;
     SLURM|slum)                                       # SLURM
-      module load rocoto/1.3.0-RC3
-#     module load slurm/18.08.6-2p1
+      module load rocoto/1.3.0-RC5
       module load slurm/18.08.7p1
 
       export PBS_JOBID=${SLURM_JOB_ID}
@@ -84,20 +83,21 @@ if [ "${MACHINE}" = "theia" ] || [ "${MACHINE}" = "jet" ] ; then    ### PBS job 
       echo "$0 -->  jobid=$jobid"
 
       cd ${SLURM_SUBMIT_DIR}
-      if [ ! -d ${SLURM_SUBMIT_DIR}/log ] ; then
-        mkdir -p ${SLURM_SUBMIT_DIR}/log
+      if [ ! -d ${LOG_DIR}/log ] ; then
+        mkdir -p ${LOG_DIR}/log
       fi
-      slurm_hfile=${SLURM_SUBMIT_DIR}/log/hostfile.${SLURM_JOB_NAME}.${SLURM_JOB_ID}
-      export PBS_NODEFILE=${SLURM_SUBMIT_DIR}/log/pbs_nodefile.${SLURM_JOB_NAME}.${SLURM_JOB_ID}
+      slurm_hfile=${LOG_DIR}/log/hostfile.${SLURM_JOB_NAME}.${SLURM_JOB_ID}
+      export PBS_NODEFILE=${LOG_DIR}/log/pbs_nodefile.${SLURM_JOB_NAME}.${SLURM_JOB_ID}
       scontrol show hostname $SLURM_NODELSIT > ${slurm_hfile}
-      cp ${slurm_hfile} $HOME/TestDir/PBS_NODEFILE
       np=`cat ${slurm_hfile} | wc -l`
       echo "launch.sh: ${SLURM_JOB_NAME} np=$np (in SLURM hostname)"
       echo "launch.sh: ${SLURM_JOB_NAME} SLURM_NTASKS=${SLURM_NTASKS} "
       echo "Launch.sh: ${SLURM_JOB_NAME} SLURM_JOB_NUM_NODES=${SLURM_JOB_NUM_NODES} "
       echo "Launch.sh: ${SLURM_JOB_NAME} SLURM_TASKS_PER_NODE=${SLURM_TASKS_PER_NODE} "
       echo "Launch.sh: ${SLURM_JOB_NAME} SLURM_JOB_NODELIST=$SLURM_JOB_NODELIST "
-      rm -f ${PBS_NODEFILE}
+      if [ -f ${PBS_NODEFILE} ] ; then
+        rm -f ${PBS_NODEFILE}
+      fi
       i=0
       imax=${SLURM_NTASKS}
       while [[ $i -lt ${SLURM_NTASKS} ]]
@@ -107,7 +107,6 @@ ujet$i
 EOF
         (( i += 1 ))
       done
-      cp -p ${PBS_NODEFILE} $HOME/TestDir/PBS_NODEFILE
       np=`cat $PBS_NODEFILE | wc -l`
       echo "Launch.sh: ${SLURM_JOB_NAME} np=$np (in $PBS_NODEFILE)"
 #     export MPIRUN="srun -n ${np}"

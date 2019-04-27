@@ -12,6 +12,7 @@ set -x
 # for the NCO running enviroment
 #######################################################
 
+export jlogfile=${jlogfile:-"${LOG_DIR}/jlogfile_${PDY}${cyc}"}
 
 ######################
 # Execute the script.

@@ -73,7 +73,7 @@ set -x
 export startCDATE=201902131200              #yyyymmddhhmm - Starting day of RTMA3D run (mainly used for retrospective run)
 export endCDATE=201902131200                #yyyymmddhhmm - Ending day of RTMA3D run (mainly used for retrospective run) 
 
-export ExpDateWindows="22-24 04 2019 *"        # dd mm yyyy weekday (crontab-like date format, mainly used for real-time run)
+export ExpDateWindows="26 04 2019 *"        # dd mm yyyy weekday (crontab-like date format, mainly used for real-time run)
 
 export NET=rtma3d                           #selection of rtma3d (or rtma,urma)
 export RUN=rtma3d_rt                        #selection of rtma3d (or rtma,urma)
@@ -106,7 +106,7 @@ if [ ${MACHINE} = "jet" ] ; then
 
 # Path to top running directory
 # DATABASE_DIR="/mnt/lfs3/projects/hfv3gfs/Gang.Zhao/gsd_dev1_jjob_databasedir"
-  DATABASE_DIR="/mnt/lfs3/projects/hfv3gfs/Gang.Zhao/gsd_dev1_jjob_dbs4slurm"
+  DATABASE_DIR="/mnt/lfs3/projects/hfv3gfs/Gang.Zhao/gsd_dev1_jjob_dbs4slurm2"
 
 # Computational resources
   ACCOUNT="hfv3gfs"                    # account for CPU resources
@@ -118,16 +118,16 @@ if [ ${MACHINE} = "jet" ] ; then
 
   if [ ${SCHEDULER} = "SLURM" ] || [ ${SCHEDULER} = "slurm" ]; then
 
-    PARTITION="ujet:vjet:xjet:kjet"
+    PARTITION="kjet"
     PARTITION_DA="kjet"
 
-    RESERVATION="<native>--partition=&PARTITION; --export=ALL,SLURM_UMAK=022 --mail-type=NONE</native><queue>&QUEUE;</queue><account>&ACCOUNT;</account>"
+    RESERVATION="<native>--export=ALL,SLURM_UMAK=022 --mail-type=NONE</native><queue>&QUEUE;</queue><account>&ACCOUNT;</account><partition>&PARTITION;</partition>"
 #   RESERVATION_DA="<native>--partition=&PARTITION_DA; --reservation=&RES_DA; --export=SLURM_UMAK=022 --mail-type=NONE</native><queue>&QUEUE;</queue><account>&ACCOUNT_DA;</account>"
-    RESERVATION_DA="<native>--partition=&PARTITION_DA; --export=ALL,SLURM_UMAK=022 --mail-type=NONE</native><queue>&QUEUE;</queue><account>&ACCOUNT_DA;</account>"
-    RESERVATION_SMARTINIT="<native>--partition=&PARTITION; --export=ALL,SLURM_UMAK=022 --mail-type=NONE</native><queue>&QUEUE;</queue><account>&ACCOUNT;</account>"
+    RESERVATION_DA="<native>--export=ALL,SLURM_UMAK=022 --mail-type=NONE</native><queue>&QUEUE;</queue><account>&ACCOUNT_DA;</account><partition>&PARTITION;</partition>"
+    RESERVATION_SMARTINIT="<native>--export=ALL,SLURM_UMAK=022 --mail-type=NONE</native><queue>&QUEUE;</queue><account>&ACCOUNT;</account>"
 #   RESERVATION_POST="<native>--partition=&PARTITION; --reservation=&RES_POST; --export=SLURM_UMAK=022 --mail-type=NONE</native><queue>&QUEUE;</queue><account>&ACCOUNT;</account>"
-    RESERVATION_POST="<native>--partition=&PARTITION; --export=ALL,SLURM_UMAK=022 --mail-type=NONE</native><queue>&QUEUE;</queue><account>&ACCOUNT;</account>"
-    RESERVATION_SERIAL="<native> --ntasks=1 --partition=&PARTITION; --export=ALL,SLURM_UMAK=022 --mail-type=NONE</native><queue>&QUEUE;</queue><account>&ACCOUNT;</account>"
+    RESERVATION_POST="<native>--export=ALL,SLURM_UMAK=022 --mail-type=NONE</native><queue>&QUEUE;</queue><account>&ACCOUNT;</account><partition>&PARTITION;</partition>"
+    RESERVATION_SERIAL="<native>--ntasks=1 --export=ALL,SLURM_UMAK=02  --mail-type=NONE</native><queue>&QUEUE;</queue><account>&ACCOUNT;</account><partition>&PARTITION;</partition>"
 
   elif [ ${SCHEDULER} = "PBS" ] || [ ${SCHEDULER} = "MOAB" ]; then
 
@@ -538,7 +538,28 @@ cat > ${NWROOT}/workflow/${XML_FNAME} <<EOF
     <envar>
       <name>MACHINE</name>
       <value>&MACHINE;</value>
-    </envar>'>
+    </envar>
+    <envar>
+      <name>LOG_DIR</name>
+      <value>&LOG_DIR;</value>
+    </envar>
+    <envar>
+      <name>jlogfile</name>
+      <value><cyclestr>&LOG_DIR;/jlogfile_@Y@m@d@H</cyclestr></value>
+    </envar>
+    <envar>
+      <name>PDY</name>
+      <value><cyclestr>@Y@m@d</cyclestr></value>
+    </envar>
+    <envar>
+      <name>cyc</name>
+      <value><cyclestr>@H</cyclestr></value>
+    </envar>
+    <envar>
+      <name>subcyc</name>
+      <value><cyclestr>@M</cyclestr></value>
+    </envar>
+   '>
 
 EOF
 
@@ -1646,7 +1667,7 @@ if [ ${MACHINE} = 'theia' ] || [ ${MACHINE} = 'jet' ]; then
 
 module purge
 module load intel
-module load rocoto/1.3.0-RC4
+module load rocoto/1.3.0-RC5
 EOF
 
   if [ ${SCHEDULER} = "SLURM" ] || [ ${SCHEDULER} = "slurm" ]; then
@@ -1668,7 +1689,7 @@ EOF
 
 module purge
 module load intel
-module load rocoto/1.3.0-RC4
+module load rocoto/1.3.0-RC5
 EOF
 
   if [ ${SCHEDULER} = "SLURM" ] || [ ${SCHEDULER} = "slurm" ]; then

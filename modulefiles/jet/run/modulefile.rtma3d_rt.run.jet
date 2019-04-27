@@ -61,7 +61,7 @@
 
   export NCDUMP=ncdump
 
-  export MPIRUN=mpirun
+# export MPIRUN=mpirun
 
 #--- for NCL (defined in ncl scripts)
 # XARGS=${XARGS:-/usr/bin/xargs}
