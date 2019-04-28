@@ -385,7 +385,7 @@ nummem=`more filelist03 | wc -l`
 nummem=$((nummem - 3 ))
 if [[ ${nummem} -eq 80 ]]; then
   echo "Do hybrid with ${memname}"
-  beta1_inv=0.50 ##0.15
+  beta1_inv=0.15
   ifhyb=.true.
   ${ECHO} " Cycle ${YYYYMMDDHH}: GSI hybrid uses ${memname} with n_ens=${nummem}" >> ${logfile}
 fi
