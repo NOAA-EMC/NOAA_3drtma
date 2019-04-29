@@ -95,7 +95,7 @@ ${LN} -s ${FIXwps}/hrrr_geo_em.d01.nc           ./geo_em.d01.nc
 # copy the excutable file of processing NASA LaRC Cloud data
   ${CP} ${EXECrtma3d}/${exefile_name_cloud}   ./rtma3d_process_cloud
 
-  runline="${MPIRUN}  -np ${np}  ./rtma3d_process_cloud"
+  runline="${MPIRUN}             ./rtma3d_process_cloud"
   $runline >> ${pgmout} 2>errfile
   export err=$?; err_chk
 

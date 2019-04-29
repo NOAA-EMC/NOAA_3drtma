@@ -17,7 +17,7 @@
 #
 # Section 1: loading modules used in building RTMA package
 #            This section is skipped here.
-#            In jobs/launch.sh, 
+#            In jobs/launch.ksh, 
 #              it loads building modules first,
 #              then load this module file.
 #

@@ -86,24 +86,153 @@ export expname="${envir}"                   # experiment name
 
 export NWROOT=${TOP_RTMA}                   #root directory for RTMA/URMA j-job scripts, scripts, parm files, etc. 
 
-# Note: the definition for the following variables depends on the machine.
-export QUEUE="batch"                        #user-specified processing queue
-export QUEUE_DBG="debug"                    #user-specified processing queue -- debug
-export QUEUE_SVC="service"                  #user-specified transfer queue
-export ACCOUNT="fv3-cpu"                    #account for CPU resources
-# export ACCOUNT="hfv3gfs"                    #account for CPU resources
-
-#
-#--- ptmp_base: top running and arching directory
-#
-export ptmp_base="/scratch3/NCEPDEV/stmp1/${USER}/wrkdir_${NET}"  #base subdirectory for all subsequent working and storage directories
-# export ptmp_base="/mnt/lfs3/projects/hfv3gfs/${USER}/wrkdir_${NET}"  #base subdirectory for all subsequent working and storage directories
-if [[ ! -d ${ptmp_base} ]] ; then
-    echo " ${ptmp_base} does NOT exist !"
-    echo " Please define the variable and create this directory."
-    echo " Abort! "
-    exit 1
+export SCHEDULER="SLURM"                    # SLURM (after 05/01/2019)
+if [ ${SCHEDULER} = "PBS" ] || [ ${SCHEDULER} = "MOAB" ]; then
+  SCHD_ATTRB="moabtorque"
+elif [ ${SCHEDULER} = "SLURM" ] || [ ${SCHEDULER} = "slurm" ]; then
+  SCHD_ATTRB="slurm"
+else
+  echo "user specified an Unknown Scheduler: ${SCHEDULER}. Please re-set : either PBS or SLURM "
+  exit 1
 fi
+
+
+#====================================================================#
+# Note: Definition for the following variables 
+#       depends on the machine platform, 
+#       and different user and/or experiment.
+#====================================================================#
+if [ ${MACHINE} = "theia" ] ; then
+
+  QUEUE="batch"                        #user-specified processing queue
+  QUEUE_DBG="debug"                    #user-specified processing queue -- debug
+  QUEUE_SVC="service"                  #user-specified transfer queue
+
+# Path to top running and archiving directory
+  ptmp_base="/scratch3/NCEPDEV/stmp1/${USER}/wrkdir_${NET}"  #base subdirectory for all subsequent working and storage directories
+
+  DATABASE_DIR=${ptmp_base}            # (equivalent to ptmp_base)
+  HOMEBASE_DIR=${NWROOT}               # path to system home directory
+
+# Computational resources
+  ACCOUNT="fv3-cpu"                    #account for CPU resources
+
+  case ${SCHEDULER} in
+    SLURM|slurm)
+      PARTITION=""
+      RESERVATION="<native>--export=ALL --mail-type=NONE</native><queue>&QUEUE_DBG;</queue><account>&ACCOUNT;</account>"
+      RESERVATION_GSI="<native>--export=ALL --mail-type=NONE</native><queue>&QUEUE_DBG;</queue><account>&ACCOUNT;</account>"
+      RESERVATION_UPP="<native>--export=ALL --mail-type=NONE</native><queue>&QUEUE_DBG;</queue><account>&ACCOUNT;</account>"
+      PARTITION_SVC=${QUEUE_SVC}
+      RESERVATION_SVC="<native>--export=ALL --mail-type=NONE</native><queue>&QUEUE;</queue><account>&ACCOUNT;</account><partition>&PARTITION_SVC;</partition>"
+      ;;
+    PBS|MOAB*|moab*|pbs)
+      RESERVATION="<native>-m n</native><queue>&QUEUE_DBG;</queue><account>&ACCOUNT;</account>"
+      RESERVATION_GSI="<native>-m n</native><queue>&QUEUE_DBG;</queue><account>&ACCOUNT;</account>"
+      RESERVATION_UPP="<native>-m n</native><queue>&QUEUE_DBG;</queue><account>&ACCOUNT;</account>"
+      RESERVATION_SVC="<native>-m n</native><queue>&QUEUE_SVC;</queue><account>&ACCOUNT;</account>"
+      ;;
+    *)
+      echo " scheduler ${SCHEDULER} is unknown. Abort!"
+      exit 1
+      ;;
+  esac
+
+elif [ ${MACHINE} = "jet" ] ; then
+
+  QUEUE="batch"                        #user-specified processing queue
+  QUEUE_DBG="debug"                    #user-specified processing queue -- debug
+  QUEUE_SVC="service"                  #user-specified transfer queue
+
+# Path to top running and archiving directory
+  ptmp_base="/mnt/lfs3/projects/hfv3gfs/Gang.Zhao/gsd_dev1_jjob_databasedir"
+
+  DATABASE_DIR=${ptmp_base}            # (equivalent to ptmp_base)
+  HOMEBASE_DIR=${NWROOT}               # path to system home directory
+
+# Computational resources
+  ACCOUNT="hfv3gfs"                    #account for CPU resources
+
+  case ${SCHEDULER} in
+    SLURM|slurm)
+      PARTITION="kjet"
+      PARTITION_DA="kjet"
+      RESERVATION="<native>--export=ALL --mail-type=NONE</native><queue>&QUEUE;</queue><account>&ACCOUNT;</account><partition>&PARTITION;</partition>"
+      RESERVATION_GSI="<native>--export=ALL --mail-type=NONE</native><queue>&QUEUE;</queue><account>&ACCOUNT;</account><partition>&PARTITION_DA;</partition>"
+      RESERVATION_UPP="<native>--export=ALL --mail-type=NONE</native><queue>&QUEUE;</queue><account>&ACCOUNT;</account><partition>&PARTITION;</partition>"
+      PARTITION_SVC=${QUEUE_SVC}
+      RESERVATION_SVC="<native>--export=ALL --mail-type=NONE</native><queue>&QUEUE;</queue><account>&ACCOUNT;</account><partition>&PARTITION_SVC;</partition>"
+      ;;
+    PBS|MOAB*|moab*|pbs)
+      PARTITION="sjet:tjet"
+      PARTITION_DA="sjet:tjet"
+      RESERVATION="<native>-l partition=&PARTITION; -W umask=022 -m n</native><queue>&QUEUE_DBG;</queue><account>&ACCOUNT;</account>"
+      RESERVATION_GSI="<native>-l partition=&PARTITION_DA; -W umask=022 -m n</native><queue>&QUEUE_DBG;</queue><account>&ACCOUNT;</account>"
+      RESERVATION_UPP="<native>-l partition=&PARTITION; -W umask=022 -m n</native><queue>&QUEUE_DBG;</queue><account>&ACCOUNT;</account>"
+      RESERVATION_SVC="<native>-l partition=&PARTITION; -W umask=022 -m n</native><queue>&QUEUE_SVC;</queue><account>&ACCOUNT;</account>"
+      ;;
+    *)
+      echo " scheduler ${SCHEDULER} is unknown. Abort!"
+      exit 1
+      ;;
+  esac
+
+else
+  echo "This machine ${MACHINE} is not set up ROCOTO workflow for RTMA3D. Abort!"
+  exit 1
+fi
+
+# General definition of computation resources for each task
+  FETCHHPSS_PROC="1"
+  FETCHHPSS_RESOURCES="<cores>&FETCHHPSS_PROC;</cores><walltime>03:00:00</walltime>"
+  FETCHHPSS_RESERVATION=${RESERVATION_SVC}
+
+  OBSPREP_RADAR_PROC="36"
+  OBSPREP_RADAR_RESOURCES="<cores>&OBSPREP_RADAR_PROC;</cores><walltime>00:30:00</walltime>"
+  OBSPREP_RADAR_RESERVATION=${RESERVATION}
+
+  OBSPREP_LGHTN_PROC="1"
+  OBSPREP_LGHTN_RESOURCES="<cores>&OBSPREP_LGHTN_PROC;</cores><walltime>00:30:00</walltime>"
+  OBSPREP_LGHTN_RESERVATION=${RESERVATION}
+
+  OBSPREP_CLOUD_PROC="4"
+  OBSPREP_CLOUD_RESOURCES="<cores>&OBSPREP_CLOUD_PROC;</cores><walltime>00:30:00</walltime>"
+  OBSPREP_CLOUD_RESERVATION=${RESERVATION}
+
+  PREPOBS_PROC="1"
+  PREPOBS_RESOURCES="<cores>&PREPOBS_PROC;</cores><walltime>00:30:00</walltime>"
+  PREPOBS_RESERVATION=${RESERVATION}
+
+  PREPFGS_PROC="1"
+  PREPFGS_RESOURCES="<cores>&PREPFGS_PROC;</cores><walltime>00:30:00</walltime>"
+  PREPFGS_RESERVATION=${RESERVATION}
+
+  GSI_PROC="192"
+  GSI_THREADS=1
+  GSI_OMP_STACKSIZE="512M"
+  GSI_RESOURCES="<cores>&GSI_PROC;</cores><walltime>00:30:00</walltime>"
+  GSI_RESERVATION=${RESERVATION_GSI}
+
+  POST_PROC="96"
+  POST_THREADS=1
+  POST_OMP_STACKSIZE="512MB"
+  POST_RESOURCES="<cores>&POST_PROC;</cores><walltime>00:30:00</walltime>"
+  POST_RESERVATION=${RESERVATION_UPP}
+
+  PLOT_PROC="1"
+  PLOT_RESOURCES="<cores>&PLOT_PROC;</cores><walltime>00:30:00</walltime><memory>3G</memory>"
+  PLOT_RESERVATION=${RESERVATION}
+
+  VERIF_PROC="1"
+  VERIF_RESOURCES="<cores>&VERIF_PROC;</cores><walltime>00:30:00</walltime>"
+  VERIF_RESERVATION=${RESERVATION}
+
+# if [[ ! -d ${ptmp_base} ]] ; then
+#     echo " ${ptmp_base} does NOT exist !"
+#     echo " Please define the variable and create this directory."
+#     echo " Abort! "
+#     exit 1
+# fi
 
 export CAP_NET=`echo ${NET} | tr '[:lower:]' '[:upper:]'`
 export CAP_RUN=`echo ${RUN} | tr '[:lower:]' '[:upper:]'`
@@ -315,12 +444,6 @@ export exefile_name_verif=""    # executable of verification (MET) is defined by
   fi 
 
 #
-#--- Definition for common Linux commands and tools
-#
-  linux_cmd_list="rm cp mv ln mkdir cat echo ls cut date wc sed awk tail cnvgrib mpirun cpfs unzip "
-  LINUX_CMD_LIST=`echo ${linux_cmd_list} | tr '[:lower:]' '[:upper:]'`
-
-#
 #--- Computational Resources
 #
   if [ $MACHINE = jet ] ; then
@@ -489,97 +612,54 @@ cat > ${NWROOT}/workflow/${RUN}_${expname}.xml <<EOF
 <!ENTITY time_int  "1hr">
 <!ENTITY time_int_ex "01:00:00">
 
-<!ENTITY FETCHHPSS_PROC "1">
-<!ENTITY FETCHHPSS_RESOURCES
-   '<cores>&FETCHHPSS_PROC;</cores>
-    <walltime>03:00:00</walltime>
-    ${PARTITION_udef}
-    <queue>&QUEUE_SVC;</queue>
-    <account>&ACCOUNT;</account>'>
+<!ENTITY FETCHHPSS_PROC "${FETCHHPSS_PROC}">
+<!ENTITY FETCHHPSS_RESOURCES '${FETCHHPSS_RESOURCES}'>
+<!ENTITY FETCHHPSS_RESERVATION '${FETCHHPSS_RESERVATION}'>
 
-<!ENTITY OBSPREP_RADAR_PROC "36">
-<!ENTITY OBSPREP_RADAR_RESOURCES
-   '<cores>&OBSPREP_RADAR_PROC;</cores>
-    <walltime>00:30:00</walltime>
-    ${PARTITION_udef}
-    <queue>&QUEUE_DBG;</queue>
-    <account>&ACCOUNT;</account>'>
+<!ENTITY OBSPREP_RADAR_PROC "${OBSPREP_RADAR_PROC}">
+<!ENTITY OBSPREP_RADAR_RESOURCES '${OBSPREP_RADAR_RESOURCES}'>
+<!ENTITY OBSPREP_RADAR_RESERVATION '${OBSPREP_RADAR_RESERVATION}'>
 
-<!ENTITY OBSPREP_LGHTN_PROC "1">
-<!ENTITY OBSPREP_LGHTN_RESOURCES
-   '<cores>&OBSPREP_LGHTN_PROC;</cores>
-    <walltime>00:30:00</walltime>
-    ${PARTITION_udef}
-    <queue>&QUEUE_DBG;</queue>
-    <account>&ACCOUNT;</account>'>
+<!ENTITY OBSPREP_LGHTN_PROC "${OBSPREP_LGHTN_PROC}">
+<!ENTITY OBSPREP_LGHTN_RESOURCES '${OBSPREP_LGHTN_RESOURCES}'>
+<!ENTITY OBSPREP_LGHTN_RESERVATION '${OBSPREP_LGHTN_RESERVATION}'>
 
-<!ENTITY OBSPREP_CLOUD_PROC "4">
-<!ENTITY OBSPREP_CLOUD_RESOURCES
-   '<cores>&OBSPREP_CLOUD_PROC;</cores>
-    <walltime>00:30:00</walltime>
-    ${PARTITION_udef}
-    <queue>&QUEUE_DBG;</queue>
-    <account>&ACCOUNT;</account>'>
+<!ENTITY OBSPREP_CLOUD_PROC "${OBSPREP_CLOUD_PROC}">
+<!ENTITY OBSPREP_CLOUD_RESOURCES '${OBSPREP_CLOUD_RESOURCES}'>
+<!ENTITY OBSPREP_LGHTN_RESERVATION '${OBSPREP_LGHTN_RESERVATION}'>
 
-<!ENTITY PREPOBS_PROC "1">
-<!ENTITY PREPOBS_RESOURCES
-   '<cores>&PREPOBS_PROC;</cores>
-    <walltime>00:30:00</walltime>
-    ${PARTITION_udef}
-    <queue>&QUEUE_DBG;</queue>
-    <account>&ACCOUNT;</account>'>
-<!ENTITY PREPFGS_PROC "1">
-<!ENTITY PREPFGS_RESOURCES
-   '<cores>&PREPFGS_PROC;</cores>
-    <walltime>00:30:00</walltime>
-    ${PARTITION_udef}
-    <queue>&QUEUE_DBG;</queue>
-    <account>&ACCOUNT;</account>'>
+<!ENTITY PREPOBS_PROC "${PREPOBS_PROC}">
+<!ENTITY PREPOBS_RESOURCES '${PREPOBS_RESOURCES}'>
+<!ENTITY PREPOBS_RESERVATION '${PREPOBS_RESERVATION}'>
 
-<!ENTITY GSI_CORES "96">
-<!ENTITY GSI_THREADS "4">
-<!ENTITY GSI_RESOURCES  
-   "<nodes>8:ppn=12</nodes>
-    <walltime>00:30:00</walltime>">
-<!ENTITY GSI_OMP_STACKSIZE "512M">
+<!ENTITY PREPFGS_PROC "${PREPFGS_PROC}">
+<!ENTITY PREPFGS_RESOURCES '${PREPFGS_RESOURCES}'>
+<!ENTITY PREPFGS_RESERVATION '${PREPFGS_RESERVATION}'>
+
+<!ENTITY GSI_PROC "${GSI_PROC}">
+<!ENTITY GSI_THREADS "${GSI_THREADS}">
+<!ENTITY GSI_OMP_STACKSIZE "${GSI_OMP_STACKSIZE}">
+<!ENTITY GSI_RESOURCES '${GSI_RESOURCES}'> 
+<!ENTITY GSI_RESERVATION '${GSI_RESERVATION}'>
 
 <!ENTITY GSI_START_TIME "00:40:00">
 <!ENTITY GSI_DEADLINE   "01:30:00">
 <!ENTITY GSI_WALL_LIMIT 
    '<deadline><cyclestr offset="&GSI_DEADLINE;">@Y@m@d@H@M</cyclestr></deadline>'>
-<!ENTITY GSI_RESERVATION 
-   '<native>-m n</native>
-    ${PARTITION_udef}
-    <queue>&QUEUE_DBG;</queue>
-    <account>&ACCOUNT;</account>'>
 
-<!ENTITY POST_CORES "96">
-<!ENTITY POST_OMP_STACKSIZE "512M">
-<!ENTITY POST_THREADS "1">
-<!ENTITY POST_RESOURCES
-   '<nodes>8:ppn=12</nodes>
-    <walltime>00:30:00</walltime>
-    ${PARTITION_udef}
-    <queue>&QUEUE_DBG;</queue>
-    <account>&ACCOUNT;</account>'>
+<!ENTITY POST_PROC "${POST_PROC}">
+<!ENTITY POST_THREADS "${POST_THREADS}">
+<!ENTITY POST_OMP_STACKSIZE "${POST_OMP_STACKSIZE}">
+<!ENTITY POST_RESOURCES '${POST_RESOURCES}'> 
+<!ENTITY POST_RESERVATION '${POST_RESERVATION}'>
 
-<!ENTITY PLOT_PROC "1">
-<!ENTITY PLOT_RESOURCES
-   '<cores>&PLOT_PROC;</cores>
-    <walltime>00:30:00</walltime>
-    ${PARTITION_udef}
-    <queue>&QUEUE_DBG;</queue>
-    <memory>3G</memory>
-    <account>&ACCOUNT;</account>'>
+<!ENTITY PLOT_PROC "${PLOT_PROC}">
+<!ENTITY PLOT_RESOURCES '${PLOT_RESOURCES}'>
+<!ENTITY PLOT_RESERVATION '${PLOT_RESERVATION}'>
 
-<!ENTITY VERIF_PROC "1">
-<!ENTITY VERIF_RESOURCES
-   '<cores>&VERIF_PROC;</cores>
-    <walltime>00:30:00</walltime>
-    ${PARTITION_udef}
-    <queue>&QUEUE_DBG;</queue>
-    <account>&ACCOUNT;</account>'>
-
+<!ENTITY VERIF_PROC "${VERIF_PROC}">
+<!ENTITY VERIF_RESOURCES '${VERIF_RESOURCES}'>
+<!ENTITY VERIF_RESERVATION '${VERIF_RESERVATION}'>
 
 <!-- Variables in Namelist -->
 <!ENTITY GSI_grid_ratio_in_var       "${gsi_grid_ratio_in_var}">
@@ -604,6 +684,10 @@ cat > ${NWROOT}/workflow/${RUN}_${expname}.xml <<EOF
    <envar>
         <name>MACHINE</name>
         <value>&MACHINE;</value>
+   </envar>
+   <envar>
+        <name>SCHEDULER</name>
+        <value>&SCHEDULER;</value>
    </envar>
    <envar>
         <name>NET</name>
@@ -877,7 +961,7 @@ cat > ${NWROOT}/workflow/${RUN}_${expname}.xml <<EOF
 <!ENTITY ENVARS_GSI
     '<envar>
       <name>GSIPROC</name>
-      <value>&GSI_CORES;</value>
+      <value>&GSI_PROC;</value>
     </envar>
     <envar>
       <name>START_TIME</name>
@@ -1081,74 +1165,13 @@ cat > ${NWROOT}/workflow/${RUN}_${expname}.xml <<EOF
     </envar>'>
 EOF
 
-#
-#--- Definition for common Linux commands and tools
-#
 cat >> ${NWROOT}/workflow/${RUN}_${expname}.xml <<EOF 
-
-<!-- Set of system(LINUX, MPI, etc.) commands -->
-<!ENTITY SYS_COMMANDS 
-   '
-EOF
-
-for lnxcmd in ${linux_cmd_list}
-do
-  case ${lnxcmd} in
-    cpfs)
-      if [ -f ${produtil_path}/ush/${lnxcmd} ] ; then
-        cmdpath="${lnxcmd}"
-      else
-        cmdpath="cp"
-      fi
-      ;;
-    cnvgrib|mpirun)
-       cmdpath="${lnxcmd}"
-      ;;
-    awk)
-      if [ -f /bin/${lnxcmd} ] ; then
-        cmdpath="/bin/${lnxcmd}"
-        [ "${MACHINE}" = "jet" ] && cmapath="${cmdpath} --posix"
-      elif [ -f /usr/bin/${lnxcmd} ] ; then
-        cmdpath="usr/bin/${lnxcmd}"
-        [ "${MACHINE}" = "jet" ] && cmapath="${cmdpath} --posix"
-      else
-        cmdpath=""
-      fi
-      ;;
-    *)
-      if [ -f /bin/${lnxcmd} ] ; then
-        cmdpath="/bin/${lnxcmd}"
-      elif [ -f /usr/bin/${lnxcmd} ] ; then
-        cmdpath="usr/bin/${lnxcmd}"
-      else
-        cmdpath=""
-      fi
-      ;;
-  esac
-
-  LNXCMD=`echo ${lnxcmd} | tr '[:lower:]' '[:upper:]'`
-  
-  cat >> ${NWROOT}/workflow/${RUN}_${expname}.xml <<EOF 
-   <envar>
-        <name>${LNXCMD}</name>
-        <value>${cmdpath}</value>
-   </envar>
-EOF
-done
-
-#  '<envar>
-#       <name>RM</name>
-#       <value>/bin/rm</value>
-#  </envar>'>
-
-cat >> ${NWROOT}/workflow/${RUN}_${expname}.xml <<EOF 
-   '>
 
 ]>
 EOF
 
 cat >> ${NWROOT}/workflow/${RUN}_${expname}.xml <<EOF 
-<workflow realtime="F" scheduler="moabtorque" cyclethrottle="1" taskthrottle="350" cyclelifespan="15:00:00:00">
+<workflow realtime="F" scheduler="${SCHD_ATTRB}" cyclethrottle="1" taskthrottle="350" cyclelifespan="15:00:00:00">
 
   <log>
     <cyclestr>&LOG_WRKFLW;/&NET;_workflow_&envir;_@Y@m@d@H.log</cyclestr>
@@ -1170,6 +1193,7 @@ cat >> ${NWROOT}/workflow/${RUN}_${expname}.xml <<EOF
     <join><cyclestr>&LOG_SCHDLR;/&NET;_&envir;_fetchhpss_@Y@m@d@H@M.log\${PBS_JOBID}</cyclestr></join>
 
     &FETCHHPSS_RESOURCES;
+    &FETCHHPSS_RESERVATION;
 
     &ENVARS_FETCHHPSS;
 
@@ -1194,6 +1218,7 @@ cat >> ${NWROOT}/workflow/${RUN}_${expname}.xml <<EOF
     <join><cyclestr>&LOG_SCHDLR;/&NET;_&envir;_obsprep_radar_@Y@m@d@H@M.log\${PBS_JOBID}</cyclestr></join>
 
     &OBSPREP_RADAR_RESOURCES;
+    &OBSPREP_RADAR_RESERVATION;
 
     &ENVARS_PREPJOB;
 
@@ -1225,6 +1250,7 @@ cat >> ${NWROOT}/workflow/${RUN}_${expname}.xml <<EOF
     <join><cyclestr>&LOG_SCHDLR;/&NET;_&envir;_obsprep_lghtn_@Y@m@d@H@M.log\${PBS_JOBID}</cyclestr></join>
 
     &OBSPREP_LGHTN_RESOURCES;
+    &OBSPREP_LGHTN_RESERVATION;
 
     &ENVARS_PREPJOB;
 
@@ -1256,6 +1282,7 @@ cat >> ${NWROOT}/workflow/${RUN}_${expname}.xml <<EOF
     <join><cyclestr>&LOG_SCHDLR;/&NET;_&envir;_obsprep_cloud_@Y@m@d@H@M.log\${PBS_JOBID}</cyclestr></join>
 
     &OBSPREP_CLOUD_RESOURCES;
+    &OBSPREP_CLOUD_RESERVATION;
 
     &ENVARS_PREPJOB;
 
@@ -1285,6 +1312,7 @@ cat >> ${NWROOT}/workflow/${RUN}_${expname}.xml <<EOF
     <join><cyclestr>&LOG_SCHDLR;/&NET;_&envir;_prepobs_@Y@m@d@H@M.log\${PBS_JOBID}</cyclestr></join>
 
     &PREPOBS_RESOURCES;
+    &PREPOBS_RESERVATION;
 
     &ENVARS_PREPJOB;
 
@@ -1331,6 +1359,7 @@ cat >> ${NWROOT}/workflow/${RUN}_${expname}.xml <<EOF
     <join><cyclestr>&LOG_SCHDLR;/&NET;_&envir;_prepfgs_@Y@m@d@H@M.log\${PBS_JOBID}</cyclestr></join>
 
     &PREPFGS_RESOURCES;
+    &PREPFGS_RESERVATION;
 
     &ENVARS_PREPJOB;
 
@@ -1371,7 +1400,17 @@ cat >> ${NWROOT}/workflow/${RUN}_${expname}.xml <<EOF
 
     &ENVARS;
     &POST_RESOURCES;
+    &POST_RESERVATION;
     &SYS_COMMANDS;
+
+    <envar>
+        <name>OMP_NUM_THREADS</name>
+        <value>&POST_THREADS;</value>
+    </envar>
+    <envar>
+        <name>OMP_STACKSIZE</name>
+        <value>&POST_OMP_STACKSIZE;</value>
+    </envar>
     <envar>
        <name>rundir_task</name>
        <value><cyclestr>&DATA_POST;</cyclestr></value>
@@ -1521,7 +1560,7 @@ fi
 # Now make the run_rtma3d.sh script that can be invoked from a crontab
 
 if [ ${MACHINE} = 'theia' ] || [ ${MACHINE} = 'jet' ]; then
-cat > ${NWROOT}/workflow/run_${RUN}_${expname}.sh <<EOF 
+  cat > ${NWROOT}/workflow/run_${RUN}_${expname}.sh <<EOF 
 #!/bin/bash
 
 . /etc/profile
@@ -1529,10 +1568,28 @@ cat > ${NWROOT}/workflow/run_${RUN}_${expname}.sh <<EOF
 
 module purge
 module load intel
-module load rocoto
+EOF
 
+  case ${SCHEDULER} in
+    PBS*|MOAB*|pbs*|moab*)
+      cat >> ${NWROOT}/workflow/run_${RUN}_${expname}.sh <<EOF 
+module load rocoto
+EOF
+      ;;
+    SLURM|slurm)
+      cat >> ${NWROOT}/workflow/run_${RUN}_${expname}.sh <<EOF 
+module load rocoto/1.3.0-RC5
+module load slurm
+EOF
+      ;;
+    *)
+      ;;
+  esac
+
+  cat >> ${NWROOT}/workflow/run_${RUN}_${expname}.sh <<EOF 
 rocotorun -v 10 -w ${NWROOT}/workflow/${RUN}_${expname}.xml -d ${NWROOT}/workflow/${RUN}_${expname}.db 
 EOF
+
 fi
 
 chmod 744 ${NWROOT}/workflow/run_${RUN}_${expname}.sh
@@ -1542,7 +1599,7 @@ echo "RTMA3D is ready to go! Run using run_${RUN}_${expname}.sh.  Make sure your
 # script to check the status of workflow            #
 #####################################################
 if [ ${MACHINE} = 'theia' ] || [ ${MACHINE} = 'jet' ] ; then
-cat > ${NWROOT}/workflow/chk_${RUN}_${expname}.sh <<EOF 
+  cat > ${NWROOT}/workflow/chk_${RUN}_${expname}.sh <<EOF 
 #!/bin/bash
 
 . /etc/profile
@@ -1550,10 +1607,28 @@ cat > ${NWROOT}/workflow/chk_${RUN}_${expname}.sh <<EOF
 
 module purge
 module load intel
-module load rocoto
+EOF
 
+  case ${SCHEDULER} in
+    PBS*|MOAB*|pbs*|moab*)
+      cat >> ${NWROOT}/workflow/chk_${RUN}_${expname}.sh <<EOF 
+module load rocoto
+EOF
+      ;;
+    SLURM|slurm)
+      cat >> ${NWROOT}/workflow/chk_${RUN}_${expname}.sh <<EOF 
+module load rocoto/1.3.0-RC5
+module load slurm
+EOF
+      ;;
+    *)
+      ;;
+  esac
+
+  cat >> ${NWROOT}/workflow/chk_${RUN}_${expname}.sh <<EOF 
 rocotostat -v 10 -w ${NWROOT}/workflow/${RUN}_${expname}.xml -d ${NWROOT}/workflow/${RUN}_${expname}.db 
 EOF
+
 fi
 
 chmod 744 ${NWROOT}/workflow/chk_${RUN}_${expname}.sh

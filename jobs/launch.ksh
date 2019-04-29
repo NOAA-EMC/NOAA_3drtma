@@ -72,34 +72,124 @@ fi
 # obtain unique process id (pid) and define the name of  temp directories
 ###########################################################################
 if [ "${machine}" = "theia" ] ; then    ### PBS job Scheduler
+
+  case ${SCHEDULER} in
+    PBS|pbs|moab*)                                    # PBS maob/torque
+      module load rocoto
+      export np=`cat $PBS_NODEFILE | wc -l`
+      export MPIRUN="mpirun -np $np"
+      ;;
+    SLURM|slum)                                       # SLURM
+      module load rocoto/1.3.0-RC5
+      module load slurm/18.08
+
+      export PBS_JOBID=${SLURM_JOB_ID}
+      export PBS_JOBNAME=${SLURM_JOB_NAME}
+      export PBS_NP=${SLURM_NTASKS}
+      export PBS_O_DIR=${SLURM_SUBMIT_DIR}
+
+      cd ${SLURM_SUBMIT_DIR}
+      if [ ! -d ${LOG_DIR}/nodefiles ] ; then
+        mkdir -p ${LOG_DIR}/nodefiles
+      fi
+      slurm_hfile=${LOG_DIR}/nodefiles/hostfile.${SLURM_JOB_NAME}.${SLURM_JOB_ID}
+      scontrol show hostname $SLURM_NODELSIT > ${slurm_hfile}
+      export PBS_NODEFILE=${LOG_DIR}/nodefiles/pbs_nodefile.${SLURM_JOB_NAME}.${SLURM_JOB_ID}
+      if [ -f ${PBS_NODEFILE} ] ; then
+        rm -f ${PBS_NODEFILE}
+      fi
+      i=0
+      imax=${SLURM_NTASKS}
+      while [[ $i -lt ${SLURM_NTASKS} ]]
+      do
+        cat >> ${PBS_NODEFILE} << EOF
+node$i
+EOF
+        (( i += 1 ))
+      done
+      np=`cat $PBS_NODEFILE | wc -l`
+      echo "Launch.sh: ${SLURM_JOB_NAME} np=$np (in $PBS_NODEFILE)"
+#     export MPIRUN="srun -n ${np}"
+      export MPIRUN="srun"
+      ;;
+    *)
+      echo "unknown scheduler: ${SCHEDULER}. $0 abort! "
+      exit 1
+      ;;
+  esac
   export job=${job:-"${PBS_JOBNAME}"}    # job is defined as job name
   export jid=`echo ${PBS_JOBID} | cut -f1 -d.`  # removal of tailing sub-server string
 # export jid=`echo ${PBS_JOBID} | awk -F'.' '{print $1}'`
   export jobid=${jobid:-"${job}.${jid}"}
-  export np=`cat $PBS_NODEFILE | wc -l`
-  export NCDUMP="ncdump"
-  export MPIRUN=${MPIRUN:-"mpirun -np $np"}
   echo " number of cores : $np for job $job with id as $jobid "
+
 elif [ "${machine}" = "jet" ] ;  then    ### PBS job Scheduler
+
+  case ${SCHEDULER} in
+    PBS|pbs|moab*)                                    # PBS maob/torque
+      module load rocoto
+      export np=`cat $PBS_NODEFILE | wc -l`
+      export MPIRUN="mpiexec -np $np"
+      ;;
+    SLURM|slum)                                       # SLURM
+      module load rocoto/1.3.0-RC5
+      module load slurm/18.08.7p1
+
+      export PBS_JOBID=${SLURM_JOB_ID}
+      export PBS_JOBNAME=${SLURM_JOB_NAME}
+      export PBS_NP=${SLURM_NTASKS}
+      export PBS_O_DIR=${SLURM_SUBMIT_DIR}
+
+      cd ${SLURM_SUBMIT_DIR}
+      if [ ! -d ${LOG_DIR}/nodefiles ] ; then
+        mkdir -p ${LOG_DIR}/nodefiles
+      fi
+      slurm_hfile=${LOG_DIR}/nodefiles/hostfile.${SLURM_JOB_NAME}.${SLURM_JOB_ID}
+      scontrol show hostname $SLURM_NODELSIT > ${slurm_hfile}
+      export PBS_NODEFILE=${LOG_DIR}/nodefiles/pbs_nodefile.${SLURM_JOB_NAME}.${SLURM_JOB_ID}
+      if [ -f ${PBS_NODEFILE} ] ; then
+        rm -f ${PBS_NODEFILE}
+      fi
+      i=0
+      imax=${SLURM_NTASKS}
+      while [[ $i -lt ${SLURM_NTASKS} ]]
+      do
+        cat >> ${PBS_NODEFILE} << EOF
+node$i
+EOF
+        (( i += 1 ))
+      done
+      np=`cat $PBS_NODEFILE | wc -l`
+      echo "Launch.sh: ${SLURM_JOB_NAME} np=$np (in $PBS_NODEFILE)"
+#     export MPIRUN="srun -n ${np}"
+      export MPIRUN="srun"
+      ;;
+    *)
+      echo "unknown scheduler: ${SCHEDULER}. $0 abort! "
+      exit 1
+      ;;
+  esac
   export job=${job:-"${PBS_JOBNAME}"}    # job is defined as job name
   export jid=`echo ${PBS_JOBID} | cut -f1 -d.`  # removal of tailing sub-server string
 # export jid=`echo ${PBS_JOBID} | awk -F'.' '{print $1}'`
   export jobid=${jobid:-"${job}.${jid}"}
-  export np=`cat $PBS_NODEFILE | wc -l`
-  export NCDUMP="ncdump"
-  export MPIRUN=${MPIRUN:-"mpirun -np $np"}
   echo " number of cores : $np for job $job with id as $jobid "
+
 elif [ "${machine}" = "wcoss" ] ; then  ### LSB scheduler
+
   export job=${job:-"${LSB_JOBNAME}"}    # job is defined as job name
   export jid=`echo ${LSB_JOBID} `
   export jobid=${jobid:-"${job}.${jid}"}
   echo " job $job with id as $jobid "
   export MPIRUN=${MPIRUN:-"aprun"}
+
 else
+
   export job=${job:-"${outid}.o$$"}
   export jobid=${jobid:-"${outid}.o$$"}
   export jid=$$
   export MPIRUN=${MPIRUN:-"mpirun"}
+
 fi
 
 ############################################################

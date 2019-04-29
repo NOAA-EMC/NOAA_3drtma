@@ -2,10 +2,6 @@
 
 date
 
-module load grads
-module load wgrib
-module load wgrib2
-
 # set -x
 ulimit -S -s unlimited
 #------------------------------------------------------------------#

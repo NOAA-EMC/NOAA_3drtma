@@ -344,9 +344,7 @@ postmsg "$jlogfile" "$msg"
 # Save a copy of the GSI executable in the workdir
 ${CP} ${EXECrtma3d}/${exefile_name_gsi}   ./rtma3d_gsi
 
-#runline="${MPIRUN} -np $np ${GSI} < gsiparm.anl > stdout 2>&1"
-#runline="${MPIRUN} -np $np ${pgm} < gsiparm.anl >> ${pgmout} 2>errfile"
- runline="${MPIRUN} -np $np ./rtma3d_gsi"
+ runline="${MPIRUN}         ./rtma3d_gsi"
 $runline < gsiparm.anl >> ${pgmout} 2>errfile
 export err=$? ; err_chk
 
@@ -459,9 +457,7 @@ msg="***********************************************************"
 postmsg "$jlogfile" "$msg"
 
 # Run GSI
-#runline="${MPIRUN} -np $np ${GSI} < gsiparm.anl > stdout 2>&1"
-#runline="${MPIRUN} -np $np ${pgm} < gsiparm.anl >> ${pgmout} 2>errfile"
- runline="${MPIRUN} -np $np ./rtma3d_gsi"
+ runline="${MPIRUN}         ./rtma3d_gsi"
 $runline < gsiparm.anl >> ${pgmout}  2>errfile
 export err=$? ; err_chk
 

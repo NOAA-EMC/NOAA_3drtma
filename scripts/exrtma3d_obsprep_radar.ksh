@@ -197,7 +197,7 @@ postmsg "$jlogfile" "$msg"
 # copy the excutable file of processing mosaic data
 ${CP} ${EXECrtma3d}/${exefile_name_radar}   ./rtma3d_process_mosaic
 
-runline="${MPIRUN}  -np ${np}  ./rtma3d_process_mosaic"
+runline="${MPIRUN}             ./rtma3d_process_mosaic"
 $runline > ${pgmout} 2>errfile
 export err=$?; err_chk
 
