@@ -80,13 +80,13 @@ export startCDATE=201904271200              #yyyymmddhhmm - Starting day of retr
 export endCDATE=201904271400                #yyyymmddhhmm - Ending day of RTMA3D run (needed for both RETRO and REAL TIME). 
 export NET=rtma3d                           #selection of rtma3d (or rtma,urma)
 export RUN=rtma3d                           #selection of rtma3d (or rtma,urma)
-export envir="moab"                      #environment (test, prod, dev, etc.)
+export envir="slurm"                      #environment (test, prod, dev, etc.)
 export run_envir="dev"                      #
 export expname="${envir}"                   # experiment name
 
 export NWROOT=${TOP_RTMA}                   #root directory for RTMA/URMA j-job scripts, scripts, parm files, etc. 
 
-export SCHEDULER="MOAB"                    # SLURM (after 05/01/2019)   or MOAB(PBS)
+export SCHEDULER="SLURM"                    # SLURM (after 05/01/2019)   or MOAB(PBS)
 case ${SCHEDULER} in
   PBS|pbs|MOAB*|moab*)
     SCHD_ATTRB="moabtorque"
