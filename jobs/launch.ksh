@@ -74,7 +74,7 @@ fi
 if [ "${machine}" = "theia" ] ; then    ### PBS job Scheduler
 
   case ${SCHEDULER} in
-    PBS|pbs|moab*)                                    # PBS maob/torque
+    PBS|pbs|MOAB*|moab*)                                    # PBS maob/torque
       module load rocoto
       export np=`cat $PBS_NODEFILE | wc -l`
       export MPIRUN="mpirun -np $np"
@@ -126,7 +126,7 @@ EOF
 elif [ "${machine}" = "jet" ] ;  then    ### PBS job Scheduler
 
   case ${SCHEDULER} in
-    PBS|pbs|moab*)                                    # PBS maob/torque
+    PBS|pbs|MOAB*|moab*)                                    # PBS maob/torque
       module load rocoto
       export np=`cat $PBS_NODEFILE | wc -l`
       export MPIRUN="mpiexec -np $np"

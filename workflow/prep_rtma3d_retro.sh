@@ -76,25 +76,28 @@ fi
 #--- User defined variables                         #
 #####################################################
 set -x
-export startCDATE=201902131200              #yyyymmddhhmm - Starting day of retro run 
-export endCDATE=201902131200                #yyyymmddhhmm - Ending day of RTMA3D run (needed for both RETRO and REAL TIME). 
+export startCDATE=201904271300              #yyyymmddhhmm - Starting day of retro run 
+export endCDATE=201904271400                #yyyymmddhhmm - Ending day of RTMA3D run (needed for both RETRO and REAL TIME). 
 export NET=rtma3d                           #selection of rtma3d (or rtma,urma)
 export RUN=rtma3d                           #selection of rtma3d (or rtma,urma)
-export envir="Feb2019"                      #environment (test, prod, dev, etc.)
+export envir="slurm"                      #environment (test, prod, dev, etc.)
 export run_envir="dev"                      #
 export expname="${envir}"                   # experiment name
 
 export NWROOT=${TOP_RTMA}                   #root directory for RTMA/URMA j-job scripts, scripts, parm files, etc. 
 
 export SCHEDULER="SLURM"                    # SLURM (after 05/01/2019)
-if [ ${SCHEDULER} = "PBS" ] || [ ${SCHEDULER} = "MOAB" ]; then
-  SCHD_ATTRB="moabtorque"
-elif [ ${SCHEDULER} = "SLURM" ] || [ ${SCHEDULER} = "slurm" ]; then
-  SCHD_ATTRB="slurm"
-else
+case ${SCHEDULER} in
+  PBS|pbs|MOAB*|moab*)
+    SCHD_ATTRB="moabtorque"
+    ;;
+  SLURM|slurm)
+    SCHD_ATTRB="slurm"
+    ;;
+  *)
   echo "user specified an Unknown Scheduler: ${SCHEDULER}. Please re-set : either PBS or SLURM "
   exit 1
-fi
+esac
 
 
 #====================================================================#
@@ -484,6 +487,8 @@ cat > ${NWROOT}/workflow/${RUN}_${expname}.xml <<EOF
 <!ENTITY MACHINE	"${MACHINE}">
 <!ENTITY machine	"&MACHINE;">
 
+<!ENTITY SCHEDULER      "${SCHEDULER}">
+
 <!-- Variables Defined by absolute paths -->
 
 <!ENTITY ptmp_base	"${ptmp_base}">
@@ -607,6 +612,10 @@ cat > ${NWROOT}/workflow/${RUN}_${expname}.xml <<EOF
 <!ENTITY QUEUE           "${QUEUE}">
 <!ENTITY QUEUE_DBG       "${QUEUE_DBG}">
 <!ENTITY QUEUE_SVC       "${QUEUE_SVC}">
+
+<!ENTITY PARTITION       "${PARTITION}">
+<!ENTITY PARTITION_DA    "${PARTITION_DA}">
+<!ENTITY PARTITION_SVC   "${PARTITION_SVC}">
 
 <!ENTITY time_sig  "@Y@m@d@H">
 <!ENTITY time_int  "1hr">
@@ -1182,7 +1191,6 @@ cat >> ${NWROOT}/workflow/${RUN}_${expname}.xml <<EOF
   <task name="&NET;_fetchhpss" cycledefs="&time_int;" maxtries="&maxtries;">
 
     &ENVARS;
-    &SYS_COMMANDS;
     <envar>
        <name>rundir_task</name>
        <value><cyclestr>&DATA_FETCHHPSS;</cyclestr></value>
@@ -1190,7 +1198,7 @@ cat >> ${NWROOT}/workflow/${RUN}_${expname}.xml <<EOF
 
     <command>&JJOB_DIR;/launch.ksh &JJOB_FETCHHPSS;</command>
     <jobname><cyclestr>&NET;_fetchhpss_@H</cyclestr></jobname>
-    <join><cyclestr>&LOG_SCHDLR;/&NET;_&envir;_fetchhpss_@Y@m@d@H@M.log\${PBS_JOBID}</cyclestr></join>
+    <join><cyclestr>&LOG_SCHDLR;/&NET;_&envir;_fetchhpss_@Y@m@d@H@M.log</cyclestr></join>
 
     &FETCHHPSS_RESOURCES;
     &FETCHHPSS_RESERVATION;
@@ -1207,7 +1215,6 @@ cat >> ${NWROOT}/workflow/${RUN}_${expname}.xml <<EOF
   <task name="&NET;_obsprep_radar" cycledefs="&time_int;" maxtries="&maxtries;">
 
     &ENVARS;
-    &SYS_COMMANDS;
     <envar>
        <name>rundir_task</name>
        <value><cyclestr>&DATA_OBSPREP_RADAR;</cyclestr></value>
@@ -1215,7 +1222,7 @@ cat >> ${NWROOT}/workflow/${RUN}_${expname}.xml <<EOF
 
     <command>&JJOB_DIR;/launch.ksh &JJOB_OBSPREP_RADAR;</command>
     <jobname><cyclestr>&NET;_obsprep_radar_@H</cyclestr></jobname>
-    <join><cyclestr>&LOG_SCHDLR;/&NET;_&envir;_obsprep_radar_@Y@m@d@H@M.log\${PBS_JOBID}</cyclestr></join>
+    <join><cyclestr>&LOG_SCHDLR;/&NET;_&envir;_obsprep_radar_@Y@m@d@H@M.log</cyclestr></join>
 
     &OBSPREP_RADAR_RESOURCES;
     &OBSPREP_RADAR_RESERVATION;
@@ -1239,7 +1246,6 @@ cat >> ${NWROOT}/workflow/${RUN}_${expname}.xml <<EOF
   <task name="&NET;_obsprep_lghtn" cycledefs="&time_int;" maxtries="&maxtries;">
 
     &ENVARS;
-    &SYS_COMMANDS;
     <envar>
        <name>rundir_task</name>
        <value><cyclestr>&DATA_OBSPREP_LGHTN;</cyclestr></value>
@@ -1247,7 +1253,7 @@ cat >> ${NWROOT}/workflow/${RUN}_${expname}.xml <<EOF
 
     <command>&JJOB_DIR;/launch.ksh &JJOB_OBSPREP_LGHTN;</command>
     <jobname><cyclestr>&NET;_obsprep_lghtn_@H</cyclestr></jobname>
-    <join><cyclestr>&LOG_SCHDLR;/&NET;_&envir;_obsprep_lghtn_@Y@m@d@H@M.log\${PBS_JOBID}</cyclestr></join>
+    <join><cyclestr>&LOG_SCHDLR;/&NET;_&envir;_obsprep_lghtn_@Y@m@d@H@M.log</cyclestr></join>
 
     &OBSPREP_LGHTN_RESOURCES;
     &OBSPREP_LGHTN_RESERVATION;
@@ -1271,7 +1277,6 @@ cat >> ${NWROOT}/workflow/${RUN}_${expname}.xml <<EOF
   <task name="&NET;_obsprep_cloud" cycledefs="&time_int;" maxtries="&maxtries;">
 
     &ENVARS;
-    &SYS_COMMANDS;
     <envar>
        <name>rundir_task</name>
        <value><cyclestr>&DATA_OBSPREP_CLOUD;</cyclestr></value>
@@ -1279,7 +1284,7 @@ cat >> ${NWROOT}/workflow/${RUN}_${expname}.xml <<EOF
 
     <command>&JJOB_DIR;/launch.ksh &JJOB_OBSPREP_CLOUD;</command>
     <jobname><cyclestr>&NET;_obsprep_cloud_@H</cyclestr></jobname>
-    <join><cyclestr>&LOG_SCHDLR;/&NET;_&envir;_obsprep_cloud_@Y@m@d@H@M.log\${PBS_JOBID}</cyclestr></join>
+    <join><cyclestr>&LOG_SCHDLR;/&NET;_&envir;_obsprep_cloud_@Y@m@d@H@M.log</cyclestr></join>
 
     &OBSPREP_CLOUD_RESOURCES;
     &OBSPREP_CLOUD_RESERVATION;
@@ -1301,7 +1306,6 @@ cat >> ${NWROOT}/workflow/${RUN}_${expname}.xml <<EOF
   <task name="&NET;_prepobs" cycledefs="&time_int;" maxtries="&maxtries;">
 
     &ENVARS;
-    &SYS_COMMANDS;
     <envar>
        <name>rundir_task</name>
        <value><cyclestr>&DATA_OBSPRD;</cyclestr></value>
@@ -1309,7 +1313,7 @@ cat >> ${NWROOT}/workflow/${RUN}_${expname}.xml <<EOF
 
     <command>&JJOB_DIR;/launch.ksh &JJOB_PREPOBS;</command>
     <jobname><cyclestr>&NET;_prepobs_@H</cyclestr></jobname>
-    <join><cyclestr>&LOG_SCHDLR;/&NET;_&envir;_prepobs_@Y@m@d@H@M.log\${PBS_JOBID}</cyclestr></join>
+    <join><cyclestr>&LOG_SCHDLR;/&NET;_&envir;_prepobs_@Y@m@d@H@M.log</cyclestr></join>
 
     &PREPOBS_RESOURCES;
     &PREPOBS_RESERVATION;
@@ -1348,7 +1352,6 @@ cat >> ${NWROOT}/workflow/${RUN}_${expname}.xml <<EOF
   <task name="&NET;_prepfgs" cycledefs="&time_int;" maxtries="&maxtries;">
 
     &ENVARS;
-    &SYS_COMMANDS;
     <envar>
        <name>rundir_task</name>
        <value><cyclestr>&DATA_FGSPRD;</cyclestr></value>
@@ -1356,7 +1359,7 @@ cat >> ${NWROOT}/workflow/${RUN}_${expname}.xml <<EOF
 
     <command>&JJOB_DIR;/launch.ksh &JJOB_PREPFGS;</command>
     <jobname><cyclestr>&NET;_prepfgs_@H</cyclestr></jobname>
-    <join><cyclestr>&LOG_SCHDLR;/&NET;_&envir;_prepfgs_@Y@m@d@H@M.log\${PBS_JOBID}</cyclestr></join>
+    <join><cyclestr>&LOG_SCHDLR;/&NET;_&envir;_prepfgs_@Y@m@d@H@M.log</cyclestr></join>
 
     &PREPFGS_RESOURCES;
     &PREPFGS_RESERVATION;
@@ -1374,7 +1377,6 @@ cat >> ${NWROOT}/workflow/${RUN}_${expname}.xml <<EOF
     &ENVARS;
     &GSI_RESOURCES;
     &GSI_RESERVATION;
-    &SYS_COMMANDS;
     &OPTIMIZATIONS_GSI;
     <envar>
        <name>rundir_task</name>
@@ -1383,7 +1385,7 @@ cat >> ${NWROOT}/workflow/${RUN}_${expname}.xml <<EOF
 
     <command>&JJOB_DIR;/launch.ksh &JJOB_GSIANL;</command>
     <jobname><cyclestr>&NET;_gsianl_@H</cyclestr></jobname>
-    <join><cyclestr>&LOG_SCHDLR;/&NET;_&envir;_gsianl_@Y@m@d@H@M.log\${PBS_JOBID}</cyclestr></join>
+    <join><cyclestr>&LOG_SCHDLR;/&NET;_&envir;_gsianl_@Y@m@d@H@M.log</cyclestr></join>
 
     &ENVARS_GSI;
 
@@ -1401,7 +1403,6 @@ cat >> ${NWROOT}/workflow/${RUN}_${expname}.xml <<EOF
     &ENVARS;
     &POST_RESOURCES;
     &POST_RESERVATION;
-    &SYS_COMMANDS;
 
     <envar>
         <name>OMP_NUM_THREADS</name>
@@ -1418,7 +1419,7 @@ cat >> ${NWROOT}/workflow/${RUN}_${expname}.xml <<EOF
 
     <command>&JJOB_DIR;/launch.ksh &JJOB_POST;</command>
     <jobname><cyclestr>&NET;_post_@H</cyclestr></jobname>
-    <join><cyclestr>&LOG_SCHDLR;/&NET;_&envir;_post_@Y@m@d@H@M.log\${PBS_JOBID}</cyclestr></join>
+    <join><cyclestr>&LOG_SCHDLR;/&NET;_&envir;_post_@Y@m@d@H@M.log</cyclestr></join>
 
     &ENVARS_POST;
 
@@ -1433,14 +1434,14 @@ cat >> ${NWROOT}/workflow/${RUN}_${expname}.xml <<EOF
   <task name="&NET;_verif" cycledefs="&time_int;" maxtries="&maxtries;">
     &ENVARS;
     &VERIF_RESOURCES;
-    &SYS_COMMANDS;
+    &VERIF_RESERVATION;
     <envar>
        <name>rundir_task</name>
        <value><cyclestr>&DATA_VERIF;</cyclestr></value>
     </envar>
     <command>&JJOB_DIR;/launch.ksh &JJOB_VERIF;</command>
     <jobname><cyclestr>&NET;_verif_@H</cyclestr></jobname>
-    <join><cyclestr>&LOG_SCHDLR;/&NET;_&envir;_verif_@Y@m@d@H@M.log\${PBS_JOBID}</cyclestr></join>
+    <join><cyclestr>&LOG_SCHDLR;/&NET;_&envir;_verif_@Y@m@d@H@M.log</cyclestr></join>
     &ENVARS_VERIF;
     <dependency>
           <taskdep task="&NET;_post"/>
@@ -1459,7 +1460,7 @@ cat >> ${NWROOT}/workflow/${RUN}_${expname}.xml <<EOF
 
     &ENVARS;
     &POST_RESOURCES;
-    &SYS_COMMANDS;
+    &POST_RESERVATION;
     <envar>
        <name>rundir_task</name>
        <value><cyclestr>&DATA_POST4FGS;</cyclestr></value>
@@ -1467,7 +1468,7 @@ cat >> ${NWROOT}/workflow/${RUN}_${expname}.xml <<EOF
 
     <command>&JJOB_DIR;/launch.ksh &JJOB_POST4FGS;</command>
     <jobname><cyclestr>&NET;_post4fgs_@H</cyclestr></jobname>
-    <join><cyclestr>&LOG_SCHDLR;/&NET;_&envir;_post4fgs_@Y@m@d@H@M.log\${PBS_JOBID}</cyclestr></join>
+    <join><cyclestr>&LOG_SCHDLR;/&NET;_&envir;_post4fgs_@Y@m@d@H@M.log</cyclestr></join>
 
     &ENVARS_POST;
 
@@ -1483,7 +1484,7 @@ cat >> ${NWROOT}/workflow/${RUN}_${expname}.xml <<EOF
 
     &ENVARS;
     &PLOT_RESOURCES;
-    &SYS_COMMANDS;
+    &PLOT_RESERVATION;
     <envar>
        <name>rundir_task</name>
        <value><cyclestr>&DATA_PLOTGRADS;</cyclestr></value>
@@ -1491,7 +1492,7 @@ cat >> ${NWROOT}/workflow/${RUN}_${expname}.xml <<EOF
 
     <command>&JJOB_DIR;/launch.ksh &JJOB_PLOTGRADS;</command>
     <jobname><cyclestr>&NET;_plotgrads_@H</cyclestr></jobname>
-    <join><cyclestr>&LOG_SCHDLR;/&NET;_&envir;_plotgrads_@Y@m@d@H@M.log\${PBS_JOBID}</cyclestr></join>
+    <join><cyclestr>&LOG_SCHDLR;/&NET;_&envir;_plotgrads_@Y@m@d@H@M.log</cyclestr></join>
 
     &ENVARS_PLOT;
 
