@@ -59,7 +59,8 @@ PDYHH="${PDY}${cyc}"
 ####################################
 export LOG_JJOB=${LOG_JJOB:-$COMROOT/logs/jlogfiles}
 export jlogfile=${jlogfile:-$LOG_JJOB/jlogfile.${jobid}}
-export pgmout=${pgmout:-"OUTPUT.$$"}
+# export pgmout=${pgmout:-"OUTPUT.$$"}
+export pgmout=${pgmout:-"OUTPUT.${PDY}${cyc}.${jobid}"}
 if [ ! -d ${LOG_JJOB} ] ; then
    mkdir -p ${LOG_JJOB}
 fi

@@ -6,7 +6,6 @@ export PS4=' $SECONDS + '
 set -x
 
 COMMAND=$1
-kwd_task="POST"
 
 #############################################################
 # load modulefile and set up the environment for job runnning
@@ -20,7 +19,7 @@ if [ "${machine}" = "theia" ] ; then
   module purge
 # loading modules used when building the code
   case "$COMMAND" in
-    *"${kwd_task}"*)
+    *POST*)
       modulefile_build=${modulefile_build:-"${MODULEFILES}/${machine}/build/modulefile.build.post.${machine}"}
       moduledir=`dirname $(readlink -f ${modulefile_build})`
       module use ${moduledir}
@@ -34,6 +33,14 @@ if [ "${machine}" = "theia" ] ; then
 # loading modules for running
   modulefile_run=${modulefile_run:-"${MODULEFILES}/${machine}/run/modulefile.run.${machine}"}
   source ${modulefile_run}
+# loading modules for specific task
+  case "$COMMAND" in
+    *VERIF*)
+      module load met/7.0
+      ;;
+    *)
+      ;;
+  esac
   module list
 elif [ "${machine}" = "jet" ] ; then
   . /etc/profile
@@ -61,6 +68,14 @@ elif [ "${machine}" = "jet" ] ; then
 # loading modules for running
   modulefile_run=${modulefile_run:-"${MODULEFILES}/${machine}/run/modulefile.run.${machine}"}
   source ${modulefile_run}
+# loading modules for specific task
+  case "$COMMAND" in
+    *VERIF*)
+      module load met/8.1_beta2
+      ;;
+    *)
+      ;;
+  esac
   module list
 else
   echo "modulefile has not set up for this unknow machine. Job abort!"
@@ -129,7 +144,8 @@ elif [ "${machine}" = "jet" ] ;  then    ### PBS job Scheduler
     PBS|pbs|MOAB*|moab*)                                    # PBS maob/torque
       module load rocoto
       export np=`cat $PBS_NODEFILE | wc -l`
-      export MPIRUN="mpiexec -np $np"
+#     export MPIRUN="mpiexec -np $np"
+      export MPIRUN="mpirun -np $np"
       ;;
     SLURM|slum)                                       # SLURM
       module load rocoto/1.3.0-RC5

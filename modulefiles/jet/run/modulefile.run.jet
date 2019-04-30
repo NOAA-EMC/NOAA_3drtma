@@ -51,43 +51,60 @@
 
 # Access to archiving system
     module load hpss
-    module load hsms
-#   module load gsd                       # not available on Jet
 
 # Grib
-    module load cnvgrib                   # 1.2.3 default on Jet
-                                          # 1.4.0 default on Theia (available on Jet)
+    module load cnvgrib                   # 1.4.0
+    export CNVGRIB=${CNVGRIB:-"cnvgrib"}
+
     module load wgrib
     module load wgrib2
+    export WGRIB2=${WGRIB2:-"wgrib2"}
  
-# GrADS
-    module load grads
+# MET verification tool support (loaded in launch.ksh when running MET job)
+#   module use /mnt/lfs1/projects/dtc-hurr/MET/MET_releases/modulefiles
+#   module load met/8.1_beta2             # 8.1_beta2(D), 8.0 is also available
+                                          # version number must match the config file
 
-# NCL
-#   module load cairo
-#   module load ncl
-#   module load ncview
- 
+#   module load anaconda                  # Python
+    module load grads                     # GrADS
+#   export GADDIR=$GADDIR
+    export GASCRP=/home/Gang.Zhao/local/grads/scripts
+
+    module load cairo                     # NCL
+    module load ncl                       # NCL
+    module load ncview
     module load imagemagick               # image file format conversion
 
-#   module load xxdiff
 
-#   module load rocoto                    # default 1.2.4
-#   module load rocoto/1.3.0-RC3          # to support SLURM
+#   module load rocoto/1.3.0-RC5          # loaded in launch.ksh
+#   module load slurm                     # loaded in launch.ksh
 
-#   module load udunits
-#   module load cdo
+#
+# Section 3: path to some common unix/linux commands and tools
+#
+    export RM=/bin/rm
+    export CP=/bin/cp
+    export MV=/bin/mv
+    export LN=/bin/ln
+    export MKDIR=/bin/mkdir
+    export CAT=/bin/cat
+    export ECHO=/bin/echo
+    export LS=/bin/ls
+    export CUT=/bin/cut
+    export WC=/usr/bin/wc
+    export DATE=/bin/date
+    export AWK="/bin/gawk --posix"       # for jet
+    export SED=/bin/sed
+    export TAIL=/usr/bin/tail
+    export BC=/usr/bin/bc
+    export WHICH=/usr/bin/which
+    export GREP=/usr/bin/grep
+    export UNZIP=/bin/unzip
 
-# MET verification tool support
-    module use /mnt/lfs1/projects/dtc-hurr/MET/MET_releases/modulefiles
-    module load met/7.0                   # met 7.0, 8.0 require inte/14.0.3 for current MET installation on Jet
-#   module switch intel/14.0.3     intel/15.0.3.187
+    export CPFS=cpfs
+
+    export NCDUMP=ncdump
+#   export MPIRUN=${MPIRUN:-"srun"}    # defined in launch.ksh
  
-# Python
-    module load anaconda
- 
-    export CNVGRIB=${CNVGRIB:-"cnvgrib"}
-    export WGRIB2=${WGRIB2:-"wgrib2"}
-    export MPIRUN=${MPIRUN:-"mpirun"}
 
 echo "done loading modules"

@@ -33,7 +33,7 @@ fix/*
 !parm/gsi
 
 # ignore the link files under directory modulefiles
-
+modulefiles/*/build/build_ncep_post.*
 
 # ignore directory of development ('dev')
 **/dev/

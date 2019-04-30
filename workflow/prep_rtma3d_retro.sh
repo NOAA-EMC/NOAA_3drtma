@@ -76,17 +76,17 @@ fi
 #--- User defined variables                         #
 #####################################################
 set -x
-export startCDATE=201904271300              #yyyymmddhhmm - Starting day of retro run 
+export startCDATE=201904271200              #yyyymmddhhmm - Starting day of retro run 
 export endCDATE=201904271400                #yyyymmddhhmm - Ending day of RTMA3D run (needed for both RETRO and REAL TIME). 
 export NET=rtma3d                           #selection of rtma3d (or rtma,urma)
 export RUN=rtma3d                           #selection of rtma3d (or rtma,urma)
-export envir="slurm"                      #environment (test, prod, dev, etc.)
+export envir="moab"                      #environment (test, prod, dev, etc.)
 export run_envir="dev"                      #
 export expname="${envir}"                   # experiment name
 
 export NWROOT=${TOP_RTMA}                   #root directory for RTMA/URMA j-job scripts, scripts, parm files, etc. 
 
-export SCHEDULER="SLURM"                    # SLURM (after 05/01/2019)
+export SCHEDULER="MOAB"                    # SLURM (after 05/01/2019)   or MOAB(PBS)
 case ${SCHEDULER} in
   PBS|pbs|MOAB*|moab*)
     SCHD_ATTRB="moabtorque"
@@ -148,7 +148,7 @@ elif [ ${MACHINE} = "jet" ] ; then
   QUEUE_SVC="service"                  #user-specified transfer queue
 
 # Path to top running and archiving directory
-  ptmp_base="/mnt/lfs3/projects/hfv3gfs/Gang.Zhao/gsd_dev1_jjob_databasedir"
+  ptmp_base="/mnt/lfs3/projects/hfv3gfs/Gang.Zhao/${NET}_wrkdir_retro"
 
   DATABASE_DIR=${ptmp_base}            # (equivalent to ptmp_base)
   HOMEBASE_DIR=${NWROOT}               # path to system home directory
@@ -158,8 +158,8 @@ elif [ ${MACHINE} = "jet" ] ; then
 
   case ${SCHEDULER} in
     SLURM|slurm)
-      PARTITION="kjet"
-      PARTITION_DA="kjet"
+      PARTITION="kjet,xjet,ujet,vjet"
+      PARTITION_DA="kjet,xjet,ujet,vjet"
       RESERVATION="<native>--export=ALL --mail-type=NONE</native><queue>&QUEUE;</queue><account>&ACCOUNT;</account><partition>&PARTITION;</partition>"
       RESERVATION_GSI="<native>--export=ALL --mail-type=NONE</native><queue>&QUEUE;</queue><account>&ACCOUNT;</account><partition>&PARTITION_DA;</partition>"
       RESERVATION_UPP="<native>--export=ALL --mail-type=NONE</native><queue>&QUEUE;</queue><account>&ACCOUNT;</account><partition>&PARTITION;</partition>"
@@ -227,7 +227,7 @@ fi
   PLOT_RESERVATION=${RESERVATION}
 
   VERIF_PROC="1"
-  VERIF_RESOURCES="<cores>&VERIF_PROC;</cores><walltime>00:30:00</walltime>"
+  VERIF_RESOURCES="<cores>&VERIF_PROC;</cores><walltime>00:30:00</walltime><memory>3G</memory>"
   VERIF_RESERVATION=${RESERVATION}
 
 # if [[ ! -d ${ptmp_base} ]] ; then
@@ -296,7 +296,8 @@ export exefile_name_verif=""    # executable of verification (MET) is defined by
 #   export PARMupp_udef="/scratch4/NCEPDEV/fv3-cam/save/Gang.Zhao/FixData/parm/upp_gsd_test_mhu_hrrr_04"
     export PARMupp_udef="/scratch4/NCEPDEV/fv3-cam/save/Gang.Zhao/FixData/parm/upp_emc_raphrrr_5.0"
     export PARMwrf_udef="/scratch4/NCEPDEV/fv3-cam/save/Gang.Zhao/FixData/static_gsd_rtma3d_gge/WRF"
-    export PARMverf_udef="/scratch4/NCEPDEV/fv3-cam/save/Edward.Colon/FixData/VERIF-fix"
+#   export PARMverf_udef="/scratch4/NCEPDEV/fv3-cam/save/Edward.Colon/FixData/VERIF-fix"                          # v7.0
+    export PARMverf_udef="/scratch4/NCEPDEV/fv3-cam/save/Gang.Zhao/FixData/parm/VERIF-fix_ecolon"                 # v7.0
 
   elif [ $MACHINE = jet ] ; then
 
@@ -315,7 +316,8 @@ export exefile_name_verif=""    # executable of verification (MET) is defined by
 #   export PARMupp_udef="/mnt/lfs3/projects/hfv3gfs/Gang.Zhao/FixData/parm/upp_gsd_test_mhu_hrrr_04"
     export PARMupp_udef="/mnt/lfs3/projects/hfv3gfs/Gang.Zhao/FixData/parm/upp_emc_raphrrr_5.0"
     export PARMwrf_udef="/mnt/lfs3/projects/hfv3gfs/Gang.Zhao/FixData/static_gsd_rtma3d_gge/WRF"
-    export PARMverf_udef="/mnt/lfs3/projects/hfv3gfs/Edward.Colon/FixData/VERIF-fix"
+#   export PARMverf_udef="/mnt/lfs3/projects/hfv3gfs/Edward.Colon/FixData/VERIF-fix"                              # v7.0
+    export PARMverf_udef="/mnt/lfs3/projects/hfv3gfs/Gang.Zhao/FixData/parm/VERIF-fix_ecolon"                     # v8.1_beta2
 
   fi
 
@@ -533,6 +535,7 @@ cat > ${NWROOT}/workflow/${RUN}_${expname}.xml <<EOF
 <!ENTITY LOG_JJOB	"&LOG_DIR;/jlogfiles">
 <!ENTITY LOG_SCHDLR	"&LOG_DIR;">
 <!ENTITY LOG_PGMOUT     "&LOG_DIR;/pgmout">
+<!ENTITY jlogfile       "&LOG_JJOB;/jlogfile_${expname}.@Y@m@d@H">
 
 <!-- definition of name of the top running directory for all tasks -->
 <!ENTITY DATA_RUNDIR    "&DATAROOT;/&envir;/&RUN;.@Y@m@d@H@M">
@@ -805,6 +808,10 @@ cat > ${NWROOT}/workflow/${RUN}_${expname}.xml <<EOF
    <envar>
         <name>JJOB_DIR</name>
         <value>&JJOB_DIR;</value>
+   </envar>
+   <envar>
+        <name>jlogfile</name>
+        <value><cyclestr>&jlogfile;</cyclestr></value>
    </envar>
    <envar>
         <name>SCRIPT_DIR</name>

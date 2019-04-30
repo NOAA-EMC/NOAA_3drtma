@@ -72,7 +72,8 @@ export jlogfile=${jlogfile:-$COMROOT/logs/jlogfiles/jlogfile.$jobid}
 
 PDYm1=`$NDATE -24 ${PDY}${cyc} | cut -c 1-8`
 
-export pgmout=${pgmout:-"OUTPUT.$$"}
+# export pgmout=${pgmout:-"OUTPUT.$$"}
+export pgmout=${pgmout:-"OUTPUT.${PDY}${cyc}.${jobid}"}
 
 export cycle=t${cyc}z 
 
