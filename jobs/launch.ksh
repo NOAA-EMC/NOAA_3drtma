@@ -35,6 +35,15 @@ if [ "${MACHINE}" = "jet" ] ; then
     *)
       ;;
   esac
+elif  [ "${machine}" = "theia" ] ; then
+  module purge
+# load modules used when compiling the code
+  modulefile=${modulefile:-"${MODULEFILES}/modulefile.${target}.${machine}"}
+  source $modulefile
+# load extra modules to run the job
+  modulefile_run=${modulefile_run:-"${MODULEFILES}/modulefile.RUN.${machine}"}
+  source $modulefile_run
+  module list
 else
   echo "launch.ksh: modulefile is not set up yet for this machine-->${MACHINE}."
   echo "Job abort!"

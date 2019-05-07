@@ -3,61 +3,6 @@
 # loading modules and set common unix commands from outside
 #   in jobs/launch.sh and/or modulefile
 
-# for testing purposes
-#DATAHOME="/tmp/obsprd" #/home/rtrr/hrrr/2019032720/obsprd"
-#START_TIME=2019042107
-#SUBH_TIME=$1
-#NSSL="/public/data/radar/mrms"
-#AWK="awk"; ECHO="echo"; SED="sed"; MKDIR="mkdir"; DATE="date"; RM="rm"
-
-# Make sure DATAHOME is defined and exists
-if [ ! "${DATAHOME}" ]; then
-  ${ECHO} "ERROR: \$DATAHOME is not defined!"
-  exit 1
-fi
-
-# Make sure START_TIME is defined and in the correct format
-if [ ! "${START_TIME}" ]; then
-  ${ECHO} "ERROR: \$START_TIME is not defined!"
-  exit 1
-else
-  if [ `${ECHO} "${START_TIME}" | ${AWK} '/^[[:digit:]]{10}$/'` ]; then
-    START_TIME=`${ECHO} "${START_TIME}" | ${SED} 's/\([[:digit:]]\{2\}\)$/ \1/'`
-  elif [ ! "`${ECHO} "${START_TIME}" | ${AWK} '/^[[:digit:]]{8}[[:blank:]]{1}[[:digit:]]{2}$/'`" ]; then
-    ${ECHO} "ERROR: start time, '${START_TIME}', is not in 'yyyymmddhh' or 'yyyymmdd hh' format"
-    exit 1
-  fi
-fi
-
-if [ ! -d "${NSSL}" ]; then
-  ${ECHO} "ERROR: directory '${NSSL}' does not exist!"
-  exit 1
-fi
-
-if [ ! "${SUBH_TIME}" ]; then
-  ${ECHO} "ERROR: \$SUBH_TIME is not defined!"
-  exit 1
-else
-  subh=${SUBH_TIME}
-fi
-
-# Create the obsprd directory if necessary and cd into it
-if [ ! -d "${DATAHOME}" ]; then
-  ${MKDIR} -p ${DATAHOME}
-fi
-cd ${DATAHOME}
-
-# Compute date & time components for the analysis time
-YYYY1=`${DATE} +"%Y" -d "${START_TIME}"`
-MM1=`${DATE} +"%m" -d "${START_TIME}"`
-DD1=`${DATE} +"%d" -d "${START_TIME}"`
-HH1=`${DATE} +"%H" -d "${START_TIME}"`
-NEXT_HOUR=`${DATE} +"%Y%m%d%H" -d "${START_TIME} + 1 hour"`
-NEXT_HOUR=`${ECHO} "${NEXT_HOUR}" | ${SED} 's/\([[:digit:]]\{2\}\)$/ \1/'`
-YYYY2=`${DATE} +"%Y" -d "${NEXT_HOUR}"`
-MM2=`${DATE} +"%m" -d "${NEXT_HOUR}"`
-DD2=`${DATE} +"%d" -d "${NEXT_HOUR}"`
-HH2=`${DATE} +"%H" -d "${NEXT_HOUR}"`
 
 #for subh in 00 15 30 45 60
 #do

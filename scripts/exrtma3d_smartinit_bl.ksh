@@ -16,68 +16,12 @@
 
 #set -x
 
-# Print run parameters
-${ECHO}
-${ECHO} "smartinit.sh started at `${DATE}`"
-${ECHO}
-${ECHO} "DATAHOME = ${DATAHOME}"
-${ECHO} "     EXE_ROOT = ${EXE_ROOT}"
-
-# Set up some constants
-if [ "${MODEL}" == "HRRR" ]; then
-  export POST=${EXE_ROOT}/hrrr_smartinit_conus
-  export CORE=RAPR
-fi
-
-# Check to make sure the EXE_ROOT var was specified
-if [ ! -d ${EXE_ROOT} ]; then
-   ${ECHO} "ERROR: EXE_ROOT, '${EXE_ROOT}', does not exist"
-   exit 1
-fi
-
-# Check to make sure the post executable exists
-if [ ! -x ${POST} ]; then
-  ${ECHO} "ERROR: ${POST} does not exist, or is not executable"
-  exit 1
-fi
-
-# Check to make sure that the DATAHOME exists
-if [ ! ${DATAROOT} ]; then
-  ${ECHO} "ERROR: DATAROOT, \$DATAROOT , is not defined"
-  exit 1
-fi
-
-# If START_TIME is not defined, use the current time
-if [ ! "${START_TIME}" ]; then
-  START_TIME=`${DATE} +"%Y%m%d %H"`
-else
-  if [ `${ECHO} "${START_TIME}" | ${AWK} '/^[[:digit:]]{10}$/'` ]; then
-    START_TIME=`${ECHO} "${START_TIME}" | ${SED} 's/\([[:digit:]]\{2\}\)$/ \1/'`
-  elif [ ! "`${ECHO} "${START_TIME}" | ${AWK} '/^[[:digit:]]{8}[[:blank:]]{1}[[:digit:]]{2}$/'`" ]; then
-    ${ECHO} "ERROR: start time, '${START_TIME}', is not in 'yyyymmddhh' or 'yyyymmdd hh' format"
-    exit 1
-  fi
-  START_TIME=`${DATE} -d "${START_TIME}"`
-fi
-
-# Print out times
-${ECHO} "   START TIME = "`${DATE} +%Y%m%d%H -d "${START_TIME}"`
-${ECHO} "    FCST_TIME = ${FCST_TIME}"
-
-export STARTTIME_STR=`${DATE} +%Y%m%d%H -d "${START_TIME}"`
 
 # Set up the work directory and cd into it
 workdir=${DATAHOME}/smartinit_bl
 ${RM} -rf ${workdir}
 ${MKDIR} -p ${workdir}
 cd ${workdir}
-
-# Compute date & time components for the analysis time
-YYYYMMDDHH=`${DATE} +"%Y%m%d%H" -d "${START_TIME}"`
-HH=`${DATE} +"%H" -d "${START_TIME}"`
-
-cyc=${HH}
-fhr=${FCST_TIME}
 
 GRB2INDEX=${EXE_ROOT}/grb2index
 #EXEChrrr=${EXE_ROOT}/hrrr_smartinit_conus
