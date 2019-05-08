@@ -238,7 +238,7 @@ else
   # Output successful so write status to log
   #${ECHO} " Cycle ${YYYYMMDDHH}: ARW finished successfully at `${DATE}`" >> ${DATABASE_DIR}/loghistory/update_vars.log
   ${ECHO} "Assemble  REFL_10CM,U10,V10 back into wrf_inout"
-  ${NCKS} -A -H -v REFL_10CM,U10,V10 wrfout_d01_${time_str} ${DATAGSIHOME}/wrf_inout
+  ${NCKS} -A -H -v REFL_10CM,COMPOSITE_REFL_10CM,REFL_10CM_1KM,REFL_10CM_4KM,U10,V10 wrfout_d01_${time_str} ${DATAGSIHOME}/wrf_inout
 
   ${ECHO} "update_vars.ksh completed successfully at `${DATE}`"
 fi
