@@ -39,14 +39,8 @@ fi
 echo "Using $THREADS thread(s) for procesing."
 
 # Load modules
-module purge
-module load szip/2.1
-module load intel/18.0.5.274
-module load hdf5/1.8.9
-module load netcdf/4.2.1.1
-module load mvapich2/2.3
-module load ncl/6.5.0
-module load imagemagick/7.0.8-34
+# export MODULE_FILE="/home/rtrr/PARM_EXEC/modulefiles/modulefile.jet.NCL"
+source ${MODULE_FILE}
 
 # Make sure we are using GMT time zone for time computations
 # export NCL_VER=6.1.2  # for testing
@@ -88,8 +82,11 @@ PATH=${NCARG_ROOT}/bin:${PATH}
 # typeset -RZ2 FCST_TIME_AHEAD2
 # typeset -RZ2 FCST_TIME_BACK1
 # typeset -RZ2 FCST_TIME_BACK3
+typeset -Z6 j
+typeset -Z6 k
 
-ulimit -s 512000
+# ulimit -s 512000
+ulimit -s 1024000
 
 EXE_ROOT=/misc/whome/wrfruc/bin/ncl/nclhrrr
 
@@ -340,31 +337,33 @@ set -A webmon montage
 i=0
 p=0
 while [ ${i} -lt ${#ncgms[@]} ]; do
-  j=0 
+  j=000000
+  k=000000
   numtiles=${#tiles[@]}
-  (( numtiles=numtiles - 1 ))
+  (( numtiles=numtiles - 1 ))  
   while [ ${j} -le ${numtiles} ]; do
-    pngs[${p}]=${ncgms[${i}]}-${j}.png
-    # echo ${pngs[${p}]}
-    if [ ${j} -eq 0 ]; then
-      if [ "${websfx[${i}]}" = "ua" ]; then
+    (( k=j + 1 ))  
+    pngs[${p}]=${ncgms[${i}]}.${k}.png
+#    echo ${pngs[${p}]}
+    if [ ${j} -eq 000000 ]; then 
+      if [ "${websfx[${i}]}" = "ua" ]; then 
         webnames[${p}]=${webpfx[${i}]}
-      else
+      else 
         webnames[${p}]=${webpfx[${i}]}_${websfx[${i}]}
-      fi
-    else
-      if [ "${websfx[${i}]}" = "ua" ]; then
+      fi   
+    else 
+      if [ "${websfx[${i}]}" = "ua" ]; then 
         webnames[${p}]=${webpfx[${i}]}_${tiles[${j}]}
-      else
+      else 
         webnames[${p}]=${webpfx[${i}]}_${tiles[${j}]}${websfx[${i}]}
-      fi
-    fi
-    # echo ${webnames[${p}]}
-    (( j=j + 1 ))
+      fi   
+    fi   
+#    echo ${webnames[${p}]}
+    (( j=j + 1 ))  
 # p is total number of images (image index)
-    (( p=p + 1 ))
-  done
-  (( i=i + 1 ))
+    (( p=p + 1 ))  
+  done 
+  (( i=i + 1 ))  
 done
 
 ncl_error=0

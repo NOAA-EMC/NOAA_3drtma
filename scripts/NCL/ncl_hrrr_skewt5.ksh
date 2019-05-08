@@ -1,14 +1,8 @@
 #!/bin/ksh --login
 
 # Load modules
-module purge
-module load szip/2.1
-module load intel/18.0.5.274
-module load hdf5/1.8.9
-module load netcdf/4.2.1.1
-module load mvapich2/2.3
-module load ncl/6.5.0
-module load imagemagick/7.0.8-34
+# export MODULE_FILE="/home/rtrr/PARM_EXEC/modulefiles/modulefile.jet.NCL"
+source ${MODULE_FILE}
 
 # Make sure we are using GMT time zone for time computations
 export TZ="GMT"
