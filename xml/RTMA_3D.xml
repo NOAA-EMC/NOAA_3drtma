@@ -32,8 +32,7 @@
 <!ENTITY FIX_ROOT "&STATIC_DIR;/GSI">
 
 <!ENTITY MODULE_DIR "/home/rtrr/PARM_EXEC/modulefiles">
-<!ENTITY MODULE_FILE_MAIN "&MODULE_DIR;/modulefile.jet.GSI_UPP_WRF">
-<!ENTITY MODULE_FILE_NCL "&MODULE_DIR;/modulefile.jet.NCL">
+<!ENTITY MODULE_FILE "&MODULE_DIR;/modulefile.jet.RAPHRRR">
 
 <!ENTITY SCRIPT_DIR "&HOMEBASE_DIR;/scripts">
 <!ENTITY JJOB_DIR   "&HOMEBASE_DIR;/jobs">
@@ -384,7 +383,7 @@
   </metatask>
 -->
 
-  <task name="satellite_gsi_bufr" cycledefs="02-11hr,00hr,01hr" maxtries="3">
+  <task name="satellite_gsi_bufr" cycledefs="02-11hr,01hr" maxtries="3">
 
     &SATELLITE_RESOURCES;
     &WALL_LIMIT_DA;
@@ -428,6 +427,56 @@
     <dependency>
       <or>
         <datadep><cyclestr>&LANGLEY_BUFR_DIR;/@Y@j@H00.rap.t@Hz.lgycld.tm00.bufr_d</cyclestr></datadep>
+        <timedep><cyclestr offset="&START_TIME_CONVENTIONAL;">@Y@m@d@H@M00</cyclestr></timedep>
+      </or>
+    </dependency>
+
+  </task>
+
+  <task name="satellite_gsi_bufr_early" cycledefs="00hr" maxtries="3">
+
+    &SATELLITE_RESOURCES;
+    &WALL_LIMIT_DA;
+    &RESERVATION_PRE;
+    &ENVARS;
+
+    <command>&JJOB_DIR;/launch.ksh &JJOB_DIR;/JRTMA3D_SATELLITE_BUFR</command>
+    <cores>&SATELLITE_PROC;</cores>
+    <jobname><cyclestr>&JOBNAME_PRE;_satellite_bufr_@H</cyclestr></jobname>
+    <join><cyclestr>&LOG_DIR;/satellite_gsi_bufr_@Y@m@d@H00.log</cyclestr></join>
+
+    <envar>
+      <name>START_TIME</name>
+      <value><cyclestr>@Y@m@d@H</cyclestr></value>
+    </envar>
+    <envar>
+      <name>DATAROOT</name>
+      <value>&DATAROOT;</value>
+    </envar>
+    <envar>
+      <name>DATAHOME</name>
+      <value><cyclestr>&DATAROOT;/@Y@m@d@H/obsprd</cyclestr></value>
+    </envar>
+    <envar>
+      <name>GSI_ROOT</name>
+      <value>&GSI_ROOT;</value>
+    </envar>
+    <envar>
+      <name>FIX_ROOT</name>
+      <value>&FIX_ROOT;</value>
+    </envar>
+    <envar>
+      <name>STATIC_DIR</name>
+      <value>&STATIC_DIR;/WPS</value>
+    </envar>
+    <envar>
+      <name>NASALARC_DATA</name>
+      <value>&LANGLEY_BUFR_DIR;</value>
+    </envar>
+
+    <dependency>
+      <or>
+        <datadep><cyclestr>&LANGLEY_BUFR_DIR;/@Y@j@H00.rap_e.t@Hz.lgycld.tm00.bufr_d</cyclestr></datadep>
         <timedep><cyclestr offset="&START_TIME_CONVENTIONAL;">@Y@m@d@H@M00</cyclestr></timedep>
       </or>
     </dependency>
@@ -1001,7 +1050,7 @@
 
     <envar>
       <name>MODULE_FILE</name>
-      <value>&MODULE_FILE_NCL;</value>
+      <value>&MODULE_FILE;</value>
     </envar>
     <envar>
       <name>START_TIME</name>
@@ -1050,7 +1099,7 @@
 
       <envar>
         <name>MODULE_FILE</name>
-        <value>&MODULE_FILE_NCL;</value>
+        <value>&MODULE_FILE;</value>
       </envar>
       <envar>
         <name>START_TIME</name>
@@ -1101,7 +1150,7 @@
 
       <envar>
         <name>MODULE_FILE</name>
-        <value>&MODULE_FILE_NCL;</value>
+        <value>&MODULE_FILE;</value>
       </envar>
       <envar>
         <name>START_TIME</name>
