@@ -312,7 +312,7 @@ set -A ncgms  sfc_temp   \
               sfc_ssrun  \
               sfc_3hssrun
 
-set -A monpngs montage.png
+# set -A monpngs montage.png
 
 set -A webpfx temp temp ptemp dewp rh temp wind wind wchg wind wind vort pwtr totp cref \
               ptyp cape cin acp weasd 1hsnw acsnw snod acsnod cpcp sfcp hpbl rh rh rhpw vvel vis ceil ctop \
@@ -332,7 +332,7 @@ set -A websfx sfc 2m 2m 2m 2m 2ds 10m 80m 80m 850 250 500 sfc sfc sfc sfc sfc sf
 
 set -A tiles dum t1 t2 t3 t4 t5 t6 t7 t8 z0 z1 z2 z3 z4 z5 z6 z7
 
-set -A webmon montage
+# set -A webmon montage
 
 i=0
 p=0
@@ -398,89 +398,90 @@ ${CAT} $CMDFN | ${XARGS} -P $THREADS -I {} ${BASH} -c "{}"
 ncl_error=$?
 ${RM} -f $CMDFN
 
-# Run ctrans on all the .ncgm files to translate them into Sun Raster files
-i=0
-while [ ${i} -lt ${#ncgms[@]} ]; do
-
-  plot=${ncgms[${i}]}
-#  ${ECHO} "Starting ctrans for ${plot}.ncgm at `${DATE}`"
-## normal image
-#  ${CTRANS} -d sun ${plot}.ncgm -resolution 1132x906 > ${plot}.ras
-#
-## montage image
-#  ${CTRANS} -d sun ${plot}.ncgm -resolution 2678x1673 > ${plot}_mon.ras
-#
-#  error=$?
-#  if [ ${error} -ne 0 ]; then
-#    ${ECHO} "ERROR: ctrans ${plot}.ncgm crashed!  Exit status=${error}"
-#    ncl_error=${error}
-#  fi
-#  ${ECHO} "Finished ctrans for ${plot}.ncgm at `${DATE}`"
-
-  echo "${CTRANS} -d sun ${plot}.ncgm -resolution 1132x906 > ${plot}.ras" >> $CMDFN
-  echo "${CTRANS} -d sun ${plot}.ncgm -resolution 2678x1673 > ${plot}_mon.ras" >> $CMDFN
-
-  (( i=i + 1 )) 
-
-done
-
-${CAT} $CMDFN | ${XARGS} -P $THREADS -I {} ${BASH} -c "{}" 
-ncl_error=$?
-${RM} -f $CMDFN
-
-# Convert the .ras files into .png files
-i=0
-while [ ${i} -lt ${#ncgms[@]} ]; do
-
-  plot=${ncgms[${i}]}
-  ${ECHO} "Starting convert for ${plot}.ras at `${DATE}`"
-
-  if [ -s ${plot}.ras ]; then 
-# normal image
-#    ${CONVERT} -colors 128 -trim -border 5x5 -bordercolor black ${plot}.ras ${plot}.png
-#    error=$?
-#    if [ ${error} -ne 0 ]; then
-#      ${ECHO} "ERROR: convert ${plot}.ras crashed!  Exit status=${error}"
-#      ncl_error=${error}
-#    fi
-   echo ${CONVERT} -colors 128 -trim -border 5x5 -bordercolor black ${plot}.ras ${plot}.png >> $CMDFN
-   
-  else 
-    ${ECHO} "No file to convert, exit gracefully"
-    ncl_error=0
-  fi
-  ${ECHO} "Finished convert for ${plot}.ras at `${DATE}`"
-
-  if [ -s ${plot}_mon.ras ]; then 
-# montage image
-#    ${CONVERT} -colors 128 -trim -border 190x12 -bordercolor black ${plot}_mon.ras ${plot}_mon.png
-#    error=$?
-#    if [ ${error} -ne 0 ]; then
-#      ${ECHO} "ERROR: convert ${plot}_mon.ras crashed!  Exit status=${error}"
-#      ncl_error=${error}
-#    fi
-    echo ${CONVERT} -colors 128 -trim -border 190x12 -bordercolor black ${plot}_mon.ras ${plot}_mon.png >> $CMDFN
-  else 
-    ${ECHO} "No file to convert, exit gracefully"
-    ncl_error=0
-  fi
-  ${ECHO} "Finished convert for ${plot}_mon.ras at `${DATE}`"
-
-  (( i=i + 1 )) 
-  
-done
-
-${CAT} $CMDFN | ${XARGS} -P $THREADS -I {} ${BASH} -c "{}" 
-ncl_error=$?
-${RM} -f $CMDFN
-
-# put together the montage images
-${MONTAGE} sfc_cref_mon-0.png 2m_temp_mon-0.png 10m_wind_mon-0.png ua_ceil_mon-0.png -tile 2x2 -geometry 1877x1048+21+4 -background black montage.png
+# # Run ctrans on all the .ncgm files to translate them into Sun Raster files
+# i=0
+# while [ ${i} -lt ${#ncgms[@]} ]; do
+# 
+#   plot=${ncgms[${i}]}
+# #  ${ECHO} "Starting ctrans for ${plot}.ncgm at `${DATE}`"
+# ## normal image
+# #  ${CTRANS} -d sun ${plot}.ncgm -resolution 1132x906 > ${plot}.ras
+# #
+# ## montage image
+# #  ${CTRANS} -d sun ${plot}.ncgm -resolution 2678x1673 > ${plot}_mon.ras
+# #
+# #  error=$?
+# #  if [ ${error} -ne 0 ]; then
+# #    ${ECHO} "ERROR: ctrans ${plot}.ncgm crashed!  Exit status=${error}"
+# #    ncl_error=${error}
+# #  fi
+# #  ${ECHO} "Finished ctrans for ${plot}.ncgm at `${DATE}`"
+# 
+#   echo "${CTRANS} -d sun ${plot}.ncgm -resolution 1132x906 > ${plot}.ras" >> $CMDFN
+#   echo "${CTRANS} -d sun ${plot}.ncgm -resolution 2678x1673 > ${plot}_mon.ras" >> $CMDFN
+# 
+#   (( i=i + 1 )) 
+# 
+# done
+# 
+# ${CAT} $CMDFN | ${XARGS} -P $THREADS -I {} ${BASH} -c "{}" 
+# ncl_error=$?
+# ${RM} -f $CMDFN
+# 
+# # Convert the .ras files into .png files
+# i=0
+# while [ ${i} -lt ${#ncgms[@]} ]; do
+# 
+#   plot=${ncgms[${i}]}
+#   ${ECHO} "Starting convert for ${plot}.ras at `${DATE}`"
+# 
+#   if [ -s ${plot}.ras ]; then 
+# # normal image
+# #    ${CONVERT} -colors 128 -trim -border 5x5 -bordercolor black ${plot}.ras ${plot}.png
+# #    error=$?
+# #    if [ ${error} -ne 0 ]; then
+# #      ${ECHO} "ERROR: convert ${plot}.ras crashed!  Exit status=${error}"
+# #      ncl_error=${error}
+# #    fi
+#    echo ${CONVERT} -colors 128 -trim -border 5x5 -bordercolor black ${plot}.ras ${plot}.png >> $CMDFN
+#    
+#   else 
+#     ${ECHO} "No file to convert, exit gracefully"
+#     ncl_error=0
+#   fi
+#   ${ECHO} "Finished convert for ${plot}.ras at `${DATE}`"
+# 
+#   if [ -s ${plot}_mon.ras ]; then 
+# # montage image
+# #    ${CONVERT} -colors 128 -trim -border 190x12 -bordercolor black ${plot}_mon.ras ${plot}_mon.png
+# #    error=$?
+# #    if [ ${error} -ne 0 ]; then
+# #      ${ECHO} "ERROR: convert ${plot}_mon.ras crashed!  Exit status=${error}"
+# #      ncl_error=${error}
+# #    fi
+#     echo ${CONVERT} -colors 128 -trim -border 190x12 -bordercolor black ${plot}_mon.ras ${plot}_mon.png >> $CMDFN
+#   else 
+#     ${ECHO} "No file to convert, exit gracefully"
+#     ncl_error=0
+#   fi
+#   ${ECHO} "Finished convert for ${plot}_mon.ras at `${DATE}`"
+# 
+#   (( i=i + 1 )) 
+#   
+# done
+# 
+# ${CAT} $CMDFN | ${XARGS} -P $THREADS -I {} ${BASH} -c "{}" 
+# ncl_error=$?
+# ${RM} -f $CMDFN
+# 
+# # put together the montage images
+# ${MONTAGE} sfc_cref_mon-0.png 2m_temp_mon-0.png 10m_wind_mon-0.png ua_ceil_mon-0.png -tile 2x2 -geometry 1877x1048+21+4 -background black montage.png
 
 # Copy png files to their proper names
 i=0
 while [ ${i} -lt ${#pngs[@]} ]; do
   pngfile=${pngs[${i}]}
+  ${CONVERT} -trim ${pngfile} ${pngfile}
   fulldir=${DATAHOME}/nclprd/full
   ${MKDIR} -p ${fulldir}
   webfile=${fulldir}/${webnames[${i}]}_f${FCST_TIME}.png
@@ -488,96 +489,112 @@ while [ ${i} -lt ${#pngs[@]} ]; do
   ${MV} ${pngfile} ${webfile}
   (( i=i + 1 ))
   pngfile=${pngs[${i}]}
+  ${CONVERT} -trim ${pngfile} ${pngfile}
   t1dir=${DATAHOME}/nclprd/t1
   ${MKDIR} -p ${t1dir}
   webfile=${t1dir}/${webnames[${i}]}_f${FCST_TIME}.png
   ${MV} ${pngfile} ${webfile}
   (( i=i + 1 ))
   pngfile=${pngs[${i}]}
+  ${CONVERT} -trim ${pngfile} ${pngfile}
   t2dir=${DATAHOME}/nclprd/t2
   ${MKDIR} -p ${t2dir}
   webfile=${t2dir}/${webnames[${i}]}_f${FCST_TIME}.png
   ${MV} ${pngfile} ${webfile}
   (( i=i + 1 ))
   pngfile=${pngs[${i}]}
+  ${CONVERT} -trim ${pngfile} ${pngfile}
   t3dir=${DATAHOME}/nclprd/t3
   ${MKDIR} -p ${t3dir}
   webfile=${t3dir}/${webnames[${i}]}_f${FCST_TIME}.png
   ${MV} ${pngfile} ${webfile}
   (( i=i + 1 ))
   pngfile=${pngs[${i}]}
+  ${CONVERT} -trim ${pngfile} ${pngfile}
   t4dir=${DATAHOME}/nclprd/t4
   ${MKDIR} -p ${t4dir}
   webfile=${t4dir}/${webnames[${i}]}_f${FCST_TIME}.png
   ${MV} ${pngfile} ${webfile}
   (( i=i + 1 ))
   pngfile=${pngs[${i}]}
+  ${CONVERT} -trim ${pngfile} ${pngfile}
   t5dir=${DATAHOME}/nclprd/t5
   ${MKDIR} -p ${t5dir}
   webfile=${t5dir}/${webnames[${i}]}_f${FCST_TIME}.png
   ${MV} ${pngfile} ${webfile}
   (( i=i + 1 ))
   pngfile=${pngs[${i}]}
+  ${CONVERT} -trim ${pngfile} ${pngfile}
   t6dir=${DATAHOME}/nclprd/t6
   ${MKDIR} -p ${t6dir}
   webfile=${t6dir}/${webnames[${i}]}_f${FCST_TIME}.png
   ${MV} ${pngfile} ${webfile}
   (( i=i + 1 ))
   pngfile=${pngs[${i}]}
+  ${CONVERT} -trim ${pngfile} ${pngfile}
   t7dir=${DATAHOME}/nclprd/t7
   ${MKDIR} -p ${t7dir}
   webfile=${t7dir}/${webnames[${i}]}_f${FCST_TIME}.png
   ${MV} ${pngfile} ${webfile}
   (( i=i + 1 ))
   pngfile=${pngs[${i}]}
+  ${CONVERT} -trim ${pngfile} ${pngfile}
   t8dir=${DATAHOME}/nclprd/t8
   ${MKDIR} -p ${t8dir}
   webfile=${t8dir}/${webnames[${i}]}_f${FCST_TIME}.png
   ${MV} ${pngfile} ${webfile}
   (( i=i + 1 ))
   pngfile=${pngs[${i}]}
+  ${CONVERT} -trim ${pngfile} ${pngfile}
   z0dir=${DATAHOME}/nclprd/z0
   ${MKDIR} -p ${z0dir}
   webfile=${z0dir}/${webnames[${i}]}_f${FCST_TIME}.png
   ${MV} ${pngfile} ${webfile}
   (( i=i + 1 ))
   pngfile=${pngs[${i}]}
+  ${CONVERT} -trim ${pngfile} ${pngfile}
   z1dir=${DATAHOME}/nclprd/z1
   ${MKDIR} -p ${z1dir}
   webfile=${z1dir}/${webnames[${i}]}_f${FCST_TIME}.png
   ${MV} ${pngfile} ${webfile}
   (( i=i + 1 ))
   pngfile=${pngs[${i}]}
+  ${CONVERT} -trim ${pngfile} ${pngfile}
   z2dir=${DATAHOME}/nclprd/z2
   ${MKDIR} -p ${z2dir}
   webfile=${z2dir}/${webnames[${i}]}_f${FCST_TIME}.png
   ${MV} ${pngfile} ${webfile}
   (( i=i + 1 ))
   pngfile=${pngs[${i}]}
+  ${CONVERT} -trim ${pngfile} ${pngfile}
   z3dir=${DATAHOME}/nclprd/z3
   ${MKDIR} -p ${z3dir}
   webfile=${z3dir}/${webnames[${i}]}_f${FCST_TIME}.png
   ${MV} ${pngfile} ${webfile}
   (( i=i + 1 ))
   pngfile=${pngs[${i}]}
+  ${CONVERT} -trim ${pngfile} ${pngfile}
   z4dir=${DATAHOME}/nclprd/z4
   ${MKDIR} -p ${z4dir}
   webfile=${z4dir}/${webnames[${i}]}_f${FCST_TIME}.png
   ${MV} ${pngfile} ${webfile}
   (( i=i + 1 ))
   pngfile=${pngs[${i}]}
+  ${CONVERT} -trim ${pngfile} ${pngfile}
   z5dir=${DATAHOME}/nclprd/z5
   ${MKDIR} -p ${z5dir}
   webfile=${z5dir}/${webnames[${i}]}_f${FCST_TIME}.png
   ${MV} ${pngfile} ${webfile}
   (( i=i + 1 ))
   pngfile=${pngs[${i}]}
+  ${CONVERT} -trim ${pngfile} ${pngfile}
   z6dir=${DATAHOME}/nclprd/z6
   ${MKDIR} -p ${z6dir}
   webfile=${z6dir}/${webnames[${i}]}_f${FCST_TIME}.png
   ${MV} ${pngfile} ${webfile}
   (( i=i + 1 ))
   pngfile=${pngs[${i}]}
+  ${CONVERT} -trim ${pngfile} ${pngfile}
   z7dir=${DATAHOME}/nclprd/z7
   ${MKDIR} -p ${z7dir}
   webfile=${z7dir}/${webnames[${i}]}_f${FCST_TIME}.png
@@ -585,18 +602,18 @@ while [ ${i} -lt ${#pngs[@]} ]; do
   (( i=i + 1 ))
 done
 
-# Copy montage files to their proper names
-i=0
-while [ ${i} -lt ${#monpngs[@]} ]; do
-  pngfile=${monpngs[${i}]}
-  fulldir=${DATAHOME}/nclprd/full
-  ${MKDIR} -p ${fulldir}
-  webfile=${fulldir}/${webmon[${i}]}_f${FCST_TIME}.png
-#  webfile=${webmon[${i}]}_f${FCST_TIME}.png    # for testing
-  ${MV} ${pngfile} ${webfile}
-
-  (( i=i + 1 ))
-done
+# # Copy montage files to their proper names
+# i=0
+# while [ ${i} -lt ${#monpngs[@]} ]; do
+#   pngfile=${monpngs[${i}]}
+#   fulldir=${DATAHOME}/nclprd/full
+#   ${MKDIR} -p ${fulldir}
+#   webfile=${fulldir}/${webmon[${i}]}_f${FCST_TIME}.png
+# #   webfile=${webmon[${i}]}_f${FCST_TIME}.png    # for testing
+#   ${MV} ${pngfile} ${webfile}
+# 
+#   (( i=i + 1 ))
+# done
 
 # Remove the workdir
 ${RM} -rf ${workdir}
