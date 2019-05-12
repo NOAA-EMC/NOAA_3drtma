@@ -97,8 +97,12 @@ ${CP} ${NASALARC} .
 
 ${LN} -s ${STATIC_DIR}/geo_em.d01.nc .
 
-# Link to the prepbufr data
-${LN} -s ${NASALARC_DATA}/${YYYYJJJHH}00.rap.t${HH}z.lgycld.tm00.bufr_d ./NASA_LaRC_cloud.bufr
+# Link to the NASA LaRC cloud data
+if [ "${HH}" = 12 ] || [ "${HH}" = "00" ] ; then
+  ${LN} -s ${NASALARC_DATA}/${YYYYJJJHH}00.rap_e.t${HH}z.lgycld.tm00.bufr_d ./NASA_LaRC_cloud.bufr
+else
+  ${LN} -s ${NASALARC_DATA}/${YYYYJJJHH}00.rap.t${HH}z.lgycld.tm00.bufr_d ./NASA_LaRC_cloud.bufr
+fi
 
 # echo ${YYYYMMDDHH} > nasaLaRC_cycle_date
 # Build the namelist on-the-fly
