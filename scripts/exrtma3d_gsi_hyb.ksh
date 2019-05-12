@@ -234,27 +234,6 @@ fi
   fi
 #fi
 
-if [ -r "${DATAOBSHOME}/prepbufr_vsesondes" ]; then
-   ${CP} ${DATAOBSHOME}/prepbufr_vsesondes .
-   ${RM} ./prepbufr
-   ${LN} -s prepbufr_vsesondes ./prepbufr
-else
-   ${ECHO} "Warning: ${DATAOBSHOME}/prepbufr_vsesondes does not exist!"
-fi
-if [ -r "${DATAOBSHOME}/prepbufr_clamps" ]; then
-   ${CP} ${DATAOBSHOME}/prepbufr_clamps .
-   ${RM} ./prepbufr
-   ${LN} -s prepbufr_clamps ./prepbufr
-else
-   ${ECHO} "Warning: ${DATAOBSHOME}/prepbufr_clamps does not exist!"
-fi
-if [ -r "${DATAOBSHOME}/prepbufr_sticknet" ]; then
-   ${CP} ${DATAOBSHOME}/prepbufr_sticknet .
-   ${RM} ./prepbufr
-   ${LN} -s prepbufr_sticknet ./prepbufr
-else
-   ${ECHO} "Warning: ${DATAOBSHOME}/prepbufr_sticknet does not exist!"
-fi
 
 if [ -r "${DATAOBSHOME}/NSSLRefInGSI.bufr" ]; then
   ${LN} -s ${DATAOBSHOME}/NSSLRefInGSI.bufr ./refInGSI
