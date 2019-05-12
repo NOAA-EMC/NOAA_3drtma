@@ -31,6 +31,9 @@
 <!ENTITY GSI_ROOT "&HOMEBASE_DIR;/exec/GSI">
 <!ENTITY FIX_ROOT "&STATIC_DIR;/GSI">
 
+<!ENTITY MODULE_DIR "/home/rtrr/PARM_EXEC/modulefiles">
+<!ENTITY MODULE_FILE "&MODULE_DIR;/modulefile.jet.RAPHRRR">
+
 <!ENTITY SCRIPT_DIR "&HOMEBASE_DIR;/scripts">
 <!ENTITY JJOB_DIR   "&HOMEBASE_DIR;/jobs">
 <!ENTITY WRKFLW_DIR "&HOMEBASE_DIR;/workflow">
@@ -1046,6 +1049,10 @@
     <join><cyclestr>&LOG_DIR;/ncl_@Y@m@d@H00_00.log</cyclestr></join>
 
     <envar>
+      <name>MODULE_FILE</name>
+      <value>&MODULE_FILE;</value>
+    </envar>
+    <envar>
       <name>START_TIME</name>
       <value><cyclestr>@Y@m@d@H</cyclestr></value>
     </envar>
@@ -1090,6 +1097,10 @@
       <jobname><cyclestr>&JOBNAME_PRE;_ncl_@H_00_#skewt#</cyclestr></jobname>
       <join><cyclestr>&LOG_DIR;/ncl_@Y@m@d@H00_00_#skewt#.log</cyclestr></join>
 
+      <envar>
+        <name>MODULE_FILE</name>
+        <value>&MODULE_FILE;</value>
+      </envar>
       <envar>
         <name>START_TIME</name>
         <value><cyclestr>@Y@m@d@H</cyclestr></value>
@@ -1137,6 +1148,10 @@
       <jobname><cyclestr>&JOBNAME_PRE;_ncl_@H_00_#htxs#</cyclestr></jobname>
       <join><cyclestr>&LOG_DIR;/ncl_@Y@m@d@H00_00_#htxs#.log</cyclestr></join>
 
+      <envar>
+        <name>MODULE_FILE</name>
+        <value>&MODULE_FILE;</value>
+      </envar>
       <envar>
         <name>START_TIME</name>
         <value><cyclestr>@Y@m@d@H</cyclestr></value>
