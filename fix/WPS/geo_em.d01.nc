@@ -1,1 +1,0 @@
-/home/rtrr/HRRR/static/WPS/geo_em.d01.nc

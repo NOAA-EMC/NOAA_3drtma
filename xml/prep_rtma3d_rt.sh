@@ -30,7 +30,57 @@
 
 #
 
-if [[ -d /jetmon ]] ; then
+if [[ -d /dcom && -d /hwrf ]] ; then
+
+    . /usrx/local/Modules/3.2.10/init/sh
+
+#   MODULESHOME="/usrx/local/Modules/3.2.10"
+
+#   . $MODULESHOME/init/sh
+
+    MACHINE=wcoss 
+
+    echo "Machine not configured for 3d rtma."
+
+elif [[ -d /cm ]] ; then
+
+#   MODULESHOME="/usrx/local/Modules/3.2.10"
+
+#   . $MODULESHOME/init/sh
+
+    conf_target=nco
+
+    MACHINE=cray
+
+    echo "Machine not configured for 3d rtma."
+
+elif [[ -d /ioddev_dell ]]; then
+
+#   MODULESHOME="/usrx/local/Modules/3.2.10"
+
+#   . $MODULESHOME/init/sh
+
+    conf_target=nco
+
+    MACHINE=dell
+
+    echo "Machine not yet configured for real time 3d rtma but is being developed."
+
+    exit 1
+
+elif [[ -d /scratch3 ]] ; then
+
+    . /etc/profile
+
+    . /etc/profile.d/modules.sh >/dev/null # Module Support
+
+    MACHINE=theia
+
+    echo "Machine not configured for real time 3d rtma."
+
+    exit 1
+
+elif [[ -d /mnt/lfs3/projects ]] ; then
 
     . /etc/profile
 
@@ -46,17 +96,16 @@ else
 
     MACHINE="unknown"
 
-    echo "Running on Machine: $MACHINE "
+    echo 'Running on $MACHINE '
 
     echo ' ---------> Warning Warning Warning Warning <--------- '
 
-    echo '     Machine $MACHINE is NOT ready for running This System.'
-
-    echo " ---- > Abort! Abort! Abort! < ---- "
+    echo '     Machine $machine is NOT ready for running $NET.'
 
     exit 1
 
 fi
+
 
 echo "Running on Machine: $MACHINE "
 
@@ -138,7 +187,7 @@ export startCDATE=201902131200              #yyyymmddhhmm - Starting day of RTMA
 
 export endCDATE=201905310000                #yyyymmddhhmm - Ending day of RTMA3D run (mainly used for retrospective run) 
 
-export ExpDateWindows="03 05 2019 *"        # dd mm yyyy weekday (crontab-like date format, mainly used for real-time run)
+export ExpDateWindows="08 05 2019 *"        # dd mm yyyy weekday (crontab-like date format, mainly used for real-time run)
 
 export NET=rtma3d                           #selection of rtma3d (or rtma,urma)
 
