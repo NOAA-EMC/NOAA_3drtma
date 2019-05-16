@@ -1,0 +1,36 @@
+#IncludeRegexLine: ^[ 	]*#[ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
+
+#IncludeRegexScan: ^.*$
+
+#IncludeRegexComplain: ^$
+
+#IncludeRegexTransform: 
+
+/home/Edward.Colon/EMC_noaa-3drtma/sorc/rtma_gsi.fd/libsrc/w3nco/mova2i.c
+fortran.h
+-
+
+/home/Edward.Colon/EMC_noaa-3drtma/sorc/rtma_gsi.fd/libsrc/w3nco/summary.c
+stdio.h
+-
+stdlib.h
+-
+math.h
+-
+string.h
+-
+sys/types.h
+-
+sys/stat.h
+-
+sys/time.h
+-
+sys/utsname.h
+-
+sys/proc.h
+-
+errno.h
+-
+sys/resource.h
+-
+

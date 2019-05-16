@@ -1,0 +1,110 @@
+#   load modules for running gsi anl
+###########################################################
+#                                                         #
+# This module file for running 3DRTMA package             #
+# is basically including two parts:                       #
+# 1. first part is same as the module file for building,  #
+#    so these same modules used in compilation will be    #
+#    used to support running the code.                    #
+#    (see ../build/modulefile.build.machine)              #
+#    This part is in build module file, so skipped here.  #
+#                                                         #
+# 2. second part is to load specific modules for running  #
+#    specific tools/utilities, like wgrib, MET, etc.      #
+#                                                         #
+###########################################################
+
+#
+# Section 1: loading modules used in building RTMA package
+#            This section is skipped here.
+#            In jobs/launch.ksh, 
+#              it loads building modules first,
+#              then load this module file.
+#
+#%Module######################################################################
+##                                                       Russ.Treadon@noaa.gov
+##                                                           NOAA/NWS/NCEP/EMC
+## GDAS_ENKF v6.2.3
+##_____________________________________________________
+#proc ModulesHelp { } {
+#puts stderr "Set environment veriables for GSI build with CMake"
+#puts stderr "This module initializes the environment "
+#puts stderr "for the Intel Compiler Suite $version\n"
+#}
+#module-whatis " GDAS_ENKF whatis description"
+#
+#set ver v6.2.3
+#
+#
+# Section 2: loading modules used to run the specific tools/utilities
+#
+# Loading production utilities
+#   adding module path for prod_util (e.g., ndate)  and esmf libs
+    module use -a /mnt/lfs3/projects/hfv3gfs/emc.nemspara/soft/modulefiles       # Jet
+    module load prod_util
+
+# Loading contrib modules (e.g., anaconda, cmake, met for verification, etc.)
+    module use -a /contrib/modulefiles	
+#   module load contrib     # not use this line if use the command just above
+
+    module load nco
+
+# Access to archiving system
+    module load hpss
+
+# Grib
+    module load cnvgrib                   # 1.4.0
+    export CNVGRIB=${CNVGRIB:-"cnvgrib"}
+
+    module load wgrib
+    module load wgrib2
+    export WGRIB2=${WGRIB2:-"wgrib2"}
+ 
+# MET verification tool support (loaded in launch.ksh when running MET job)
+#   module use /mnt/lfs1/projects/dtc-hurr/MET/MET_releases/modulefiles
+#   module load met/8.1_beta2             # 8.1_beta2(D), 8.0 is also available
+                                          # version number must match the config file
+
+#   module load anaconda                  # Python
+    module load grads                     # GrADS
+#   export GADDIR=$GADDIR
+    export GASCRP=/home/Gang.Zhao/local/grads/scripts
+
+    module load cairo                     # NCL
+    module load ncl                       # NCL
+    module load ncview
+    module load imagemagick               # image file format conversion
+
+
+#   module load rocoto/1.3.0-RC5          # loaded in launch.ksh
+#   module load slurm                     # loaded in launch.ksh
+
+#
+# Section 3: path to some common unix/linux commands and tools
+#
+    export RM=/bin/rm
+    export CP=/bin/cp
+    export MV=/bin/mv
+    export LN=/bin/ln
+    export MKDIR=/bin/mkdir
+    export CAT=/bin/cat
+    export ECHO=/bin/echo
+    export LS=/bin/ls
+    export CUT=/bin/cut
+    export WC=/usr/bin/wc
+    export DATE=/bin/date
+    export AWK="/bin/gawk --posix"       # for jet
+    export SED=/bin/sed
+    export TAIL=/usr/bin/tail
+    export BC=/usr/bin/bc
+    export WHICH=/usr/bin/which
+    export GREP=/usr/bin/grep
+    export UNZIP=/bin/unzip
+
+    export CPFS=cpfs
+
+    export NCDUMP=ncdump
+#   export MPIRUN=${MPIRUN:-"srun"}    # defined in launch.ksh
+ 
+
+echo "done loading modules"

@@ -1,0 +1,560 @@
+The system is: Linux - 3.10.0-957.1.3.el7.x86_64 - x86_64
+Compiling the C compiler identification source file "CMakeCCompilerId.c" succeeded.
+Compiler: /apps/intel/composer_xe_2015.3.187/bin/intel64/icc 
+Build flags: 
+Id flags: 
+
+The output was:
+0
+
+
+Compilation of the C compiler identification source "CMakeCCompilerId.c" produced "a.out"
+
+The C compiler identification is Intel, found in "/mnt/lfs3/projects/hfv3gfs/Edward.Colon/junk/EMC_noaa-3drtma/sorc/build_gsi/CMakeFiles/2.8.12.2/CompilerIdC/a.out"
+
+Compiling the CXX compiler identification source file "CMakeCXXCompilerId.cpp" succeeded.
+Compiler: /apps/intel/composer_xe_2015.3.187/bin/intel64/icpc 
+Build flags: 
+Id flags: 
+
+The output was:
+0
+
+
+Compilation of the CXX compiler identification source "CMakeCXXCompilerId.cpp" produced "a.out"
+
+The CXX compiler identification is Intel, found in "/mnt/lfs3/projects/hfv3gfs/Edward.Colon/junk/EMC_noaa-3drtma/sorc/build_gsi/CMakeFiles/2.8.12.2/CompilerIdCXX/a.out"
+
+Determining if the C compiler works passed with the following output:
+Change Dir: /mnt/lfs3/projects/hfv3gfs/Edward.Colon/junk/EMC_noaa-3drtma/sorc/build_gsi/CMakeFiles/CMakeTmp
+
+Run Build Command:/bin/gmake "cmTryCompileExec704976034/fast"
+/bin/gmake -f CMakeFiles/cmTryCompileExec704976034.dir/build.make CMakeFiles/cmTryCompileExec704976034.dir/build
+gmake[1]: Entering directory `/mnt/lfs3/projects/hfv3gfs/Edward.Colon/junk/EMC_noaa-3drtma/sorc/build_gsi/CMakeFiles/CMakeTmp'
+/usr/bin/cmake -E cmake_progress_report /mnt/lfs3/projects/hfv3gfs/Edward.Colon/junk/EMC_noaa-3drtma/sorc/build_gsi/CMakeFiles/CMakeTmp/CMakeFiles 1
+Building C object CMakeFiles/cmTryCompileExec704976034.dir/testCCompiler.c.o
+/apps/intel/composer_xe_2015.3.187/bin/intel64/icc    -o CMakeFiles/cmTryCompileExec704976034.dir/testCCompiler.c.o   -c /mnt/lfs3/projects/hfv3gfs/Edward.Colon/junk/EMC_noaa-3drtma/sorc/build_gsi/CMakeFiles/CMakeTmp/testCCompiler.c
+Linking C executable cmTryCompileExec704976034
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTryCompileExec704976034.dir/link.txt --verbose=1
+/apps/intel/composer_xe_2015.3.187/bin/intel64/icc      -qopenmp CMakeFiles/cmTryCompileExec704976034.dir/testCCompiler.c.o  -o cmTryCompileExec704976034 -rdynamic 
+gmake[1]: Leaving directory `/mnt/lfs3/projects/hfv3gfs/Edward.Colon/junk/EMC_noaa-3drtma/sorc/build_gsi/CMakeFiles/CMakeTmp'
+
+
+Detecting C compiler ABI info compiled with the following output:
+Change Dir: /mnt/lfs3/projects/hfv3gfs/Edward.Colon/junk/EMC_noaa-3drtma/sorc/build_gsi/CMakeFiles/CMakeTmp
+
+Run Build Command:/bin/gmake "cmTryCompileExec504805090/fast"
+/bin/gmake -f CMakeFiles/cmTryCompileExec504805090.dir/build.make CMakeFiles/cmTryCompileExec504805090.dir/build
+gmake[1]: Entering directory `/mnt/lfs3/projects/hfv3gfs/Edward.Colon/junk/EMC_noaa-3drtma/sorc/build_gsi/CMakeFiles/CMakeTmp'
+/usr/bin/cmake -E cmake_progress_report /mnt/lfs3/projects/hfv3gfs/Edward.Colon/junk/EMC_noaa-3drtma/sorc/build_gsi/CMakeFiles/CMakeTmp/CMakeFiles 1
+Building C object CMakeFiles/cmTryCompileExec504805090.dir/CMakeCCompilerABI.c.o
+/apps/intel/composer_xe_2015.3.187/bin/intel64/icc    -o CMakeFiles/cmTryCompileExec504805090.dir/CMakeCCompilerABI.c.o   -c /usr/share/cmake/Modules/CMakeCCompilerABI.c
+Linking C executable cmTryCompileExec504805090
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTryCompileExec504805090.dir/link.txt --verbose=1
+/apps/intel/composer_xe_2015.3.187/bin/intel64/icc     -v CMakeFiles/cmTryCompileExec504805090.dir/CMakeCCompilerABI.c.o  -o cmTryCompileExec504805090 -rdynamic  
+icc version 15.0.3 (gcc version 4.8.5 compatibility)
+/apps/intel/composer_xe_2015.3.187/bin/intel64/mcpcom    -mP1OPT_version=15.0-intel64 -mGLOB_diag_file=CMakeFiles/cmTryCompileExec504805090.dir/CMakeCCompilerABI.c.diag -mP1OPT_print_version=FALSE -mCG_use_gas_got_workaround=F -mP2OPT_align_option_used=TRUE -mGLOB_gcc_version=485 "-mGLOB_options_string=-v -o cmTryCompileExec504805090 -rdynamic" -mGLOB_cxx_limited_range=FALSE -mCG_extend_parms=FALSE -mGLOB_compiler_bin_directory=/apps/intel/composer_xe_2015.3.187/bin/intel64 -mGLOB_as_output_backup_file_name=/tmp/icc85w6YPas_.s -mIPOPT_activate -mGLOB_em64t -mGLOB_product_id_code=0x22006d91 -mP3OPT_use_mspp_call_convention -mP2OPT_subs_out_of_bound=FALSE -mP2OPT_disam_type_based_disam=2 -mP2OPT_disam_assume_ansi_c -mP2OPT_checked_disam_ansi_alias=TRUE -mGLOB_ansi_alias -mPGOPTI_value_profile_use=T -mGLOB_opt_report_use_source_name -mP2OPT_il0_array_sections=TRUE -mGLOB_offload_mode=1 -mP2OPT_offload_unique_var_string=icc010314464460HJDP3s -mP2OPT_hlo -mP2OPT_hpo_rtt_control=0 -mIPOPT_args_in_regs=0 -mP2OPT_disam_assume_nonstd_intent_in=FALSE -mGLOB_imf_mapping_library=/apps/intel/composer_xe_2015.3.187/bin/intel64/libiml_attr.so -mPGOPTI_gen_threadsafe_level=0 -mIPOPT_link -mIPOPT_ipo_activate -mIPOPT_mo_activate -mIPOPT_source_files_list=/tmp/iccslisJeSJv9 -mIPOPT_mo_global_data -mIPOPT_link_script_file=/tmp/iccscriptkpbVZ2 "-mIPOPT_cmdline_link="/usr/lib/gcc/x86_64-redhat-linux/4.8.5/../../../../lib64/crt1.o" "/usr/lib/gcc/x86_64-redhat-linux/4.8.5/../../../../lib64/crti.o" "/usr/lib/gcc/x86_64-redhat-linux/4.8.5/crtbegin.o" "-export-dynamic" "--eh-frame-hdr" "--build-id" "-dynamic-linker" "/lib64/ld-linux-x86-64.so.2" "-m" "elf_x86_64" "-o" "cmTryCompileExec504805090" "-L/apps/pnetcdf/1.6.1-intel15-impi5/lib" "-L/apps/intel/composer_xe_2015.3.187/mkl/lib/intel64" "-L/apps/intel/composer_xe_2015.3.187/debugger/lib/intel64" "-L/apps/intel/composer_xe_2015.3.187/compiler/lib/intel64" "-L/apps/intel/composer_xe_2015.3.187/compiler/lib/intel64" "-L/usr/lib/gcc/x86_64-redhat-linux/4.8.5/" "-L/usr/lib/gcc/x86_64-redhat-linux/4.8.5/../../../../lib64" "-L/usr/lib/gcc/x86_64-redhat-linux/4.8.5/../../../../lib64/" "-L/lib/../lib64" "-L/lib/../lib64/" "-L/usr/lib/../lib64" "-L/usr/lib/../lib64/" "-L/apps/pnetcdf/1.6.1-intel15-impi5/lib/" "-L/apps/intel/composer_xe_2015.3.187/mkl/lib/intel64/" "-L/apps/intel/composer_xe_2015.3.187/compiler/lib/intel64/" "-L/usr/lib/gcc/x86_64-redhat-linux/4.8.5/../../../" "-L/lib64" "-L/lib/" "-L/usr/lib64" "-L/usr/lib" "CMakeFiles/cmTryCompileExec504805090.dir/CMakeCCompilerABI.c.o" "-Bdynamic" "-Bstatic" "-limf" "-lsvml" "-lirng" "-Bdynamic" "-lm" "-Bstatic" "-lipgo" "-ldecimal" "--as-needed" "-Bdynamic" "-lcilkrts" "-lstdc++" "--no-as-needed" "-lgcc" "-lgcc_s" "-Bstatic" "-lirc" "-lsvml" "-Bdynamic" "-lc" "-lgcc" "-lgcc_s" "-Bstatic" "-lirc_s" "-Bdynamic" "-ldl" "-lc" "/usr/lib/gcc/x86_64-redhat-linux/4.8.5/crtend.o" "/usr/lib/gcc/x86_64-redhat-linux/4.8.5/../../../../lib64/crtn.o"" -mIPOPT_il_in_obj -mIPOPT_ipo_activate_warn=FALSE -mIPOPT_obj_output_file_name=/tmp/ipo_iccZVYGAM.o -mIPOPT_whole_archive_fixup_file_name=/tmp/iccwarchR3UZmN -mGLOB_linker_version=2.27 -mGLOB_long_size_64 -mGLOB_routine_pointer_size_64 -mGLOB_driver_tempfile_name=/tmp/icctempfileGJSVWG -mP3OPT_asm_target=P3OPT_ASM_TARGET_GAS -mGLOB_async_unwind_tables=TRUE -mGLOB_obj_output_file=/tmp/ipo_iccZVYGAM.o -mGLOB_source_dialect=GLOB_SOURCE_DIALECT_NONE -mP1OPT_source_file_name=ipo_out.c CMakeFiles/cmTryCompileExec504805090.dir/CMakeCCompilerABI.c.o -mIPOPT_object_files=T -mIPOPT_assembly_files=/tmp/iccalisjpV1yz -mIPOPT_generated_tempfiles=/tmp/icceliseoPc3s -mIPOPT_embedded_object_base_name=/tmp/icceobjPuynxm -mIPOPT_cmdline_link_new_name=/tmp/iccllisKNNy1f
+ld    /usr/lib/gcc/x86_64-redhat-linux/4.8.5/../../../../lib64/crt1.o /usr/lib/gcc/x86_64-redhat-linux/4.8.5/../../../../lib64/crti.o /usr/lib/gcc/x86_64-redhat-linux/4.8.5/crtbegin.o -export-dynamic --eh-frame-hdr --build-id -dynamic-linker /lib64/ld-linux-x86-64.so.2 -m elf_x86_64 -o cmTryCompileExec504805090 -L/apps/pnetcdf/1.6.1-intel15-impi5/lib -L/apps/intel/composer_xe_2015.3.187/mkl/lib/intel64 -L/apps/intel/composer_xe_2015.3.187/debugger/lib/intel64 -L/apps/intel/composer_xe_2015.3.187/compiler/lib/intel64 -L/apps/intel/composer_xe_2015.3.187/compiler/lib/intel64 -L/usr/lib/gcc/x86_64-redhat-linux/4.8.5/ -L/usr/lib/gcc/x86_64-redhat-linux/4.8.5/../../../../lib64 -L/usr/lib/gcc/x86_64-redhat-linux/4.8.5/../../../../lib64/ -L/lib/../lib64 -L/lib/../lib64/ -L/usr/lib/../lib64 -L/usr/lib/../lib64/ -L/apps/pnetcdf/1.6.1-intel15-impi5/lib/ -L/apps/intel/composer_xe_2015.3.187/mkl/lib/intel64/ -L/apps/intel/composer_xe_2015.3.187/compiler/lib/intel64/ -L/usr/lib/gcc/x86_64-redhat-linux/4.8.5/../../../ -L/lib64 -L/lib/ -L/usr/lib64 -L/usr/lib CMakeFiles/cmTryCompileExec504805090.dir/CMakeCCompilerABI.c.o -Bdynamic -Bstatic -limf -lsvml -lirng -Bdynamic -lm -Bstatic -lipgo -ldecimal --as-needed -Bdynamic -lcilkrts -lstdc++ --no-as-needed -lgcc -lgcc_s -Bstatic -lirc -lsvml -Bdynamic -lc -lgcc -lgcc_s -Bstatic -lirc_s -Bdynamic -ldl -lc /usr/lib/gcc/x86_64-redhat-linux/4.8.5/crtend.o /usr/lib/gcc/x86_64-redhat-linux/4.8.5/../../../../lib64/crtn.o
+gmake[1]: Leaving directory `/mnt/lfs3/projects/hfv3gfs/Edward.Colon/junk/EMC_noaa-3drtma/sorc/build_gsi/CMakeFiles/CMakeTmp'
+
+
+Parsed C implicit link information from above output:
+  link line regex: [^( *|.*[/\])(ld|([^/\]+-)?ld|collect2)[^/\]*( |$)]
+  ignore line: [Change Dir: /mnt/lfs3/projects/hfv3gfs/Edward.Colon/junk/EMC_noaa-3drtma/sorc/build_gsi/CMakeFiles/CMakeTmp]
+  ignore line: []
+  ignore line: [Run Build Command:/bin/gmake "cmTryCompileExec504805090/fast"]
+  ignore line: [/bin/gmake -f CMakeFiles/cmTryCompileExec504805090.dir/build.make CMakeFiles/cmTryCompileExec504805090.dir/build]
+  ignore line: [gmake[1]: Entering directory `/mnt/lfs3/projects/hfv3gfs/Edward.Colon/junk/EMC_noaa-3drtma/sorc/build_gsi/CMakeFiles/CMakeTmp']
+  ignore line: [/usr/bin/cmake -E cmake_progress_report /mnt/lfs3/projects/hfv3gfs/Edward.Colon/junk/EMC_noaa-3drtma/sorc/build_gsi/CMakeFiles/CMakeTmp/CMakeFiles 1]
+  ignore line: [Building C object CMakeFiles/cmTryCompileExec504805090.dir/CMakeCCompilerABI.c.o]
+  ignore line: [/apps/intel/composer_xe_2015.3.187/bin/intel64/icc    -o CMakeFiles/cmTryCompileExec504805090.dir/CMakeCCompilerABI.c.o   -c /usr/share/cmake/Modules/CMakeCCompilerABI.c]
+  ignore line: [Linking C executable cmTryCompileExec504805090]
+  ignore line: [/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTryCompileExec504805090.dir/link.txt --verbose=1]
+  ignore line: [/apps/intel/composer_xe_2015.3.187/bin/intel64/icc     -v CMakeFiles/cmTryCompileExec504805090.dir/CMakeCCompilerABI.c.o  -o cmTryCompileExec504805090 -rdynamic  ]
+  ignore line: [icc version 15.0.3 (gcc version 4.8.5 compatibility)]
+  ignore line: [/apps/intel/composer_xe_2015.3.187/bin/intel64/mcpcom    -mP1OPT_version=15.0-intel64 -mGLOB_diag_file=CMakeFiles/cmTryCompileExec504805090.dir/CMakeCCompilerABI.c.diag -mP1OPT_print_version=FALSE -mCG_use_gas_got_workaround=F -mP2OPT_align_option_used=TRUE -mGLOB_gcc_version=485 "-mGLOB_options_string=-v -o cmTryCompileExec504805090 -rdynamic" -mGLOB_cxx_limited_range=FALSE -mCG_extend_parms=FALSE -mGLOB_compiler_bin_directory=/apps/intel/composer_xe_2015.3.187/bin/intel64 -mGLOB_as_output_backup_file_name=/tmp/icc85w6YPas_.s -mIPOPT_activate -mGLOB_em64t -mGLOB_product_id_code=0x22006d91 -mP3OPT_use_mspp_call_convention -mP2OPT_subs_out_of_bound=FALSE -mP2OPT_disam_type_based_disam=2 -mP2OPT_disam_assume_ansi_c -mP2OPT_checked_disam_ansi_alias=TRUE -mGLOB_ansi_alias -mPGOPTI_value_profile_use=T -mGLOB_opt_report_use_source_name -mP2OPT_il0_array_sections=TRUE -mGLOB_offload_mode=1 -mP2OPT_offload_unique_var_string=icc010314464460HJDP3s -mP2OPT_hlo -mP2OPT_hpo_rtt_control=0 -mIPOPT_args_in_regs=0 -mP2OPT_disam_assume_nonstd_intent_in=FALSE -mGLOB_imf_mapping_library=/apps/intel/composer_xe_2015.3.187/bin/intel64/libiml_attr.so -mPGOPTI_gen_threadsafe_level=0 -mIPOPT_link -mIPOPT_ipo_activate -mIPOPT_mo_activate -mIPOPT_source_files_list=/tmp/iccslisJeSJv9 -mIPOPT_mo_global_data -mIPOPT_link_script_file=/tmp/iccscriptkpbVZ2 "-mIPOPT_cmdline_link="/usr/lib/gcc/x86_64-redhat-linux/4.8.5/../../../../lib64/crt1.o" "/usr/lib/gcc/x86_64-redhat-linux/4.8.5/../../../../lib64/crti.o" "/usr/lib/gcc/x86_64-redhat-linux/4.8.5/crtbegin.o" "-export-dynamic" "--eh-frame-hdr" "--build-id" "-dynamic-linker" "/lib64/ld-linux-x86-64.so.2" "-m" "elf_x86_64" "-o" "cmTryCompileExec504805090" "-L/apps/pnetcdf/1.6.1-intel15-impi5/lib" "-L/apps/intel/composer_xe_2015.3.187/mkl/lib/intel64" "-L/apps/intel/composer_xe_2015.3.187/debugger/lib/intel64" "-L/apps/intel/composer_xe_2015.3.187/compiler/lib/intel64" "-L/apps/intel/composer_xe_2015.3.187/compiler/lib/intel64" "-L/usr/lib/gcc/x86_64-redhat-linux/4.8.5/" "-L/usr/lib/gcc/x86_64-redhat-linux/4.8.5/../../../../lib64" "-L/usr/lib/gcc/x86_64-redhat-linux/4.8.5/../../../../lib64/" "-L/lib/../lib64" "-L/lib/../lib64/" "-L/usr/lib/../lib64" "-L/usr/lib/../lib64/" "-L/apps/pnetcdf/1.6.1-intel15-impi5/lib/" "-L/apps/intel/composer_xe_2015.3.187/mkl/lib/intel64/" "-L/apps/intel/composer_xe_2015.3.187/compiler/lib/intel64/" "-L/usr/lib/gcc/x86_64-redhat-linux/4.8.5/../../../" "-L/lib64" "-L/lib/" "-L/usr/lib64" "-L/usr/lib" "CMakeFiles/cmTryCompileExec504805090.dir/CMakeCCompilerABI.c.o" "-Bdynamic" "-Bstatic" "-limf" "-lsvml" "-lirng" "-Bdynamic" "-lm" "-Bstatic" "-lipgo" "-ldecimal" "--as-needed" "-Bdynamic" "-lcilkrts" "-lstdc++" "--no-as-needed" "-lgcc" "-lgcc_s" "-Bstatic" "-lirc" "-lsvml" "-Bdynamic" "-lc" "-lgcc" "-lgcc_s" "-Bstatic" "-lirc_s" "-Bdynamic" "-ldl" "-lc" "/usr/lib/gcc/x86_64-redhat-linux/4.8.5/crtend.o" "/usr/lib/gcc/x86_64-redhat-linux/4.8.5/../../../../lib64/crtn.o"" -mIPOPT_il_in_obj -mIPOPT_ipo_activate_warn=FALSE -mIPOPT_obj_output_file_name=/tmp/ipo_iccZVYGAM.o -mIPOPT_whole_archive_fixup_file_name=/tmp/iccwarchR3UZmN -mGLOB_linker_version=2.27 -mGLOB_long_size_64 -mGLOB_routine_pointer_size_64 -mGLOB_driver_tempfile_name=/tmp/icctempfileGJSVWG -mP3OPT_asm_target=P3OPT_ASM_TARGET_GAS -mGLOB_async_unwind_tables=TRUE -mGLOB_obj_output_file=/tmp/ipo_iccZVYGAM.o -mGLOB_source_dialect=GLOB_SOURCE_DIALECT_NONE -mP1OPT_source_file_name=ipo_out.c CMakeFiles/cmTryCompileExec504805090.dir/CMakeCCompilerABI.c.o -mIPOPT_object_files=T -mIPOPT_assembly_files=/tmp/iccalisjpV1yz -mIPOPT_generated_tempfiles=/tmp/icceliseoPc3s -mIPOPT_embedded_object_base_name=/tmp/icceobjPuynxm -mIPOPT_cmdline_link_new_name=/tmp/iccllisKNNy1f]
+  link line: [ld    /usr/lib/gcc/x86_64-redhat-linux/4.8.5/../../../../lib64/crt1.o /usr/lib/gcc/x86_64-redhat-linux/4.8.5/../../../../lib64/crti.o /usr/lib/gcc/x86_64-redhat-linux/4.8.5/crtbegin.o -export-dynamic --eh-frame-hdr --build-id -dynamic-linker /lib64/ld-linux-x86-64.so.2 -m elf_x86_64 -o cmTryCompileExec504805090 -L/apps/pnetcdf/1.6.1-intel15-impi5/lib -L/apps/intel/composer_xe_2015.3.187/mkl/lib/intel64 -L/apps/intel/composer_xe_2015.3.187/debugger/lib/intel64 -L/apps/intel/composer_xe_2015.3.187/compiler/lib/intel64 -L/apps/intel/composer_xe_2015.3.187/compiler/lib/intel64 -L/usr/lib/gcc/x86_64-redhat-linux/4.8.5/ -L/usr/lib/gcc/x86_64-redhat-linux/4.8.5/../../../../lib64 -L/usr/lib/gcc/x86_64-redhat-linux/4.8.5/../../../../lib64/ -L/lib/../lib64 -L/lib/../lib64/ -L/usr/lib/../lib64 -L/usr/lib/../lib64/ -L/apps/pnetcdf/1.6.1-intel15-impi5/lib/ -L/apps/intel/composer_xe_2015.3.187/mkl/lib/intel64/ -L/apps/intel/composer_xe_2015.3.187/compiler/lib/intel64/ -L/usr/lib/gcc/x86_64-redhat-linux/4.8.5/../../../ -L/lib64 -L/lib/ -L/usr/lib64 -L/usr/lib CMakeFiles/cmTryCompileExec504805090.dir/CMakeCCompilerABI.c.o -Bdynamic -Bstatic -limf -lsvml -lirng -Bdynamic -lm -Bstatic -lipgo -ldecimal --as-needed -Bdynamic -lcilkrts -lstdc++ --no-as-needed -lgcc -lgcc_s -Bstatic -lirc -lsvml -Bdynamic -lc -lgcc -lgcc_s -Bstatic -lirc_s -Bdynamic -ldl -lc /usr/lib/gcc/x86_64-redhat-linux/4.8.5/crtend.o /usr/lib/gcc/x86_64-redhat-linux/4.8.5/../../../../lib64/crtn.o]
+    arg [ld] ==> ignore
+    arg [/usr/lib/gcc/x86_64-redhat-linux/4.8.5/../../../../lib64/crt1.o] ==> ignore
+    arg [/usr/lib/gcc/x86_64-redhat-linux/4.8.5/../../../../lib64/crti.o] ==> ignore
+    arg [/usr/lib/gcc/x86_64-redhat-linux/4.8.5/crtbegin.o] ==> ignore
+    arg [-export-dynamic] ==> ignore
+    arg [--eh-frame-hdr] ==> ignore
+    arg [--build-id] ==> ignore
+    arg [-dynamic-linker] ==> ignore
+    arg [/lib64/ld-linux-x86-64.so.2] ==> ignore
+    arg [-m] ==> ignore
+    arg [elf_x86_64] ==> ignore
+    arg [-o] ==> ignore
+    arg [cmTryCompileExec504805090] ==> ignore
+    arg [-L/apps/pnetcdf/1.6.1-intel15-impi5/lib] ==> dir [/apps/pnetcdf/1.6.1-intel15-impi5/lib]
+    arg [-L/apps/intel/composer_xe_2015.3.187/mkl/lib/intel64] ==> dir [/apps/intel/composer_xe_2015.3.187/mkl/lib/intel64]
+    arg [-L/apps/intel/composer_xe_2015.3.187/debugger/lib/intel64] ==> dir [/apps/intel/composer_xe_2015.3.187/debugger/lib/intel64]
+    arg [-L/apps/intel/composer_xe_2015.3.187/compiler/lib/intel64] ==> dir [/apps/intel/composer_xe_2015.3.187/compiler/lib/intel64]
+    arg [-L/apps/intel/composer_xe_2015.3.187/compiler/lib/intel64] ==> dir [/apps/intel/composer_xe_2015.3.187/compiler/lib/intel64]
+    arg [-L/usr/lib/gcc/x86_64-redhat-linux/4.8.5/] ==> dir [/usr/lib/gcc/x86_64-redhat-linux/4.8.5/]
+    arg [-L/usr/lib/gcc/x86_64-redhat-linux/4.8.5/../../../../lib64] ==> dir [/usr/lib/gcc/x86_64-redhat-linux/4.8.5/../../../../lib64]
+    arg [-L/usr/lib/gcc/x86_64-redhat-linux/4.8.5/../../../../lib64/] ==> dir [/usr/lib/gcc/x86_64-redhat-linux/4.8.5/../../../../lib64/]
+    arg [-L/lib/../lib64] ==> dir [/lib/../lib64]
+    arg [-L/lib/../lib64/] ==> dir [/lib/../lib64/]
+    arg [-L/usr/lib/../lib64] ==> dir [/usr/lib/../lib64]
+    arg [-L/usr/lib/../lib64/] ==> dir [/usr/lib/../lib64/]
+    arg [-L/apps/pnetcdf/1.6.1-intel15-impi5/lib/] ==> dir [/apps/pnetcdf/1.6.1-intel15-impi5/lib/]
+    arg [-L/apps/intel/composer_xe_2015.3.187/mkl/lib/intel64/] ==> dir [/apps/intel/composer_xe_2015.3.187/mkl/lib/intel64/]
+    arg [-L/apps/intel/composer_xe_2015.3.187/compiler/lib/intel64/] ==> dir [/apps/intel/composer_xe_2015.3.187/compiler/lib/intel64/]
+    arg [-L/usr/lib/gcc/x86_64-redhat-linux/4.8.5/../../../] ==> dir [/usr/lib/gcc/x86_64-redhat-linux/4.8.5/../../../]
+    arg [-L/lib64] ==> dir [/lib64]
+    arg [-L/lib/] ==> dir [/lib/]
+    arg [-L/usr/lib64] ==> dir [/usr/lib64]
+    arg [-L/usr/lib] ==> dir [/usr/lib]
+    arg [CMakeFiles/cmTryCompileExec504805090.dir/CMakeCCompilerABI.c.o] ==> ignore
+    arg [-Bdynamic] ==> ignore
+    arg [-Bstatic] ==> ignore
+    arg [-limf] ==> lib [imf]
+    arg [-lsvml] ==> lib [svml]
+    arg [-lirng] ==> lib [irng]
+    arg [-Bdynamic] ==> ignore
+    arg [-lm] ==> lib [m]
+    arg [-Bstatic] ==> ignore
+    arg [-lipgo] ==> lib [ipgo]
+    arg [-ldecimal] ==> lib [decimal]
+    arg [--as-needed] ==> ignore
+    arg [-Bdynamic] ==> ignore
+    arg [-lcilkrts] ==> lib [cilkrts]
+    arg [-lstdc++] ==> lib [stdc++]
+    arg [--no-as-needed] ==> ignore
+    arg [-lgcc] ==> lib [gcc]
+    arg [-lgcc_s] ==> lib [gcc_s]
+    arg [-Bstatic] ==> ignore
+    arg [-lirc] ==> lib [irc]
+    arg [-lsvml] ==> lib [svml]
+    arg [-Bdynamic] ==> ignore
+    arg [-lc] ==> lib [c]
+    arg [-lgcc] ==> lib [gcc]
+    arg [-lgcc_s] ==> lib [gcc_s]
+    arg [-Bstatic] ==> ignore
+    arg [-lirc_s] ==> lib [irc_s]
+    arg [-Bdynamic] ==> ignore
+    arg [-ldl] ==> lib [dl]
+    arg [-lc] ==> lib [c]
+    arg [/usr/lib/gcc/x86_64-redhat-linux/4.8.5/crtend.o] ==> ignore
+    arg [/usr/lib/gcc/x86_64-redhat-linux/4.8.5/../../../../lib64/crtn.o] ==> ignore
+  remove lib [gcc]
+  remove lib [gcc_s]
+  remove lib [gcc]
+  remove lib [gcc_s]
+  collapse library dir [/apps/pnetcdf/1.6.1-intel15-impi5/lib] ==> [/apps/pnetcdf/1.6.1-intel15-impi5/lib]
+  collapse library dir [/apps/intel/composer_xe_2015.3.187/mkl/lib/intel64] ==> [/apps/intel/composer_xe_2015.3.187/mkl/lib/intel64]
+  collapse library dir [/apps/intel/composer_xe_2015.3.187/debugger/lib/intel64] ==> [/apps/intel/composer_xe_2015.3.187/debugger/lib/intel64]
+  collapse library dir [/apps/intel/composer_xe_2015.3.187/compiler/lib/intel64] ==> [/apps/intel/composer_xe_2015.3.187/compiler/lib/intel64]
+  collapse library dir [/apps/intel/composer_xe_2015.3.187/compiler/lib/intel64] ==> [/apps/intel/composer_xe_2015.3.187/compiler/lib/intel64]
+  collapse library dir [/usr/lib/gcc/x86_64-redhat-linux/4.8.5/] ==> [/usr/lib/gcc/x86_64-redhat-linux/4.8.5]
+  collapse library dir [/usr/lib/gcc/x86_64-redhat-linux/4.8.5/../../../../lib64] ==> [/usr/lib64]
+  collapse library dir [/usr/lib/gcc/x86_64-redhat-linux/4.8.5/../../../../lib64/] ==> [/usr/lib64]
+  collapse library dir [/lib/../lib64] ==> [/lib64]
+  collapse library dir [/lib/../lib64/] ==> [/lib64]
+  collapse library dir [/usr/lib/../lib64] ==> [/usr/lib64]
+  collapse library dir [/usr/lib/../lib64/] ==> [/usr/lib64]
+  collapse library dir [/apps/pnetcdf/1.6.1-intel15-impi5/lib/] ==> [/apps/pnetcdf/1.6.1-intel15-impi5/lib]
+  collapse library dir [/apps/intel/composer_xe_2015.3.187/mkl/lib/intel64/] ==> [/apps/intel/composer_xe_2015.3.187/mkl/lib/intel64]
+  collapse library dir [/apps/intel/composer_xe_2015.3.187/compiler/lib/intel64/] ==> [/apps/intel/composer_xe_2015.3.187/compiler/lib/intel64]
+  collapse library dir [/usr/lib/gcc/x86_64-redhat-linux/4.8.5/../../../] ==> [/usr/lib]
+  collapse library dir [/lib64] ==> [/lib64]
+  collapse library dir [/lib/] ==> [/lib]
+  collapse library dir [/usr/lib64] ==> [/usr/lib64]
+  collapse library dir [/usr/lib] ==> [/usr/lib]
+  implicit libs: [imf;svml;irng;m;ipgo;decimal;cilkrts;stdc++;irc;svml;c;irc_s;dl;c]
+  implicit dirs: [/apps/pnetcdf/1.6.1-intel15-impi5/lib;/apps/intel/composer_xe_2015.3.187/mkl/lib/intel64;/apps/intel/composer_xe_2015.3.187/debugger/lib/intel64;/apps/intel/composer_xe_2015.3.187/compiler/lib/intel64;/usr/lib/gcc/x86_64-redhat-linux/4.8.5;/usr/lib64;/lib64;/usr/lib;/lib]
+  implicit fwks: []
+
+
+Determining if the CXX compiler works passed with the following output:
+Change Dir: /mnt/lfs3/projects/hfv3gfs/Edward.Colon/junk/EMC_noaa-3drtma/sorc/build_gsi/CMakeFiles/CMakeTmp
+
+Run Build Command:/bin/gmake "cmTryCompileExec35359321/fast"
+/bin/gmake -f CMakeFiles/cmTryCompileExec35359321.dir/build.make CMakeFiles/cmTryCompileExec35359321.dir/build
+gmake[1]: Entering directory `/mnt/lfs3/projects/hfv3gfs/Edward.Colon/junk/EMC_noaa-3drtma/sorc/build_gsi/CMakeFiles/CMakeTmp'
+/usr/bin/cmake -E cmake_progress_report /mnt/lfs3/projects/hfv3gfs/Edward.Colon/junk/EMC_noaa-3drtma/sorc/build_gsi/CMakeFiles/CMakeTmp/CMakeFiles 1
+Building CXX object CMakeFiles/cmTryCompileExec35359321.dir/testCXXCompiler.cxx.o
+/apps/intel/composer_xe_2015.3.187/bin/intel64/icpc     -o CMakeFiles/cmTryCompileExec35359321.dir/testCXXCompiler.cxx.o -c /mnt/lfs3/projects/hfv3gfs/Edward.Colon/junk/EMC_noaa-3drtma/sorc/build_gsi/CMakeFiles/CMakeTmp/testCXXCompiler.cxx
+Linking CXX executable cmTryCompileExec35359321
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTryCompileExec35359321.dir/link.txt --verbose=1
+/apps/intel/composer_xe_2015.3.187/bin/intel64/icpc       -qopenmp CMakeFiles/cmTryCompileExec35359321.dir/testCXXCompiler.cxx.o  -o cmTryCompileExec35359321 -rdynamic 
+gmake[1]: Leaving directory `/mnt/lfs3/projects/hfv3gfs/Edward.Colon/junk/EMC_noaa-3drtma/sorc/build_gsi/CMakeFiles/CMakeTmp'
+
+
+Detecting CXX compiler ABI info compiled with the following output:
+Change Dir: /mnt/lfs3/projects/hfv3gfs/Edward.Colon/junk/EMC_noaa-3drtma/sorc/build_gsi/CMakeFiles/CMakeTmp
+
+Run Build Command:/bin/gmake "cmTryCompileExec434247207/fast"
+/bin/gmake -f CMakeFiles/cmTryCompileExec434247207.dir/build.make CMakeFiles/cmTryCompileExec434247207.dir/build
+gmake[1]: Entering directory `/mnt/lfs3/projects/hfv3gfs/Edward.Colon/junk/EMC_noaa-3drtma/sorc/build_gsi/CMakeFiles/CMakeTmp'
+/usr/bin/cmake -E cmake_progress_report /mnt/lfs3/projects/hfv3gfs/Edward.Colon/junk/EMC_noaa-3drtma/sorc/build_gsi/CMakeFiles/CMakeTmp/CMakeFiles 1
+Building CXX object CMakeFiles/cmTryCompileExec434247207.dir/CMakeCXXCompilerABI.cpp.o
+/apps/intel/composer_xe_2015.3.187/bin/intel64/icpc     -o CMakeFiles/cmTryCompileExec434247207.dir/CMakeCXXCompilerABI.cpp.o -c /usr/share/cmake/Modules/CMakeCXXCompilerABI.cpp
+Linking CXX executable cmTryCompileExec434247207
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTryCompileExec434247207.dir/link.txt --verbose=1
+/apps/intel/composer_xe_2015.3.187/bin/intel64/icpc      -v CMakeFiles/cmTryCompileExec434247207.dir/CMakeCXXCompilerABI.cpp.o  -o cmTryCompileExec434247207 -rdynamic  
+icpc version 15.0.3 (gcc version 4.8.5 compatibility)
+/apps/intel/composer_xe_2015.3.187/bin/intel64/mcpcom    -mP1OPT_version=15.0-intel64 -mGLOB_diag_file=CMakeFiles/cmTryCompileExec434247207.dir/CMakeCXXCompilerABI.cpp.diag -mP1OPT_print_version=FALSE -mCG_use_gas_got_workaround=F -mP2OPT_align_option_used=TRUE -mGLOB_gcc_version=485 "-mGLOB_options_string=-v -o cmTryCompileExec434247207 -rdynamic" -mGLOB_cxx_limited_range=FALSE -mCG_extend_parms=FALSE -mGLOB_compiler_bin_directory=/apps/intel/composer_xe_2015.3.187/bin/intel64 -mGLOB_as_output_backup_file_name=/tmp/icpcQlW3ZRas_.s -mIPOPT_activate -mGLOB_em64t -mGLOB_product_id_code=0x22006d8e -mP3OPT_use_mspp_call_convention -mP2OPT_subs_out_of_bound=FALSE -mP2OPT_disam_type_based_disam=2 -mP2OPT_disam_assume_ansi_c -mP2OPT_checked_disam_ansi_alias=TRUE -mGLOB_ansi_alias -mPGOPTI_value_profile_use=T -mGLOB_opt_report_use_source_name -mP2OPT_il0_array_sections=TRUE -mGLOB_offload_mode=1 -mP2OPT_offload_unique_var_string=icpc0101968233688PwAPUu -mP2OPT_hlo -mP2OPT_hpo_rtt_control=0 -mIPOPT_args_in_regs=0 -mP2OPT_disam_assume_nonstd_intent_in=FALSE -mGLOB_imf_mapping_library=/apps/intel/composer_xe_2015.3.187/bin/intel64/libiml_attr.so -mPGOPTI_gen_threadsafe_level=0 -mIPOPT_link -mIPOPT_ipo_activate -mIPOPT_mo_activate -mIPOPT_source_files_list=/tmp/icpcslisOzZn43 -mIPOPT_mo_global_data -mIPOPT_link_script_file=/tmp/icpcscriptXVrH2Z "-mIPOPT_cmdline_link="/usr/lib/gcc/x86_64-redhat-linux/4.8.5/../../../../lib64/crt1.o" "/usr/lib/gcc/x86_64-redhat-linux/4.8.5/../../../../lib64/crti.o" "/usr/lib/gcc/x86_64-redhat-linux/4.8.5/crtbegin.o" "-export-dynamic" "--eh-frame-hdr" "--build-id" "-dynamic-linker" "/lib64/ld-linux-x86-64.so.2" "-m" "elf_x86_64" "-o" "cmTryCompileExec434247207" "-L/apps/pnetcdf/1.6.1-intel15-impi5/lib" "-L/apps/intel/composer_xe_2015.3.187/mkl/lib/intel64" "-L/apps/intel/composer_xe_2015.3.187/debugger/lib/intel64" "-L/apps/intel/composer_xe_2015.3.187/compiler/lib/intel64" "-L/apps/intel/composer_xe_2015.3.187/compiler/lib/intel64" "-L/usr/lib/gcc/x86_64-redhat-linux/4.8.5/" "-L/usr/lib/gcc/x86_64-redhat-linux/4.8.5/../../../../lib64" "-L/usr/lib/gcc/x86_64-redhat-linux/4.8.5/../../../../lib64/" "-L/lib/../lib64" "-L/lib/../lib64/" "-L/usr/lib/../lib64" "-L/usr/lib/../lib64/" "-L/apps/pnetcdf/1.6.1-intel15-impi5/lib/" "-L/apps/intel/composer_xe_2015.3.187/mkl/lib/intel64/" "-L/apps/intel/composer_xe_2015.3.187/compiler/lib/intel64/" "-L/usr/lib/gcc/x86_64-redhat-linux/4.8.5/../../../" "-L/lib64" "-L/lib/" "-L/usr/lib64" "-L/usr/lib" "CMakeFiles/cmTryCompileExec434247207.dir/CMakeCXXCompilerABI.cpp.o" "-Bdynamic" "-Bstatic" "-limf" "-lsvml" "-lirng" "-Bdynamic" "-lm" "-Bstatic" "-lipgo" "-ldecimal" "--as-needed" "-Bdynamic" "-lcilkrts" "--no-as-needed" "-lstdc++" "-lgcc" "-lgcc_s" "-Bstatic" "-lirc" "-lsvml" "-Bdynamic" "-lc" "-lgcc" "-lgcc_s" "-Bstatic" "-lirc_s" "-Bdynamic" "-ldl" "-lc" "/usr/lib/gcc/x86_64-redhat-linux/4.8.5/crtend.o" "/usr/lib/gcc/x86_64-redhat-linux/4.8.5/../../../../lib64/crtn.o"" -mIPOPT_il_in_obj -mIPOPT_ipo_activate_warn=FALSE -mIPOPT_obj_output_file_name=/tmp/ipo_icpcGsPzes.o -mIPOPT_whole_archive_fixup_file_name=/tmp/icpcwarchhx5cee -mGLOB_linker_version=2.27 -mGLOB_long_size_64 -mGLOB_routine_pointer_size_64 -mGLOB_driver_tempfile_name=/tmp/icpctempfilemFJXha -mP3OPT_asm_target=P3OPT_ASM_TARGET_GAS -mGLOB_async_unwind_tables=TRUE -mGLOB_obj_output_file=/tmp/ipo_icpcGsPzes.o -mGLOB_source_dialect=GLOB_SOURCE_DIALECT_NONE -mP1OPT_source_file_name=ipo_out.c CMakeFiles/cmTryCompileExec434247207.dir/CMakeCXXCompilerABI.cpp.o -mIPOPT_object_files=T -mIPOPT_assembly_files=/tmp/icpcalisKXDabk -mIPOPT_generated_tempfiles=/tmp/icpcelisBW6s9f -mIPOPT_embedded_object_base_name=/tmp/icpceobjykYL7b -mIPOPT_cmdline_link_new_name=/tmp/icpcllis5Y3457
+ld    /usr/lib/gcc/x86_64-redhat-linux/4.8.5/../../../../lib64/crt1.o /usr/lib/gcc/x86_64-redhat-linux/4.8.5/../../../../lib64/crti.o /usr/lib/gcc/x86_64-redhat-linux/4.8.5/crtbegin.o -export-dynamic --eh-frame-hdr --build-id -dynamic-linker /lib64/ld-linux-x86-64.so.2 -m elf_x86_64 -o cmTryCompileExec434247207 -L/apps/pnetcdf/1.6.1-intel15-impi5/lib -L/apps/intel/composer_xe_2015.3.187/mkl/lib/intel64 -L/apps/intel/composer_xe_2015.3.187/debugger/lib/intel64 -L/apps/intel/composer_xe_2015.3.187/compiler/lib/intel64 -L/apps/intel/composer_xe_2015.3.187/compiler/lib/intel64 -L/usr/lib/gcc/x86_64-redhat-linux/4.8.5/ -L/usr/lib/gcc/x86_64-redhat-linux/4.8.5/../../../../lib64 -L/usr/lib/gcc/x86_64-redhat-linux/4.8.5/../../../../lib64/ -L/lib/../lib64 -L/lib/../lib64/ -L/usr/lib/../lib64 -L/usr/lib/../lib64/ -L/apps/pnetcdf/1.6.1-intel15-impi5/lib/ -L/apps/intel/composer_xe_2015.3.187/mkl/lib/intel64/ -L/apps/intel/composer_xe_2015.3.187/compiler/lib/intel64/ -L/usr/lib/gcc/x86_64-redhat-linux/4.8.5/../../../ -L/lib64 -L/lib/ -L/usr/lib64 -L/usr/lib CMakeFiles/cmTryCompileExec434247207.dir/CMakeCXXCompilerABI.cpp.o -Bdynamic -Bstatic -limf -lsvml -lirng -Bdynamic -lm -Bstatic -lipgo -ldecimal --as-needed -Bdynamic -lcilkrts --no-as-needed -lstdc++ -lgcc -lgcc_s -Bstatic -lirc -lsvml -Bdynamic -lc -lgcc -lgcc_s -Bstatic -lirc_s -Bdynamic -ldl -lc /usr/lib/gcc/x86_64-redhat-linux/4.8.5/crtend.o /usr/lib/gcc/x86_64-redhat-linux/4.8.5/../../../../lib64/crtn.o
+gmake[1]: Leaving directory `/mnt/lfs3/projects/hfv3gfs/Edward.Colon/junk/EMC_noaa-3drtma/sorc/build_gsi/CMakeFiles/CMakeTmp'
+
+
+Parsed CXX implicit link information from above output:
+  link line regex: [^( *|.*[/\])(ld|([^/\]+-)?ld|collect2)[^/\]*( |$)]
+  ignore line: [Change Dir: /mnt/lfs3/projects/hfv3gfs/Edward.Colon/junk/EMC_noaa-3drtma/sorc/build_gsi/CMakeFiles/CMakeTmp]
+  ignore line: []
+  ignore line: [Run Build Command:/bin/gmake "cmTryCompileExec434247207/fast"]
+  ignore line: [/bin/gmake -f CMakeFiles/cmTryCompileExec434247207.dir/build.make CMakeFiles/cmTryCompileExec434247207.dir/build]
+  ignore line: [gmake[1]: Entering directory `/mnt/lfs3/projects/hfv3gfs/Edward.Colon/junk/EMC_noaa-3drtma/sorc/build_gsi/CMakeFiles/CMakeTmp']
+  ignore line: [/usr/bin/cmake -E cmake_progress_report /mnt/lfs3/projects/hfv3gfs/Edward.Colon/junk/EMC_noaa-3drtma/sorc/build_gsi/CMakeFiles/CMakeTmp/CMakeFiles 1]
+  ignore line: [Building CXX object CMakeFiles/cmTryCompileExec434247207.dir/CMakeCXXCompilerABI.cpp.o]
+  ignore line: [/apps/intel/composer_xe_2015.3.187/bin/intel64/icpc     -o CMakeFiles/cmTryCompileExec434247207.dir/CMakeCXXCompilerABI.cpp.o -c /usr/share/cmake/Modules/CMakeCXXCompilerABI.cpp]
+  ignore line: [Linking CXX executable cmTryCompileExec434247207]
+  ignore line: [/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTryCompileExec434247207.dir/link.txt --verbose=1]
+  ignore line: [/apps/intel/composer_xe_2015.3.187/bin/intel64/icpc      -v CMakeFiles/cmTryCompileExec434247207.dir/CMakeCXXCompilerABI.cpp.o  -o cmTryCompileExec434247207 -rdynamic  ]
+  ignore line: [icpc version 15.0.3 (gcc version 4.8.5 compatibility)]
+  ignore line: [/apps/intel/composer_xe_2015.3.187/bin/intel64/mcpcom    -mP1OPT_version=15.0-intel64 -mGLOB_diag_file=CMakeFiles/cmTryCompileExec434247207.dir/CMakeCXXCompilerABI.cpp.diag -mP1OPT_print_version=FALSE -mCG_use_gas_got_workaround=F -mP2OPT_align_option_used=TRUE -mGLOB_gcc_version=485 "-mGLOB_options_string=-v -o cmTryCompileExec434247207 -rdynamic" -mGLOB_cxx_limited_range=FALSE -mCG_extend_parms=FALSE -mGLOB_compiler_bin_directory=/apps/intel/composer_xe_2015.3.187/bin/intel64 -mGLOB_as_output_backup_file_name=/tmp/icpcQlW3ZRas_.s -mIPOPT_activate -mGLOB_em64t -mGLOB_product_id_code=0x22006d8e -mP3OPT_use_mspp_call_convention -mP2OPT_subs_out_of_bound=FALSE -mP2OPT_disam_type_based_disam=2 -mP2OPT_disam_assume_ansi_c -mP2OPT_checked_disam_ansi_alias=TRUE -mGLOB_ansi_alias -mPGOPTI_value_profile_use=T -mGLOB_opt_report_use_source_name -mP2OPT_il0_array_sections=TRUE -mGLOB_offload_mode=1 -mP2OPT_offload_unique_var_string=icpc0101968233688PwAPUu -mP2OPT_hlo -mP2OPT_hpo_rtt_control=0 -mIPOPT_args_in_regs=0 -mP2OPT_disam_assume_nonstd_intent_in=FALSE -mGLOB_imf_mapping_library=/apps/intel/composer_xe_2015.3.187/bin/intel64/libiml_attr.so -mPGOPTI_gen_threadsafe_level=0 -mIPOPT_link -mIPOPT_ipo_activate -mIPOPT_mo_activate -mIPOPT_source_files_list=/tmp/icpcslisOzZn43 -mIPOPT_mo_global_data -mIPOPT_link_script_file=/tmp/icpcscriptXVrH2Z "-mIPOPT_cmdline_link="/usr/lib/gcc/x86_64-redhat-linux/4.8.5/../../../../lib64/crt1.o" "/usr/lib/gcc/x86_64-redhat-linux/4.8.5/../../../../lib64/crti.o" "/usr/lib/gcc/x86_64-redhat-linux/4.8.5/crtbegin.o" "-export-dynamic" "--eh-frame-hdr" "--build-id" "-dynamic-linker" "/lib64/ld-linux-x86-64.so.2" "-m" "elf_x86_64" "-o" "cmTryCompileExec434247207" "-L/apps/pnetcdf/1.6.1-intel15-impi5/lib" "-L/apps/intel/composer_xe_2015.3.187/mkl/lib/intel64" "-L/apps/intel/composer_xe_2015.3.187/debugger/lib/intel64" "-L/apps/intel/composer_xe_2015.3.187/compiler/lib/intel64" "-L/apps/intel/composer_xe_2015.3.187/compiler/lib/intel64" "-L/usr/lib/gcc/x86_64-redhat-linux/4.8.5/" "-L/usr/lib/gcc/x86_64-redhat-linux/4.8.5/../../../../lib64" "-L/usr/lib/gcc/x86_64-redhat-linux/4.8.5/../../../../lib64/" "-L/lib/../lib64" "-L/lib/../lib64/" "-L/usr/lib/../lib64" "-L/usr/lib/../lib64/" "-L/apps/pnetcdf/1.6.1-intel15-impi5/lib/" "-L/apps/intel/composer_xe_2015.3.187/mkl/lib/intel64/" "-L/apps/intel/composer_xe_2015.3.187/compiler/lib/intel64/" "-L/usr/lib/gcc/x86_64-redhat-linux/4.8.5/../../../" "-L/lib64" "-L/lib/" "-L/usr/lib64" "-L/usr/lib" "CMakeFiles/cmTryCompileExec434247207.dir/CMakeCXXCompilerABI.cpp.o" "-Bdynamic" "-Bstatic" "-limf" "-lsvml" "-lirng" "-Bdynamic" "-lm" "-Bstatic" "-lipgo" "-ldecimal" "--as-needed" "-Bdynamic" "-lcilkrts" "--no-as-needed" "-lstdc++" "-lgcc" "-lgcc_s" "-Bstatic" "-lirc" "-lsvml" "-Bdynamic" "-lc" "-lgcc" "-lgcc_s" "-Bstatic" "-lirc_s" "-Bdynamic" "-ldl" "-lc" "/usr/lib/gcc/x86_64-redhat-linux/4.8.5/crtend.o" "/usr/lib/gcc/x86_64-redhat-linux/4.8.5/../../../../lib64/crtn.o"" -mIPOPT_il_in_obj -mIPOPT_ipo_activate_warn=FALSE -mIPOPT_obj_output_file_name=/tmp/ipo_icpcGsPzes.o -mIPOPT_whole_archive_fixup_file_name=/tmp/icpcwarchhx5cee -mGLOB_linker_version=2.27 -mGLOB_long_size_64 -mGLOB_routine_pointer_size_64 -mGLOB_driver_tempfile_name=/tmp/icpctempfilemFJXha -mP3OPT_asm_target=P3OPT_ASM_TARGET_GAS -mGLOB_async_unwind_tables=TRUE -mGLOB_obj_output_file=/tmp/ipo_icpcGsPzes.o -mGLOB_source_dialect=GLOB_SOURCE_DIALECT_NONE -mP1OPT_source_file_name=ipo_out.c CMakeFiles/cmTryCompileExec434247207.dir/CMakeCXXCompilerABI.cpp.o -mIPOPT_object_files=T -mIPOPT_assembly_files=/tmp/icpcalisKXDabk -mIPOPT_generated_tempfiles=/tmp/icpcelisBW6s9f -mIPOPT_embedded_object_base_name=/tmp/icpceobjykYL7b -mIPOPT_cmdline_link_new_name=/tmp/icpcllis5Y3457]
+  link line: [ld    /usr/lib/gcc/x86_64-redhat-linux/4.8.5/../../../../lib64/crt1.o /usr/lib/gcc/x86_64-redhat-linux/4.8.5/../../../../lib64/crti.o /usr/lib/gcc/x86_64-redhat-linux/4.8.5/crtbegin.o -export-dynamic --eh-frame-hdr --build-id -dynamic-linker /lib64/ld-linux-x86-64.so.2 -m elf_x86_64 -o cmTryCompileExec434247207 -L/apps/pnetcdf/1.6.1-intel15-impi5/lib -L/apps/intel/composer_xe_2015.3.187/mkl/lib/intel64 -L/apps/intel/composer_xe_2015.3.187/debugger/lib/intel64 -L/apps/intel/composer_xe_2015.3.187/compiler/lib/intel64 -L/apps/intel/composer_xe_2015.3.187/compiler/lib/intel64 -L/usr/lib/gcc/x86_64-redhat-linux/4.8.5/ -L/usr/lib/gcc/x86_64-redhat-linux/4.8.5/../../../../lib64 -L/usr/lib/gcc/x86_64-redhat-linux/4.8.5/../../../../lib64/ -L/lib/../lib64 -L/lib/../lib64/ -L/usr/lib/../lib64 -L/usr/lib/../lib64/ -L/apps/pnetcdf/1.6.1-intel15-impi5/lib/ -L/apps/intel/composer_xe_2015.3.187/mkl/lib/intel64/ -L/apps/intel/composer_xe_2015.3.187/compiler/lib/intel64/ -L/usr/lib/gcc/x86_64-redhat-linux/4.8.5/../../../ -L/lib64 -L/lib/ -L/usr/lib64 -L/usr/lib CMakeFiles/cmTryCompileExec434247207.dir/CMakeCXXCompilerABI.cpp.o -Bdynamic -Bstatic -limf -lsvml -lirng -Bdynamic -lm -Bstatic -lipgo -ldecimal --as-needed -Bdynamic -lcilkrts --no-as-needed -lstdc++ -lgcc -lgcc_s -Bstatic -lirc -lsvml -Bdynamic -lc -lgcc -lgcc_s -Bstatic -lirc_s -Bdynamic -ldl -lc /usr/lib/gcc/x86_64-redhat-linux/4.8.5/crtend.o /usr/lib/gcc/x86_64-redhat-linux/4.8.5/../../../../lib64/crtn.o]
+    arg [ld] ==> ignore
+    arg [/usr/lib/gcc/x86_64-redhat-linux/4.8.5/../../../../lib64/crt1.o] ==> ignore
+    arg [/usr/lib/gcc/x86_64-redhat-linux/4.8.5/../../../../lib64/crti.o] ==> ignore
+    arg [/usr/lib/gcc/x86_64-redhat-linux/4.8.5/crtbegin.o] ==> ignore
+    arg [-export-dynamic] ==> ignore
+    arg [--eh-frame-hdr] ==> ignore
+    arg [--build-id] ==> ignore
+    arg [-dynamic-linker] ==> ignore
+    arg [/lib64/ld-linux-x86-64.so.2] ==> ignore
+    arg [-m] ==> ignore
+    arg [elf_x86_64] ==> ignore
+    arg [-o] ==> ignore
+    arg [cmTryCompileExec434247207] ==> ignore
+    arg [-L/apps/pnetcdf/1.6.1-intel15-impi5/lib] ==> dir [/apps/pnetcdf/1.6.1-intel15-impi5/lib]
+    arg [-L/apps/intel/composer_xe_2015.3.187/mkl/lib/intel64] ==> dir [/apps/intel/composer_xe_2015.3.187/mkl/lib/intel64]
+    arg [-L/apps/intel/composer_xe_2015.3.187/debugger/lib/intel64] ==> dir [/apps/intel/composer_xe_2015.3.187/debugger/lib/intel64]
+    arg [-L/apps/intel/composer_xe_2015.3.187/compiler/lib/intel64] ==> dir [/apps/intel/composer_xe_2015.3.187/compiler/lib/intel64]
+    arg [-L/apps/intel/composer_xe_2015.3.187/compiler/lib/intel64] ==> dir [/apps/intel/composer_xe_2015.3.187/compiler/lib/intel64]
+    arg [-L/usr/lib/gcc/x86_64-redhat-linux/4.8.5/] ==> dir [/usr/lib/gcc/x86_64-redhat-linux/4.8.5/]
+    arg [-L/usr/lib/gcc/x86_64-redhat-linux/4.8.5/../../../../lib64] ==> dir [/usr/lib/gcc/x86_64-redhat-linux/4.8.5/../../../../lib64]
+    arg [-L/usr/lib/gcc/x86_64-redhat-linux/4.8.5/../../../../lib64/] ==> dir [/usr/lib/gcc/x86_64-redhat-linux/4.8.5/../../../../lib64/]
+    arg [-L/lib/../lib64] ==> dir [/lib/../lib64]
+    arg [-L/lib/../lib64/] ==> dir [/lib/../lib64/]
+    arg [-L/usr/lib/../lib64] ==> dir [/usr/lib/../lib64]
+    arg [-L/usr/lib/../lib64/] ==> dir [/usr/lib/../lib64/]
+    arg [-L/apps/pnetcdf/1.6.1-intel15-impi5/lib/] ==> dir [/apps/pnetcdf/1.6.1-intel15-impi5/lib/]
+    arg [-L/apps/intel/composer_xe_2015.3.187/mkl/lib/intel64/] ==> dir [/apps/intel/composer_xe_2015.3.187/mkl/lib/intel64/]
+    arg [-L/apps/intel/composer_xe_2015.3.187/compiler/lib/intel64/] ==> dir [/apps/intel/composer_xe_2015.3.187/compiler/lib/intel64/]
+    arg [-L/usr/lib/gcc/x86_64-redhat-linux/4.8.5/../../../] ==> dir [/usr/lib/gcc/x86_64-redhat-linux/4.8.5/../../../]
+    arg [-L/lib64] ==> dir [/lib64]
+    arg [-L/lib/] ==> dir [/lib/]
+    arg [-L/usr/lib64] ==> dir [/usr/lib64]
+    arg [-L/usr/lib] ==> dir [/usr/lib]
+    arg [CMakeFiles/cmTryCompileExec434247207.dir/CMakeCXXCompilerABI.cpp.o] ==> ignore
+    arg [-Bdynamic] ==> ignore
+    arg [-Bstatic] ==> ignore
+    arg [-limf] ==> lib [imf]
+    arg [-lsvml] ==> lib [svml]
+    arg [-lirng] ==> lib [irng]
+    arg [-Bdynamic] ==> ignore
+    arg [-lm] ==> lib [m]
+    arg [-Bstatic] ==> ignore
+    arg [-lipgo] ==> lib [ipgo]
+    arg [-ldecimal] ==> lib [decimal]
+    arg [--as-needed] ==> ignore
+    arg [-Bdynamic] ==> ignore
+    arg [-lcilkrts] ==> lib [cilkrts]
+    arg [--no-as-needed] ==> ignore
+    arg [-lstdc++] ==> lib [stdc++]
+    arg [-lgcc] ==> lib [gcc]
+    arg [-lgcc_s] ==> lib [gcc_s]
+    arg [-Bstatic] ==> ignore
+    arg [-lirc] ==> lib [irc]
+    arg [-lsvml] ==> lib [svml]
+    arg [-Bdynamic] ==> ignore
+    arg [-lc] ==> lib [c]
+    arg [-lgcc] ==> lib [gcc]
+    arg [-lgcc_s] ==> lib [gcc_s]
+    arg [-Bstatic] ==> ignore
+    arg [-lirc_s] ==> lib [irc_s]
+    arg [-Bdynamic] ==> ignore
+    arg [-ldl] ==> lib [dl]
+    arg [-lc] ==> lib [c]
+    arg [/usr/lib/gcc/x86_64-redhat-linux/4.8.5/crtend.o] ==> ignore
+    arg [/usr/lib/gcc/x86_64-redhat-linux/4.8.5/../../../../lib64/crtn.o] ==> ignore
+  remove lib [gcc]
+  remove lib [gcc_s]
+  remove lib [gcc]
+  remove lib [gcc_s]
+  collapse library dir [/apps/pnetcdf/1.6.1-intel15-impi5/lib] ==> [/apps/pnetcdf/1.6.1-intel15-impi5/lib]
+  collapse library dir [/apps/intel/composer_xe_2015.3.187/mkl/lib/intel64] ==> [/apps/intel/composer_xe_2015.3.187/mkl/lib/intel64]
+  collapse library dir [/apps/intel/composer_xe_2015.3.187/debugger/lib/intel64] ==> [/apps/intel/composer_xe_2015.3.187/debugger/lib/intel64]
+  collapse library dir [/apps/intel/composer_xe_2015.3.187/compiler/lib/intel64] ==> [/apps/intel/composer_xe_2015.3.187/compiler/lib/intel64]
+  collapse library dir [/apps/intel/composer_xe_2015.3.187/compiler/lib/intel64] ==> [/apps/intel/composer_xe_2015.3.187/compiler/lib/intel64]
+  collapse library dir [/usr/lib/gcc/x86_64-redhat-linux/4.8.5/] ==> [/usr/lib/gcc/x86_64-redhat-linux/4.8.5]
+  collapse library dir [/usr/lib/gcc/x86_64-redhat-linux/4.8.5/../../../../lib64] ==> [/usr/lib64]
+  collapse library dir [/usr/lib/gcc/x86_64-redhat-linux/4.8.5/../../../../lib64/] ==> [/usr/lib64]
+  collapse library dir [/lib/../lib64] ==> [/lib64]
+  collapse library dir [/lib/../lib64/] ==> [/lib64]
+  collapse library dir [/usr/lib/../lib64] ==> [/usr/lib64]
+  collapse library dir [/usr/lib/../lib64/] ==> [/usr/lib64]
+  collapse library dir [/apps/pnetcdf/1.6.1-intel15-impi5/lib/] ==> [/apps/pnetcdf/1.6.1-intel15-impi5/lib]
+  collapse library dir [/apps/intel/composer_xe_2015.3.187/mkl/lib/intel64/] ==> [/apps/intel/composer_xe_2015.3.187/mkl/lib/intel64]
+  collapse library dir [/apps/intel/composer_xe_2015.3.187/compiler/lib/intel64/] ==> [/apps/intel/composer_xe_2015.3.187/compiler/lib/intel64]
+  collapse library dir [/usr/lib/gcc/x86_64-redhat-linux/4.8.5/../../../] ==> [/usr/lib]
+  collapse library dir [/lib64] ==> [/lib64]
+  collapse library dir [/lib/] ==> [/lib]
+  collapse library dir [/usr/lib64] ==> [/usr/lib64]
+  collapse library dir [/usr/lib] ==> [/usr/lib]
+  implicit libs: [imf;svml;irng;m;ipgo;decimal;cilkrts;stdc++;irc;svml;c;irc_s;dl;c]
+  implicit dirs: [/apps/pnetcdf/1.6.1-intel15-impi5/lib;/apps/intel/composer_xe_2015.3.187/mkl/lib/intel64;/apps/intel/composer_xe_2015.3.187/debugger/lib/intel64;/apps/intel/composer_xe_2015.3.187/compiler/lib/intel64;/usr/lib/gcc/x86_64-redhat-linux/4.8.5;/usr/lib64;/lib64;/usr/lib;/lib]
+  implicit fwks: []
+
+
+Compiling the Fortran compiler identification source file "CMakeFortranCompilerId.F" succeeded.
+Compiler: /apps/intel/composer_xe_2015.3.187/bin/intel64/ifort 
+Build flags: -qopenmp
+Id flags: 
+
+The output was:
+0
+
+
+Compilation of the Fortran compiler identification source "CMakeFortranCompilerId.F" produced "a.out"
+
+The Fortran compiler identification is Intel, found in "/mnt/lfs3/projects/hfv3gfs/Edward.Colon/junk/EMC_noaa-3drtma/sorc/build_gsi/CMakeFiles/2.8.12.2/CompilerIdFortran/a.out"
+
+Determining if the Fortran compiler works passed with the following output:
+Change Dir: /mnt/lfs3/projects/hfv3gfs/Edward.Colon/junk/EMC_noaa-3drtma/sorc/build_gsi/CMakeFiles/CMakeTmp
+
+Run Build Command:/bin/gmake "cmTryCompileExec497504356/fast"
+/bin/gmake -f CMakeFiles/cmTryCompileExec497504356.dir/build.make CMakeFiles/cmTryCompileExec497504356.dir/build
+gmake[1]: Entering directory `/mnt/lfs3/projects/hfv3gfs/Edward.Colon/junk/EMC_noaa-3drtma/sorc/build_gsi/CMakeFiles/CMakeTmp'
+/usr/bin/cmake -E cmake_progress_report /mnt/lfs3/projects/hfv3gfs/Edward.Colon/junk/EMC_noaa-3drtma/sorc/build_gsi/CMakeFiles/CMakeTmp/CMakeFiles 1
+Building Fortran object CMakeFiles/cmTryCompileExec497504356.dir/testFortranCompiler.f.o
+/apps/intel/composer_xe_2015.3.187/bin/intel64/ifort   -qopenmp     -c /mnt/lfs3/projects/hfv3gfs/Edward.Colon/junk/EMC_noaa-3drtma/sorc/build_gsi/CMakeFiles/CMakeTmp/testFortranCompiler.f -o CMakeFiles/cmTryCompileExec497504356.dir/testFortranCompiler.f.o
+Linking Fortran executable cmTryCompileExec497504356
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTryCompileExec497504356.dir/link.txt --verbose=1
+/apps/intel/composer_xe_2015.3.187/bin/intel64/ifort    -qopenmp -qopenmp   CMakeFiles/cmTryCompileExec497504356.dir/testFortranCompiler.f.o  -o cmTryCompileExec497504356 -i_dynamic 
+ifort: command line remark #10148: option '-i_dynamic' not supported
+gmake[1]: Leaving directory `/mnt/lfs3/projects/hfv3gfs/Edward.Colon/junk/EMC_noaa-3drtma/sorc/build_gsi/CMakeFiles/CMakeTmp'
+
+
+Detecting Fortran compiler ABI info compiled with the following output:
+Change Dir: /mnt/lfs3/projects/hfv3gfs/Edward.Colon/junk/EMC_noaa-3drtma/sorc/build_gsi/CMakeFiles/CMakeTmp
+
+Run Build Command:/bin/gmake "cmTryCompileExec287444667/fast"
+/bin/gmake -f CMakeFiles/cmTryCompileExec287444667.dir/build.make CMakeFiles/cmTryCompileExec287444667.dir/build
+gmake[1]: Entering directory `/mnt/lfs3/projects/hfv3gfs/Edward.Colon/junk/EMC_noaa-3drtma/sorc/build_gsi/CMakeFiles/CMakeTmp'
+/usr/bin/cmake -E cmake_progress_report /mnt/lfs3/projects/hfv3gfs/Edward.Colon/junk/EMC_noaa-3drtma/sorc/build_gsi/CMakeFiles/CMakeTmp/CMakeFiles 1
+Building Fortran object CMakeFiles/cmTryCompileExec287444667.dir/CMakeFortranCompilerABI.F.o
+/apps/intel/composer_xe_2015.3.187/bin/intel64/ifort   -qopenmp     -c /usr/share/cmake/Modules/CMakeFortranCompilerABI.F -o CMakeFiles/cmTryCompileExec287444667.dir/CMakeFortranCompilerABI.F.o
+Linking Fortran executable cmTryCompileExec287444667
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTryCompileExec287444667.dir/link.txt --verbose=1
+/apps/intel/composer_xe_2015.3.187/bin/intel64/ifort   -v -qopenmp   CMakeFiles/cmTryCompileExec287444667.dir/CMakeFortranCompilerABI.F.o  -o cmTryCompileExec287444667 -i_dynamic  
+ifort: command line remark #10148: option '-i_dynamic' not supported
+ifort version 15.0.3
+/apps/intel/composer_xe_2015.3.187/bin/intel64/fortcom    -mP1OPT_version=15.0-intel64 -mGLOB_diag_file=CMakeFiles/cmTryCompileExec287444667.dir/CMakeFortranCompilerABI.F.diag -mGLOB_source_language=GLOB_SOURCE_LANGUAGE_F90 -mP2OPT_static_promotion -mP1OPT_print_version=FALSE -mCG_use_gas_got_workaround=F -mP2OPT_align_option_used=TRUE -mGLOB_gcc_version=485 "-mGLOB_options_string=-v -qopenmp -o cmTryCompileExec287444667 -i_dynamic" -mGLOB_cxx_limited_range=FALSE -mCG_extend_parms=FALSE -mGLOB_compiler_bin_directory=/apps/intel/composer_xe_2015.3.187/bin/intel64 -mGLOB_as_output_backup_file_name=/tmp/ifortGryNB8as_.s -mIPOPT_activate -mGLOB_em64t -mGLOB_product_id_code=0x22006d8f -mP3OPT_use_mspp_call_convention -mP2OPT_subs_out_of_bound=FALSE -mGLOB_ansi_alias -mPGOPTI_value_profile_use=T -mGLOB_opt_report_use_source_name -mPAROPT_openmp=TRUE -mP2OPT_il0_array_sections=TRUE -mGLOB_offload_mode=1 -mP2OPT_offload_unique_var_string=ifort010305987507Wj4CrD -mP2OPT_hlo -mP2OPT_hpo_rtt_control=0 -mIPOPT_args_in_regs=0 -mP2OPT_disam_assume_nonstd_intent_in=FALSE -mGLOB_imf_mapping_library=/apps/intel/composer_xe_2015.3.187/bin/intel64/libiml_attr.so -mPGOPTI_gen_threadsafe_level=0 -mIPOPT_link -mIPOPT_ipo_activate -mIPOPT_mo_activate -mIPOPT_source_files_list=/tmp/ifortslisIOxLgc -mIPOPT_mo_global_data -mIPOPT_link_script_file=/tmp/ifortscriptg5iS2a "-mIPOPT_cmdline_link="/usr/lib/gcc/x86_64-redhat-linux/4.8.5/../../../../lib64/crt1.o" "/usr/lib/gcc/x86_64-redhat-linux/4.8.5/../../../../lib64/crti.o" "/usr/lib/gcc/x86_64-redhat-linux/4.8.5/crtbegin.o" "--eh-frame-hdr" "--build-id" "-dynamic-linker" "/lib64/ld-linux-x86-64.so.2" "-m" "elf_x86_64" "-o" "cmTryCompileExec287444667" "/apps/intel/composer_xe_2015.3.187/compiler/lib/intel64/for_main.o" "-L/apps/pnetcdf/1.6.1-intel15-impi5/lib" "-L/apps/intel/composer_xe_2015.3.187/mkl/lib/intel64" "-L/apps/intel/composer_xe_2015.3.187/debugger/lib/intel64" "-L/apps/intel/composer_xe_2015.3.187/compiler/lib/intel64" "-L/apps/intel/composer_xe_2015.3.187/compiler/lib/intel64" "-L/usr/lib/gcc/x86_64-redhat-linux/4.8.5/" "-L/usr/lib/gcc/x86_64-redhat-linux/4.8.5/../../../../lib64" "-L/usr/lib/gcc/x86_64-redhat-linux/4.8.5/../../../../lib64/" "-L/lib/../lib64" "-L/lib/../lib64/" "-L/usr/lib/../lib64" "-L/usr/lib/../lib64/" "-L/apps/pnetcdf/1.6.1-intel15-impi5/lib/" "-L/apps/intel/composer_xe_2015.3.187/mkl/lib/intel64/" "-L/apps/intel/composer_xe_2015.3.187/compiler/lib/intel64/" "-L/usr/lib/gcc/x86_64-redhat-linux/4.8.5/../../../" "-L/lib64" "-L/lib/" "-L/usr/lib64" "-L/usr/lib" "CMakeFiles/cmTryCompileExec287444667.dir/CMakeFortranCompilerABI.F.o" "-Bdynamic" "-Bstatic" "-lifport" "-lifcoremt" "-limf" "-lsvml" "-Bdynamic" "-lm" "-Bstatic" "-lipgo" "-Bdynamic" "-liomp5" "-Bstatic" "-lirc" "-Bdynamic" "-lpthread" "-Bstatic" "-lsvml" "-Bdynamic" "-lc" "-lgcc" "-lgcc_s" "-Bstatic" "-lirc_s" "-Bdynamic" "-ldl" "-lc" "/usr/lib/gcc/x86_64-redhat-linux/4.8.5/crtend.o" "/usr/lib/gcc/x86_64-redhat-linux/4.8.5/../../../../lib64/crtn.o"" -mIPOPT_il_in_obj -mIPOPT_ipo_activate_warn=FALSE -mIPOPT_obj_output_file_name=/tmp/ipo_ifortM4oaCj.o -mIPOPT_whole_archive_fixup_file_name=/tmp/ifortwarchfqCNYX -mGLOB_linker_version=2.27 -mGLOB_long_size_64 -mGLOB_routine_pointer_size_64 -mGLOB_driver_tempfile_name=/tmp/iforttempfileU5gBPW -mP3OPT_asm_target=P3OPT_ASM_TARGET_GAS -mGLOB_async_unwind_tables=TRUE -mGLOB_obj_output_file=/tmp/ipo_ifortM4oaCj.o -mGLOB_source_dialect=GLOB_SOURCE_DIALECT_NONE -mP1OPT_source_file_name=ipo_out.f -mP2OPT_symtab_type_copy=true CMakeFiles/cmTryCompileExec287444667.dir/CMakeFortranCompilerABI.F.o -mIPOPT_object_files=T -mIPOPT_assembly_files=/tmp/ifortalisUSUlah -mIPOPT_generated_tempfiles=/tmp/ifortelisovasWf -mIPOPT_embedded_object_base_name=/tmp/iforteobjQ8kyIe -mIPOPT_cmdline_link_new_name=/tmp/ifortllisKaLEud
+ld    /usr/lib/gcc/x86_64-redhat-linux/4.8.5/../../../../lib64/crt1.o /usr/lib/gcc/x86_64-redhat-linux/4.8.5/../../../../lib64/crti.o /usr/lib/gcc/x86_64-redhat-linux/4.8.5/crtbegin.o --eh-frame-hdr --build-id -dynamic-linker /lib64/ld-linux-x86-64.so.2 -m elf_x86_64 -o cmTryCompileExec287444667 /apps/intel/composer_xe_2015.3.187/compiler/lib/intel64/for_main.o -L/apps/pnetcdf/1.6.1-intel15-impi5/lib -L/apps/intel/composer_xe_2015.3.187/mkl/lib/intel64 -L/apps/intel/composer_xe_2015.3.187/debugger/lib/intel64 -L/apps/intel/composer_xe_2015.3.187/compiler/lib/intel64 -L/apps/intel/composer_xe_2015.3.187/compiler/lib/intel64 -L/usr/lib/gcc/x86_64-redhat-linux/4.8.5/ -L/usr/lib/gcc/x86_64-redhat-linux/4.8.5/../../../../lib64 -L/usr/lib/gcc/x86_64-redhat-linux/4.8.5/../../../../lib64/ -L/lib/../lib64 -L/lib/../lib64/ -L/usr/lib/../lib64 -L/usr/lib/../lib64/ -L/apps/pnetcdf/1.6.1-intel15-impi5/lib/ -L/apps/intel/composer_xe_2015.3.187/mkl/lib/intel64/ -L/apps/intel/composer_xe_2015.3.187/compiler/lib/intel64/ -L/usr/lib/gcc/x86_64-redhat-linux/4.8.5/../../../ -L/lib64 -L/lib/ -L/usr/lib64 -L/usr/lib CMakeFiles/cmTryCompileExec287444667.dir/CMakeFortranCompilerABI.F.o -Bdynamic -Bstatic -lifport -lifcoremt -limf -lsvml -Bdynamic -lm -Bstatic -lipgo -Bdynamic -liomp5 -Bstatic -lirc -Bdynamic -lpthread -Bstatic -lsvml -Bdynamic -lc -lgcc -lgcc_s -Bstatic -lirc_s -Bdynamic -ldl -lc /usr/lib/gcc/x86_64-redhat-linux/4.8.5/crtend.o /usr/lib/gcc/x86_64-redhat-linux/4.8.5/../../../../lib64/crtn.o
+gmake[1]: Leaving directory `/mnt/lfs3/projects/hfv3gfs/Edward.Colon/junk/EMC_noaa-3drtma/sorc/build_gsi/CMakeFiles/CMakeTmp'
+
+
+Parsed Fortran implicit link information from above output:
+  link line regex: [^( *|.*[/\])(ld|([^/\]+-)?ld|collect2)[^/\]*( |$)]
+  ignore line: [Change Dir: /mnt/lfs3/projects/hfv3gfs/Edward.Colon/junk/EMC_noaa-3drtma/sorc/build_gsi/CMakeFiles/CMakeTmp]
+  ignore line: []
+  ignore line: [Run Build Command:/bin/gmake "cmTryCompileExec287444667/fast"]
+  ignore line: [/bin/gmake -f CMakeFiles/cmTryCompileExec287444667.dir/build.make CMakeFiles/cmTryCompileExec287444667.dir/build]
+  ignore line: [gmake[1]: Entering directory `/mnt/lfs3/projects/hfv3gfs/Edward.Colon/junk/EMC_noaa-3drtma/sorc/build_gsi/CMakeFiles/CMakeTmp']
+  ignore line: [/usr/bin/cmake -E cmake_progress_report /mnt/lfs3/projects/hfv3gfs/Edward.Colon/junk/EMC_noaa-3drtma/sorc/build_gsi/CMakeFiles/CMakeTmp/CMakeFiles 1]
+  ignore line: [Building Fortran object CMakeFiles/cmTryCompileExec287444667.dir/CMakeFortranCompilerABI.F.o]
+  ignore line: [/apps/intel/composer_xe_2015.3.187/bin/intel64/ifort   -qopenmp     -c /usr/share/cmake/Modules/CMakeFortranCompilerABI.F -o CMakeFiles/cmTryCompileExec287444667.dir/CMakeFortranCompilerABI.F.o]
+  ignore line: [Linking Fortran executable cmTryCompileExec287444667]
+  ignore line: [/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTryCompileExec287444667.dir/link.txt --verbose=1]
+  ignore line: [/apps/intel/composer_xe_2015.3.187/bin/intel64/ifort   -v -qopenmp   CMakeFiles/cmTryCompileExec287444667.dir/CMakeFortranCompilerABI.F.o  -o cmTryCompileExec287444667 -i_dynamic  ]
+  ignore line: [ifort: command line remark #10148: option '-i_dynamic' not supported]
+  ignore line: [ifort version 15.0.3]
+  ignore line: [/apps/intel/composer_xe_2015.3.187/bin/intel64/fortcom    -mP1OPT_version=15.0-intel64 -mGLOB_diag_file=CMakeFiles/cmTryCompileExec287444667.dir/CMakeFortranCompilerABI.F.diag -mGLOB_source_language=GLOB_SOURCE_LANGUAGE_F90 -mP2OPT_static_promotion -mP1OPT_print_version=FALSE -mCG_use_gas_got_workaround=F -mP2OPT_align_option_used=TRUE -mGLOB_gcc_version=485 "-mGLOB_options_string=-v -qopenmp -o cmTryCompileExec287444667 -i_dynamic" -mGLOB_cxx_limited_range=FALSE -mCG_extend_parms=FALSE -mGLOB_compiler_bin_directory=/apps/intel/composer_xe_2015.3.187/bin/intel64 -mGLOB_as_output_backup_file_name=/tmp/ifortGryNB8as_.s -mIPOPT_activate -mGLOB_em64t -mGLOB_product_id_code=0x22006d8f -mP3OPT_use_mspp_call_convention -mP2OPT_subs_out_of_bound=FALSE -mGLOB_ansi_alias -mPGOPTI_value_profile_use=T -mGLOB_opt_report_use_source_name -mPAROPT_openmp=TRUE -mP2OPT_il0_array_sections=TRUE -mGLOB_offload_mode=1 -mP2OPT_offload_unique_var_string=ifort010305987507Wj4CrD -mP2OPT_hlo -mP2OPT_hpo_rtt_control=0 -mIPOPT_args_in_regs=0 -mP2OPT_disam_assume_nonstd_intent_in=FALSE -mGLOB_imf_mapping_library=/apps/intel/composer_xe_2015.3.187/bin/intel64/libiml_attr.so -mPGOPTI_gen_threadsafe_level=0 -mIPOPT_link -mIPOPT_ipo_activate -mIPOPT_mo_activate -mIPOPT_source_files_list=/tmp/ifortslisIOxLgc -mIPOPT_mo_global_data -mIPOPT_link_script_file=/tmp/ifortscriptg5iS2a "-mIPOPT_cmdline_link="/usr/lib/gcc/x86_64-redhat-linux/4.8.5/../../../../lib64/crt1.o" "/usr/lib/gcc/x86_64-redhat-linux/4.8.5/../../../../lib64/crti.o" "/usr/lib/gcc/x86_64-redhat-linux/4.8.5/crtbegin.o" "--eh-frame-hdr" "--build-id" "-dynamic-linker" "/lib64/ld-linux-x86-64.so.2" "-m" "elf_x86_64" "-o" "cmTryCompileExec287444667" "/apps/intel/composer_xe_2015.3.187/compiler/lib/intel64/for_main.o" "-L/apps/pnetcdf/1.6.1-intel15-impi5/lib" "-L/apps/intel/composer_xe_2015.3.187/mkl/lib/intel64" "-L/apps/intel/composer_xe_2015.3.187/debugger/lib/intel64" "-L/apps/intel/composer_xe_2015.3.187/compiler/lib/intel64" "-L/apps/intel/composer_xe_2015.3.187/compiler/lib/intel64" "-L/usr/lib/gcc/x86_64-redhat-linux/4.8.5/" "-L/usr/lib/gcc/x86_64-redhat-linux/4.8.5/../../../../lib64" "-L/usr/lib/gcc/x86_64-redhat-linux/4.8.5/../../../../lib64/" "-L/lib/../lib64" "-L/lib/../lib64/" "-L/usr/lib/../lib64" "-L/usr/lib/../lib64/" "-L/apps/pnetcdf/1.6.1-intel15-impi5/lib/" "-L/apps/intel/composer_xe_2015.3.187/mkl/lib/intel64/" "-L/apps/intel/composer_xe_2015.3.187/compiler/lib/intel64/" "-L/usr/lib/gcc/x86_64-redhat-linux/4.8.5/../../../" "-L/lib64" "-L/lib/" "-L/usr/lib64" "-L/usr/lib" "CMakeFiles/cmTryCompileExec287444667.dir/CMakeFortranCompilerABI.F.o" "-Bdynamic" "-Bstatic" "-lifport" "-lifcoremt" "-limf" "-lsvml" "-Bdynamic" "-lm" "-Bstatic" "-lipgo" "-Bdynamic" "-liomp5" "-Bstatic" "-lirc" "-Bdynamic" "-lpthread" "-Bstatic" "-lsvml" "-Bdynamic" "-lc" "-lgcc" "-lgcc_s" "-Bstatic" "-lirc_s" "-Bdynamic" "-ldl" "-lc" "/usr/lib/gcc/x86_64-redhat-linux/4.8.5/crtend.o" "/usr/lib/gcc/x86_64-redhat-linux/4.8.5/../../../../lib64/crtn.o"" -mIPOPT_il_in_obj -mIPOPT_ipo_activate_warn=FALSE -mIPOPT_obj_output_file_name=/tmp/ipo_ifortM4oaCj.o -mIPOPT_whole_archive_fixup_file_name=/tmp/ifortwarchfqCNYX -mGLOB_linker_version=2.27 -mGLOB_long_size_64 -mGLOB_routine_pointer_size_64 -mGLOB_driver_tempfile_name=/tmp/iforttempfileU5gBPW -mP3OPT_asm_target=P3OPT_ASM_TARGET_GAS -mGLOB_async_unwind_tables=TRUE -mGLOB_obj_output_file=/tmp/ipo_ifortM4oaCj.o -mGLOB_source_dialect=GLOB_SOURCE_DIALECT_NONE -mP1OPT_source_file_name=ipo_out.f -mP2OPT_symtab_type_copy=true CMakeFiles/cmTryCompileExec287444667.dir/CMakeFortranCompilerABI.F.o -mIPOPT_object_files=T -mIPOPT_assembly_files=/tmp/ifortalisUSUlah -mIPOPT_generated_tempfiles=/tmp/ifortelisovasWf -mIPOPT_embedded_object_base_name=/tmp/iforteobjQ8kyIe -mIPOPT_cmdline_link_new_name=/tmp/ifortllisKaLEud]
+  link line: [ld    /usr/lib/gcc/x86_64-redhat-linux/4.8.5/../../../../lib64/crt1.o /usr/lib/gcc/x86_64-redhat-linux/4.8.5/../../../../lib64/crti.o /usr/lib/gcc/x86_64-redhat-linux/4.8.5/crtbegin.o --eh-frame-hdr --build-id -dynamic-linker /lib64/ld-linux-x86-64.so.2 -m elf_x86_64 -o cmTryCompileExec287444667 /apps/intel/composer_xe_2015.3.187/compiler/lib/intel64/for_main.o -L/apps/pnetcdf/1.6.1-intel15-impi5/lib -L/apps/intel/composer_xe_2015.3.187/mkl/lib/intel64 -L/apps/intel/composer_xe_2015.3.187/debugger/lib/intel64 -L/apps/intel/composer_xe_2015.3.187/compiler/lib/intel64 -L/apps/intel/composer_xe_2015.3.187/compiler/lib/intel64 -L/usr/lib/gcc/x86_64-redhat-linux/4.8.5/ -L/usr/lib/gcc/x86_64-redhat-linux/4.8.5/../../../../lib64 -L/usr/lib/gcc/x86_64-redhat-linux/4.8.5/../../../../lib64/ -L/lib/../lib64 -L/lib/../lib64/ -L/usr/lib/../lib64 -L/usr/lib/../lib64/ -L/apps/pnetcdf/1.6.1-intel15-impi5/lib/ -L/apps/intel/composer_xe_2015.3.187/mkl/lib/intel64/ -L/apps/intel/composer_xe_2015.3.187/compiler/lib/intel64/ -L/usr/lib/gcc/x86_64-redhat-linux/4.8.5/../../../ -L/lib64 -L/lib/ -L/usr/lib64 -L/usr/lib CMakeFiles/cmTryCompileExec287444667.dir/CMakeFortranCompilerABI.F.o -Bdynamic -Bstatic -lifport -lifcoremt -limf -lsvml -Bdynamic -lm -Bstatic -lipgo -Bdynamic -liomp5 -Bstatic -lirc -Bdynamic -lpthread -Bstatic -lsvml -Bdynamic -lc -lgcc -lgcc_s -Bstatic -lirc_s -Bdynamic -ldl -lc /usr/lib/gcc/x86_64-redhat-linux/4.8.5/crtend.o /usr/lib/gcc/x86_64-redhat-linux/4.8.5/../../../../lib64/crtn.o]
+    arg [ld] ==> ignore
+    arg [/usr/lib/gcc/x86_64-redhat-linux/4.8.5/../../../../lib64/crt1.o] ==> ignore
+    arg [/usr/lib/gcc/x86_64-redhat-linux/4.8.5/../../../../lib64/crti.o] ==> ignore
+    arg [/usr/lib/gcc/x86_64-redhat-linux/4.8.5/crtbegin.o] ==> ignore
+    arg [--eh-frame-hdr] ==> ignore
+    arg [--build-id] ==> ignore
+    arg [-dynamic-linker] ==> ignore
+    arg [/lib64/ld-linux-x86-64.so.2] ==> ignore
+    arg [-m] ==> ignore
+    arg [elf_x86_64] ==> ignore
+    arg [-o] ==> ignore
+    arg [cmTryCompileExec287444667] ==> ignore
+    arg [/apps/intel/composer_xe_2015.3.187/compiler/lib/intel64/for_main.o] ==> ignore
+    arg [-L/apps/pnetcdf/1.6.1-intel15-impi5/lib] ==> dir [/apps/pnetcdf/1.6.1-intel15-impi5/lib]
+    arg [-L/apps/intel/composer_xe_2015.3.187/mkl/lib/intel64] ==> dir [/apps/intel/composer_xe_2015.3.187/mkl/lib/intel64]
+    arg [-L/apps/intel/composer_xe_2015.3.187/debugger/lib/intel64] ==> dir [/apps/intel/composer_xe_2015.3.187/debugger/lib/intel64]
+    arg [-L/apps/intel/composer_xe_2015.3.187/compiler/lib/intel64] ==> dir [/apps/intel/composer_xe_2015.3.187/compiler/lib/intel64]
+    arg [-L/apps/intel/composer_xe_2015.3.187/compiler/lib/intel64] ==> dir [/apps/intel/composer_xe_2015.3.187/compiler/lib/intel64]
+    arg [-L/usr/lib/gcc/x86_64-redhat-linux/4.8.5/] ==> dir [/usr/lib/gcc/x86_64-redhat-linux/4.8.5/]
+    arg [-L/usr/lib/gcc/x86_64-redhat-linux/4.8.5/../../../../lib64] ==> dir [/usr/lib/gcc/x86_64-redhat-linux/4.8.5/../../../../lib64]
+    arg [-L/usr/lib/gcc/x86_64-redhat-linux/4.8.5/../../../../lib64/] ==> dir [/usr/lib/gcc/x86_64-redhat-linux/4.8.5/../../../../lib64/]
+    arg [-L/lib/../lib64] ==> dir [/lib/../lib64]
+    arg [-L/lib/../lib64/] ==> dir [/lib/../lib64/]
+    arg [-L/usr/lib/../lib64] ==> dir [/usr/lib/../lib64]
+    arg [-L/usr/lib/../lib64/] ==> dir [/usr/lib/../lib64/]
+    arg [-L/apps/pnetcdf/1.6.1-intel15-impi5/lib/] ==> dir [/apps/pnetcdf/1.6.1-intel15-impi5/lib/]
+    arg [-L/apps/intel/composer_xe_2015.3.187/mkl/lib/intel64/] ==> dir [/apps/intel/composer_xe_2015.3.187/mkl/lib/intel64/]
+    arg [-L/apps/intel/composer_xe_2015.3.187/compiler/lib/intel64/] ==> dir [/apps/intel/composer_xe_2015.3.187/compiler/lib/intel64/]
+    arg [-L/usr/lib/gcc/x86_64-redhat-linux/4.8.5/../../../] ==> dir [/usr/lib/gcc/x86_64-redhat-linux/4.8.5/../../../]
+    arg [-L/lib64] ==> dir [/lib64]
+    arg [-L/lib/] ==> dir [/lib/]
+    arg [-L/usr/lib64] ==> dir [/usr/lib64]
+    arg [-L/usr/lib] ==> dir [/usr/lib]
+    arg [CMakeFiles/cmTryCompileExec287444667.dir/CMakeFortranCompilerABI.F.o] ==> ignore
+    arg [-Bdynamic] ==> ignore
+    arg [-Bstatic] ==> ignore
+    arg [-lifport] ==> lib [ifport]
+    arg [-lifcoremt] ==> lib [ifcoremt]
+    arg [-limf] ==> lib [imf]
+    arg [-lsvml] ==> lib [svml]
+    arg [-Bdynamic] ==> ignore
+    arg [-lm] ==> lib [m]
+    arg [-Bstatic] ==> ignore
+    arg [-lipgo] ==> lib [ipgo]
+    arg [-Bdynamic] ==> ignore
+    arg [-liomp5] ==> lib [iomp5]
+    arg [-Bstatic] ==> ignore
+    arg [-lirc] ==> lib [irc]
+    arg [-Bdynamic] ==> ignore
+    arg [-lpthread] ==> lib [pthread]
+    arg [-Bstatic] ==> ignore
+    arg [-lsvml] ==> lib [svml]
+    arg [-Bdynamic] ==> ignore
+    arg [-lc] ==> lib [c]
+    arg [-lgcc] ==> lib [gcc]
+    arg [-lgcc_s] ==> lib [gcc_s]
+    arg [-Bstatic] ==> ignore
+    arg [-lirc_s] ==> lib [irc_s]
+    arg [-Bdynamic] ==> ignore
+    arg [-ldl] ==> lib [dl]
+    arg [-lc] ==> lib [c]
+    arg [/usr/lib/gcc/x86_64-redhat-linux/4.8.5/crtend.o] ==> ignore
+    arg [/usr/lib/gcc/x86_64-redhat-linux/4.8.5/../../../../lib64/crtn.o] ==> ignore
+  remove lib [gcc]
+  remove lib [gcc_s]
+  collapse library dir [/apps/pnetcdf/1.6.1-intel15-impi5/lib] ==> [/apps/pnetcdf/1.6.1-intel15-impi5/lib]
+  collapse library dir [/apps/intel/composer_xe_2015.3.187/mkl/lib/intel64] ==> [/apps/intel/composer_xe_2015.3.187/mkl/lib/intel64]
+  collapse library dir [/apps/intel/composer_xe_2015.3.187/debugger/lib/intel64] ==> [/apps/intel/composer_xe_2015.3.187/debugger/lib/intel64]
+  collapse library dir [/apps/intel/composer_xe_2015.3.187/compiler/lib/intel64] ==> [/apps/intel/composer_xe_2015.3.187/compiler/lib/intel64]
+  collapse library dir [/apps/intel/composer_xe_2015.3.187/compiler/lib/intel64] ==> [/apps/intel/composer_xe_2015.3.187/compiler/lib/intel64]
+  collapse library dir [/usr/lib/gcc/x86_64-redhat-linux/4.8.5/] ==> [/usr/lib/gcc/x86_64-redhat-linux/4.8.5]
+  collapse library dir [/usr/lib/gcc/x86_64-redhat-linux/4.8.5/../../../../lib64] ==> [/usr/lib64]
+  collapse library dir [/usr/lib/gcc/x86_64-redhat-linux/4.8.5/../../../../lib64/] ==> [/usr/lib64]
+  collapse library dir [/lib/../lib64] ==> [/lib64]
+  collapse library dir [/lib/../lib64/] ==> [/lib64]
+  collapse library dir [/usr/lib/../lib64] ==> [/usr/lib64]
+  collapse library dir [/usr/lib/../lib64/] ==> [/usr/lib64]
+  collapse library dir [/apps/pnetcdf/1.6.1-intel15-impi5/lib/] ==> [/apps/pnetcdf/1.6.1-intel15-impi5/lib]
+  collapse library dir [/apps/intel/composer_xe_2015.3.187/mkl/lib/intel64/] ==> [/apps/intel/composer_xe_2015.3.187/mkl/lib/intel64]
+  collapse library dir [/apps/intel/composer_xe_2015.3.187/compiler/lib/intel64/] ==> [/apps/intel/composer_xe_2015.3.187/compiler/lib/intel64]
+  collapse library dir [/usr/lib/gcc/x86_64-redhat-linux/4.8.5/../../../] ==> [/usr/lib]
+  collapse library dir [/lib64] ==> [/lib64]
+  collapse library dir [/lib/] ==> [/lib]
+  collapse library dir [/usr/lib64] ==> [/usr/lib64]
+  collapse library dir [/usr/lib] ==> [/usr/lib]
+  implicit libs: [ifport;ifcoremt;imf;svml;m;ipgo;iomp5;irc;pthread;svml;c;irc_s;dl;c]
+  implicit dirs: [/apps/pnetcdf/1.6.1-intel15-impi5/lib;/apps/intel/composer_xe_2015.3.187/mkl/lib/intel64;/apps/intel/composer_xe_2015.3.187/debugger/lib/intel64;/apps/intel/composer_xe_2015.3.187/compiler/lib/intel64;/usr/lib/gcc/x86_64-redhat-linux/4.8.5;/usr/lib64;/lib64;/usr/lib;/lib]
+  implicit fwks: []
+
+
+Determining if the Fortran compiler supports Fortran 90 passed with the following output:
+Change Dir: /mnt/lfs3/projects/hfv3gfs/Edward.Colon/junk/EMC_noaa-3drtma/sorc/build_gsi/CMakeFiles/CMakeTmp
+
+Run Build Command:/bin/gmake "cmTryCompileExec2983488269/fast"
+/bin/gmake -f CMakeFiles/cmTryCompileExec2983488269.dir/build.make CMakeFiles/cmTryCompileExec2983488269.dir/build
+gmake[1]: Entering directory `/mnt/lfs3/projects/hfv3gfs/Edward.Colon/junk/EMC_noaa-3drtma/sorc/build_gsi/CMakeFiles/CMakeTmp'
+/usr/bin/cmake -E cmake_progress_report /mnt/lfs3/projects/hfv3gfs/Edward.Colon/junk/EMC_noaa-3drtma/sorc/build_gsi/CMakeFiles/CMakeTmp/CMakeFiles 1
+Building Fortran object CMakeFiles/cmTryCompileExec2983488269.dir/testFortranCompilerF90.f90.o
+/apps/intel/composer_xe_2015.3.187/bin/intel64/ifort   -qopenmp     -c /mnt/lfs3/projects/hfv3gfs/Edward.Colon/junk/EMC_noaa-3drtma/sorc/build_gsi/CMakeFiles/CMakeTmp/testFortranCompilerF90.f90 -o CMakeFiles/cmTryCompileExec2983488269.dir/testFortranCompilerF90.f90.o
+Linking Fortran executable cmTryCompileExec2983488269
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTryCompileExec2983488269.dir/link.txt --verbose=1
+/apps/intel/composer_xe_2015.3.187/bin/intel64/ifort    -qopenmp -qopenmp   CMakeFiles/cmTryCompileExec2983488269.dir/testFortranCompilerF90.f90.o  -o cmTryCompileExec2983488269 -i_dynamic 
+ifort: command line remark #10148: option '-i_dynamic' not supported
+gmake[1]: Leaving directory `/mnt/lfs3/projects/hfv3gfs/Edward.Colon/junk/EMC_noaa-3drtma/sorc/build_gsi/CMakeFiles/CMakeTmp'
+
+
+Determining if files pthread.h exist passed with the following output:
+Change Dir: /mnt/lfs3/projects/hfv3gfs/Edward.Colon/junk/EMC_noaa-3drtma/sorc/build_gsi/CMakeFiles/CMakeTmp
+
+Run Build Command:/bin/gmake "cmTryCompileExec381708939/fast"
+/bin/gmake -f CMakeFiles/cmTryCompileExec381708939.dir/build.make CMakeFiles/cmTryCompileExec381708939.dir/build
+gmake[1]: Entering directory `/mnt/lfs3/projects/hfv3gfs/Edward.Colon/junk/EMC_noaa-3drtma/sorc/build_gsi/CMakeFiles/CMakeTmp'
+/usr/bin/cmake -E cmake_progress_report /mnt/lfs3/projects/hfv3gfs/Edward.Colon/junk/EMC_noaa-3drtma/sorc/build_gsi/CMakeFiles/CMakeTmp/CMakeFiles 1
+Building C object CMakeFiles/cmTryCompileExec381708939.dir/CheckIncludeFiles.c.o
+/apps/intel/composer_xe_2015.3.187/bin/intel64/icc    -o CMakeFiles/cmTryCompileExec381708939.dir/CheckIncludeFiles.c.o   -c /mnt/lfs3/projects/hfv3gfs/Edward.Colon/junk/EMC_noaa-3drtma/sorc/build_gsi/CMakeFiles/CMakeTmp/CheckIncludeFiles.c
+Linking C executable cmTryCompileExec381708939
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTryCompileExec381708939.dir/link.txt --verbose=1
+/apps/intel/composer_xe_2015.3.187/bin/intel64/icc      -qopenmp CMakeFiles/cmTryCompileExec381708939.dir/CheckIncludeFiles.c.o  -o cmTryCompileExec381708939 -rdynamic 
+gmake[1]: Leaving directory `/mnt/lfs3/projects/hfv3gfs/Edward.Colon/junk/EMC_noaa-3drtma/sorc/build_gsi/CMakeFiles/CMakeTmp'
+
+
+Determining if the pthread_create exist passed with the following output:
+Change Dir: /mnt/lfs3/projects/hfv3gfs/Edward.Colon/junk/EMC_noaa-3drtma/sorc/build_gsi/CMakeFiles/CMakeTmp
+
+Run Build Command:/bin/gmake "cmTryCompileExec756008927/fast"
+/bin/gmake -f CMakeFiles/cmTryCompileExec756008927.dir/build.make CMakeFiles/cmTryCompileExec756008927.dir/build
+gmake[1]: Entering directory `/mnt/lfs3/projects/hfv3gfs/Edward.Colon/junk/EMC_noaa-3drtma/sorc/build_gsi/CMakeFiles/CMakeTmp'
+/usr/bin/cmake -E cmake_progress_report /mnt/lfs3/projects/hfv3gfs/Edward.Colon/junk/EMC_noaa-3drtma/sorc/build_gsi/CMakeFiles/CMakeTmp/CMakeFiles 1
+Building C object CMakeFiles/cmTryCompileExec756008927.dir/CheckSymbolExists.c.o
+/apps/intel/composer_xe_2015.3.187/bin/intel64/icc    -o CMakeFiles/cmTryCompileExec756008927.dir/CheckSymbolExists.c.o   -c /mnt/lfs3/projects/hfv3gfs/Edward.Colon/junk/EMC_noaa-3drtma/sorc/build_gsi/CMakeFiles/CMakeTmp/CheckSymbolExists.c
+Linking C executable cmTryCompileExec756008927
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTryCompileExec756008927.dir/link.txt --verbose=1
+/apps/intel/composer_xe_2015.3.187/bin/intel64/icc      -qopenmp CMakeFiles/cmTryCompileExec756008927.dir/CheckSymbolExists.c.o  -o cmTryCompileExec756008927 -rdynamic 
+gmake[1]: Leaving directory `/mnt/lfs3/projects/hfv3gfs/Edward.Colon/junk/EMC_noaa-3drtma/sorc/build_gsi/CMakeFiles/CMakeTmp'
+
+File /mnt/lfs3/projects/hfv3gfs/Edward.Colon/junk/EMC_noaa-3drtma/sorc/build_gsi/CMakeFiles/CMakeTmp/CheckSymbolExists.c:
+/* */
+#include <pthread.h>
+
+int main(int argc, char** argv)
+{
+  (void)argv;
+#ifndef pthread_create
+  return ((int*)(&pthread_create))[argc];
+#else
+  (void)argc;
+  return 0;
+#endif
+}
+
+Determining if the Fortran sgemm exists passed with the following output:
+Change Dir: /mnt/lfs3/projects/hfv3gfs/Edward.Colon/junk/EMC_noaa-3drtma/sorc/build_gsi/CMakeFiles/CMakeTmp
+
+Run Build Command:/bin/gmake "cmTryCompileExec3047645431/fast"
+/bin/gmake -f CMakeFiles/cmTryCompileExec3047645431.dir/build.make CMakeFiles/cmTryCompileExec3047645431.dir/build
+gmake[1]: Entering directory `/mnt/lfs3/projects/hfv3gfs/Edward.Colon/junk/EMC_noaa-3drtma/sorc/build_gsi/CMakeFiles/CMakeTmp'
+/usr/bin/cmake -E cmake_progress_report /mnt/lfs3/projects/hfv3gfs/Edward.Colon/junk/EMC_noaa-3drtma/sorc/build_gsi/CMakeFiles/CMakeTmp/CMakeFiles 1
+Building Fortran object CMakeFiles/cmTryCompileExec3047645431.dir/testFortranCompiler.f.o
+/apps/intel/composer_xe_2015.3.187/bin/intel64/ifort   -qopenmp     -c /mnt/lfs3/projects/hfv3gfs/Edward.Colon/junk/EMC_noaa-3drtma/sorc/build_gsi/CMakeFiles/CMakeTmp/testFortranCompiler.f -o CMakeFiles/cmTryCompileExec3047645431.dir/testFortranCompiler.f.o
+Linking Fortran executable cmTryCompileExec3047645431
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTryCompileExec3047645431.dir/link.txt --verbose=1
+/apps/intel/composer_xe_2015.3.187/bin/intel64/ifort    -qopenmp -qopenmp   CMakeFiles/cmTryCompileExec3047645431.dir/testFortranCompiler.f.o  -o cmTryCompileExec3047645431 -i_dynamic -lmkl_intel_lp64 -lmkl_intel_thread -lmkl_core /apps/intel/composer_xe_2015.3.187/compiler/lib/intel64/libiomp5.so -lm 
+ifort: command line remark #10148: option '-i_dynamic' not supported
+gmake[1]: Leaving directory `/mnt/lfs3/projects/hfv3gfs/Edward.Colon/junk/EMC_noaa-3drtma/sorc/build_gsi/CMakeFiles/CMakeTmp'
+
+
+Determining if the Fortran cheev exists passed with the following output:
+Change Dir: /mnt/lfs3/projects/hfv3gfs/Edward.Colon/junk/EMC_noaa-3drtma/sorc/build_gsi/CMakeFiles/CMakeTmp
+
+Run Build Command:/bin/gmake "cmTryCompileExec2992953900/fast"
+/bin/gmake -f CMakeFiles/cmTryCompileExec2992953900.dir/build.make CMakeFiles/cmTryCompileExec2992953900.dir/build
+gmake[1]: Entering directory `/mnt/lfs3/projects/hfv3gfs/Edward.Colon/junk/EMC_noaa-3drtma/sorc/build_gsi/CMakeFiles/CMakeTmp'
+/usr/bin/cmake -E cmake_progress_report /mnt/lfs3/projects/hfv3gfs/Edward.Colon/junk/EMC_noaa-3drtma/sorc/build_gsi/CMakeFiles/CMakeTmp/CMakeFiles 1
+Building Fortran object CMakeFiles/cmTryCompileExec2992953900.dir/testFortranCompiler.f.o
+/apps/intel/composer_xe_2015.3.187/bin/intel64/ifort   -qopenmp     -c /mnt/lfs3/projects/hfv3gfs/Edward.Colon/junk/EMC_noaa-3drtma/sorc/build_gsi/CMakeFiles/CMakeTmp/testFortranCompiler.f -o CMakeFiles/cmTryCompileExec2992953900.dir/testFortranCompiler.f.o
+Linking Fortran executable cmTryCompileExec2992953900
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTryCompileExec2992953900.dir/link.txt --verbose=1
+/apps/intel/composer_xe_2015.3.187/bin/intel64/ifort    -qopenmp -qopenmp   CMakeFiles/cmTryCompileExec2992953900.dir/testFortranCompiler.f.o  -o cmTryCompileExec2992953900 -i_dynamic -lmkl_gf_lp64 -lmkl_intel_lp64 -lmkl_intel_thread -lmkl_core /apps/intel/composer_xe_2015.3.187/compiler/lib/intel64/libiomp5.so -lm 
+ifort: command line remark #10148: option '-i_dynamic' not supported
+gmake[1]: Leaving directory `/mnt/lfs3/projects/hfv3gfs/Edward.Colon/junk/EMC_noaa-3drtma/sorc/build_gsi/CMakeFiles/CMakeTmp'
+
+

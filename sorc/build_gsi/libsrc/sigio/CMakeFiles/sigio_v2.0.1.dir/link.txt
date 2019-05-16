@@ -1,0 +1,2 @@
+/bin/ar cr ../../lib/libsigio_v2.0.1.a  CMakeFiles/sigio_v2.0.1.dir/sigio_r_module.f.o CMakeFiles/sigio_v2.0.1.dir/sigio_module.f.o
+/bin/ranlib ../../lib/libsigio_v2.0.1.a

@@ -1,0 +1,13 @@
+mpiifort -free -f90=ifort -O3 -fp-model precise -assume byterecl -fpe0 -g -traceback -qopenmp -DLINUX  -I/apps/netcdf/4.2.1.1-intel/include -I../../build_gsi/include -c Check_Lightning_QC.f90
+mpiifort -free -f90=ifort -O3 -fp-model precise -assume byterecl -fpe0 -g -traceback -qopenmp -DLINUX  -I/apps/netcdf/4.2.1.1-intel/include -I../../build_gsi/include -c netCDFsub_geo.f90
+cc -DLINUX -Dfunder -DFortranByte=char -DFortranInt=int -DFortranLlong='long long' -D_UNDERSCORE -c cio.c
+mpiifort -free -f90=ifort -O3 -fp-model precise -assume byterecl -fpe0 -g -traceback -qopenmp -DLINUX  -I/apps/netcdf/4.2.1.1-intel/include -I../../build_gsi/include -c read_lightning_bufr.f90
+mpiifort -free -f90=ifort -O3 -fp-model precise -assume byterecl -fpe0 -g -traceback -qopenmp -DLINUX  -I/apps/netcdf/4.2.1.1-intel/include -I../../build_gsi/include -c module_debug.F90
+mpiifort -free -f90=ifort -O3 -fp-model precise -assume byterecl -fpe0 -g -traceback -qopenmp -DLINUX  -I/apps/netcdf/4.2.1.1-intel/include -I../../build_gsi/include -c misc_definitions_module.f90
+mpiifort -free -f90=ifort -O3 -fp-model precise -assume byterecl -fpe0 -g -traceback -qopenmp -DLINUX  -I/apps/netcdf/4.2.1.1-intel/include -I../../build_gsi/include -c constants_module.f90
+mpiifort -free -f90=ifort -O3 -fp-model precise -assume byterecl -fpe0 -g -traceback -qopenmp -DLINUX  -I/apps/netcdf/4.2.1.1-intel/include -I../../build_gsi/include -c module_map_utils.f90
+mpiifort -free -f90=ifort -O3 -fp-model precise -assume byterecl -fpe0 -g -traceback -qopenmp -DLINUX  -I/apps/netcdf/4.2.1.1-intel/include -I../../build_gsi/include -c gridmod_gsi_map_utils.f90
+mpiifort -free -f90=ifort -O3 -fp-model precise -assume byterecl -fpe0 -g -traceback -qopenmp -DLINUX  -I/apps/netcdf/4.2.1.1-intel/include -I../../build_gsi/include -c write_bufr_lght.f90
+mpiifort -free -f90=ifort -O3 -fp-model precise -assume byterecl -fpe0 -g -traceback -qopenmp -DLINUX  -I/apps/netcdf/4.2.1.1-intel/include -I../../build_gsi/include -c process_Lightning.f90
+mpiifort -free -f90=ifort -o process_Lightning_bufr.exe -O3 -fp-model precise -assume byterecl -fpe0 -g -traceback -qopenmp -DLINUX  Check_Lightning_QC.o netCDFsub_geo.o cio.o read_lightning_bufr.o module_debug.o misc_definitions_module.o constants_module.o module_map_utils.o gridmod_gsi_map_utils.o write_bufr_lght.o process_Lightning.o -L/apps/netcdf/4.2.1.1-intel/lib -lnetcdf -lnetcdff /mnt/lfs3/projects/hfv3gfs/nwprod/lib/w3emc/v2.2.0/libw3emc_v2.2.0_d.a /mnt/lfs3/projects/hfv3gfs/nwprod/lib/w3nco/v2.0.6/libw3nco_v2.0.6_d.a /mnt/lfs3/projects/hfv3gfs/nwprod/lib/bacio/v2.0.2/libbacio_v2.0.2_4.a /mnt/lfs3/projects/hfv3gfs/nwprod/lib/bufr/v11.1.0/libbufr_v11.1.0_d_64.a ../../build_gsi/lib/libgsilib_shrd.a 
+/bin/rm -f *.o *.mod

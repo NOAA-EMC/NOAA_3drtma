@@ -1,0 +1,37 @@
+Control path is 
+The hostname is  fe5
+Setting paths for Generic System
+/home/Edward.Colon/EMC_noaa-3drtma/sorc/rtma_gsi.fd
+Setting Intel flags
+Compiler version is 15.0.0
+Compiler version is 15.0.0
+Compiler OMPFLAG is -openmp
+Compiler GSDCLOUDOPT is -DRR_CLOUDANALYSIS
+MPI version is 
+MPI f90 version is 
+MPI f08 version is 
+ trying to find lapack, GENERIC, 
+-- A library with BLAS API found.
+-- A library with LAPACK API found.
+setting values for corelibs
+Could not find BACIO library, so building from libsrc
+setting source for bacio to be in libsrc
+Could not find W3NCO library, so building from libsrc
+setting source for w3nco to be in libsrc
+HEY w3nco lib is called w3nco_v2.0.6
+HEY GSD Cloud analysis lib is called gsdcloud_arw
+MPI include PATH  /apps/intel/compilers_and_libraries_2018.5.274/linux/mpi/intel64/include/gfortran/4.8.0;/apps/intel/compilers_and_libraries_2018.5.274/linux/mpi/intel64/include
+-- A library with BLAS API found.
+-- A library with LAPACK API found.
+Configuring utility in adderrspec_nmcmeth_spec.fd
+Configuring utility in calc_increment_ens.fd
+Configuring utility in getnstensmeanp.fd
+Configuring utility in getsfcensmeanp.fd
+Configuring utility in getsfcnstensupdp.fd
+Configuring utility in getsigensmeanp_smooth_ncep.fd
+Configuring utility in getsigensstatp.fd
+Configuring utility in gribmean.fd
+Configuring utility in recentersigp.fd
+-- Configuring done
+-- Generating done
+-- Build files have been written to: /home/Edward.Colon/EMC_noaa-3drtma/sorc/build_gsi

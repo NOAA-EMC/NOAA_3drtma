@@ -1,0 +1,2 @@
+/bin/ar cr ../../lib/libWRFLIB.a  CMakeFiles/WRFLIB.dir/field_routines.F90.o CMakeFiles/WRFLIB.dir/io_int_stubs.f90.o CMakeFiles/WRFLIB.dir/module_driver_constants.F90.o CMakeFiles/WRFLIB.dir/module_machine.F90.o CMakeFiles/WRFLIB.dir/wrf_io.f90.o CMakeFiles/WRFLIB.dir/pack_utils.c.o
+/bin/ranlib ../../lib/libWRFLIB.a

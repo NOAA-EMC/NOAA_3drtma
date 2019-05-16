@@ -1,0 +1,13 @@
+mpif90 -f90=ifort  -I/apps/netcdf/4.2.1.1-intel/include -I/mnt/lfs3/projects/rtwbl/mhu/rapcode/git_local/work/WRFV3.8_GSD_hybridcoord/frame -c kinds.f90
+mpif90 -f90=ifort  -I/apps/netcdf/4.2.1.1-intel/include -I/mnt/lfs3/projects/rtwbl/mhu/rapcode/git_local/work/WRFV3.8_GSD_hybridcoord/frame -c constants.f90
+mpif90 -f90=ifort  -I/apps/netcdf/4.2.1.1-intel/include -I/mnt/lfs3/projects/rtwbl/mhu/rapcode/git_local/work/WRFV3.8_GSD_hybridcoord/frame -c module_debug.F90
+mpif90 -f90=ifort  -I/apps/netcdf/4.2.1.1-intel/include -I/mnt/lfs3/projects/rtwbl/mhu/rapcode/git_local/work/WRFV3.8_GSD_hybridcoord/frame -c gridmod_gsi_map_utils.f90
+mpif90 -f90=ifort  -I/apps/netcdf/4.2.1.1-intel/include -I/mnt/lfs3/projects/rtwbl/mhu/rapcode/git_local/work/WRFV3.8_GSD_hybridcoord/frame -c misc_definitions_module.f90
+mpif90 -f90=ifort  -I/apps/netcdf/4.2.1.1-intel/include -I/mnt/lfs3/projects/rtwbl/mhu/rapcode/git_local/work/WRFV3.8_GSD_hybridcoord/frame -c constants_module.f90
+mpif90 -f90=ifort  -I/apps/netcdf/4.2.1.1-intel/include -I/mnt/lfs3/projects/rtwbl/mhu/rapcode/git_local/work/WRFV3.8_GSD_hybridcoord/frame -c module_map_utils.f90
+mpif90 -f90=ifort  -I/apps/netcdf/4.2.1.1-intel/include -I/mnt/lfs3/projects/rtwbl/mhu/rapcode/git_local/work/WRFV3.8_GSD_hybridcoord/frame -c write_bufr_NASALaRC.f90
+mpif90 -f90=ifort  -I/apps/netcdf/4.2.1.1-intel/include -I/mnt/lfs3/projects/rtwbl/mhu/rapcode/git_local/work/WRFV3.8_GSD_hybridcoord/frame -c process_NASALaRC_cloud.f90
+mpif90 -f90=ifort  -I/apps/netcdf/4.2.1.1-intel/include -I/mnt/lfs3/projects/rtwbl/mhu/rapcode/git_local/work/WRFV3.8_GSD_hybridcoord/frame -c netCDFsub.f90
+mpif90 -f90=ifort  -I/apps/netcdf/4.2.1.1-intel/include -I/mnt/lfs3/projects/rtwbl/mhu/rapcode/git_local/work/WRFV3.8_GSD_hybridcoord/frame -c netCDFsub_geo.f90
+cc -DLINUX -Dfunder -DFortranByte=char -DFortranInt=int -DFortranLlong='long long' -D_UNDERSCORE -c cio.c
+mpif90 -f90=ifort -o rap_process_cloud.exe  kinds.o constants.o module_debug.o gridmod_gsi_map_utils.o misc_definitions_module.o constants_module.o module_map_utils.o write_bufr_NASALaRC.o process_NASALaRC_cloud.o netCDFsub.o netCDFsub_geo.o cio.o -L/mnt/lfs3/projects/hfv3gfs/nwprod/lib/w3emc/v2.2.0/libw3emc_v2.2.0_d.a /mnt/lfs3/projects/hfv3gfs/nwprod/lib/w3nco/v2.0.6/libw3nco_v2.0.6_d.a /mnt/lfs3/projects/hfv3gfs/nwprod/lib/bacio/v2.0.2/libbacio_v2.0.2_4.a /mnt/lfs3/projects/hfv3gfs/nwprod/lib/bufr/v11.1.0/libbufr_v11.1.0_d_64.a /mnt/lfs3/projects/rtwbl/mhu/rapcode/git_local/work/WRFV3.8_GSD_hybridcoord/external/io_netcdf/libwrfio_nf.a /mnt/lfs3/projects/rtwbl/mhu/rapcode/git_local/work/WRFV3.8_GSD_hybridcoord/frame/pack_utils.o -L/apps/netcdf/4.2.1.1-intel/lib -lnetcdf -lnetcdff 
