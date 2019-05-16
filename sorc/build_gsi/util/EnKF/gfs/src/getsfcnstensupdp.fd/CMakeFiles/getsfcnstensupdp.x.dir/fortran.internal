@@ -1,5 +1,0 @@
-# The fortran modules provided by this target.
-provides
- constants
- kinds
- nstio_module

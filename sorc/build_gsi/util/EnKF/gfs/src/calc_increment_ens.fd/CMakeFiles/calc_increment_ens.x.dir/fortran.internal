@@ -1,9 +1,0 @@
-# The fortran modules provided by this target.
-provides
- calc_increment_interface
- constants
- fv3_interface
- gfs_nems_interface
- kinds
- namelist_def
- variable_interface

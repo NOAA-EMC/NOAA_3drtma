@@ -1,4 +1,0 @@
-# The fortran modules provided by this target.
-provides
- sigio_module
- sigio_r_module

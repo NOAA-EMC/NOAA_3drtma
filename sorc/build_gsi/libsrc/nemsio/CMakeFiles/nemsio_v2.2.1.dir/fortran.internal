@@ -1,7 +1,0 @@
-# The fortran modules provided by this target.
-provides
- nemsio_module
- nemsio_module_mpi
- nemsio_openclose
- nemsio_read
- nemsio_write
