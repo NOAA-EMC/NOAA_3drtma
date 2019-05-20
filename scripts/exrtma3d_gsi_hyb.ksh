@@ -65,12 +65,6 @@ if [ ! -d "${DATAHOME_BK}" ]; then
   exit 1
 fi
 
-# Check to make sure the number of processors for running GSI was specified
-if [ -z "${GSIPROC}" ]; then
-  ${ECHO} "ERROR: The variable $GSIPROC must be set to contain the number of processors to run GSI"
-  exit 1
-fi
-
 # Check to make sure that STATIC_PATH exists
 if [ ! -d ${STATIC_DIR} ]; then
   ${ECHO} "ERROR: ${STATIC_DIR} does not exist"
@@ -125,6 +119,7 @@ HH=`${DATE} +"%H" -d "${START_TIME}"`
 workdir=${DATAHOME}
 ${RM} -rf ${workdir}
 ${MKDIR} -p ${workdir}
+lfs setstripe --stripe-count 8 ${workdir}
 # if [ "`stat -f -c %T ${workdir}`" == "lustre" ]; then
 #  lfs setstripe --count 8 ${workdir}
 # fi
@@ -357,15 +352,58 @@ ${LS} ${ENKF_FCST}/${enkfcstname}.mem???.nemsio > filelist03
 
 # ${LS} enspreproc_arw_mem??? > filelist
 
+#----------------------------------------------------
+# generate list of HRRRDAS members for ensemble covariances
+# Use 1-hr forecasts from the HRRRDAS cycling
+time_1hour_ago=`${DATE} -d "${START_TIME} 1 hour ago" +%Y%m%d%H`
+if [ ${HRRRDAS_SMALL} -eq 1 ]; then
+  ls ${HRRRDAS_DIR}/${time_1hour_ago}/wrfprd_mem????/wrfout_small_d02_${YYYY}-${MM}-${DD}_${HH}_00_00 > filelist.hrrrdas
+else
+  ls ${HRRRDAS_DIR}/${time_1hour_ago}/wrfprd_mem????/wrfout_d02_${YYYY}-${MM}-${DD}_${HH}_00_00 > filelist.hrrrdas
+fi
+c=1
+while [[ $c -le 36 ]]; do
+ if [ $c -lt 10 ]; then
+  cc="0"$c
+ else
+  cc=$c
+ fi
+ if [ ${HRRRDAS_SMALL} -eq 1 ]; then
+   hrrre_file=${HRRRDAS_DIR}/${time_1hour_ago}/wrfprd_mem00${cc}/wrfout_small_d02_${YYYY}-${MM}-${DD}_${HH}_00_00
+ else
+   hrrre_file=${HRRRDAS_DIR}/${time_1hour_ago}/wrfprd_mem00${cc}/wrfout_d02_${YYYY}-${MM}-${DD}_${HH}_00_00
+ fi
+ ln -sf ${hrrre_file} wrf_en0${cc}
+ ((c = c + 1))
+done
+
 # Determine if hybrid option is available
 beta1_inv=1.0
 ifhyb=.false.
 nummem=`more filelist03 | wc -l`
 nummem=$((nummem - 3 ))
-if [[ ${nummem} -eq 80 ]]; then
+hrrrmem=`more filelist.hrrrdas | wc -l`
+hrrrmem=$((hrrrmem - 3 ))
+if [[ ${hrrrmem} -gt 30 ]] && [[ ${HRRRDAS_BEC} -eq 1  ]]; then  #if HRRRDAS BEC is available, use it as first choice
+  echo "Do hybrid with HRRRDAS BEC"
+  nummem=${hrrrmem}
+  cp filelist.hrrrdas filelist03
+
+  beta1_inv=0.15
+  ifhyb=.true.
+  regional_ensemble_option=3
+  grid_ratio_ens=1
+  i_en_perts_io=0
+  ens_fast_read=.true. 
+  ${ECHO} " Cycle ${YYYYMMDDHH}: GSI hybrid uses HRRRDAS BEC with n_ens=${nummem}" >> ${logfile}
+elif [[ ${nummem} -eq 80 ]]; then
   echo "Do hybrid with ${memname}"
   beta1_inv=0.15
   ifhyb=.true.
+  regional_ensemble_option=1
+  grid_ratio_ens=12 #ensemble resolution=3 * grid_ratio * grid_ratio_ens
+  i_en_perts_io=3
+  ens_fast_read=.false. 
   ${ECHO} " Cycle ${YYYYMMDDHH}: GSI hybrid uses ${memname} with n_ens=${nummem}" >> ${logfile}
 fi
 
@@ -457,7 +495,6 @@ export LEVS=60
 export DELTIM=${DELTIM:-$((3600/($JCAP/20)))}
 ndatrap=62
 grid_ratio=1 #4
-grid_ratio_ens=12 #ensemble resolution=3 * grid_ratio * grid_ratio_ens
 cloudanalysistype=1 #5
 ens_h=20 #40 #110
 ens_v=1 #3
@@ -473,7 +510,9 @@ cp ${fixdir}/rap_satbias_starting_file.txt ./satbias_in
 cp ${fixdir}/rap_satbias_pc_starting_file.txt ./satbias_pc
 
 # Run GSI
-${MPIRUN} ${GSI} < gsiparm.anl > stdout 2>&1
+#${MPIRUN} ${GSI} < gsiparm.anl > stdout 2>&1
+module load contrib wrap-mpi
+mpirun ${GSI} < gsiparm.anl > stdout 2>&1
 error=$?
 if [ ${error} -ne 0 ]; then
   ${ECHO} "ERROR: ${GSI} crashed  Exit status=${error}"
