@@ -389,7 +389,7 @@ if [[ ${hrrrmem} -gt 30 ]] && [[ ${HRRRDAS_BEC} -eq 1  ]]; then  #if HRRRDAS BEC
   nummem=${hrrrmem}
   cp filelist.hrrrdas filelist03
 
-  beta1_inv=0.15
+  beta1_inv=0.50 #0.15
   ifhyb=.true.
   regional_ensemble_option=3
   grid_ratio_ens=1
@@ -398,7 +398,7 @@ if [[ ${hrrrmem} -gt 30 ]] && [[ ${HRRRDAS_BEC} -eq 1  ]]; then  #if HRRRDAS BEC
   ${ECHO} " Cycle ${YYYYMMDDHH}: GSI hybrid uses HRRRDAS BEC with n_ens=${nummem}" >> ${logfile}
 elif [[ ${nummem} -eq 80 ]]; then
   echo "Do hybrid with ${memname}"
-  beta1_inv=0.15
+  beta1_inv=0.50 #0.15
   ifhyb=.true.
   regional_ensemble_option=1
   grid_ratio_ens=12 #ensemble resolution=3 * grid_ratio * grid_ratio_ens
