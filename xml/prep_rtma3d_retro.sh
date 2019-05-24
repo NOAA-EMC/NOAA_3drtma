@@ -80,19 +80,22 @@ export startCDATE=201904271200              #yyyymmddhhmm - Starting day of retr
 export endCDATE=201904271400                #yyyymmddhhmm - Ending day of RTMA3D run (needed for both RETRO and REAL TIME). 
 export NET=rtma3d                           #selection of rtma3d (or rtma,urma)
 export RUN=rtma3d                           #selection of rtma3d (or rtma,urma)
-export envir="slurm"                      #environment (test, prod, dev, etc.)
-export run_envir="dev"                      #
+export envir="lsf"                      #environment (test, prod, dev, etc.)
+export run_envir="dev_shared"                      #
 export expname="${envir}"                   # experiment name
 
 export NWROOT=${TOP_RTMA}                   #root directory for RTMA/URMA j-job scripts, scripts, parm files, etc. 
 
-export SCHEDULER="SLURM"                    # SLURM (after 05/01/2019)   or MOAB(PBS)
+export SCHEDULER="LSF"                    # SLURM (after 05/01/2019)   or MOAB(PBS)
 case ${SCHEDULER} in
   PBS|pbs|MOAB*|moab*)
     SCHD_ATTRB="moabtorque"
     ;;
   SLURM|slurm)
     SCHD_ATTRB="slurm"
+    ;;
+  LSF|lsf)
+    SCHD_ATTRB="lsf"
     ;;
   *)
   echo "user specified an Unknown Scheduler: ${SCHEDULER}. Please re-set : either PBS or SLURM "
@@ -173,6 +176,34 @@ elif [ ${MACHINE} = "jet" ] ; then
       RESERVATION_GSI="<native>-l partition=&PARTITION_DA; -W umask=022 -m n</native><queue>&QUEUE_DBG;</queue><account>&ACCOUNT;</account>"
       RESERVATION_UPP="<native>-l partition=&PARTITION; -W umask=022 -m n</native><queue>&QUEUE_DBG;</queue><account>&ACCOUNT;</account>"
       RESERVATION_SVC="<native>-l partition=&PARTITION; -W umask=022 -m n</native><queue>&QUEUE_SVC;</queue><account>&ACCOUNT;</account>"
+      ;;
+    *)
+      echo " scheduler ${SCHEDULER} is unknown. Abort!"
+      exit 1
+      ;;
+  esac
+
+elif [ ${MACHINE} = "dell" ] ; then
+
+  QUEUE=dev_shared                        #user-specified processing queue
+  QUEUE_DBG="debug"                    #user-specified processing queue -- debug
+  QUEUE_SVC="dev_transfer"                  #user-specified transfer queue
+
+# Path to top running and archiving directory
+  ptmp_base="/gpfs/dell2/stmp/${USER}/${NET}_wrkdir_retro"
+
+  DATABASE_DIR=${ptmp_base}            # (equivalent to ptmp_base)
+  HOMEBASE_DIR=${NWROOT}               # path to system home directory
+
+# Computational resources
+  ACCOUNT="RTMA-T2O"                    #account for CPU resources
+
+  case ${SCHEDULER} in
+    LSF|lsf)
+      RESERVATION="<native>-R rusage[mem=2000] -R affinity[core]</native><queue>&QUEUE;</queue><account>&ACCOUNT;</account>"
+      RESERVATION_GSI="<native>-R rusage[mem=1900] -R span[ptile=14] -R affinity[core]</native><queue>&QUEUE;</queue><account>&ACCOUNT;</account>"
+      RESERVATION_UPP="<native>-R rusage[mem=3300] -R span[ptile=8] -R affinity[core]</native><queue>&QUEUE;</queue><account>&ACCOUNT;</account>"
+      RESERVATION_SVC="<native>-R rusage[mem=1000] -R affinity[core]</native><queue>&QUEUE_SVC;</queue><account>&ACCOUNT;</account>"
       ;;
     *)
       echo " scheduler ${SCHEDULER} is unknown. Abort!"
@@ -319,6 +350,22 @@ export exefile_name_verif=""    # executable of verification (MET) is defined by
 #   export PARMverf_udef="/mnt/lfs3/projects/hfv3gfs/Edward.Colon/FixData/VERIF-fix"                              # v7.0
     export PARMverf_udef="/mnt/lfs3/projects/hfv3gfs/Gang.Zhao/FixData/parm/VERIF-fix_ecolon"                     # v8.1_beta2
 
+  elif [ $MACHINE = dell ] ; then
+
+   export FIXgsi_udef="/gpfs/dell2/emc/modeling/noscrub/Edward.Colon/FixData/GSI-fix"
+   export FIXcrtm_udef="/gpfs/dell2/emc/modeling/noscrub/Edward.Colon/FixData/CRTM-fix"
+   export FIXwps_udef="/gpfs/dell2/emc/modeling/noscrub/Edward.Colon/FixData/wps"
+
+   export OBS_USELIST_udef="/gpfs/dell2/emc/modeling/noscrub/Edward.Colon/FixData/obsuselist"
+   export SFCOBS_USELIST_udef="/gpfs/dell2/emc/modeling/noscrub/Edward.Colon/FixData/obsuselist/mesonet_uselists"
+   export AIRCRAFT_REJECT_udef="/gpfs/dell2/emc/modeling/noscrub/Edward.Colon/FixData/obsuselist/amdar_reject_lists"
+   export SFCOBS_PROVIDER_udef="/gpfs/dell2/emc/modeling/noscrub/Edward.Colon/FixData/obsuselist/sfcobs_provider"
+   
+   export PARMgsi_udef=""
+   export PARMupp_udef="/gpfs/dell2/emc/modeling/noscrub/Edward.Colon/FixData/parm/upp"
+   export PARMwrf_udef="/gpfs/dell2/emc/modeling/noscrub/Edward.Colon/FixData/parm/wrf"
+   export PARMverf_udef="/gpfs/dell2/emc/modeling/noscrub/Edward.Colon/FixData/parm/verif" 
+   
   fi
 
 #       define the variable names for symbol links under fix/ and parm/
@@ -345,7 +392,7 @@ export exefile_name_verif=""    # executable of verification (MET) is defined by
   if [ ! -d ${FIXrtma3d}   ] ; then mkdir -p ${FIXrtma3d}   ; fi
   if [ ! -d ${PARMrtma3d}  ] ; then mkdir -p ${PARMrtma3d}  ; fi
   if [ ! -d ${OBS_USELIST} ] ; then mkdir -p ${OBS_USELIST} ; fi
-  if [ ${MACHINE} = 'theia' ] || [ ${MACHINE} = 'jet' ] ; then
+  if [ ${MACHINE} = 'theia' ] || [ ${MACHINE} = 'jet' ] || [ ${MACHINE} = 'dell' ] ; then
     cd ${FIXrtma3d}
     echo " linking fixed data on ${MACHINE} for GSI analysis"
     rm -rf $FIXgsi
@@ -1567,27 +1614,42 @@ fi
 ######################################################
 # Now make the run_rtma3d.sh script that can be invoked from a crontab
 
-if [ ${MACHINE} = 'theia' ] || [ ${MACHINE} = 'jet' ]; then
+if [ ${MACHINE} = 'theia' ] || [ ${MACHINE} = 'jet' ] || [ ${MACHINE} = 'dell' ] ; then
   cat > ${NWROOT}/xml/run_${RUN}_${expname}.sh <<EOF 
 #!/bin/bash
 
-. /etc/profile
-. /etc/profile.d/modules.sh >/dev/null # Module Support
-
-module purge
-module load intel
 EOF
 
   case ${SCHEDULER} in
     PBS*|MOAB*|pbs*|moab*)
       cat >> ${NWROOT}/xml/run_${RUN}_${expname}.sh <<EOF 
+. /etc/profile
+. /etc/profile.d/modules.sh >/dev/null # Module Support
+
+module purge
+module load intel
 module load rocoto
 EOF
       ;;
     SLURM|slurm)
       cat >> ${NWROOT}/xml/run_${RUN}_${expname}.sh <<EOF 
+. /etc/profile
+. /etc/profile.d/modules.sh >/dev/null # Module Support
+
+module purge
+module load intel
 module load rocoto/1.3.0-RC5
-module load slurm
+EOF
+      ;;
+    LSF|lsf)
+      cat >> ${NWROOT}/xml/run_${RUN}_${expname}.sh <<EOF 
+. /etc/profile
+. /etc/profile.d/lmod.sh >/dev/null # Module Support
+
+module purge
+module load lsf/10.1
+module load ruby/2.5.1
+module load rocoto/complete
 EOF
       ;;
     *)
@@ -1606,27 +1668,40 @@ echo "RTMA3D is ready to go! Run using run_${RUN}_${expname}.sh.  Make sure your
 #####################################################
 # script to check the status of workflow            #
 #####################################################
-if [ ${MACHINE} = 'theia' ] || [ ${MACHINE} = 'jet' ] ; then
+if [ ${MACHINE} = 'theia' ] || [ ${MACHINE} = 'jet' ] || [ ${MACHINE} = 'dell' ] ; then
   cat > ${NWROOT}/xml/chk_${RUN}_${expname}.sh <<EOF 
 #!/bin/bash
 
-. /etc/profile
-. /etc/profile.d/modules.sh >/dev/null # Module Support
 
-module purge
-module load intel
 EOF
 
   case ${SCHEDULER} in
     PBS*|MOAB*|pbs*|moab*)
       cat >> ${NWROOT}/xml/chk_${RUN}_${expname}.sh <<EOF 
+. /etc/profile
+. /etc/profile.d/modules.sh >/dev/null # Module Support
+module purge
+module load intel
 module load rocoto
 EOF
       ;;
     SLURM|slurm)
       cat >> ${NWROOT}/xml/chk_${RUN}_${expname}.sh <<EOF 
+. /etc/profile
+. /etc/profile.d/modules.sh >/dev/null # Module Support
+module purge
+module load intel
 module load rocoto/1.3.0-RC5
-module load slurm
+EOF
+      ;;
+    LSF|lsf)
+      cat >> ${NWROOT}/xml/chk_${RUN}_${expname}.sh <<EOF 
+. /etc/profile
+. /etc/profile.d/lmod.sh >/dev/null # Module Support
+module purge
+module load lsf/10.1
+module load ruby/2.5.1
+module load rocoto/complete
 EOF
       ;;
     *)

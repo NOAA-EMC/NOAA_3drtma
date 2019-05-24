@@ -40,8 +40,8 @@ echo " This machine is $target ."
 # User define the following variables:
 
 # branch_gsi_gsd: GSD RAP/HRRR-based GSI branch in repository of ProdGSI
-branch_gsi_gsd="feature/gsd_raphrrr_july2018"
-# branch_gsi_gsd="master"
+#branch_gsi_gsd="feature/gsd_raphrrr_April2019"
+ branch_gsi_gsd="feature/gsd_raphrrr_july2018"
 # branch_gsi_source: source branch  # the user-specified branch to build on.
                                     # if not specified by user, 
                                     #   it is branch_gsi_gsd by default.
@@ -57,6 +57,16 @@ else
   build_corelibs="OFF"  # OFF: using installed corelibs (bacio, bufr, etc.)
   build_type=""         # option: DEBUG, or PRODUCTION(default)
 fi
+
+if [ ${target} = dell ] ; then
+  build_corelibs="OFF"   # ON: Not using installed corelibs, building all corelibs with GSI together
+                        # OFF: using installed corelibs (bacio, bufr, etc.)
+  build_type=""         # option: DEBUG, or PRODUCTION(default)
+else
+  build_corelibs="OFF"  # OFF: using installed corelibs (bacio, bufr, etc.)
+  build_type=""         # option: DEBUG, or PRODUCTION(default)
+fi
+
 
 echo "option of build_corelibs = ${build_corelibs}"
 echo "option of build_type     = ${build_type}"

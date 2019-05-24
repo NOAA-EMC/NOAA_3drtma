@@ -15,7 +15,6 @@ MODULEFILES=${MODULEFILES:-${HOMErtma3d}/modulefiles}
 if [ "${machine}" = "theia" ] ; then
   . /etc/profile
   . /etc/profile.d/modules.sh >/dev/null # Module Support
-# . /apps/lmod/lmod/init/bash >/dev/null # Module Support
   module purge
 # loading modules used when building the code
   case "$COMMAND" in
@@ -45,7 +44,6 @@ if [ "${machine}" = "theia" ] ; then
 elif [ "${machine}" = "jet" ] ; then
   . /etc/profile
   . /etc/profile.d/modules.sh >/dev/null # Module Support
-# . /apps/lmod/lmod/init/bash >/dev/null # Module Support
   module purge
 # loading modules used when building the code
   case "$COMMAND" in
@@ -77,6 +75,41 @@ elif [ "${machine}" = "jet" ] ; then
       ;;
   esac
   module list
+
+elif [ "${machine}" = "dell" ] ; then
+  . /etc/profile
+  . /usrx/local/prod/lmod/lmod/init/sh >/dev/null # Module Support 
+  module purge
+# loading modules used when building the code
+  case "$COMMAND" in
+    *POST*)
+      modulefile_build=${modulefile_build:-"${MODULEFILES}/${machine}/build/modulefile.build.post.${machine}"}
+      moduledir=`dirname $(readlink -f ${modulefile_build})`
+      module use ${moduledir}
+      module load modulefile.build.post.${machine}
+      ;;
+    *GSIANL*)
+      modulefile_build=${modulefile_build:-"${MODULEFILES}/${machine}/build/modulefile.build.gsi.${machine}"}
+      source $modulefile_build
+      ;;
+    *)
+      modulefile_build=${modulefile_build:-"${MODULEFILES}/${machine}/build/modulefile.build.gsi.${machine}"}
+      source $modulefile_build
+      ;;
+  esac
+# loading modules for running
+  modulefile_run=${modulefile_run:-"${MODULEFILES}/${machine}/run/modulefile.run.${machine}"}
+  source ${modulefile_run}
+# loading modules for specific task
+  case "$COMMAND" in
+    *VERIF*)
+      module load met/8.1_beta2
+      ;;
+    *)
+      ;;
+  esac
+  module list
+
 else
   echo "modulefile has not set up for this unknow machine. Job abort!"
   exit 1
@@ -89,11 +122,6 @@ fi
 if [ "${machine}" = "theia" ] ; then    ### PBS job Scheduler
 
   case ${SCHEDULER} in
-    PBS|pbs|MOAB*|moab*)                                    # PBS maob/torque
-      module load rocoto
-      export np=`cat $PBS_NODEFILE | wc -l`
-      export MPIRUN="mpirun -np $np"
-      ;;
     SLURM|slum)                                       # SLURM
       module load rocoto/1.3.0-RC5
       module load slurm/18.08
@@ -124,7 +152,6 @@ EOF
       done
       np=`cat $PBS_NODEFILE | wc -l`
       echo "Launch.sh: ${SLURM_JOB_NAME} np=$np (in $PBS_NODEFILE)"
-#     export MPIRUN="srun -n ${np}"
       export MPIRUN="srun"
       ;;
     *)
@@ -141,12 +168,6 @@ EOF
 elif [ "${machine}" = "jet" ] ;  then    ### PBS job Scheduler
 
   case ${SCHEDULER} in
-    PBS|pbs|MOAB*|moab*)                                    # PBS maob/torque
-      module load rocoto
-      export np=`cat $PBS_NODEFILE | wc -l`
-#     export MPIRUN="mpiexec -np $np"
-      export MPIRUN="mpirun -np $np"
-      ;;
     SLURM|slum)                                       # SLURM
       module load rocoto/1.3.0-RC5
       module load slurm/18.08.7p1
@@ -177,7 +198,6 @@ EOF
       done
       np=`cat $PBS_NODEFILE | wc -l`
       echo "Launch.sh: ${SLURM_JOB_NAME} np=$np (in $PBS_NODEFILE)"
-#     export MPIRUN="srun -n ${np}"
       export MPIRUN="srun"
       ;;
     *)
@@ -191,20 +211,34 @@ EOF
   export jobid=${jobid:-"${job}.${jid}"}
   echo " number of cores : $np for job $job with id as $jobid "
 
-elif [ "${machine}" = "wcoss" ] ; then  ### LSB scheduler
+elif [ "${machine}" = "dell" ] ; then  ### LSB scheduler
 
+  case ${SCHEDULER} in
+    LSF|lfs)
+      module load lsf/10.1
+      module load ruby/2.5.1
+      module load rocoto/complete
+      export np=`cat $PBS_NODEFILE | wc -l`
+#      export MPIRUN="mpirun -np $np"
+      export MPIRUN="mpirun"
+      ;;
+    *)
+      echo "unknown scheduler: ${SCHEDULER}. $0 abort! "
+      exit 1
+      ;;
+  esac
   export job=${job:-"${LSB_JOBNAME}"}    # job is defined as job name
-  export jid=`echo ${LSB_JOBID} `
+  export jid=`echo ${LSB_JOBID} | cut -f1 -d.`  # removal of tailing sub-server string
   export jobid=${jobid:-"${job}.${jid}"}
-  echo " job $job with id as $jobid "
-  export MPIRUN=${MPIRUN:-"aprun"}
+  echo " number of cores : $np for job $job with id as $jobid "
 
+ 
 else
-
+  
   export job=${job:-"${outid}.o$$"}
   export jobid=${jobid:-"${outid}.o$$"}
   export jid=$$
-  export MPIRUN=${MPIRUN:-"mpirun"}
+#  export MPIRUN=${MPIRUN:-"mpirun"}
 
 fi
 

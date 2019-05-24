@@ -197,11 +197,11 @@ export envir=""                             #environment (test, prod, dev, etc.)
 
 export run_envir=""                         #
 
-export expname="slurm"                      # experiment name
+export expname="lsf"                      # experiment name
 
 export NWROOT=${TOP_RTMA}                   #root directory for RTMA/URMA j-job scripts, scripts, parm files, etc. 
 
-export SCHEDULER="slurm"                    # SLURM (after 05/01/2019)
+export SCHEDULER="lsf"                    # SLURM (after 05/01/2019)
 
                                             # PBS (not available after May 2019)
 
@@ -212,6 +212,10 @@ if [ ${SCHEDULER} = "PBS" ] || [ ${SCHEDULER} = "MOAB" ]; then
 elif [ ${SCHEDULER} = "SLURM" ] || [ ${SCHEDULER} = "slurm" ]; then
 
   SCHD_ATTRB="slurm"
+
+elif [ ${SCHEDULER} = "LSF" ] || [ ${SCHEDULER} = "lsf" ]; then
+
+  SCHD_ATTRB="lsf"
 
 else
 
@@ -293,6 +297,35 @@ if [ ${MACHINE} = "jet" ] ; then
 
   fi
 
+elif [ ${MACHINE} = "dell" ] ; then
+
+# path to system home directory
+
+  HOMEBASE_DIR=${NWROOT}               # path to system home directory
+
+# Path to top running directory
+
+  DATABASE_DIR="/gpfs/dell2/stmp/${USER}/${NET}_wrkdir_databasedir"
+
+# Computational resources
+
+  ACCOUNT="RTMA-T2O"                    # account for CPU resources
+
+  QUEUE="dev_shared"                        #
+
+  QUEUE_DBG="debug"                    #
+
+  QUEUE_SVC="dev_transfer"                  # queue/partition for transferring data
+
+  RESERVATION="<native>-R rusage[mem=2000] -R affinity[core]</native><queue>&QUEUE;</queue><account>&ACCOUNT;</account>"
+
+  RESERVATION_DA="<native>-R rusage[mem=1900] -R span[ptile=14] -R affinity[core]</native><queue>&QUEUE;</queue><account>&ACCOUNT_DA;</account>"
+
+  RESERVATION_SMARTINIT="<native>-R rusage[mem=2000] -R affinity[core]</native><queue>&QUEUE;</queue><account>&ACCOUNT;</account>"
+
+  RESERVATION_POST="<native></native>-R rusage[mem=3300] -R span[ptile=8] -R affinity[core]<queue>&QUEUE;</queue><account>&ACCOUNT;</account>"
+
+  RESERVATION_SERIAL="<native>-R rusage[mem=2000] -R affinity[core]</native><queue>&QUEUE;</queue><account>&ACCOUNT;</account>"
 fi
 
 #
@@ -331,7 +364,25 @@ if [ ${MACHINE} = 'jet' ] ; then
 
   RTMA3D_GSD_dev1='/home/${USER}/rtma3d_repo/GSD_dev1'
 
+elif [ ${MACHINE} = 'dell' ] ; then
+
+  rtrr_hrrr='/home/rtrr/HRRR'
+
+  rtrr_rap='/home/rtrr/RAP'
+
+  EXECrtrr_hrrr=${rtrr_hrrr}/exec
+
+  EXECrtrr_rap=${rtrr_rap}/exec
+
+  RTMA3D_GSD='/home/${USER}/rtma3d_repo/GSD'
+
+  RTMA3D_GSD_dev1='/home/${USER}/rtma3d_repo/GSD_dev1'
+  
+
+
 fi
+
+
 
 #
 
