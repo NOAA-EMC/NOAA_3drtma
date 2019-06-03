@@ -164,7 +164,7 @@ fi
 ######################
 # Execute the script.
 ######################
-${exSCR_PLOTGRADS:-$HOMErtma3d/scripts/${RUN}/ex${RUN}_plotgrads.ksh}
+${exSCR_PLOTGRADS:-$HOMErtma3d/scripts/ex${RUN}_plotgrads.ksh}
 # export err=$?; err_chk
 if [ $? -eq 111 ] ; then
   export err=$?; err_chk

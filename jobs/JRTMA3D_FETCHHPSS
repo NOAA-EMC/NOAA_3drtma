@@ -109,7 +109,7 @@ export obsprep_cloud=${obsprep_cloud:-1}
 ######################
 # Execute the script.
 ######################
-${exSCR_FETCHHPSS:-$HOMErtma3d/scripts/${RUN}/ex${RUN}_fetchhpss.ksh}
+${exSCR_FETCHHPSS:-$HOMErtma3d/scripts/ex${RUN}_fetchhpss.ksh}
 export err=$?; err_chk
 
 msg="$0 of $job completed normally"

@@ -40,8 +40,9 @@ echo " This machine is $target ."
 # User define the following variables:
 
 # branch_gsi_gsd: GSD RAP/HRRR-based GSI branch in repository of ProdGSI
-#branch_gsi_gsd="feature/gsd_raphrrr_April2019"
- branch_gsi_gsd="feature/gsd_raphrrr_july2018"
+branch_gsi_gsd="feature/gsd_raphrrr_April2019"
+# branch_gsi_gsd="feature/gsd_raphrrr_july2018"
+# branch_gsi_gsd="master"
 # branch_gsi_source: source branch  # the user-specified branch to build on.
                                     # if not specified by user, 
                                     #   it is branch_gsi_gsd by default.
@@ -169,7 +170,7 @@ fi
 # modules_fname=modulefile.ProdGSI.$target
 modules_dir=${MODULEFILES_DIR}/${target}/build
 modules_fname=modulefile.build.gsi.${target}
-# modules_fname=modulefile.build.gsi_NoPreInstalledLibs.${target}
+#modules_fname=modulefile.build.gsi.No_PreInstalledLibs.${target}
 
 if [ $target = wcoss -o $target = cray ]; then
     module purge

@@ -131,7 +131,7 @@ fi
 ######################
 # Execute the script.
 ######################
-${exSCR_PREPFGS:-$HOMErtma3d/scripts/${RUN}/ex${RUN}_prepfgs.ksh}
+${exSCR_PREPFGS:-$HOMErtma3d/scripts/ex${RUN}_prepfgs.ksh}
 export err=$?; err_chk
 
 msg="$0 of $job completed normally"

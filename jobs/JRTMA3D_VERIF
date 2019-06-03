@@ -167,7 +167,7 @@ fi
 
 # Execute the script.
 
-${exSCR_VERIF:-$HOMErtma3d/scripts/${RUN}/rtma3d_verif.ksh}
+${exSCR_VERIF:-$HOMErtma3d/scripts/rtma3d_verif.ksh}
 
 export err=$?; err_chk
 

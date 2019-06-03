@@ -172,7 +172,7 @@ fi
 ######################
 # Execute the script.
 ######################
-${exSCR_GSIANL:-$HOMErtma3d/scripts/${RUN}/ex${RUN}_gsianl.ksh}
+${exSCR_GSIANL:-$HOMErtma3d/scripts/ex${RUN}_gsianl.ksh}
 export err=$?; err_chk
 
 msg="$0 of $job completed normally"
