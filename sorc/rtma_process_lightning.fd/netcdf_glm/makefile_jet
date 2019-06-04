@@ -7,14 +7,14 @@
 
 SFC            =  ifort
 FC   =  mpiifort -free -f90=$(SFC)
-# FC   =  mpif90 -f90=$(SFC)
+# FC   =  mpi90 -free -f90=$(SFC)
 CC  = cc
 CPP      = /lib/cpp -P
 ARCH     =
 FLAGS= -O3 -fp-model precise -assume byterecl -fpe0 -g -traceback $(LDFLAGS) -DLINUX ## -convert big_endian
 CPPFLAGS =  -DLINUX -Dfunder -DFortranByte=char -DFortranInt=int -DFortranLlong='long long' -D_UNDERSCORE
 
-EXEFILE  = process_Lightning_bufr.exe
+EXEFILE  = process_Lightning_glm.exe
 
 # NWPROD LIBs (pre-installed on Theia)
 CORELIB  = /mnt/lfs3/projects/hfv3gfs/nwprod/lib
@@ -23,14 +23,14 @@ BUFR_VER=v11.1.0
 BUFR_LIBd   = ${CORELIB}/bufr/$(BUFR_VER)/libbufr_$(BUFR_VER)_d_64.a
 W3EMC_VER=v2.2.0
 W3EMC_LIBd  = ${CORELIB}/w3emc/$(W3EMC_VER)/libw3emc_$(W3EMC_VER)_d.a
-W3EMC_INCd  = ${CORELIB}/w3emc/$(W3EMC_VER)/w3emc_$(W3EMC_VER)_d
+W3EMC_INCd  = ${CORELIB}/w3emc/$(W3EMC_VER)/include/w3emc_$(W3EMC_VER)_d
 W3NCO_VER=v2.0.6
 W3NCO_LIBd  =${CORELIB}/w3nco/$(W3NCO_VER)/libw3nco_$(W3NCO_VER)_d.a
 BACIO_VER=v2.0.2
 BACIO_LIB4  = ${CORELIB}/bacio/$(BACIO_VER)/libbacio_$(BACIO_VER)_4.a
 
 NETCDF      = /apps/netcdf/3.6.3-intel
-NETCDF4     = /apps/netcdf/4.2-intel
+NETCDF4     = /apps/netcdf/4.3.0-intel
 
 # GSILIBS are also from nwprod lib (pre-installed on Theia, not re-compiled when installing GSI by user)
 # GSILIBS =../../../lib -lw3emc_i4r8 -lw3nco_i4r8 -lbacio -lbufr_i4r8
@@ -41,18 +41,19 @@ GSI_INCDIR   = ${GSI_BUILDDIR}/include
 GSI_LIBDIR   = ${GSI_BUILDDIR}/lib
 
 # INCLD=  -I${NETCDF4}/include -I../../../include
-# INCLD=  -I${NETCDF}/include -I${GSI_INCDIR}
-INCLD=  -I${NETCDF4}/include -I${GSI_INCDIR}
+# INCLD=  -I${NETCDF4}/include -I${GSI_INCDIR}
+INCLD=  -I${NETCDF}/include -I${GSI_INCDIR}
 
 # LIBS =  -L${NETCDF4}/lib -lnetcdf -lnetcdff -L${GSILIBS} \
 #       ../../../src/main/constants.o
-# LIBS =  -L${NETCDF}/lib -lnetcdf ${GSILIBS} \
+# LIBS =  -L${NETCDF4}/lib -lnetcdf -lnetcdff ${GSILIBS} \
 #         ${GSI_LIBDIR}/libgsilib_shrd.a
-LIBS =  -L${NETCDF4}/lib -lnetcdf -lnetcdff ${GSILIBS} \
+LIBS =  -L${NETCDF}/lib -lnetcdf  ${GSILIBS} \
         ${GSI_LIBDIR}/libgsilib_shrd.a
 
-OBJS = \
-       Check_Lightning_QC.o netCDFsub_geo.o cio.o read_lightning_bufr.o \
+OBJS = Check_Alaska.o Check_NLDN.o \
+       netCDFsub_geo.o netCDFsub_lightning.o \
+       cio.o \
        module_debug.o misc_definitions_module.o constants_module.o \
        module_map_utils.o gridmod_gsi_map_utils.o write_bufr_lght.o \
        process_Lightning.o
@@ -60,7 +61,7 @@ OBJS = \
 all: process_Lightning clean_obj
 
 process_Lightning: ${OBJS}
-	${FC} -o $(EXEFILE) ${FLAGS} ${OBJS} ${LIBS} 
+	${FC} -o $(EXEFILE) ${FLAGS} ${OBJS} ${LIBS}
 
 .SUFFIXES : .F90 .f90 .f .c .o
 
