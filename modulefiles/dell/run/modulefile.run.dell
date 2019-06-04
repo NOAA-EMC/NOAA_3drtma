@@ -35,7 +35,7 @@
 # Loading production utilities
 #   adding module path for prod_util (e.g., ndate)  and esmf libs
 #    module use /scratch4/NCEPDEV/nems/noscrub/emc.nemspara/soft/modulefiles
-    module load prod_util/1.1.1 
+    module load prod_util/1.1.0 
 
 # Loading contrib modules (e.g., anaconda, cmake, met for verification, etc.)
 #    module use -a /contrib/modulefiles	

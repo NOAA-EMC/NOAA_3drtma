@@ -1,0 +1,88 @@
+0.0.2a 1/2008 initial release for grads 2.0a
+
+0.0.3  1/2008 apparently grads 2.0a handles yrev differently than I
+
+       thought. 
+
+0.0.3b 2/2008 updates requires wgrib.1.6.1
+
+0.0.3c 2/2008 fixed problem with sfc parameters, gaussian thinned grids
+
+                (nearest neighbor) support (need to fix linear interpolation)
+
+0.0.3d 2/2008 template option now works,
+
+              profiles work better, prints out profile levels
+
+0.0.3f 2/2008 profiles
+
+0.0.3g 2/2008 better windows compatability
+
+0.0.3h 5/2008 error message for Lambert Conformal if dx or dy == 0
+
+0.0.4b 5/2008 updated Lambert Conformal, handles rotated winds
+
+0.0.4i 10/2008 adds preliminary support for ensembles needs new wgrib2
+
+	I expect people to find problems!
+
+0.0.4j 11/2008 fixed error with thinned gaussian grids with new wgrib2
+
+0.0.4k 12/2008 sps handled correctly
+
+0.0.4l 1/2009 lambert conformal: minor adjustment to xdef and ydef (nx+=1, ny+=1)
+
+0.0.4m 3/2009 preliminary support for thinned grids: yet another update
+
+0.0.4n 6/2009 fix lambert conformal grids that cross the prime meridian
+
+0.0.4o 11/2009 fix for polar stereographic projection
+
+0.0.4p 12/2009 added -b options (like gribmap -b option)
+
+        added %iy4, %im2 %id2 %id1 %ih1 and %ih2 template support
+
+0.0.4q 12/2009 added command line options to ctl file
+
+0.0.5  1/2010 added minutes (alpha)
+
+0.0.7  9/2010 minute version plus accumulated changes
+
+0.0.8  12/2010 slightly smarter selection of temp files
+
+0.0.8.1  1/2011 if "Big Problem", unlink $ListA
+
+0.0.8.2  1/2011 fix thinned grid (new inv format), remove -fix_ncep option
+
+            option -fix_ncep will be removed in future
+
+0.0.8.3  7/2011 minor fix lat-lon grid, godas grid, make lon0=0.5 instead of -359.5
+
+0.0.8.4  10/2011 fix for Lambert conformal grids, make sure lov and lon1 are within
+
+           180 degrees of longitude of the mid-point of the map
+
+0.0.8.5: 1/2012 added support for regional (not-thinned) Gaussian grids
+
+	   do thinned regional Gaussian grids exist?
+
+0.0.8.6: 7/2012 NPS: fix for polar stereograpic over pole (make a global field)
+
+0.0.8.7: 9/2012 bug fix: allow grib files with spaces in directory for file name, security improvement
+
+0.0.8.8: 11/2012 support for dust and probability
+
+0.0.8.9: 12/2012 if mercator goes for 0E to 0E (360)
+
+0.0.9    03/2014 if nps/sps has pole in grid
+
+0.1.0    05/2014 if staggered grid found - quit
+
+0.1.1    10/2014 rotated lat-lon grid (cosmo) rot angle==0.0
+
+0.1.2    04/2016 %f2 matches 2..8 digits, %f3 matches 3..8 digits
+
+0.1.3    12/2017 remove some restrictions on templating
+
+0.1.4    2/2018: tdef+dir bug fix: J. Lehtiranta helped
+

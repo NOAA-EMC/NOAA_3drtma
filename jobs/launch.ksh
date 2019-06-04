@@ -103,7 +103,8 @@ elif [ "${machine}" = "dell" ] ; then
 # loading modules for specific task
   case "$COMMAND" in
     *VERIF*)
-      module load met/8.1_beta2
+      module use /gpfs/dell2/emc/verification/noscrub/Julie.Prestopnik/modulefiles/
+      module load met/8.1
       ;;
     *)
       ;;

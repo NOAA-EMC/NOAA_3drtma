@@ -7,7 +7,7 @@ date
 # User define the following variables:
 
 # branch_gsi_gsd: GSD RAP/HRRR-based GSI branch in repository of ProdGSI
-branch_gsi_gsd="feature/gsd_raphrrr_April2019"
+branch_gsi_gsd="feature/gsd_raphrrr_April2019_plusCLD"
 # branch_gsi_gsd="feature/gsd_raphrrr_july2018" 
 # branch_gsi_gsd="master"
 # branch_gsi_source: source branch  # the user-specified branch to check out.
@@ -30,12 +30,10 @@ if [[ -d /dcom && -d /hwrf ]] ; then
 elif [[ -d /cm ]] ; then
 #   MODULESHOME="/usrx/local/Modules/3.2.10"
 #   . $MODULESHOME/init/sh
-    conf_target=nco
     target=cray
 elif [[ -d /ioddev_dell ]]; then
 #   MODULESHOME="/usrx/local/Modules/3.2.10"
 #   . $MODULESHOME/init/sh
-    conf_target=nco
     target=dell
 elif [[ -d /scratch3 ]] ; then
     . /etc/profile
@@ -134,24 +132,24 @@ echo
 #--- If no modulefile specified for 3DRTMA on this machine to build GSI,
 #--- then adopting the modulefile used in GSI.
 #
-MODULEFILES=${TOP_RTMA}/modulefiles
-SORCDIR_GSI=${TOP_SORC}/rtma_gsi.fd
-modules_fname=modulefile.build.gsi.${target}
+#MODULEFILES=${TOP_RTMA}/modulefiles
+#SORCDIR_GSI=${TOP_SORC}/rtma_gsi.fd
+#modules_fname=modulefile.build.gsi.${target}
 # modules_fname=modulefile.build.gsi_NoPreInstalledLibs.${target}
-if [ ! -f ${MODULEFILES}/${target}/build/${modules_fname} ] ; then
-  echo " --> There is no pre-defined modulefile for building 3DRTMA on this ${target}.  "
-  echo " --> Using modulefile in ProdGSI package to build 3DRTMA  "
-  mfiles_gsi="modulefile.ProdGSI.${target}"
-  for modfile in ${mfiles_gsi}
-  do
-    if [ ! -f ${SORCDIR_GSI}/modulefiles/${modfile} ] ; then
-      echo " ----> ProdGSI also does NOT have modulefile for this ${target}. Abort! "
-      exit 1
-    else
-      cp -p ${SORCDIR_GSI}/modulefiles/${modfile}   ${MODULEFILES}/${target}/build/${modules_fname}
-    fi
-  done
-fi
+#if [ ! -f ${MODULEFILES}/${target}/build/${modules_fname} ] ; then
+#  echo " --> There is no pre-defined modulefile for building 3DRTMA on this ${target}.  "
+#  echo " --> Using modulefile in ProdGSI package to build 3DRTMA  "
+#  mfiles_gsi="modulefile.ProdGSI.${target}"
+#  for modfile in ${mfiles_gsi}
+#  do
+#    if [ ! -f ${SORCDIR_GSI}/modulefiles/${modfile} ] ; then
+#      echo " ----> ProdGSI also does NOT have modulefile for this ${target}. Abort! "
+#      exit 1
+#    else
+#      cp -p ${SORCDIR_GSI}/modulefiles/${modfile}   ${MODULEFILES}/${target}/build/${modules_fname}
+#    fi
+#  done
+#fi
 # set +x
 
 date
