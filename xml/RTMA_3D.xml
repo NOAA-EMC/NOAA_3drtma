@@ -127,7 +127,7 @@
 <!ENTITY RESERVATION_SMARTINIT '<native>--mail-type=NONE</native><queue>&QUEUE;</queue><account>&ACCOUNT;</account><partition>&PARTITION;</partition>'>
 <!ENTITY RESERVATION_POST '<native>--mail-type=NONE</native><queue>&QUEUE;</queue><account>&ACCOUNT;</account><partition>&PARTITION;</partition>'>
 
-<!ENTITY ENVARS
+<!ENTITY COMMONVARS
    '<envar>
       <name>HOMErtma3d</name>
       <value>&HOMEBASE_DIR;</value>
@@ -171,13 +171,13 @@
     &LIGHTNING_RESOURCES;
     &WALL_LIMIT_DA;
     &RESERVATION_PRE;
-    &ENVARS;
 
     <command>&JJOB_DIR;/launch.ksh &JJOB_DIR;/JRTMA3D_LIGHTNING</command>
     <cores>&LIGHTNING_PROC;</cores>
     <jobname><cyclestr>&JOBNAME_PRE;_lightning_@H_#min#</cyclestr></jobname>
     <join><cyclestr>&LOG_DIR;/lightning_gsi_@Y@m@d@H00_#min#.log</cyclestr></join>
 
+    &COMMONVARS;
     <envar>
       <name>START_TIME</name>
       <value><cyclestr offset="-1:00:00">@Y@m@d@H</cyclestr></value>
@@ -232,13 +232,13 @@
     &RADAR_RESOURCES;
     &WALL_LIMIT_DA;
     &RESERVATION_PRE;
-    &ENVARS;
 
     <command>&JJOB_DIR;/launch.ksh &JJOB_DIR;/JRTMA3D_RADAR_LINKS</command>
     <cores>&RADARLINKS_PROC;</cores>
     <jobname><cyclestr>&JOBNAME_PRE;_radarlink_#min#_@H</cyclestr></jobname>
     <join><cyclestr>&LOG_DIR;/radar_link_#min#_@Y@m@d@H00.log</cyclestr></join>
 
+    &COMMONVARS;
     <envar>
       <name>START_TIME</name>
       <value><cyclestr offset="-01:00:00">@Y@m@d@H</cyclestr></value>
@@ -275,13 +275,13 @@
     &RADAR_RESOURCES;
     &WALL_LIMIT_DA;
     &RESERVATION_PRE;
-    &ENVARS;
 
     <command>&JJOB_DIR;/launch.ksh &JJOB_DIR;/JRTMA3D_RADAR</command>
     <cores>&RADAR_PROC;</cores>
     <jobname><cyclestr>&JOBNAME_PRE;_radar_@H</cyclestr></jobname>
     <join><cyclestr>&LOG_DIR;/radar_gsi_@Y@m@d@H00.log</cyclestr></join>
 
+    &COMMONVARS;
     <envar>
       <name>START_TIME</name>
       <value><cyclestr>@Y@m@d@H</cyclestr></value>
@@ -332,13 +332,13 @@
       &RADAR_RESOURCES;
       &WALL_LIMIT_DA;
       &RESERVATION_PRE;
-      &ENVARS;
 
       <command>&JJOB_DIR;/launch.ksh &JJOB_DIR;/JRTMA3D_RADAR</command>
       <cores>&RADAR_PROC;</cores>
       <jobname><cyclestr>&JOBNAME_PRE;_radar_@H_#subh#</cyclestr></jobname>
       <join><cyclestr>&LOG_DIR;/radar_gsi_@Y@m@d@H00_#subh#.log</cyclestr></join>
 
+      &COMMONVARS;
       <envar>
         <name>START_TIME</name>
         <value><cyclestr offset="-01:00:00">@Y@m@d@H</cyclestr></value>
@@ -388,13 +388,13 @@
     &SATELLITE_RESOURCES;
     &WALL_LIMIT_DA;
     &RESERVATION_PRE;
-    &ENVARS;
 
     <command>&JJOB_DIR;/launch.ksh &JJOB_DIR;/JRTMA3D_SATELLITE_BUFR</command>
     <cores>&SATELLITE_PROC;</cores>
     <jobname><cyclestr>&JOBNAME_PRE;_satellite_bufr_@H</cyclestr></jobname>
     <join><cyclestr>&LOG_DIR;/satellite_gsi_bufr_@Y@m@d@H00.log</cyclestr></join>
 
+    &COMMONVARS;
     <envar>
       <name>START_TIME</name>
       <value><cyclestr>@Y@m@d@H</cyclestr></value>
@@ -438,13 +438,13 @@
     &SATELLITE_RESOURCES;
     &WALL_LIMIT_DA;
     &RESERVATION_PRE;
-    &ENVARS;
 
     <command>&JJOB_DIR;/launch.ksh &JJOB_DIR;/JRTMA3D_SATELLITE_BUFR</command>
     <cores>&SATELLITE_PROC;</cores>
     <jobname><cyclestr>&JOBNAME_PRE;_satellite_bufr_@H</cyclestr></jobname>
     <join><cyclestr>&LOG_DIR;/satellite_gsi_bufr_@Y@m@d@H00.log</cyclestr></join>
 
+    &COMMONVARS;
     <envar>
       <name>START_TIME</name>
       <value><cyclestr>@Y@m@d@H</cyclestr></value>
@@ -488,13 +488,13 @@
     &CONVENTIONAL_RESOURCES;
     &WALL_LIMIT_DA;
     &RESERVATION_PRE;
-    &ENVARS;
 
     <command>&JJOB_DIR;/launch.ksh &JJOB_DIR;/JRTMA3D_CONVENTIONAL</command>
     <cores>&CONVENTIONAL_PROC;</cores>
     <jobname><cyclestr>&JOBNAME_PRE;_conventional_@H</cyclestr></jobname>
     <join><cyclestr>&LOG_DIR;/conventional_gsi_@Y@m@d@H00.log</cyclestr></join>
 
+    &COMMONVARS;
     <envar>
       <name>START_TIME</name>
       <value><cyclestr>@Y@m@d@H</cyclestr></value>
@@ -581,13 +581,13 @@
     &CONVENTIONAL_RESOURCES;
     &WALL_LIMIT_DA;
     &RESERVATION_PRE;
-    &ENVARS;
 
     <command>&JJOB_DIR;/launch.ksh &JJOB_DIR;/JRTMA3D_CONVENTIONAL</command>
     <cores>&CONVENTIONAL_PROC;</cores>
     <jobname><cyclestr>&JOBNAME_PRE;_conventional_early_@H</cyclestr></jobname>
     <join><cyclestr>&LOG_DIR;/conventional_gsi_early_@Y@m@d@H00.log</cyclestr></join>
 
+    &COMMONVARS;
     <envar>
       <name>START_TIME</name>
       <value><cyclestr>@Y@m@d@H</cyclestr></value>
@@ -674,13 +674,13 @@
     &GSI_HYB_RESOURCES;
     &WALL_LIMIT_DA;
     &RESERVATION_DA;
-    &ENVARS;
 
     <command>&JJOB_DIR;/launch.ksh &JJOB_DIR;/JRTMA3D_GSI_HYB</command>
     <cores>&GSI_HYB_PROC;</cores>
     <jobname><cyclestr>&JOBNAME_PRE;_gsi_hyb_@H</cyclestr></jobname>
     <join><cyclestr>&LOG_DIR;/gsi_hyb_@Y@m@d@H00.log</cyclestr></join>
 
+    &COMMONVARS;
     <envar>
       <name>SYSTEM_ID</name>
       <value>&SYSTEM_ID;</value>
@@ -795,13 +795,13 @@
     &GSI_DIAG_RESOURCES;
     &WALL_LIMIT_DA;
     &RESERVATION;
-    &ENVARS;
 
     <command>&JJOB_DIR;/launch.ksh &JJOB_DIR;/JRTMA3D_GSI_DIAG</command>
     <cores>&GSI_DIAG_PROC;</cores>
     <jobname><cyclestr>&JOBNAME_PRE;_gsi_diag_@H</cyclestr></jobname>
     <join><cyclestr>&LOG_DIR;/gsi_diag_@Y@m@d@H00.log</cyclestr></join>
 
+    &COMMONVARS;
     <envar>
       <name>GSIPROC</name>
       <value>&GSI_DIAG_PROC;</value>
@@ -834,13 +834,13 @@
     &UPDATE_VARS_RESOURCES;
     &WALL_LIMIT_UV;
     &RESERVATION_DA;
-    &ENVARS;
 
     <command>&JJOB_DIR;/launch.ksh &JJOB_DIR;/JRTMA3D_UPDATE_VARS</command>
     <cores>&GSI_HYB_PROC;</cores>
     <jobname><cyclestr>&JOBNAME_PRE;_update_vars_@H</cyclestr></jobname>
     <join><cyclestr>&LOG_DIR;/update_vars_@Y@m@d@H00.log</cyclestr></join>
 
+    &COMMONVARS;
     <envar>
       <name>START_TIME</name>
       <value><cyclestr>@Y@m@d@H</cyclestr></value>
@@ -889,13 +889,13 @@
     &POST_RESOURCES;
     &WALL_LIMIT_PP;
     &RESERVATION_POST;
-    &ENVARS;
 
     <command>&JJOB_DIR;/launch.ksh &JJOB_DIR;/JRTMA3D_UNIPOST</command>
     <cores>&POST_PROC;</cores>
     <jobname><cyclestr>&JOBNAME_PRE;_post_@H_00</cyclestr></jobname>
     <join><cyclestr>&LOG_DIR;/post_@Y@m@d@H00_00.log</cyclestr></join>
 
+    &COMMONVARS;
     <envar>
       <name>START_TIME</name>
       <value><cyclestr>@Y@m@d@H</cyclestr></value>
@@ -952,13 +952,13 @@
     &SMARTINIT_RESOURCES;
     &WALL_LIMIT_PP;
     &RESERVATION_SMARTINIT;
-    &ENVARS;
 
     <command>&JJOB_DIR;/launch.ksh &JJOB_DIR;/JRTMA3D_SMARTINIT_BL</command>
     <cores>&SMARTINIT_PROC;</cores>
     <jobname><cyclestr>&JOBNAME_PRE;_smartinit_@H_bl</cyclestr></jobname>
     <join><cyclestr>&LOG_DIR;/smartinit_@Y@m@d@H00_bl.log</cyclestr></join>
 
+    &COMMONVARS;
     <envar>
       <name>START_TIME</name>
       <value><cyclestr>@Y@m@d@H</cyclestr></value>
@@ -1003,13 +1003,13 @@
     &SMARTINIT_RESOURCES;
     &WALL_LIMIT_PP;
     &RESERVATION_SMARTINIT;
-    &ENVARS;
 
     <command>&JJOB_DIR;/launch.ksh &JJOB_DIR;/JRTMA3D_SMARTINIT_NB</command>
     <cores>&SMARTINIT_PROC;</cores>
     <jobname><cyclestr>&JOBNAME_PRE;_smartinit_@H_nb</cyclestr></jobname>
     <join><cyclestr>&LOG_DIR;/smartinit_@Y@m@d@H00_nb.log</cyclestr></join>
 
+    &COMMONVARS;
     <envar>
       <name>START_TIME</name>
       <value><cyclestr>@Y@m@d@H</cyclestr></value>
