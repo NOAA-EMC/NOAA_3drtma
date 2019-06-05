@@ -12,14 +12,6 @@ if [ ! -d "${COMINhrrr}" ]; then
   ${ECHO} "ERROR: $COMINhrrr does not exist!"
   exit 1
 fi
-if [ ! "${COMINhrrr_cycp1}" ]; then
-  ${ECHO} "ERROR: \$COMINhrrr_cycp1 is not defined!"
-  exit 1
-fi
-if [ ! -d "${COMINhrrr_cycp1}" ]; then
-  ${ECHO} "ERROR: $COMINhrrr_cycp1 does not exist!"
-  exit 1
-fi
 
 if [ ! "${GESINhrrr_rtma3d}" ]; then
   ${ECHO} "ERROR: \$GESINhrrr_rtma3d is not defined!"
@@ -125,11 +117,11 @@ elif [ -r ${COMINhrrr}/${FGShrrr_FNAME0} ] ; then
   ${LN} -sf ${GESINhrrr_rtma3d}/${FGSrtma3d_FNAME}     ${DATA}/${FGSrtma3d_FNAME}
   ${ECHO} " Cycle ${YYYYMMDDHH}: PREPFGS background --> ${COMINhrrr}/${FGShrrr_FNAME0} "
 
-elif [ -r ${COMINhrrr_cycp1}/${FGShrrr_FNAME3} ] ; then
-  # cpfs ${COMINhrrr_cycp1}/${FGShrrr_FNAME3}          ${GESINhrrr_rtma3d}/${FGSrtma3d_FNAME}
-  ${LN} -sf ${COMINhrrr_cycp1}/${FGShrrr_FNAME3}       ${GESINhrrr_rtma3d}/${FGSrtma3d_FNAME}
+elif [ -r ${COMINhrrr}/${FGShrrr_FNAME3} ] ; then
+  # cpfs ${COMINhrrr}/${FGShrrr_FNAME3}          ${GESINhrrr_rtma3d}/${FGSrtma3d_FNAME}
+  ${LN} -sf ${COMINhrrr}/${FGShrrr_FNAME3}       ${GESINhrrr_rtma3d}/${FGSrtma3d_FNAME}
   ${LN} -sf ${GESINhrrr_rtma3d}/${FGSrtma3d_FNAME}     ${DATA}/${FGSrtma3d_FNAME}
-  ${ECHO} " Cycle ${YYYYMMDDHH}: PREPFGS background --> ${COMINhrrr_cycp1}/${FGShrrr_FNAME3} "
+  ${ECHO} " Cycle ${YYYYMMDDHH}: PREPFGS background --> ${COMINhrrr}/${FGShrrr_FNAME3} "
 
 # No background available so abort
 else

@@ -90,13 +90,13 @@ if [ "${machine}" = "theia" ] ; then    ### PBS job Scheduler
 
   case ${SCHEDULER} in
     PBS|pbs|MOAB*|moab*)                                    # PBS maob/torque
-      module load rocoto
+#     module load rocoto
       export np=`cat $PBS_NODEFILE | wc -l`
       export MPIRUN="mpirun -np $np"
       ;;
     SLURM|slum)                                       # SLURM
-      module load rocoto/1.3.0-RC5
-      module load slurm/18.08
+#     module load rocoto/1.3.0-RC5                    # not necessady for running j-job and ex-shell scripts
+#     module load slurm/18.08                         # slurm is loaded as system default
 
       export PBS_JOBID=${SLURM_JOB_ID}
       export PBS_JOBNAME=${SLURM_JOB_NAME}
@@ -142,14 +142,14 @@ elif [ "${machine}" = "jet" ] ;  then    ### PBS job Scheduler
 
   case ${SCHEDULER} in
     PBS|pbs|MOAB*|moab*)                                    # PBS maob/torque
-      module load rocoto
+#     module load rocoto
       export np=`cat $PBS_NODEFILE | wc -l`
 #     export MPIRUN="mpiexec -np $np"
       export MPIRUN="mpirun -np $np"
       ;;
-    SLURM|slum)                                       # SLURM
-      module load rocoto/1.3.0-RC5
-      module load slurm/18.08.7p1
+    SLURM|slum)                                             # SLURM
+#     module load rocoto/1.3.0-RC5                          # not necessary for running j-job and ex-shell scripts
+#     module load slurm/18.08.7p1                           # slurm is loaded as system default
 
       export PBS_JOBID=${SLURM_JOB_ID}
       export PBS_JOBNAME=${SLURM_JOB_NAME}

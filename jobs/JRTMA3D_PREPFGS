@@ -95,8 +95,6 @@ export PDYHH_cycp1=$($NDATE +01  "${PDYHH}")
 
 PDY_cycp1=`echo ${PDYHH_cycp1} | cut -c 1-8`
 
-export COMINhrrr_cycp1=${COMIN}/hrrr.${PDY_cycp1}/${domain}
-
 export FGS_OPT=${FGS_OPT:-1}
 
 # set the file name of the firstguess for rtma3d
@@ -119,10 +117,6 @@ fi
 # fgs data from HPSS
 if [ ! -d "${COMINhrrr}" ] ; then
   ${ECHO} "ERROR: ${COMINhrrr} does not exist!"
-  exit 1
-fi
-if [ ! -d "${COMINhrrr_cycp1}" ] ; then
-  ${ECHO} "ERROR: ${COMINhrrr_cycp1} does not exist!"
   exit 1
 fi
 

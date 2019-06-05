@@ -76,8 +76,8 @@ fi
 #--- User defined variables                         #
 #####################################################
 set -x
-export startCDATE=201904271200              #yyyymmddhhmm - Starting day of retro run 
-export endCDATE=201904271400                #yyyymmddhhmm - Ending day of RTMA3D run (needed for both RETRO and REAL TIME). 
+export startCDATE=201905212100              #yyyymmddhhmm - Starting day of retro run 
+export endCDATE=201905220100                #yyyymmddhhmm - Ending day of RTMA3D run (needed for both RETRO and REAL TIME). 
 export NET=rtma3d                           #selection of rtma3d (or rtma,urma)
 export RUN=rtma3d                           #selection of rtma3d (or rtma,urma)
 export envir="slurm"                      #environment (test, prod, dev, etc.)
@@ -1586,8 +1586,9 @@ EOF
       ;;
     SLURM|slurm)
       cat >> ${NWROOT}/workflow/run_${RUN}_${expname}.sh <<EOF 
-module load rocoto/1.3.0-RC5
-module load slurm
+# module load rocoto/1.3.0-RC5
+  module load rocoto/1.3.0
+# module load slurm            # slurm is loaded as system default
 EOF
       ;;
     *)
@@ -1615,6 +1616,7 @@ if [ ${MACHINE} = 'theia' ] || [ ${MACHINE} = 'jet' ] ; then
 
 module purge
 module load intel
+
 EOF
 
   case ${SCHEDULER} in
@@ -1625,8 +1627,8 @@ EOF
       ;;
     SLURM|slurm)
       cat >> ${NWROOT}/workflow/chk_${RUN}_${expname}.sh <<EOF 
-module load rocoto/1.3.0-RC5
-module load slurm
+  module load rocoto/1.3.0
+# module load slurm
 EOF
       ;;
     *)
@@ -1634,7 +1636,24 @@ EOF
   esac
 
   cat >> ${NWROOT}/workflow/chk_${RUN}_${expname}.sh <<EOF 
-rocotostat -v 10 -w ${NWROOT}/workflow/${RUN}_${expname}.xml -d ${NWROOT}/workflow/${RUN}_${expname}.db 
+if [ -z \$1 ] ; then
+  echo "check current cycle "
+  echo "rocotostat -v 10 -w ${NWROOT}/workflow/${RUN}_${expname}.xml -d ${NWROOT}/workflow/${RUN}_${expname}.db "
+  rocotostat -v 10 -w ${NWROOT}/workflow/${RUN}_${expname}.xml -d ${NWROOT}/workflow/${RUN}_${expname}.db 
+  echo
+  echo "=============================================================================================="
+  echo
+  rocotostat -v 10 -w ${NWROOT}/workflow/${RUN}_${expname}.xml -d ${NWROOT}/workflow/${RUN}_${expname}.db -s
+else
+  cyclist=\$1
+  echo "check cycles of \${cyclist} "
+  echo "rocotostat -v 10 -w ${NWROOT}/workflow/${RUN}_${expname}.xml -d ${NWROOT}/workflow/${RUN}_${expname}.db -c \${cyclist}"
+  rocotostat -v 10 -w ${NWROOT}/workflow/${RUN}_${expname}.xml -d ${NWROOT}/workflow/${RUN}_${expname}.db -c \${cyclist}
+  echo
+  echo "=============================================================================================="
+  echo
+  rocotostat -v 10 -w ${NWROOT}/workflow/${RUN}_${expname}.xml -d ${NWROOT}/workflow/${RUN}_${expname}.db -s
+fi
 EOF
 
 fi
