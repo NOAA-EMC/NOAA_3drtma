@@ -1,13 +1,13 @@
-mpif90 -f90=ifort  -I/usrx/local/prod/packages/ips/18.0.1/netcdf/3.6.3/include -I/ioddev_dell/dell1/nco/ops/nwtest/wrf_shared.v1.1.0/frame -c kinds.f90
-mpif90 -f90=ifort  -I/usrx/local/prod/packages/ips/18.0.1/netcdf/3.6.3/include -I/ioddev_dell/dell1/nco/ops/nwtest/wrf_shared.v1.1.0/frame -c constants.f90
-mpif90 -f90=ifort  -I/usrx/local/prod/packages/ips/18.0.1/netcdf/3.6.3/include -I/ioddev_dell/dell1/nco/ops/nwtest/wrf_shared.v1.1.0/frame -c module_debug.F90
-mpif90 -f90=ifort  -I/usrx/local/prod/packages/ips/18.0.1/netcdf/3.6.3/include -I/ioddev_dell/dell1/nco/ops/nwtest/wrf_shared.v1.1.0/frame -c gridmod_gsi_map_utils.f90
-mpif90 -f90=ifort  -I/usrx/local/prod/packages/ips/18.0.1/netcdf/3.6.3/include -I/ioddev_dell/dell1/nco/ops/nwtest/wrf_shared.v1.1.0/frame -c misc_definitions_module.f90
-mpif90 -f90=ifort  -I/usrx/local/prod/packages/ips/18.0.1/netcdf/3.6.3/include -I/ioddev_dell/dell1/nco/ops/nwtest/wrf_shared.v1.1.0/frame -c constants_module.f90
-mpif90 -f90=ifort  -I/usrx/local/prod/packages/ips/18.0.1/netcdf/3.6.3/include -I/ioddev_dell/dell1/nco/ops/nwtest/wrf_shared.v1.1.0/frame -c module_map_utils.f90
-mpif90 -f90=ifort  -I/usrx/local/prod/packages/ips/18.0.1/netcdf/3.6.3/include -I/ioddev_dell/dell1/nco/ops/nwtest/wrf_shared.v1.1.0/frame -c write_bufr_NASALaRC.f90
-mpif90 -f90=ifort  -I/usrx/local/prod/packages/ips/18.0.1/netcdf/3.6.3/include -I/ioddev_dell/dell1/nco/ops/nwtest/wrf_shared.v1.1.0/frame -c process_NASALaRC_cloud.f90
-mpif90 -f90=ifort  -I/usrx/local/prod/packages/ips/18.0.1/netcdf/3.6.3/include -I/ioddev_dell/dell1/nco/ops/nwtest/wrf_shared.v1.1.0/frame -c netCDFsub.f90
-mpif90 -f90=ifort  -I/usrx/local/prod/packages/ips/18.0.1/netcdf/3.6.3/include -I/ioddev_dell/dell1/nco/ops/nwtest/wrf_shared.v1.1.0/frame -c netCDFsub_geo.f90
+mpif90 -f90=ifort  -I/apps/netcdf/3.6.3-intel/include -I/scratch3/NCEPDEV/nceplibs/ext/WRF/3.7/WRFV3/frame -c kinds.f90
+mpif90 -f90=ifort  -I/apps/netcdf/3.6.3-intel/include -I/scratch3/NCEPDEV/nceplibs/ext/WRF/3.7/WRFV3/frame -c constants.f90
+mpif90 -f90=ifort  -I/apps/netcdf/3.6.3-intel/include -I/scratch3/NCEPDEV/nceplibs/ext/WRF/3.7/WRFV3/frame -c module_debug.F90
+mpif90 -f90=ifort  -I/apps/netcdf/3.6.3-intel/include -I/scratch3/NCEPDEV/nceplibs/ext/WRF/3.7/WRFV3/frame -c gridmod_gsi_map_utils.f90
+mpif90 -f90=ifort  -I/apps/netcdf/3.6.3-intel/include -I/scratch3/NCEPDEV/nceplibs/ext/WRF/3.7/WRFV3/frame -c misc_definitions_module.f90
+mpif90 -f90=ifort  -I/apps/netcdf/3.6.3-intel/include -I/scratch3/NCEPDEV/nceplibs/ext/WRF/3.7/WRFV3/frame -c constants_module.f90
+mpif90 -f90=ifort  -I/apps/netcdf/3.6.3-intel/include -I/scratch3/NCEPDEV/nceplibs/ext/WRF/3.7/WRFV3/frame -c module_map_utils.f90
+mpif90 -f90=ifort  -I/apps/netcdf/3.6.3-intel/include -I/scratch3/NCEPDEV/nceplibs/ext/WRF/3.7/WRFV3/frame -c write_bufr_NASALaRC.f90
+mpif90 -f90=ifort  -I/apps/netcdf/3.6.3-intel/include -I/scratch3/NCEPDEV/nceplibs/ext/WRF/3.7/WRFV3/frame -c process_NASALaRC_cloud.f90
+mpif90 -f90=ifort  -I/apps/netcdf/3.6.3-intel/include -I/scratch3/NCEPDEV/nceplibs/ext/WRF/3.7/WRFV3/frame -c netCDFsub.f90
+mpif90 -f90=ifort  -I/apps/netcdf/3.6.3-intel/include -I/scratch3/NCEPDEV/nceplibs/ext/WRF/3.7/WRFV3/frame -c netCDFsub_geo.f90
 cc -DLINUX -Dfunder -DFortranByte=char -DFortranInt=int -DFortranLlong='long long' -D_UNDERSCORE -c cio.c
-mpif90 -f90=ifort -o rap_process_cloud.exe  kinds.o constants.o module_debug.o gridmod_gsi_map_utils.o misc_definitions_module.o constants_module.o module_map_utils.o write_bufr_NASALaRC.o process_NASALaRC_cloud.o netCDFsub.o netCDFsub_geo.o cio.o -L/ioddev_dell/dell1/nco/ops/nwtest/lib.p2/w3emc/v2.3.0/libw3emc_v2.3.0_d.a /ioddev_dell/dell1/nco/ops/nwtest/lib.p2/w3nco/v2.0.6/libw3nco_v2.0.6_d.a /ioddev_dell/dell1/nco/ops/nwtest/lib.p2/bacio/v2.0.2/libbacio_v2.0.2_4.a /ioddev_dell/dell1/nco/ops/nwtest/lib.p2/bufr/v11.2.0/libbufr_v11.2.0_d_64.a /ioddev_dell/dell1/nco/ops/nwtest/wrf_shared.v1.1.0/external/io_netcdf/libwrfio_nf.a /ioddev_dell/dell1/nco/ops/nwtest/wrf_shared.v1.1.0/frame/pack_utils.o -L/usrx/local/prod/packages/ips/18.0.1/netcdf/4.5.0/lib -lnetcdf -lnetcdff 
+mpif90 -f90=ifort -o rap_process_cloud.exe  kinds.o constants.o module_debug.o gridmod_gsi_map_utils.o misc_definitions_module.o constants_module.o module_map_utils.o write_bufr_NASALaRC.o process_NASALaRC_cloud.o netCDFsub.o netCDFsub_geo.o cio.o -L/scratch3/NCEPDEV/nwprod/lib/w3emc/v2.3.0/libw3emc_v2.3.0_d.a /scratch3/NCEPDEV/nwprod/lib/w3nco/v2.0.6/libw3nco_v2.0.6_d.a /scratch3/NCEPDEV/nwprod/lib/bacio/v2.0.2/libbacio_v2.0.2_4.a /scratch3/NCEPDEV/nwprod/lib/bufr/v10.2.5/libbufr_v10.2.5_d_64.a /scratch3/NCEPDEV/nceplibs/ext/WRF/3.7/WRFV3/external/io_netcdf/libwrfio_nf.a /scratch3/NCEPDEV/nceplibs/ext/WRF/3.7/WRFV3/frame/pack_utils.o -L/apps/netcdf/4.3.0-intel/lib -lnetcdf -lnetcdff 

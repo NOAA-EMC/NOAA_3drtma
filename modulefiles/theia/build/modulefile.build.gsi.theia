@@ -46,7 +46,8 @@ set C_COMP_MP mpcc
 
 # Loading Intel Compiler Suite
 
-module load intel/15.6.233
+#module load intel/15.6.233
+module load intel/18.1.163 
 
 # Loading impi
 

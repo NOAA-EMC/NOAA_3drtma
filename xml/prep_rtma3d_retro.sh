@@ -16,28 +16,33 @@ if [[ -d /dcom && -d /hwrf ]] ; then
 #   MODULESHOME="/usrx/local/Modules/3.2.10"
 #   . $MODULESHOME/init/sh
     MACHINE=wcoss
+    export SCHEDULER="LSF"
 elif [[ -d /cm ]] ; then
 #   MODULESHOME="/usrx/local/Modules/3.2.10"
 #   . $MODULESHOME/init/sh
     conf_target=nco
     MACHINE=cray
+    export SCHEDULER="LSF"
 elif [[ -d /ioddev_dell ]]; then
 #   MODULESHOME="/usrx/local/Modules/3.2.10"
 #   . $MODULESHOME/init/sh
     conf_target=nco
     MACHINE=dell
+    export SCHEDULER="LSF" 
 elif [[ -d /scratch3 ]] ; then
     . /etc/profile
     . /etc/profile.d/modules.sh >/dev/null # Module Support
     MACHINE=theia
     nwprod_path="/scratch3/NCEPDEV/nwprod/lib/modulefiles"
     produtil_path="/scratch4/NCEPDEV/nems/noscrub/emc.nemspara/soft/NCEPLIBS-prod_util"
+    export SCHEDULER="SLURM"
 elif [[ -d /mnt/lfs3/projects ]] ; then
     . /etc/profile
     . /etc/profile.d/modules.sh >/dev/null # Module Support
     MACHINE=jet
     nwprod_path="/mnt/lfs3/projects/hfv3gfs/nwprod/lib/modulefiles"
     produtil_path="/mnt/lfs3/projects/hfv3gfs/emc.nemspara/soft/NCEPLIBS-prod_util"
+    export SCHEDULER="SLURM"
 else
     MACHINE="unknown"
     echo 'Running on $MACHINE '
@@ -80,13 +85,9 @@ export startCDATE=201904271200              #yyyymmddhhmm - Starting day of retr
 export endCDATE=201904271400                #yyyymmddhhmm - Ending day of RTMA3D run (needed for both RETRO and REAL TIME). 
 export NET=rtma3d                           #selection of rtma3d (or rtma,urma)
 export RUN=rtma3d                           #selection of rtma3d (or rtma,urma)
-export envir="lsf"                      #environment (test, prod, dev, etc.)
 export run_envir="dev_shared"                      #
-export expname="${envir}"                   # experiment name
-
 export NWROOT=${TOP_RTMA}                   #root directory for RTMA/URMA j-job scripts, scripts, parm files, etc. 
 
-export SCHEDULER="LSF"                    # SLURM (after 05/01/2019)   or MOAB(PBS)
 case ${SCHEDULER} in
   PBS|pbs|MOAB*|moab*)
     SCHD_ATTRB="moabtorque"
@@ -102,6 +103,8 @@ case ${SCHEDULER} in
   exit 1
 esac
 
+export envir="${SCHD_ATTRB}"                      #environment (test, prod, dev, etc.)
+export expname="${envir}"                   # experiment name
 
 #====================================================================#
 # Note: Definition for the following variables 
@@ -312,23 +315,22 @@ export exefile_name_verif=""    # executable of verification (MET) is defined by
 #
   if [ $MACHINE = theia ] ; then
 
-#   export Fixrtma3d_udef="/scratch4/NCEPDEV/fv3-cam/save/Gang.Zhao/FixData"
-    export FIXgsi_udef="/scratch4/NCEPDEV/fv3-cam/save/Gang.Zhao/FixData/GSI-fix_rtma3d_emc_test"
-    export FIXcrtm_udef="/scratch4/NCEPDEV/fv3-cam/save/Gang.Zhao/FixData/CRTM-fix_rtma3d"
-    export FIXwps_udef="/scratch4/NCEPDEV/fv3-cam/save/Gang.Zhao/FixData/WPS"
+/scratch4/NCEPDEV/fv3-cam/save/
 
-    export OBS_USELIST_udef="/scratch4/NCEPDEV/fv3-cam/save/Gang.Zhao/FixData/ObsUseList_rtma3d"
-    export SFCOBS_USELIST_udef="/scratch4/NCEPDEV/fv3-cam/save/Gang.Zhao/FixData/ObsUseList_rtma3d/gsd/mesonet_uselists"
-    export AIRCRAFT_REJECT_udef="/scratch4/NCEPDEV/fv3-cam/save/Gang.Zhao/FixData/ObsUseList_rtma3d/gsd/amdar_reject_lists"
-    export SFCOBS_PROVIDER_udef="/scratch4/NCEPDEV/fv3-cam/save/Gang.Zhao/FixData/GSI-fix_rtma3d_emc_test"
+   export FIXgsi_udef="/scratch4/NCEPDEV/fv3-cam/noscrub/Edward.Colon/FixData/GSI-fix"
+   export FIXcrtm_udef="/scratch4/NCEPDEV/fv3-cam/noscrub/Edward.Colon/FixData/CRTM-fix"
+   export FIXwps_udef="/scratch4/NCEPDEV/fv3-cam/noscrub/Edward.Colon/FixData/wps"
 
-    export PARMgsi_udef=""
-#   export PARMupp_udef="/scratch4/NCEPDEV/fv3-cam/save/Gang.Zhao/FixData/parm/upp_gsd_test_mhu_rap_20"
-#   export PARMupp_udef="/scratch4/NCEPDEV/fv3-cam/save/Gang.Zhao/FixData/parm/upp_gsd_test_mhu_hrrr_04"
-    export PARMupp_udef="/scratch4/NCEPDEV/fv3-cam/save/Gang.Zhao/FixData/parm/upp_emc_raphrrr_5.0"
-    export PARMwrf_udef="/scratch4/NCEPDEV/fv3-cam/save/Gang.Zhao/FixData/static_gsd_rtma3d_gge/WRF"
-#   export PARMverf_udef="/scratch4/NCEPDEV/fv3-cam/save/Edward.Colon/FixData/VERIF-fix"                          # v7.0
-    export PARMverf_udef="/scratch4/NCEPDEV/fv3-cam/save/Gang.Zhao/FixData/parm/VERIF-fix_ecolon"                 # v7.0
+   export OBS_USELIST_udef="/scratch4/NCEPDEV/fv3-cam/noscrub/Edward.Colon/FixData/obsuselist"
+   export SFCOBS_USELIST_udef="/scratch4/NCEPDEV/fv3-cam/noscrub/Edward.Colon/FixData/obsuselist/mesonet_uselists"
+   export AIRCRAFT_REJECT_udef="/scratch4/NCEPDEV/fv3-cam/noscrub/Edward.Colon/FixData/obsuselist/amdar_reject_lists"
+   export SFCOBS_PROVIDER_udef="/scratch4/NCEPDEV/fv3-cam/noscrub/Edward.Colon/FixData/obsuselist/sfcobs_provider"
+
+   export PARMgsi_udef=""
+   export PARMupp_udef="/scratch4/NCEPDEV/fv3-cam/noscrub/Edward.Colon/FixData/parm/upp"
+   export PARMwrf_udef="/scratch4/NCEPDEV/fv3-cam/noscrub/Edward.Colon/FixData/parm/wrf"
+   export PARMverf_udef="/scratch4/NCEPDEV/fv3-cam/noscrub/Edward.Colon/FixData/parm/verif"
+
 
   elif [ $MACHINE = jet ] ; then
 

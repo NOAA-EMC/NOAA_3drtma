@@ -8,7 +8,7 @@ CC  = cc
 FLAGS= -fp-model precise -assume byterecl -g -traceback $(LDFLAGS) -DLINUX ## -convert big_endian
 CPPFLAGS =  -D_UNDERSCORE -DLINUX -Dfunder -DFortranByte=char -DFortranInt=int -DFortranLlong='long long'
 
-GSI_BUILDDIR = ../build_gsi
+GSI_BUILDDIR = ../rtma_gsi.fd/build
 GSI_INCDIR   = ${GSI_BUILDDIR}/include
 
 # G2_VER=v2.5.0
