@@ -39,7 +39,7 @@ echo " This machine is $target ."
 
 dirname_source="rtma_process_lightning.fd"
 ltn_bufr="netcdf_bufr"
-exefile_name_lightning="rtma3d_process_lightning"
+exefile_name_lightning="rtma3d_process_retro_lightning"
 
 #=========================================================================#
 

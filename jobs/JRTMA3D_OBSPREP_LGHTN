@@ -123,7 +123,7 @@ fi
 ###########################################################
 
 #   Set the name to the executable
-    export exefile_name_lightning=${exefile_name_lightning:-"rtma3d_process_lightning"}
+    export exefile_name_lightning=${exefile_name_lightning:-"rtma3d_process_retro_lightning"}
 
 #   Set the path to the GSI static files
     export FIXgsi=${FIX_GSI:-"${FIXrtma3d}/gsi"}
