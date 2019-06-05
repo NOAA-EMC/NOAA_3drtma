@@ -334,23 +334,22 @@ export exefile_name_verif=""    # executable of verification (MET) is defined by
 
   elif [ $MACHINE = jet ] ; then
 
-#   export Fixrtma3d_udef="/mnt/lfs3/projects/hfv3gfs/Gang.Zhao/FixData"
-    export FIXgsi_udef="/mnt/lfs3/projects/hfv3gfs/Gang.Zhao/FixData/GSI-fix_rtma3d_emc_test"
-    export FIXcrtm_udef="/mnt/lfs3/projects/hfv3gfs/Gang.Zhao/FixData/CRTM-fix_rtma3d"
-    export FIXwps_udef="/mnt/lfs3/projects/hfv3gfs/Gang.Zhao/FixData/WPS"
+  /mnt/lfs3/projects/hfv3gfs/
 
-    export OBS_USELIST_udef="/mnt/lfs3/projects/hfv3gfs/Gang.Zhao/FixData/ObsUseList_rtma3d"
-    export SFCOBS_USELIST_udef="/mnt/lfs3/projects/hfv3gfs/Gang.Zhao/FixData/ObsUseList_rtma3d/gsd/mesonet_uselists"
-    export AIRCRAFT_REJECT_udef="/mnt/lfs3/projects/hfv3gfs/Gang.Zhao/FixData/ObsUseList_rtma3d/gsd/amdar_reject_lists"
-    export SFCOBS_PROVIDER_udef="/mnt/lfs3/projects/hfv3gfs/Gang.Zhao/FixData/GSI-fix_rtma3d_emc_test"
+   export FIXgsi_udef="/mnt/lfs3/projects/hfv3gfs/Edward.Colon/FixData/GSI-fix"
+   export FIXcrtm_udef="/mnt/lfs3/projects/hfv3gfs/Edward.Colon/FixData/CRTM-fix"
+   export FIXwps_udef="/mnt/lfs3/projects/hfv3gfs/Edward.Colon/FixData/wps"
 
-    export PARMgsi_udef=""
-#   export PARMupp_udef="/mnt/lfs3/projects/hfv3gfs/Gang.Zhao/FixData/parm/upp_gsd_test_mhu_rap_20"
-#   export PARMupp_udef="/mnt/lfs3/projects/hfv3gfs/Gang.Zhao/FixData/parm/upp_gsd_test_mhu_hrrr_04"
-    export PARMupp_udef="/mnt/lfs3/projects/hfv3gfs/Gang.Zhao/FixData/parm/upp_emc_raphrrr_5.0"
-    export PARMwrf_udef="/mnt/lfs3/projects/hfv3gfs/Gang.Zhao/FixData/static_gsd_rtma3d_gge/WRF"
-#   export PARMverf_udef="/mnt/lfs3/projects/hfv3gfs/Edward.Colon/FixData/VERIF-fix"                              # v7.0
-    export PARMverf_udef="/mnt/lfs3/projects/hfv3gfs/Gang.Zhao/FixData/parm/VERIF-fix_ecolon"                     # v8.1_beta2
+   export OBS_USELIST_udef="/mnt/lfs3/projects/hfv3gfs/Edward.Colon/FixData/obsuselist"
+   export SFCOBS_USELIST_udef="/mnt/lfs3/projects/hfv3gfs/Edward.Colon/FixData/obsuselist/mesonet_uselists"
+   export AIRCRAFT_REJECT_udef="/mnt/lfs3/projects/hfv3gfs/Edward.Colon/FixData/obsuselist/amdar_reject_lists"
+   export SFCOBS_PROVIDER_udef="/mnt/lfs3/projects/hfv3gfs/Edward.Colon/FixData/obsuselist/sfcobs_provider"
+
+   export PARMgsi_udef=""
+   export PARMupp_udef="/mnt/lfs3/projects/hfv3gfs/Edward.Colon/FixData/parm/upp"
+   export PARMwrf_udef="/mnt/lfs3/projects/hfv3gfs/Edward.Colon/FixData/parm/wrf"
+   export PARMverf_udef="/mnt/lfs3/projects/hfv3gfs/Edward.Colon/FixData/parm/verif"
+
 
   elif [ $MACHINE = dell ] ; then
 

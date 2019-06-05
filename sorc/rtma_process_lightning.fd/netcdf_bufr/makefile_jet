@@ -29,8 +29,10 @@ W3NCO_LIBd  =${CORELIB}/w3nco/$(W3NCO_VER)/libw3nco_$(W3NCO_VER)_d.a
 BACIO_VER=v2.0.2
 BACIO_LIB4  = ${CORELIB}/bacio/$(BACIO_VER)/libbacio_$(BACIO_VER)_4.a
 
-NETCDF      = /apps/netcdf/3.6.3-intel
-NETCDF4     = /apps/netcdf/4.2-intel
+# NETCDF 4 is default netcdf on Jet (03/26/2019)
+NETCDF3     = /apps/netcdf/3.6.3-intel
+NETCDF4     = /apps/netcdf/4.2.1.1-intel
+NETCDF      = /apps/netcdf/4.2.1.1-intel
 
 # GSILIBS are also from nwprod lib (pre-installed on Theia, not re-compiled when installing GSI by user)
 # GSILIBS =../../../lib -lw3emc_i4r8 -lw3nco_i4r8 -lbacio -lbufr_i4r8

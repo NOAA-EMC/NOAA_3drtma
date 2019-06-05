@@ -28,7 +28,7 @@
 
 # module load intel/18.0.5.274        # (D, 03/26/2019, only work for updated GSI by GSD_GSI)
 
-  module load intel/15.0.3.187
+  module load intel/18.0.5.274 
 
   module load impi/2018.4.274         # (D, 03/26/2019)
 
