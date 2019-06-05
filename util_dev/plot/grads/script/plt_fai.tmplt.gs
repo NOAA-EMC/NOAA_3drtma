@@ -70,7 +70,9 @@ endif
 
 panel_setup="2 2"
 
-say panels(panel_setup)
+panels(panel_setup)
+
+*'enable print GMFNAME.gmf'
 
 fname_head="GMFNAME"
 
@@ -209,6 +211,8 @@ nv=1
 while(nv<=icount)
 
   vname_loc=vname.nv
+
+  'enable print '%fname.nv
 
 * set up the map projection
 
@@ -368,7 +372,7 @@ while(nv<=icount)
 
   endwhile
 
-  'gxprint '%fname.nv.png
+  'print'
 
   if(wid != '')
 
@@ -382,6 +386,8 @@ while(nv<=icount)
 
   'c'
 
+  'disable print'
+
   if(vname.nv="CEIL215")
 
     'undefine cl215fgs'
@@ -393,6 +399,8 @@ while(nv<=icount)
   nv = nv + 1
 
 endwhile
+
+*'disable print'
 
 * exit grads (for batch job)
 

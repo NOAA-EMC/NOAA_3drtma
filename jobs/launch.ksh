@@ -35,7 +35,7 @@ if [ "${machine}" = "theia" ] ; then
 # loading modules for specific task
   case "$COMMAND" in
     *VERIF*)
-      module load met/7.0
+      module load met/8.0
       ;;
     *)
       ;;
@@ -69,7 +69,7 @@ elif [ "${machine}" = "jet" ] ; then
 # loading modules for specific task
   case "$COMMAND" in
     *VERIF*)
-      module load met/8.1_beta2
+      module load met/8.0
       ;;
     *)
       ;;
@@ -104,7 +104,7 @@ elif [ "${machine}" = "dell" ] ; then
   case "$COMMAND" in
     *VERIF*)
       module use /gpfs/dell2/emc/verification/noscrub/Julie.Prestopnik/modulefiles/
-      module load met/8.1
+      module load met/8.0
       ;;
     *)
       ;;
