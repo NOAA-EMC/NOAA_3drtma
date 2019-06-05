@@ -54,6 +54,35 @@ while [ ${i} -lt ${#domains[@]} ]; do
 
   (( i=i + 1 ))
 done
+${ECHO} "ncl_hrrr_zip done for nclprd"
+
+if [ -d ${DATAHOME}/nclprd_fgs ] ; then
+  i=0
+  while [ ${i} -lt ${#domains[@]} ]; do
+    dir=${DATAHOME}/nclprd_fgs/${domains[${i}]}
+    if [ -d $dir ] ; then
+      cd ${dir}
+      zip -g -0 files.zip * -i \*${FCST_TIME}.png
+    fi
+
+    (( i=i + 1 ))
+  done
+  ${ECHO} "ncl_hrrr_zip done for nclprd_fgs"
+fi
+
+if [ -d ${DATAHOME}/nclprd_inc ] ; then
+  i=0
+  while [ ${i} -lt ${#domains[@]} ]; do
+    dir=${DATAHOME}/nclprd_inc/${domains[${i}]}
+    if [ -d $dir ] ; then
+      cd ${dir}
+      zip -g -0 files.zip * -i \*${FCST_TIME}.png
+    fi
+
+    (( i=i + 1 ))
+  done
+  ${ECHO} "ncl_hrrr_zip done for nclprd_inc"
+fi
 
 ${ECHO} "ncl_hrrr_zip.ksh completed at `${DATE}`"
 

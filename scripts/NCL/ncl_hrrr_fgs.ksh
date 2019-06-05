@@ -128,6 +128,17 @@ else
   START_TIME_BACK2=$( date +"%Y%m%d%H" -d "${START_TIME_BACK2}" )
 fi
 
+NCLPRD=nclprd_fgs
+if [ ! ${NCLPRD} ]; then
+  ${ECHO} "ERROR: NCLPRD, \$NCLPRD, is not defined."
+  exit 1
+fi
+POSTPRD=postprd_fgs
+if [ ! ${POSTPRD} ]; then
+  ${ECHO} "ERROR: POSTPRD, \$POSTPRD, is not defined."
+  exit 1
+fi
+
 # To be valid at the same time, FCST_TIME_AHEAD1 matches with START_TIME_BACK1,
 # and FCST_TIME_AHEAD2 matches with START_TIME_BACK2
 
@@ -169,7 +180,7 @@ fi
 
 # Set up the work directory and cd into it
 # workdir=nclprd/${FCST_TIME}part1   # for testing
-workdir=${DATAHOME}/nclprd/${FCST_TIME}
+workdir=${DATAHOME}/${NCLPRD}/${FCST_TIME}
 ${RM} -rf ${workdir}
 ${MKDIR} -p ${workdir}
 cd ${workdir}
@@ -178,26 +189,26 @@ cd ${workdir}
 BACK1_DATAROOT=${DATAROOT}/${START_TIME_BACK1}
 BACK2_DATAROOT=${DATAROOT}/${START_TIME_BACK2}
 # DATAHOME=${DATAROOT}/${START_TIME}  # for testing
-${LN} -s ${DATAHOME}/postprd/wrfprs_hrconus_${FCST_TIME}.grib2 hrrrfile.grb
+${LN} -s ${DATAHOME}/${POSTPRD}/wrfprs_hrconus_${FCST_TIME}.grib2 hrrrfile.grb
 ${ECHO} "hrrrfile.grb" > arw_file.txt
 if (( ${FCST_TIME_AHEAD1} != 99 )); then
-  ${LN} -s ${BACK1_DATAROOT}/postprd/wrfprs_hrconus_${FCST_TIME_AHEAD1}.grib2 back1file.grb
+  ${LN} -s ${BACK1_DATAROOT}/${POSTPRD}/wrfprs_hrconus_${FCST_TIME_AHEAD1}.grib2 back1file.grb
   ${ECHO} "back1file.grb" > back1_file.txt
-  ${LN} -s ${BACK1_DATAROOT}/postprd/wrfprs_hrconus_${FCST_TIME}.grib2 back1fileback1hour.grb
+  ${LN} -s ${BACK1_DATAROOT}/${POSTPRD}/wrfprs_hrconus_${FCST_TIME}.grib2 back1fileback1hour.grb
   ${ECHO} "back1fileback1hour.grb" > back1_file_back1_hour.txt
 fi
 if (( ${FCST_TIME_AHEAD2} != 99 )); then
-  ${LN} -s ${BACK2_DATAROOT}/postprd/wrfprs_hrconus_${FCST_TIME_AHEAD2}.grib2 back2file.grb
+  ${LN} -s ${BACK2_DATAROOT}/${POSTPRD}/wrfprs_hrconus_${FCST_TIME_AHEAD2}.grib2 back2file.grb
   ${ECHO} "back2file.grb" > back2_file.txt
-  ${LN} -s ${BACK2_DATAROOT}/postprd/wrfprs_hrconus_${FCST_TIME_AHEAD1}.grib2 back2fileback1hour.grb
+  ${LN} -s ${BACK2_DATAROOT}/${POSTPRD}/wrfprs_hrconus_${FCST_TIME_AHEAD1}.grib2 back2fileback1hour.grb
   ${ECHO} "back2fileback1hour.grb" > back2_file_back1_hour.txt
 fi
 if (( ${FCST_TIME_BACK1} != -9 )); then
-  ${LN} -s ${DATAHOME}/postprd/wrfprs_hrconus_${FCST_TIME_BACK1}.grib2 back1hour.grb
+  ${LN} -s ${DATAHOME}/${POSTPRD}/wrfprs_hrconus_${FCST_TIME_BACK1}.grib2 back1hour.grb
   ${ECHO} "back1hour.grb" > back1_hour.txt
 fi
 if (( ${FCST_TIME_BACK3} != -9 )); then
-  ${LN} -s ${DATAHOME}/postprd/wrfprs_hrconus_${FCST_TIME_BACK3}.grib2 back3file.grb
+  ${LN} -s ${DATAHOME}/${POSTPRD}/wrfprs_hrconus_${FCST_TIME_BACK3}.grib2 back3file.grb
   ${ECHO} "back3file.grb" > back3_file.txt
 fi
 
@@ -482,7 +493,7 @@ i=0
 while [ ${i} -lt ${#pngs[@]} ]; do
   pngfile=${pngs[${i}]}
   ${CONVERT} -trim ${pngfile} ${pngfile}
-  fulldir=${DATAHOME}/nclprd/full
+  fulldir=${DATAHOME}/${NCLPRD}/full
   ${MKDIR} -p ${fulldir}
   webfile=${fulldir}/${webnames[${i}]}_f${FCST_TIME}.png
 #  webfile=${webnames[${i}]}_f${FCST_TIME}.png    # for testing
@@ -490,112 +501,112 @@ while [ ${i} -lt ${#pngs[@]} ]; do
   (( i=i + 1 ))
   pngfile=${pngs[${i}]}
   ${CONVERT} -trim ${pngfile} ${pngfile}
-  t1dir=${DATAHOME}/nclprd/t1
+  t1dir=${DATAHOME}/${NCLPRD}/t1
   ${MKDIR} -p ${t1dir}
   webfile=${t1dir}/${webnames[${i}]}_f${FCST_TIME}.png
   ${MV} ${pngfile} ${webfile}
   (( i=i + 1 ))
   pngfile=${pngs[${i}]}
   ${CONVERT} -trim ${pngfile} ${pngfile}
-  t2dir=${DATAHOME}/nclprd/t2
+  t2dir=${DATAHOME}/${NCLPRD}/t2
   ${MKDIR} -p ${t2dir}
   webfile=${t2dir}/${webnames[${i}]}_f${FCST_TIME}.png
   ${MV} ${pngfile} ${webfile}
   (( i=i + 1 ))
   pngfile=${pngs[${i}]}
   ${CONVERT} -trim ${pngfile} ${pngfile}
-  t3dir=${DATAHOME}/nclprd/t3
+  t3dir=${DATAHOME}/${NCLPRD}/t3
   ${MKDIR} -p ${t3dir}
   webfile=${t3dir}/${webnames[${i}]}_f${FCST_TIME}.png
   ${MV} ${pngfile} ${webfile}
   (( i=i + 1 ))
   pngfile=${pngs[${i}]}
   ${CONVERT} -trim ${pngfile} ${pngfile}
-  t4dir=${DATAHOME}/nclprd/t4
+  t4dir=${DATAHOME}/${NCLPRD}/t4
   ${MKDIR} -p ${t4dir}
   webfile=${t4dir}/${webnames[${i}]}_f${FCST_TIME}.png
   ${MV} ${pngfile} ${webfile}
   (( i=i + 1 ))
   pngfile=${pngs[${i}]}
   ${CONVERT} -trim ${pngfile} ${pngfile}
-  t5dir=${DATAHOME}/nclprd/t5
+  t5dir=${DATAHOME}/${NCLPRD}/t5
   ${MKDIR} -p ${t5dir}
   webfile=${t5dir}/${webnames[${i}]}_f${FCST_TIME}.png
   ${MV} ${pngfile} ${webfile}
   (( i=i + 1 ))
   pngfile=${pngs[${i}]}
   ${CONVERT} -trim ${pngfile} ${pngfile}
-  t6dir=${DATAHOME}/nclprd/t6
+  t6dir=${DATAHOME}/${NCLPRD}/t6
   ${MKDIR} -p ${t6dir}
   webfile=${t6dir}/${webnames[${i}]}_f${FCST_TIME}.png
   ${MV} ${pngfile} ${webfile}
   (( i=i + 1 ))
   pngfile=${pngs[${i}]}
   ${CONVERT} -trim ${pngfile} ${pngfile}
-  t7dir=${DATAHOME}/nclprd/t7
+  t7dir=${DATAHOME}/${NCLPRD}/t7
   ${MKDIR} -p ${t7dir}
   webfile=${t7dir}/${webnames[${i}]}_f${FCST_TIME}.png
   ${MV} ${pngfile} ${webfile}
   (( i=i + 1 ))
   pngfile=${pngs[${i}]}
   ${CONVERT} -trim ${pngfile} ${pngfile}
-  t8dir=${DATAHOME}/nclprd/t8
+  t8dir=${DATAHOME}/${NCLPRD}/t8
   ${MKDIR} -p ${t8dir}
   webfile=${t8dir}/${webnames[${i}]}_f${FCST_TIME}.png
   ${MV} ${pngfile} ${webfile}
   (( i=i + 1 ))
   pngfile=${pngs[${i}]}
   ${CONVERT} -trim ${pngfile} ${pngfile}
-  z0dir=${DATAHOME}/nclprd/z0
+  z0dir=${DATAHOME}/${NCLPRD}/z0
   ${MKDIR} -p ${z0dir}
   webfile=${z0dir}/${webnames[${i}]}_f${FCST_TIME}.png
   ${MV} ${pngfile} ${webfile}
   (( i=i + 1 ))
   pngfile=${pngs[${i}]}
   ${CONVERT} -trim ${pngfile} ${pngfile}
-  z1dir=${DATAHOME}/nclprd/z1
+  z1dir=${DATAHOME}/${NCLPRD}/z1
   ${MKDIR} -p ${z1dir}
   webfile=${z1dir}/${webnames[${i}]}_f${FCST_TIME}.png
   ${MV} ${pngfile} ${webfile}
   (( i=i + 1 ))
   pngfile=${pngs[${i}]}
   ${CONVERT} -trim ${pngfile} ${pngfile}
-  z2dir=${DATAHOME}/nclprd/z2
+  z2dir=${DATAHOME}/${NCLPRD}/z2
   ${MKDIR} -p ${z2dir}
   webfile=${z2dir}/${webnames[${i}]}_f${FCST_TIME}.png
   ${MV} ${pngfile} ${webfile}
   (( i=i + 1 ))
   pngfile=${pngs[${i}]}
   ${CONVERT} -trim ${pngfile} ${pngfile}
-  z3dir=${DATAHOME}/nclprd/z3
+  z3dir=${DATAHOME}/${NCLPRD}/z3
   ${MKDIR} -p ${z3dir}
   webfile=${z3dir}/${webnames[${i}]}_f${FCST_TIME}.png
   ${MV} ${pngfile} ${webfile}
   (( i=i + 1 ))
   pngfile=${pngs[${i}]}
   ${CONVERT} -trim ${pngfile} ${pngfile}
-  z4dir=${DATAHOME}/nclprd/z4
+  z4dir=${DATAHOME}/${NCLPRD}/z4
   ${MKDIR} -p ${z4dir}
   webfile=${z4dir}/${webnames[${i}]}_f${FCST_TIME}.png
   ${MV} ${pngfile} ${webfile}
   (( i=i + 1 ))
   pngfile=${pngs[${i}]}
   ${CONVERT} -trim ${pngfile} ${pngfile}
-  z5dir=${DATAHOME}/nclprd/z5
+  z5dir=${DATAHOME}/${NCLPRD}/z5
   ${MKDIR} -p ${z5dir}
   webfile=${z5dir}/${webnames[${i}]}_f${FCST_TIME}.png
   ${MV} ${pngfile} ${webfile}
   (( i=i + 1 ))
   pngfile=${pngs[${i}]}
   ${CONVERT} -trim ${pngfile} ${pngfile}
-  z6dir=${DATAHOME}/nclprd/z6
+  z6dir=${DATAHOME}/${NCLPRD}/z6
   ${MKDIR} -p ${z6dir}
   webfile=${z6dir}/${webnames[${i}]}_f${FCST_TIME}.png
   ${MV} ${pngfile} ${webfile}
   (( i=i + 1 ))
   pngfile=${pngs[${i}]}
   ${CONVERT} -trim ${pngfile} ${pngfile}
-  z7dir=${DATAHOME}/nclprd/z7
+  z7dir=${DATAHOME}/${NCLPRD}/z7
   ${MKDIR} -p ${z7dir}
   webfile=${z7dir}/${webnames[${i}]}_f${FCST_TIME}.png
   ${MV} ${pngfile} ${webfile}
@@ -606,7 +617,7 @@ done
 # i=0
 # while [ ${i} -lt ${#monpngs[@]} ]; do
 #   pngfile=${monpngs[${i}]}
-#   fulldir=${DATAHOME}/nclprd/full
+#   fulldir=${DATAHOME}/${NCLPRD}/full
 #   ${MKDIR} -p ${fulldir}
 #   webfile=${fulldir}/${webmon[${i}]}_f${FCST_TIME}.png
 # #   webfile=${webmon[${i}]}_f${FCST_TIME}.png    # for testing

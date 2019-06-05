@@ -18,21 +18,39 @@ if [ "${MACHINE}" = "jet" ] ; then
 # loading modules in the general module file
 #  (also including path definition of some common UNIX commands)
 
-  . ${MODULEFILES}/modulefile.rtma3d.${MACHINE}
+#  . /etc/profile
+#  . /etc/profile.d/modules.sh >/dev/null # Module Support
+## . /apps/lmod/lmod/init/bash >/dev/null # Module Support
+#  module purge
+# . ${MODULEFILES}/modulefile.rtma3d.${MACHINE}
 
 # loading  Specific modules and configurations used in individual task 
 #   and path to some specific command/tool used
 
   case "$COMMAND" in
     *LIGHTNING*|*SATELLITE*|*GSI_DIAG*)
+      . ${MODULEFILES}/modulefile.rtma3d.${MACHINE}
       ;;
     *GSI_HYB*)
+      . ${MODULEFILES}/modulefile.rtma3d.${MACHINE}
       ;;
     *POST*)
+      . ${MODULEFILES}/modulefile.rtma3d.${MACHINE}
       ;;
     *SMARTINIT*)
+      . ${MODULEFILES}/modulefile.rtma3d.${MACHINE}
+      ;;
+    *NCL_HRRR_INC*)
+      source ${MODULE_FILE}
+      module load cnvgrib/1.4.0
+      module load wgrib/1.8.1.0b
+      module load wgrib2/2.0.8
+      ;;
+    *NCL_HRRR*)
+      source ${MODULE_FILE}
       ;;
     *)
+      . ${MODULEFILES}/modulefile.rtma3d.${MACHINE}
       ;;
   esac
 else
@@ -60,11 +78,58 @@ if [ "${MACHINE}" = "theia" ] || [ "${MACHINE}" = "jet" ] ; then    ### PBS job 
       export MPIRUN="mpiexec -np $np"
       ;;
     SLURM|slurm)                                       # SLURM
-      module load slurm
+#     module load slurm
       export job=${job:-"${SLURM_JOB_NAME}"}
       export jid=${SLURM_JOBID}
       export jobid=${jobid:-"${job}.${jid}"}
-      export np=${SLURM_NNODES}
+      export np=${SLURM_NTASKS}
+
+      case "$COMMAND" in
+        *NCL_HRRR*|*GSI_HYB*)
+          cd ${SLURM_SUBMIT_DIR}
+          if [ ! -d ${LOG_DIR}/nodefiles ] ; then
+            mkdir -p ${LOG_DIR}/nodefiles
+          fi
+          slurm_hfile=${LOG_DIR}/nodefiles/hostfile.${SLURM_JOB_NAME}.${SLURM_JOB_ID}
+          scontrol show hostname $SLURM_NODELSIT > ${slurm_hfile}
+          export PBS_NODEFILE=${LOG_DIR}/nodefiles/pbs_nodefile.${SLURM_JOB_NAME}.${SLURM_JOB_ID}
+          if [ -f ${PBS_NODEFILE} ] ; then
+            rm -f ${PBS_NODEFILE}
+          fi
+          i=0
+          imax=${SLURM_NTASKS}
+          while [[ $i -lt ${SLURM_NTASKS} ]]
+          do
+            cat >> ${PBS_NODEFILE} << EOF
+node$i
+EOF
+        ((     i += 1 ))
+          done
+          ;;
+        *)
+          cd ${SLURM_SUBMIT_DIR}
+          if [ ! -d ${LOG_DIR}/nodefiles ] ; then
+            mkdir -p ${LOG_DIR}/nodefiles
+          fi
+          slurm_hfile=${LOG_DIR}/nodefiles/hostfile.${SLURM_JOB_NAME}.${SLURM_JOB_ID}
+          scontrol show hostname $SLURM_NODELSIT > ${slurm_hfile}
+          export PBS_NODEFILE=${LOG_DIR}/nodefiles/pbs_nodefile.${SLURM_JOB_NAME}.${SLURM_JOB_ID}
+          if [ -f ${PBS_NODEFILE} ] ; then
+            rm -f ${PBS_NODEFILE}
+          fi
+          i=0
+          imax=${SLURM_NTASKS}
+          while [[ $i -lt ${SLURM_NTASKS} ]]
+          do
+            cat >> ${PBS_NODEFILE} << EOF
+node$i
+EOF
+        ((     i += 1 ))
+          done
+          ;;
+      esac
+
+      np=`cat $PBS_NODEFILE | wc -l`
       export MPIRUN="srun"
       ;;
     *)

@@ -237,6 +237,8 @@ fi
 
 if [ -r "${DATAOBSHOME}/NSSLRefInGSI.bufr" ]; then
   ${LN} -s ${DATAOBSHOME}/NSSLRefInGSI.bufr ./refInGSI
+elif [ -r "${DATAOBSHOME}/60/NSSLRefInGSI.bufr" ]; then
+  ${LN} -s ${DATAOBSHOME}/60/NSSLRefInGSI.bufr ./refInGSI
 else
   ${ECHO} "Warning: ${DATAOBSHOME}/NSSLRefInGSI.bufr does not exist!"
 fi

@@ -121,11 +121,11 @@
 <!ENTITY WALL_LIMIT_PP '<deadline><cyclestr offset="&DEADLINE_PP;">@Y@m@d@H@M</cyclestr></deadline>'>
 <!ENTITY WALL_LIMIT_UV '<deadline><cyclestr offset="&DEADLINE_UV;">@Y@m@d@H@M</cyclestr></deadline>'>
 
-<!ENTITY RESERVATION '<native>--export=ALL --mail-type=NONE</native><queue>&QUEUE;</queue><account>&ACCOUNT;</account><partition>&PARTITION;</partition>'>
-<!ENTITY RESERVATION_PRE '<native>--export=ALL --mail-type=NONE</native><queue>&QUEUE;</queue><account>&ACCOUNT;</account><partition>&PARTITION;</partition>'>
-<!ENTITY RESERVATION_DA '<native>--export=ALL --mail-type=NONE</native><queue>&QUEUE;</queue><account>&ACCOUNT_DA;</account><partition>&PARTITION_DA;</partition>'>
-<!ENTITY RESERVATION_POST '<native>--export=ALL --mail-type=NONE</native><queue>&QUEUE;</queue><account>&ACCOUNT;</account><partition>&PARTITION;</partition>'>
-<!ENTITY RESERVATION_SMARTINIT '<native>--export=ALL --mail-type=NONE</native><queue>&QUEUE;</queue><account>&ACCOUNT;</account><partition>&PARTITION;</partition>'>
+<!ENTITY RESERVATION '<native>--mail-type=NONE</native><queue>&QUEUE;</queue><account>&ACCOUNT;</account><partition>&PARTITION;</partition>'>
+<!ENTITY RESERVATION_PRE '<native>--mail-type=NONE</native><queue>&QUEUE;</queue><account>&ACCOUNT;</account><partition>&PARTITION;</partition>'>
+<!ENTITY RESERVATION_DA '<native>---mail-type=NONE</native><queue>&QUEUE;</queue><account>&ACCOUNT_DA;</account><partition>&PARTITION_DA;</partition>'>
+<!ENTITY RESERVATION_POST '<native>--mail-type=NONE</native><queue>&QUEUE;</queue><account>&ACCOUNT;</account><partition>&PARTITION;</partition>'>
+<!ENTITY RESERVATION_SMARTINIT '<native>--mail-type=NONE</native><queue>&QUEUE;</queue><account>&ACCOUNT;</account><partition>&PARTITION;</partition>'>
 
 <!ENTITY ENVARS
    '<envar>
@@ -158,9 +158,9 @@
     <cyclestr>&LOG_DIR;/workflow_@Y@m@d@H.log</cyclestr>
   </log>
 
-  <cycledef group="00hr">00 00,12 03-10 06 2019 *</cycledef>
-  <cycledef group="01hr">00 01,13 03-10 06 2019 *</cycledef>
-  <cycledef group="02-11hr">00 02-11,14-23 03-10 06 2019 *</cycledef>
+  <cycledef group="00hr">00 00,12 21-31 05 2019 *</cycledef>
+  <cycledef group="01hr">00 01,13 21-31 05 2019 *</cycledef>
+  <cycledef group="02-11hr">00 02-11,14-23 21-31 05 2019 *</cycledef>
 
   <metatask>
 <!-- only need 60 for hourly running
@@ -1205,64 +1205,6 @@
 
     <dependency>
       <taskdep task="post_00_fgs"/>
-    </dependency>
-
-  </task>
-
-  <task name="ncl_00_inc" cycledefs="02-11hr,00hr,01hr" maxtries="3">
-
-    &NCL_RESOURCES;
-    &WALL_LIMIT_PP;
-    &RESERVATION;
-    &ENVARS;
-
-    <command>&JJOB_DIR;/launch.ksh &JJOB_DIR;/JRTMA3D_NCL_HRRR_INC</command>
-    <cores>&NCL_MAIN_PROC;</cores>
-    <jobname><cyclestr>&JOBNAME_PRE;_ncl_@H_00_inc</cyclestr></jobname>
-    <join><cyclestr>&LOG_DIR;/ncl_@Y@m@d@H00_00_inc.log</cyclestr></join>
-
-    <envar>
-      <name>MODULE_FILE</name>
-      <value>&MODULE_FILE;</value>
-    </envar>
-    <envar>
-      <name>START_TIME</name>
-      <value><cyclestr>@Y@m@d@H</cyclestr></value>
-    </envar>
-    <envar>
-      <name>FCST_TIME</name>
-      <value>00</value>
-    </envar>
-    <envar>
-      <name>NCL_VER</name>
-      <value>&NCL_VER;</value>
-    </envar>
-    <envar>
-      <name>DATAROOT</name>
-      <value>&DATAROOT;</value>
-    </envar>
-    <envar>
-      <name>DATAHOME</name>
-      <value><cyclestr>&DATAROOT;/@Y@m@d@H</cyclestr></value>
-    </envar>
-    <envar>
-      <name>MODEL</name>
-      <value>RTMA_3D</value>
-    </envar>
-    <envar>
-      <name>NCLPRD</name>
-      <value>nclprd_inc</value>
-    </envar>
-    <envar>
-      <name>POSTPRD</name>
-      <value>postprd_inc</value>
-    </envar>
-
-    <dependency>
-      <and>
-        <taskdep task="post_00"/>
-        <taskdep task="post_00_fgs"/>
-      </and>
     </dependency>
 
   </task>
