@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 date
 # set -x
@@ -7,8 +7,9 @@ date
 # User define the following variables:
 
 # branch_gsi_gsd: GSD RAP/HRRR-based GSI branch in repository of ProdGSI
-#branch_gsi_gsd="feature/gsd_raphrrr_july2018"
-branch_gsi_gsd="master"
+branch_gsi_gsd="feature/gsd_raphrrr_April2019_plusCLD"
+# branch_gsi_gsd="feature/gsd_raphrrr_july2018" 
+# branch_gsi_gsd="master"
 # branch_gsi_source: source branch  # the user-specified branch to check out.
                                     # if not specified by user, 
                                     #   it is branch_gsi_gsd by default.
@@ -17,6 +18,37 @@ branch_gsi_gsd="master"
 branch_gsi_source=${branch_gsi_source:-"$branch_gsi_gsd"}
 
 #=========================================================================#
+
+#
+#--- detect the machine/platform
+#
+if [[ -d /dcom && -d /hwrf ]] ; then
+    . /usrx/local/Modules/3.2.10/init/sh
+#   MODULESHOME="/usrx/local/Modules/3.2.10"
+#   . $MODULESHOME/init/sh
+    target=wcoss
+elif [[ -d /cm ]] ; then
+#   MODULESHOME="/usrx/local/Modules/3.2.10"
+#   . $MODULESHOME/init/sh
+    target=cray
+elif [[ -d /ioddev_dell ]]; then
+#   MODULESHOME="/usrx/local/Modules/3.2.10"
+#   . $MODULESHOME/init/sh
+    target=dell
+elif [[ -d /scratch3 ]] ; then
+    . /etc/profile
+    . /etc/profile.d/modules.sh >/dev/null # Module Support
+    target=theia
+elif [[ -d /jetmon ]] ; then
+    . /etc/profile
+    . /etc/profile.d/modules.sh >/dev/null # Module Support
+    target=jet
+else
+    echo "unknown target = $target"
+    exit 9
+fi
+echo " This machine is $target ."
+#===================================================================#
 
 echo "*==================================================================*"
 echo " this script is going to clone a local repository of ProdGSI "
@@ -27,7 +59,7 @@ echo "     ----> ${branch_gsi_source}"
 echo
 echo " please look at the branch name and make sure it is the branch you want to check out "
 echo " if it is not, abort and change the definition of branch_gsi_source in this script ($0)  "
-read -p " Press [Enter] key to continue (or Press Ctrl-C to abort) "
+# read -p " Press [Enter] key to continue (or Press Ctrl-C to abort) "
 echo
 echo "*==================================================================*"
 
@@ -69,6 +101,10 @@ SORCDIR_GSI=${TOP_SORC}/${DIRNAME_GSI}
 #
 cd ${TOP_SORC}
 
+if [ -d ${DIRNAME_GSI} ] ; then
+    rm -rf ${DIRNAME_GSI}
+fi
+
 echo " make a local clone of the ProdGSI repository under ${TOP_SORC}/${DIRNAME_GSI} ... "
 echo " ====> git clone gerrit:ProdGSI  ./${DIRNAME_GSI} "
 git clone gerrit:ProdGSI  ./${DIRNAME_GSI}
@@ -93,19 +129,27 @@ git submodule update --init libsrc
 echo
 
 #
-#--- link modulefiles used in GSI
+#--- If no modulefile specified for 3DRTMA on this machine to build GSI,
+#--- then adopting the modulefile used in GSI.
 #
-MODULEFILES=${TOP_RTMA}/modulefiles
-SORCDIR_GSI=${TOP_SORC}/rtma_gsi.fd
-echo " --> linking GSI modulefiles to RTMA3D modulefiles (used for compilation of GSI)  "
-cd ${MODULEFILES}
-mfiles="modulefile.ProdGSI.wcoss modulefile.ProdGSI.theia modulefile.ProdGSI.jet modulefile.global_gsi.theia modulefile.global_gsi.jet"
-for modfile in $mfiles
-do
-  echo " ----> ln -sf ${MODULEFILES}/$modfile ${SORCDIR_GSI}/modulefiles/$modfile "
-  ln -sf ${SORCDIR_GSI}/modulefiles/$modfile ${MODULEFILES}/$modfile 
-done
-
+#MODULEFILES=${TOP_RTMA}/modulefiles
+#SORCDIR_GSI=${TOP_SORC}/rtma_gsi.fd
+#modules_fname=modulefile.build.gsi.${target}
+# modules_fname=modulefile.build.gsi_NoPreInstalledLibs.${target}
+#if [ ! -f ${MODULEFILES}/${target}/build/${modules_fname} ] ; then
+#  echo " --> There is no pre-defined modulefile for building 3DRTMA on this ${target}.  "
+#  echo " --> Using modulefile in ProdGSI package to build 3DRTMA  "
+#  mfiles_gsi="modulefile.ProdGSI.${target}"
+#  for modfile in ${mfiles_gsi}
+#  do
+#    if [ ! -f ${SORCDIR_GSI}/modulefiles/${modfile} ] ; then
+#      echo " ----> ProdGSI also does NOT have modulefile for this ${target}. Abort! "
+#      exit 1
+#    else
+#      cp -p ${SORCDIR_GSI}/modulefiles/${modfile}   ${MODULEFILES}/${target}/build/${modules_fname}
+#    fi
+#  done
+#fi
 # set +x
 
 date

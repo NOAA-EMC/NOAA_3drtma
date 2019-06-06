@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/ksh
 
 # --- for debug --- #
 date
@@ -58,7 +58,8 @@ export PDYHH="${PDY}${cyc}"
 ####################################
 export LOG_JJOB=${LOG_JJOB:-$COMROOT/logs/jlogfiles}
 export jlogfile=${jlogfile:-$LOG_JJOB/jlogfile.${jobid}}
-export pgmout=${pgmout:-"OUTPUT.$$"}
+# export pgmout=${pgmout:-"OUTPUT.$$"}
+export pgmout=${pgmout:-"OUTPUT.${PDY}${cyc}.${jobid}"}
 if [ ! -d ${LOG_JJOB} ] ; then
    mkdir -p ${LOG_JJOB}
 fi
@@ -75,6 +76,7 @@ export EXECrtma3d=${EXECrtma3d:-$HOMErtma3d/exec}
 export FIXrtma3d=${FIXrtma3d:-$HOMErtma3d/fix/${RUN}}
 export PARMrtma3d=${PARMrtma3d:-$HOMErtma3d/parm/${RUN}}
 export USHrtma3d=${USHrtma3d:-$HOMErtma3d/ush/${RUN}}
+export UTILrtma3d=${UTILrtma3d:-$HOMErtma3d/util/${RUN}}
 
 # date and time for previous and next cycle
 export PDYHH_cycm1=$($NDATE -01  "${PDYHH}")
@@ -111,32 +113,29 @@ fi
 
 ###########################################################
 #
-# The following variables are used in exrtma3d_obsprep_cloud.sh
+# The following variables are used in exrtma3d_obsprep_cloud.ksh
 #
 ###########################################################
 
-#   Set the path to the executable
-    export NASACLOUD_EXEDIR=${NASACLOUD_EXEDIR:-"${EXECrtma3d}"}
-    export NASACLOUD_EXE=${NASACLOUD_EXE:-"rap_process_cloud.exe"}
-    export NASACLOUD=${NASACLOUD:-"${NASACLOUD_EXEDIR}/${NASACLOUD_EXE}"}
+#   Set the name to the executable
+    export exefile_name_cloud=${exefile_name_cloud:-"rtma3d_process_cloud"}
 
 #   Set the path to the GSI static files
-#   export FIX_ROOT=${FIXrtma3d:?} 
-    export fixdir=${FIX_GSI:-"${FIXrtma3d}/GSI-fix"}
-    export CRTMFIX=${FIX_CRTM:-"${FIXrtma3d}/CRTM-fix"}
-    export PARMwps=${PARMwps:-"${FIXrtma3d}/WPS"}
+    export FIXgsi=${FIXgsi:-"${FIXrtma3d}/gsi"}
+    export FIXcrtm=${FIXcrtm:-"${FIXrtma3d}/crtm"}
+    export FIXwps=${FIXwps:-"${FIXrtma3d}/wps"}
 
-    export PARMupp=${PARMupp:-"${PARMrtma3d}/UPP"}
-    export PARMwrf=${PARMwrf:-"${PARMrtma3d}/WRF"}
+    export PARMupp=${PARMupp:-"${PARMrtma3d}/upp"}
+    export PARMwrf=${PARMwrf:-"${PARMrtma3d}/wrf"}
 
-    export OBS_USELIST=${OBS_USELIST:-"${FIXrtma3d}/GSI-fix"}
+    export OBS_USELIST=${OBS_USELIST:-"${FIXrtma3d}/gsi"}
 
 ##########################################################
 
 ######################
 # Execute the script.
 ######################
-${exSCR_OBSPREP_CLOUD:-$HOMErtma3d/scripts/${RUN}/ex${RUN}_cloud.sh}
+${exSCR_OBSPREP_CLOUD:-$HOMErtma3d/scripts/${RUN}/ex${RUN}_cloud.ksh}
 export err=$?; err_chk
 
 msg="$0 of $job completed normally"

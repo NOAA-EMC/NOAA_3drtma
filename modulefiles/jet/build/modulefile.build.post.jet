@@ -1,0 +1,132 @@
+#%Module######################################################################
+
+#############################################################
+
+## Lin.Gan@noaa.gov
+
+## EMC
+
+## post v7.0.0 
+
+## Wen Meng 07/2018: set post to v8.0.0 for fv3gfs
+
+#
+
+#  Edward Colon 03/2019: add this module file for Jet
+
+#
+
+#############################################################
+
+proc ModulesHelp { } {
+
+puts stderr "Set environment veriables for post"
+
+puts stderr "This module initializes the users environment"
+
+puts stderr "to build the post for WCOSS production.\n"
+
+}
+
+module-whatis "post"
+
+set ver v8.0.0
+
+# Loading Intel Compiler Suite
+
+# newdefaults is no longer available (03/26/2019)
+
+# module load newdefaults
+
+# intel default compiler is  18.0.5.274 (03/26/2019, more strict than v15.)
+
+# module load intel/18.0.5.274
+
+  module load intel/15.0.3.187
+
+# impi default is 2018.4.274 (03/26/2019)
+
+# module load impi/2018.4.274
+
+  module load impi/5.0.3.048
+
+# Loading nceplibs modules
+
+  module use /lfs3/projects/hfv3gfs/nwprod/lib/modulefiles
+
+  module load sigio/v2.0.1
+
+  module load jasper/v1.900.1
+
+  module load png/v1.2.44
+
+  module load z/v1.2.6
+
+  module load sfcio/v1.0.0
+
+  module load nemsio/v2.2.2
+
+  module load bacio/v2.0.1
+
+  module load g2/v2.5.2
+
+  module load xmlparse/v2.0.0
+
+  module load gfsio/v1.1.0
+
+  module load ip/v3.0.0
+
+  module load sp/v2.0.2
+
+  module load w3emc/v2.2.0
+
+  module load w3nco/v2.0.6
+
+  module load crtm/v2.2.3
+
+  module load g2tmpl/v1.4.0
+
+# on Jet, netcdf 4 requires for szip and hdf5 loaded first
+
+# module load szip/2.1
+
+# module load hdf5/1.8.9
+
+# module load netcdf/4.2.1.1
+
+ 
+
+# UPP still works with netcdf 3, not 4. So switch.
+
+# module switch netcdf/4.2.1.1 netcdf/3.6.3
+
+  module load netcdf/3.6.3
+
+  setenv NETCDF /apps/netcdf/3.6.3-intel
+
+  setenv NETCDF_DIR /apps/netcdf/3.6.3-intel
+
+  setenv NETCDF_INCLUDES /apps/netcdf/3.6.3-intel/include
+
+  setenv NETCDF_LIBRARIES /apps/netcdf/3.6.3-intel/lib
+
+#
+
+  setenv WRFPATH /lfs3/projects/hfv3gfs/nwprod/wrf_shared.v1.1.0
+
+  setenv myFC mpiifort
+
+  setenv OPENMP "-qopenmp"
+
+  setenv myFCFLAGS "-O3 -convert big_endian -traceback -g -fp-model source -openmp -fpp"
+
+#
+
+# setenv myFCFLAGS "-O0 -convert big_endian -fp-model source -openmp -g -check all -ftrapuv -fp-stack-check -fstack-protector -heap-arrays -recursive -traceback"
+
+  setenv myCPP /lib/cpp 
+
+# setenv myCPPFLAGS "-P"
+
+  setenv myCPPFLAGS "-P -nostdinc"
+

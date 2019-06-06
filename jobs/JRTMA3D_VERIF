@@ -49,6 +49,12 @@ export NET=rtma3d
 export jobid=${jobid:-"${outid}.o$$"}
 
 export DATA=${DATA:-${DATAROOT:?}/${jobid:?}}  #jobid ($job.$LSB_JOBID MUST BE DEFINED IN TERNS OF $RUN IN UPPER LEVEL SCRIPT /MPondeca, 26Jul2015
+if [ -d $DATA ] ; then
+   rm  -rf $DATA/*
+else
+   mkdir -p $DATA
+fi
+cd $DATA
 
 ####################################
 
@@ -66,7 +72,8 @@ export jlogfile=${jlogfile:-$COMROOT/logs/jlogfiles/jlogfile.$jobid}
 
 PDYm1=`$NDATE -24 ${PDY}${cyc} | cut -c 1-8`
 
-export pgmout=${pgmout:-"OUTPUT.$$"}
+# export pgmout=${pgmout:-"OUTPUT.$$"}
+export pgmout=${pgmout:-"OUTPUT.${PDY}${cyc}.${jobid}"}
 
 export cycle=t${cyc}z 
 
@@ -90,15 +97,27 @@ export PARMrtma3d=${PARMrtma3d:-$HOMErtma/parm/${RUN}}
 
 export USHrtma3d=${USHrtma3d:-$HOMErtma/ush/${RUN}}
 
+export UTILrtma3d=${UTILrtma3d:-$HOMErtma3d/util/${RUN}}
+
 export config_dir=${config_dir:-$PARMverf/config_files}
 
 export urma_dir_ops=${urma_dir_ops:-$DATA_OBSPRD}
 
 export urma_dir=${urma_dir:-$DATA_OBSPRD}
 
-export stat_dir=${stat_dir:-$DATAHOME}
+export DATA_RUNDIR=${DATA_RUNDIR:-"${DATAROOT}/${envir}/${RUN}.${PDY}${cyc}${subcyc}"}
+# stat_dir and MET_DIR are both used in verification MET script
+# MET_DIR: as MET running dir
+# stat_dir: as statistics results output dir (could be same as MET_DIR?)
+export DATA_VERIF=${DATA_VERIF:-"${DATA_RUNDIR}/verifprd"}
+export stat_dir=${stat_dir:-"${DATA_VERIF}"}
+export MET_DIR=${MET_DIR:-"$DATA"}
+if [ ! -d $MET_DIR ] ; then
+   mkdir -p $MET_DIR
+fi
 
 export MASKS=${MASKS:-$PARMverf/masks}
+
 
 ###########################################
 
@@ -118,15 +137,23 @@ export MASKS=${MASKS:-$PARMverf/masks}
 
 export COMOUT=${COMOUT:-$COMROOT/${NET}/${envir}}/${RUN}.${PDY}
 
-mkdir -p $COMOUT
+if [ ! -d "${COMOUT}" ] ; then
+   mkdir -p $COMOUT
+fi
 
 export COMOUTpost_rtma3d=${COMOUTpost_rtma3d:-${COMOUT}/postprd.${cycle}}
+
+### 3DRTMA Verification Products
+export COMOUTverif_rtma3d=${COMOUTverif_rtma3d:-"${COMOUT}/verifprd.${cycle}"}
+if [ ! -d "${COMOUTverif_rtma3d}" ] ; then
+   mkdir -p ${COMOUTverif_rtma3d}
+fi
 
 ###########################################################
 
 #
 
-# The following variables are used in exrtma3d_gsianl.sh
+# The following variables are used in exrtma3d_gsianl.ksh
 
 #
 
@@ -140,7 +167,7 @@ export COMOUTpost_rtma3d=${COMOUTpost_rtma3d:-${COMOUT}/postprd.${cycle}}
 
 # Execute the script.
 
-${exSCR_VERIF:-$HOMErtma3d/scripts/${RUN}/rtma3d_verif.sh}
+${exSCR_VERIF:-$HOMErtma3d/scripts/rtma3d_verif.ksh}
 
 export err=$?; err_chk
 

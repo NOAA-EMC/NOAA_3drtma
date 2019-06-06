@@ -1,0 +1,150 @@
+#%Module######################################################################
+
+##                                                       Russ.Treadon@noaa.gov
+
+##                                                           NOAA/NWS/NCEP/EMC
+
+## GDAS_ENKF v6.2.3
+
+##_____________________________________________________
+
+#proc ModulesHelp { } {
+
+#puts stderr "Set environment veriables for GSI build with CMake"
+
+#puts stderr "This module initializes the environment "
+
+#puts stderr "for the Intel Compiler Suite $version\n"
+
+#}
+
+#module-whatis " GDAS_ENKF whatis description"
+
+#
+
+#
+
+# module load newdefaults             # no longer available (03/26/2019)
+
+# module load intel/18.0.5.274        # (D, 03/26/2019, only work for updated GSI by GSD_GSI)
+
+  module load intel/18.0.5.274 
+
+  module load impi/2018.4.274         # (D, 03/26/2019)
+
+# module load impi/5.0.3.048
+
+  module load pnetcdf                 # (D, only work with impi)
+
+# module load mvapich2/2.3            # (D, alternative to impi)
+
+ 
+
+# GSI requires for NETCDF4
+
+# on Jet, netcdf 4 requires for szip and hdf5 loaded first
+
+  module load szip/2.1                # (D)
+
+  module load hdf5/1.8.9              # (D)
+
+  module load netcdf/4.2.1.1          # (D) 03/26/2019 default is netcdf 4, not 3
+
+  export NETCDF4=/apps/netcdf/4.2.1.1-intel
+
+# module load netcdf/3.6.3
+
+# module switch netcdf/4.2.1.1 netcdf/3.6.3
+
+  export NETCDF_DIR=${NETCDF}
+
+  export NETCDF_INCLUDES=${NETCDF}/include
+
+  export NETCDF_LIBRARIES=${NETCDF}/lib
+
+# export FFLAGS="-openmp"             #  -openmp for intel 14 & old
+
+  export FFLAGS="-qopenmp"            # -qopenmp for intel 15 & beyond
+
+# export LDFLAGS="-openmp"            #  -openmp for intel 14 & old
+
+  export LDFLAGS="-qopenmp"           # -qopenmp for intel 15 & beyond
+
+#==============================================================#
+
+# loading pre-installed nwprod NCEPLIBs if necessary
+
+# Note:
+
+#      if using, then cmake gsi with BUILD_CORELIBS=OFF, but running may fail with seg fault.
+
+#      so currently not loading these modules, 
+
+#      but compiling corelibs with gsi together with BUILD_CORELIBS=ON.
+
+# export COREPATH=/mnt/lfs3/projects/hfv3gfs/nwprod/lib
+
+# export NCEPLIBS=$COREPATH
+
+# module use $NCEPLIBS/modulefiles
+
+# module load bacio/v2.0.2
+
+# module load crtm/v2.2.4
+
+# module load bufr/v11.1.0
+
+# module load nemsio/v2.2.2
+
+# module load sp/v2.0.2
+
+# module load w3emc/v2.2.0
+
+# module load w3nco/v2.0.6
+
+# module load sigio/v2.0.1
+
+# module load sfcio/v1.0.0
+
+##module load g2/v2.5.2
+
+##module load g2tmpl/v1.4.0
+
+##module load jasper/v1.900.1
+
+##module load png/v1.2.44
+
+##module load z/v1.2.6
+
+#==============================================================#
+
+  module load contrib
+
+  module load nco
+
+#     PyThon
+
+# module load anaconda    # Warning: New GSI package uses new cmake and requires for anaconda.
+
+#                                    but for this gsd_july2018 GSI, do not load it.
+
+#                                    May lead to cmake fail for gsi.
+
+ 
+
+# env used for compilg wrf and comGSI
+
+  export WRFIO_NCD_LARGE_FILE_SUPPORT=1
+
+# export LAPACK_PATH=${MKLROOT}
+
+# export MKL=${MKLROOT}
+
+# export JASPER=/usr
+
+# export JASPERLIB=${JASPER}/lib64
+
+# export JASPERINC=${JASPER}/include
+
+# export SMS=/opt/sms/2.9.0-intel-9.1
+

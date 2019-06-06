@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/ksh
 
 # --- for debug --- #
 date
@@ -58,7 +58,8 @@ export subcyc=${subcyc} #Note: Must define subcyc in upper level script. Can be 
 ####################################
 export LOG_JJOB=${LOG_JJOB:-$COMROOT/logs/jlogfiles}
 export jlogfile=${jlogfile:-$LOG_JJOB/jlogfile.${jobid}}
-export pgmout=${pgmout:-"OUTPUT.$$"}
+# export pgmout=${pgmout:-"OUTPUT.$$"}
+export pgmout=${pgmout:-"OUTPUT.${PDY}${cyc}.${jobid}"}
 if [ ! -d ${LOG_JJOB} ] ; then
    mkdir -p ${LOG_JJOB}
 fi
@@ -75,6 +76,7 @@ export EXECrtma3d=${EXECrtma3d:-$HOMErtma3d/exec}
 export FIXrtma3d=${FIXrtma3d:-$HOMErtma3d/fix/${RUN}}
 export PARMrtma3d=${PARMrtma3d:-$HOMErtma3d/parm/${RUN}}
 export USHrtma3d=${USHrtma3d:-$HOMErtma3d/ush/${RUN}}
+export UTILrtma3d=${UTILrtma3d:-$HOMErtma3d/util/${RUN}}
 
 #################################################
 # Set up the INPUT and OUTPUT directories
@@ -98,13 +100,16 @@ if [ ! -d "${GESINhrrr_rtma3d}" ] ; then
    mkdir -p $GESINhrrr_rtma3d
 fi
 
-
+###########################################################
+export obsprep_radar=${obsprep_radar:-1}
+export obsprep_lghtn=${obsprep_lghtn:-1}
+export obsprep_cloud=${obsprep_cloud:-1}
 ###########################################################
 
 ######################
 # Execute the script.
 ######################
-${exSCR_FETCHHPSS:-$HOMErtma3d/scripts/${RUN}/ex${RUN}_fetchhpss.sh}
+${exSCR_FETCHHPSS:-$HOMErtma3d/scripts/ex${RUN}_fetchhpss.ksh}
 export err=$?; err_chk
 
 msg="$0 of $job completed normally"

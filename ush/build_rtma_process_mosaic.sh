@@ -1,12 +1,46 @@
-#!/bin/sh
+#!/bin/bash
 
 date
-set -x
+# set -x
+#=========================================================================#
+#
+#--- detect the machine/platform
+#
+if [[ -d /dcom && -d /hwrf ]] ; then
+    . /usrx/local/Modules/3.2.10/init/sh
+#   MODULESHOME="/usrx/local/Modules/3.2.10"
+#   . $MODULESHOME/init/sh
+    target=wcoss
+elif [[ -d /cm ]] ; then
+#   MODULESHOME="/usrx/local/Modules/3.2.10"
+#   . $MODULESHOME/init/sh
+    conf_target=nco
+    target=cray
+elif [[ -d /ioddev_dell ]]; then
+#   MODULESHOME="/usrx/local/Modules/3.2.10"
+#   . $MODULESHOME/init/sh
+    conf_target=nco
+    target=dell
+elif [[ -d /scratch3 ]] ; then
+    . /etc/profile
+    . /etc/profile.d/modules.sh >/dev/null # Module Support
+    target=theia
+elif [[ -d /jetmon ]] ; then
+    . /etc/profile
+    . /etc/profile.d/modules.sh >/dev/null # Module Support
+    target=jet
+else
+    echo "unknown target = $target"
+    exit 9
+fi
+echo " This machine is $target ."
 
 #=========================================================================#
 # User define the following variables:
 
 dirname_source="rtma_process_mosaic.fd"
+
+exefile_name_mosaic="rtma3d_process_mosaic"
 
 #=========================================================================#
 
@@ -14,52 +48,6 @@ echo "*==================================================================*"
 echo " this script is going to build/make the executable code of observation pre-process " 
 echo "   of MOSAIC radar data used for RTMA3D " 
 echo "*==================================================================*"
-#
-#--- detect the machine/platform
-#
-if [[ -d /dcom && -d /hwrf ]] ; then
-    . /usrx/local/Modules/3.2.10/init/sh
-    target=wcoss
-    . $MODULESHOME/init/sh
-elif [[ -d /cm ]] ; then
-    . $MODULESHOME/init/sh
-    conf_target=nco
-    target=cray
-elif [[ -d /ioddev_dell ]]; then
-    . $MODULESHOME/init/sh
-    conf_target=nco
-    target=dell
-elif [[ -d /scratch3 ]] ; then
-    . /apps/lmod/lmod/init/sh
-    target=theia
-elif [[ -d /jetmon ]] ; then
-    . /apps/lmod/lmod/init/sh
-    target=jet
-elif [ $target = dell ]; then
-    module purge
-    source $modules_dir/modulefile.ProdGSI.$target
-    export NETCDF_INCLUDE=-I/usrx/local/prod/packages/ips/18.0.1/netcdf/4.5.0/include
-    export NETCDF_CFLAGS=-I/usrx/local/prod/packages/ips/18.0.1/netcdf/4.5.0/include
-    export NETCDF_LDFLAGS_CXX="-L/usrx/local/prod/packages/ips/18.0.1/netcdf/4.5.0/lib -lnetcdf -lnetcdf_c++"
-    export NETCDF_LDFLAGS_CXX4="-L/usrx/local/prod/packages/ips/18.0.1/netcdf/4.5.0/lib -lnetcdf -lnetcdf_c++4"
-    export NETCDF_CXXFLAGS=-I/usrx/local/prod/packages/ips/18.0.1/netcdf/4.5.0/include
-    export NETCDF_FFLAGS=-I/usrx/local/prod/packages/ips/18.0.1/netcdf/4.5.0/include
-    export NETCDF_ROOT=/usrx/local/prod/packages/ips/18.0.1/netcdf/4.5.0
-    export NETCDF_LIB=/usrx/local/prod/packages/ips/18.0.1/netcdf/4.5.0/lib
-    export NETCDF_LDFLAGS_F="-L/usrx/local/prod/packages/ips/18.0.1/netcdf/4.5.0/lib -lnetcdff"
-    export NETCDF_LDFLAGS_C="-L/usrx/local/prod/packages/ips/18.0.1/netcdf/4.5.0/lib -lnetcdf"
-    export NETCDF_LDFLAGS="-L/usrx/local/prod/packages/ips/18.0.1/netcdf/4.5.0/lib -lnetcdff"
-    export NETCDF=/usrx/local/prod/packages/ips/18.0.1/netcdf/4.5.0
-    export NETCDF_INC=/usrx/local/prod/packages/ips/18.0.1/netcdf/4.5.0/include
-    export NETCDF_CXX4FLAGS=-I/usrx/local/prod/packages/ips/18.0.1/netcdf/4.5.0/include
-else
-    echo " ----> WARNING: module file has not been configured for this machine: $target "
-    echo " ----> warning: abort compilation "
-    exit 9
-fi
-
-echo " This machine is $target ."
-#===================================================================#
 
 #
 #--- Finding the RTMA ROOT DIRECTORY --- #
@@ -90,6 +78,7 @@ then
 fi
 
 USH_DIR=${TOP_RTMA}/ush
+MODULEFILES_DIR=${TOP_RTMA}/modulefiles
 
 cd $TOP_RTMA
 EXEC=${TOP_RTMA}/exec
@@ -108,7 +97,7 @@ echo "   ----> ${SOURCE_DIR}"
 echo
 echo " please look at the source code directory name and make sure it is the name you want to build code on "
 echo " if it is not, abort and change the definition of 'dirname_source' in this script ($0)  "
-read -p " Press [Enter] key to continue (or Press Ctrl-C to abort) "
+# read -p " Press [Enter] key to continue (or Press Ctrl-C to abort) "
 echo
 echo "*==================================================================*"
 #
@@ -126,22 +115,27 @@ fi
 #
 
 #==================#
-# load modules
-modules_dir=${TOP_RTMA}/modulefiles
+# load modules (using module file under modulefiles/${target}/build)
+#
+
+modules_dir=${MODULEFILES_DIR}/${target}/build
+modules_fname=modulefile.build.gsi.${target}
+
 if [ $target = wcoss -o $target = cray ]; then
     module purge
-    module load $modules_dir/modulefile.ProdGSI.$target
+    module load $modules_dir/${modules_fname}
 elif [ $target = theia ]; then
     module purge
-    source $modules_dir/modulefile.ProdGSI.$target
+    source $modules_dir/${modules_fname}
     module list
 elif [ $target = jet ]; then
+#    modules_fname=modulefile.build.gsi.PreInstalledLibs.${target}
     module purge
-    source $modules_dir/modulefile.ProdGSI.$target
+    source $modules_dir/${modules_fname}
     module list
 elif [ $target = dell ]; then
     module purge
-    source $modules_dir/modulefile.ProdGSI.$target
+    source $modules_dir/${modules_fname}
     export NETCDF_INCLUDE=-I/usrx/local/prod/packages/ips/18.0.1/netcdf/4.5.0/include
     export NETCDF_CFLAGS=-I/usrx/local/prod/packages/ips/18.0.1/netcdf/4.5.0/include
     export NETCDF_LDFLAGS_CXX="-L/usrx/local/prod/packages/ips/18.0.1/netcdf/4.5.0/lib -lnetcdf -lnetcdf_c++"
@@ -173,9 +167,11 @@ make -f makefile_${target}  >& ./log.make.process_NSSL_mosaic
 
 if [ $? -eq 0 ] ; then
   echo " code was built successfully."
-  echo " cp -p ${BUILD_DIR}/process_NSSL_mosaic.exe   ${EXEC}/process_NSSL_mosaic.exe "
-  cp -p ${BUILD_DIR}/process_NSSL_mosaic.exe   ${EXEC}/process_NSSL_mosaic.exe
-  ls -l ${EXEC}/process_NSSL_mosaic.exe
+
+  echo " cp -p ${BUILD_DIR}/process_NSSL_mosaic.exe   ${EXEC}/${exefile_name_mosaic} "
+  cp -p ${BUILD_DIR}/process_NSSL_mosaic.exe   ${EXEC}/${exefile_name_mosaic}
+  ls -l ${EXEC}/${exefile_name_mosaic}
+
 else
   echo " ================ WARNING =============== " 
   echo " Compilation of process_NSSL_mosaic code was failed."
