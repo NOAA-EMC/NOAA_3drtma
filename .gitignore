@@ -51,9 +51,9 @@
 #
 #  # ignore directory of static data ('fix/', 'parm/')
 #
-  parm/*
+  parm
 #
-  fix/*
+  fix
 #
   !parm/gsi
 #

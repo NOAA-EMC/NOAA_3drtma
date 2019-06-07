@@ -35,6 +35,8 @@ if [ "${machine}" = "theia" ] ; then
 # loading modules for specific task
   case "$COMMAND" in
     *VERIF*)
+      module load anaconda/anaconda2-4.4.0
+      module use contrib/modulefiles
       module load met/8.0
       ;;
     *)
