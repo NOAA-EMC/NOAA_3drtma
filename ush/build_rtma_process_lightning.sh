@@ -28,6 +28,12 @@ elif [[ -d /scratch3 ]] ; then
 elif [[ -d /jetmon ]] ; then
     . /etc/profile
     . /etc/profile.d/modules.sh >/dev/null # Module Support
+    target=jet
+else
+    echo "unknown target = $target"
+    exit 9
+fi
+echo " This machine is $target ."
 #=========================================================================#
 # User define the following variables:
 
@@ -41,7 +47,6 @@ echo "*==================================================================*"
 echo " this script is going to build/make the executable code of observation pre-process " 
 echo "   of ENLTN (lighning for glm) data used for RTMA3D " 
 echo "*==================================================================*"
-
 #===================================================================#
 
 #

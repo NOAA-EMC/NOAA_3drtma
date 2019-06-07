@@ -129,7 +129,6 @@ echo " running build_rtma_post.sh to build uni-post code ..."
 cd ${USH_DIR}
 echo " running link_rtma.sh to link fixed dta , executables, etc. ... "
 ./link_rtma.sh
->>>>>>> master
 
 #===================================================================#
 date
