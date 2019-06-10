@@ -118,6 +118,8 @@ ulimit -S -s unlimited
 rm -f ./plt_fai.gs      ./variables_list_for_plot.txt
 cp -p ${UTILrtma3d_dev}/plot/grads/script/plt_fai.tmplt.gs			./plt_fai.gs
 cp -p ${UTILrtma3d_dev}/plot/grads/script/variables_list_for_plot.txt	        ./variables_list_for_plot.txt
+cp -p ${UTILrtma3d_dev}/plot/grads/script/cbarns.gs                             ./cbarn.gs
+cp -p ${UTILrtma3d_dev}/plot/grads/script/panels.gsf                            ./panels.gsf
 sed -i 's/GMFNAME/'${gmf_fhead}'/g' ./plt_fai.gs
 sed -i 's/Y4M2D2H2M2/'${adate}'/g'  ./plt_fai.gs
 
@@ -127,6 +129,7 @@ rm -f ./${gmf_fhead}_*.gmf ./${gmf_fhead}_*.ps  ./${gmf_fhead}_*.png ./${gmf_fhe
 . prep_step
 startmsg
 
+export GASCRP="${GASCRP} ${PLRDIR}"
 grads -lbcx ./plt_fai.gs
 
 gmf_fname=`ls ${gmf_fhead}_*.gmf`
