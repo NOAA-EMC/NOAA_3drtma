@@ -39,9 +39,7 @@ echo " This machine is $target ."
 
 dirname_source="rtma_process_lightning.fd"
 ltn_bufr="netcdf_bufr"
-exefile_name_lightning="rtma3d_process_retro_lightning"
-
-#=========================================================================#
+exefile_name_lightning="process_Lightning_bufr.exe"
 
 echo "*==================================================================*"
 echo " this script is going to build/make the executable code of observation pre-process " 
@@ -162,17 +160,16 @@ BUILD_DIR=${SOURCE_DIR}/${ltn_bufr}
 cd ${BUILD_DIR}
 echo " ====>  compiling (bufr lightning)  is under directory: ${BUILD_DIR} "
 
-make clean  -f makefile_${target}
-echo " make -f makefile_${target}  >& ./log.make.process_lightning_bufr "
-make -f makefile_${target}  >& ./log.make.process_lightning_bufr
+make clean  -f makefile_${target}_${MACHINENAME}
+echo " make -f makefile_${target}_${MACHINENAME}  >& ./log.make.process_lightning_bufr "
+make -f makefile_${target}_${MACHINENAME}  >& ./log.make.process_lightning_bufr
 
 if [ $? -eq 0 ] ; then
   echo " code was built successfully."
 
-  echo " cp -p ${BUILD_DIR}/process_Lightning_bufr.exe    ${EXEC}/${exefile_name_lightning} "
-  cp -p ${BUILD_DIR}/process_Lightning_bufr.exe    ${EXEC}/${exefile_name_lightning}
-  ls -l ${EXEC}/${exefile_name_lightning}
-
+  echo " cp -p ${BUILD_DIR}/process_Lightning_bufr.exe    ${EXEC}/GSI/${exefile_name_lightning} "
+  cp -p ${BUILD_DIR}/process_Lightning_bufr.exe    ${EXEC}/GSI/${exefile_name_lightning}
+  ls -l ${EXEC}/GSI/${exefile_name_lightning}
 else
   echo " ================ WARNING =============== " 
   echo " Compilation of code to pre-process lightning obs was failed."

@@ -46,6 +46,7 @@ echo " This machine is $target ."
 #
 #--- Finding the RTMA ROOT DIRECTORY --- #
 #
+
 BASE=`pwd`;
 echo " current directory is $BASE "
 
@@ -71,7 +72,33 @@ then
   exit 1
 fi
 
-export USH_DIR=${TOP_RTMA}/ush
+export USH_DIR=${TOP_RTMA}/ush 
+export EXEC_DIR=${TOP_RTMA}/exec
+
+
+if [ $target = 'jet' ] ; then
+
+ln -s /home/rtrr/HRRR/exec/GSI/count_obs.exe ${EXEC_dir}/GSI/rtma3d_count_obs
+ln -s /home/rtrr/HRRR/exec/GSI/HRRR_gsi_hyb ${EXEC_dir}/GSI/rtma3d_gsi_hyb
+ln -s /home/rtrr/HRRR/exec/GSI/prepbufr_append_clamps.exe ${EXEC_dir}/GSI/prepbufr_append_clamps.exe
+ln -s /home/rtrr/HRRR/exec/GSI/prepbufr_append_sticknet.exe ${EXEC_dir}/GSI/prepbufr_append_sticknet.exe
+ln -s /home/rtrr/HRRR/exec/GSI/prepbufr_append_vessonndes.exe ${EXEC_dir}/GSI/prepbufr_append_vessonndes.exe
+ln -s /home/rtrr/HRRR/exec/GSI/process_Lightning.exe ${EXEC_dir}/GSI/process_Lightning.exe
+ln -s /home/rtrr/HRRR/exec/GSI/process_Lightning_bufr.exe ${EXEC_dir}/GSI/process_Lightning_bufr.exe
+ln -s /home/rtrr/HRRR/exec/GSI/process_NASALaRC_cloud.exe ${EXEC_dir}/GSI/process_NASALaRC_cloud.exe
+ln -s /home/rtrr/HRRR/exec/GSI/process_NSSL_mosaic.exe ${EXEC_dir}/GSI/process_NSSL_mosaic.exe
+ln -s /home/rtrr/HRRR/exec/GSI/process_SST.exe  ${EXEC_dir}/GSI/process_SST.exe
+ln -s /home/rtrr/HRRR/exec/GSI/process_sodardata_rt.exe ${EXEC_dir}/GSI/process_sodardata_rt.exe
+ln -s /home/rtrr/HRRR/exec/GSI/process_tamdar_netcdf.exe ${EXEC_dir}/GSI/process_tamdar_netcdf.exe
+ln -s /home/rtrr/HRRR/exec/GSI/rap_process_cloud ${EXEC_dir}/GSI/rap_process_cloud
+ln -s /home/rtrr/HRRR/exec/GSI/read_diag_conv.exe ${EXEC_dir}/GSI/read_diag_conv.exe
+ln -s /home/rtrr/HRRR/exec/GSI/read_diag_rad.exe ${EXEC_dir}/GSI/read_diag_rad.exe
+ln -s /home/rtrr/HRRR/exec/GSI/ssrc.exe ${EXEC_dir}/GSI/ssrc.exe
+ln -s /home/rtrr/HRRR/exec/UPP/ncep_post.exe ${EXEC_dir}/UPP/ncep_post.exe
+ln -s /home/rtrr/HRRR/exec/smartinit/wgrib2  ${EXEC_dir}/smartinit/wgrib2
+
+else
+
 
 #
 #--- check out GSI package
@@ -132,5 +159,7 @@ echo " running link_rtma.sh to link fixed dta , executables, etc. ... "
 
 #===================================================================#
 date
+
+fi
 
 exit

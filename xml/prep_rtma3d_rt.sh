@@ -64,9 +64,8 @@ elif [[ -d /ioddev_dell ]]; then
 
     MACHINE=dell
 
-    echo "Machine not yet configured for real time 3d rtma but is being developed."
+    export SCHEDULER="LSF"
 
-    exit 1
 
 elif [[ -d /scratch3 ]] ; then
 
@@ -91,6 +90,8 @@ elif [[ -d /mnt/lfs3/projects ]] ; then
     nwprod_path="/mnt/lfs3/projects/hfv3gfs/nwprod/lib/modulefiles"
 
     produtil_path="/mnt/lfs3/projects/hfv3gfs/emc.nemspara/soft/NCEPLIBS-prod_util"
+
+    export SCHEDULER="SLURM"
 
 else
 
@@ -197,13 +198,8 @@ export envir=""                             #environment (test, prod, dev, etc.)
 
 export run_envir=""                         #
 
-export expname="lsf"                      # experiment name
-
 export NWROOT=${TOP_RTMA}                   #root directory for RTMA/URMA j-job scripts, scripts, parm files, etc. 
 
-export SCHEDULER="lsf"                    # SLURM (after 05/01/2019)
-
-                                            # PBS (not available after May 2019)
 
 if [ ${SCHEDULER} = "PBS" ] || [ ${SCHEDULER} = "MOAB" ]; then
 
@@ -224,6 +220,8 @@ else
   exit 1
 
 fi
+
+export expname="$SCHD_ATTRB"
 
 #
 
@@ -366,20 +364,10 @@ if [ ${MACHINE} = 'jet' ] ; then
 
 elif [ ${MACHINE} = 'dell' ] ; then
 
-  rtrr_hrrr='/home/rtrr/HRRR'
+  RTMA3D_GSD='/u/${USER}/rtma3d_repo/GSD'
 
-  rtrr_rap='/home/rtrr/RAP'
-
-  EXECrtrr_hrrr=${rtrr_hrrr}/exec
-
-  EXECrtrr_rap=${rtrr_rap}/exec
-
-  RTMA3D_GSD='/home/${USER}/rtma3d_repo/GSD'
-
-  RTMA3D_GSD_dev1='/home/${USER}/rtma3d_repo/GSD_dev1'
+  RTMA3D_GSD_dev1='/u/${USER}/rtma3d_repo/GSD_dev1'
   
-
-
 fi
 
 
@@ -412,13 +400,17 @@ EXEC_mine=/home/${USER}/rtma3d_repo/rt_nco_jet_GSD_dev1/exec
 
 # GSI
 
+if [ ${MACHINE} = 'jet' ]; then
+
+rm ${EXEC_DIR}/*
+
 export exefile_name_gsi='rtma3d_gsi_hyb'
 
 ln -sf ${EXECrtrr_hrrr}/GSI/HRRR_gsi_hyb ${EXEC_DIR}/${exefile_name_gsi}
 
 export exefile_name_radar='rtma3d_process_NSSL_mosaic'
 
-ln -sf ${EXECrtrr_hrrr}/GSI/process_NSSL_mosaic.exe ${EXEC_DIR}/${exefile_name_radar}
+ln -sf ${EXECrtrr_hrrr}/GSI/process_NSSL_mosaic.x ${EXEC_DIR}/${exefile_name_radar}
 
 export exefile_name_lightning='rtma3d_process_lightning'
 
@@ -456,10 +448,6 @@ export exefile_name_smartinit="rtma3d_smartinit_conus"
 
 ln -sf ${RTMA3D_GSD_dev1}/exec/smartinit/hrrr_smartinit_conus ${EXEC_DIR}/${exefile_name_smartinit}
 
-# MET
-
-export exefile_name_verif=""    # executable of verification (MET) is defined by loading module met
-
 echo 
 
 echo " check up the symbol link name for executables under ${EXEC_DIR}"
@@ -467,6 +455,64 @@ echo " check up the symbol link name for executables under ${EXEC_DIR}"
 ls -l ${EXEC_DIR}
 
 echo 
+
+elif [ ${MACHINE} = 'dell' ] ; then
+
+rm -rf ${EXEC_DIR}/*
+
+export exefile_name_gsi='rtma3d_gsi_hyb'
+
+ln -sf ${EXEC_DIR}/GSI/HRRR_gsi_hyb ${EXEC_DIR}/${exefile_name_gsi}
+
+export exefile_name_radar='rtma3d_process_NSSL_mosaic'
+
+ln -sf ${EXEC_DIR}/GSI/process_NSSL_mosaic.x ${EXEC_DIR}/${exefile_name_radar}
+
+#export exefile_name_lightning='rtma3d_process_lightning'
+
+#ln -sf ${EXEC_DIR}/GSI/process_Lightning.exe ${EXEC_DIR}/${exefile_name_lightning}
+
+export exefile_name_lightning_bufr="rtma3d_process_lightning_bufr"
+
+ln -sf ${EXEC_DIR}/GSI/process_Lightning_bufr.exe ${EXEC_DIR}/${exefile_name_lightning_bufr}
+
+export exefile_name_cloud="rtma3d_process_NASALaRC_cloud"
+
+ln -sf ${EXEC_DIR}/GSI/process_NASALaRC_cloud.exe ${EXEC_DIR}/${exefile_name_cloud}
+
+export exefile_name_diagconv="rtma3d_read_diag_conv"
+
+ln -sf ${EXEC_DIR}/GSI/read_diag_conv.x ${EXEC_DIR}/${exefile_name_diagconv}
+
+export exefile_name_diagrad="rtma3d_read_diag_rad"
+
+ln -sf ${EXEC_DIR}/GSI/read_diag_rad.x ${EXEC_DIR}/${exefile_name_diagrad}
+
+# UPP
+
+export exefile_name_post="rtma3d_ncep_post"
+
+ln -sf ${EXEC_DIR}/UPP/ncep_post.exe ${EXEC_DIR}/${exefile_name_post}
+
+# SMARTINIT
+
+export exefile_name_smartinit="rtma3d_smartinit_conus"
+
+ln -sf ${EXEC_DIR}/smartinit/hrrr_smartinit_conus ${EXEC_DIR}/${exefile_name_smartinit}
+ln -sf /gpfs/dell2/u/Wesley.Ebisuzaki/bin/wgrib2 ${EXEC_DIR}/smartinit/wgrib2
+                                                                                                                          
+echo 
+
+echo " check up the symbol link name for executables under ${EXEC_DIR}"
+
+ls -l ${EXEC_DIR}
+
+else
+
+echo "${MACHINE} currently does not support real-time 3D RTMA."
+exit
+
+fi
 
 #
 
@@ -536,45 +582,68 @@ echo
 
 # then use $STATIC_mine to define the follwing FIXgsi_udef, Fixcrtm_udef, etc.
 
-  STATIC_mine=${NWROOT}/static
 
   if [ $MACHINE = jet ] ; then
 
-    export FIXgsi_udef=${RTMA3D_GSD_dev1}/static/GSI
+   export FIXgsi_udef=${RTMA3D_GSD_dev1}/static/GSI
 
-    export FIXcrtm_udef=${RTMA3D_GSD_dev1}/static/GSI/CRTM_Coefficients
+   export FIXcrtm_udef=${RTMA3D_GSD_dev1}/static/GSI/CRTM_Coefficients
 
-    export FIXwps_udef=${RTMA3D_GSD_dev1}/static/WPS
+   export FIXwps_udef=${RTMA3D_GSD_dev1}/static/WPS
 
-#   export OBS_USELIST_udef="/mnt/lfs3/projects/hfv3gfs/${USER}/FixData/ObsUseList_rtma3d"
+   export OBS_USELIST_udef="/mnt/lfs3/projects/hfv3gfs/${USER}/FixData/ObsUseList_rtma3d"
 
-#   export SFCOBS_USELIST_udef="/mnt/lfs3/projects/hfv3gfs/${USER}/FixData/ObsUseList_rtma3d/gsd/mesonet_uselists"
+   export SFCOBS_USELIST_udef="/mnt/lfs3/projects/hfv3gfs/${USER}/FixData/ObsUseList_rtma3d/gsd/mesonet_uselists"
 
-#   export AIRCRAFT_REJECT_udef="/mnt/lfs3/projects/hfv3gfs/${USER}/FixData/ObsUseList_rtma3d/gsd/amdar_reject_lists"
+   export AIRCRAFT_REJECT_udef="/mnt/lfs3/projects/hfv3gfs/${USER}/FixData/ObsUseList_rtma3d/gsd/amdar_reject_lists"
 
-#   export SFCOBS_PROVIDER_udef="/mnt/lfs3/projects/hfv3gfs/${USER}/FixData/GSI-fix_rtma3d_emc_test"
+   export SFCOBS_PROVIDER_udef="/mnt/lfs3/projects/hfv3gfs/${USER}/FixData/GSI-fix_rtma3d_emc_test"
 
-    export PARMupp_udef=${RTMA3D_GSD_dev1}/static/UPP
+   export PARMupp_udef=${RTMA3D_GSD_dev1}/static/UPP
+
+ elif [ $MACHINE = dell ] ; then
+
+   export FIXgsi_udef="/gpfs/dell2/emc/modeling/noscrub/Edward.Colon/FixData/GSI"
+
+   export FIXcrtm_udef="/gpfs/dell2/emc/modeling/noscrub/Edward.Colon/FixData/GSI/CRTM_Coefficients"
+
+   export FIXwps_udef="/gpfs/dell2/emc/modeling/noscrub/Edward.Colon/FixData/WPS"
+
+   export OBS_USELIST_udef="/gpfs/dell2/emc/modeling/noscrub/Edward.Colon/FixData/obsuselist"
+
+   export SFCOBS_USELIST_udef="/gpfs/dell2/emc/modeling/noscrub/Edward.Colon/FixData/obsuselist/mesonet_uselists"
+
+   export AIRCRAFT_REJECT_udef="/gpfs/dell2/emc/modeling/noscrub/Edward.Colon/FixData/obsuselist/amdar_reject_lists"
+
+   export SFCOBS_PROVIDER_udef="/gpfs/dell2/emc/modeling/noscrub/Edward.Colon/FixData/obsuselist/sfcobs_provider"
+
+   export PARMgsi_udef="/gpfs/dell2/emc/modeling/noscrub/Edward.Colon/FixData/parm/gsi"
+
+   export PARMupp_udef="/gpfs/dell2/emc/modeling/noscrub/Edward.Colon/FixData/parm/upp"
+
+   export PARMwrf_udef="/gpfs/dell2/emc/modeling/noscrub/Edward.Colon/FixData/parm/wrf"
+
+   export PARMverf_udef="/gpfs/dell2/emc/modeling/noscrub/Edward.Colon/FixData/parm/verif"
 
   fi
 
 #       define the variable names for symbol links under fix/ and parm/
 
-  export FIXrtma3d="${NWROOT}/fix"
+ export FIXrtma3d="${NWROOT}/fix"
 
-  export FIXgsi="${FIXrtma3d}/gsi"
+ export FIXgsi="${FIXrtma3d}/gsi"
 
-  export FIXcrtm="${FIXrtma3d}/crtm"
+ export FIXcrtm="${FIXrtma3d}/crtm"
 
-  export FIXwps="${FIXrtma3d}/wps"
+ export FIXwps="${FIXrtma3d}/wps"
 
-# export OBS_USELIST="${FIXrtma3d}/obsuselist"
+ export OBS_USELIST="${FIXrtma3d}/obsuselist"
 
-# export SFCOBS_USELIST="${OBS_USELIST}/mesonet_uselists"
+ export SFCOBS_USELIST="${OBS_USELIST}/mesonet_uselists"
 
-# export AIRCRAFT_REJECT="${OBS_USELIST}/amdar_reject_lists"
+ export AIRCRAFT_REJECT="${OBS_USELIST}/amdar_reject_lists"
 
-# export SFCOBS_PROVIDER="${OBS_USELIST}/sfcobs_provider"
+ export SFCOBS_PROVIDER="${OBS_USELIST}/sfcobs_provider"
 
   export PARMrtma3d="${NWROOT}/parm"
 
@@ -592,61 +661,57 @@ echo
 
   if [ ! -d ${PARMrtma3d}  ] ; then mkdir -p ${PARMrtma3d}  ; fi
 
-# if [ ! -d ${OBS_USELIST} ] ; then mkdir -p ${OBS_USELIST} ; fi
+ if [ ! -d ${OBS_USELIST} ] ; then mkdir -p ${OBS_USELIST} ; fi
 
-  if [ ${MACHINE} = 'jet' ] ; then
+  if [ ${MACHINE} = 'jet' ] || [ ${MACHINE} = 'dell' ] ; then
 
     cd ${FIXrtma3d}
 
-    echo " linking fixed data on ${MACHINE} for GSI analysis"
+#    echo " linking fixed data on ${MACHINE} for GSI analysis"
 
-    rm -rf $FIXgsi
+   rm -rf $FIXgsi
 
-    ln -sf ${FIXgsi_udef}        ${FIXgsi}
+   ln -sf ${FIXgsi_udef}        ${FIXgsi}
 
-    rm -rf $FIXcrtm
+   rm -rf $FIXcrtm
 
-    ln -sf ${FIXcrtm_udef}       ${FIXcrtm}
+   ln -sf ${FIXcrtm_udef}       ${FIXcrtm}
 
-    rm -rf $FIXwps
+   rm -rf $FIXwps
 
-    ln -sf ${FIXwps_udef}        ${FIXwps}
+   ln -sf ${FIXwps_udef}        ${FIXwps}
 
-#   cd ${OBS_USELIST}
+   cd ${OBS_USELIST}
 
-#   rm -rf $SFCOBS_USELIST
+   rm -rf $SFCOBS_USELIST
 
-#   echo " ln -sf ${SFCOBS_USELIST_udef}        ${SFCOBS_USELIST}"
+   ln -sf ${SFCOBS_USELIST_udef}        ${SFCOBS_USELIST}
 
-#   ln -sf ${SFCOBS_USELIST_udef}        ${SFCOBS_USELIST}
+   rm -rf $AIRCRAFT_REJECT
 
-#   rm -rf $AIRCRAFT_REJECT
+   ln -sf ${AIRCRAFT_REJECT_udef}       ${AIRCRAFT_REJECT}
 
-#   echo " ln -sf ${AIRCRAFT_REJECT_udef}       ${AIRCRAFT_REJECT}"
+   rm -rf $SFCOBS_PROVIDER
 
-#   ln -sf ${AIRCRAFT_REJECT_udef}       ${AIRCRAFT_REJECT}
+   ln -sf ${SFCOBS_PROVIDER_udef}       ${SFCOBS_PROVIDER}
 
-#   rm -rf $SFCOBS_PROVIDER
+   cd ${PARMrtma3d}
 
-#   echo " ln -sf ${SFCOBS_PROVIDER_udef}       ${SFCOBS_PROVIDER}"
+   rm -rf $PARMgsi
+ 
+   ln -sf ${PARMgsi_udef}               ${PARMgsi}
 
-#   ln -sf ${SFCOBS_PROVIDER_udef}       ${SFCOBS_PROVIDER}
+   rm -rf $PARMupp
 
-    cd ${PARMrtma3d}
+   ln -sf ${PARMupp_udef}               ${PARMupp}
 
-#   if [ ! -d $PARMgsi ] && [ ! -f ${PARMgsi}/gsiparm.anl.sh ]  
+   rm -rf $PARMverf
 
-#   then
+   ln -sf ${PARMverf_udef}              ${PARMverf}
 
-#     echo " WARNING ---- ${PARMgsi} does NOT exist. Check and Abort this task! ---- WARNING ! "
+   rm -rf $PARMwrf
 
-#     exit 1
-
-#   fi
-
-    rm -rf $PARMupp
-
-    ln -sf ${PARMupp_udef}               ${PARMupp}
+   ln -sf ${PARMwrf_udef}               ${PARMwrf}
 
   else
 
@@ -662,7 +727,7 @@ echo
 
   echo; ls -ltr $FIXrtma3d ; echo
 
-# echo; ls -ltr $OBS_USELIST; echo
+  echo; ls -ltr $OBS_USELIST; echo
 
   echo; ls -ltr $PARMrtma3d; echo
 
@@ -742,7 +807,7 @@ run_scriptname="run_${RUN}_${expname}.sh"
 
 chk_scriptname="chk_${RUN}_${expname}.sh"
 
-rm -f ${NWROOT}/xml/${XML_FNAME}
+rm -rf ${NWROOT}/xml/${XML_FNAME}
 
 #
 
@@ -3028,9 +3093,9 @@ fi
 
 #
 
-if [ ${MACHINE} = 'theia' ] || [ ${MACHINE} = 'jet' ]; then
+if [ ${MACHINE} = 'jet' ]; then
 
-  cat > ${NWROOT}/xml/${run_scriptname} <<EOF 
+cat > ${NWROOT}/xml/${run_scriptname} <<EOF 
 
 #!/bin/bash
 
@@ -3044,25 +3109,19 @@ module load intel
 
 module load rocoto/1.3.0-RC5
 
-EOF
-
-  if [ ${SCHEDULER} = "SLURM" ] || [ ${SCHEDULER} = "slurm" ]; then
-
-    cat >> ${NWROOT}/xml/${run_scriptname} <<EOF 
+cat >> ${NWROOT}/xml/${run_scriptname} <<EOF 
 
 module load slurm/18.08.7p1
 
 EOF
 
-  fi
-
-  cat >> ${NWROOT}/xml/${run_scriptname} <<EOF 
+cat >> ${NWROOT}/xml/${run_scriptname} <<EOF 
 
 rocotorun -v 10 -w ${NWROOT}/xml/${XML_FNAME} -d ${NWROOT}/xml/${DB_FNAME}
 
 EOF
 
-  cat > ${NWROOT}/xml/${chk_scriptname} <<EOF 
+cat > ${NWROOT}/xml/${chk_scriptname} <<EOF 
 
 #!/bin/bash
 
@@ -3078,17 +3137,69 @@ module load rocoto/1.3.0-RC5
 
 EOF
 
-  if [ ${SCHEDULER} = "SLURM" ] || [ ${SCHEDULER} = "slurm" ]; then
-
-    cat >> ${NWROOT}/xml/${chk_scriptname} <<EOF 
+cat >> ${NWROOT}/xml/${chk_scriptname} <<EOF 
 
 module load slurm/18.08.7p1
 
 EOF
 
-  fi
+cat >> ${NWROOT}/xml/${chk_scriptname} <<EOF 
 
-  cat >> ${NWROOT}/xml/${chk_scriptname} <<EOF 
+subhr="00"
+
+timewindow=\$1
+
+timewindow=\${timewindow:-"6"}
+
+date1=\`date +%Y%m%d%H -d "now"\`
+
+date1="\${date1}\${subhr}"
+
+date0=\`date +%Y%m%d%H -d "\${timewindow} hour ago"\`
+
+date0="\${date0}\${subhr}"
+
+rocotostat -v 10 -w ${NWROOT}/xml/${RUN}_${expname}.xml -d ${NWROOT}/xml/${DB_FNAME} -c \${date0}:\${date1}
+
+EOF
+
+elif [ ${MACHINE} = 'dell' ]; then
+
+cat > ${NWROOT}/xml/${run_scriptname} <<EOF 
+
+#!/bin/bash
+
+. /etc/profile
+
+. /etc/profile.d/lmod.sh >/dev/null # Module Support
+
+module purge
+
+module load lsf/10.1
+
+module load ruby/2.5.1
+
+module load rocoto/complete
+
+rocotorun -v 10 -w ${NWROOT}/xml/${XML_FNAME} -d ${NWROOT}/xml/${DB_FNAME}
+
+EOF
+
+cat > ${NWROOT}/xml/${chk_scriptname} <<EOF 
+
+#!/bin/bash
+
+. /etc/profile
+
+. /etc/profile.d/lmod.sh >/dev/null # Module Support
+
+module purge
+
+module load lsf/10.1
+
+module load ruby/2.5.1
+
+module load rocoto/complete
 
 subhr="00"
 
