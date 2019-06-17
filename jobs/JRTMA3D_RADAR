@@ -12,7 +12,7 @@ set -x
 # for the NCO running enviroment
 #######################################################
 
-et endian conversion options for use with Intel compilers
+#set endian conversion options for use with Intel compilers
 # export F_UFMTENDIAN="big;little:10,15,66"
 # export GMPIENVVAR=F_UFMTENDIAN
 export MV2_ON_DEMAND_THRESHOLD=256

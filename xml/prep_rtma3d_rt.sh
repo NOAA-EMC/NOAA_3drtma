@@ -188,7 +188,7 @@ export startCDATE=201902131200              #yyyymmddhhmm - Starting day of RTMA
 
 export endCDATE=201905310000                #yyyymmddhhmm - Ending day of RTMA3D run (mainly used for retrospective run) 
 
-export ExpDateWindows="08 05 2019 *"        # dd mm yyyy weekday (crontab-like date format, mainly used for real-time run)
+export ExpDateWindows="17 06 2019 *"        # dd mm yyyy weekday (crontab-like date format, mainly used for real-time run)
 
 export NET=rtma3d                           #selection of rtma3d (or rtma,urma)
 
@@ -321,7 +321,7 @@ elif [ ${MACHINE} = "dell" ] ; then
 
   RESERVATION_SMARTINIT="<native>-R rusage[mem=2000] -R affinity[core]</native><queue>&QUEUE;</queue><account>&ACCOUNT;</account>"
 
-  RESERVATION_POST="<native></native>-R rusage[mem=3300] -R span[ptile=8] -R affinity[core]<queue>&QUEUE;</queue><account>&ACCOUNT;</account>"
+  RESERVATION_POST="<native>-R rusage[mem=3300] -R span[ptile=8] -R affinity[core]</native><queue>&QUEUE;</queue><account>&ACCOUNT;</account>"
 
   RESERVATION_SERIAL="<native>-R rusage[mem=2000] -R affinity[core]</native><queue>&QUEUE;</queue><account>&ACCOUNT;</account>"
 fi
@@ -892,6 +892,8 @@ cat > ${NWROOT}/xml/${XML_FNAME} <<EOF
 
 <!ENTITY MACHINE    "${MACHINE}">
 
+<!ENTITY machine    "${MACHINE}">
+
 <!-- Definition Block of Datasets for Real-Time RTMA3D on Jet -->
 
 <!--     (Better DO NOT TOUCH this Block)                     -->
@@ -1079,6 +1081,14 @@ cat > ${NWROOT}/xml/${XML_FNAME} <<EOF
       <name>MACHINE</name>
 
       <value>&MACHINE;</value>
+
+    </envar>
+
+    <envar>
+
+      <name>machine</name>
+
+      <value>&machine;</value>
 
     </envar>
 
@@ -1378,7 +1388,7 @@ cat >> ${NWROOT}/xml/${XML_FNAME} <<EOF
 
     &WALL_LIMIT_DA;
 
-    &RESERVATION;
+    &RESERVATION_DA;
 
     &ENVARS;
 
@@ -1483,7 +1493,7 @@ cat >> ${NWROOT}/xml/${XML_FNAME} <<EOF
 
       &WALL_LIMIT_DA;
 
-      &RESERVATION;
+      &RESERVATION_DA;
 
       &ENVARS;
 
