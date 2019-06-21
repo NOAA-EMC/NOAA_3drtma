@@ -11,45 +11,9 @@
 #                ( if `grep -c 'E5-2690 v3' /proc/cpuinfo` -gt 0 )
 #
 ####################################################################################################
-if [[ -d /dcom && -d /hwrf ]] ; then
-    . /usrx/local/Modules/3.2.10/init/sh
-#   MODULESHOME="/usrx/local/Modules/3.2.10"
-#   . $MODULESHOME/init/sh
-    MACHINE=wcoss
-    export SCHEDULER="LSF"
-elif [[ -d /cm ]] ; then
-#   MODULESHOME="/usrx/local/Modules/3.2.10"
-#   . $MODULESHOME/init/sh
-    conf_target=nco
-    MACHINE=cray
-    export SCHEDULER="LSF"
-elif [[ -d /ioddev_dell ]]; then
-#   MODULESHOME="/usrx/local/Modules/3.2.10"
-#   . $MODULESHOME/init/sh
     conf_target=nco
     MACHINE=dell
     export SCHEDULER="LSF" 
-elif [[ -d /scratch3 ]] ; then
-    . /etc/profile
-    . /etc/profile.d/modules.sh >/dev/null # Module Support
-    MACHINE=theia
-    nwprod_path="/scratch3/NCEPDEV/nwprod/lib/modulefiles"
-    produtil_path="/scratch4/NCEPDEV/nems/noscrub/emc.nemspara/soft/NCEPLIBS-prod_util"
-    export SCHEDULER="SLURM"
-elif [[ -d /mnt/lfs3/projects ]] ; then
-    . /etc/profile
-    . /etc/profile.d/modules.sh >/dev/null # Module Support
-    MACHINE=jet
-    nwprod_path="/mnt/lfs3/projects/hfv3gfs/nwprod/lib/modulefiles"
-    produtil_path="/mnt/lfs3/projects/hfv3gfs/emc.nemspara/soft/NCEPLIBS-prod_util"
-    export SCHEDULER="SLURM"
-else
-    MACHINE="unknown"
-    echo 'Running on $MACHINE '
-    echo ' ---------> Warning Warning Warning Warning <--------- '
-    echo '     Machine $machine is NOT ready for running $NET.'
-    exit 9
-fi
 echo 'Running on $MACHINE '
 
 #
@@ -81,112 +45,25 @@ fi
 #--- User defined variables                         #
 #####################################################
 set -x
+
+export ExpDateWindows="21 06 2019 *"        # dd mm yyyy weekday (crontab-like date format, mainly used for real-time run)
 export startCDATE=201904271200              #yyyymmddhhmm - Starting day of retro run 
 export endCDATE=201904271400                #yyyymmddhhmm - Ending day of RTMA3D run (needed for both RETRO and REAL TIME). 
 export NET=rtma3d                           #selection of rtma3d (or rtma,urma)
 export RUN=rtma3d                           #selection of rtma3d (or rtma,urma)
 export run_envir="dev_shared"                      #
 export NWROOT=${TOP_RTMA}                   #root directory for RTMA/URMA j-job scripts, scripts, parm files, etc. 
-
-case ${SCHEDULER} in
-  PBS|pbs|MOAB*|moab*)
-    SCHD_ATTRB="moabtorque"
-    ;;
-  SLURM|slurm)
-    SCHD_ATTRB="slurm"
-    ;;
-  LSF|lsf)
-    SCHD_ATTRB="lsf"
-    ;;
-  *)
-  echo "user specified an Unknown Scheduler: ${SCHEDULER}. Please re-set : either PBS or SLURM "
-  exit 1
-esac
+export SCHD_ATTRB="lsf"
 
 export envir="${SCHD_ATTRB}"                      #environment (test, prod, dev, etc.)
 export expname="${envir}"                   # experiment name
-
+export realtime="T"
 #====================================================================#
 # Note: Definition for the following variables 
 #       depends on the machine platform, 
 #       and different user and/or experiment.
 #====================================================================#
-if [ ${MACHINE} = "theia" ] ; then
 
-  QUEUE="batch"                        #user-specified processing queue
-  QUEUE_DBG="debug"                    #user-specified processing queue -- debug
-  QUEUE_SVC="service"                  #user-specified transfer queue
-
-# Path to top running and archiving directory
-  ptmp_base="/scratch3/NCEPDEV/stmp1/${USER}/wrkdir_${NET}"  #base subdirectory for all subsequent working and storage directories
-
-  DATABASE_DIR=${ptmp_base}            # (equivalent to ptmp_base)
-  HOMEBASE_DIR=${NWROOT}               # path to system home directory
-
-# Computational resources
-  ACCOUNT="fv3-cpu"                    #account for CPU resources
-
-  case ${SCHEDULER} in
-    SLURM|slurm)
-      PARTITION=""
-      RESERVATION="<native>--export=ALL --mail-type=NONE</native><queue>&QUEUE_DBG;</queue><account>&ACCOUNT;</account>"
-      RESERVATION_GSI="<native>--export=ALL --mail-type=NONE</native><queue>&QUEUE_DBG;</queue><account>&ACCOUNT;</account>"
-      RESERVATION_UPP="<native>--export=ALL --mail-type=NONE</native><queue>&QUEUE_DBG;</queue><account>&ACCOUNT;</account>"
-      PARTITION_SVC=${QUEUE_SVC}
-      RESERVATION_SVC="<native>--export=ALL --mail-type=NONE</native><queue>&QUEUE;</queue><account>&ACCOUNT;</account><partition>&PARTITION_SVC;</partition>"
-      ;;
-    PBS|MOAB*|moab*|pbs)
-      RESERVATION="<native>-m n</native><queue>&QUEUE_DBG;</queue><account>&ACCOUNT;</account>"
-      RESERVATION_GSI="<native>-m n</native><queue>&QUEUE_DBG;</queue><account>&ACCOUNT;</account>"
-      RESERVATION_UPP="<native>-m n</native><queue>&QUEUE_DBG;</queue><account>&ACCOUNT;</account>"
-      RESERVATION_SVC="<native>-m n</native><queue>&QUEUE_SVC;</queue><account>&ACCOUNT;</account>"
-      ;;
-    *)
-      echo " scheduler ${SCHEDULER} is unknown. Abort!"
-      exit 1
-      ;;
-  esac
-
-elif [ ${MACHINE} = "jet" ] ; then
-
-  QUEUE="batch"                        #user-specified processing queue
-  QUEUE_DBG="debug"                    #user-specified processing queue -- debug
-  QUEUE_SVC="service"                  #user-specified transfer queue
-
-# Path to top running and archiving directory
-  ptmp_base="/mnt/lfs3/projects/hfv3gfs/${USER}/${NET}_wrkdir_retro"
-
-  DATABASE_DIR=${ptmp_base}            # (equivalent to ptmp_base)
-  HOMEBASE_DIR=${NWROOT}               # path to system home directory
-
-# Computational resources
-  ACCOUNT="hfv3gfs"                    #account for CPU resources
-
-  case ${SCHEDULER} in
-    SLURM|slurm)
-      PARTITION="kjet,xjet,ujet,vjet"
-      PARTITION_DA="kjet,xjet,ujet,vjet"
-      RESERVATION="<native>--export=ALL --mail-type=NONE</native><queue>&QUEUE;</queue><account>&ACCOUNT;</account><partition>&PARTITION;</partition>"
-      RESERVATION_GSI="<native>--export=ALL --mail-type=NONE</native><queue>&QUEUE;</queue><account>&ACCOUNT;</account><partition>&PARTITION_DA;</partition>"
-      RESERVATION_UPP="<native>--export=ALL --mail-type=NONE</native><queue>&QUEUE;</queue><account>&ACCOUNT;</account><partition>&PARTITION;</partition>"
-      PARTITION_SVC=${QUEUE_SVC}
-      RESERVATION_SVC="<native>--export=ALL --mail-type=NONE</native><queue>&QUEUE;</queue><account>&ACCOUNT;</account><partition>&PARTITION_SVC;</partition>"
-      ;;
-    PBS|MOAB*|moab*|pbs)
-      PARTITION="sjet:tjet"
-      PARTITION_DA="sjet:tjet"
-      RESERVATION="<native>-l partition=&PARTITION; -W umask=022 -m n</native><queue>&QUEUE_DBG;</queue><account>&ACCOUNT;</account>"
-      RESERVATION_GSI="<native>-l partition=&PARTITION_DA; -W umask=022 -m n</native><queue>&QUEUE_DBG;</queue><account>&ACCOUNT;</account>"
-      RESERVATION_UPP="<native>-l partition=&PARTITION; -W umask=022 -m n</native><queue>&QUEUE_DBG;</queue><account>&ACCOUNT;</account>"
-      RESERVATION_SVC="<native>-l partition=&PARTITION; -W umask=022 -m n</native><queue>&QUEUE_SVC;</queue><account>&ACCOUNT;</account>"
-      ;;
-    *)
-      echo " scheduler ${SCHEDULER} is unknown. Abort!"
-      exit 1
-      ;;
-  esac
-
-elif [ ${MACHINE} = "dell" ] ; then
 
   QUEUE=dev_shared                        #user-specified processing queue
   QUEUE_DBG="debug"                    #user-specified processing queue -- debug
@@ -197,34 +74,20 @@ elif [ ${MACHINE} = "dell" ] ; then
 
   DATABASE_DIR=${ptmp_base}            # (equivalent to ptmp_base)
   HOMEBASE_DIR=${NWROOT}               # path to system home directory
-
+  COMINRAP="/gpfs/hps/nco/ops/com/rap/prod"
+  COMINRAP_E="/gpfs/hps/nco/ops/com/rap/prod"
+  COMINHRRR="/gpfs/hps/nco/ops/com/hrrr/prod"
+  GESINHRRR="/gpfs/hps/nco/ops/nwges/prod"
 # Computational resources
   ACCOUNT="RTMA-T2O"                    #account for CPU resources
 
-  case ${SCHEDULER} in
-    LSF|lsf)
-      RESERVATION="<native>-R rusage[mem=2000] -R affinity[core]</native><queue>&QUEUE;</queue><account>&ACCOUNT;</account>"
-      RESERVATION_GSI="<native>-R rusage[mem=1900] -R span[ptile=14] -R affinity[core]</native><queue>&QUEUE;</queue><account>&ACCOUNT;</account>"
-      RESERVATION_UPP="<native>-R rusage[mem=3300] -R span[ptile=8] -R affinity[core]</native><queue>&QUEUE;</queue><account>&ACCOUNT;</account>"
-      RESERVATION_SVC="<native>-R rusage[mem=1000] -R affinity[core]</native><queue>&QUEUE_SVC;</queue><account>&ACCOUNT;</account>"
-      ;;
-    *)
-      echo " scheduler ${SCHEDULER} is unknown. Abort!"
-      exit 1
-      ;;
-  esac
-
-else
-  echo "This machine ${MACHINE} is not set up ROCOTO workflow for RTMA3D. Abort!"
-  exit 1
-fi
+  RESERVATION="<native>-R rusage[mem=2000] -R affinity[core]</native><queue>&QUEUE;</queue><account>&ACCOUNT;</account>"
+  RESERVATION_GSI="<native>-R rusage[mem=1900] -R span[ptile=14] -R affinity[core]</native><queue>&QUEUE;</queue><account>&ACCOUNT;</account>"
+  RESERVATION_UPP="<native>-R rusage[mem=3300] -R span[ptile=8] -R affinity[core]</native><queue>&QUEUE;</queue><account>&ACCOUNT;</account>"
+  RESERVATION_SVC="<native>-R rusage[mem=1000] -R affinity[core]</native><queue>&QUEUE_SVC;</queue><account>&ACCOUNT;</account>"
 
 # General definition of computation resources for each task
-  FETCHHPSS_PROC="1"
-  FETCHHPSS_RESOURCES="<cores>&FETCHHPSS_PROC;</cores><walltime>03:00:00</walltime>"
-  FETCHHPSS_RESERVATION=${RESERVATION_SVC}
-
-  OBSPREP_RADAR_PROC="36"
+  OBSPREP_RADAR_PROC="1"
   OBSPREP_RADAR_RESOURCES="<cores>&OBSPREP_RADAR_PROC;</cores><walltime>00:30:00</walltime>"
   OBSPREP_RADAR_RESERVATION=${RESERVATION}
 
@@ -232,7 +95,7 @@ fi
   OBSPREP_LGHTN_RESOURCES="<cores>&OBSPREP_LGHTN_PROC;</cores><walltime>00:30:00</walltime>"
   OBSPREP_LGHTN_RESERVATION=${RESERVATION}
 
-  OBSPREP_CLOUD_PROC="4"
+  OBSPREP_CLOUD_PROC="1"
   OBSPREP_CLOUD_RESOURCES="<cores>&OBSPREP_CLOUD_PROC;</cores><walltime>00:30:00</walltime>"
   OBSPREP_CLOUD_RESERVATION=${RESERVATION}
 
@@ -287,7 +150,6 @@ export exefile_name_radar="rtma3d_process_mosaic"
 export exefile_name_lightning="rtma3d_process_lightning"
 export exefile_name_cloud="rtma3d_process_cloud"
 export exefile_name_verif=""    # executable of verification (MET) is defined by loading module met
-
 #########################################################
 #--- define the path to the static data
 #    fix/
@@ -313,45 +175,6 @@ export exefile_name_verif=""    # executable of verification (MET) is defined by
 #       specific static data, 
 #       then link these paths to the symbol links under fix/ and parm/.
 #
-  if [ $MACHINE = theia ] ; then
-
-/scratch4/NCEPDEV/fv3-cam/save/
-
-   export FIXgsi_udef="/scratch4/NCEPDEV/fv3-cam/noscrub/Edward.Colon/FixData/GSI-fix"
-   export FIXcrtm_udef="/scratch4/NCEPDEV/fv3-cam/noscrub/Edward.Colon/FixData/CRTM-fix"
-   export FIXwps_udef="/scratch4/NCEPDEV/fv3-cam/noscrub/Edward.Colon/FixData/wps"
-
-   export OBS_USELIST_udef="/scratch4/NCEPDEV/fv3-cam/noscrub/Edward.Colon/FixData/obsuselist"
-   export SFCOBS_USELIST_udef="/scratch4/NCEPDEV/fv3-cam/noscrub/Edward.Colon/FixData/obsuselist/mesonet_uselists"
-   export AIRCRAFT_REJECT_udef="/scratch4/NCEPDEV/fv3-cam/noscrub/Edward.Colon/FixData/obsuselist/amdar_reject_lists"
-   export SFCOBS_PROVIDER_udef="/scratch4/NCEPDEV/fv3-cam/noscrub/Edward.Colon/FixData/obsuselist/sfcobs_provider"
-
-   export PARMgsi_udef=""
-   export PARMupp_udef="/scratch4/NCEPDEV/fv3-cam/noscrub/Edward.Colon/FixData/parm/upp"
-   export PARMwrf_udef="/scratch4/NCEPDEV/fv3-cam/noscrub/Edward.Colon/FixData/parm/wrf"
-   export PARMverf_udef="/scratch4/NCEPDEV/fv3-cam/noscrub/Edward.Colon/FixData/parm/verif"
-
-
-  elif [ $MACHINE = jet ] ; then
-
-  /mnt/lfs3/projects/hfv3gfs/
-
-   export FIXgsi_udef="/mnt/lfs3/projects/hfv3gfs/Edward.Colon/FixData/GSI-fix"
-   export FIXcrtm_udef="/mnt/lfs3/projects/hfv3gfs/Edward.Colon/FixData/CRTM-fix"
-   export FIXwps_udef="/mnt/lfs3/projects/hfv3gfs/Edward.Colon/FixData/wps"
-
-   export OBS_USELIST_udef="/mnt/lfs3/projects/hfv3gfs/Edward.Colon/FixData/obsuselist"
-   export SFCOBS_USELIST_udef="/mnt/lfs3/projects/hfv3gfs/Edward.Colon/FixData/obsuselist/mesonet_uselists"
-   export AIRCRAFT_REJECT_udef="/mnt/lfs3/projects/hfv3gfs/Edward.Colon/FixData/obsuselist/amdar_reject_lists"
-   export SFCOBS_PROVIDER_udef="/mnt/lfs3/projects/hfv3gfs/Edward.Colon/FixData/obsuselist/sfcobs_provider"
-
-   export PARMgsi_udef=""
-   export PARMupp_udef="/mnt/lfs3/projects/hfv3gfs/Edward.Colon/FixData/parm/upp"
-   export PARMwrf_udef="/mnt/lfs3/projects/hfv3gfs/Edward.Colon/FixData/parm/wrf"
-   export PARMverf_udef="/mnt/lfs3/projects/hfv3gfs/Edward.Colon/FixData/parm/verif"
-
-
-  elif [ $MACHINE = dell ] ; then
 
    export FIXgsi_udef="/gpfs/dell2/emc/modeling/noscrub/Edward.Colon/FixData/GSI-fix"
    export FIXcrtm_udef="/gpfs/dell2/emc/modeling/noscrub/Edward.Colon/FixData/CRTM-fix"
@@ -362,14 +185,14 @@ export exefile_name_verif=""    # executable of verification (MET) is defined by
    export AIRCRAFT_REJECT_udef="/gpfs/dell2/emc/modeling/noscrub/Edward.Colon/FixData/obsuselist/amdar_reject_lists"
    export SFCOBS_PROVIDER_udef="/gpfs/dell2/emc/modeling/noscrub/Edward.Colon/FixData/obsuselist/sfcobs_provider"
    
-   export PARMgsi_udef=""
+   export PARMgsi_udef="/gpfs/dell2/emc/modeling/noscrub/Edward.Colon/FixData/parm/gsi"
    export PARMupp_udef="/gpfs/dell2/emc/modeling/noscrub/Edward.Colon/FixData/parm/upp"
    export PARMwrf_udef="/gpfs/dell2/emc/modeling/noscrub/Edward.Colon/FixData/parm/wrf"
    export PARMverf_udef="/gpfs/dell2/emc/modeling/noscrub/Edward.Colon/FixData/parm/verif" 
-   
-  fi
+
 
 #       define the variable names for symbol links under fix/ and parm/
+
   export FIXrtma3d="${NWROOT}/fix"
   export FIXgsi="${FIXrtma3d}/gsi"
   export FIXcrtm="${FIXrtma3d}/crtm"
@@ -385,6 +208,9 @@ export exefile_name_verif=""    # executable of verification (MET) is defined by
   export PARMupp="${PARMrtma3d}/upp"
   export PARMwrf="${PARMrtma3d}/wrf"
   export PARMverf="${PARMrtma3d}/verif"
+
+
+
 
 #
 #        link to the symbol links
@@ -418,11 +244,9 @@ export exefile_name_verif=""    # executable of verification (MET) is defined by
     ln -sf ${SFCOBS_PROVIDER_udef}       ${SFCOBS_PROVIDER}
 
     cd ${PARMrtma3d}
-    if [ ! -d $PARMgsi ] && [ ! -f ${PARMgsi}/gsiparm.anl.sh ]  
-    then
-      echo " WARNING ---- ${PARMgsi} does NOT exist. Check and Abort this task! ---- WARNING ! "
-      exit 1
-    fi
+    rm -rf $PARMgsi
+    echo " ln -sf ${PARMgsi_udef}        ${PARMgsi}"
+    ln -sf ${PARMgsi_udef}               ${PARMgsi}
     rm -rf $PARMupp
     echo " ln -sf ${PARMupp_udef}        ${PARMupp}"
     ln -sf ${PARMupp_udef}               ${PARMupp}
@@ -438,7 +262,6 @@ export exefile_name_verif=""    # executable of verification (MET) is defined by
     echo " Abort linking task."
     exit 9
   fi
-
 
   echo
   ls -ltr $FIXrtma3d
@@ -467,7 +290,7 @@ export exefile_name_verif=""    # executable of verification (MET) is defined by
 
 #
 #--- option to plot the firstguess/analysis/increment
-  export run_plt=1        # default is 1 to plot with GrADS
+  export run_plt=0        # default is 1 to plot with GrADS
                           # >0: plot (and post-process of firstguess fields)
                           # =1: plot with GrADS 
                           # =2: plot with NCL (not available yet)
@@ -499,11 +322,6 @@ export exefile_name_verif=""    # executable of verification (MET) is defined by
 #
 #--- Computational Resources
 #
-  if [ $MACHINE = jet ] ; then
-    export PARTITION_udef="<native>-l partition=xjet</native>"
-  else
-    export PARTITION_udef=""
-  fi
 ########################################################################################
 #
 #             User definition section ends here.
@@ -513,8 +331,8 @@ export exefile_name_verif=""    # executable of verification (MET) is defined by
 # Workflow is specified using user-derived settings in xml format    
 ########################################################################################
 
-rm -f ${NWROOT}/xml/${RUN}_${expname}.xml
-cat > ${NWROOT}/xml/${RUN}_${expname}.xml <<EOF 
+rm -f ${NWROOT}/xml/${RUN}_${expname}_rt.xml
+cat > ${NWROOT}/xml/${RUN}_${expname}_rt.xml <<EOF 
 <?xml version="1.0" encoding="UTF-8"?>
 
 <!DOCTYPE workflow [
@@ -523,7 +341,7 @@ cat > ${NWROOT}/xml/${RUN}_${expname}.xml <<EOF
 <!-- date/time of cases or cycles -->
 <!ENTITY startCDATE     "${startCDATE}">
 <!ENTITY endCDATE       "${endCDATE}">
-
+<!ENTITY realtime       "${realtime}">
 <!ENTITY NET		"${NET}">
 <!ENTITY RUN		"${RUN}">
 <!ENTITY envir		"${envir}">
@@ -542,6 +360,10 @@ cat > ${NWROOT}/xml/${RUN}_${expname}.xml <<EOF
 <!-- Variables Defined by absolute paths -->
 
 <!ENTITY ptmp_base	"${ptmp_base}">
+<!ENTITY COMINRAP       "${COMINRAP}">
+<!ENTITY COMINRAP_E     "${COMINRAP_E}">
+<!ENTITY COMINHRRR      "${COMINHRRR}">
+<!ENTITY GESINHRRR      "${GESINHRRR}">
 <!ENTITY NWROOT		"${NWROOT}">
 
 <!ENTITY OBS_DIR	"/scratch4/NCEPDEV/fv3-cam/save/Gang.Zhao/Data/GSD_GSI_Case/obs">
@@ -583,7 +405,7 @@ cat > ${NWROOT}/xml/${RUN}_${expname}.xml <<EOF
 <!ENTITY LOG_JJOB	"&LOG_DIR;/jlogfiles">
 <!ENTITY LOG_SCHDLR	"&LOG_DIR;">
 <!ENTITY LOG_PGMOUT     "&LOG_DIR;/pgmout">
-<!ENTITY jlogfile       "&LOG_JJOB;/jlogfile_${expname}.@Y@m@d@H">
+<!ENTITY jlogfile       "&LOG_JJOB;/jlogfile_${expname}_rt.@Y@m@d@H">
 
 <!-- definition of name of the top running directory for all tasks -->
 <!ENTITY DATA_RUNDIR    "&DATAROOT;/&envir;/&RUN;.@Y@m@d@H@M">
@@ -596,7 +418,6 @@ cat > ${NWROOT}/xml/${RUN}_${expname}.xml <<EOF
 <!ENTITY DATA_POST      "&DATA_RUNDIR;/postprd">
 <!ENTITY DATA_POST4FGS  "&DATA_RUNDIR;/postprd4fgs">
 <!ENTITY DATA_PLOTGRADS "&DATA_RUNDIR;/plotgrads">
-<!ENTITY DATA_FETCHHPSS "&DATA_RUNDIR;/fetchhpss">
 <!ENTITY DATA_VERIF     "&DATA_RUNDIR;/verifprd">
 <!ENTITY DATA_OBSPREP_LGHTN    "&DATA_RUNDIR;/obsprep_lghtn">
 <!ENTITY DATA_OBSPREP_RADAR    "&DATA_RUNDIR;/obsprep_radar">
@@ -628,10 +449,18 @@ cat > ${NWROOT}/xml/${RUN}_${expname}.xml <<EOF
 <!-- for various observations used in RTMA3D -->
 
 <!-- ex-shell and J-job script name -->
-<!ENTITY JJOB_FETCHHPSS  "&JJOB_DIR;/J&CAP_RUN;_FETCHHPSS">
-<!ENTITY exSCR_FETCHHPSS "&SCRIPT_DIR;/ex&RUN;_fetchhpss.ksh">
 <!ENTITY JJOB_OBSPREP_RADAR    "&JJOB_DIR;/J&CAP_RUN;_OBSPREP_RADAR">
+EOF
+if [ $realtime = 'T' ]; then 
+cat >> ${NWROOT}/xml/${RUN}_${expname}_rt.xml <<EOF
+<!ENTITY exSCR_OBSPREP_RADAR   "&SCRIPT_DIR;/ex&RUN;_obsprep_radar_rt.ksh">
+EOF
+else
+cat >> ${NWROOT}/xml/${RUN}_${expname}_rt.xml <<EOF
 <!ENTITY exSCR_OBSPREP_RADAR   "&SCRIPT_DIR;/ex&RUN;_obsprep_radar.ksh">
+EOF
+fi
+cat >> ${NWROOT}/xml/${RUN}_${expname}_rt.xml <<EOF
 <!ENTITY exefile_name_mosaic   "${exefile_name_mosaic}">
 <!ENTITY JJOB_OBSPREP_LGHTN    "&JJOB_DIR;/J&CAP_RUN;_OBSPREP_LGHTN">
 <!ENTITY exSCR_OBSPREP_LGHTN   "&SCRIPT_DIR;/ex&RUN;_obsprep_lghtn.ksh">
@@ -672,10 +501,6 @@ cat > ${NWROOT}/xml/${RUN}_${expname}.xml <<EOF
 <!ENTITY time_int  "1hr">
 <!ENTITY time_int_ex "01:00:00">
 
-<!ENTITY FETCHHPSS_PROC "${FETCHHPSS_PROC}">
-<!ENTITY FETCHHPSS_RESOURCES '${FETCHHPSS_RESOURCES}'>
-<!ENTITY FETCHHPSS_RESERVATION '${FETCHHPSS_RESERVATION}'>
-
 <!ENTITY OBSPREP_RADAR_PROC "${OBSPREP_RADAR_PROC}">
 <!ENTITY OBSPREP_RADAR_RESOURCES '${OBSPREP_RADAR_RESOURCES}'>
 <!ENTITY OBSPREP_RADAR_RESERVATION '${OBSPREP_RADAR_RESERVATION}'>
@@ -686,7 +511,7 @@ cat > ${NWROOT}/xml/${RUN}_${expname}.xml <<EOF
 
 <!ENTITY OBSPREP_CLOUD_PROC "${OBSPREP_CLOUD_PROC}">
 <!ENTITY OBSPREP_CLOUD_RESOURCES '${OBSPREP_CLOUD_RESOURCES}'>
-<!ENTITY OBSPREP_LGHTN_RESERVATION '${OBSPREP_LGHTN_RESERVATION}'>
+<!ENTITY OBSPREP_CLOUD_RESERVATION '${OBSPREP_CLOUD_RESERVATION}'>
 
 <!ENTITY PREPOBS_PROC "${PREPOBS_PROC}">
 <!ENTITY PREPOBS_RESOURCES '${PREPOBS_RESOURCES}'>
@@ -734,6 +559,10 @@ cat > ${NWROOT}/xml/${RUN}_${expname}.xml <<EOF
         <value>&envir;</value>
    </envar>
    <envar>
+        <name>realtime</name>
+        <value>&realtime;</value>
+   </envar>
+   <envar>
         <name>RUN_ENVIR</name>
         <value>&RUN_ENVIR;</value>
    </envar>
@@ -772,6 +601,22 @@ cat > ${NWROOT}/xml/${RUN}_${expname}.xml <<EOF
    <envar>
         <name>ptmp_base</name>
         <value>&ptmp_base;</value>
+   </envar>
+   <envar>
+        <name>COMINRAP</name>
+        <value>&COMINRAP;</value>
+   </envar>
+   <envar>
+        <name>COMINRAP_E</name>
+        <value>&COMINRAP_E;</value>
+   </envar>
+   <envar>
+        <name>COMINHRRR</name>
+        <value>&COMINHRRR;</value>
+   </envar>
+   <envar>
+        <name>GESINHRRR</name>
+        <value>&GESINHRRR;</value>
    </envar>
    <envar>
         <name>NWROOT</name>
@@ -978,10 +823,6 @@ cat > ${NWROOT}/xml/${RUN}_${expname}.xml <<EOF
       <value><cyclestr>&DATA_FGSPRD;</cyclestr></value>
    </envar>
    <envar>
-      <name>DATA_FETCHHPSS</name>
-      <value><cyclestr>&DATA_FETCHHPSS;</cyclestr></value>
-   </envar>
-   <envar>
       <name>exefile_name_gsi</name>
       <value><cyclestr>&exefile_name_gsi;</cyclestr></value>
    </envar>
@@ -1070,36 +911,6 @@ cat > ${NWROOT}/xml/${RUN}_${expname}.xml <<EOF
     <envar>
       <name>SFCOBS_PROVIDER</name>
       <value>&SFCOBS_PROVIDER;</value>
-    </envar>'>
-
-<!ENTITY ENVARS_FETCHHPSS
-    '<envar>
-      <name>START_TIME</name>
-      <value><cyclestr>@Y@m@d@H</cyclestr></value>
-    </envar>
-    <envar>
-      <name>hpsspath1</name>
-      <value>&hpsspath1;</value>
-    </envar>
-    <envar>
-      <name>hpsspath1_1yr</name>
-      <value>&hpsspath1_1yr;</value>
-    </envar>
-    <envar>
-      <name>hpsspath1_gsd</name>
-      <value>&hpsspath1_gsd;</value>
-    </envar>
-    <envar>
-      <name>hpsspath1_AGibbs</name>
-      <value>&hpsspath1_AGibbs;</value>
-    </envar>
-    <envar>
-      <name>exSCR_FETCHHPSS</name>
-      <value>&exSCR_FETCHHPSS;</value>
-    </envar>
-    <envar>
-      <name>JJOB_FETCHHPSS</name>
-      <value>&JJOB_FETCHHPSS;</value>
     </envar>'>
 
 <!-- BLOCKS for OPTIMIZATIONS FOR GSIANL DA step-->
@@ -1229,76 +1040,47 @@ cat > ${NWROOT}/xml/${RUN}_${expname}.xml <<EOF
     </envar>'>
 EOF
 
-cat >> ${NWROOT}/xml/${RUN}_${expname}.xml <<EOF 
+cat >> ${NWROOT}/xml/${RUN}_${expname}_rt.xml <<EOF 
 
 ]>
 EOF
 
-cat >> ${NWROOT}/xml/${RUN}_${expname}.xml <<EOF 
-<workflow realtime="F" scheduler="${SCHD_ATTRB}" cyclethrottle="1" taskthrottle="350" cyclelifespan="15:00:00:00">
+cat >> ${NWROOT}/xml/${RUN}_${expname}_rt.xml <<EOF 
+
+<workflow realtime="$realtime" scheduler="${SCHD_ATTRB}" cyclethrottle="1" taskthrottle="350" cyclelifespan="15:00:00:00">
 
   <log>
-    <cyclestr>&LOG_WRKFLW;/&NET;_workflow_&envir;_@Y@m@d@H.log</cyclestr>
+    <cyclestr>&LOG_DIR;/&NET;_workflow_&envir;_@Y@m@d@H.log</cyclestr>
   </log>
 
-  <cycledef group="&time_int;">&startCDATE; &endCDATE; &time_int_ex;</cycledef>
 
-  <task name="&NET;_fetchhpss" cycledefs="&time_int;" maxtries="&maxtries;">
+  <cycledef group="00hr">00 00,12 ${ExpDateWindows}</cycledef>
 
-    &ENVARS;
-    <envar>
-       <name>rundir_task</name>
-       <value><cyclestr>&DATA_FETCHHPSS;</cyclestr></value>
-    </envar>
+  <cycledef group="01hr">00 01,13 ${ExpDateWindows}</cycledef>
 
-    <command>&JJOB_DIR;/launch.ksh &JJOB_FETCHHPSS;</command>
-    <jobname><cyclestr>&NET;_fetchhpss_@H</cyclestr></jobname>
-    <join><cyclestr>&LOG_SCHDLR;/&NET;_&envir;_fetchhpss_@Y@m@d@H@M.log</cyclestr></join>
-
-    &FETCHHPSS_RESOURCES;
-    &FETCHHPSS_RESERVATION;
-
-    &ENVARS_FETCHHPSS;
-
-  </task>
-EOF
-
-if [ ${obsprep_radar} -eq 1 ] ; then
-
-cat >> ${NWROOT}/xml/${RUN}_${expname}.xml <<EOF 
-
-  <task name="&NET;_obsprep_radar" cycledefs="&time_int;" maxtries="&maxtries;">
-
-    &ENVARS;
-    <envar>
-       <name>rundir_task</name>
-       <value><cyclestr>&DATA_OBSPREP_RADAR;</cyclestr></value>
-    </envar>
-
-    <command>&JJOB_DIR;/launch.ksh &JJOB_OBSPREP_RADAR;</command>
-    <jobname><cyclestr>&NET;_obsprep_radar_@H</cyclestr></jobname>
-    <join><cyclestr>&LOG_SCHDLR;/&NET;_&envir;_obsprep_radar_@Y@m@d@H@M.log</cyclestr></join>
-
-    &OBSPREP_RADAR_RESOURCES;
-    &OBSPREP_RADAR_RESERVATION;
-
-    &ENVARS_PREPJOB;
-
-    <dependency>
-      <taskdep task="&NET;_fetchhpss"/>
-    </dependency>
-
-  </task>
+  <cycledef group="02-11hr">00 02-11,14-23 ${ExpDateWindows}</cycledef>
 
 EOF
-
-fi
 
 if [ ${obsprep_lghtn} -eq 1 ] ; then
 
-cat >> ${NWROOT}/xml/${RUN}_${expname}.xml <<EOF 
+cat >> ${NWROOT}/xml/${RUN}_${expname}_rt.xml <<EOF 
 
-  <task name="&NET;_obsprep_lghtn" cycledefs="&time_int;" maxtries="&maxtries;">
+     <metatask>
+
+<!-- only need 60 for hourly running
+
+    <var name="min">15 30 45 60</var>
+
+    <var name="off">00:45:00 00:30:00 00:15:00 00:00:00</var>
+
+-->
+
+    <var name="min">60</var>
+
+    <var name="off">00:00:00</var>
+
+  <task name="&NET;_obsprep_lghtn" cycledefs="02-11hr,00hr,01hr" maxtries="&maxtries;">
 
     &ENVARS;
     <envar>
@@ -1315,21 +1097,55 @@ cat >> ${NWROOT}/xml/${RUN}_${expname}.xml <<EOF
 
     &ENVARS_PREPJOB;
 
-    <dependency>
-      <taskdep task="&NET;_fetchhpss"/>
-    </dependency>
-
   </task>
+
+  </metatask>
 
 EOF
 
 fi
 
+
+if [ ${obsprep_radar} -eq 1 ] ; then
+
+cat >> ${NWROOT}/xml/${RUN}_${expname}_rt.xml <<EOF 
+    <metatask>
+
+<!-- <var name="subh">15 30 45 60</var> -->
+
+    <var name="subh">60</var>
+
+
+  <task name="&NET;_obsprep_radar_#subh#" cycledefs="02-11hr,00hr,01hr" maxtries="&maxtries;">
+
+    &ENVARS;
+    <envar>
+       <name>rundir_task</name>
+       <value><cyclestr>&DATA_OBSPREP_RADAR;</cyclestr></value>
+    </envar>
+
+    <command>&JJOB_DIR;/launch.ksh &JJOB_OBSPREP_RADAR;</command>
+    <jobname><cyclestr>&NET;_obsprep_radar_@H</cyclestr></jobname>
+    <join><cyclestr>&LOG_SCHDLR;/&NET;_&envir;_obsprep_radar_@Y@m@d@H@M.log</cyclestr></join>
+
+    &OBSPREP_RADAR_RESOURCES;
+    &OBSPREP_RADAR_RESERVATION;
+
+    &ENVARS_PREPJOB;
+
+  </task>
+  </metatask>
+
+EOF
+
+fi
+
+
 if [ ${obsprep_cloud} -eq 1 ] ; then
 
-cat >> ${NWROOT}/xml/${RUN}_${expname}.xml <<EOF 
+cat >> ${NWROOT}/xml/${RUN}_${expname}_rt.xml <<EOF 
 
-  <task name="&NET;_obsprep_cloud" cycledefs="&time_int;" maxtries="&maxtries;">
+  <task name="&NET;_obsprep_cloud" cycledefs="02-11hr,00hr,01hr" maxtries="&maxtries;">
 
     &ENVARS;
     <envar>
@@ -1346,19 +1162,15 @@ cat >> ${NWROOT}/xml/${RUN}_${expname}.xml <<EOF
 
     &ENVARS_PREPJOB;
 
-    <dependency>
-      <taskdep task="&NET;_fetchhpss"/>
-    </dependency>
-
   </task>
 
 EOF
 
 fi
 
-cat >> ${NWROOT}/xml/${RUN}_${expname}.xml <<EOF 
+cat >> ${NWROOT}/xml/${RUN}_${expname}_rt.xml <<EOF 
 
-  <task name="&NET;_prepobs" cycledefs="&time_int;" maxtries="&maxtries;">
+  <task name="&NET;_prepobs" cycledefs="02-11hr,01hr" maxtries="&maxtries;">
 
     &ENVARS;
     <envar>
@@ -1376,35 +1188,12 @@ cat >> ${NWROOT}/xml/${RUN}_${expname}.xml <<EOF
     &ENVARS_PREPJOB;
 
     <dependency>
-      <and>
-        <taskdep task="&NET;_fetchhpss"/>
-EOF
-
-if [ $obsprep_radar -eq 1 ] ; then
-cat >> ${NWROOT}/xml/${RUN}_${expname}.xml <<EOF 
-        <taskdep task="&NET;_obsprep_radar"/>
-EOF
-fi
-
-if [ $obsprep_lghtn -eq 1 ] ; then
-cat >> ${NWROOT}/xml/${RUN}_${expname}.xml <<EOF 
-        <taskdep task="&NET;_obsprep_lghtn"/>
-EOF
-fi
-
-if [ $obsprep_cloud -eq 1 ] ; then
-cat >> ${NWROOT}/xml/${RUN}_${expname}.xml <<EOF 
-        <taskdep task="&NET;_obsprep_cloud"/>
-EOF
-fi
-
-cat >> ${NWROOT}/xml/${RUN}_${expname}.xml <<EOF 
-      </and>
+       <taskdep task="&NET;_obsprep_lghtn"/>
     </dependency>
 
   </task>
 
-  <task name="&NET;_prepfgs" cycledefs="&time_int;" maxtries="&maxtries;">
+  <task name="&NET;_prepfgs" cycledefs="02-11hr,01hr" maxtries="&maxtries;">
 
     &ENVARS;
     <envar>
@@ -1422,12 +1211,12 @@ cat >> ${NWROOT}/xml/${RUN}_${expname}.xml <<EOF
     &ENVARS_PREPJOB;
 
     <dependency>
-      <taskdep task="&NET;_fetchhpss"/>
+       <taskdep task="&NET;_obsprep_lghtn"/>
     </dependency>
 
   </task>
 
-  <task name="&NET;_gsianl" cycledefs="&time_int;" maxtries="&maxtries;">
+  <task name="&NET;_gsianl" cycledefs="02-11hr,01hr" maxtries="&maxtries;">
 
     &ENVARS;
     &GSI_RESOURCES;
@@ -1453,7 +1242,7 @@ cat >> ${NWROOT}/xml/${RUN}_${expname}.xml <<EOF
 
   </task>
 
-  <task name="&NET;_post" cycledefs="&time_int;" maxtries="&maxtries;">
+  <task name="&NET;_post" cycledefs="02-11hr,01hr" maxtries="&maxtries;">
 
     &ENVARS;
     &POST_RESOURCES;
@@ -1486,7 +1275,7 @@ cat >> ${NWROOT}/xml/${RUN}_${expname}.xml <<EOF
 
   </task>
 
-  <task name="&NET;_verif" cycledefs="&time_int;" maxtries="&maxtries;">
+  <task name="&NET;_verif" cycledefs="02-11hr,01hr" maxtries="&maxtries;">
     &ENVARS;
     &VERIF_RESOURCES;
     &VERIF_RESERVATION;
@@ -1499,7 +1288,9 @@ cat >> ${NWROOT}/xml/${RUN}_${expname}.xml <<EOF
     <join><cyclestr>&LOG_SCHDLR;/&NET;_&envir;_verif_@Y@m@d@H@M.log</cyclestr></join>
     &ENVARS_VERIF;
     <dependency>
+       <and>
           <taskdep task="&NET;_post"/>
+       </and>
     </dependency>
 
   </task>
@@ -1509,9 +1300,9 @@ EOF
 
 # if running the step to plot (with GrADS)
 if [ ${run_plt} -gt 0 ] ; then
-cat >> ${NWROOT}/xml/${RUN}_${expname}.xml <<EOF 
+cat >> ${NWROOT}/xml/${RUN}_${expname}_rt.xml <<EOF 
 
-  <task name="&NET;_post4fgs" cycledefs="&time_int;" maxtries="&maxtries;">
+  <task name="&NET;_post4fgs" cycledefs="02-11hr,01hr" maxtries="&maxtries;">
 
     &ENVARS;
     &POST_RESOURCES;
@@ -1563,7 +1354,7 @@ cat >> ${NWROOT}/xml/${RUN}_${expname}.xml <<EOF
 EOF
 fi
 
-cat >> ${NWROOT}/xml/${RUN}_${expname}.xml <<EOF 
+cat >> ${NWROOT}/xml/${RUN}_${expname}_rt.xml <<EOF 
 
 </workflow>
 
@@ -1615,106 +1406,40 @@ fi
 ######################################################
 # Now make the run_rtma3d.sh script that can be invoked from a crontab
 
-if [ ${MACHINE} = 'theia' ] || [ ${MACHINE} = 'jet' ] || [ ${MACHINE} = 'dell' ] ; then
-  cat > ${NWROOT}/xml/run_${RUN}_${expname}.sh <<EOF 
+  cat > ${NWROOT}/xml/run_${RUN}_${expname}_rt.sh <<EOF 
 #!/bin/bash
 
-EOF
-
-  case ${SCHEDULER} in
-    PBS*|MOAB*|pbs*|moab*)
-      cat >> ${NWROOT}/xml/run_${RUN}_${expname}.sh <<EOF 
-. /etc/profile
-. /etc/profile.d/modules.sh >/dev/null # Module Support
-
-module purge
-module load intel
-module load rocoto
-EOF
-      ;;
-    SLURM|slurm)
-      cat >> ${NWROOT}/xml/run_${RUN}_${expname}.sh <<EOF 
-. /etc/profile
-. /etc/profile.d/modules.sh >/dev/null # Module Support
-
-module purge
-module load intel
-module load rocoto/1.3.0-RC5
-EOF
-      ;;
-    LSF|lsf)
-      cat >> ${NWROOT}/xml/run_${RUN}_${expname}.sh <<EOF 
-. /etc/profile
 . /etc/profile.d/lmod.sh >/dev/null # Module Support
 
 module purge
 module load lsf/10.1
 module load ruby/2.5.1
 module load rocoto/complete
-EOF
-      ;;
-    *)
-      ;;
-  esac
 
-  cat >> ${NWROOT}/xml/run_${RUN}_${expname}.sh <<EOF 
-rocotorun -v 10 -w ${NWROOT}/xml/${RUN}_${expname}.xml -d ${NWROOT}/xml/${RUN}_${expname}.db 
+rocotorun -v 10 -w ${NWROOT}/xml/${RUN}_${expname}_rt.xml -d ${NWROOT}/xml/${RUN}_${expname}_rt.db 
 EOF
 
-fi
 
-chmod 744 ${NWROOT}/xml/run_${RUN}_${expname}.sh
-echo "RTMA3D is ready to go! Run using run_${RUN}_${expname}.sh.  Make sure your xml file has consistent directory settings!"
+chmod 744 ${NWROOT}/xml/run_${RUN}_${expname}_rt.sh
+echo "RTMA3D is ready to go! Run using run_${RUN}_${expname}_rt.sh.  Make sure your xml file has consistent directory settings!"
 
 #####################################################
 # script to check the status of workflow            #
 #####################################################
-if [ ${MACHINE} = 'theia' ] || [ ${MACHINE} = 'jet' ] || [ ${MACHINE} = 'dell' ] ; then
-  cat > ${NWROOT}/xml/chk_${RUN}_${expname}.sh <<EOF 
+  cat > ${NWROOT}/xml/chk_${RUN}_${expname}_rt.sh <<EOF 
 #!/bin/bash
 
-
-EOF
-
-  case ${SCHEDULER} in
-    PBS*|MOAB*|pbs*|moab*)
-      cat >> ${NWROOT}/xml/chk_${RUN}_${expname}.sh <<EOF 
-. /etc/profile
-. /etc/profile.d/modules.sh >/dev/null # Module Support
-module purge
-module load intel
-module load rocoto
-EOF
-      ;;
-    SLURM|slurm)
-      cat >> ${NWROOT}/xml/chk_${RUN}_${expname}.sh <<EOF 
-. /etc/profile
-. /etc/profile.d/modules.sh >/dev/null # Module Support
-module purge
-module load intel
-module load rocoto/1.3.0-RC5
-EOF
-      ;;
-    LSF|lsf)
-      cat >> ${NWROOT}/xml/chk_${RUN}_${expname}.sh <<EOF 
 . /etc/profile
 . /etc/profile.d/lmod.sh >/dev/null # Module Support
 module purge
 module load lsf/10.1
 module load ruby/2.5.1
 module load rocoto/complete
-EOF
-      ;;
-    *)
-      ;;
-  esac
 
-  cat >> ${NWROOT}/xml/chk_${RUN}_${expname}.sh <<EOF 
-rocotostat -v 10 -w ${NWROOT}/xml/${RUN}_${expname}.xml -d ${NWROOT}/xml/${RUN}_${expname}.db 
+rocotostat -v 10 -w ${NWROOT}/xml/${RUN}_${expname}_rt.xml -d ${NWROOT}/xml/${RUN}_${expname}_rt.db 
+
 EOF
 
-fi
-
-chmod 744 ${NWROOT}/xml/chk_${RUN}_${expname}.sh
+chmod 744 ${NWROOT}/xml/chk_${RUN}_${expname}_rt.sh
 
 exit 

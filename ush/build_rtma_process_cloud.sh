@@ -38,7 +38,7 @@ echo " This machine is $target ."
 # User define the following variables:
 
 dirname_source="rtma_process_cloud.fd"
-exefile_name_cloud="process_NASALaRC_cloud.exe"
+exefile_name_cloud="rtma3d_process_cloud"
 #=========================================================================#
 
 echo "*==================================================================*"

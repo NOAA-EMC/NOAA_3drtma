@@ -40,7 +40,7 @@ echo " This machine is $target ."
 
 dirname_source="rtma_process_mosaic.fd"
 
-exefile_name_mosaic="process_NSSL_mosaic.exe"
+exefile_name_mosaic="rtma3d_process_mosaic"
 
 #=========================================================================#
 

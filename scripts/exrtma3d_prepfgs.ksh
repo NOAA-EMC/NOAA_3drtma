@@ -131,6 +131,12 @@ elif [ -r ${COMINhrrr_cycp1}/${FGShrrr_FNAME3} ] ; then
   ${LN} -sf ${GESINhrrr_rtma3d}/${FGSrtma3d_FNAME}     ${DATA}/${FGSrtma3d_FNAME}
   ${ECHO} " Cycle ${YYYYMMDDHH}: PREPFGS background --> ${COMINhrrr_cycp1}/${FGShrrr_FNAME3} "
 
+elif [ -r ${GESINhrrr}/${FGShrrr_FNAME2} ] ; then
+  # cpfs ${COMINhrrr}/${FGShrrr_FNAME2}                ${GESINhrrr_rtma3d}/${FGSrtma3d_FNAME}
+  ${LN} -sf ${GESINhrrr}/${FGShrrr_FNAME2}             ${GESINhrrr_rtma3d}/${FGSrtma3d_FNAME}
+  ${LN} -sf ${GESINhrrr_rtma3d}/${FGSrtma3d_FNAME}     ${DATA}/${FGSrtma3d_FNAME}
+  ${ECHO} " Cycle ${YYYYMMDDHH}: PREPFGS background --> ${GESINhrrr}/${FGShrrr_FNAME2} "
+
 # No background available so abort
 else
   ${ECHO} "ERROR: No background file for analysis at ${time_run}!!!!"

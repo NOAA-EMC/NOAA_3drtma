@@ -17,7 +17,7 @@ branch_gsi_gsd="feature/gsd_raphrrr_April2019_plusCLD"
 
 # branch_gsi_source="<specify_your_source_branch_name_here>"
 branch_gsi_source=${branch_gsi_source:-"$branch_gsi_gsd"}
-exefile_name_gsi="HRRR_gsi_hyb"
+exefile_name_gsi="rtma3d_gsi"
 
 #=========================================================================#
 

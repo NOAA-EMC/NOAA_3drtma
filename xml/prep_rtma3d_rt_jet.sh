@@ -188,7 +188,7 @@ export startCDATE=201902131200              #yyyymmddhhmm - Starting day of RTMA
 
 export endCDATE=201905310000                #yyyymmddhhmm - Ending day of RTMA3D run (mainly used for retrospective run) 
 
-export ExpDateWindows="17 06 2019 *"        # dd mm yyyy weekday (crontab-like date format, mainly used for real-time run)
+export ExpDateWindows="18 06 2019 *"        # dd mm yyyy weekday (crontab-like date format, mainly used for real-time run)
 
 export NET=rtma3d                           #selection of rtma3d (or rtma,urma)
 
@@ -458,7 +458,7 @@ echo
 
 elif [ ${MACHINE} = 'dell' ] ; then
 
-rm -rf ${EXEC_DIR}/*
+rm  ${EXEC_DIR}/*
 
 export exefile_name_gsi='rtma3d_gsi_hyb'
 
@@ -617,13 +617,13 @@ fi
 
    export SFCOBS_PROVIDER_udef="/gpfs/dell2/emc/modeling/noscrub/Edward.Colon/FixData/obsuselist/sfcobs_provider"
 
-   export PARMgsi_udef="/gpfs/dell2/emc/modeling/noscrub/Edward.Colon/FixData/parm/gsi"
+   export PARMgsi_udef="/gpfs/dell2/emc/modeling/noscrub/Edward.Colon/FixData/parm/GSI"
 
-   export PARMupp_udef="/gpfs/dell2/emc/modeling/noscrub/Edward.Colon/FixData/parm/upp"
+   export PARMupp_udef="/gpfs/dell2/emc/modeling/noscrub/Edward.Colon/FixData/parm/UPP"
 
-   export PARMwrf_udef="/gpfs/dell2/emc/modeling/noscrub/Edward.Colon/FixData/parm/wrf"
+   export PARMwrf_udef="/gpfs/dell2/emc/modeling/noscrub/Edward.Colon/FixData/parm/WRF"
 
-   export PARMverf_udef="/gpfs/dell2/emc/modeling/noscrub/Edward.Colon/FixData/parm/verif"
+   export PARMverf_udef="/gpfs/dell2/emc/modeling/noscrub/Edward.Colon/FixData/parm/VERIF"
 
   fi
 
@@ -858,8 +858,6 @@ cat > ${NWROOT}/xml/${XML_FNAME} <<EOF
 
 <!ENTITY DATABASE_DIR "${DATABASE_DIR}">
 
-<!ENTITY OBS_DIR "/public/data">
-
 <!ENTITY NCL_VER "6.5.0">
 
 <!ENTITY SCRIPTS "&HOMEBASE_DIR;/scripts">
@@ -897,6 +895,14 @@ cat > ${NWROOT}/xml/${XML_FNAME} <<EOF
 <!-- Definition Block of Datasets for Real-Time RTMA3D on Jet -->
 
 <!--     (Better DO NOT TOUCH this Block)                     -->
+
+EOF
+
+if [ $MACHINE = 'jet' ] ; then
+
+cat >> ${NWROOT}/xml/${XML_FNAME} <<EOF 
+
+<!ENTITY OBS_DIR "/public/data">
 
 <!ENTITY HRRR_DIR "/home/rtrr/hrrr">
 
@@ -951,6 +957,74 @@ cat > ${NWROOT}/xml/${XML_FNAME} <<EOF
 <!ENTITY TCVITALS_DIR "&OBS_DIR;/nhc/tcvitals">
 
 <!ENTITY STICKNET_DIR "&OBS_DIR;/vortex-se/stesonet">
+
+EOF
+
+elif [ $MACHINE = 'dell' ]; then
+
+cat >> ${NWROOT}/xml/${XML_FNAME} <<EOF 
+
+<!ENTITY OBS_DIR "/gpfs/dell2/stmp/Shelley.Melchior/rapcron2/com/rap/prod">
+
+<!ENTITY HRRR_DIR "/home/rtrr/hrrr">
+
+<!ENTITY SST_DIR "&OBS_DIR;/grids/ncep/sst/0p083deg/grib2">
+
+<!ENTITY GFS_DIR "&OBS_DIR;/grids/gfs/0p5deg/grib2">
+
+<!ENTITY ENKFFCST_DIR "&OBS_DIR;/grids/enkf/atm">
+
+<!ENTITY AIRCRAFT_REJECT "/home/rtruc/amdar_reject_lists">
+
+<!ENTITY SFCOBS_USELIST "/lfs3/projects/amb-verif/mesonet_uselists">
+
+<!ENTITY PREPBUFR_DIR "&OBS_DIR;/grids/rap/prepbufr">
+
+<!ENTITY PREPBUFR_EARLY_DIR "&OBS_DIR;/grids/rap/prepbufr_test">
+
+<!ENTITY PREPBUFR_SAT_DIR "&OBS_DIR;">
+
+<!ENTITY LIGHTNING_DIR "&OBS_DIR;">
+
+<!ENTITY BUFRLIGHTNING_DIR "/mnt/lfs1/projects/rtwbl/mhu/rapobs/radiance">
+
+<!ENTITY RADAR_DIR "&OBS_DIR;/radar/mrms">
+
+<!ENTITY SATELLITE_DIR "&OBS_DIR;/sat/nasa">
+
+<!ENTITY LANGLEY_BUFR_DIR "&OBS_DIR;/grids/rap/langley">
+
+<!ENTITY RADVELLEV2_DIR "&OBS_DIR;/grids/rap/nexrad">
+
+<!ENTITY RADVELLEV2P5_DIR "&OBS_DIR;/grids/rap/radwnd">
+
+<!ENTITY SATWND_DIR "&OBS_DIR;/grids/rap/satwnd">
+
+<!ENTITY NACELLE_RSD "&OBS_DIR;/tower/restricted/nacelle/netcdf">
+
+<!ENTITY TOWER_RSD "&OBS_DIR;/tower/restricted/met/netcdf">
+
+<!ENTITY TOWER_NRSD "&OBS_DIR;/tower/public/netcdf">
+
+<!ENTITY SODAR_NRSD "&OBS_DIR;/profiler/wind/external/netcdf">
+
+<!ENTITY TAMDAR_DIR "&OBS_DIR;/acars/raw/netcdf">
+
+<!ENTITY NCEPSNOW_DIR "&OBS_DIR;/grids/ncep/snow/ims96/grib2">
+
+<!ENTITY HIGHRES_SST_DIR "&OBS_DIR;/grids/ncep/sst/0p083deg/grib2">
+
+<!ENTITY HIGHRES_SST14KM_DIR "&OBS_DIR;/grids/ncep/sst/grib">
+
+<!ENTITY TCVITALS_DIR "&OBS_DIR;/nhc/tcvitals">
+
+<!ENTITY STICKNET_DIR "&OBS_DIR;/vortex-se/stesonet">
+
+EOF
+
+fi
+
+cat >> ${NWROOT}/xml/${XML_FNAME} <<EOF 
 
 <!-- END OF BLOCK -->
 
@@ -3119,13 +3193,7 @@ module load intel
 
 module load rocoto/1.3.0-RC5
 
-cat >> ${NWROOT}/xml/${run_scriptname} <<EOF 
-
 module load slurm/18.08.7p1
-
-EOF
-
-cat >> ${NWROOT}/xml/${run_scriptname} <<EOF 
 
 rocotorun -v 10 -w ${NWROOT}/xml/${XML_FNAME} -d ${NWROOT}/xml/${DB_FNAME}
 
@@ -3145,15 +3213,7 @@ module load intel
 
 module load rocoto/1.3.0-RC5
 
-EOF
-
-cat >> ${NWROOT}/xml/${chk_scriptname} <<EOF 
-
 module load slurm/18.08.7p1
-
-EOF
-
-cat >> ${NWROOT}/xml/${chk_scriptname} <<EOF 
 
 subhr="00"
 
