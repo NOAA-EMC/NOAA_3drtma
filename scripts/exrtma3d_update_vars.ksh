@@ -116,9 +116,9 @@ time_str=`${DATE} "+%Y-%m-%d_%H_%M_%S" -d "${START_TIME}"`
 # Set up the work directory and cd into it
 workdir=${DATAHOME}
 ${MKDIR} -p ${workdir}
-if [ "`stat -f -c %T ${workdir}`" == "lustre" ]; then
-  lfs setstripe --count 8 ${workdir}
-fi
+#if [ "`stat -f -c %T ${workdir}`" == "lustre" ]; then
+#  lfs setstripe --count 8 ${workdir}
+#fi
 cd ${workdir}
 
 ${CP} ${STATIC_DIR}/wrf.nl ${WRF_NAMELIST}
