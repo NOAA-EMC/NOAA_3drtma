@@ -11,9 +11,14 @@
 #                ( if `grep -c 'E5-2690 v3' /proc/cpuinfo` -gt 0 )
 #
 ####################################################################################################
-    conf_target=nco
-    MACHINE=dell
-    export SCHEDULER="LSF" 
+    if [[ -d /ioddev_dell ]]; then
+       conf_target=nco
+       MACHINE=dell
+       export SCHEDULER="LSF"
+    else
+       echo 'Script only runs on the dell machines. Exiting....'
+       exit 0
+    fi
 echo 'Running on $MACHINE '
 
 #
@@ -46,7 +51,7 @@ fi
 #####################################################
 set -x
 
-export ExpDateWindows="21 06 2019 *"        # dd mm yyyy weekday (crontab-like date format, mainly used for real-time run)
+export ExpDateWindows="24 06 2019 *"        # dd mm yyyy weekday (crontab-like date format, mainly used for real-time run)
 export startCDATE=201904271200              #yyyymmddhhmm - Starting day of retro run 
 export endCDATE=201904271400                #yyyymmddhhmm - Ending day of RTMA3D run (needed for both RETRO and REAL TIME). 
 export NET=rtma3d                           #selection of rtma3d (or rtma,urma)
@@ -277,6 +282,12 @@ export exefile_name_verif=""    # executable of verification (MET) is defined by
 #
 #--- option control for obs pre-processing (esp. for obs used in cloud analysis)
 #
+################################################################################
+#THESE SETTINGS ARE SPECIFIC TO DELL REAL-TIME 3D RTMA. DO NOT CHANGE.
+################################################################################
+
+
+
   export obsprep_radar=0  # 0: No (using archived hrrr.t{HH}z.NSSLRefInGSI.bufr processed in operational hrrr run)
                           # 1: pre-processing MRMS grib2 radar reflectivity obs
 
@@ -1070,17 +1081,15 @@ cat >> ${NWROOT}/xml/${RUN}_${expname}_rt.xml <<EOF
 
 <!-- only need 60 for hourly running
 
-    <var name="min">15 30 45 60</var>
+    <var name="subh">15 30 45 60</var>
 
     <var name="off">00:45:00 00:30:00 00:15:00 00:00:00</var>
 
 -->
 
-    <var name="min">60</var>
+    <var name="subh">60</var>
 
-    <var name="off">00:00:00</var>
-
-  <task name="&NET;_obsprep_lghtn" cycledefs="02-11hr,00hr,01hr" maxtries="&maxtries;">
+  <task name="&NET;_obsprep_lghtn_#subh#" cycledefs="02-11hr,00hr,01hr" maxtries="&maxtries;">
 
     &ENVARS;
     <envar>
@@ -1089,7 +1098,7 @@ cat >> ${NWROOT}/xml/${RUN}_${expname}_rt.xml <<EOF
     </envar>
 
     <command>&JJOB_DIR;/launch.ksh &JJOB_OBSPREP_LGHTN;</command>
-    <jobname><cyclestr>&NET;_obsprep_lghtn_@H</cyclestr></jobname>
+    <jobname><cyclestr>&NET;_obsprep_lghtn_@H_#subh#</cyclestr></jobname>
     <join><cyclestr>&LOG_SCHDLR;/&NET;_&envir;_obsprep_lghtn_@Y@m@d@H@M.log</cyclestr></join>
 
     &OBSPREP_LGHTN_RESOURCES;
@@ -1097,41 +1106,9 @@ cat >> ${NWROOT}/xml/${RUN}_${expname}_rt.xml <<EOF
 
     &ENVARS_PREPJOB;
 
-  </task>
-
-  </metatask>
-
-EOF
-
-fi
-
-
-if [ ${obsprep_radar} -eq 1 ] ; then
-
-cat >> ${NWROOT}/xml/${RUN}_${expname}_rt.xml <<EOF 
-    <metatask>
-
-<!-- <var name="subh">15 30 45 60</var> -->
-
-    <var name="subh">60</var>
-
-
-  <task name="&NET;_obsprep_radar_#subh#" cycledefs="02-11hr,00hr,01hr" maxtries="&maxtries;">
-
-    &ENVARS;
-    <envar>
-       <name>rundir_task</name>
-       <value><cyclestr>&DATA_OBSPREP_RADAR;</cyclestr></value>
-    </envar>
-
-    <command>&JJOB_DIR;/launch.ksh &JJOB_OBSPREP_RADAR;</command>
-    <jobname><cyclestr>&NET;_obsprep_radar_@H</cyclestr></jobname>
-    <join><cyclestr>&LOG_SCHDLR;/&NET;_&envir;_obsprep_radar_@Y@m@d@H@M.log</cyclestr></join>
-
-    &OBSPREP_RADAR_RESOURCES;
-    &OBSPREP_RADAR_RESERVATION;
-
-    &ENVARS_PREPJOB;
+    <dependency>
+       <datadep><cyclestr>&COMINRAP;/rap.@Y@m@d/rap.t@Hz.lghtng.tm00.bufr_d</cyclestr></datadep>
+   </dependency>
 
   </task>
   </metatask>
@@ -1143,9 +1120,18 @@ fi
 
 if [ ${obsprep_cloud} -eq 1 ] ; then
 
+cat >> ${NWROOT}/xml/${RUN}_${expname}_rt.xml <<EOF    
+
+    <metatask>
+
+<!-- <var name="subh">15 30 45 60</var> -->
+
+    <var name="subh">60</var>
+
+
 cat >> ${NWROOT}/xml/${RUN}_${expname}_rt.xml <<EOF 
 
-  <task name="&NET;_obsprep_cloud" cycledefs="02-11hr,00hr,01hr" maxtries="&maxtries;">
+  <task name="&NET;_obsprep_cloud_#subh#" cycledefs="02-11hr,00hr,01hr" maxtries="&maxtries;">
 
     &ENVARS;
     <envar>
@@ -1154,15 +1140,20 @@ cat >> ${NWROOT}/xml/${RUN}_${expname}_rt.xml <<EOF
     </envar>
 
     <command>&JJOB_DIR;/launch.ksh &JJOB_OBSPREP_CLOUD;</command>
-    <jobname><cyclestr>&NET;_obsprep_cloud_@H</cyclestr></jobname>
+    <jobname><cyclestr>&NET;_obsprep_cloud_@H_#subh#</cyclestr></jobname>
     <join><cyclestr>&LOG_SCHDLR;/&NET;_&envir;_obsprep_cloud_@Y@m@d@H@M.log</cyclestr></join>
 
     &OBSPREP_CLOUD_RESOURCES;
     &OBSPREP_CLOUD_RESERVATION;
 
-    &ENVARS_PREPJOB;
+    &ENVARS_PREPJOB; 
+
+    <dependency>
+       <datadep><cyclestr>&COMINRAP;/rap.@Y@m@d/rap.t@Hz.lgycld.tm00.bufr_d</cyclestr></datadep>
+    </dependency>
 
   </task>
+  </metatask>
 
 EOF
 
@@ -1170,7 +1161,20 @@ fi
 
 cat >> ${NWROOT}/xml/${RUN}_${expname}_rt.xml <<EOF 
 
-  <task name="&NET;_prepobs" cycledefs="02-11hr,01hr" maxtries="&maxtries;">
+    <metatask>
+
+<!-- only need 60 for hourly running
+
+    <var name="subh">15 30 45 60</var>
+
+    <var name="off">00:45:00 00:30:00 00:15:00 00:00:00</var>
+
+-->
+
+    <var name="subh">60</var>
+
+
+  <task name="&NET;_prepobs_#subh#" cycledefs="02-11hr,01hr" maxtries="&maxtries;">
 
     &ENVARS;
     <envar>
@@ -1179,21 +1183,38 @@ cat >> ${NWROOT}/xml/${RUN}_${expname}_rt.xml <<EOF
     </envar>
 
     <command>&JJOB_DIR;/launch.ksh &JJOB_PREPOBS;</command>
-    <jobname><cyclestr>&NET;_prepobs_@H</cyclestr></jobname>
+    <jobname><cyclestr>&NET;_prepobs_@H_#subh#</cyclestr></jobname>
     <join><cyclestr>&LOG_SCHDLR;/&NET;_&envir;_prepobs_@Y@m@d@H@M.log</cyclestr></join>
 
     &PREPOBS_RESOURCES;
     &PREPOBS_RESERVATION;
 
     &ENVARS_PREPJOB;
-
     <dependency>
-       <taskdep task="&NET;_obsprep_lghtn"/>
-    </dependency>
-
+       <and>
+       <taskdep task="&NET;_obsprep_lghtn_#subh#"/>
+       <datadep><cyclestr>&COMINRAP;/rap.@Y@m@d/rap.t@Hz.prepbufr.tm00</cyclestr></datadep>       
+       <datadep><cyclestr>&COMINHRRR;/hrrr.@Y@m@d/conus/hrrr.t@Hz.NSSLRefInGSI.bufr</cyclestr></datadep>
+       <datadep><cyclestr>&COMINHRRR;/hrrr.@Y@m@d/conus/hrrr.t@Hz.NASALaRCCloudInGSI.bufr</cyclestr></datadep>
+       </and>   
+   </dependency>
   </task>
+  </metatask>
 
-  <task name="&NET;_prepfgs" cycledefs="02-11hr,01hr" maxtries="&maxtries;">
+  <metatask>
+
+<!-- only need 60 for hourly running
+
+    <var name="subh">15 30 45 60</var>
+
+    <var name="off">00:45:00 00:30:00 00:15:00 00:00:00</var>
+
+-->
+
+    <var name="subh">60</var>
+
+
+  <task name="&NET;_prepfgs_#subh#" cycledefs="02-11hr,01hr" maxtries="&maxtries;">
 
     &ENVARS;
     <envar>
@@ -1202,7 +1223,7 @@ cat >> ${NWROOT}/xml/${RUN}_${expname}_rt.xml <<EOF
     </envar>
 
     <command>&JJOB_DIR;/launch.ksh &JJOB_PREPFGS;</command>
-    <jobname><cyclestr>&NET;_prepfgs_@H</cyclestr></jobname>
+    <jobname><cyclestr>&NET;_prepfgs_@H_#subh#</cyclestr></jobname>
     <join><cyclestr>&LOG_SCHDLR;/&NET;_&envir;_prepfgs_@Y@m@d@H@M.log</cyclestr></join>
 
     &PREPFGS_RESOURCES;
@@ -1211,12 +1232,26 @@ cat >> ${NWROOT}/xml/${RUN}_${expname}_rt.xml <<EOF
     &ENVARS_PREPJOB;
 
     <dependency>
-       <taskdep task="&NET;_obsprep_lghtn"/>
+       <datadep><cyclestr>&GESINHRRR;/hrrr/hrrrges_sfc/conus/hrrr_@Y@m@d@Hf001</cyclestr></datadep>
     </dependency>
 
   </task>
+  </metatask>
 
-  <task name="&NET;_gsianl" cycledefs="02-11hr,01hr" maxtries="&maxtries;">
+  <metatask>
+
+<!-- only need 60 for hourly running
+
+    <var name="subh">15 30 45 60</var>
+
+    <var name="off">00:45:00 00:30:00 00:15:00 00:00:00</var>
+
+-->
+
+    <var name="subh">60</var>
+
+
+  <task name="&NET;_gsianl_#subh#" cycledefs="02-11hr,01hr" maxtries="&maxtries;">
 
     &ENVARS;
     &GSI_RESOURCES;
@@ -1228,21 +1263,35 @@ cat >> ${NWROOT}/xml/${RUN}_${expname}_rt.xml <<EOF
     </envar>
 
     <command>&JJOB_DIR;/launch.ksh &JJOB_GSIANL;</command>
-    <jobname><cyclestr>&NET;_gsianl_@H</cyclestr></jobname>
+    <jobname><cyclestr>&NET;_gsianl_@H_#subh#</cyclestr></jobname>
     <join><cyclestr>&LOG_SCHDLR;/&NET;_&envir;_gsianl_@Y@m@d@H@M.log</cyclestr></join>
 
     &ENVARS_GSI;
 
     <dependency>
       <and>
-          <taskdep task="&NET;_prepobs"/>
-          <taskdep task="&NET;_prepfgs"/>
+          <taskdep task="&NET;_prepobs_#subh#"/>
+          <taskdep task="&NET;_prepfgs_#subh#"/>
       </and>
     </dependency>
 
   </task>
+  </metatask>
 
-  <task name="&NET;_post" cycledefs="02-11hr,01hr" maxtries="&maxtries;">
+  <metatask>
+
+<!-- only need 60 for hourly running
+
+    <var name="subh">15 30 45 60</var>
+
+    <var name="off">00:45:00 00:30:00 00:15:00 00:00:00</var>
+
+-->
+
+  <var name="subh">60</var>
+
+
+  <task name="&NET;_post_#subh#" cycledefs="02-11hr,01hr" maxtries="&maxtries;">
 
     &ENVARS;
     &POST_RESOURCES;
@@ -1262,20 +1311,33 @@ cat >> ${NWROOT}/xml/${RUN}_${expname}_rt.xml <<EOF
     </envar>
 
     <command>&JJOB_DIR;/launch.ksh &JJOB_POST;</command>
-    <jobname><cyclestr>&NET;_post_@H</cyclestr></jobname>
+    <jobname><cyclestr>&NET;_post_@H_#subh#</cyclestr></jobname>
     <join><cyclestr>&LOG_SCHDLR;/&NET;_&envir;_post_@Y@m@d@H@M.log</cyclestr></join>
 
     &ENVARS_POST;
 
     <dependency>
-      <and>
-          <taskdep task="&NET;_gsianl"/>
-      </and>
+          <taskdep task="&NET;_gsianl_#subh#"/>
     </dependency>
 
   </task>
+  </metatask>
 
-  <task name="&NET;_verif" cycledefs="02-11hr,01hr" maxtries="&maxtries;">
+  <metatask>
+
+<!-- only need 60 for hourly running
+
+    <var name="subh">15 30 45 60</var>
+
+    <var name="off">00:45:00 00:30:00 00:15:00 00:00:00</var>
+
+-->
+
+  <var name="subh">60</var>
+
+
+
+  <task name="&NET;_verif_#subh#" cycledefs="02-11hr,01hr" maxtries="&maxtries;">
     &ENVARS;
     &VERIF_RESOURCES;
     &VERIF_RESERVATION;
@@ -1284,16 +1346,17 @@ cat >> ${NWROOT}/xml/${RUN}_${expname}_rt.xml <<EOF
        <value><cyclestr>&DATA_VERIF;</cyclestr></value>
     </envar>
     <command>&JJOB_DIR;/launch.ksh &JJOB_VERIF;</command>
-    <jobname><cyclestr>&NET;_verif_@H</cyclestr></jobname>
+    <jobname><cyclestr>&NET;_verif_@H_#subh#</cyclestr></jobname>
     <join><cyclestr>&LOG_SCHDLR;/&NET;_&envir;_verif_@Y@m@d@H@M.log</cyclestr></join>
     &ENVARS_VERIF;
     <dependency>
        <and>
-          <taskdep task="&NET;_post"/>
+          <taskdep task="&NET;_post_#subh#"/>
        </and>
     </dependency>
 
   </task>
+  </metatask>
 
 
 EOF
@@ -1301,8 +1364,13 @@ EOF
 # if running the step to plot (with GrADS)
 if [ ${run_plt} -gt 0 ] ; then
 cat >> ${NWROOT}/xml/${RUN}_${expname}_rt.xml <<EOF 
+  <metatask>
 
-  <task name="&NET;_post4fgs" cycledefs="02-11hr,01hr" maxtries="&maxtries;">
+  <!-- <var name="subh">15 30 45 60</var> -->
+
+  <var name="subh">60</var>
+ 
+  <task name="&NET;_post4fgs_#subh#" cycledefs="02-11hr,01hr" maxtries="&maxtries;">
 
     &ENVARS;
     &POST_RESOURCES;
@@ -1313,20 +1381,26 @@ cat >> ${NWROOT}/xml/${RUN}_${expname}_rt.xml <<EOF
     </envar>
 
     <command>&JJOB_DIR;/launch.ksh &JJOB_POST4FGS;</command>
-    <jobname><cyclestr>&NET;_post4fgs_@H</cyclestr></jobname>
+    <jobname><cyclestr>&NET;_post4fgs_@H_#subh#</cyclestr></jobname>
     <join><cyclestr>&LOG_SCHDLR;/&NET;_&envir;_post4fgs_@Y@m@d@H@M.log</cyclestr></join>
 
     &ENVARS_POST;
 
     <dependency>
-      <and>
-          <taskdep task="&NET;_gsianl"/>
-      </and>
+          <taskdep task="&NET;_gsianl_#subh#"/>
     </dependency>
 
   </task>
+  </metatask>
 
-  <task name="&NET;_plotgrads" cycledefs="&time_int;" maxtries="&maxtries;">
+  <metatask>
+
+  <!-- <var name="subh">15 30 45 60</var> -->
+
+  <var name="subh">60</var>
+
+
+  <task name="&NET;_plotgrads_#subh#" cycledefs="02-11hr,01hr" maxtries="&maxtries;">
 
     &ENVARS;
     &PLOT_RESOURCES;
@@ -1337,19 +1411,20 @@ cat >> ${NWROOT}/xml/${RUN}_${expname}_rt.xml <<EOF
     </envar>
 
     <command>&JJOB_DIR;/launch.ksh &JJOB_PLOTGRADS;</command>
-    <jobname><cyclestr>&NET;_plotgrads_@H</cyclestr></jobname>
+    <jobname><cyclestr>&NET;_plotgrads_@H_#subh#</cyclestr></jobname>
     <join><cyclestr>&LOG_SCHDLR;/&NET;_&envir;_plotgrads_@Y@m@d@H@M.log</cyclestr></join>
 
     &ENVARS_PLOT;
 
     <dependency>
       <and>
-          <taskdep task="&NET;_post"/>
-          <taskdep task="&NET;_post4fgs"/>
+          <taskdep task="&NET;_post_#subh#"/>
+          <taskdep task="&NET;_post4fgs_#subh#"/>
       </and>
     </dependency>
 
   </task>
+  </metatask>
 
 EOF
 fi

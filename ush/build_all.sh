@@ -78,6 +78,10 @@ export EXEC_DIR=${TOP_RTMA}/exec
 
 if [ $target = 'jet' ] ; then
 
+rm ${EXEC_dir}/GSI/*
+rm ${EXEC_dir}/UPP/*
+rm {EXEC_dir}/smartinit/*
+
 ln -s /home/rtrr/HRRR/exec/GSI/count_obs.exe ${EXEC_dir}/GSI/rtma3d_count_obs
 ln -s /home/rtrr/HRRR/exec/GSI/HRRR_gsi_hyb ${EXEC_dir}/GSI/rtma3d_gsi_hyb
 ln -s /home/rtrr/HRRR/exec/GSI/prepbufr_append_clamps.exe ${EXEC_dir}/GSI/prepbufr_append_clamps.exe
@@ -151,12 +155,6 @@ cd ${USH_DIR}
 echo " running build_rtma_post.sh to build uni-post code ..."
 ./build_rtma_post.sh > log.build_rtma_post 2>&1
 #
-#--- link exe, fixed data, etc.
-#
-cd ${USH_DIR}
-echo " running link_rtma.sh to link fixed dta , executables, etc. ... "
-./link_rtma.sh
-
 #===================================================================#
 date
 

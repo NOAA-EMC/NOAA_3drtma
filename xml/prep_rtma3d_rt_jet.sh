@@ -30,56 +30,8 @@
 
 #
 
-if [[ -d /dcom && -d /hwrf ]] ; then
 
-    . /usrx/local/Modules/3.2.10/init/sh
-
-#   MODULESHOME="/usrx/local/Modules/3.2.10"
-
-#   . $MODULESHOME/init/sh
-
-    MACHINE=wcoss 
-
-    echo "Machine not configured for 3d rtma."
-
-elif [[ -d /cm ]] ; then
-
-#   MODULESHOME="/usrx/local/Modules/3.2.10"
-
-#   . $MODULESHOME/init/sh
-
-    conf_target=nco
-
-    MACHINE=cray
-
-    echo "Machine not configured for 3d rtma."
-
-elif [[ -d /ioddev_dell ]]; then
-
-#   MODULESHOME="/usrx/local/Modules/3.2.10"
-
-#   . $MODULESHOME/init/sh
-
-    conf_target=nco
-
-    MACHINE=dell
-
-    export SCHEDULER="LSF"
-
-
-elif [[ -d /scratch3 ]] ; then
-
-    . /etc/profile
-
-    . /etc/profile.d/modules.sh >/dev/null # Module Support
-
-    MACHINE=theia
-
-    echo "Machine not configured for real time 3d rtma."
-
-    exit 1
-
-elif [[ -d /mnt/lfs3/projects ]] ; then
+if [[ -d /mnt/lfs3/projects ]] ; then
 
     . /etc/profile
 
@@ -94,16 +46,8 @@ elif [[ -d /mnt/lfs3/projects ]] ; then
     export SCHEDULER="SLURM"
 
 else
-
-    MACHINE="unknown"
-
-    echo 'Running on $MACHINE '
-
-    echo ' ---------> Warning Warning Warning Warning <--------- '
-
-    echo '     Machine $machine is NOT ready for running $NET.'
-
-    exit 1
+    echo 'This prep script only creates xml files for the jet. Exiting..."
+    exit 0
 
 fi
 
