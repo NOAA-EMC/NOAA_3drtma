@@ -44,6 +44,7 @@
 
 <!ENTITY GFS_DIR "&OBS_DIR;/grids/gfs/0p5deg/grib2">
 <!ENTITY ENKFFCST_DIR "&OBS_DIR;/grids/enkf/atm">
+<!ENTITY HRRRDAS_DIR "/lfs1/projects/wrfruc/HRRRE/cycle">
 
 <!ENTITY AIRCRAFT_REJECT "/home/rtruc/amdar_reject_lists">
 <!ENTITY SFCOBS_USELIST "/lfs3/projects/amb-verif/mesonet_uselists">
@@ -83,7 +84,7 @@
 <!ENTITY LIGHTNING_PROC "1">
 <!ENTITY RADAR_PROC "33">
 <!ENTITY SATELLITE_PROC "1">
-<!ENTITY GSI_HYB_PROC "280">
+<!ENTITY GSI_HYB_PROC "9:ppn=20">
 <!ENTITY GSI_DIAG_PROC "1">
 <!ENTITY RADARLINKS_PROC "1">
 
@@ -676,7 +677,7 @@
     &RESERVATION_DA;
 
     <command>&JJOB_DIR;/launch.ksh &JJOB_DIR;/JRTMA3D_GSI_HYB</command>
-    <cores>&GSI_HYB_PROC;</cores>
+    <nodes>&GSI_HYB_PROC;</nodes>
     <jobname><cyclestr>&JOBNAME_PRE;_gsi_hyb_@H</cyclestr></jobname>
     <join><cyclestr>&LOG_DIR;/gsi_hyb_@Y@m@d@H00.log</cyclestr></join>
 
@@ -757,10 +758,22 @@
       <name>ENKF_FCST</name>
       <value>&ENKFFCST_DIR;</value>
     </envar>
+    <envar>
+      <name>HRRRDAS_DIR</name>
+      <value>&HRRRDAS_DIR;</value>
+    </envar>
+    <envar>
+      <name>HRRRDAS_SMALL</name>
+      <value>1</value>
+    </envar>
+    <envar>
+      <name>HRRRDAS_BEC</name>
+      <value>1</value>
+    </envar>
 
     <dependency>
       <and>
-          <datadep>&HRRR_DIR;/<cyclestr offset="-1:00:00">@Y@m@d@H</cyclestr>/wrfprd/<cyclestr>wrfout_d01_@Y-@m-@d_@H_00_00</cyclestr></datadep>
+        <datadep>&HRRR_DIR;/<cyclestr offset="-1:00:00">@Y@m@d@H</cyclestr>/wrfprd/<cyclestr>wrfout_d01_@Y-@m-@d_@H_00_00</cyclestr></datadep>
         <or> 
           <and>
             <datadep age="00:02:00"><cyclestr>&DATAROOT;/@Y@m@d@H/obsprd/NSSLRefInGSI.bufr</cyclestr></datadep>
@@ -770,6 +783,42 @@
               <taskdep task="conventional_gsi"/>
               <taskdep task="conventional_gsi_early"/>
             </or>
+            <datadep age="00:02:00"><cyclestr offset="-1:00:00">&HRRRDAS_DIR;/@Y@m@d@H/</cyclestr><cyclestr>wrfprd_mem0001/wrfout_small_d02_@Y-@m-@d_@H_00_00</cyclestr></datadep>
+            <datadep age="00:02:00"><cyclestr offset="-1:00:00">&HRRRDAS_DIR;/@Y@m@d@H/</cyclestr><cyclestr>wrfprd_mem0002/wrfout_small_d02_@Y-@m-@d_@H_00_00</cyclestr></datadep>
+            <datadep age="00:02:00"><cyclestr offset="-1:00:00">&HRRRDAS_DIR;/@Y@m@d@H/</cyclestr><cyclestr>wrfprd_mem0003/wrfout_small_d02_@Y-@m-@d_@H_00_00</cyclestr></datadep>
+            <datadep age="00:02:00"><cyclestr offset="-1:00:00">&HRRRDAS_DIR;/@Y@m@d@H/</cyclestr><cyclestr>wrfprd_mem0004/wrfout_small_d02_@Y-@m-@d_@H_00_00</cyclestr></datadep>
+            <datadep age="00:02:00"><cyclestr offset="-1:00:00">&HRRRDAS_DIR;/@Y@m@d@H/</cyclestr><cyclestr>wrfprd_mem0005/wrfout_small_d02_@Y-@m-@d_@H_00_00</cyclestr></datadep>
+            <datadep age="00:02:00"><cyclestr offset="-1:00:00">&HRRRDAS_DIR;/@Y@m@d@H/</cyclestr><cyclestr>wrfprd_mem0006/wrfout_small_d02_@Y-@m-@d_@H_00_00</cyclestr></datadep>
+            <datadep age="00:02:00"><cyclestr offset="-1:00:00">&HRRRDAS_DIR;/@Y@m@d@H/</cyclestr><cyclestr>wrfprd_mem0007/wrfout_small_d02_@Y-@m-@d_@H_00_00</cyclestr></datadep>
+            <datadep age="00:02:00"><cyclestr offset="-1:00:00">&HRRRDAS_DIR;/@Y@m@d@H/</cyclestr><cyclestr>wrfprd_mem0008/wrfout_small_d02_@Y-@m-@d_@H_00_00</cyclestr></datadep>
+            <datadep age="00:02:00"><cyclestr offset="-1:00:00">&HRRRDAS_DIR;/@Y@m@d@H/</cyclestr><cyclestr>wrfprd_mem0009/wrfout_small_d02_@Y-@m-@d_@H_00_00</cyclestr></datadep>
+            <datadep age="00:02:00"><cyclestr offset="-1:00:00">&HRRRDAS_DIR;/@Y@m@d@H/</cyclestr><cyclestr>wrfprd_mem0010/wrfout_small_d02_@Y-@m-@d_@H_00_00</cyclestr></datadep>
+            <datadep age="00:02:00"><cyclestr offset="-1:00:00">&HRRRDAS_DIR;/@Y@m@d@H/</cyclestr><cyclestr>wrfprd_mem0011/wrfout_small_d02_@Y-@m-@d_@H_00_00</cyclestr></datadep>
+            <datadep age="00:02:00"><cyclestr offset="-1:00:00">&HRRRDAS_DIR;/@Y@m@d@H/</cyclestr><cyclestr>wrfprd_mem0012/wrfout_small_d02_@Y-@m-@d_@H_00_00</cyclestr></datadep>
+            <datadep age="00:02:00"><cyclestr offset="-1:00:00">&HRRRDAS_DIR;/@Y@m@d@H/</cyclestr><cyclestr>wrfprd_mem0013/wrfout_small_d02_@Y-@m-@d_@H_00_00</cyclestr></datadep>
+            <datadep age="00:02:00"><cyclestr offset="-1:00:00">&HRRRDAS_DIR;/@Y@m@d@H/</cyclestr><cyclestr>wrfprd_mem0014/wrfout_small_d02_@Y-@m-@d_@H_00_00</cyclestr></datadep>
+            <datadep age="00:02:00"><cyclestr offset="-1:00:00">&HRRRDAS_DIR;/@Y@m@d@H/</cyclestr><cyclestr>wrfprd_mem0015/wrfout_small_d02_@Y-@m-@d_@H_00_00</cyclestr></datadep>
+            <datadep age="00:02:00"><cyclestr offset="-1:00:00">&HRRRDAS_DIR;/@Y@m@d@H/</cyclestr><cyclestr>wrfprd_mem0016/wrfout_small_d02_@Y-@m-@d_@H_00_00</cyclestr></datadep>
+            <datadep age="00:02:00"><cyclestr offset="-1:00:00">&HRRRDAS_DIR;/@Y@m@d@H/</cyclestr><cyclestr>wrfprd_mem0017/wrfout_small_d02_@Y-@m-@d_@H_00_00</cyclestr></datadep>
+            <datadep age="00:02:00"><cyclestr offset="-1:00:00">&HRRRDAS_DIR;/@Y@m@d@H/</cyclestr><cyclestr>wrfprd_mem0018/wrfout_small_d02_@Y-@m-@d_@H_00_00</cyclestr></datadep>
+            <datadep age="00:02:00"><cyclestr offset="-1:00:00">&HRRRDAS_DIR;/@Y@m@d@H/</cyclestr><cyclestr>wrfprd_mem0019/wrfout_small_d02_@Y-@m-@d_@H_00_00</cyclestr></datadep>
+            <datadep age="00:02:00"><cyclestr offset="-1:00:00">&HRRRDAS_DIR;/@Y@m@d@H/</cyclestr><cyclestr>wrfprd_mem0020/wrfout_small_d02_@Y-@m-@d_@H_00_00</cyclestr></datadep>
+            <datadep age="00:02:00"><cyclestr offset="-1:00:00">&HRRRDAS_DIR;/@Y@m@d@H/</cyclestr><cyclestr>wrfprd_mem0021/wrfout_small_d02_@Y-@m-@d_@H_00_00</cyclestr></datadep>
+            <datadep age="00:02:00"><cyclestr offset="-1:00:00">&HRRRDAS_DIR;/@Y@m@d@H/</cyclestr><cyclestr>wrfprd_mem0022/wrfout_small_d02_@Y-@m-@d_@H_00_00</cyclestr></datadep>
+            <datadep age="00:02:00"><cyclestr offset="-1:00:00">&HRRRDAS_DIR;/@Y@m@d@H/</cyclestr><cyclestr>wrfprd_mem0023/wrfout_small_d02_@Y-@m-@d_@H_00_00</cyclestr></datadep>
+            <datadep age="00:02:00"><cyclestr offset="-1:00:00">&HRRRDAS_DIR;/@Y@m@d@H/</cyclestr><cyclestr>wrfprd_mem0024/wrfout_small_d02_@Y-@m-@d_@H_00_00</cyclestr></datadep>
+            <datadep age="00:02:00"><cyclestr offset="-1:00:00">&HRRRDAS_DIR;/@Y@m@d@H/</cyclestr><cyclestr>wrfprd_mem0025/wrfout_small_d02_@Y-@m-@d_@H_00_00</cyclestr></datadep>
+            <datadep age="00:02:00"><cyclestr offset="-1:00:00">&HRRRDAS_DIR;/@Y@m@d@H/</cyclestr><cyclestr>wrfprd_mem0026/wrfout_small_d02_@Y-@m-@d_@H_00_00</cyclestr></datadep>
+            <datadep age="00:02:00"><cyclestr offset="-1:00:00">&HRRRDAS_DIR;/@Y@m@d@H/</cyclestr><cyclestr>wrfprd_mem0027/wrfout_small_d02_@Y-@m-@d_@H_00_00</cyclestr></datadep>
+            <datadep age="00:02:00"><cyclestr offset="-1:00:00">&HRRRDAS_DIR;/@Y@m@d@H/</cyclestr><cyclestr>wrfprd_mem0028/wrfout_small_d02_@Y-@m-@d_@H_00_00</cyclestr></datadep>
+            <datadep age="00:02:00"><cyclestr offset="-1:00:00">&HRRRDAS_DIR;/@Y@m@d@H/</cyclestr><cyclestr>wrfprd_mem0029/wrfout_small_d02_@Y-@m-@d_@H_00_00</cyclestr></datadep>
+            <datadep age="00:02:00"><cyclestr offset="-1:00:00">&HRRRDAS_DIR;/@Y@m@d@H/</cyclestr><cyclestr>wrfprd_mem0030/wrfout_small_d02_@Y-@m-@d_@H_00_00</cyclestr></datadep>
+            <datadep age="00:02:00"><cyclestr offset="-1:00:00">&HRRRDAS_DIR;/@Y@m@d@H/</cyclestr><cyclestr>wrfprd_mem0031/wrfout_small_d02_@Y-@m-@d_@H_00_00</cyclestr></datadep>
+            <datadep age="00:02:00"><cyclestr offset="-1:00:00">&HRRRDAS_DIR;/@Y@m@d@H/</cyclestr><cyclestr>wrfprd_mem0032/wrfout_small_d02_@Y-@m-@d_@H_00_00</cyclestr></datadep>
+            <datadep age="00:02:00"><cyclestr offset="-1:00:00">&HRRRDAS_DIR;/@Y@m@d@H/</cyclestr><cyclestr>wrfprd_mem0033/wrfout_small_d02_@Y-@m-@d_@H_00_00</cyclestr></datadep>
+            <datadep age="00:02:00"><cyclestr offset="-1:00:00">&HRRRDAS_DIR;/@Y@m@d@H/</cyclestr><cyclestr>wrfprd_mem0034/wrfout_small_d02_@Y-@m-@d_@H_00_00</cyclestr></datadep>
+            <datadep age="00:02:00"><cyclestr offset="-1:00:00">&HRRRDAS_DIR;/@Y@m@d@H/</cyclestr><cyclestr>wrfprd_mem0035/wrfout_small_d02_@Y-@m-@d_@H_00_00</cyclestr></datadep>
+            <datadep age="00:02:00"><cyclestr offset="-1:00:00">&HRRRDAS_DIR;/@Y@m@d@H/</cyclestr><cyclestr>wrfprd_mem0036/wrfout_small_d02_@Y-@m-@d_@H_00_00</cyclestr></datadep>
           </and>
           <timedep><cyclestr offset="&START_TIME_GSI;">@Y@m@d@H@M00</cyclestr></timedep>
         </or>

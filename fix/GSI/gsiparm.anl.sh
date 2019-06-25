@@ -136,13 +136,14 @@ OBS_INPUT::
    uv_hyb_ens=.true.,
    aniso_a_en=.false.,generate_ens=.false.,
    n_ens=${nummem},
-!  beta_s0=${beta1_inv},s_ens_h=110,s_ens_v=3,
-   beta_s0=${beta1_inv},s_ens_h=${ens_h},s_ens_v=${ens_v},
-   regional_ensemble_option=1,
+   beta_s0=${beta1_inv},s_ens_h=110,s_ens_v=3,
+   regional_ensemble_option=${regional_ensemble_option},
    pseudo_hybens = .false.,
    grid_ratio_ens = ${grid_ratio_ens},
    l_ens_in_diff_time=.true.,
    ensemble_path='',
+   i_en_perts_io=${i_en_perts_io},
+   ens_fast_read=${ens_fast_read},
  /
  &RAPIDREFRESH_CLDSURF
    dfi_radar_latent_heat_time_period=10.0,
