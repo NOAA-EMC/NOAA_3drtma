@@ -314,7 +314,7 @@ fi
 ## 
 stampcycle=`date -d "${START_TIME}" +%s`
 minHourDiff=100
-loops="009"
+loops="006"
 for loop in $loops; do
   for timelist in `ls ${ENKF_FCST}/*.gdas.t*z.atmf${loop}s.mem080.nemsio`; do
     availtimeyy=`basename ${timelist} | cut -c 1-2`
