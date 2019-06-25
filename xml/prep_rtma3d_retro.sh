@@ -284,7 +284,7 @@ export CAP_RUN_ENVIR=`echo ${run_envir} | tr '[:lower:]' '[:upper:]'`
 export exefile_name_gsi="rtma3d_gsi"
 export exefile_name_post="rtma3d_wrfpost"
 export exefile_name_radar="rtma3d_process_mosaic"
-export exefile_name_lightning="rtma3d_process_retro_lightning"
+export exefile_name_lightning="rtma3d_process_lightning"
 export exefile_name_cloud="rtma3d_process_cloud"
 export exefile_name_verif=""    # executable of verification (MET) is defined by loading module met
 

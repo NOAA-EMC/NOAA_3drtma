@@ -163,9 +163,9 @@ cd ${BUILD_POST}
 if [ $? -eq 0 ] ; then
   echo " NCEP-POST code was built successfully."
 
-  echo " cp -p ${TOPSORC_POST}/exec/ncep_post   ${EXEC}/${exefile_name_post} "
-  cp -p ${TOPSORC_POST}/exec/ncep_post          ${EXEC}/${exefile_name_post}
-  ls -l ${EXEC}/${exefile_name_post}
+  echo " cp -p ${TOPSORC_POST}/exec/ncep_post   ${EXEC}/UPP/${exefile_name_post} "
+  cp -p ${TOPSORC_POST}/exec/ncep_post          ${EXEC}/UPP/${exefile_name_post}
+  ls -l ${EXEC}/UPP/${exefile_name_post}
 
 else
   echo " ================ WARNING =============== " 

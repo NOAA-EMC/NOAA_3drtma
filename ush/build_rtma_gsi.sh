@@ -164,18 +164,18 @@ make -j 8 2>&1 | tee ${BUILD_LOG}/log.make.${DIRNAME_GSI}.txt
 if [ $? -eq 0 ] ; then
   echo " GSI code and utility codes were built successfully."
 
-  echo " cp -p ${BUILD_GSI}/bin/gsi.x   ${EXEC}/${exefile_name_gsi} "
-  cp -p ${BUILD_GSI}/bin/gsi.x   ${EXEC}/${exefile_name_gsi}
+  echo " cp -p ${BUILD_GSI}/bin/gsi.x   ${EXEC}/GSI/${exefile_name_gsi} "
+  cp -p ${BUILD_GSI}/bin/gsi.x   ${EXEC}/GSI/${exefile_name_gsi}
   cp -p ${BUILD_GSI}/bin/ndate.x ${EXEC}/ndate.x
-  ls -l ${EXEC}/${exefile_name_gsi}
+  ls -l ${EXEC}/GSI/${exefile_name_gsi}
 
   cd ${BUILD_GSI}/bin
   exe_fnames=`ls *`
   cd ${BUILD_GSI}
   for fn in $exe_fnames
   do
-    echo " cp -p  ${BUILD_GSI}/bin/$fn  ${EXEC}/$fn "
-    cp -p  ${BUILD_GSI}/bin/$fn  ${EXEC}/$fn
+    echo " cp -p  ${BUILD_GSI}/bin/$fn  ${EXEC}/GSI/$fn "
+    cp -p  ${BUILD_GSI}/bin/$fn  ${EXEC}/GSI/$fn
   done
 
 else

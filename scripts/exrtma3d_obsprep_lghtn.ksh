@@ -134,9 +134,9 @@ postmsg "$jlogfile" "$msg"
 
 # Run Processing lightning
 # copy the excutable file of processing RAP BUFR format lightning data
-${CP} ${EXECrtma3d}/${exefile_name_lightning}  ./rtma3d_process_retro_lightning
+${CP} ${EXECrtma3d}/${exefile_name_lightning}  ./rtma3d_process_lightning
 
-runline="${MPIRUN}             ./rtma3d_process_retro_lightning"
+runline="${MPIRUN}             ./rtma3d_process_lightning"
 if [ ${obsprep_lghtn} -eq 1 ] ; then
   $runline  > ${pgmout} 2>errfile
 else

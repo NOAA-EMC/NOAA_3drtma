@@ -168,9 +168,9 @@ make -f makefile_${target}  >& ./log.make.process_NSSL_mosaic
 if [ $? -eq 0 ] ; then
   echo " code was built successfully."
 
-  echo " cp -p ${BUILD_DIR}/process_NSSL_mosaic.exe   ${EXEC}/${exefile_name_mosaic} "
-  cp -p ${BUILD_DIR}/process_NSSL_mosaic.exe   ${EXEC}/${exefile_name_mosaic}
-  ls -l ${EXEC}/${exefile_name_mosaic}
+  echo " cp -p ${BUILD_DIR}/process_NSSL_mosaic.exe   ${EXEC}/GSI/${exefile_name_mosaic} "
+  cp -p ${BUILD_DIR}/process_NSSL_mosaic.exe   ${EXEC}/GSI/${exefile_name_mosaic}
+  ls -l ${EXEC}/GSI/${exefile_name_mosaic}
 
 else
   echo " ================ WARNING =============== " 

@@ -115,7 +115,7 @@ if [ -r ${COMINhrrr}/${FGShrrr_FNAME1} ] ; then
 
 elif [ -r ${COMINhrrr}/${FGShrrr_FNAME2} ] ; then
   # cpfs ${COMINhrrr}/${FGShrrr_FNAME2}                ${GESINhrrr_rtma3d}/${FGSrtma3d_FNAME}
-  ${LN} -sf ${COMINhrrr}/${FGShrrr_FNAME2}             ${GESINhrrr_rtma3d}/${FGSrtma3d_FNAME}
+  ${LN} -sf ${GESINhrrr}/${FGShrrr_FNAME2}   ${GESINhrrr_rtma3d}/${FGSrtma3d_FNAME}
   ${LN} -sf ${GESINhrrr_rtma3d}/${FGSrtma3d_FNAME}     ${DATA}/${FGSrtma3d_FNAME}
   ${ECHO} " Cycle ${YYYYMMDDHH}: PREPFGS background --> ${COMINhrrr}/${FGShrrr_FNAME2} "
 
@@ -130,6 +130,12 @@ elif [ -r ${COMINhrrr_cycp1}/${FGShrrr_FNAME3} ] ; then
   ${LN} -sf ${COMINhrrr_cycp1}/${FGShrrr_FNAME3}       ${GESINhrrr_rtma3d}/${FGSrtma3d_FNAME}
   ${LN} -sf ${GESINhrrr_rtma3d}/${FGSrtma3d_FNAME}     ${DATA}/${FGSrtma3d_FNAME}
   ${ECHO} " Cycle ${YYYYMMDDHH}: PREPFGS background --> ${COMINhrrr_cycp1}/${FGShrrr_FNAME3} "
+
+elif [ -r ${GESINhrrr}/${FGShrrr_FNAME2} ] ; then
+  # cpfs ${COMINhrrr}/${FGShrrr_FNAME2}                ${GESINhrrr_rtma3d}/${FGSrtma3d_FNAME}
+  ${LN} -sf ${GESINhrrr}/${FGShrrr_FNAME2}             ${GESINhrrr_rtma3d}/${FGSrtma3d_FNAME}
+  ${LN} -sf ${GESINhrrr_rtma3d}/${FGSrtma3d_FNAME}     ${DATA}/${FGSrtma3d_FNAME}
+  ${ECHO} " Cycle ${YYYYMMDDHH}: PREPFGS background --> ${GESINhrrr}/${FGShrrr_FNAME2} "
 
 # No background available so abort
 else
