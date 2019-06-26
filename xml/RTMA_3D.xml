@@ -85,6 +85,7 @@
 <!ENTITY RADAR_PROC "33">
 <!ENTITY SATELLITE_PROC "1">
 <!ENTITY GSI_HYB_PROC "9:ppn=20">
+<!ENTITY WRF_PROC "280">
 <!ENTITY GSI_DIAG_PROC "1">
 <!ENTITY RADARLINKS_PROC "1">
 
@@ -873,7 +874,7 @@
     &RESERVATION_DA;
 
     <command>&JJOB_DIR;/launch.ksh &JJOB_DIR;/JRTMA3D_UPDATE_VARS</command>
-    <cores>&GSI_HYB_PROC;</cores>
+    <cores>&WRF_PROC;</cores>
     <jobname><cyclestr>&JOBNAME_PRE;_update_vars_@H</cyclestr></jobname>
     <join><cyclestr>&LOG_DIR;/update_vars_@Y@m@d@H00.log</cyclestr></join>
 
