@@ -4,8 +4,8 @@
 #
 # # ignore building directory ('build/'), directory of executable files ('exec/','bin/')
 #
- **/exec/
 #
+**/exec/
  **/bin/
 #
  **/build_*/
