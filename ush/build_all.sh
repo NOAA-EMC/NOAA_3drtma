@@ -78,30 +78,54 @@ export EXEC_DIR=${TOP_RTMA}/exec
 
 if [ $target = 'jet' ] ; then
 
-rm ${EXEC_dir}/GSI/*
-rm ${EXEC_dir}/UPP/*
-rm {EXEC_dir}/smartinit/*
+if [ ! -d ${EXEC_DIR} ]; then
 
-ln -s /home/rtrr/HRRR/exec/GSI/count_obs.exe ${EXEC_dir}/GSI/rtma3d_count_obs
-ln -s /home/rtrr/HRRR/exec/GSI/HRRR_gsi_hyb ${EXEC_dir}/GSI/rtma3d_gsi_hyb
-ln -s /home/rtrr/HRRR/exec/GSI/prepbufr_append_clamps.exe ${EXEC_dir}/GSI/prepbufr_append_clamps.exe
-ln -s /home/rtrr/HRRR/exec/GSI/prepbufr_append_sticknet.exe ${EXEC_dir}/GSI/prepbufr_append_sticknet.exe
-ln -s /home/rtrr/HRRR/exec/GSI/prepbufr_append_vessonndes.exe ${EXEC_dir}/GSI/prepbufr_append_vessonndes.exe
-ln -s /home/rtrr/HRRR/exec/GSI/process_Lightning.exe ${EXEC_dir}/GSI/process_Lightning.exe
-ln -s /home/rtrr/HRRR/exec/GSI/process_Lightning_bufr.exe ${EXEC_dir}/GSI/process_Lightning_bufr.exe
-ln -s /home/rtrr/HRRR/exec/GSI/process_NASALaRC_cloud.exe ${EXEC_dir}/GSI/process_NASALaRC_cloud.exe
-ln -s /home/rtrr/HRRR/exec/GSI/process_NSSL_mosaic.exe ${EXEC_dir}/GSI/process_NSSL_mosaic.exe
-ln -s /home/rtrr/HRRR/exec/GSI/process_SST.exe  ${EXEC_dir}/GSI/process_SST.exe
-ln -s /home/rtrr/HRRR/exec/GSI/process_sodardata_rt.exe ${EXEC_dir}/GSI/process_sodardata_rt.exe
-ln -s /home/rtrr/HRRR/exec/GSI/process_tamdar_netcdf.exe ${EXEC_dir}/GSI/process_tamdar_netcdf.exe
-ln -s /home/rtrr/HRRR/exec/GSI/rap_process_cloud ${EXEC_dir}/GSI/rap_process_cloud
-ln -s /home/rtrr/HRRR/exec/GSI/read_diag_conv.exe ${EXEC_dir}/GSI/read_diag_conv.exe
-ln -s /home/rtrr/HRRR/exec/GSI/read_diag_rad.exe ${EXEC_dir}/GSI/read_diag_rad.exe
-ln -s /home/rtrr/HRRR/exec/GSI/ssrc.exe ${EXEC_dir}/GSI/ssrc.exe
-ln -s /home/rtrr/HRRR/exec/UPP/ncep_post.exe ${EXEC_dir}/UPP/ncep_post.exe
-ln -s /home/rtrr/HRRR/exec/smartinit/wgrib2  ${EXEC_dir}/smartinit/wgrib2
+mkdir -p ${EXEC_DIR}/GSI
+mkdir -p ${EXEC_DIR}/UPP
+mkdir -p ${EXEC_DIR}/smartinit
 
 else
+
+rm -r ${EXEC_DIR}/GSI/*
+rm -r ${EXEC_DIR}/UPP/*
+rm -r ${EXEC_DIR}/smartinit/*
+
+fi
+
+ln -s /home/rtrr/HRRR/exec/GSI/count_obs.exe ${EXEC_DIR}/GSI/rtma3d_count_obs
+ln -s /home/rtrr/HRRR/exec/GSI/HRRR_gsi_hyb ${EXEC_DIR}/GSI/rtma3d_gsi_hyb
+ln -s /home/rtrr/HRRR/exec/GSI/prepbufr_append_clamps.exe ${EXEC_DIR}/GSI/prepbufr_append_clamps.exe
+ln -s /home/rtrr/HRRR/exec/GSI/prepbufr_append_sticknet.exe ${EXEC_DIR}/GSI/prepbufr_append_sticknet.exe
+ln -s /home/rtrr/HRRR/exec/GSI/prepbufr_append_vessonndes.exe ${EXEC_DIR}/GSI/prepbufr_append_vessonndes.exe
+ln -s /home/rtrr/HRRR/exec/GSI/process_Lightning.exe ${EXEC_DIR}/GSI/process_Lightning.exe
+ln -s /home/rtrr/HRRR/exec/GSI/process_Lightning_bufr.exe ${EXEC_DIR}/GSI/process_Lightning_bufr.exe
+ln -s /home/rtrr/HRRR/exec/GSI/process_NASALaRC_cloud.exe ${EXEC_DIR}/GSI/process_NASALaRC_cloud.exe
+ln -s /home/rtrr/HRRR/exec/GSI/process_NSSL_mosaic.exe ${EXEC_DIR}/GSI/process_NSSL_mosaic.exe
+ln -s /home/rtrr/HRRR/exec/GSI/process_SST.exe  ${EXEC_DIR}/GSI/process_SST.exe
+ln -s /home/rtrr/HRRR/exec/GSI/process_sodardata_rt.exe ${EXEC_DIR}/GSI/process_sodardata_rt.exe
+ln -s /home/rtrr/HRRR/exec/GSI/process_tamdar_netcdf.exe ${EXEC_DIR}/GSI/process_tamdar_netcdf.exe
+ln -s /home/rtrr/HRRR/exec/GSI/rap_process_cloud ${EXEC_DIR}/GSI/rap_process_cloud
+ln -s /home/rtrr/HRRR/exec/GSI/read_diag_conv.exe ${EXEC_DIR}/GSI/read_diag_conv.exe
+ln -s /home/rtrr/HRRR/exec/GSI/read_diag_rad.exe ${EXEC_DIR}/GSI/read_diag_rad.exe
+ln -s /home/rtrr/HRRR/exec/GSI/ssrc.exe ${EXEC_DIR}/GSI/ssrc.exe
+ln -s /home/rtrr/HRRR/exec/UPP/ncep_post.exe ${EXEC_DIR}/UPP/ncep_post.exe
+ln -s /home/rtrr/HRRR/exec/smartinit/wgrib2  ${EXEC_DIR}/smartinit/wgrib2
+
+else
+
+if [ ! -d ${EXEC_DIR} ]; then
+
+mkdir -p ${EXEC_DIR}/GSI
+mkdir -p ${EXEC_DIR}/UPP
+mkdir -p ${EXEC_DIR}/smartinit
+
+else
+
+rm -r ${EXEC_DIR}/GSI/*
+rm -r ${EXEC_DIR}/UPP/*
+rm -r ${EXEC_DIR}/smartinit/*
+
+fi
 
 
 #
