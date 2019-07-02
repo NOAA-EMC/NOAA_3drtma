@@ -127,7 +127,6 @@ rm -r ${EXEC_DIR}/smartinit/*
 
 fi
 
-
 #
 #--- check out GSI package
 #
