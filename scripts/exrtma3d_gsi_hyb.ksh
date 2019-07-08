@@ -363,10 +363,10 @@ ifhyb=.false.
 nummem=`more filelist03 | wc -l`
 nummem=$((nummem - 3 ))
 if [[ ${nummem} -eq 80 ]]; then
-  echo "Do hybrid with ${memname}"
+  echo "Do hybrid with GDAS directly"
   beta1_inv=0.50 ##0.15
   ifhyb=.true.
-  ${ECHO} " Cycle ${YYYYMMDDHH}: GSI hybrid uses ${memname} with n_ens=${nummem}" >> ${logfile}
+  ${ECHO} " Cycle ${YYYYMMDDHH}: GSI hybrid uses GDAS directly with n_ens=${nummem}" >> ${logfile}
 fi
 
 # Set fixed files
