@@ -51,7 +51,7 @@ fi
 #####################################################
 set -x
 
-export ExpDateWindows="24 06 2019 *"        # dd mm yyyy weekday (crontab-like date format, mainly used for real-time run)
+export ExpDateWindows="04 07 2019 *"        # dd mm yyyy weekday (crontab-like date format, mainly used for real-time run)
 export startCDATE=201904271200              #yyyymmddhhmm - Starting day of retro run 
 export endCDATE=201904271400                #yyyymmddhhmm - Ending day of RTMA3D run (needed for both RETRO and REAL TIME). 
 export NET=rtma3d                           #selection of rtma3d (or rtma,urma)
@@ -62,8 +62,7 @@ export SCHD_ATTRB="lsf"
 
 export envir="${SCHD_ATTRB}"                      #environment (test, prod, dev, etc.)
 export expname="${envir}"                   # experiment name
-export realtime="T"
-export subhourly="T"
+export realtime="F"
 #====================================================================#
 # Note: Definition for the following variables 
 #       depends on the machine platform, 
@@ -80,10 +79,11 @@ export subhourly="T"
 
   DATABASE_DIR=${ptmp_base}            # (equivalent to ptmp_base)
   HOMEBASE_DIR=${NWROOT}               # path to system home directory
-  COMINRAP="/gpfs/hps/nco/ops/com/rap/prod"
-  COMINRAP_E="/gpfs/hps/nco/ops/com/rap/prod"
-  COMINHRRR="/gpfs/hps/nco/ops/com/hrrr/prod"
-  GESINHRRR="/gpfs/hps/nco/ops/nwges/prod"
+  COMINRAP="/gpfs/dell2/emc/modeling/noscrub/Edward.Colon/com/rtma/prod"
+  COMINRAP_E="/gpfs/dell2/emc/modeling/noscrub/Edward.Colon/com/rtma/prod"
+  COMINRAP_SUBHR="/gpfs/dell2/emc/modeling/noscrub/Edward.Colon/com/rtma/prod"
+  COMINHRRR="/gpfs/dell2/emc/modeling/noscrub/Edward.Colon/com/rtma/prod"
+  GESINHRRR="/gpfs/dell2/emc/modeling/noscrub/Edward.Colon/com/rtma/prod"
 # Computational resources
   ACCOUNT="RTMA-T2O"                    #account for CPU resources
 
@@ -199,6 +199,7 @@ export exefile_name_verif=""    # executable of verification (MET) is defined by
 
 #       define the variable names for symbol links under fix/ and parm/
 
+  export EXECrtma3d="${NWROOT}/exec"
   export FIXrtma3d="${NWROOT}/fix"
   export FIXgsi="${FIXrtma3d}/gsi"
   export FIXcrtm="${FIXrtma3d}/crtm"
@@ -221,6 +222,17 @@ export exefile_name_verif=""    # executable of verification (MET) is defined by
 #
 #        link to the symbol links
 #
+
+#
+#        linking executables
+#
+  if [ ! -d ${EXECrtma3d} ] ; then 
+     echo "executable directory not created. Use ush/build_all.ksh."
+     exit 0
+  else
+     ln -s ${EXECrtma3d}/GSI/* ${EXECrtma3d}
+     ln -s ${EXECrtma3d}/UPP/* ${EXECrtma3d}
+  fi
 
   if [ ! -d ${FIXrtma3d}   ] ; then mkdir -p ${FIXrtma3d}   ; fi
   if [ ! -d ${PARMrtma3d}  ] ; then mkdir -p ${PARMrtma3d}  ; fi
@@ -292,7 +304,7 @@ export exefile_name_verif=""    # executable of verification (MET) is defined by
   export obsprep_radar=0  # 0: No (using archived hrrr.t{HH}z.NSSLRefInGSI.bufr processed in operational hrrr run)
                           # 1: pre-processing MRMS grib2 radar reflectivity obs
 
-  export obsprep_lghtn=0  # 0: No pre-processing lightning obs data
+  export obsprep_lghtn=1  # 0: No pre-processing lightning obs data
                           # 1: processing archived bufr data (rap.t{HH}z.lghtng.tm00.bufr_d) from operation RAP run to HRRR grid
                           # 2: processing  NLDN lightning data (if retrospective run, also retrieving  NLDN data from HPSS)
                           # 3: processing ENTLN lightning data (if retrospective run, also retrieving ENTLN data from HPSS)
@@ -347,8 +359,8 @@ export exefile_name_verif=""    # executable of verification (MET) is defined by
 # Workflow is specified using user-derived settings in xml format    
 ########################################################################################
 
-rm -f ${NWROOT}/xml/${RUN}_${expname}_rt.xml
-cat > ${NWROOT}/xml/${RUN}_${expname}_rt.xml <<EOF 
+rm -f ${NWROOT}/xml/${RUN}_${expname}_subhr.xml
+cat > ${NWROOT}/xml/${RUN}_${expname}_subhr.xml <<EOF 
 <?xml version="1.0" encoding="UTF-8"?>
 
 <!DOCTYPE workflow [
@@ -378,6 +390,7 @@ cat > ${NWROOT}/xml/${RUN}_${expname}_rt.xml <<EOF
 <!ENTITY ptmp_base	"${ptmp_base}">
 <!ENTITY COMINRAP       "${COMINRAP}">
 <!ENTITY COMINRAP_E     "${COMINRAP_E}">
+<!ENTITY COMINRAP_SUBHR  "${COMINRAP_SUBHR}">
 <!ENTITY COMINHRRR      "${COMINHRRR}">
 <!ENTITY GESINHRRR      "${GESINHRRR}">
 <!ENTITY NWROOT		"${NWROOT}">
@@ -400,7 +413,7 @@ cat > ${NWROOT}/xml/${RUN}_${expname}_rt.xml <<EOF
 <!ENTITY UTILrtma3d	"&HOMErtma3d;/util">
 <!ENTITY UTILrtma3d_dev	"&HOMErtma3d;/util_dev">
 <!ENTITY MODULEFILES	"&HOMErtma3d;/modulefiles">
-<!ENTITY EXECrtma3d	"&HOMErtma3d;/exec">
+<!ENTITY EXECrtma3d	"${EXECrtma3d}">
 <!ENTITY PARMrtma3d	"${PARMrtma3d}">
 <!ENTITY FIXrtma3d	"${FIXrtma3d}">
 
@@ -421,7 +434,7 @@ cat > ${NWROOT}/xml/${RUN}_${expname}_rt.xml <<EOF
 <!ENTITY LOG_JJOB	"&LOG_DIR;/jlogfiles">
 <!ENTITY LOG_SCHDLR	"&LOG_DIR;">
 <!ENTITY LOG_PGMOUT     "&LOG_DIR;/pgmout">
-<!ENTITY jlogfile       "&LOG_JJOB;/jlogfile_${expname}_rt.@Y@m@d@H">
+<!ENTITY jlogfile       "&LOG_JJOB;/jlogfile_${expname}_subhr.@Y@m@d@H">
 
 <!-- definition of name of the top running directory for all tasks -->
 <!ENTITY DATA_RUNDIR    "&DATAROOT;/&envir;/&RUN;.@Y@m@d@H@M">
@@ -615,6 +628,10 @@ cat > ${NWROOT}/xml/${RUN}_${expname}_rt.xml <<EOF
    <envar>
         <name>COMINRAP_E</name>
         <value>&COMINRAP_E;</value>
+   </envar>
+   <envar>
+        <name>COMINRAP_SUBHR</name>
+        <value>&COMINRAP_SUBHR;</value>
    </envar>
    <envar>
         <name>COMINHRRR</name>
@@ -942,6 +959,10 @@ cat > ${NWROOT}/xml/${RUN}_${expname}_rt.xml <<EOF
       <value><cyclestr>@Y@m@d@H</cyclestr></value>
     </envar>
     <envar>
+      <name>SUBH_TIME</name>
+       <value><cyclestr>@M</cyclestr></value>
+    </envar>
+    <envar>
       <name>DATABASE_DIR</name>
       <value>&DATABASE_DIR;</value>
     </envar>
@@ -1046,12 +1067,12 @@ cat > ${NWROOT}/xml/${RUN}_${expname}_rt.xml <<EOF
     </envar>'>
 EOF
 
-cat >> ${NWROOT}/xml/${RUN}_${expname}_rt.xml <<EOF 
+cat >> ${NWROOT}/xml/${RUN}_${expname}_subhr.xml <<EOF 
 
 ]>
 EOF
 
-cat >> ${NWROOT}/xml/${RUN}_${expname}_rt.xml <<EOF 
+cat >> ${NWROOT}/xml/${RUN}_${expname}_subhr.xml <<EOF 
 
 <workflow realtime="$realtime" scheduler="${SCHD_ATTRB}" cyclethrottle="1" taskthrottle="350" cyclelifespan="15:00:00:00">
 
@@ -1066,24 +1087,14 @@ cat >> ${NWROOT}/xml/${RUN}_${expname}_rt.xml <<EOF
 
   <cycledef group="02-11hr">00 02-11,14-23 ${ExpDateWindows}</cycledef>
 
+  <cycledef group="15min">*/15 02-11,14-23,01,13 ${ExpDateWindows}</cycledef>
+
 EOF
 
-if [ ${obsprep_lghtn} -eq 1 ]; then
-cat >> ${NWROOT}/xml/${RUN}_${expname}_rt.xml <<EOF 
-     <metatask>
-EOF
-if [ $subhourly = T ]; then
-cat >> ${NWROOT}/xml/${RUN}_${expname}_rt.xml <<EOF
-    <var name="subh">15 30 45 60</var>
-EOF
-else
-cat >> ${NWROOT}/xml/${RUN}_${expname}_rt.xml <<EOF
-    <var name="subh">60</var>
-EOF
-fi
-cat >> ${NWROOT}/xml/${RUN}_${expname}_rt.xml <<EOF
+if [ ${obsprep_lghtn} -eq 1 ] ; then
+cat >> ${NWROOT}/xml/${RUN}_${expname}_subhr.xml <<EOF 
 
-  <task name="&NET;_obsprep_lghtn_#subh#" cycledefs="02-11hr,00hr,01hr" maxtries="&maxtries;">
+  <task name="&NET;_obsprep_lghtn_task_@Y@m@d@H" cycledefs="02-11hr,00hr,01hr" maxtries="&maxtries;">
 
     &ENVARS;
     <envar>
@@ -1092,7 +1103,7 @@ cat >> ${NWROOT}/xml/${RUN}_${expname}_rt.xml <<EOF
     </envar>
 
     <command>&JJOB_DIR;/launch.ksh &JJOB_OBSPREP_LGHTN;</command>
-    <jobname><cyclestr>&NET;_obsprep_lghtn_@H_#subh#</cyclestr></jobname>
+    <jobname><cyclestr>&NET;_obsprep_lghtn_job_@Y@m@d@H</cyclestr></jobname>
     <join><cyclestr>&LOG_SCHDLR;/&NET;_&envir;_obsprep_lghtn_@Y@m@d@H@M.log</cyclestr></join>
 
     &OBSPREP_LGHTN_RESOURCES;
@@ -1100,47 +1111,17 @@ cat >> ${NWROOT}/xml/${RUN}_${expname}_rt.xml <<EOF
 
     &ENVARS_PREPJOB;
 
-EOF
-if [ $subhourly = T ]; then
-cat >> ${NWROOT}/xml/${RUN}_${expname}_rt.xml <<EOF
    <dependency>
-       <datadep><cyclestr>&COMINRAP;/rap.@Y@m@d/rap.t@H#subh#z.lghtng.tm00.bufr_d</cyclestr></datadep>
-   </dependency>
-EOF
-else
-cat >> ${NWROOT}/xml/${RUN}_${expname}_rt.xml <<EOF
-    <dependency>
        <datadep><cyclestr>&COMINRAP;/rap.@Y@m@d/rap.t@Hz.lghtng.tm00.bufr_d</cyclestr></datadep>
    </dependency>
-
-EOF
-fi
-cat >> ${NWROOT}/xml/${RUN}_${expname}_rt.xml <<EOF
   </task>
-  </metatask>
 EOF
 fi
 
 if [ ${obsprep_cloud} -eq 1 ] ; then
-cat >> ${NWROOT}/xml/${RUN}_${expname}_rt.xml <<EOF    
-    <metatask>
+cat >> ${NWROOT}/xml/${RUN}_${expname}_subhr.xml <<EOF    
 
-<!-- <var name="subh">15 30 45 60</var> -->
-
-EOF
-if [ $subhourly = T ]; then
-cat >> ${NWROOT}/xml/${RUN}_${expname}_rt.xml <<EOF
-    <var name="subh">15 30 45 60</var>
-EOF
-else
-cat >> ${NWROOT}/xml/${RUN}_${expname}_rt.xml <<EOF
-    <var name="subh">60</var>
-EOF
-fi
-
-cat >> ${NWROOT}/xml/${RUN}_${expname}_rt.xml <<EOF 
-
-  <task name="&NET;_obsprep_cloud_#subh#" cycledefs="02-11hr,00hr,01hr" maxtries="&maxtries;">
+  <task name="&NET;_obsprep_cloud_task_@Y@m@d@H" cycledefs="02-11hr,00hr,01hr" maxtries="&maxtries;">
 
     &ENVARS;
     <envar>
@@ -1149,7 +1130,7 @@ cat >> ${NWROOT}/xml/${RUN}_${expname}_rt.xml <<EOF
     </envar>
 
     <command>&JJOB_DIR;/launch.ksh &JJOB_OBSPREP_CLOUD;</command>
-    <jobname><cyclestr>&NET;_obsprep_cloud_@H_#subh#</cyclestr></jobname>
+    <jobname><cyclestr>&NET;_obsprep_cloud_job_@Y@m@d@H</cyclestr></jobname>
     <join><cyclestr>&LOG_SCHDLR;/&NET;_&envir;_obsprep_cloud_@Y@m@d@H@M.log</cyclestr></join>
 
     &OBSPREP_CLOUD_RESOURCES;
@@ -1157,42 +1138,16 @@ cat >> ${NWROOT}/xml/${RUN}_${expname}_rt.xml <<EOF
 
     &ENVARS_PREPJOB; 
 
-EOF
-if [ $subhourly = T ]; then
-cat >> ${NWROOT}/xml/${RUN}_${expname}_rt.xml <<EOF
    <dependency>
-       <datadep><cyclestr>&COMINRAP;/rap.@Y@m@d/rap.t@H#subh#z.lgycld.tm00.bufr_d</cyclestr></datadep>
-   </dependency>
-EOF
-else
-cat >> ${NWROOT}/xml/${RUN}_${expname}_rt.xml <<EOF
-    <dependency>
        <datadep><cyclestr>&COMINRAP;/rap.@Y@m@d/rap.t@Hz.lgycld.tm00.bufr_d</cyclestr></datadep>
    </dependency>
-
-EOF
-fi
-cat >> ${NWROOT}/xml/${RUN}_${expname}_rt.xml <<EOF
   </task>
-  </metatask>
 EOF
 fi
 
-cat >> ${NWROOT}/xml/${RUN}_${expname}_rt.xml <<EOF 
-    <metatask>
-    EOF
-    if [ $subhourly = T ]; then
-    cat >> ${NWROOT}/xml/${RUN}_${expname}_rt.xml <<EOF
-      <var name="subh">15 30 45 60</var>
-    EOF
-    else
-    cat >> ${NWROOT}/xml/${RUN}_${expname}_rt.xml <<EOF
-      <var name="subh">60</var>
-    EOF
-    fi
-    cat >> ${NWROOT}/xml/${RUN}_${expname}_rt.xml <<EOF
+cat >> ${NWROOT}/xml/${RUN}_${expname}_subhr.xml <<EOF 
 
-  <task name="&NET;_prepobs_#subh#" cycledefs="02-11hr,01hr" maxtries="&maxtries;">
+    <task name="&NET;_prepobs_task_@Y@m@d@H@M" cycledefs="15min" maxtries="&maxtries;">
 
     &ENVARS;
     <envar>
@@ -1201,40 +1156,184 @@ cat >> ${NWROOT}/xml/${RUN}_${expname}_rt.xml <<EOF
     </envar>
 
     <command>&JJOB_DIR;/launch.ksh &JJOB_PREPOBS;</command>
-    <jobname><cyclestr>&NET;_prepobs_@H_#subh#</cyclestr></jobname>
+    <jobname><cyclestr>&NET;_prepobs_job_@Y@m@d@H@M</cyclestr></jobname>
     <join><cyclestr>&LOG_SCHDLR;/&NET;_&envir;_prepobs_@Y@m@d@H@M.log</cyclestr></join>
 
     &PREPOBS_RESOURCES;
     &PREPOBS_RESERVATION;
 
     &ENVARS_PREPJOB;
-    EOF
 
-if [ $subhourly = T ]; then
-   cat >> ${NWROOT}/xml/${RUN}_${expname}_rt.xml <<EOF
    <dependency>
        <and>
-       <taskdep task="&NET;_obsprep_lghtn_#subh#"/>
-       <datadep><cyclestr>&COMINRAP;/rap.@Y@m@d/rap.t@H#subh#z.prepbufr.tm00</cyclestr></datadep>       
-       <datadep><cyclestr>&COMINHRRR;/hrrr.@Y@m@d/conus/hrrr.t@H#subh#z.NSSLRefInGSI.bufr</cyclestr></datadep>
-       <datadep><cyclestr>&COMINHRRR;/hrrr.@Y@m@d/conus/hrrr.t@Hz#subh#.NASALaRCCloudInGSI.bufr</cyclestr></datadep>
-       </and>   
-   </dependency>
-   EOF
-else
-   cat >> ${NWROOT}/xml/${RUN}_${expname}_rt.xml <<EOF
-    <dependency>
-       <and>
-       <taskdep task="&NET;_obsprep_lghtn_#subh#"/>
-       <datadep><cyclestr>&COMINRAP;/rap.@Y@m@d/rap.t@Hz.prepbufr.tm00</cyclestr></datadep>       
+       <taskdep task="&NET;_obsprep_lghtn_task_@Y@m@d@H"/>
+       <datadep><cyclestr>&COMINRAP_SUBHR;/rap.@Y@m@d/rap.t@H@Mz.prepbufr.tm00</cyclestr></datadep>       
        <datadep><cyclestr>&COMINHRRR;/hrrr.@Y@m@d/conus/hrrr.t@Hz.NSSLRefInGSI.bufr</cyclestr></datadep>
        <datadep><cyclestr>&COMINHRRR;/hrrr.@Y@m@d/conus/hrrr.t@Hz.NASALaRCCloudInGSI.bufr</cyclestr></datadep>
        </and>   
    </dependency>
-   EOF
+
+  </task>
+
+  <task name="&NET;_prepfgs_task_@Y@m@d@H" cycledefs="02-11hr,01hr" maxtries="&maxtries;">
+
+    &ENVARS;
+    <envar>
+       <name>rundir_task</name>
+       <value><cyclestr>&DATA_FGSPRD;</cyclestr></value>
+    </envar>
+
+    <command>&JJOB_DIR;/launch.ksh &JJOB_PREPFGS;</command>
+    <jobname><cyclestr>&NET;_prepfgs_job_@Y@m@d@H</cyclestr></jobname>
+    <join><cyclestr>&LOG_SCHDLR;/&NET;_&envir;_prepfgs_@Y@m@d@H@M.log</cyclestr></join>
+
+    &PREPFGS_RESOURCES;
+    &PREPFGS_RESERVATION;
+
+    &ENVARS_PREPJOB;
+   <dependency>
+       <datadep><cyclestr>&GESINHRRR;/hrrr/hrrrges_sfc/conus/hrrr_@Y@m@d@Hf001</cyclestr></datadep>
+   </dependency>
+
+  </task>
+  <task name="&NET;_gsianl_task_@Y@m@d@H@M" cycledefs="15min" maxtries="&maxtries;">
+
+    &ENVARS;
+    &GSI_RESOURCES;
+    &GSI_RESERVATION;
+    &OPTIMIZATIONS_GSI;
+    <envar>
+       <name>rundir_task</name>
+       <value><cyclestr>&DATA_GSIANL;</cyclestr></value>
+    </envar>
+
+    <command>&JJOB_DIR;/launch.ksh &JJOB_GSIANL;</command>
+    <jobname><cyclestr>&NET;_gsianl_job_@Y@m@d@H@M</cyclestr></jobname>
+    <join><cyclestr>&LOG_SCHDLR;/&NET;_&envir;_gsianl_@Y@m@d@H@M.log</cyclestr></join>
+
+    &ENVARS_GSI;
+
+    <dependency>
+      <and>
+          <taskdep task="&NET;_prepobs_task_@Y@m@d@H@M"/>
+          <taskdep task="&NET;_prepfgs_task_@Y@m@d@H"/>
+      </and>
+    </dependency>
+
+  </task>
+
+  <task name="&NET;_post_@Y@m@d@H@M" cycledefs="15min" maxtries="&maxtries;">
+
+    &ENVARS;
+    &POST_RESOURCES;
+    &POST_RESERVATION;
+
+    <envar>
+        <name>OMP_NUM_THREADS</name>
+        <value>&POST_THREADS;</value>
+    </envar>
+    <envar>
+        <name>OMP_STACKSIZE</name>
+        <value>&POST_OMP_STACKSIZE;</value>
+    </envar>
+    <envar>
+       <name>rundir_task</name>
+       <value><cyclestr>&DATA_POST;</cyclestr></value>
+    </envar>
+
+    <command>&JJOB_DIR;/launch.ksh &JJOB_POST;</command>
+    <jobname><cyclestr>&NET;_post_job_@Y@m@d@H@M</cyclestr></jobname>
+    <join><cyclestr>&LOG_SCHDLR;/&NET;_&envir;_post_@Y@m@d@H@M.log</cyclestr></join>
+
+    &ENVARS_POST;
+
+    <dependency>
+          <taskdep task="&NET;_gsianl_task_@Y@m@d@H@M"/>
+    </dependency>
+
+  </task>
+
+EOF
+
+if [ ${run_verif} -gt 0 ] ; then
+  cat >> ${NWROOT}/xml/${RUN}_${expname}_subhr.xml <<EOF
+
+  <task name="&NET;_verif_task_@Y@m@d@H@M" cycledefs="15min" maxtries="&maxtries;">
+    &ENVARS;
+    &VERIF_RESOURCES;
+    &VERIF_RESERVATION;
+    <envar>
+       <name>rundir_task</name>
+       <value><cyclestr>&DATA_VERIF;</cyclestr></value>
+    </envar>
+    <command>&JJOB_DIR;/launch.ksh &JJOB_VERIF;</command>
+    <jobname><cyclestr>&NET;_verif_job_@Y@m@d@H@M</cyclestr></jobname>
+    <join><cyclestr>&LOG_SCHDLR;/&NET;_&envir;_verif_@Y@m@d@H@M.log</cyclestr></join>
+    &ENVARS_VERIF;
+    <dependency>
+       <and>
+          <taskdep task="&NET;_post_task_@Y@m@d@H@M"/>
+       </and>
+    </dependency>
+
+  </task>
+EOF
 fi
 
-cat >> ${NWROOT}/xml/${RUN}_${expname}_rt.xml <<EOF 
+
+if [ ${run_plt} -gt 0 ] ; then
+cat >> ${NWROOT}/xml/${RUN}_${expname}_subhr.xml <<EOF 
+  <task name="&NET;_post4fgs_task_@Y@m@d@H@M" cycledefs="15min" maxtries="&maxtries;">
+
+    &ENVARS;
+    &POST_RESOURCES;
+    &POST_RESERVATION;
+    <envar>
+       <name>rundir_task</name>
+       <value><cyclestr>&DATA_POST4FGS;</cyclestr></value>
+    </envar>
+
+    <command>&JJOB_DIR;/launch.ksh &JJOB_POST4FGS;</command>
+    <jobname><cyclestr>&NET;_post4fgs_job_@Y@m@d@H@M</cyclestr></jobname>
+    <join><cyclestr>&LOG_SCHDLR;/&NET;_&envir;_post4fgs_@Y@m@d@H@M.log</cyclestr></join>
+
+    &ENVARS_POST;
+
+    <dependency>
+          <taskdep task="&NET;_gsianl_task_@Y@m@d@H@M"/>
+    </dependency>
+
+  </task>
+
+
+  <task name="&NET;_plotgrads_task_@Y@m@d@H@M" cycledefs="15min" maxtries="&maxtries;">
+
+    &ENVARS;
+    &PLOT_RESOURCES;
+    &PLOT_RESERVATION;
+    <envar>
+       <name>rundir_task</name>
+       <value><cyclestr>&DATA_PLOTGRADS;</cyclestr></value>
+    </envar>
+
+    <command>&JJOB_DIR;/launch.ksh &JJOB_PLOTGRADS;</command>
+    <jobname><cyclestr>&NET;_plotgrads_job_@Y@m@d@H@M</cyclestr></jobname>
+    <join><cyclestr>&LOG_SCHDLR;/&NET;_&envir;_plotgrads_@Y@m@d@H@M.log</cyclestr></join>
+
+    &ENVARS_PLOT;
+
+    <dependency>
+      <and>
+          <taskdep task="&NET;_post_task_@Y@m@d@H@M"/>
+          <taskdep task="&NET;_post4fgs_task_@Y@m@d@H@M"/>
+      </and>
+    </dependency>
+
+  </task>
+EOF
+fi
+
+cat >> ${NWROOT}/xml/${RUN}_${expname}_subhr.xml <<EOF 
 
 </workflow>
 
@@ -1286,7 +1385,7 @@ fi
 ######################################################
 # Now make the run_rtma3d.sh script that can be invoked from a crontab
 
-  cat > ${NWROOT}/xml/run_${RUN}_${expname}_rt.sh <<EOF 
+  cat > ${NWROOT}/xml/run_${RUN}_${expname}_subhr.sh <<EOF 
 #!/bin/bash
 
 . /etc/profile.d/lmod.sh >/dev/null # Module Support
@@ -1296,17 +1395,17 @@ module load lsf/10.1
 module load ruby/2.5.1
 module load rocoto/complete
 
-rocotorun -v 10 -w ${NWROOT}/xml/${RUN}_${expname}_rt.xml -d ${NWROOT}/xml/${RUN}_${expname}_rt.db 
+rocotorun -v 10 -w ${NWROOT}/xml/${RUN}_${expname}_subhr.xml -d ${NWROOT}/xml/${RUN}_${expname}_subhr.db 
 EOF
 
 
-chmod 744 ${NWROOT}/xml/run_${RUN}_${expname}_rt.sh
-echo "RTMA3D is ready to go! Run using run_${RUN}_${expname}_rt.sh.  Make sure your xml file has consistent directory settings!"
+chmod 744 ${NWROOT}/xml/run_${RUN}_${expname}_subhr.sh
+echo "RTMA3D is ready to go! Run using run_${RUN}_${expname}_subhr.sh.  Make sure your xml file has consistent directory settings!"
 
 #####################################################
 # script to check the status of workflow            #
 #####################################################
-cat > ${NWROOT}/xml/chk_${RUN}_${expname}_rt.sh <<EOF 
+cat > ${NWROOT}/xml/chk_${RUN}_${expname}_subhr.sh <<EOF 
 #!/bin/bash
 
 . /etc/profile
@@ -1316,10 +1415,10 @@ module load lsf/10.1
 module load ruby/2.5.1
 module load rocoto/complete
 
-rocotostat -v 10 -w ${NWROOT}/xml/${RUN}_${expname}_rt.xml -d ${NWROOT}/xml/${RUN}_${expname}_rt.db 
+rocotostat -v 10 -w ${NWROOT}/xml/${RUN}_${expname}_subhr.xml -d ${NWROOT}/xml/${RUN}_${expname}_subhr.db 
 
 EOF
 
-chmod 744 ${NWROOT}/xml/chk_${RUN}_${expname}_rt.sh
+chmod 744 ${NWROOT}/xml/chk_${RUN}_${expname}_subhr.sh
 
 exit 
