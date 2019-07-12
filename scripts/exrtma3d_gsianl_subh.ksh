@@ -102,6 +102,7 @@ fi
 echo $START_TIME
 
 # Compute date & time components for the analysis time
+YYYYMMDDHHMU=`${DATE} +"%Y%m%d%H%M" -d "${START_TIME}"`
 YYYYJJJHH00=`${DATE} +"%Y%j%H00" -d "${START_TIME}"`
 YYYYMMDDHH=`${DATE} +"%Y%m%d%H" -d "${START_TIME}"`
 YYYYMMDD=`${DATE} +"%Y%m%d" -d "${START_TIME}"`
@@ -132,12 +133,12 @@ time_run=${time_str}
 if [ -r ${DATAHOME_BK}/${FGSrtma3d_FNAME} ]; then
 # copy the background to running directory (it is going to updatd by analysis)
   cpfs ${DATAHOME_BK}/${FGSrtma3d_FNAME}    ./wrf_inout
-  ${ECHO} " Cycle ${YYYYMMDDHH}: GSI background=${DATAHOME_BK}/${FGSrtma3d_FNAME}"
+  ${ECHO} " Cycle ${YYYYMMDDHHMU}: GSI background=${DATAHOME_BK}/${FGSrtma3d_FNAME}"
 else
 # No background available so abort
   ${ECHO} "${DATAHOME_BK}/${FGSrtma3d_FNAME} does not exist!!"
   ${ECHO} "ERROR: No background file for analysis at ${time_run}!!!!"
-  ${ECHO} " Cycle ${YYYYMMDDHH}: GSI failed because of no background" >> ${pgmout}
+  ${ECHO} " Cycle ${YYYYMMDDHHMMMU}: GSI failed because of no background" >> ${pgmout}
   exit 1
 fi
 
@@ -147,12 +148,12 @@ fi
 
 # Link to the prepbufr data
 
-if [ -r ${DATAOBSHOME}/newgblav.${YYYYMMDD}.rap.t${HH}${mm}z.prepbufr ] ; then
-  ${LN} -s ${DATAOBSHOME}/newgblav.${YYYYMMDD}.rap.t${HH}${mm}z.prepbufr ./prepbufr
-elif [ -r ${DATAOBSHOME}/rap.t${HH}${mm}z.prepbufr.tm00 ] ; then
-  ${LN} -s ${DATAOBSHOME}/rap.t${HH}${mm}z.prepbufr.tm00 ./prepbufr
+if [ -r ${DATAOBSHOME}/newgblav.${YYYYMMDD}.rap.t${HH}${subcyc}z.prepbufr ] ; then
+  ${LN} -s ${DATAOBSHOME}/newgblav.${YYYYMMDD}.rap.t${HH}${subcyc}z.prepbufr ./prepbufr
+elif [ -r ${DATAOBSHOME}/rtma_ru.t${HH}${subcyc}z.prepbufr.tm00 ] ; then
+  ${LN} -s ${DATAOBSHOME}/rtma_ru.t${HH}${subcyc}z.prepbufr.tm00 ./prepbufr
 else
-  ${ECHO} "Warning: either ${DATAOBSHOME}/newgblav.${YYYYMMDD}.rap.t${HH}${mm}z.prepbufr or rap.t${HH}${mm}z.prepbufr.tm00 does not exist!"
+  ${ECHO} "Warning: either ${DATAOBSHOME}/newgblav.${YYYYMMDD}.rap.t${HH}${subcyc}z.prepbufr or rap.t${HH}${subcyc}z.prepbufr.tm00 does not exist!"
 fi
 
 if [ -r "${DATAOBSHOME}/NSSLRefInGSI.bufr" ]; then
@@ -167,22 +168,22 @@ fi
 
 if [ -r "${DATAOBSHOME}/LightningInGSI.bufr" ]; then
   ${LN} -s ${DATAOBSHOME}/LightningInGSI.bufr ./lghtInGSI
-elif [ -r "${DATAOBSHOME}/hrrr.t${HH}z.LightningInGSI.bufr" ]; then
-  ${LN} -s ${DATAOBSHOME}/hrrr.t${HH}z.LightningInGSI.bufr ./lghtInGSI
-elif [ -r "${DATAOBSHOME}/${RUN}.t${HH}z.LightningInGSI.bufr" ]; then
-  ${LN} -s ${DATAOBSHOME}/${RUN}.t${HH}z.LightningInGSI.bufr ./lghtInGSI
-elif [ -r "${DATAOBSHOME}/${RUN}.t${HH}z.LightningInGSI_bufr.bufr" ]; then
-  ${LN} -s ${DATAOBSHOME}/${RUN}.t${HH}z.LightningInGSI_bufr.bufr ./lghtInGSI
+elif [ -r "${DATAOBSHOME}/hrrr.t${HH}${subcyc}z.LightningInGSI.bufr" ]; then
+  ${LN} -s ${DATAOBSHOME}/hrrr.t${HH}${subcyc}z.LightningInGSI.bufr ./lghtInGSI
+elif [ -r "${DATAOBSHOME}/${RUN}.t${HH}${subcyc}z.LightningInGSI.bufr" ]; then
+  ${LN} -s ${DATAOBSHOME}/${RUN}.t${HH}${subcyc}z.LightningInGSI.bufr ./lghtInGSI
+elif [ -r "${DATAOBSHOME}/${RUN}.t${HH}${subcyc}z.LightningInGSI_bufr.bufr" ]; then
+  ${LN} -s ${DATAOBSHOME}/${RUN}.t${HH}${subcyc}z.LightningInGSI_bufr.bufr ./lghtInGSI
 else
   ${ECHO} "Warning: ${DATAOBSHOME}: LightningInGSI.bufr does not exist!"
 fi
 
 if [ -r "${DATAOBSHOME}/NASALaRCCloudInGSI.bufr" ]; then
   ${LN} -s ${DATAOBSHOME}/NASALaRCCloudInGSI.bufr ./larcInGSI
-elif [ -r "${DATAOBSHOME}/hrrr.t${HH}z.NASALaRCCloudInGSI.bufr" ]; then
-  ${LN} -s ${DATAOBSHOME}/hrrr.t${HH}z.NASALaRCCloudInGSI.bufr ./larcInGSI
-elif [ -r "${DATAOBSHOME}/${RUN}.t${HH}z.NASALaRCCloudInGSI.bufr" ]; then
-  ${LN} -s ${DATAOBSHOME}/${RUN}.t${HH}z.NASALaRCCloudInGSI.bufr ./larcInGSI
+elif [ -r "${DATAOBSHOME}/hrrr.t${HH}${subcyc}z.NASALaRCCloudInGSI.bufr" ]; then
+  ${LN} -s ${DATAOBSHOME}/hrrr.t${HH}${subcyc}z.NASALaRCCloudInGSI.bufr ./larcInGSI
+elif [ -r "${DATAOBSHOME}/${RUN}.t${HH}${subcyc}z.NASALaRCCloudInGSI.bufr" ]; then
+  ${LN} -s ${DATAOBSHOME}/${RUN}.t${HH}${subcyc}z.NASALaRCCloudInGSI.bufr ./larcInGSI
 else
   ${ECHO} "Warning: ${DATAOBSHOME}: NASALaRCCloudInGSI.bufr does not exist!"
 fi
@@ -308,7 +309,7 @@ if [ "$NCDUMP" ] ; then
     hybridcord=".false."
   fi
 else
-  if [ ${YYYYMMDDHH} -lt "2018071118" ] ; then
+  if [ ${YYYYMMDDHHMU} -lt "201807111800" ] ; then
     hybridcord=".false."
   else
     hybridcord=".true."
@@ -409,28 +410,28 @@ esac
    for type in $listall; do
       count=`ls pe*.${type}_${loop}* | wc -l`
       if [[ $count -gt 0 ]]; then
-         `cat pe*.${type}_${loop}* > diag_${type}_${string}.${YYYYMMDDHH}`
+         `cat pe*.${type}_${loop}* > diag_${type}_${string}.${YYYYMMDDHHMU}`
       fi
    done
 done
 
 # save results from 1st run
-${CP} fort.201    fit_p1.${YYYYMMDDHH}
-${CP} fort.202    fit_w1.${YYYYMMDDHH}
-${CP} fort.203    fit_t1.${YYYYMMDDHH}
-${CP} fort.204    fit_q1.${YYYYMMDDHH}
-${CP} fort.207    fit_rad1.${YYYYMMDDHH}
-cat   fort.* >    fits_${YYYYMMDDHH}.txt
-${CP} -p fort.220 minimization_fort220.${YYYYMMDDHH}
+${CP} fort.201    fit_p1.${YYYYMMDDHHMU}
+${CP} fort.202    fit_w1.${YYYYMMDDHHMU}
+${CP} fort.203    fit_t1.${YYYYMMDDHHMU}
+${CP} fort.204    fit_q1.${YYYYMMDDHHMU}
+${CP} fort.207    fit_rad1.${YYYYMMDDHHMU}
+cat   fort.* >    fits_${YYYYMMDDHHMU}.txt
+${CP} -p fort.220 minimization_fort220.${YYYYMMDDHHMU}
 # cat fort.* > ${COMOUT}/fits_${YYYYMMDDHH}.txt
 
 
 # Saving ANALYSIS, DIAG, Obs-Fitting files TO COM2 DIRECTORY AS PRODUCT for archive
 ${CP} -p ${DATA}/wrf_inout                  ${COMOUTgsi_rtma3d}/${ANLrtma3d_FNAME}
-${CP} -p ${pgmout_stdout}                   ${COMOUTgsi_rtma3d}/${pgmout_stdout}_gsianl.${YYYYMMDDHH}${mm}
-${CP} -p fits_${YYYYMMDDHH}.txt             ${COMOUTgsi_rtma3d}/fits_${YYYYMMDDHH}${mm}.txt
-${CP} -p minimization_fort220.${YYYYMMDDHH} ${COMOUTgsi_rtma3d}/minimization_fort220.${YYYYMMDDHH}${mm}
-${CP} -p gsiparm.anl                        ${COMOUTgsi_rtma3d}/gsiparm.anl.${YYYYMMDDHH}${mm}
+${CP} -p ${pgmout_stdout}                   ${COMOUTgsi_rtma3d}/${pgmout_stdout}_gsianl.${YYYYMMDDHHMU}
+${CP} -p fits_${YYYYMMDDHHMU}.txt             ${COMOUTgsi_rtma3d}/fits_${YYYYMMDDHHMU}.txt
+${CP} -p minimization_fort220.${YYYYMMDDHHMU} ${COMOUTgsi_rtma3d}/minimization_fort220.${YYYYMMDDHHMU}
+${CP} -p gsiparm.anl                        ${COMOUTgsi_rtma3d}/gsiparm.anl.${YYYYMMDDHHMU}
 ${CP} -p diag_*                             ${COMOUTgsi_rtma3d}/
 
 tar -zcvf obsfit_fort220.tgz  ./fort.* ./fit_*
@@ -441,8 +442,8 @@ gzip ${COMOUTgsi_rtma3d}/diag_*
 
 # extra backup (NOT necessary)
 #${LN} -sf ${COMOUTgsi_rtma3d}/${ANLrtma3d_FNAME} ${COMOUT}/${ANLrtma3d_FNAME}
-#${CP} -p  ${pgmout_stdout}                       ${COMOUT}/${pgmout_stdout}_gsianl.${YYYYMMDDHH}
-#${CP} -p  fits_${YYYYMMDDHH}.txt                 ${COMOUT}/fits_${YYYYMMDDHH}.txt
+#${CP} -p  ${pgmout_stdout}                       ${COMOUT}/${pgmout_stdout}_gsianl.${YYYYMMDDHHMU}
+#${CP} -p  fits_${YYYYMMDDHHMU}.txt                 ${COMOUT}/fits_${YYYYMMDDHHMU}.txt
 
 /bin/rm -f ${DATA}/wrf_inout
 /bin/rm -f ${DATA}/sig*

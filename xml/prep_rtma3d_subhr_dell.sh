@@ -51,9 +51,9 @@ fi
 #####################################################
 set -x
 
-export ExpDateWindows="04 07 2019 *"        # dd mm yyyy weekday (crontab-like date format, mainly used for real-time run)
-export startCDATE=201904271200              #yyyymmddhhmm - Starting day of retro run 
-export endCDATE=201904271400                #yyyymmddhhmm - Ending day of RTMA3D run (needed for both RETRO and REAL TIME). 
+export ExpDateWindows="12 07 2019 *"        # dd mm yyyy weekday (crontab-like date format, mainly used for real-time run)
+export startCDATE=201907121400              #yyyymmddhhmm - Starting day of retro run 
+export endCDATE=201907121400                #yyyymmddhhmm - Ending day of RTMA3D run (needed for both RETRO and REAL TIME). 
 export NET=rtma3d                           #selection of rtma3d (or rtma,urma)
 export RUN=rtma3d                           #selection of rtma3d (or rtma,urma)
 export run_envir="dev_shared"                      #
@@ -62,7 +62,7 @@ export SCHD_ATTRB="lsf"
 
 export envir="${SCHD_ATTRB}"                      #environment (test, prod, dev, etc.)
 export expname="${envir}"                   # experiment name
-export realtime="F"
+export realtime="T"
 #====================================================================#
 # Note: Definition for the following variables 
 #       depends on the machine platform, 
@@ -79,11 +79,11 @@ export realtime="F"
 
   DATABASE_DIR=${ptmp_base}            # (equivalent to ptmp_base)
   HOMEBASE_DIR=${NWROOT}               # path to system home directory
-  COMINRAP="/gpfs/dell2/emc/modeling/noscrub/Edward.Colon/com/rtma/prod"
-  COMINRAP_E="/gpfs/dell2/emc/modeling/noscrub/Edward.Colon/com/rtma/prod"
-  COMINRAP_SUBHR="/gpfs/dell2/emc/modeling/noscrub/Edward.Colon/com/rtma/prod"
-  COMINHRRR="/gpfs/dell2/emc/modeling/noscrub/Edward.Colon/com/rtma/prod"
-  GESINHRRR="/gpfs/dell2/emc/modeling/noscrub/Edward.Colon/com/rtma/prod"
+  COMINRAP="/gpfs/tp2/ptmp/Jeff.Whiting/CHKOUT_TMP/com3d/rtma/prod"
+  COMINRAP_SUBHR="/gpfs/tp2/nco/ops/com/rtma/prod"
+#  COMINRAP_SUBHR="/gpfs/hps/nco/ops/com/rap/prod"
+  COMINHRRR="/gpfs/hps/nco/ops/com/hrrr/prod"
+  GESINHRRR="/gpfs/hps/nco/ops/nwges/prod"
 # Computational resources
   ACCOUNT="RTMA-T2O"                    #account for CPU resources
 
@@ -309,7 +309,7 @@ export exefile_name_verif=""    # executable of verification (MET) is defined by
                           # 2: processing  NLDN lightning data (if retrospective run, also retrieving  NLDN data from HPSS)
                           # 3: processing ENTLN lightning data (if retrospective run, also retrieving ENTLN data from HPSS)
 
-  export obsprep_cloud=0  # 0: No (using archived hrrr.t{HH}z.NASALaRCCloudInGSI.bufr processed in operational hrrr)
+  export obsprep_cloud=1  # 0: No (using archived hrrr.t{HH}z.NASALaRCCloudInGSI.bufr processed in operational hrrr)
                           # 1: processing bufr data from rap run 
 
 # control option for using hrrr forecast as firstguess for rtma3d
@@ -389,7 +389,6 @@ cat > ${NWROOT}/xml/${RUN}_${expname}_subhr.xml <<EOF
 
 <!ENTITY ptmp_base	"${ptmp_base}">
 <!ENTITY COMINRAP       "${COMINRAP}">
-<!ENTITY COMINRAP_E     "${COMINRAP_E}">
 <!ENTITY COMINRAP_SUBHR  "${COMINRAP_SUBHR}">
 <!ENTITY COMINHRRR      "${COMINHRRR}">
 <!ENTITY GESINHRRR      "${GESINHRRR}">
@@ -478,24 +477,24 @@ cat > ${NWROOT}/xml/${RUN}_${expname}_subhr.xml <<EOF
 <!-- for various observations used in RTMA3D -->
 
 <!-- ex-shell and J-job script name -->
-<!ENTITY JJOB_OBSPREP_RADAR    "&JJOB_DIR;/J&CAP_RUN;_OBSPREP_RADAR">
-<!ENTITY exSCR_OBSPREP_RADAR   "&SCRIPT_DIR;/ex&RUN;_obsprep_radar.ksh">
+<!ENTITY JJOB_OBSPREP_RADAR    "&JJOB_DIR;/J&CAP_RUN;_OBSPREP_RADAR_SUBH">
+<!ENTITY exSCR_OBSPREP_RADAR   "&SCRIPT_DIR;/ex&RUN;_obsprep_radar_subh.ksh">
 <!ENTITY exefile_name_mosaic   "${exefile_name_mosaic}">
-<!ENTITY JJOB_OBSPREP_LGHTN    "&JJOB_DIR;/J&CAP_RUN;_OBSPREP_LGHTN">
-<!ENTITY exSCR_OBSPREP_LGHTN   "&SCRIPT_DIR;/ex&RUN;_obsprep_lghtn.ksh">
+<!ENTITY JJOB_OBSPREP_LGHTN    "&JJOB_DIR;/J&CAP_RUN;_OBSPREP_LGHTN_SUBH">
+<!ENTITY exSCR_OBSPREP_LGHTN   "&SCRIPT_DIR;/ex&RUN;_obsprep_lghtn_subh.ksh">
 <!ENTITY exefile_name_lightning "${exefile_name_lightning}">
-<!ENTITY JJOB_OBSPREP_CLOUD    "&JJOB_DIR;/J&CAP_RUN;_OBSPREP_CLOUD">
-<!ENTITY exSCR_OBSPREP_CLOUD   "&SCRIPT_DIR;/ex&RUN;_obsprep_cloud.ksh">
+<!ENTITY JJOB_OBSPREP_CLOUD    "&JJOB_DIR;/J&CAP_RUN;_OBSPREP_CLOUD_SUBH">
+<!ENTITY exSCR_OBSPREP_CLOUD   "&SCRIPT_DIR;/ex&RUN;_obsprep_cloud_subh.ksh">
 <!ENTITY exefile_name_cloud    "${exefile_name_cloud}">
-<!ENTITY JJOB_PREPOBS    "&JJOB_DIR;/J&CAP_RUN;_PREPOBS">
-<!ENTITY exSCR_PREPOBS   "&SCRIPT_DIR;/ex&RUN;_prepobs.ksh">
-<!ENTITY JJOB_PREPFGS    "&JJOB_DIR;/J&CAP_RUN;_PREPFGS">
-<!ENTITY exSCR_PREPFGS   "&SCRIPT_DIR;/ex&RUN;_prepfgs.ksh">
-<!ENTITY JJOB_GSIANL	 "&JJOB_DIR;/J&CAP_RUN;_GSIANL${gsi2}">
-<!ENTITY exSCR_GSIANL	 "&SCRIPT_DIR;/ex&RUN;_gsianl${gsi2}.ksh">
+<!ENTITY JJOB_PREPOBS    "&JJOB_DIR;/J&CAP_RUN;_PREPOBS_SUBH">
+<!ENTITY exSCR_PREPOBS   "&SCRIPT_DIR;/ex&RUN;_prepobs_subh.ksh">
+<!ENTITY JJOB_PREPFGS    "&JJOB_DIR;/J&CAP_RUN;_PREPFGS_SUBH">
+<!ENTITY exSCR_PREPFGS   "&SCRIPT_DIR;/ex&RUN;_prepfgs_subh.ksh">
+<!ENTITY JJOB_GSIANL	 "&JJOB_DIR;/J&CAP_RUN;_GSIANL${gsi2}_SUBH">
+<!ENTITY exSCR_GSIANL	 "&SCRIPT_DIR;/ex&RUN;_gsianl${gsi2}_subh.ksh">
 <!ENTITY exefile_name_gsi      "${exefile_name_gsi}">
-<!ENTITY JJOB_POST  	 "&JJOB_DIR;/J&CAP_RUN;_POST">
-<!ENTITY exSCR_POST      "&SCRIPT_DIR;/ex&RUN;_post.ksh">
+<!ENTITY JJOB_POST  	 "&JJOB_DIR;/J&CAP_RUN;_POST_SUBH">
+<!ENTITY exSCR_POST      "&SCRIPT_DIR;/ex&RUN;_post_subh.ksh">
 <!ENTITY exefile_name_post     "${exefile_name_post}">
 <!ENTITY JJOB_POST4FGS   "&JJOB_DIR;/J&CAP_RUN;_POST4FGS">
 <!ENTITY exSCR_POST4FGS  "&SCRIPT_DIR;/ex&RUN;_post4fgs.ksh">
@@ -624,10 +623,6 @@ cat > ${NWROOT}/xml/${RUN}_${expname}_subhr.xml <<EOF
    <envar>
         <name>COMINRAP</name>
         <value>&COMINRAP;</value>
-   </envar>
-   <envar>
-        <name>COMINRAP_E</name>
-        <value>&COMINRAP_E;</value>
    </envar>
    <envar>
         <name>COMINRAP_SUBHR</name>
@@ -791,7 +786,7 @@ cat > ${NWROOT}/xml/${RUN}_${expname}_subhr.xml <<EOF
    </envar>
    <envar>
         <name>PROD_HEAD</name>
-        <value>&RUN;.t<cyclestr>@H</cyclestr>z</value>
+        <value>&RUN;.t<cyclestr>@H@M</cyclestr>z</value>
    </envar>
    <envar>
         <name>GESROOT</name>
@@ -1094,7 +1089,7 @@ EOF
 if [ ${obsprep_lghtn} -eq 1 ] ; then
 cat >> ${NWROOT}/xml/${RUN}_${expname}_subhr.xml <<EOF 
 
-  <task name="&NET;_obsprep_lghtn_task_@Y@m@d@H" cycledefs="02-11hr,00hr,01hr" maxtries="&maxtries;">
+  <task name="&NET;_obsprep_lghtn_task_@Y@m@d@H@M" cycledefs="15min" maxtries="&maxtries;">
 
     &ENVARS;
     <envar>
@@ -1103,7 +1098,7 @@ cat >> ${NWROOT}/xml/${RUN}_${expname}_subhr.xml <<EOF
     </envar>
 
     <command>&JJOB_DIR;/launch.ksh &JJOB_OBSPREP_LGHTN;</command>
-    <jobname><cyclestr>&NET;_obsprep_lghtn_job_@Y@m@d@H</cyclestr></jobname>
+    <jobname><cyclestr>&NET;_obsprep_lghtn_job_@Y@m@d@H@M</cyclestr></jobname>
     <join><cyclestr>&LOG_SCHDLR;/&NET;_&envir;_obsprep_lghtn_@Y@m@d@H@M.log</cyclestr></join>
 
     &OBSPREP_LGHTN_RESOURCES;
@@ -1112,7 +1107,7 @@ cat >> ${NWROOT}/xml/${RUN}_${expname}_subhr.xml <<EOF
     &ENVARS_PREPJOB;
 
    <dependency>
-       <datadep><cyclestr>&COMINRAP;/rap.@Y@m@d/rap.t@Hz.lghtng.tm00.bufr_d</cyclestr></datadep>
+       <datadep><cyclestr>&COMINRAP;/rtma_ru.@Y@m@d/rtma_ru.t@H@Mz.lghtng.tm00.bufr_d</cyclestr></datadep>
    </dependency>
   </task>
 EOF
@@ -1121,7 +1116,7 @@ fi
 if [ ${obsprep_cloud} -eq 1 ] ; then
 cat >> ${NWROOT}/xml/${RUN}_${expname}_subhr.xml <<EOF    
 
-  <task name="&NET;_obsprep_cloud_task_@Y@m@d@H" cycledefs="02-11hr,00hr,01hr" maxtries="&maxtries;">
+  <task name="&NET;_obsprep_cloud_task_@Y@m@d@H@M" cycledefs="15min" maxtries="&maxtries;">
 
     &ENVARS;
     <envar>
@@ -1130,7 +1125,7 @@ cat >> ${NWROOT}/xml/${RUN}_${expname}_subhr.xml <<EOF
     </envar>
 
     <command>&JJOB_DIR;/launch.ksh &JJOB_OBSPREP_CLOUD;</command>
-    <jobname><cyclestr>&NET;_obsprep_cloud_job_@Y@m@d@H</cyclestr></jobname>
+    <jobname><cyclestr>&NET;_obsprep_cloud_job_@Y@m@d@H@M</cyclestr></jobname>
     <join><cyclestr>&LOG_SCHDLR;/&NET;_&envir;_obsprep_cloud_@Y@m@d@H@M.log</cyclestr></join>
 
     &OBSPREP_CLOUD_RESOURCES;
@@ -1139,7 +1134,7 @@ cat >> ${NWROOT}/xml/${RUN}_${expname}_subhr.xml <<EOF
     &ENVARS_PREPJOB; 
 
    <dependency>
-       <datadep><cyclestr>&COMINRAP;/rap.@Y@m@d/rap.t@Hz.lgycld.tm00.bufr_d</cyclestr></datadep>
+       <datadep><cyclestr>&COMINRAP;/rtma_ru.@Y@m@d/rtma_ru.t@H@Mz.lgycld.tm00.bufr_d</cyclestr></datadep>
    </dependency>
   </task>
 EOF
@@ -1166,16 +1161,16 @@ cat >> ${NWROOT}/xml/${RUN}_${expname}_subhr.xml <<EOF
 
    <dependency>
        <and>
-       <taskdep task="&NET;_obsprep_lghtn_task_@Y@m@d@H"/>
-       <datadep><cyclestr>&COMINRAP_SUBHR;/rap.@Y@m@d/rap.t@H@Mz.prepbufr.tm00</cyclestr></datadep>       
+       <taskdep task="&NET;_obsprep_lghtn_task_@Y@m@d@H@M"/>
+       <taskdep task="&NET;_obsprep_cloud_task_@Y@m@d@H@M"/>
+       <datadep><cyclestr>&COMINRAP_SUBHR;/rtma_ru.@Y@m@d/rtma_ru.t@H@Mz.prepbufr.tm00</cyclestr></datadep>       
        <datadep><cyclestr>&COMINHRRR;/hrrr.@Y@m@d/conus/hrrr.t@Hz.NSSLRefInGSI.bufr</cyclestr></datadep>
-       <datadep><cyclestr>&COMINHRRR;/hrrr.@Y@m@d/conus/hrrr.t@Hz.NASALaRCCloudInGSI.bufr</cyclestr></datadep>
        </and>   
    </dependency>
 
   </task>
 
-  <task name="&NET;_prepfgs_task_@Y@m@d@H" cycledefs="02-11hr,01hr" maxtries="&maxtries;">
+  <task name="&NET;_prepfgs_task_@Y@m@d@H" cycledefs="15min" maxtries="&maxtries;">
 
     &ENVARS;
     <envar>
