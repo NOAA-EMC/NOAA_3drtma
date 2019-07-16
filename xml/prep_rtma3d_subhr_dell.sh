@@ -51,7 +51,7 @@ fi
 #####################################################
 set -x
 
-export ExpDateWindows="12 07 2019 *"        # dd mm yyyy weekday (crontab-like date format, mainly used for real-time run)
+export ExpDateWindows="15 07 2019 *"        # dd mm yyyy weekday (crontab-like date format, mainly used for real-time run)
 export startCDATE=201907121400              #yyyymmddhhmm - Starting day of retro run 
 export endCDATE=201907121400                #yyyymmddhhmm - Ending day of RTMA3D run (needed for both RETRO and REAL TIME). 
 export NET=rtma3d                           #selection of rtma3d (or rtma,urma)
@@ -83,7 +83,7 @@ export realtime="T"
   COMINRAP_SUBHR="/gpfs/tp2/nco/ops/com/rtma/prod"
 #  COMINRAP_SUBHR="/gpfs/hps/nco/ops/com/rap/prod"
   COMINHRRR="/gpfs/hps/nco/ops/com/hrrr/prod"
-  GESINHRRR="/gpfs/hps/nco/ops/nwges/prod"
+  GESINHRRR="/gpfs/hps/stmp/Annette.Gibbs/com/hrrr/prod"
 # Computational resources
   ACCOUNT="RTMA-T2O"                    #account for CPU resources
 
@@ -110,7 +110,7 @@ export realtime="T"
   PREPOBS_RESERVATION=${RESERVATION}
 
   PREPFGS_PROC="1"
-  PREPFGS_RESOURCES="<cores>&PREPFGS_PROC;</cores><walltime>00:30:00</walltime>"
+  PREPFGS_RESOURCES="<cores>&PREPFGS_PROC;</cores><walltime>00:45:00</walltime>"
   PREPFGS_RESERVATION=${RESERVATION}
 
   GSI_PROC="192"
@@ -781,6 +781,10 @@ cat > ${NWROOT}/xml/${RUN}_${expname}_subhr.xml <<EOF
         <value><cyclestr>@H</cyclestr></value>
    </envar>
    <envar>
+	<name>fgsoffset</name>
+	<value><cyclestr offset="-1:00:00">@H</cyclestr></value>
+   </envar>
+   <envar>
         <name>subcyc</name>
         <value><cyclestr>@M</cyclestr></value>
    </envar>
@@ -1082,7 +1086,8 @@ cat >> ${NWROOT}/xml/${RUN}_${expname}_subhr.xml <<EOF
 
   <cycledef group="02-11hr">00 02-11,14-23 ${ExpDateWindows}</cycledef>
 
-  <cycledef group="15min">*/15 02-11,14-23,01,13 ${ExpDateWindows}</cycledef>
+<!--   <cycledef group="15min">*/15 02-11,14-23,01,13 ${ExpDateWindows}</cycledef> -->
+  <cycledef group="15min">*/15 * ${ExpDateWindows}</cycledef>
 
 EOF
 
@@ -1170,7 +1175,7 @@ cat >> ${NWROOT}/xml/${RUN}_${expname}_subhr.xml <<EOF
 
   </task>
 
-  <task name="&NET;_prepfgs_task_@Y@m@d@H" cycledefs="15min" maxtries="&maxtries;">
+  <task name="&NET;_prepfgs_task_@Y@m@d@H@M" cycledefs="15min" maxtries="&maxtries;">
 
     &ENVARS;
     <envar>
@@ -1179,7 +1184,7 @@ cat >> ${NWROOT}/xml/${RUN}_${expname}_subhr.xml <<EOF
     </envar>
 
     <command>&JJOB_DIR;/launch.ksh &JJOB_PREPFGS;</command>
-    <jobname><cyclestr>&NET;_prepfgs_job_@Y@m@d@H</cyclestr></jobname>
+    <jobname><cyclestr>&NET;_prepfgs_job_@Y@m@d@H@M</cyclestr></jobname>
     <join><cyclestr>&LOG_SCHDLR;/&NET;_&envir;_prepfgs_@Y@m@d@H@M.log</cyclestr></join>
 
     &PREPFGS_RESOURCES;
@@ -1187,10 +1192,10 @@ cat >> ${NWROOT}/xml/${RUN}_${expname}_subhr.xml <<EOF
 
     &ENVARS_PREPJOB;
    <dependency>
-       <datadep><cyclestr>&GESINHRRR;/hrrr/hrrrges_sfc/conus/hrrr_@Y@m@d@Hf001</cyclestr></datadep>
+       <datadep><cyclestr>&GESINHRRR;/hrrr.@Y@m@d/conus/hrrr.t@H00z.f01@M.netcdf</cyclestr></datadep>
    </dependency>
-
-  </task>
+   </task>
+ 
   <task name="&NET;_gsianl_task_@Y@m@d@H@M" cycledefs="15min" maxtries="&maxtries;">
 
     &ENVARS;
@@ -1211,7 +1216,7 @@ cat >> ${NWROOT}/xml/${RUN}_${expname}_subhr.xml <<EOF
     <dependency>
       <and>
           <taskdep task="&NET;_prepobs_task_@Y@m@d@H@M"/>
-          <taskdep task="&NET;_prepfgs_task_@Y@m@d@H"/>
+          <taskdep task="&NET;_prepfgs_task_@Y@m@d@H@M"/>
       </and>
     </dependency>
 

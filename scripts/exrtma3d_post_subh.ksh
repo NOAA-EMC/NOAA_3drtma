@@ -148,8 +148,7 @@ EOF
 
 ${RM} -f fort.*
 ${RM} -f post_avblflds.xml params_grib2_tbl_new postcntrl.xml postxconfig-NT.txt eta_micro_lookup.dat
-${RM} -f WRF???.GrbF??.??
-
+${RM} -f WRF???.GrbF??
 # set up the namelist/control/config input files
 # hrrr"x": means experimental testing.
 # cp -p ${PARMupp}/hrrr_post_avblflds.xml          post_avblflds.xml
@@ -228,7 +227,7 @@ if [ ${err} -ne 0 ]; then
 fi
 
 # Linking GrbF{HH} to GrbF00 (esp. for firstguess which is from WRF forecast)
-GrbFiles=`ls WRF???.GrbF??.??`
+GrbFiles=`ls WRF???.GrbF??`
 for i in ${GrbFiles}
 do
   i_fname=`echo "$i" | cut -d '.' -f 1`
@@ -240,14 +239,14 @@ do
 done
 
 # Append entire wrftwo to wrfprs
-${CAT} ${workdir}/WRFPRS.GrbF${FCST_TIME}.??     ${workdir}/WRFTWO.GrbF${FCST_TIME}.?? > ${workdir}/WRFPRS.GrbF${FCST_TIME}.new
+${CAT} ${workdir}/WRFPRS.GrbF${FCST_TIME}     ${workdir}/WRFTWO.GrbF${FCST_TIME} > ${workdir}/WRFPRS.GrbF${FCST_TIME}.new
 ${MV}  ${workdir}/WRFPRS.GrbF${FCST_TIME}.new ${workdir}/wrfprs_hrconus_${FCST_TIME}.grib2
 
 # Append entire wrftwo to wrfnat
-${CAT} ${workdir}/WRFNAT.GrbF${FCST_TIME}.??     ${workdir}/WRFTWO.GrbF${FCST_TIME}.?? > ${workdir}/WRFNAT.GrbF${FCST_TIME}.new
+${CAT} ${workdir}/WRFNAT.GrbF${FCST_TIME}     ${workdir}/WRFTWO.GrbF${FCST_TIME} > ${workdir}/WRFNAT.GrbF${FCST_TIME}.new
 ${MV}  ${workdir}/WRFNAT.GrbF${FCST_TIME}.new ${workdir}/wrfnat_hrconus_${FCST_TIME}.grib2
 
-${CP}  ${workdir}/WRFTWO.GrbF${FCST_TIME}.??     ${workdir}/wrftwo_hrconus_${FCST_TIME}.grib2
+${CP}  ${workdir}/WRFTWO.GrbF${FCST_TIME}     ${workdir}/wrftwo_hrconus_${FCST_TIME}.grib2
 
 # Check to make sure all Post  output files were produced
 if [ ! -s "${workdir}/wrfprs_hrconus_${FCST_TIME}.grib2" ]; then
@@ -288,7 +287,7 @@ ${LN} -sf ${COMOUTpost_rtma3d}/${PROD_HEAD}.wrftwo_hrconus_${FCST_TIME}.grib2 ${
 
 # ${RM} -rf ${workdir}
   ${RM} -f  ${workdir}/wrf???_hrconus_*.grib2
-  ${RM} -f  ${workdir}/WRF???.GrbF??.??
+  ${RM} -f  ${workdir}/WRF???.GrbF??
 
 # Create softlinks for transfer
 # basetime=`${DATE} +%y%j%H%M -d "${START_TIME}"`
