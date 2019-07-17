@@ -158,10 +158,10 @@ fi
 
 if [ -r "${DATAOBSHOME}/NSSLRefInGSI.bufr" ]; then
   ${LN} -s ${DATAOBSHOME}/NSSLRefInGSI.bufr ./refInGSI
-elif [ -r "${DATAOBSHOME}/hrrr.t${HH}z.NSSLRefInGSI.bufr" ]; then
-  ${LN} -s ${DATAOBSHOME}/hrrr.t${HH}z.NSSLRefInGSI.bufr ./refInGSI
-elif [ -r "${DATAOBSHOME}/${RUN}.t${HH}z.NSSLRefInGSI.bufr" ]; then
-  ${LN} -s ${DATAOBSHOME}/${RUN}.t${HH}z.NSSLRefInGSI.bufr ./refInGSI
+elif [ -r "${DATAOBSHOME}/hrrr.t${HH}${subcyc}z.NSSLRefInGSI.bufr" ]; then
+  ${LN} -s ${DATAOBSHOME}/hrrr.t${HH}${subcyc}z.NSSLRefInGSI.bufr ./refInGSI
+elif [ -r "${DATAOBSHOME}/${RUN}.t${HH}${subcyc}z.NSSLRefInGSI.bufr" ]; then
+  ${LN} -s ${DATAOBSHOME}/${RUN}.t${HH}${subcyc}z.NSSLRefInGSI.bufr ./refInGSI
 else
   ${ECHO} "Warning: ${DATAOBSHOME}:NSSLRefInGSI.bufr does not exist!"
 fi
@@ -294,7 +294,7 @@ ndatrap=67  #62 ?
 
 # 3DVar and Cloud analysis in one-step
 grid_ratio=${GSI_grid_ratio_in_var:-1}
-cloudanalysistype=1
+cloudanalysistype=0
 
 # option for hybrid vertical coordinate (HVC) in WRF-ARW
 

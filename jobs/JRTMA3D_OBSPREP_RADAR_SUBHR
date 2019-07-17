@@ -46,13 +46,12 @@ cd $DATA
 #    setpdy.sh needs the variables 
 #    $PDY and $cyc already defined in advance
 #####################################################
+export cycle=${cycle:-t${cyc}${subcyc}z}
 #setpdy.sh
 #. ${DATA}/PDY
 
 export subcyc=${subcyc} #Note: Must define subcyc in upper level script. Can be 00, 15, 30, or 45 /MPondeca, 30Jun2017
                          #only used for rurtma2p5
-
-export cycle=${cycle:-t${cyc}${subcyc}z}
 export PDYHH="${PDY}${cyc}"
 ####################################
 # Determine Job Output Name on System
@@ -60,7 +59,7 @@ export PDYHH="${PDY}${cyc}"
 export LOG_JJOB=${LOG_JJOB:-$COMROOT/logs/jlogfiles}
 export jlogfile=${jlogfile:-$LOG_JJOB/jlogfile.${jobid}}
 # export pgmout=${pgmout:-"OUTPUT.$$"}
-export pgmout=${pgmout:-"OUTPUT.${PDY}${cyc}${subcyc}.${jobid}"}
+export pgmout=${pgmout:-"OUTPUT.${PDY}${cyc}.${jobid}"}
 if [ ! -d ${LOG_JJOB} ] ; then
    mkdir -p ${LOG_JJOB}
 fi
@@ -82,6 +81,7 @@ export UTILrtma3d=${UTILrtma3d:-$HOMErtma3d/util/${RUN}}
 # date and time for previous and next cycle
 export PDYHH_cycm1=$($NDATE -01  "${PDYHH}")
 export PDYHH_cycp1=$($NDATE +01  "${PDYHH}")
+
 export FGS_OPT=${FGS_OPT:-1}
 
 #################################################
@@ -90,20 +90,19 @@ export FGS_OPT=${FGS_OPT:-1}
 export COMIN=${COMIN:-${COMROOT}/${NET}/${envir}/${RUN}.${PDY}}
 export COMOUT=${COMOUT:-${COMROOT}/${NET}/${envir}/${RUN}.${PDY}}
 
+### Observations Products/Input from RAP
+export COMINrap=${COMINrap:-"${COMIN}/rap.${PDY}"}
+export COMINrap_e=${COMINrap:-"${COMIN}/rap_e.${PDY}"}
+export COMINhrrr=${COMINhrrr:-"${COMIN}/hrrr.${PDY}/conus"}
+export COMINlightning=${COMINlightning:-"${COMIN}/lightning.${PDY}"}
+export COMINmosaic=${COMINmosaic:-"${COMIN}/radar.${PDY}"}
+export COMINradar=${COMINradar:-"${COMINRADAR}/radar.${PDY}${cyc}"}
+
 ### Observations Products/Input for the RTMA3D (prepbufr files) 
 export COMINobsproc_rtma3d=${COMINobsproc_rtma3d:-"${COMIN}/obsprd.${cycle}"}
 
-### Firstguess Products/Input for the RTMA3D (netcdf) 
+### Firstguess Products/Input for the RTMA3D (prepbufr files) 
 export GESINhrrr_rtma3d=${GESINhrrr_rtma3d:-"${COMIN}/fgsprd.${cycle}"}
-
-### 3DRTMA GSIANL Products (netcdf)
-export COMOUTgsi_rtma3d=${COMOUTgsi_rtma3d:-"${COMOUT}/gsiprd.${cycle}"}
-
-### 3DRTMA UNI-POST Products (grib2)
-export COMOUTpost_rtma3d=${COMOUTpost_rtma3d:-"${COMOUT}/postprd.${cycle}"}
-
-### 3DRTMA PLOT Products (figures)
-export COMOUTplot_rtma3d=${COMOUTpost_rtma3d:-"${COMOUT}/gradsprd.${cycle}"}
 
 if [ ! -d "${COMIN}" ] ; then
    mkdir -p $COMIN
@@ -111,29 +110,22 @@ fi
 if [ ! -d "${COMOUT}" ] ; then
    mkdir -p $COMOUT
 fi
-
-if [ ! -d "${COMOUTpost_rtma3d}" ] ; then
-   mkdir -p ${COMOUTpost_rtma3d}
+if [ ! -d "${COMINobsproc_rtma3d}" ] ; then
+# echo " Directory of obs data does NOT exist. Job abort!"
+# err_exit
+  mkdir -p $COMINobsproc_rtma3d
 fi
 
 ###########################################################
 #
-# The following variables are used in exrtma3d_post.ksh
+# The following variables are used in exrtma3d_obsprep_radar.ksh
 #
 ###########################################################
-#   set the file name of the final analysis file for archive
-    if [ ! "${PROD_HEAD}" ] ; then
-      export ANLrtma3d_FNAME="${RUN}.t${cyc}${subcyc}z.wrf_inout.nc"
-      export FGSrtma3d_FNAME="${RUN}.t${cyc}${subcyc}z.firstguess.nc"
-    else
-      export ANLrtma3d_FNAME="${PROD_HEAD}.wrf_inout.nc"
-      export FGSrtma3d_FNAME="${PROD_HEAD}.firstguess.nc"
-    fi
 
-#   Set the name to the post executable
-    export exefile_name_post=${exefile_name_post:-"rtma3d_wrfpost"}
+#   Set the name to the executable
+    export exefile_name_radar=${exefile_name_radar:-"rtma3d_process_mosaic"}
 
-#   Set the path to the fix/ and parm/ files
+#   Set the path to the GSI static files
     export FIXgsi=${FIXgsi:-"${FIXrtma3d}/gsi"}
     export FIXcrtm=${FIXcrtm:-"${FIXrtma3d}/crtm"}
     export FIXwps=${FIXwps:-"${FIXrtma3d}/wps"}
@@ -148,19 +140,10 @@ fi
 
 ##########################################################
 
-#   Link the path to the working UPP directory
-    export DATA_RUNDIR=${DATA_RUNDIR:-"${DATAROOT}/${envir}/${RUN}.${PDY}${cyc}${subcyc}"}
-    if [ ! -d "${DATA_RUNDIR}" ] ; then
-        mkdir -p ${DATA_RUNDIR}
-    fi
-    export DATA_POST=${DATA_POST:-"${DATA_RUNDIR}/postprd"}
-    ${RM} -rf ${DATA_POST}
-    ${LN} -s  ${DATA}  ${DATA_POST}
-
 ######################
 # Execute the script.
 ######################
-${exSCR_POST:-$HOMErtma3d/scripts/ex${RUN}_post.ksh}
+${exSCR_OBSPREP_RADAR:-$HOMErtma3d/scripts/ex${RUN}_obsprep_radar_sub.ksh}
 export err=$?; err_chk
 
 msg="$0 of $job completed normally"

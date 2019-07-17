@@ -51,7 +51,7 @@ fi
 #####################################################
 set -x
 
-export ExpDateWindows="15 07 2019 *"        # dd mm yyyy weekday (crontab-like date format, mainly used for real-time run)
+export ExpDateWindows="16 07 2019 *"        # dd mm yyyy weekday (crontab-like date format, mainly used for real-time run)
 export startCDATE=201907121400              #yyyymmddhhmm - Starting day of retro run 
 export endCDATE=201907121400                #yyyymmddhhmm - Ending day of RTMA3D run (needed for both RETRO and REAL TIME). 
 export NET=rtma3d                           #selection of rtma3d (or rtma,urma)
@@ -81,8 +81,8 @@ export realtime="T"
   HOMEBASE_DIR=${NWROOT}               # path to system home directory
   COMINRAP="/gpfs/tp2/ptmp/Jeff.Whiting/CHKOUT_TMP/com3d/rtma/prod"
   COMINRAP_SUBHR="/gpfs/tp2/nco/ops/com/rtma/prod"
-#  COMINRAP_SUBHR="/gpfs/hps/nco/ops/com/rap/prod"
   COMINHRRR="/gpfs/hps/nco/ops/com/hrrr/prod"
+  COMINRADAR="/gpfs/tp1/nco/ops/com/hourly/prod"
   GESINHRRR="/gpfs/hps/stmp/Annette.Gibbs/com/hrrr/prod"
 # Computational resources
   ACCOUNT="RTMA-T2O"                    #account for CPU resources
@@ -91,11 +91,14 @@ export realtime="T"
   RESERVATION_GSI="<native>-R rusage[mem=1900] -R span[ptile=14] -R affinity[core]</native><queue>&QUEUE;</queue><account>&ACCOUNT;</account>"
   RESERVATION_UPP="<native>-R rusage[mem=3300] -R span[ptile=8] -R affinity[core]</native><queue>&QUEUE;</queue><account>&ACCOUNT;</account>"
   RESERVATION_SVC="<native>-R rusage[mem=1000] -R affinity[core]</native><queue>&QUEUE_SVC;</queue><account>&ACCOUNT;</account>"
+  RESERVATION_RADAR="<native>-R rusage[mem=3300] -R span[ptile=8] -R affinity[core]</native><queue>&QUEUE;</queue><account>&ACCOUNT;</account>"
 
 # General definition of computation resources for each task
-  OBSPREP_RADAR_PROC="1"
+  OBSPREP_RADAR_PROC="96"
+  RADAR_THREADS=1
+  RADAR_OMP_STACKSIZE="512M"
   OBSPREP_RADAR_RESOURCES="<cores>&OBSPREP_RADAR_PROC;</cores><walltime>00:30:00</walltime>"
-  OBSPREP_RADAR_RESERVATION=${RESERVATION}
+  OBSPREP_RADAR_RESERVATION=${RESERVATION_RADAR}
 
   OBSPREP_LGHTN_PROC="1"
   OBSPREP_LGHTN_RESOURCES="<cores>&OBSPREP_LGHTN_PROC;</cores><walltime>00:30:00</walltime>"
@@ -301,7 +304,7 @@ export exefile_name_verif=""    # executable of verification (MET) is defined by
 
 
 
-  export obsprep_radar=0  # 0: No (using archived hrrr.t{HH}z.NSSLRefInGSI.bufr processed in operational hrrr run)
+  export obsprep_radar=1  # 0: No (using archived hrrr.t{HH}z.NSSLRefInGSI.bufr processed in operational hrrr run)
                           # 1: pre-processing MRMS grib2 radar reflectivity obs
 
   export obsprep_lghtn=1  # 0: No pre-processing lightning obs data
@@ -326,7 +329,7 @@ export exefile_name_verif=""    # executable of verification (MET) is defined by
 
 
 #----option to compute verification statistics using MET
-  export run_verif=0      # 0: No not process verification statistics
+  export run_verif=1      # 0: No not process verification statistics
                           # 1: Compute verification statistics including cloud ceiling and visibility
 
 #--- option to plot the firstguess/analysis/increment
@@ -391,6 +394,7 @@ cat > ${NWROOT}/xml/${RUN}_${expname}_subhr.xml <<EOF
 <!ENTITY COMINRAP       "${COMINRAP}">
 <!ENTITY COMINRAP_SUBHR  "${COMINRAP_SUBHR}">
 <!ENTITY COMINHRRR      "${COMINHRRR}">
+<!ENTITY COMINRADAR      "${COMINRADAR}">
 <!ENTITY GESINHRRR      "${GESINHRRR}">
 <!ENTITY NWROOT		"${NWROOT}">
 
@@ -477,31 +481,31 @@ cat > ${NWROOT}/xml/${RUN}_${expname}_subhr.xml <<EOF
 <!-- for various observations used in RTMA3D -->
 
 <!-- ex-shell and J-job script name -->
-<!ENTITY JJOB_OBSPREP_RADAR    "&JJOB_DIR;/J&CAP_RUN;_OBSPREP_RADAR_SUBH">
+<!ENTITY JJOB_OBSPREP_RADAR    "&JJOB_DIR;/J&CAP_RUN;_OBSPREP_RADAR_SUBHR">
 <!ENTITY exSCR_OBSPREP_RADAR   "&SCRIPT_DIR;/ex&RUN;_obsprep_radar_subh.ksh">
 <!ENTITY exefile_name_mosaic   "${exefile_name_mosaic}">
-<!ENTITY JJOB_OBSPREP_LGHTN    "&JJOB_DIR;/J&CAP_RUN;_OBSPREP_LGHTN_SUBH">
+<!ENTITY JJOB_OBSPREP_LGHTN    "&JJOB_DIR;/J&CAP_RUN;_OBSPREP_LGHTN_SUBHR">
 <!ENTITY exSCR_OBSPREP_LGHTN   "&SCRIPT_DIR;/ex&RUN;_obsprep_lghtn_subh.ksh">
 <!ENTITY exefile_name_lightning "${exefile_name_lightning}">
-<!ENTITY JJOB_OBSPREP_CLOUD    "&JJOB_DIR;/J&CAP_RUN;_OBSPREP_CLOUD_SUBH">
+<!ENTITY JJOB_OBSPREP_CLOUD    "&JJOB_DIR;/J&CAP_RUN;_OBSPREP_CLOUD_SUBHR">
 <!ENTITY exSCR_OBSPREP_CLOUD   "&SCRIPT_DIR;/ex&RUN;_obsprep_cloud_subh.ksh">
 <!ENTITY exefile_name_cloud    "${exefile_name_cloud}">
-<!ENTITY JJOB_PREPOBS    "&JJOB_DIR;/J&CAP_RUN;_PREPOBS_SUBH">
+<!ENTITY JJOB_PREPOBS    "&JJOB_DIR;/J&CAP_RUN;_PREPOBS_SUBHR">
 <!ENTITY exSCR_PREPOBS   "&SCRIPT_DIR;/ex&RUN;_prepobs_subh.ksh">
-<!ENTITY JJOB_PREPFGS    "&JJOB_DIR;/J&CAP_RUN;_PREPFGS_SUBH">
+<!ENTITY JJOB_PREPFGS    "&JJOB_DIR;/J&CAP_RUN;_PREPFGS_SUBHR">
 <!ENTITY exSCR_PREPFGS   "&SCRIPT_DIR;/ex&RUN;_prepfgs_subh.ksh">
-<!ENTITY JJOB_GSIANL	 "&JJOB_DIR;/J&CAP_RUN;_GSIANL${gsi2}_SUBH">
+<!ENTITY JJOB_GSIANL	 "&JJOB_DIR;/J&CAP_RUN;_GSIANL${gsi2}_SUBHR">
 <!ENTITY exSCR_GSIANL	 "&SCRIPT_DIR;/ex&RUN;_gsianl${gsi2}_subh.ksh">
 <!ENTITY exefile_name_gsi      "${exefile_name_gsi}">
-<!ENTITY JJOB_POST  	 "&JJOB_DIR;/J&CAP_RUN;_POST_SUBH">
+<!ENTITY JJOB_POST  	 "&JJOB_DIR;/J&CAP_RUN;_POST_SUBHR">
 <!ENTITY exSCR_POST      "&SCRIPT_DIR;/ex&RUN;_post_subh.ksh">
 <!ENTITY exefile_name_post     "${exefile_name_post}">
 <!ENTITY JJOB_POST4FGS   "&JJOB_DIR;/J&CAP_RUN;_POST4FGS">
 <!ENTITY exSCR_POST4FGS  "&SCRIPT_DIR;/ex&RUN;_post4fgs.ksh">
 <!ENTITY JJOB_PLOTGRADS  "&JJOB_DIR;/J&CAP_RUN;_PLOTGRADS">
 <!ENTITY exSCR_PLOTGRADS "&SCRIPT_DIR;/ex&RUN;_plotgrads.ksh">
-<!ENTITY JJOB_VERIF     "&JJOB_DIR;/J&CAP_RUN;_VERIF">
-<!ENTITY exSCR_VERIF    "&SCRIPT_DIR;/ex&RUN;_verif.ksh">
+<!ENTITY JJOB_VERIF     "&JJOB_DIR;/J&CAP_RUN;_VERIF_SUBHR">
+<!ENTITY exSCR_VERIF    "&SCRIPT_DIR;/ex&RUN;_verif_subh.ksh">
 <!ENTITY exefile_name_verif    "${exefile_name_verif}">
 
 <!-- Resources -->
@@ -520,6 +524,8 @@ cat > ${NWROOT}/xml/${RUN}_${expname}_subhr.xml <<EOF
 <!ENTITY time_int_ex "01:00:00">
 
 <!ENTITY OBSPREP_RADAR_PROC "${OBSPREP_RADAR_PROC}">
+<!ENTITY RADAR_THREADS "${RADAR_THREADS}">
+<!ENTITY RADAR_OMP_STACKSIZE "${RADAR_OMP_STACKSIZE}">
 <!ENTITY OBSPREP_RADAR_RESOURCES '${OBSPREP_RADAR_RESOURCES}'>
 <!ENTITY OBSPREP_RADAR_RESERVATION '${OBSPREP_RADAR_RESERVATION}'>
 
@@ -631,6 +637,10 @@ cat > ${NWROOT}/xml/${RUN}_${expname}_subhr.xml <<EOF
    <envar>
         <name>COMINHRRR</name>
         <value>&COMINHRRR;</value>
+   </envar>
+   <envar>
+        <name>COMINRADAR</name>
+        <value>&COMINRADAR;</value>
    </envar>
    <envar>
         <name>GESINHRRR</name>
@@ -1145,6 +1155,51 @@ cat >> ${NWROOT}/xml/${RUN}_${expname}_subhr.xml <<EOF
 EOF
 fi
 
+if [ ${obsprep_radar} -eq 1 ] ; then
+cat >> ${NWROOT}/xml/${RUN}_${expname}_subhr.xml <<EOF 
+
+  <task name="&NET;_obsprep_radar_task_@Y@m@d@H@M" cycledefs="15min" maxtries="&maxtries;">
+
+    &ENVARS;
+   <envar>
+        <name>OMP_NUM_THREADS</name>
+        <value>&RADAR_THREADS;</value>
+    </envar>
+    <envar>
+        <name>OMP_STACKSIZE</name>
+        <value>&RADAR_OMP_STACKSIZE;</value>
+    </envar>
+    <envar>
+       <name>rundir_task</name>
+       <value><cyclestr>&DATA_OBSPREP_RADAR;</cyclestr></value>
+    </envar>
+
+    <command>&JJOB_DIR;/launch.ksh &JJOB_OBSPREP_RADAR;</command>
+    <jobname><cyclestr>&NET;_obsprep_radar_job_@Y@m@d@H@M</cyclestr></jobname>
+    <join><cyclestr>&LOG_SCHDLR;/&NET;_&envir;_obsprep_radar_@Y@m@d@H@M.log</cyclestr></join>
+
+    &OBSPREP_RADAR_RESOURCES;
+    &OBSPREP_RADAR_RESERVATION;
+    &ENVARS_PREPJOB;
+
+
+   <dependency>
+       <and>
+       <datadep><cyclestr>&COMINRADAR;/radar.@Y@m@d@H/tile1/@Y@m@d_@H@M.mosaic</cyclestr></datadep>
+       <datadep><cyclestr>&COMINRADAR;/radar.@Y@m@d@H/tile2/@Y@m@d_@H@M.mosaic</cyclestr></datadep>
+       <datadep><cyclestr>&COMINRADAR;/radar.@Y@m@d@H/tile3/@Y@m@d_@H@M.mosaic</cyclestr></datadep>
+       <datadep><cyclestr>&COMINRADAR;/radar.@Y@m@d@H/tile4/@Y@m@d_@H@M.mosaic</cyclestr></datadep>
+       <datadep><cyclestr>&COMINRADAR;/radar.@Y@m@d@H/tile5/@Y@m@d_@H@M.mosaic</cyclestr></datadep>
+       <datadep><cyclestr>&COMINRADAR;/radar.@Y@m@d@H/tile6/@Y@m@d_@H@M.mosaic</cyclestr></datadep>
+       <datadep><cyclestr>&COMINRADAR;/radar.@Y@m@d@H/tile7/@Y@m@d_@H@M.mosaic</cyclestr></datadep>
+       <datadep><cyclestr>&COMINRADAR;/radar.@Y@m@d@H/tile8/@Y@m@d_@H@M.mosaic</cyclestr></datadep>
+       </and>
+   </dependency>
+  </task>
+EOF
+fi
+
+
 cat >> ${NWROOT}/xml/${RUN}_${expname}_subhr.xml <<EOF 
 
     <task name="&NET;_prepobs_task_@Y@m@d@H@M" cycledefs="15min" maxtries="&maxtries;">
@@ -1168,8 +1223,8 @@ cat >> ${NWROOT}/xml/${RUN}_${expname}_subhr.xml <<EOF
        <and>
        <taskdep task="&NET;_obsprep_lghtn_task_@Y@m@d@H@M"/>
        <taskdep task="&NET;_obsprep_cloud_task_@Y@m@d@H@M"/>
+       <taskdep task="&NET;_obsprep_radar_task_@Y@m@d@H@M"/>
        <datadep><cyclestr>&COMINRAP_SUBHR;/rtma_ru.@Y@m@d/rtma_ru.t@H@Mz.prepbufr.tm00</cyclestr></datadep>       
-       <datadep><cyclestr>&COMINHRRR;/hrrr.@Y@m@d/conus/hrrr.t@Hz.NSSLRefInGSI.bufr</cyclestr></datadep>
        </and>   
    </dependency>
 
@@ -1222,7 +1277,7 @@ cat >> ${NWROOT}/xml/${RUN}_${expname}_subhr.xml <<EOF
 
   </task>
 
-  <task name="&NET;_post_@Y@m@d@H@M" cycledefs="15min" maxtries="&maxtries;">
+  <task name="&NET;_post_task_@Y@m@d@H@M" cycledefs="15min" maxtries="&maxtries;">
 
     &ENVARS;
     &POST_RESOURCES;
@@ -1388,12 +1443,17 @@ fi
   cat > ${NWROOT}/xml/run_${RUN}_${expname}_subhr.sh <<EOF 
 #!/bin/bash
 
-. /etc/profile.d/lmod.sh >/dev/null # Module Support
-
-module purge
-module load lsf/10.1
-module load ruby/2.5.1
-module load rocoto/complete
+  if [ -f /etc/bashrc ]; then
+        . /etc/bashrc
+  fi
+  if [ ! -z $MODULESHOME ]; then
+    . $MODULESHOME/init/bash
+  else
+    . /opt/modules/default/init/bash
+  fi
+  module use /gpfs/dell3/usrx/local/dev/emc_rocoto/modulefiles/
+  module load lsf/10.1 
+  module load ruby/2.5.1 rocoto/complete
 
 rocotorun -v 10 -w ${NWROOT}/xml/${RUN}_${expname}_subhr.xml -d ${NWROOT}/xml/${RUN}_${expname}_subhr.db 
 EOF
@@ -1408,12 +1468,17 @@ echo "RTMA3D is ready to go! Run using run_${RUN}_${expname}_subhr.sh.  Make sur
 cat > ${NWROOT}/xml/chk_${RUN}_${expname}_subhr.sh <<EOF 
 #!/bin/bash
 
-. /etc/profile
-. /etc/profile.d/lmod.sh >/dev/null # Module Support
-module purge
-module load lsf/10.1
-module load ruby/2.5.1
-module load rocoto/complete
+  if [ -f /etc/bashrc ]; then
+        . /etc/bashrc
+  fi
+  if [ ! -z $MODULESHOME ]; then
+    . $MODULESHOME/init/bash
+  else
+    . /opt/modules/default/init/bash
+  fi
+  module use /gpfs/dell3/usrx/local/dev/emc_rocoto/modulefiles/
+  module load lsf/10.1 
+  module load ruby/2.5.1 rocoto/complete
 
 rocotostat -v 10 -w ${NWROOT}/xml/${RUN}_${expname}_subhr.xml -d ${NWROOT}/xml/${RUN}_${expname}_subhr.db 
 
