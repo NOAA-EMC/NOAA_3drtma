@@ -89,26 +89,17 @@ export COMOUT=${COMOUT:-${COMROOT}/${NET}/${envir}/${RUN}.${PDY}}
 
 # Directory to store the firstguess as input for the RTMA3D (NETCDF?) 
 
-if [ $realtime = 'T' ]; then
 export COMINrap=${COMINRAP}/rap.${PDY}
 export COMINhrrr=${COMINHRRR}/hrrr.${PDY}/${domain}
 export GESINhrrr=${GESINHRRR}/hrrr.${PDY}/conus
 
-else
-export COMINrap=${COMIN}/rap.${PDY}
-export COMINhrrr=${COMIN}/hrrr.${PDY}/${domain}
-fi
 export GESINhrrr_rtma3d=${GESINhrrr_rtma3d:-"${COMIN}/fgsprd.${cycle}"}
 export PDYHH_cycm1=$($NDATE -01  "${PDYHH}")
 export PDYHH_cycp1=$($NDATE +01  "${PDYHH}")
 
 PDY_cycp1=`echo ${PDYHH_cycp1} | cut -c 1-8`
 
-if [ $realtime = 'T' ]; then
 export COMINhrrr_cycp1=${COMINHRRR}/hrrr.${PDY_cycp1}/${domain}
-else
-export COMINhrrr_cycp1=${COMIN}/hrrr.${PDY_cycp1}/${domain}
-fi
 
 export FGS_OPT=${FGS_OPT:-1}
 

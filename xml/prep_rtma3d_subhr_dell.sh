@@ -51,7 +51,7 @@ fi
 #####################################################
 set -x
 
-export ExpDateWindows="16 07 2019 *"        # dd mm yyyy weekday (crontab-like date format, mainly used for real-time run)
+export ExpDateWindows="17 07 2019 *"        # dd mm yyyy weekday (crontab-like date format, mainly used for real-time run)
 export startCDATE=201907121400              #yyyymmddhhmm - Starting day of retro run 
 export endCDATE=201907121400                #yyyymmddhhmm - Ending day of RTMA3D run (needed for both RETRO and REAL TIME). 
 export NET=rtma3d                           #selection of rtma3d (or rtma,urma)
@@ -83,12 +83,12 @@ export realtime="T"
   COMINRAP_SUBHR="/gpfs/tp2/nco/ops/com/rtma/prod"
   COMINHRRR="/gpfs/hps/nco/ops/com/hrrr/prod"
   COMINRADAR="/gpfs/tp1/nco/ops/com/hourly/prod"
-  GESINHRRR="/gpfs/hps/stmp/Annette.Gibbs/com/hrrr/prod"
+  GESINHRRR="/gpfs/hps/ptmp/Annette.Gibbs/com/hrrr/prod"
 # Computational resources
   ACCOUNT="RTMA-T2O"                    #account for CPU resources
 
   RESERVATION="<native>-R rusage[mem=2000] -R affinity[core]</native><queue>&QUEUE;</queue><account>&ACCOUNT;</account>"
-  RESERVATION_GSI="<native>-R rusage[mem=1900] -R span[ptile=14] -R affinity[core]</native><queue>&QUEUE;</queue><account>&ACCOUNT;</account>"
+  RESERVATION_GSI="<native>-R rusage[mem=3300] -R span[ptile=14] -R affinity[core]</native><queue>&QUEUE;</queue><account>&ACCOUNT;</account>"
   RESERVATION_UPP="<native>-R rusage[mem=3300] -R span[ptile=8] -R affinity[core]</native><queue>&QUEUE;</queue><account>&ACCOUNT;</account>"
   RESERVATION_SVC="<native>-R rusage[mem=1000] -R affinity[core]</native><queue>&QUEUE_SVC;</queue><account>&ACCOUNT;</account>"
   RESERVATION_RADAR="<native>-R rusage[mem=3300] -R span[ptile=8] -R affinity[core]</native><queue>&QUEUE;</queue><account>&ACCOUNT;</account>"
@@ -333,7 +333,7 @@ export exefile_name_verif=""    # executable of verification (MET) is defined by
                           # 1: Compute verification statistics including cloud ceiling and visibility
 
 #--- option to plot the firstguess/analysis/increment
-  export run_plt=0        # default is 1 to plot with GrADS
+  export run_plt=1        # default is 1 to plot with GrADS
                           # >0: plot (and post-process of firstguess fields)
                           # =1: plot with GrADS 
                           # =2: plot with NCL (not available yet)
@@ -411,7 +411,7 @@ cat > ${NWROOT}/xml/${RUN}_${expname}_subhr.xml <<EOF
 <!ENTITY HOMErtma3d	"&NWROOT;">
 <!ENTITY LOG_DIR	"&HOMErtma3d;/xml/logs">
 <!ENTITY JJOB_DIR	"&HOMErtma3d;/jobs">
-<!ENTITY SCRIPT_DIR	"&HOMErtma3d;/scripts/">
+<!ENTITY SCRIPT_DIR	"&HOMErtma3d;/scripts">
 <!ENTITY USHrtma3d	"&HOMErtma3d;/ush">
 <!ENTITY UTILrtma3d	"&HOMErtma3d;/util">
 <!ENTITY UTILrtma3d_dev	"&HOMErtma3d;/util_dev">
@@ -500,10 +500,10 @@ cat > ${NWROOT}/xml/${RUN}_${expname}_subhr.xml <<EOF
 <!ENTITY JJOB_POST  	 "&JJOB_DIR;/J&CAP_RUN;_POST_SUBHR">
 <!ENTITY exSCR_POST      "&SCRIPT_DIR;/ex&RUN;_post_subh.ksh">
 <!ENTITY exefile_name_post     "${exefile_name_post}">
-<!ENTITY JJOB_POST4FGS   "&JJOB_DIR;/J&CAP_RUN;_POST4FGS">
-<!ENTITY exSCR_POST4FGS  "&SCRIPT_DIR;/ex&RUN;_post4fgs.ksh">
-<!ENTITY JJOB_PLOTGRADS  "&JJOB_DIR;/J&CAP_RUN;_PLOTGRADS">
-<!ENTITY exSCR_PLOTGRADS "&SCRIPT_DIR;/ex&RUN;_plotgrads.ksh">
+<!ENTITY JJOB_POST4FGS   "&JJOB_DIR;/J&CAP_RUN;_POST4FGS_SUBHR">
+<!ENTITY exSCR_POST4FGS  "&SCRIPT_DIR;/ex&RUN;_post4fgs_subhr.ksh">
+<!ENTITY JJOB_PLOTGRADS  "&JJOB_DIR;/J&CAP_RUN;_PLOTGRADS_SUBHR">
+<!ENTITY exSCR_PLOTGRADS "&SCRIPT_DIR;/ex&RUN;_plotgrads_subhr.ksh">
 <!ENTITY JJOB_VERIF     "&JJOB_DIR;/J&CAP_RUN;_VERIF_SUBHR">
 <!ENTITY exSCR_VERIF    "&SCRIPT_DIR;/ex&RUN;_verif_subh.ksh">
 <!ENTITY exefile_name_verif    "${exefile_name_verif}">

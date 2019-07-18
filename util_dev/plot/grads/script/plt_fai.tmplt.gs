@@ -72,8 +72,6 @@ panel_setup="2 2"
 
 panels(panel_setup)
 
-*'enable print GMFNAME.gmf'
-
 fname_head="GMFNAME"
 
 * ready to plot
@@ -212,8 +210,6 @@ while(nv<=icount)
 
   vname_loc=vname.nv
 
-  'enable print '%fname.nv
-
 * set up the map projection
 
 * 'set mproj latlon'
@@ -244,7 +240,8 @@ while(nv<=icount)
 
 *   set the range of z (vertical coordinate)
 
-    'set z 'zlev.nv
+*    'set z 'zlev.nv
+    'set z '1
 
     if(p=1 | p=2)
 
@@ -372,7 +369,7 @@ while(nv<=icount)
 
   endwhile
 
-  'print'
+  'gxprint '%fname.nvi' png'
 
   if(wid != '')
 
@@ -385,8 +382,6 @@ while(nv<=icount)
   endif
 
   'c'
-
-  'disable print'
 
   if(vname.nv="CEIL215")
 

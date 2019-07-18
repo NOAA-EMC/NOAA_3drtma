@@ -294,7 +294,7 @@ ndatrap=67  #62 ?
 
 # 3DVar and Cloud analysis in one-step
 grid_ratio=${GSI_grid_ratio_in_var:-1}
-cloudanalysistype=0
+cloudanalysistype=1
 
 # option for hybrid vertical coordinate (HVC) in WRF-ARW
 
