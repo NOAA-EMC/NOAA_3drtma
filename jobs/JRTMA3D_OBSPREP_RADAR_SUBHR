@@ -21,7 +21,6 @@ export NET=${NET:-rtma3d}
 export RUN=${RUN:-rtma3d}
 export model=${model:-rtma3d}
 
-export domain=${domain:-conus}
 ##########################################################
 # obtain unique process id (pid)
 ##########################################################
@@ -47,13 +46,13 @@ cd $DATA
 #    setpdy.sh needs the variables 
 #    $PDY and $cyc already defined in advance
 #####################################################
-export cycle=${cycle:-t${cyc}z} 
-setpdy.sh
-. ${DATA}/PDY
+export cycle=${cycle:-t${cyc}${subcyc}z}
+#setpdy.sh
+#. ${DATA}/PDY
 
 export subcyc=${subcyc} #Note: Must define subcyc in upper level script. Can be 00, 15, 30, or 45 /MPondeca, 30Jun2017
                          #only used for rurtma2p5
-
+export PDYHH="${PDY}${cyc}"
 ####################################
 # Determine Job Output Name on System
 ####################################
@@ -79,42 +78,72 @@ export PARMrtma3d=${PARMrtma3d:-$HOMErtma3d/parm/${RUN}}
 export USHrtma3d=${USHrtma3d:-$HOMErtma3d/ush/${RUN}}
 export UTILrtma3d=${UTILrtma3d:-$HOMErtma3d/util/${RUN}}
 
+# date and time for previous and next cycle
+export PDYHH_cycm1=$($NDATE -01  "${PDYHH}")
+export PDYHH_cycp1=$($NDATE +01  "${PDYHH}")
+
+export FGS_OPT=${FGS_OPT:-1}
+
 #################################################
 # Set up the INPUT and OUTPUT directories
 #################################################
 export COMIN=${COMIN:-${COMROOT}/${NET}/${envir}/${RUN}.${PDY}}
 export COMOUT=${COMOUT:-${COMROOT}/${NET}/${envir}/${RUN}.${PDY}}
 
-# Directory to store the Pre-processed obs and ready as input for the RTMA3D (BUFR?) 
-export COMINrap=${COMIN}/rap.${PDY}
-export COMINhrrr=${COMIN}/hrrr.${PDY}/${domain}
-export COMINobsproc_rtma3d=${COMINobsproc_rtma3d:-"${COMIN}/obsprd.${cycle}"}
-# export OBS_DIR_CYCLE=${OBS_DIR}/${PDY}${cyc}
+### Observations Products/Input from RAP
+export COMINrap=${COMINrap:-"${COMIN}/rap.${PDY}"}
+export COMINrap_e=${COMINrap:-"${COMIN}/rap_e.${PDY}"}
+export COMINhrrr=${COMINhrrr:-"${COMIN}/hrrr.${PDY}/conus"}
+export COMINlightning=${COMINlightning:-"${COMIN}/lightning.${PDY}"}
+export COMINmosaic=${COMINmosaic:-"${COMIN}/radar.${PDY}"}
+export COMINradar=${COMINradar:-"${COMINRADAR}/radar.${PDY}${cyc}"}
 
+### Observations Products/Input for the RTMA3D (prepbufr files) 
+export COMINobsproc_rtma3d=${COMINobsproc_rtma3d:-"${COMIN}/obsprd.${cycle}"}
+
+### Firstguess Products/Input for the RTMA3D (prepbufr files) 
+export GESINhrrr_rtma3d=${GESINhrrr_rtma3d:-"${COMIN}/fgsprd.${cycle}"}
+
+if [ ! -d "${COMIN}" ] ; then
+   mkdir -p $COMIN
+fi
 if [ ! -d "${COMOUT}" ] ; then
    mkdir -p $COMOUT
 fi
-
 if [ ! -d "${COMINobsproc_rtma3d}" ] ; then
-   mkdir -p $COMINobsproc_rtma3d
-fi
-
-# obs data from HPSS
-if [ ! -d "${COMINrap}" ] ; then
-  ${ECHO} "ERROR: ${COMINrap} does not exist!"
-  exit 1
-fi
-if [ ! -d "${COMINhrrr}" ] ; then
-  ${ECHO} "ERROR: ${COMINhrrr} does not exist!"
-  exit 1
+# echo " Directory of obs data does NOT exist. Job abort!"
+# err_exit
+  mkdir -p $COMINobsproc_rtma3d
 fi
 
 ###########################################################
+#
+# The following variables are used in exrtma3d_obsprep_radar.ksh
+#
+###########################################################
+
+#   Set the name to the executable
+    export exefile_name_radar=${exefile_name_radar:-"rtma3d_process_mosaic"}
+
+#   Set the path to the GSI static files
+    export FIXgsi=${FIXgsi:-"${FIXrtma3d}/gsi"}
+    export FIXcrtm=${FIXcrtm:-"${FIXrtma3d}/crtm"}
+    export FIXwps=${FIXwps:-"${FIXrtma3d}/wps"}
+
+    export PARMupp=${PARMupp:-"${PARMrtma3d}/upp"}
+    export PARMwrf=${PARMwrf:-"${PARMrtma3d}/wrf"}
+
+    export OBS_USELIST=${OBS_USELIST:-"${FIXrtma3d}/gsi"}
+    export SFCOBS_USELIST=${SFCOBS_USELIST:-"${FIXrtma3d}/gsi"}
+    export AIRCRAFT_REJECT=${AIRCRAFT_REJECT:-"${FIXrtma3d}/gsi"}
+    export SFCOBS_PROVIDER=${SFCOBS_PROVIDER:-"${FIXrtma3d}/gsi"}
+
+##########################################################
 
 ######################
 # Execute the script.
 ######################
-${exSCR_PREPOBS:-$HOMErtma3d/scripts/ex${RUN}_prepobs.ksh}
+${exSCR_OBSPREP_RADAR:-$HOMErtma3d/scripts/ex${RUN}_obsprep_radar_sub.ksh}
 export err=$?; err_chk
 
 msg="$0 of $job completed normally"

@@ -47,13 +47,13 @@ cd $DATA
 #    setpdy.sh needs the variables 
 #    $PDY and $cyc already defined in advance
 #####################################################
-export cycle=${cycle:-t${cyc}z} 
-setpdy.sh
-. ${DATA}/PDY
+#setpdy.sh
+#. ${DATA}/PDY
 
 export subcyc=${subcyc} #Note: Must define subcyc in upper level script. Can be 00, 15, 30, or 45 /MPondeca, 30Jun2017
                          #only used for rurtma2p5
 
+export cycle=${cycle:-t${cyc}${subcyc}z}
 ####################################
 # Determine Job Output Name on System
 ####################################
@@ -86,8 +86,10 @@ export COMIN=${COMIN:-${COMROOT}/${NET}/${envir}/${RUN}.${PDY}}
 export COMOUT=${COMOUT:-${COMROOT}/${NET}/${envir}/${RUN}.${PDY}}
 
 # Directory to store the Pre-processed obs and ready as input for the RTMA3D (BUFR?) 
-export COMINrap=${COMIN}/rap.${PDY}
-export COMINhrrr=${COMIN}/hrrr.${PDY}/${domain}
+export COMINrap=${COMINRAP}/rtma_ru.${PDY}
+export COMINhrrr=${COMINHRRR}/hrrr.${PDY}/${domain}
+export COMINrap_subhr=${COMINRAP_SUBHR}/rtma_ru.${PDY}
+#export COMINrap_subhr=${COMINRAP_SUBHR}/rap.${PDY}
 export COMINobsproc_rtma3d=${COMINobsproc_rtma3d:-"${COMIN}/obsprd.${cycle}"}
 # export OBS_DIR_CYCLE=${OBS_DIR}/${PDY}${cyc}
 

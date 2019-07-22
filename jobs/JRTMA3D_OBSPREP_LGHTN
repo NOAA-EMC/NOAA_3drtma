@@ -91,15 +91,9 @@ export COMIN=${COMIN:-${COMROOT}/${NET}/${envir}/${RUN}.${PDY}}
 export COMOUT=${COMOUT:-${COMROOT}/${NET}/${envir}/${RUN}.${PDY}}
 
 ### Observations Products/Input from RAP
-if [ $realtime = 'T' ]; then
-export COMINrap=${COMINRAP}/rap.${PDY}
-export COMINrap_e=${COMINRAP_E}/rap_e.${PDY}
-export COMINhrrr=${COMINHRRR}/hrrr.${PDY}/${domain}
-else
 export COMINrap=${COMIN}/rap.${PDY}
 export COMINrap_e=${COMINrap:-"${COMIN}/rap_e.${PDY}"}
 export COMINhrrr=${COMIN}/hrrr.${PDY}/${domain}
-fi
 export COMINlightning=${COMINlightning:-"${COMIN}/lightning.${PDY}"}
 export COMINmosaic=${COMINmosaic:-"${COMIN}/radar.${PDY}"}
 export COMINradar=${COMINradar:-"${COMIN}/radar.${PDY}"}

@@ -47,12 +47,14 @@ cd $DATA
 #    setpdy.sh needs the variables 
 #    $PDY and $cyc already defined in advance
 #####################################################
-export cycle=${cycle:-t${cyc}z} 
-setpdy.sh
-. ${DATA}/PDY
+#setpdy.sh
+#. ${DATA}/PDY
 
 export subcyc=${subcyc} #Note: Must define subcyc in upper level script. Can be 00, 15, 30, or 45 /MPondeca, 30Jun2017
                          #only used for rurtma2p5
+
+export cycle=${cycle:-t${cyc}${subcyc}z}
+export PDYHH="${PDY}${cyc}"
 
 ####################################
 # Determine Job Output Name on System
@@ -69,7 +71,7 @@ if [ ! -d ${LOG_PGMOUT} ] ; then
 fi
 
 # specify the file head for the file names of the archived data files
-export PROD_HEAD=${PROD_HEAD:-"${RUN}.t${cyc}z"}
+export PROD_HEAD=${PROD_HEAD:-${RUN}.t${cyc}z}
 
 # Specify Execution Areas
 export HOMErtma3d=${HOMErtma3d:-$NWROOT/rtma.${rtma_ver}}
@@ -85,27 +87,46 @@ export UTILrtma3d=${UTILrtma3d:-$HOMErtma3d/util/${RUN}}
 export COMIN=${COMIN:-${COMROOT}/${NET}/${envir}/${RUN}.${PDY}}
 export COMOUT=${COMOUT:-${COMROOT}/${NET}/${envir}/${RUN}.${PDY}}
 
-# Directory to store the Pre-processed obs and ready as input for the RTMA3D (BUFR?) 
-export COMINrap=${COMIN}/rap.${PDY}
-export COMINhrrr=${COMIN}/hrrr.${PDY}/${domain}
-export COMINobsproc_rtma3d=${COMINobsproc_rtma3d:-"${COMIN}/obsprd.${cycle}"}
-# export OBS_DIR_CYCLE=${OBS_DIR}/${PDY}${cyc}
+# Directory to store the firstguess as input for the RTMA3D (NETCDF?) 
+
+export COMINrap=${COMINRAP}/rap.${PDY}
+export COMINhrrr=${COMINHRRR}/hrrr.${PDY}/${domain}
+export GESINhrrr=${GESINHRRR}/hrrr.${PDY}/conus
+
+export GESINhrrr_rtma3d=${GESINhrrr_rtma3d:-"${COMIN}/fgsprd.${cycle}"}
+export PDYHH_cycm1=$($NDATE -01  "${PDYHH}")
+export PDYHH_cycp1=$($NDATE +01  "${PDYHH}")
+
+PDY_cycp1=`echo ${PDYHH_cycp1} | cut -c 1-8`
+
+export COMINhrrr_cycp1=${COMINHRRR}/hrrr.${PDY_cycp1}/${domain}
+
+export FGS_OPT=${FGS_OPT:-1}
+
+# set the file name of the firstguess for rtma3d
+if [ ! "${PROD_HEAD}" ] ; then
+  export ANLrtma3d_FNAME="${RUN}.${cycle}.wrf_inout.nc"
+  export FGSrtma3d_FNAME="${RUN}.${cycle}.firstguess.nc"
+else
+  export ANLrtma3d_FNAME="${PROD_HEAD}.wrf_inout.nc"
+  export FGSrtma3d_FNAME="${PROD_HEAD}.firstguess.nc"
+fi
 
 if [ ! -d "${COMOUT}" ] ; then
    mkdir -p $COMOUT
 fi
 
-if [ ! -d "${COMINobsproc_rtma3d}" ] ; then
-   mkdir -p $COMINobsproc_rtma3d
+if [ ! -d "${GESINhrrr_rtma3d}" ] ; then
+   mkdir -p $GESINhrrr_rtma3d
 fi
 
-# obs data from HPSS
-if [ ! -d "${COMINrap}" ] ; then
-  ${ECHO} "ERROR: ${COMINrap} does not exist!"
-  exit 1
-fi
+# fgs data from HPSS
 if [ ! -d "${COMINhrrr}" ] ; then
   ${ECHO} "ERROR: ${COMINhrrr} does not exist!"
+  exit 1
+fi
+if [ ! -d "${COMINhrrr_cycp1}" ] ; then
+  ${ECHO} "ERROR: ${COMINhrrr_cycp1} does not exist!"
   exit 1
 fi
 
@@ -114,7 +135,7 @@ fi
 ######################
 # Execute the script.
 ######################
-${exSCR_PREPOBS:-$HOMErtma3d/scripts/ex${RUN}_prepobs.ksh}
+${exSCR_PREPFGS:-$HOMErtma3d/scripts/ex${RUN}_prepfgs.ksh}
 export err=$?; err_chk
 
 msg="$0 of $job completed normally"

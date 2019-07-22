@@ -34,7 +34,7 @@ else
     exit 9
 fi
 echo " This machine is $target ."
-
+MACHINENAME="mars"
 #=========================================================================#
 # User define the following variables:
 
@@ -161,9 +161,9 @@ fi
 cd ${SOURCE_DIR}
 echo " ====>  compiling is under directory: ${SOURCE_DIR} "
 
-make clean  -f makefile_${target}
-echo " make -f makefile_${target}  >& ./log.make.process_mosaic "
-make -f makefile_${target}  >& ./log.make.process_NSSL_mosaic
+make clean  -f makefile_${target}_${MACHINENAME}
+echo " make -f makefile_${target}_${MACHINENAME}  >& ./log.make.process_mosaic "
+make -f makefile_${target}_${MACHINENAME}  >& ./log.make.process_NSSL_mosaic
 
 if [ $? -eq 0 ] ; then
   echo " code was built successfully."
