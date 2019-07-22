@@ -105,8 +105,8 @@ if [ ${obsprep_lghtn} -eq 1 ] ; then
  &SETUP
   analysis_time = ${YYYYMMDDHH},
   minute=${minutetime},
-  trange_start=-15.0,
-  trange_end=15.0,
+  trange_start=-30.0,
+  trange_end=30.0,
  /
 EOF
 

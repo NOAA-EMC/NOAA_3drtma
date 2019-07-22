@@ -56,13 +56,13 @@ if(wid != '')
 
 endif
 
-'open fgs_nat.ctl'
+ 'open fgs_nat.ctl'
 
-'open anl_nat.ctl'
+ 'open anl_nat.ctl'
 
-* 'open fgs_prs.ctl'
+ 'open fgs_prs.ctl'
 
-* 'open anl_prs.ctl'
+ 'open anl_prs.ctl'
 
 *'reset'
 
@@ -200,7 +200,7 @@ say ' total number of variables(to be plotted): 'icount
 
 pnltitle.1="Fgs.Y4M2D2H2M2"
 
-pnltitle.2="Anl."
+pnltitle.2="Anl.Y4M2D2H2M2"
 
 pnltitle.3="Inc. (Anl - Fgs)"
 
@@ -240,8 +240,8 @@ while(nv<=icount)
 
 *   set the range of z (vertical coordinate)
 
-*    'set z 'zlev.nv
-    'set z '1
+    'set z 'zlev.nv
+*    'set z '1
 
     if(p=1 | p=2)
 
@@ -254,6 +254,7 @@ while(nv<=icount)
 *         wind vector @ 10 meters
 
           'd skip(UGRD10m.'p',40,25); skip(VGRD10m.'p',40,25)'
+          'gxprint '%vname.nv'.png white png'
 
         endif
 
@@ -262,6 +263,7 @@ while(nv<=icount)
 *         wind vector @ model level (hlev)
 
           'd skip(UGRDhlev.'p',40,25); skip(VGRDhlev.'p',40,25)'
+          'gxprint '%vname.nv'.png white png'
 
         endif
 
@@ -278,6 +280,7 @@ while(nv<=icount)
           'set ccols 0 2 8 3 4'
 
           'd 'vname.nv'.'p'*'factor.nv
+          'gxprint '%vname.nv'.png white png'
 
         else
 
@@ -290,6 +293,7 @@ while(nv<=icount)
             'set ccols 0 2 8 3 4'
 
             'd 'vname.nv'.'p'*'factor.nv
+            'gxprint '%vname.nv'.png white png'
 
           else
 
@@ -308,10 +312,12 @@ while(nv<=icount)
               'set ccols 0 2 8 3 4'
 
               'd 'vnm'*'factor.nv
+              'gxprint '%vname.nv'.png white png'
 
             else
 
               'd 'vname.nv'.'p'*'factor.nv
+              'gxprint '%vname.nv'.png white png'
 
             endif
 
@@ -332,6 +338,7 @@ while(nv<=icount)
 *         wind vector @ 10 meters
 
           'd skip((UGRD10m.2-UGRD10m.1),40,25); skip((VGRD10m.2-VGRD10m.1),40,25)'
+           'gxprint '%vname.nv'.png white png'
 
         endif
 
@@ -340,6 +347,7 @@ while(nv<=icount)
 *         wind vector @ model level (hlev)
 
           'd skip((UGRDhlev.2-UGRDhlev.1),40,25); skip((VGRDhlev.2-VGRDhlev.1),40,25)'
+          'gxprint '%vname.nv'.png white png'
 
         endif
 
@@ -350,10 +358,12 @@ while(nv<=icount)
 *         Cloud Ceiling Height=L215-Lsfc (in unit of ft)
 
           'd (cl215anl-cl215fgs) * 'factor.nv
+          'gxprint '%vname.nv'.png white png'
 
         else
 
           'd 'vname.nv'.2 * 'factor.nv' - 'vname.nv'.1 * 'factor.nv
+          'gxprint '%vname.nv'.png white png'
 
         endif
 
@@ -369,7 +379,7 @@ while(nv<=icount)
 
   endwhile
 
-  'gxprint '%fname.nvi' png'
+  'gxprint '%vname.nv'.png white png'
 
   if(wid != '')
 

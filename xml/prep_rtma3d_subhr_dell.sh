@@ -51,7 +51,11 @@ fi
 #####################################################
 set -x
 
-export ExpDateWindows="17 07 2019 *"        # dd mm yyyy weekday (crontab-like date format, mainly used for real-time run)
+YYYY=`${NDATE} | cut -c 1-4`
+MM=`${NDATE} | cut -c 5-6`
+DD=`${NDATE} | cut -c 7-8`
+
+export ExpDateWindows="$DD $MM $YYYY *"        # dd mm yyyy weekday (crontab-like date format, mainly used for real-time run)
 export startCDATE=201907121400              #yyyymmddhhmm - Starting day of retro run 
 export endCDATE=201907121400                #yyyymmddhhmm - Ending day of RTMA3D run (needed for both RETRO and REAL TIME). 
 export NET=rtma3d                           #selection of rtma3d (or rtma,urma)
@@ -94,7 +98,7 @@ export realtime="T"
   RESERVATION_RADAR="<native>-R rusage[mem=3300] -R span[ptile=8] -R affinity[core]</native><queue>&QUEUE;</queue><account>&ACCOUNT;</account>"
 
 # General definition of computation resources for each task
-  OBSPREP_RADAR_PROC="96"
+  OBSPREP_RADAR_PROC="112"
   RADAR_THREADS=1
   RADAR_OMP_STACKSIZE="512M"
   OBSPREP_RADAR_RESOURCES="<cores>&OBSPREP_RADAR_PROC;</cores><walltime>00:30:00</walltime>"
@@ -116,13 +120,13 @@ export realtime="T"
   PREPFGS_RESOURCES="<cores>&PREPFGS_PROC;</cores><walltime>00:45:00</walltime>"
   PREPFGS_RESERVATION=${RESERVATION}
 
-  GSI_PROC="192"
+  GSI_PROC="196"
   GSI_THREADS=1
   GSI_OMP_STACKSIZE="512M"
   GSI_RESOURCES="<cores>&GSI_PROC;</cores><walltime>00:30:00</walltime>"
   GSI_RESERVATION=${RESERVATION_GSI}
 
-  POST_PROC="96"
+  POST_PROC="112"
   POST_THREADS=1
   POST_OMP_STACKSIZE="512MB"
   POST_RESOURCES="<cores>&POST_PROC;</cores><walltime>00:30:00</walltime>"
