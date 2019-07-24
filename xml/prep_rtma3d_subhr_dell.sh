@@ -51,11 +51,16 @@ fi
 #####################################################
 set -x
 
-YYYY=`${NDATE} | cut -c 1-4`
-MM=`${NDATE} | cut -c 5-6`
-DD=`${NDATE} | cut -c 7-8`
 
-export ExpDateWindows="$DD $MM $YYYY *"        # dd mm yyyy weekday (crontab-like date format, mainly used for real-time run)
+CYCLE=`${MDATE}`
+YYYYMMDDHHm1=`$MDATE -60 ${CYCLE}`
+
+YYYY=`echo ${YYYYMMDDHHm1} | cut -c 1-4`
+MM=`echo ${YYYYMMDDHHm1} | cut -c 5-6`
+DD=`echo ${YYYYMMDDHHm1} | cut -c 7-8`
+mm=`echo ${YYYYMMDDHHm1} | cut -c 9-10`
+
+export ExpDateWindows="$mm $DD $MM $YYYY *"        # dd mm yyyy weekday (crontab-like date format, mainly used for real-time run)
 export startCDATE=201907121400              #yyyymmddhhmm - Starting day of retro run 
 export endCDATE=201907121400                #yyyymmddhhmm - Ending day of RTMA3D run (needed for both RETRO and REAL TIME). 
 export NET=rtma3d                           #selection of rtma3d (or rtma,urma)
@@ -1093,15 +1098,7 @@ cat >> ${NWROOT}/xml/${RUN}_${expname}_subhr.xml <<EOF
     <cyclestr>&LOG_DIR;/&NET;_workflow_&envir;_@Y@m@d@H.log</cyclestr>
   </log>
 
-
-  <cycledef group="00hr">00 00,12 ${ExpDateWindows}</cycledef>
-
-  <cycledef group="01hr">00 01,13 ${ExpDateWindows}</cycledef>
-
-  <cycledef group="02-11hr">00 02-11,14-23 ${ExpDateWindows}</cycledef>
-
-<!--   <cycledef group="15min">*/15 02-11,14-23,01,13 ${ExpDateWindows}</cycledef> -->
-  <cycledef group="15min">*/15 * ${ExpDateWindows}</cycledef>
+  <cycledef group="15min">*/15 ${ExpDateWindows}</cycledef>
 
 EOF
 
