@@ -170,18 +170,21 @@ if [ -r "${DATAOBSHOME}/LightningInGSI.bufr" ]; then
   ${LN} -s ${DATAOBSHOME}/LightningInGSI.bufr ./lghtInGSI
 elif [ -r "${DATAOBSHOME}/hrrr.t${HH}${subcyc}z.LightningInGSI.bufr" ]; then
   ${LN} -s ${DATAOBSHOME}/hrrr.t${HH}${subcyc}z.LightningInGSI.bufr ./lghtInGSI
-elif [ -r "${DATAOBSHOME}/${RUN}.t${HH}${subcyc}z.LightningInGSI.bufr" ]; then
-  ${LN} -s ${DATAOBSHOME}/${RUN}.t${HH}${subcyc}z.LightningInGSI.bufr ./lghtInGSI
+elif [ -r "${DATAOBSHOME}/rtma_ru.t${HH}${subcyc}z.lghtng.tm00.bufr_d" ]; then
+  ${LN} -s ${DATAOBSHOME}/rtma_ru.t${HH}${subcyc}z.lghtng.tm00.bufr_d ./lghtInGSI
 elif [ -r "${DATAOBSHOME}/${RUN}.t${HH}${subcyc}z.LightningInGSI_bufr.bufr" ]; then
   ${LN} -s ${DATAOBSHOME}/${RUN}.t${HH}${subcyc}z.LightningInGSI_bufr.bufr ./lghtInGSI
 else
   ${ECHO} "Warning: ${DATAOBSHOME}: LightningInGSI.bufr does not exist!"
 fi
 
+
 if [ -r "${DATAOBSHOME}/NASALaRCCloudInGSI.bufr" ]; then
   ${LN} -s ${DATAOBSHOME}/NASALaRCCloudInGSI.bufr ./larcInGSI
 elif [ -r "${DATAOBSHOME}/hrrr.t${HH}${subcyc}z.NASALaRCCloudInGSI.bufr" ]; then
   ${LN} -s ${DATAOBSHOME}/hrrr.t${HH}${subcyc}z.NASALaRCCloudInGSI.bufr ./larcInGSI
+elif [ -r "${DATAOBSHOME}/rtma_ru.t${HH}${subcyc}z.lgycld.tm00.bufr_d" ]; then
+  ${LN} -s ${DATAOBSHOME}/rtma_ru.t${HH}${subcyc}z.lgycld.tm00.bufr_d ./larcInGSI
 elif [ -r "${DATAOBSHOME}/${RUN}.t${HH}${subcyc}z.NASALaRCCloudInGSI.bufr" ]; then
   ${LN} -s ${DATAOBSHOME}/${RUN}.t${HH}${subcyc}z.NASALaRCCloudInGSI.bufr ./larcInGSI
 else
