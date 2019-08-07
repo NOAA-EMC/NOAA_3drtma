@@ -101,9 +101,6 @@ if [ -r ${COMINrap_subhr}/newgblav.${YYYYMMDD}.rap.t${HH}${subcyc}z.prepbufr ] ;
 elif [ -f ${COMINrap_subhr}/rtma_ru.t${HH}${subcyc}z.prepbufr.tm00 ] ; then
   cpreq ${COMINrap_subhr}/rtma_ru.t${HH}${subcyc}z.prepbufr.tm00                   ${COMINobsproc_rtma3d}/rtma_ru.t${HH}${subcyc}z.prepbufr.tm00
   ${LN} -sf ${COMINobsproc_rtma3d}/rtma_ru.t${HH}${subcyc}z.prepbufr.tm00    ${DATA}/rtma_ru.t${HH}${subcyc}z.prepbufr.tm00
-#elif [ -f ${COMINrap_subhr}/rap.t${HH}z.prepbufr.tm00 ] ; then
-#  cpreq ${COMINrap_subhr}/rap.t${HH}z.prepbufr.tm00                   ${COMINobsproc_rtma3d}/rtma_ru.t${HH}${subcyc}z.prepbufr.tm00
-#  ${LN} -sf ${COMINobsproc_rtma3d}/rtma_ru.t${HH}${subcyc}z.prepbufr.tm00    ${DATA}/rtma_ru.t${HH}${subcyc}z.prepbufr.tm00
 else
   ${ECHO} "Warning: ${COMINrap_subhr}/rtma_ru.t${HH}${subcyc}z.prepbufr.tm00 does NOT exist! "
 fi
@@ -128,9 +125,9 @@ fi
 
 # lightning obs (pre-processed/re-mapped to model grid)
 if [ $obsprep_lghtn -eq 0 ] ; then
-  if [ -r "${COMINhrrr}/hrrr.t${HH}z.LightningInGSI.bufr" ]; then
-    cpreq  ${COMINhrrr}/hrrr.t${HH}z.LightningInGSI.bufr  ${COMINobsproc_rtma3d}
-    ${LN} -sf ${COMINobsproc_rtma3d}/hrrr.t${HH}z.LightningInGSI.bufr ${DATA}/hrrr.t${HH}${subcyc}z.LightningInGSI.bufr
+  if [ -r "${COMINRAP}/rtma_ru.${PDY}/rtma_ru.t${HH}${subcyc}z.lghtng.tm00.bufr_d" ]; then
+    cpreq  ${COMINRAP}/rtma_ru.${PDY}/rtma_ru.t${HH}${subcyc}z.lghtng.tm00.bufr_d  ${COMINobsproc_rtma3d}
+    ${LN} -sf ${COMINobsproc_rtma3d}/rtma_ru.t${HH}${subcyc}z.lghtng.tm00.bufr_d ${DATA}/${RUN}.t${HH}${subcyc}z.LightningInGSI.bufr
   else
     ${ECHO} "Warning: ${COMINhrrr}/hrrr.t${HH}z.LightningInGSI.bufr does not exist!"
   fi

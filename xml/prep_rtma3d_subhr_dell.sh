@@ -326,7 +326,7 @@ export exefile_name_verif=""    # executable of verification (MET) is defined by
   export obsprep_radar=1  # 0: No (using archived hrrr.t{HH}z.NSSLRefInGSI.bufr processed in operational hrrr run)
                           # 1: pre-processing MRMS grib2 radar reflectivity obs
 
-  export obsprep_lghtn=1  # 0: No pre-processing lightning obs data
+  export obsprep_lghtn=0  # 0: No pre-processing lightning obs data
                           # 1: processing archived bufr data (rap.t{HH}z.lghtng.tm00.bufr_d) from operation RAP run to HRRR grid
                           # 2: processing  NLDN lightning data (if retrospective run, also retrieving  NLDN data from HPSS)
                           # 3: processing ENTLN lightning data (if retrospective run, also retrieving ENTLN data from HPSS)
