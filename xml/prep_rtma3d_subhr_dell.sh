@@ -88,10 +88,10 @@ export realtime="T"
 
   DATABASE_DIR=${ptmp_base}            # (equivalent to ptmp_base)
   HOMEBASE_DIR=${NWROOT}               # path to system home directory
-  COMINRAP="/gpfs/tp2/ptmp/Jeff.Whiting/CHKOUT_TMP/com3d/rtma/prod"
-  COMINRAP_SUBHR="/gpfs/tp2/nco/ops/com/rtma/prod"
+  COMINRAP="/gpfs/gp2/ptmp/Jeff.Whiting/CHKOUT_TMP/com3d/rtma/prod"
+  COMINRAP_SUBHR="/gpfs/gp2/nco/ops/com/rtma/prod"
   COMINHRRR="/gpfs/hps/nco/ops/com/hrrr/prod"
-  COMINRADAR="/gpfs/tp1/nco/ops/com/hourly/prod"
+  COMINRADAR="/gpfs/gp1/nco/ops/com/hourly/prod"
   GESINHRRR="/gpfs/dell1/ptmp/Annette.Gibbs/com/hrrr/prod"
 # Computational resources
   ACCOUNT="RTMA-T2O"                    #account for CPU resources
@@ -326,7 +326,7 @@ export exefile_name_verif=""    # executable of verification (MET) is defined by
   export obsprep_radar=1  # 0: No (using archived hrrr.t{HH}z.NSSLRefInGSI.bufr processed in operational hrrr run)
                           # 1: pre-processing MRMS grib2 radar reflectivity obs
 
-  export obsprep_lghtn=0  # 0: No pre-processing lightning obs data
+  export obsprep_lghtn=1  # 0: No pre-processing lightning obs data
                           # 1: processing archived bufr data (rap.t{HH}z.lghtng.tm00.bufr_d) from operation RAP run to HRRR grid
                           # 2: processing  NLDN lightning data (if retrospective run, also retrieving  NLDN data from HPSS)
                           # 3: processing ENTLN lightning data (if retrospective run, also retrieving ENTLN data from HPSS)

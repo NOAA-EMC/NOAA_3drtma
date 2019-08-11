@@ -217,7 +217,7 @@ program process_Lightning
        numlightning=numlightning+1
        lightning_out(1,numlightning)=float(i)
        lightning_out(2,numlightning)=float(j)
-       lightning_out(3,numlightning)=float(minute)
+       lightning_out(3,numlightning)=0.0_r_kind
        lightning_out(4,numlightning)=lightning(i,j)
        if(lightning_out(4,numlightning) > 1000.0 ) then
           lightning_out(4,numlightning)=1000.0
