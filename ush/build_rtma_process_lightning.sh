@@ -21,6 +21,11 @@ elif [[ -d /ioddev_dell ]]; then
 #   . $MODULESHOME/init/sh
     conf_target=nco
     target=dell
+    if [[ -d /ioddev_dell/dell1/nco/ops/nwtest/wrf_shared.v1.1.0 ]]; then
+        MACHINENAME=venus
+    else
+        MACHINENAME=mars
+    fi
 elif [[ -d /scratch3 ]] ; then
     . /etc/profile
     . /etc/profile.d/modules.sh >/dev/null # Module Support

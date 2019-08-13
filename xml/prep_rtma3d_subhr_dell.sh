@@ -78,8 +78,8 @@ export realtime="T"
 #       and different user and/or experiment.
 #====================================================================#
 
-
-  QUEUE=dev_shared                        #user-specified processing queue
+   QUEUE=debug
+#  QUEUE=dev_shared                        #user-specified processing queue
   QUEUE_DBG="debug"                    #user-specified processing queue -- debug
   QUEUE_SVC="dev_transfer"                  #user-specified transfer queue
 
@@ -88,25 +88,31 @@ export realtime="T"
 
   DATABASE_DIR=${ptmp_base}            # (equivalent to ptmp_base)
   HOMEBASE_DIR=${NWROOT}               # path to system home directory
-  COMINRAP="/gpfs/tp2/ptmp/Jeff.Whiting/CHKOUT_TMP/com3d/rtma/prod"
-  COMINRAP_SUBHR="/gpfs/tp2/nco/ops/com/rtma/prod"
+  COMINRAP="/gpfs/gp2/ptmp/Jeff.Whiting/CHKOUT_TMP/com3d/rtma/prod"
+  COMINRAP_SUBHR="/gpfs/gp2/nco/ops/com/rtma/prod"
   COMINHRRR="/gpfs/hps/nco/ops/com/hrrr/prod"
-  COMINRADAR="/gpfs/tp1/nco/ops/com/hourly/prod"
-  GESINHRRR="/gpfs/hps/ptmp/Annette.Gibbs/com/hrrr/prod"
+  COMINRADAR="/gpfs/gp1/nco/ops/com/hourly/prod"
+  GESINHRRR="/gpfs/dell1/ptmp/Annette.Gibbs/com/hrrr/prod"
 # Computational resources
   ACCOUNT="RTMA-T2O"                    #account for CPU resources
-
   RESERVATION="<native>-R rusage[mem=2000] -R affinity[core]</native><queue>&QUEUE;</queue><account>&ACCOUNT;</account>"
-  RESERVATION_GSI="<native>-R rusage[mem=3300] -R span[ptile=14] -R affinity[core]</native><queue>&QUEUE;</queue><account>&ACCOUNT;</account>"
-  RESERVATION_UPP="<native>-R rusage[mem=3300] -R span[ptile=8] -R affinity[core]</native><queue>&QUEUE;</queue><account>&ACCOUNT;</account>"
+  RESERVATION_GSI="<native>-R rusage[mem=3300] -R affinity[core]</native><queue>&QUEUE;</queue><account>&ACCOUNT;</account>"
+  RESERVATION_UPP="<native>-R rusage[mem=3300] -R affinity[core]</native><queue>&QUEUE;</queue><account>&ACCOUNT;</account>"
   RESERVATION_SVC="<native>-R rusage[mem=1000] -R affinity[core]</native><queue>&QUEUE_SVC;</queue><account>&ACCOUNT;</account>"
-  RESERVATION_RADAR="<native>-R rusage[mem=3300] -R span[ptile=8] -R affinity[core]</native><queue>&QUEUE;</queue><account>&ACCOUNT;</account>"
+  RESERVATION_RADAR="<native>-R rusage[mem=3300] -R affinity[core]</native><queue>&QUEUE;</queue><account>&ACCOUNT;</account>"
+#  RESERVATION="<native>-R rusage[mem=2000] -R affinity[core]</native><queue>&QUEUE;</queue><account>&ACCOUNT;</account>"
+#  RESERVATION_GSI="<native>-R rusage[mem=3300] -R span[ptile=14] -R affinity[core]</native><queue>&QUEUE;</queue><account>&ACCOUNT;</account>"
+#  RESERVATION_UPP="<native>-R rusage[mem=3300] -R span[ptile=8] -R affinity[core]</native><queue>&QUEUE;</queue><account>&ACCOUNT;</account>"
+#  RESERVATION_SVC="<native>-R rusage[mem=1000] -R affinity[core]</native><queue>&QUEUE_SVC;</queue><account>&ACCOUNT;</account>"
+#  RESERVATION_RADAR="<native>-R rusage[mem=3300] -R span[ptile=8] -R affinity[core]</native><queue>&QUEUE;</queue><account>&ACCOUNT;</account>"
 
 # General definition of computation resources for each task
-  OBSPREP_RADAR_PROC="112"
+#  OBSPREP_RADAR_PROC="112"
+  OBSPREP_RADAR_PROC=14
   RADAR_THREADS=1
   RADAR_OMP_STACKSIZE="512M"
-  OBSPREP_RADAR_RESOURCES="<cores>&OBSPREP_RADAR_PROC;</cores><walltime>00:30:00</walltime>"
+#  OBSPREP_RADAR_RESOURCES="<cores>&OBSPREP_RADAR_PROC;</cores><walltime>00:30:00</walltime>"
+  OBSPREP_RADAR_RESOURCES="<nodes>16:ppn=&OBSPREP_RADAR_PROC;</nodes><walltime>00:30:00</walltime>"
   OBSPREP_RADAR_RESERVATION=${RESERVATION_RADAR}
 
   OBSPREP_LGHTN_PROC="1"
@@ -122,19 +128,23 @@ export realtime="T"
   PREPOBS_RESERVATION=${RESERVATION}
 
   PREPFGS_PROC="1"
-  PREPFGS_RESOURCES="<cores>&PREPFGS_PROC;</cores><walltime>00:45:00</walltime>"
+  PREPFGS_RESOURCES="<cores>&PREPFGS_PROC;</cores><walltime>00:30:00</walltime>"
   PREPFGS_RESERVATION=${RESERVATION}
 
-  GSI_PROC="196"
+#  GSI_PROC="196"
+  GSI_PROC=14
   GSI_THREADS=1
   GSI_OMP_STACKSIZE="512M"
-  GSI_RESOURCES="<cores>&GSI_PROC;</cores><walltime>00:30:00</walltime>"
+#  GSI_RESOURCES="<cores>&GSI_PROC;</cores><walltime>00:30:00</walltime>"
+  GSI_RESOURCES="<nodes>28:ppn=&GSI_PROC;</nodes><walltime>00:30:00</walltime>"
   GSI_RESERVATION=${RESERVATION_GSI}
 
-  POST_PROC="112"
+#  POST_PROC="112"
+  POST_PROC=14
   POST_THREADS=1
   POST_OMP_STACKSIZE="512MB"
-  POST_RESOURCES="<cores>&POST_PROC;</cores><walltime>00:30:00</walltime>"
+#  POST_RESOURCES="<cores>&POST_PROC;</cores><walltime>00:30:00</walltime>"
+  POST_RESOURCES="<nodes>16:ppn=&POST_PROC;</nodes><walltime>00:30:00</walltime>"
   POST_RESERVATION=${RESERVATION_UPP}
 
   PLOT_PROC="1"
@@ -1222,10 +1232,10 @@ cat >> ${NWROOT}/xml/${RUN}_${expname}_subhr.xml <<EOF
 
    <dependency>
        <and>
-       <taskdep task="&NET;_obsprep_lghtn_task_@Y@m@d@H@M"/>
-       <taskdep task="&NET;_obsprep_cloud_task_@Y@m@d@H@M"/>
-       <taskdep task="&NET;_obsprep_radar_task_@Y@m@d@H@M"/>
+       <datadep><cyclestr>&COMINRAP;/rtma_ru.@Y@m@d/rtma_ru.t@H@Mz.lghtng.tm00.bufr_d</cyclestr></datadep>
+       <datadep><cyclestr>&COMINRAP;/rtma_ru.@Y@m@d/rtma_ru.t@H@Mz.lgycld.tm00.bufr_d</cyclestr></datadep> 
        <datadep><cyclestr>&COMINRAP_SUBHR;/rtma_ru.@Y@m@d/rtma_ru.t@H@Mz.prepbufr.tm00</cyclestr></datadep>       
+       <taskdep task="&NET;_obsprep_radar_task_@Y@m@d@H@M"/>
        </and>   
    </dependency>
 
