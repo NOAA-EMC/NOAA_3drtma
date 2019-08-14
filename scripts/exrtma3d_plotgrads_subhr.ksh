@@ -117,7 +117,7 @@ export adate="${YYYY}${MM}${DD}${HH}${mm}"
 ulimit -S -s unlimited
 
 rm -f ./plt_fai.gs      ./variables_list_for_plot.txt      ./panels.gsf     ./cbarn.gs
-cp -p ${UTILrtma3d_dev}/plot/grads/script/plt_fai.tmplt.gs			./plt_fai.gs
+cp -p ${UTILrtma3d_dev}/plot/grads/script/plt_fai.tmplt_dell.gs			./plt_fai.gs
 cp -p ${UTILrtma3d_dev}/plot/grads/script/variables_list_for_plot.txt	        ./variables_list_for_plot.txt
 cp -p ${UTILrtma3d_dev}/plot/grads/script/panels.gsf                            ./panels.gsf
 cp -p ${UTILrtma3d_dev}/plot/grads/script/cbarn.gs                              ./cbarn.gs

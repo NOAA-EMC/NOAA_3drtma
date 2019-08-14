@@ -164,11 +164,15 @@ fi
 BUILD_DIR=${SOURCE_DIR}/${ltn_bufr}
 cd ${BUILD_DIR}
 echo " ====>  compiling (bufr lightning)  is under directory: ${BUILD_DIR} "
-
+if [ $target = dell ]; then
 make clean  -f makefile_${target}_${MACHINENAME}
 echo " make -f makefile_${target}_${MACHINENAME}  >& ./log.make.process_lightning_bufr "
 make -f makefile_${target}_${MACHINENAME}  >& ./log.make.process_lightning_bufr
-
+else
+make clean  -f makefile_${target}
+echo " make -f makefile_${target}  >& ./log.make.process_lightning_bufr "
+make -f makefile_${target}  >& ./log.make.process_lightning_bufr
+fi
 if [ $? -eq 0 ] ; then
   echo " code was built successfully."
 

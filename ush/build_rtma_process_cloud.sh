@@ -163,10 +163,15 @@ fi
 # compiling
 cd ${SOURCE_DIR}
 echo " ====>  compiling is under directory: ${SOURCE_DIR} "
-
+if [ $target = dell ]; then
 make clean  -f makefile_${target}_${MACHINENAME}
 echo " make -f makefile_${target}_${MACHINENAME}  >& ./log.make.process_NASA_cloud "
-make -f makefile_${target}_${MACHINENAME}  >& ./log.make.process_NASA_cloud
+make -f makefile_${target}_${MACHINENAME}  >& ./log.make.process_NASA_cloud 
+else
+make clean  -f makefile_${target}
+echo " make -f makefile_${target}  >& ./log.make.process_NASA_cloud "
+make -f makefile_${target} >& ./log.make.process_NASA_cloud
+fi
 
 if [ $? -eq 0 ] ; then
   echo " code was built successfully."
