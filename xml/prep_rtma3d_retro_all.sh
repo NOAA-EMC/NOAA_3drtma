@@ -281,13 +281,18 @@ export CAP_RUN_ENVIR=`echo ${run_envir} | tr '[:lower:]' '[:upper:]'`
 # User defined executable file name for each task
 #
 #########################################################
-export exefile_name_gsi="rtma3d_gsi"
-export exefile_name_post="rtma3d_wrfpost"
 export exefile_name_radar="rtma3d_process_mosaic"
-export exefile_name_lightning="rtma3d_process_lightning"
 export exefile_name_cloud="rtma3d_process_cloud"
 export exefile_name_verif=""    # executable of verification (MET) is defined by loading module met
-
+if [ $MACHINE = jet ] ; then
+   export exefile_name_post="ncep_post.exe"
+   export exefile_name_gsi="rtma3d_gsi_hyb"
+   export exefile_name_lightning="process_Lightning_bufr.exe"
+else
+   export exefile_name_post="rtma3d_wrfpost"
+   export exefile_name_gsi="rtma3d_gsi"
+   export exefile_name_lightning="rtma3d_process_lightning"
+fi
 #########################################################
 #--- define the path to the static data
 #    fix/
@@ -343,7 +348,7 @@ export exefile_name_verif=""    # executable of verification (MET) is defined by
    export AIRCRAFT_REJECT_udef="/mnt/lfs3/projects/hfv3gfs/Edward.Colon/FixData/obsuselist/amdar_reject_lists"
    export SFCOBS_PROVIDER_udef="/mnt/lfs3/projects/hfv3gfs/Edward.Colon/FixData/obsuselist/sfcobs_provider"
 
-   export PARMgsi_udef=""
+   export PARMgsi_udef="/mnt/lfs3/projects/hfv3gfs/Edward.Colon/FixData/parm/gsi"
    export PARMupp_udef="/mnt/lfs3/projects/hfv3gfs/Edward.Colon/FixData/parm/upp"
    export PARMwrf_udef="/mnt/lfs3/projects/hfv3gfs/Edward.Colon/FixData/parm/wrf"
    export PARMverf_udef="/mnt/lfs3/projects/hfv3gfs/Edward.Colon/FixData/parm/verif"

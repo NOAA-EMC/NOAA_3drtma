@@ -98,7 +98,7 @@ ln -s /home/rtrr/HRRR/exec/GSI/prepbufr_append_clamps.exe ${EXEC_DIR}/GSI/prepbu
 ln -s /home/rtrr/HRRR/exec/GSI/prepbufr_append_sticknet.exe ${EXEC_DIR}/GSI/prepbufr_append_sticknet.exe
 ln -s /home/rtrr/HRRR/exec/GSI/prepbufr_append_vessonndes.exe ${EXEC_DIR}/GSI/prepbufr_append_vessonndes.exe
 ln -s /home/rtrr/HRRR/exec/GSI/process_Lightning.exe ${EXEC_DIR}/GSI/process_Lightning.exe
-ln -s /home/rtrr/HRRR/exec/GSI/process_Lightning_bufr.exe ${EXEC_DIR}/GSI/process_Lightning_bufr.exe
+ln -s /home/rtrr/HRRR/exec/GSI/process_Lightning_bufr.exe ${EXEC_DIR}/GSI/process_Lightning_bufr.exe 
 ln -s /home/rtrr/HRRR/exec/GSI/process_NASALaRC_cloud.exe ${EXEC_DIR}/GSI/process_NASALaRC_cloud.exe
 ln -s /home/rtrr/HRRR/exec/GSI/process_NSSL_mosaic.exe ${EXEC_DIR}/GSI/process_NSSL_mosaic.exe
 ln -s /home/rtrr/HRRR/exec/GSI/process_SST.exe  ${EXEC_DIR}/GSI/process_SST.exe
@@ -108,7 +108,7 @@ ln -s /home/rtrr/HRRR/exec/GSI/rap_process_cloud ${EXEC_DIR}/GSI/rap_process_clo
 ln -s /home/rtrr/HRRR/exec/GSI/read_diag_conv.exe ${EXEC_DIR}/GSI/read_diag_conv.exe
 ln -s /home/rtrr/HRRR/exec/GSI/read_diag_rad.exe ${EXEC_DIR}/GSI/read_diag_rad.exe
 ln -s /home/rtrr/HRRR/exec/GSI/ssrc.exe ${EXEC_DIR}/GSI/ssrc.exe
-ln -s /home/rtrr/HRRR/exec/UPP/ncep_post.exe ${EXEC_DIR}/UPP/ncep_post.exe
+ln -s /mnt/lfs3/projects/hfv3gfs/Edward.Colon/FixData/upp/ncep_post.exe ${EXEC_DIR}/UPP/ncep_post.exe
 ln -s /home/rtrr/HRRR/exec/smartinit/wgrib2  ${EXEC_DIR}/smartinit/wgrib2
 
 else
