@@ -315,8 +315,6 @@ export exefile_name_verif=""    # executable of verification (MET) is defined by
 #
   if [ $MACHINE = theia ] ; then
 
-/scratch4/NCEPDEV/fv3-cam/save/
-
    export FIXgsi_udef="/scratch4/NCEPDEV/fv3-cam/noscrub/Edward.Colon/FixData/GSI-fix"
    export FIXcrtm_udef="/scratch4/NCEPDEV/fv3-cam/noscrub/Edward.Colon/FixData/CRTM-fix"
    export FIXwps_udef="/scratch4/NCEPDEV/fv3-cam/noscrub/Edward.Colon/FixData/wps"
@@ -326,7 +324,7 @@ export exefile_name_verif=""    # executable of verification (MET) is defined by
    export AIRCRAFT_REJECT_udef="/scratch4/NCEPDEV/fv3-cam/noscrub/Edward.Colon/FixData/obsuselist/amdar_reject_lists"
    export SFCOBS_PROVIDER_udef="/scratch4/NCEPDEV/fv3-cam/noscrub/Edward.Colon/FixData/obsuselist/sfcobs_provider"
 
-   export PARMgsi_udef=""
+   export PARMgsi_udef="/scratch4/NCEPDEV/fv3-cam/noscrub/Edward.Colon/FixData/parm/gsi"
    export PARMupp_udef="/scratch4/NCEPDEV/fv3-cam/noscrub/Edward.Colon/FixData/parm/upp"
    export PARMwrf_udef="/scratch4/NCEPDEV/fv3-cam/noscrub/Edward.Colon/FixData/parm/wrf"
    export PARMverf_udef="/scratch4/NCEPDEV/fv3-cam/noscrub/Edward.Colon/FixData/parm/verif"
@@ -370,6 +368,7 @@ export exefile_name_verif=""    # executable of verification (MET) is defined by
   fi
 
 #       define the variable names for symbol links under fix/ and parm/
+  export EXECrtma3d="${NWROOT}/exec"
   export FIXrtma3d="${NWROOT}/fix"
   export FIXgsi="${FIXrtma3d}/gsi"
   export FIXcrtm="${FIXrtma3d}/crtm"
@@ -396,8 +395,6 @@ export exefile_name_verif=""    # executable of verification (MET) is defined by
      ln -s ${EXECrtma3d}/GSI/* ${EXECrtma3d}
      ln -s ${EXECrtma3d}/UPP/* ${EXECrtma3d}
   fi
-
-
   if [ ! -d ${FIXrtma3d}   ] ; then mkdir -p ${FIXrtma3d}   ; fi
   if [ ! -d ${PARMrtma3d}  ] ; then mkdir -p ${PARMrtma3d}  ; fi
   if [ ! -d ${OBS_USELIST} ] ; then mkdir -p ${OBS_USELIST} ; fi
@@ -426,11 +423,9 @@ export exefile_name_verif=""    # executable of verification (MET) is defined by
     ln -sf ${SFCOBS_PROVIDER_udef}       ${SFCOBS_PROVIDER}
 
     cd ${PARMrtma3d}
-    if [ ! -d $PARMgsi ] && [ ! -f ${PARMgsi}/gsiparm.anl.sh ]  
-    then
-      echo " WARNING ---- ${PARMgsi} does NOT exist. Check and Abort this task! ---- WARNING ! "
-      exit 1
-    fi
+    rm -rf $PARMgsi
+    echo " ln -sf ${PARMgsi_udef}        ${PARMgsi}"
+    ln -sf ${PARMgsi_udef}               ${PARMgsi}
     rm -rf $PARMupp
     echo " ln -sf ${PARMupp_udef}        ${PARMupp}"
     ln -sf ${PARMupp_udef}               ${PARMupp}
@@ -440,14 +435,11 @@ export exefile_name_verif=""    # executable of verification (MET) is defined by
     rm -rf $PARMwrf
     echo " ln -sf ${PARMwrf_udef}        ${PARMwrf}"
     ln -sf ${PARMwrf_udef}               ${PARMwrf}
-
   else
     echo " the fixed data directories have not set up yet for machine ${MACHINE}."
     echo " Abort linking task."
     exit 9
   fi
-
-
   echo
   ls -ltr $FIXrtma3d
   echo
@@ -1625,7 +1617,7 @@ fi
 
 if [ ${MACHINE} = 'theia' ] || [ ${MACHINE} = 'jet' ] || [ ${MACHINE} = 'dell' ] ; then
   cat > ${NWROOT}/xml/run_${RUN}_${expname}.sh <<EOF 
-#!/bin/bash
+#!/bin/ksh --login
 
 EOF
 
@@ -1643,11 +1635,8 @@ EOF
     SLURM|slurm)
       cat >> ${NWROOT}/xml/run_${RUN}_${expname}.sh <<EOF 
 . /etc/profile
-. /etc/profile.d/modules.sh >/dev/null # Module Support
-
-module purge
-module load intel
-module load rocoto/1.3.0-RC5
+. /apps/lmod/lmod/init/ksh >/dev/null # Module Support
+module load rocoto/1.3.1
 EOF
       ;;
     LSF|lsf)
@@ -1679,8 +1668,7 @@ echo "RTMA3D is ready to go! Run using run_${RUN}_${expname}.sh.  Make sure your
 #####################################################
 if [ ${MACHINE} = 'theia' ] || [ ${MACHINE} = 'jet' ] || [ ${MACHINE} = 'dell' ] ; then
   cat > ${NWROOT}/xml/chk_${RUN}_${expname}.sh <<EOF 
-#!/bin/bash
-
+#!/bin/ksh --login
 
 EOF
 
@@ -1697,10 +1685,8 @@ EOF
     SLURM|slurm)
       cat >> ${NWROOT}/xml/chk_${RUN}_${expname}.sh <<EOF 
 . /etc/profile
-. /etc/profile.d/modules.sh >/dev/null # Module Support
-module purge
-module load intel
-module load rocoto/1.3.0-RC5
+. /apps/lmod/lmod/init/ksh >/dev/null # Module Support
+module load rocoto/1.3.1
 EOF
       ;;
     LSF|lsf)
