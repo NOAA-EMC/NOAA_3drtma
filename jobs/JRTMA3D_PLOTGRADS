@@ -164,7 +164,11 @@ fi
 ######################
 # Execute the script.
 ######################
+if [ ${MACHINE} = 'dell' ]; then
+${exSCR_PLOTGRADS:-$HOMErtma3d/scripts/ex${RUN}_plotgrads_dell.ksh} 
+else
 ${exSCR_PLOTGRADS:-$HOMErtma3d/scripts/ex${RUN}_plotgrads.ksh}
+fi
 # export err=$?; err_chk
 if [ $? -eq 111 ] ; then
   export err=$?; err_chk
