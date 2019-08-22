@@ -266,7 +266,6 @@ export exefile_name_lightning="rtma3d_process_lightning"
 
 export exefile_name_cloud="rtma3d_process_cloud"
 
-export exefile_name_verif=""    # executable of verification (MET) is defined by loading module met
 
 #########################################################
 
@@ -835,7 +834,6 @@ cat > ${NWROOT}/xml/${RUN}_${expname}_rt.xml <<EOF
 
 <!ENTITY exSCR_VERIF    "&SCRIPT_DIR;/ex&RUN;_verif.ksh">
 
-<!ENTITY exefile_name_verif    "${exefile_name_verif}">
 
 <!-- Resources -->
 
@@ -1512,14 +1510,6 @@ cat > ${NWROOT}/xml/${RUN}_${expname}_rt.xml <<EOF
       <name>exefile_name_cloud</name>
 
       <value><cyclestr>&exefile_name_cloud;</cyclestr></value>
-
-   </envar>
-
-   <envar>
-
-      <name>exefile_name_verif</name>
-
-      <value><cyclestr>&exefile_name_verif;</cyclestr></value>
 
    </envar>
 

@@ -262,7 +262,12 @@ fi
 
   VERIF_PROC="1"
   VERIF_RESOURCES="<cores>&VERIF_PROC;</cores><walltime>00:30:00</walltime><memory>3G</memory>"
-  VERIF_RESERVATION=${RESERVATION}
+  VERIF_RESERVATION=${RESERVATION} 
+
+  ARCH_PROC="1"
+  ARCH_RESOURCES="<cores>&ARCH_PROC;</cores><walltime>00:30:00</walltime><memory>3G</memory>"
+  ARCH_RESERVATION=${RESERVATION_SVC}
+  
 
 # if [[ ! -d ${ptmp_base} ]] ; then
 #     echo " ${ptmp_base} does NOT exist !"
@@ -286,8 +291,6 @@ export exefile_name_post="rtma3d_wrfpost"
 export exefile_name_radar="rtma3d_process_mosaic"
 export exefile_name_lightning="rtma3d_process_lightning"
 export exefile_name_cloud="rtma3d_process_cloud"
-export exefile_name_verif=""    # executable of verification (MET) is defined by loading module met
-
 #########################################################
 #--- define the path to the static data
 #    fix/
@@ -480,6 +483,14 @@ export exefile_name_verif=""    # executable of verification (MET) is defined by
                           # 2: wrfguess_rap (directly downscaled from RAP to HRRR grid  at 1 hr before analysis time)
                           # 2: Not recommended (missing some hydrometer information and leading to failure of UPP on CEIL)
 
+#--- option to MET verification
+  export run_verif=1      # 0: No application of MET verification utility on 3d rtma results
+                          # 1: MET verification applied
+
+#--- option for archiving results on hpss
+  export run_arch=1    # 0: No archiving of 3d rtma post-processed output
+                          # 1: Archiving of 3d rtma results performed on hpss
+
 #
 #--- option for two-step gsi analysis (var + cloud analysis in two steps)
 #
@@ -598,10 +609,12 @@ cat > ${NWROOT}/xml/${RUN}_${expname}.xml <<EOF
 <!ENTITY DATA_PLOTGRADS "&DATA_RUNDIR;/plotgrads">
 <!ENTITY DATA_FETCHHPSS "&DATA_RUNDIR;/fetchhpss">
 <!ENTITY DATA_VERIF     "&DATA_RUNDIR;/verifprd">
+<!ENTITY DATA_ARCH     "&DATA_RUNDIR;/archprd">
 <!ENTITY DATA_OBSPREP_LGHTN    "&DATA_RUNDIR;/obsprep_lghtn">
 <!ENTITY DATA_OBSPREP_RADAR    "&DATA_RUNDIR;/obsprep_radar">
 <!ENTITY DATA_OBSPREP_CLOUD    "&DATA_RUNDIR;/obsprep_cloud">
 
+<!ENTITY hpsspath0      "/NCEPDEV/emc-meso/5year/${USER}/${envir}_${RUN}">
 <!ENTITY hpsspath1      "/NCEPPROD/hpssprod/runhistory">
 <!ENTITY hpsspath1_1yr  "/NCEPPROD/1year/hpssprod/runhistory">
 <!ENTITY hpsspath1_gsd  "/BMC/fdr/Permanent">
@@ -655,7 +668,9 @@ cat > ${NWROOT}/xml/${RUN}_${expname}.xml <<EOF
 <!ENTITY exSCR_PLOTGRADS "&SCRIPT_DIR;/ex&RUN;_plotgrads.ksh">
 <!ENTITY JJOB_VERIF     "&JJOB_DIR;/J&CAP_RUN;_VERIF">
 <!ENTITY exSCR_VERIF    "&SCRIPT_DIR;/ex&RUN;_verif.ksh">
-<!ENTITY exefile_name_verif    "${exefile_name_verif}">
+<!ENTITY JJOB_ARCH     "&JJOB_DIR;/J&CAP_RUN;_ARCH">
+<!ENTITY exSCR_ARCH    "&SCRIPT_DIR;/ex&RUN;_arch.ksh">
+
 
 <!-- Resources -->
 
@@ -720,6 +735,11 @@ cat > ${NWROOT}/xml/${RUN}_${expname}.xml <<EOF
 <!ENTITY VERIF_PROC "${VERIF_PROC}">
 <!ENTITY VERIF_RESOURCES '${VERIF_RESOURCES}'>
 <!ENTITY VERIF_RESERVATION '${VERIF_RESERVATION}'>
+
+<!ENTITY ARCH_PROC "${ARCH_PROC}">
+<!ENTITY ARCH_RESOURCES '${ARCH_RESOURCES}'>
+<!ENTITY ARCH_RESERVATION '${ARCH_RESERVATION}'>
+
 
 <!-- Variables in Namelist -->
 <!ENTITY GSI_grid_ratio_in_var       "${gsi_grid_ratio_in_var}">
@@ -1002,10 +1022,6 @@ cat > ${NWROOT}/xml/${RUN}_${expname}.xml <<EOF
       <value><cyclestr>&exefile_name_cloud;</cyclestr></value>
    </envar>
    <envar>
-      <name>exefile_name_verif</name>
-      <value><cyclestr>&exefile_name_verif;</cyclestr></value>
-   </envar>
-   <envar>
         <name>SENDCOM</name>
         <value>&SENDCOM;</value>
    </envar>
@@ -1209,6 +1225,39 @@ cat > ${NWROOT}/xml/${RUN}_${expname}.xml <<EOF
       <value>&JJOB_VERIF;</value>
     </envar>'>
 
+<!ENTITY ENVARS_ARCH
+    '<envar>
+      <name>START_TIME</name>
+      <value><cyclestr>@Y@m@d@H</cyclestr></value>
+    </envar>
+    <envar>
+      <name>DATABASE_DIR</name>
+      <value>&DATABASE_DIR;</value>
+    </envar>
+    <envar>
+        <name>hpsspath0</name>
+        <value>&hpsspath0;</value>
+    </envar>
+    <envar>
+        <name>hpss_save</name>
+        <value>yes</value>
+    </envar> 
+    <envar>
+        <name>write_to_rzdm</name>
+        <value>no</value>
+    </envar>
+    <envar>
+        <name>write_to_rzdm</name>
+        <value>no</value>
+    </envar>
+    <envar>
+      <name>exSCR_ARCH</name>
+      <value>&exSCR_ARCH;</value>
+    </envar>
+    <envar>
+      <name>JJOB_ARCH</name>
+      <value>&JJOB_ARCH;</value>
+    </envar>'>
 
 <!ENTITY ENVARS_PLOT
     '<envar>
@@ -1486,6 +1535,11 @@ cat >> ${NWROOT}/xml/${RUN}_${expname}.xml <<EOF
 
   </task>
 
+EOF
+
+if [run_verif -gt 0 ]; then
+cat >> ${NWROOT}/xml/${RUN}_${expname}.xml <<EOF 
+
   <task name="&NET;_verif" cycledefs="&time_int;" maxtries="&maxtries;">
     &ENVARS;
     &VERIF_RESOURCES;
@@ -1503,9 +1557,8 @@ cat >> ${NWROOT}/xml/${RUN}_${expname}.xml <<EOF
     </dependency>
 
   </task>
-
-
 EOF
+fi
 
 # if running the step to plot (with GrADS)
 if [ ${run_plt} -gt 0 ] ; then
@@ -1562,6 +1615,31 @@ cat >> ${NWROOT}/xml/${RUN}_${expname}.xml <<EOF
 
 EOF
 fi
+
+if [ $run_arch -gt 0 ] ;then 
+cat >> ${NWROOT}/xml/${RUN}_${expname}.xml <<EOF 
+
+  <task name="&NET;_arch" cycledefs="&time_int;" maxtries="&maxtries;">
+    &ENVARS;
+    &ARCH_RESOURCES;
+    &ARCH_RESERVATION;
+    <envar>
+       <name>rundir_task</name>
+       <value><cyclestr>&DATA_ARCH;</cyclestr></value>
+    </envar>
+    <command>&JJOB_DIR;/launch.ksh &JJOB_ARCH;</command>
+    <jobname><cyclestr>&NET;_arch_@H</cyclestr></jobname>
+    <join><cyclestr>&LOG_SCHDLR;/&NET;_&envir;_arch_@Y@m@d@H@M.log</cyclestr></join>
+    &ENVARS_ARCH;
+    <dependency>
+          <taskdep task="&NET;_post"/>
+    </dependency>
+  </task>
+EOF
+fi
+
+
+
 
 cat >> ${NWROOT}/xml/${RUN}_${expname}.xml <<EOF 
 
