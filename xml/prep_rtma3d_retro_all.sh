@@ -286,11 +286,17 @@ export CAP_RUN_ENVIR=`echo ${run_envir} | tr '[:lower:]' '[:upper:]'`
 # User defined executable file name for each task
 #
 #########################################################
-export exefile_name_gsi="rtma3d_gsi"
-export exefile_name_post="rtma3d_wrfpost"
 export exefile_name_radar="rtma3d_process_mosaic"
-export exefile_name_lightning="rtma3d_process_lightning"
 export exefile_name_cloud="rtma3d_process_cloud"
+if [ $MACHINE = jet ] ; then
+   export exefile_name_post="ncep_post.exe"
+   export exefile_name_gsi="rtma3d_gsi_hyb"
+   export exefile_name_lightning="process_Lightning_bufr.exe"
+else
+   export exefile_name_post="rtma3d_wrfpost"
+   export exefile_name_gsi="rtma3d_gsi"
+   export exefile_name_lightning="rtma3d_process_lightning"
+fi
 #########################################################
 #--- define the path to the static data
 #    fix/
@@ -346,7 +352,7 @@ export exefile_name_cloud="rtma3d_process_cloud"
    export AIRCRAFT_REJECT_udef="/mnt/lfs3/projects/hfv3gfs/Edward.Colon/FixData/obsuselist/amdar_reject_lists"
    export SFCOBS_PROVIDER_udef="/mnt/lfs3/projects/hfv3gfs/Edward.Colon/FixData/obsuselist/sfcobs_provider"
 
-   export PARMgsi_udef=""
+   export PARMgsi_udef="/mnt/lfs3/projects/hfv3gfs/Edward.Colon/FixData/parm/gsi"
    export PARMupp_udef="/mnt/lfs3/projects/hfv3gfs/Edward.Colon/FixData/parm/upp"
    export PARMwrf_udef="/mnt/lfs3/projects/hfv3gfs/Edward.Colon/FixData/parm/wrf"
    export PARMverf_udef="/mnt/lfs3/projects/hfv3gfs/Edward.Colon/FixData/parm/verif"
@@ -363,7 +369,7 @@ export exefile_name_cloud="rtma3d_process_cloud"
    export AIRCRAFT_REJECT_udef="/gpfs/dell2/emc/modeling/noscrub/Edward.Colon/FixData/obsuselist/amdar_reject_lists"
    export SFCOBS_PROVIDER_udef="/gpfs/dell2/emc/modeling/noscrub/Edward.Colon/FixData/obsuselist/sfcobs_provider"
    
-   export PARMgsi_udef=""
+   export PARMgsi_udef="/gpfs/dell2/emc/modeling/noscrub/Edward.Colon/FixData/parm/gsi"
    export PARMupp_udef="/gpfs/dell2/emc/modeling/noscrub/Edward.Colon/FixData/parm/upp"
    export PARMwrf_udef="/gpfs/dell2/emc/modeling/noscrub/Edward.Colon/FixData/parm/wrf"
    export PARMverf_udef="/gpfs/dell2/emc/modeling/noscrub/Edward.Colon/FixData/parm/verif" 
@@ -665,7 +671,6 @@ cat > ${NWROOT}/xml/${RUN}_${expname}.xml <<EOF
 <!ENTITY JJOB_POST4FGS   "&JJOB_DIR;/J&CAP_RUN;_POST4FGS">
 <!ENTITY exSCR_POST4FGS  "&SCRIPT_DIR;/ex&RUN;_post4fgs.ksh">
 <!ENTITY JJOB_PLOTGRADS  "&JJOB_DIR;/J&CAP_RUN;_PLOTGRADS">
-<!ENTITY exSCR_PLOTGRADS "&SCRIPT_DIR;/ex&RUN;_plotgrads.ksh">
 <!ENTITY JJOB_VERIF     "&JJOB_DIR;/J&CAP_RUN;_VERIF">
 <!ENTITY exSCR_VERIF    "&SCRIPT_DIR;/ex&RUN;_verif.ksh">
 <!ENTITY JJOB_ARCH     "&JJOB_DIR;/J&CAP_RUN;_ARCH">
