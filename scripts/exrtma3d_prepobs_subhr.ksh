@@ -95,14 +95,14 @@ postmsg "$jlogfile" "$msg"
 
 # copy/link the prepbufr obs data
 # prepbufr obs
-if [ -r ${COMINrap_subhr}/newgblav.${YYYYMMDD}.rap.t${HH}${subcyc}z.prepbufr ] ; then
-  cpreq ${COMINrap_subhr}/newgblav.${YYYYMMDD}.rap.t${HH}${subcyc}z.prepbufr                 ${COMINobsproc_rtma3d}/newgblav.${YYYYMMDD}.rap.t${HH}${subcyc}z.prepbufr
+if [ -r ${COMINrap}/newgblav.${YYYYMMDD}.rap.t${HH}${subcyc}z.prepbufr ] ; then
+  cpreq ${COMINrap}/newgblav.${YYYYMMDD}.rap.t${HH}${subcyc}z.prepbufr                 ${COMINobsproc_rtma3d}/newgblav.${YYYYMMDD}.rap.t${HH}${subcyc}z.prepbufr
   ${LN} -sf ${COMINobsproc_rtma3d}/newgblav.${YYYYMMDD}.rap.t${HH}${subcyc}z.prepbufr  ${DATA}/newgblav.${YYYYMMDD}.rap.t${HH}${subcyc}z.prepbufr
-elif [ -f ${COMINrap_subhr}/rtma_ru.t${HH}${subcyc}z.prepbufr.tm00 ] ; then
-  cpreq ${COMINrap_subhr}/rtma_ru.t${HH}${subcyc}z.prepbufr.tm00                   ${COMINobsproc_rtma3d}/rtma_ru.t${HH}${subcyc}z.prepbufr.tm00
+elif [ -f ${COMINrap}/rtma_ru.t${HH}${subcyc}z.prepbufr.tm00 ] ; then
+  cpreq ${COMINrap}/rtma_ru.t${HH}${subcyc}z.prepbufr.tm00                   ${COMINobsproc_rtma3d}/rtma_ru.t${HH}${subcyc}z.prepbufr.tm00
   ${LN} -sf ${COMINobsproc_rtma3d}/rtma_ru.t${HH}${subcyc}z.prepbufr.tm00    ${DATA}/rtma_ru.t${HH}${subcyc}z.prepbufr.tm00
 else
-  ${ECHO} "Warning: ${COMINrap_subhr}/rtma_ru.t${HH}${subcyc}z.prepbufr.tm00 does NOT exist! "
+  ${ECHO} "Warning: ${COMINrap}/rtma_ru.t${HH}${subcyc}z.prepbufr.tm00 does NOT exist! "
 fi
 
 # MRMS MOSAIC RADAR data (pre-processed bufr data/remapped on model grid )
@@ -125,8 +125,8 @@ fi
 
 # lightning obs (pre-processed/re-mapped to model grid)
 if [ $obsprep_lghtn -eq 0 ] ; then
-  if [ -r "${COMINRAP}/rtma_ru.${PDY}/rtma_ru.t${HH}${subcyc}z.lghtng.tm00.bufr_d" ]; then
-    cpreq  ${COMINRAP}/rtma_ru.${PDY}/rtma_ru.t${HH}${subcyc}z.lghtng.tm00.bufr_d  ${COMINobsproc_rtma3d}
+  if [ -r "${COMINrap}/rtma_ru.t${HH}${subcyc}z.lghtng.tm00.bufr_d" ]; then
+    cpreq  ${COMINrap}/rtma_ru.t${HH}${subcyc}z.lghtng.tm00.bufr_d  ${COMINobsproc_rtma3d}
     ${LN} -sf ${COMINobsproc_rtma3d}/rtma_ru.t${HH}${subcyc}z.lghtng.tm00.bufr_d ${DATA}/${RUN}.t${HH}${subcyc}z.LightningInGSI.bufr
   else
     ${ECHO} "Warning: ${COMINhrrr}/hrrr.t${HH}z.LightningInGSI.bufr does not exist!"

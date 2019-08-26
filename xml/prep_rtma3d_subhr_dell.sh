@@ -177,7 +177,6 @@ export exefile_name_post="rtma3d_wrfpost"
 export exefile_name_radar="rtma3d_process_mosaic"
 export exefile_name_lightning="rtma3d_process_lightning"
 export exefile_name_cloud="rtma3d_process_cloud"
-export exefile_name_verif=""    # executable of verification (MET) is defined by loading module met
 #########################################################
 #--- define the path to the static data
 #    fix/
@@ -525,7 +524,6 @@ cat > ${NWROOT}/xml/${RUN}_${expname}_subhr.xml <<EOF
 <!ENTITY exSCR_PLOTGRADS "&SCRIPT_DIR;/ex&RUN;_plotgrads_subhr.ksh">
 <!ENTITY JJOB_VERIF     "&JJOB_DIR;/J&CAP_RUN;_VERIF_SUBHR">
 <!ENTITY exSCR_VERIF    "&SCRIPT_DIR;/ex&RUN;_verif_subh.ksh">
-<!ENTITY exefile_name_verif    "${exefile_name_verif}">
 
 <!-- Resources -->
 
@@ -892,10 +890,6 @@ cat > ${NWROOT}/xml/${RUN}_${expname}_subhr.xml <<EOF
    <envar>
       <name>exefile_name_cloud</name>
       <value><cyclestr>&exefile_name_cloud;</cyclestr></value>
-   </envar>
-   <envar>
-      <name>exefile_name_verif</name>
-      <value><cyclestr>&exefile_name_verif;</cyclestr></value>
    </envar>
    <envar>
         <name>SENDCOM</name>

@@ -73,7 +73,7 @@ export jlogfile=${jlogfile:-$COMROOT/logs/jlogfiles/jlogfile.$jobid}
 PDYm1=`$NDATE -24 ${PDY}${cyc} | cut -c 1-8`
 
 # export pgmout=${pgmout:-"OUTPUT.$$"}
-export pgmout=${pgmout:-"OUTPUT.${PDY}${cyc}.${jobid}"}
+export pgmout=${pgmout:-"OUTPUT.${PDY}${cyc}${subcyc}.${jobid}"}
 
 export cycle=t${cyc}${subcyc}z 
 
@@ -167,7 +167,7 @@ fi
 
 # Execute the script.
 
-${exSCR_VERIF:-$HOMErtma3d/scripts/rtma3d_verif_subh.ksh}
+${exSCR_VERIF:-$HOMErtma3d/scripts/rtma3d_verif_subhr.ksh}
 
 export err=$?; err_chk
 
