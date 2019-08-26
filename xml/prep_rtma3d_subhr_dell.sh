@@ -53,7 +53,7 @@ set -x
 
 
 CYCLE=`${MDATE}`
-YYYYMMDDHHm1=`$MDATE -60 ${CYCLE}`
+YYYYMMDDHHm1=`$MDATE -00 ${CYCLE}`
 
 YYYY=`echo ${YYYYMMDDHHm1} | cut -c 1-4`
 MM=`echo ${YYYYMMDDHHm1} | cut -c 5-6`
@@ -88,10 +88,10 @@ export realtime="T"
 
   DATABASE_DIR=${ptmp_base}            # (equivalent to ptmp_base)
   HOMEBASE_DIR=${NWROOT}               # path to system home directory
-  COMINRAP="/gpfs/gp2/ptmp/Jeff.Whiting/CHKOUT_TMP/com3d/rtma/prod"
-  COMINRAP_SUBHR="/gpfs/gp2/nco/ops/com/rtma/prod"
+  COMINRAP="/gpfs/tp2/ptmp/Jeff.Whiting/CHKOUT_TMP/com3d/rtma/prod"
+  COMINRAP_SUBHR="/gpfs/tp2/nco/ops/com/rtma/prod"
   COMINHRRR="/gpfs/hps/nco/ops/com/hrrr/prod"
-  COMINRADAR="/gpfs/gp1/nco/ops/com/hourly/prod"
+  COMINRADAR="/gpfs/tp1/nco/ops/com/hourly/prod"
   GESINHRRR="/gpfs/dell1/ptmp/Annette.Gibbs/com/hrrr/prod"
 # Computational resources
   ACCOUNT="RTMA-T2O"                    #account for CPU resources
@@ -154,6 +154,11 @@ export realtime="T"
   VERIF_PROC="1"
   VERIF_RESOURCES="<cores>&VERIF_PROC;</cores><walltime>00:30:00</walltime><memory>3G</memory>"
   VERIF_RESERVATION=${RESERVATION}
+
+  ARCH_PROC="1"
+  ARCH_RESOURCES="<cores>&ARCH_PROC;</cores><walltime>00:30:00</walltime><memory>3G</memory>"
+  ARCH_RESERVATION=${RESERVATION_SVC}
+
 
 # if [[ ! -d ${ptmp_base} ]] ; then
 #     echo " ${ptmp_base} does NOT exist !"
@@ -350,6 +355,11 @@ export exefile_name_cloud="rtma3d_process_cloud"
   export run_verif=1      # 0: No not process verification statistics
                           # 1: Compute verification statistics including cloud ceiling and visibility
 
+#--- option for archiving results on hpss
+  export run_arch=1    # 0: No archiving of 3d rtma post-processed output
+                          # 1: Archiving of 3d rtma results performed on hpss
+
+
 #--- option to plot the firstguess/analysis/increment
   export run_plt=1        # default is 1 to plot with GrADS
                           # >0: plot (and post-process of firstguess fields)
@@ -469,10 +479,11 @@ cat > ${NWROOT}/xml/${RUN}_${expname}_subhr.xml <<EOF
 <!ENTITY DATA_POST4FGS  "&DATA_RUNDIR;/postprd4fgs">
 <!ENTITY DATA_PLOTGRADS "&DATA_RUNDIR;/plotgrads">
 <!ENTITY DATA_VERIF     "&DATA_RUNDIR;/verifprd">
+<!ENTITY DATA_ARCH     "&DATA_RUNDIR;/archprd">
 <!ENTITY DATA_OBSPREP_LGHTN    "&DATA_RUNDIR;/obsprep_lghtn">
 <!ENTITY DATA_OBSPREP_RADAR    "&DATA_RUNDIR;/obsprep_radar">
 <!ENTITY DATA_OBSPREP_CLOUD    "&DATA_RUNDIR;/obsprep_cloud">
-
+<!ENTITY hpsspath0      "/NCEPDEV/emc-meso/5year/${USER}/${envir}_${RUN}">
 <!ENTITY hpsspath1      "/NCEPPROD/hpssprod/runhistory">
 <!ENTITY hpsspath1_1yr  "/NCEPPROD/1year/hpssprod/runhistory">
 <!ENTITY hpsspath1_gsd  "/BMC/fdr/Permanent">
@@ -500,30 +511,33 @@ cat > ${NWROOT}/xml/${RUN}_${expname}_subhr.xml <<EOF
 
 <!-- ex-shell and J-job script name -->
 <!ENTITY JJOB_OBSPREP_RADAR    "&JJOB_DIR;/J&CAP_RUN;_OBSPREP_RADAR_SUBHR">
-<!ENTITY exSCR_OBSPREP_RADAR   "&SCRIPT_DIR;/ex&RUN;_obsprep_radar_subh.ksh">
+<!ENTITY exSCR_OBSPREP_RADAR   "&SCRIPT_DIR;/ex&RUN;_obsprep_radar_subhr.ksh">
 <!ENTITY exefile_name_mosaic   "${exefile_name_mosaic}">
 <!ENTITY JJOB_OBSPREP_LGHTN    "&JJOB_DIR;/J&CAP_RUN;_OBSPREP_LGHTN_SUBHR">
-<!ENTITY exSCR_OBSPREP_LGHTN   "&SCRIPT_DIR;/ex&RUN;_obsprep_lghtn_subh.ksh">
+<!ENTITY exSCR_OBSPREP_LGHTN   "&SCRIPT_DIR;/ex&RUN;_obsprep_lghtn_subhr.ksh">
 <!ENTITY exefile_name_lightning "${exefile_name_lightning}">
 <!ENTITY JJOB_OBSPREP_CLOUD    "&JJOB_DIR;/J&CAP_RUN;_OBSPREP_CLOUD_SUBHR">
-<!ENTITY exSCR_OBSPREP_CLOUD   "&SCRIPT_DIR;/ex&RUN;_obsprep_cloud_subh.ksh">
+<!ENTITY exSCR_OBSPREP_CLOUD   "&SCRIPT_DIR;/ex&RUN;_obsprep_cloud_subhr.ksh">
 <!ENTITY exefile_name_cloud    "${exefile_name_cloud}">
 <!ENTITY JJOB_PREPOBS    "&JJOB_DIR;/J&CAP_RUN;_PREPOBS_SUBHR">
-<!ENTITY exSCR_PREPOBS   "&SCRIPT_DIR;/ex&RUN;_prepobs_subh.ksh">
+<!ENTITY exSCR_PREPOBS   "&SCRIPT_DIR;/ex&RUN;_prepobs_subhr.ksh">
 <!ENTITY JJOB_PREPFGS    "&JJOB_DIR;/J&CAP_RUN;_PREPFGS_SUBHR">
-<!ENTITY exSCR_PREPFGS   "&SCRIPT_DIR;/ex&RUN;_prepfgs_subh.ksh">
+<!ENTITY exSCR_PREPFGS   "&SCRIPT_DIR;/ex&RUN;_prepfgs_subhr.ksh">
 <!ENTITY JJOB_GSIANL	 "&JJOB_DIR;/J&CAP_RUN;_GSIANL${gsi2}_SUBHR">
-<!ENTITY exSCR_GSIANL	 "&SCRIPT_DIR;/ex&RUN;_gsianl${gsi2}_subh.ksh">
+<!ENTITY exSCR_GSIANL	 "&SCRIPT_DIR;/ex&RUN;_gsianl${gsi2}_subhr.ksh">
 <!ENTITY exefile_name_gsi      "${exefile_name_gsi}">
 <!ENTITY JJOB_POST  	 "&JJOB_DIR;/J&CAP_RUN;_POST_SUBHR">
-<!ENTITY exSCR_POST      "&SCRIPT_DIR;/ex&RUN;_post_subh.ksh">
+<!ENTITY exSCR_POST      "&SCRIPT_DIR;/ex&RUN;_post_subhr.ksh">
 <!ENTITY exefile_name_post     "${exefile_name_post}">
 <!ENTITY JJOB_POST4FGS   "&JJOB_DIR;/J&CAP_RUN;_POST4FGS_SUBHR">
 <!ENTITY exSCR_POST4FGS  "&SCRIPT_DIR;/ex&RUN;_post4fgs_subhr.ksh">
 <!ENTITY JJOB_PLOTGRADS  "&JJOB_DIR;/J&CAP_RUN;_PLOTGRADS_SUBHR">
 <!ENTITY exSCR_PLOTGRADS "&SCRIPT_DIR;/ex&RUN;_plotgrads_subhr.ksh">
 <!ENTITY JJOB_VERIF     "&JJOB_DIR;/J&CAP_RUN;_VERIF_SUBHR">
-<!ENTITY exSCR_VERIF    "&SCRIPT_DIR;/ex&RUN;_verif_subh.ksh">
+<!ENTITY exSCR_VERIF    "&SCRIPT_DIR;/ex&RUN;_verif_subhr.ksh">
+<!ENTITY JJOB_ARCH     "&JJOB_DIR;/J&CAP_RUN;_ARCH_SUBHR">
+<!ENTITY exSCR_ARCH    "&SCRIPT_DIR;/ex&RUN;_arch_subhr.ksh">
+
 
 <!-- Resources -->
 
@@ -586,6 +600,11 @@ cat > ${NWROOT}/xml/${RUN}_${expname}_subhr.xml <<EOF
 <!ENTITY VERIF_PROC "${VERIF_PROC}">
 <!ENTITY VERIF_RESOURCES '${VERIF_RESOURCES}'>
 <!ENTITY VERIF_RESERVATION '${VERIF_RESERVATION}'>
+
+<!ENTITY ARCH_PROC "${ARCH_PROC}">
+<!ENTITY ARCH_RESOURCES '${ARCH_RESOURCES}'>
+<!ENTITY ARCH_RESERVATION '${ARCH_RESERVATION}'>
+
 
 <!-- Variables in Namelist -->
 <!ENTITY GSI_grid_ratio_in_var       "${gsi_grid_ratio_in_var}">
@@ -1069,6 +1088,41 @@ cat > ${NWROOT}/xml/${RUN}_${expname}_subhr.xml <<EOF
       <value>&JJOB_VERIF;</value>
     </envar>'>
 
+<!ENTITY ENVARS_ARCH
+    '<envar>
+      <name>START_TIME</name>
+      <value><cyclestr>@Y@m@d@H</cyclestr></value>
+    </envar>
+    <envar>
+      <name>DATABASE_DIR</name>
+      <value>&DATABASE_DIR;</value>
+    </envar>
+    <envar>
+        <name>hpsspath0</name>
+        <value>&hpsspath0;</value>
+    </envar>
+    <envar>
+        <name>hpss_save</name>
+        <value>yes</value>
+    </envar> 
+    <envar>
+        <name>write_to_rzdm</name>
+        <value>no</value>
+    </envar>
+    <envar>
+        <name>write_to_rzdm</name>
+        <value>no</value>
+    </envar>
+    <envar>
+      <name>exSCR_ARCH</name>
+      <value>&exSCR_ARCH;</value>
+    </envar>
+    <envar>
+      <name>JJOB_ARCH</name>
+      <value>&JJOB_ARCH;</value>
+    </envar>'>
+
+
 
 <!ENTITY ENVARS_PLOT
     '<envar>
@@ -1228,7 +1282,7 @@ cat >> ${NWROOT}/xml/${RUN}_${expname}_subhr.xml <<EOF
        <and>
        <datadep><cyclestr>&COMINRAP;/rtma_ru.@Y@m@d/rtma_ru.t@H@Mz.lghtng.tm00.bufr_d</cyclestr></datadep>
        <datadep><cyclestr>&COMINRAP;/rtma_ru.@Y@m@d/rtma_ru.t@H@Mz.lgycld.tm00.bufr_d</cyclestr></datadep> 
-       <datadep><cyclestr>&COMINRAP_SUBHR;/rtma_ru.@Y@m@d/rtma_ru.t@H@Mz.prepbufr.tm00</cyclestr></datadep>       
+       <datadep><cyclestr>&COMINRAP;/rtma_ru.@Y@m@d/rtma_ru.t@H@Mz.prepbufr.tm00</cyclestr></datadep>       
        <taskdep task="&NET;_obsprep_radar_task_@Y@m@d@H@M"/>
        </and>   
    </dependency>
@@ -1339,6 +1393,29 @@ if [ ${run_verif} -gt 0 ] ; then
   </task>
 EOF
 fi
+
+if [ $run_arch -gt 0 ] ;then
+cat >> ${NWROOT}/xml/${RUN}_${expname}_subhr.xml <<EOF 
+
+  <task name="&NET;_arch_task_@Y@m@d@H@M" cycledefs="15min" maxtries="&maxtries;">
+    &ENVARS;
+    &ARCH_RESOURCES;
+    &ARCH_RESERVATION;
+    <envar>
+       <name>rundir_task</name>
+       <value><cyclestr>&DATA_ARCH;</cyclestr></value>
+    </envar>
+    <command>&JJOB_DIR;/launch.ksh &JJOB_ARCH;</command>
+    <jobname><cyclestr>&NET;_arch_job_@Y@m@d@H@M</cyclestr></jobname>
+    <join><cyclestr>&LOG_SCHDLR;/&NET;_&envir;_arch_@Y@m@d@H@M.log</cyclestr></join>
+    &ENVARS_ARCH;
+    <dependency>
+          <taskdep task="&NET;_post_task_@Y@m@d@H@M"/>
+    </dependency>
+  </task>
+EOF
+fi
+
 
 
 if [ ${run_plt} -gt 0 ] ; then
