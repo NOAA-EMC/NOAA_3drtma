@@ -1144,7 +1144,7 @@ EOF
 
 cat >> ${NWROOT}/xml/${RUN}_${expname}_subhr.xml <<EOF 
 
-<workflow realtime="$realtime" scheduler="${SCHD_ATTRB}" cyclethrottle="10" taskthrottle="200" cyclelifespan="00:03:00:00">
+<workflow realtime="$realtime" scheduler="${SCHD_ATTRB}" cyclethrottle="1" taskthrottle="200" cyclelifespan="00:03:00:00">
 
   <log>
     <cyclestr>&LOG_DIR;/&NET;_workflow_&envir;_@Y@m@d@H@M.log</cyclestr>
