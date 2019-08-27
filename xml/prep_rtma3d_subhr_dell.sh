@@ -89,7 +89,6 @@ export realtime="T"
   DATABASE_DIR=${ptmp_base}            # (equivalent to ptmp_base)
   HOMEBASE_DIR=${NWROOT}               # path to system home directory
   COMINRAP="/gpfs/tp2/ptmp/Jeff.Whiting/CHKOUT_TMP/com3d/rtma/prod"
-  COMINRAP_SUBHR="/gpfs/tp2/nco/ops/com/rtma/prod"
   COMINHRRR="/gpfs/hps/nco/ops/com/hrrr/prod"
   COMINRADAR="/gpfs/tp1/nco/ops/com/hourly/prod"
   GESINHRRR="/gpfs/dell1/ptmp/Annette.Gibbs/com/hrrr/prod"
@@ -420,7 +419,6 @@ cat > ${NWROOT}/xml/${RUN}_${expname}_subhr.xml <<EOF
 
 <!ENTITY ptmp_base	"${ptmp_base}">
 <!ENTITY COMINRAP       "${COMINRAP}">
-<!ENTITY COMINRAP_SUBHR  "${COMINRAP_SUBHR}">
 <!ENTITY COMINHRRR      "${COMINHRRR}">
 <!ENTITY COMINRADAR      "${COMINRADAR}">
 <!ENTITY GESINHRRR      "${GESINHRRR}">
@@ -665,10 +663,6 @@ cat > ${NWROOT}/xml/${RUN}_${expname}_subhr.xml <<EOF
    <envar>
         <name>COMINRAP</name>
         <value>&COMINRAP;</value>
-   </envar>
-   <envar>
-        <name>COMINRAP_SUBHR</name>
-        <value>&COMINRAP_SUBHR;</value>
    </envar>
    <envar>
         <name>COMINHRRR</name>
@@ -1150,10 +1144,10 @@ EOF
 
 cat >> ${NWROOT}/xml/${RUN}_${expname}_subhr.xml <<EOF 
 
-<workflow realtime="$realtime" scheduler="${SCHD_ATTRB}" cyclethrottle="1" taskthrottle="350" cyclelifespan="15:00:00:00">
+<workflow realtime="$realtime" scheduler="${SCHD_ATTRB}" cyclethrottle="10" taskthrottle="200" cyclelifespan="00:03:00:00">
 
   <log>
-    <cyclestr>&LOG_DIR;/&NET;_workflow_&envir;_@Y@m@d@H.log</cyclestr>
+    <cyclestr>&LOG_DIR;/&NET;_workflow_&envir;_@Y@m@d@H@M.log</cyclestr>
   </log>
 
   <cycledef group="15min">*/15 ${ExpDateWindows}</cycledef>
