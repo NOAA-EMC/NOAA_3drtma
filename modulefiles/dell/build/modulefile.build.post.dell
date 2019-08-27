@@ -1,49 +1,58 @@
 #%Module######################################################################
-#                                                       Russ.Treadon@noaa.gov
-#                                                           NOAA/NWS/NCEP/EMC
-# GDAS_ENKF v6.2.3
-#_____________________________________________________
-#proc ModulesHelp { } {
-#puts stderr "Set environment veriables for GDAS_ENKF"
-#puts stderr "This module initializes the environment "
-#puts stderr "for the Intel Compiler Suite $version\n"
-##}
-#module-whatis " GDAS_ENKF whatis description"
+#############################################################
+## post v7.0.0 - for WCOSS Dell
+## Wen Meng 07/2018: set post to v8.0.0 for fv3gfs
+#############################################################
+proc ModulesHelp { } {
+puts stderr "Set environment veriables for post"
+puts stderr "This module initializes the users environment"
+puts stderr "to build the post for production.\n"
+}
+module-whatis "post"
 
-#set ver v6.2.3
+set ver v8.0.0
 
-set COMP ifort
-set COMP_MPI mpiifort
-
-set C_COMP icc
-
-# Known conflicts
-
-# Loading pe environment
-module load lsf/10.1
-
-# Loading Intel Compiler Suite
 module load ips/18.0.1.163
-
-# Loading intel mpi
 module load impi/18.0.1
+module load prod_util/1.1.0 
 
-# Loading production utilities (ndate)
-module load prod_util/1.1.0
-module load grib_util/1.1.0
-# Loading nceplibs modules
-module load bufr/11.2.0
-module load nemsio/2.2.3
+
+module load jasper/1.900.1                    
+module load libpng/1.2.59
+module load zlib/1.2.11 
 module load sfcio/1.0.0
+module load nemsio/2.2.3 
+
 module load sigio/2.1.0
-module load sp/2.0.2
-module load w3nco/2.0.6
-module load w3emc/2.3.0
-module load crtm/2.2.6
 module load bacio/2.0.2
+module load g2/3.1.0           
+module load gfsio/1.1.0            
+module load ip/3.0.1          
+module load sp/2.0.2        
+module load w3emc/2.3.0          
+module load w3nco/2.0.6
+module load NetCDF/3.6.3
+module load g2tmpl/1.5.0          
+module load crtm/2.2.6
+#module load dev/crtm/2.0.6
+#module load prod_envir/1.0.2
 
-# Loading netcdf modules
-module load NetCDF/4.5.0
+#setenv NCEPLIBS /gpfs/gd1/emc/global/noscrub/gwv/lv/lib
+#module use /gpfs/gd1/emc/global/noscrub/gwv/lv/lib/modulefiles
+#module load crtm-intel-sandybridge/2.0.6
+#module use /usrx/local/nceplibs/dev/modulefiles
 
-# Loading cmake
-module load cmake/3.10.0
+#setenv WRFPATH /gpfs/gp1/nco/ops/nwprod/sorc/wrf_shared.v1.1.0
+set WRF_SHARED_ROOT /gpfs/hps/nco/ops/nwprod/wrf_shared
+set WRF_SHARED_VER v1.1.0
+setenv WRFPATH ${WRF_SHARED_ROOT}.${WRF_SHARED_VER}-intel
+
+setenv myFC mpiifort
+setenv OPENMP "-qopenmp"
+setenv myFCFLAGS "-O3 -convert big_endian -traceback -g -fp-model source -qopenmp -fpp"
+setenv myCPP /lib/cpp 
+setenv myCPPFLAGS "-P"
+ 
+
+
+
