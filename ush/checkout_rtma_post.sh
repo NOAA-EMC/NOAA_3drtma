@@ -8,7 +8,7 @@ date
 
 # branch_post: POST master branch in repository EMC_post
 # branch_post_gsd="master"
-  branch_post_gsd="ncep_post_raphrrr.v5.0"
+  branch_post_gsd="RAPHRRR_201902_master3b5f724"
 
 # branch_post_source: source branch  # the user-specified branch to check out.
                                      # if not specified by user, 
@@ -145,7 +145,7 @@ modules_fname=modulefile.build.post.${target}
 modules_fname2=modulefile.run.post.${target}
 
   echo " --> Using UPP modulefile to building post-processing code of 3DRTMA  "
-  mfiles="v8.0.0-${target}"
+  mfiles="v8.0.0-wcoss_${target}_p3"
   for modfile in $mfiles
   do
     if [ -f ${SORCDIR_POST}/modulefiles/post/${modfile} ] ; then

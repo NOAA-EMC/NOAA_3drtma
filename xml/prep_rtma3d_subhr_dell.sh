@@ -58,9 +58,9 @@ YYYYMMDDHHm1=`$MDATE -00 ${CYCLE}`
 YYYY=`echo ${YYYYMMDDHHm1} | cut -c 1-4`
 MM=`echo ${YYYYMMDDHHm1} | cut -c 5-6`
 DD=`echo ${YYYYMMDDHHm1} | cut -c 7-8`
-mm=`echo ${YYYYMMDDHHm1} | cut -c 9-10`
+HH=`echo ${YYYYMMDDHHm1} | cut -c 9-10`
 
-export ExpDateWindows="$mm $DD $MM $YYYY *"        # dd mm yyyy weekday (crontab-like date format, mainly used for real-time run)
+export ExpDateWindows="$HH $DD $MM $YYYY *"        # HH DD HH YYYY weekday (crontab-like date format, mainly used for real-time run)
 export startCDATE=201907121400              #yyyymmddhhmm - Starting day of retro run 
 export endCDATE=201907121400                #yyyymmddhhmm - Ending day of RTMA3D run (needed for both RETRO and REAL TIME). 
 export NET=rtma3d                           #selection of rtma3d (or rtma,urma)
