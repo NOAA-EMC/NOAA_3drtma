@@ -96,7 +96,12 @@ fi
 
 set -x
 
-export ExpDateWindows="12 07 2019 *"        # dd mm yyyy weekday (crontab-like date format, mainly used for real-time run)
+CYCLE=`${NDATE}`
+YYYY=`echo ${CYCLE} | cut -c 1-4`
+MM=`echo ${CYCLE} | cut -c 5-6`
+DD=`echo ${CYCLE} | cut -c 7-8`
+
+export ExpDateWindows="$DD $MM $YYYY *"        # HH DD HH YYYY weekday (crontab-like date format, mainly used for real-time run)
 
 export startCDATE=201904271200              #yyyymmddhhmm - Starting day of retro run 
 

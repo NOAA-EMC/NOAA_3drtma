@@ -53,14 +53,15 @@ set -x
 
 
 CYCLE=`${MDATE}`
-YYYYMMDDHHm1=`$MDATE -00 ${CYCLE}`
+YYYYMMDDHHm1=`$MDATE -60 ${CYCLE}`
 
 YYYY=`echo ${YYYYMMDDHHm1} | cut -c 1-4`
 MM=`echo ${YYYYMMDDHHm1} | cut -c 5-6`
 DD=`echo ${YYYYMMDDHHm1} | cut -c 7-8`
-HH=`echo ${YYYYMMDDHHm1} | cut -c 9-10`
+#HH=`echo ${YYYYMMDDHHm1} | cut -c 9-10`
 
-export ExpDateWindows="$HH $DD $MM $YYYY *"        # HH DD HH YYYY weekday (crontab-like date format, mainly used for real-time run)
+#export ExpDateWindows="$HH $DD $MM $YYYY *"        # HH DD HH YYYY weekday (crontab-like date format, mainly used for real-time run)
+export ExpDateWindows="$DD $MM $YYYY *"        # HH DD HH YYYY weekday (crontab-like date format, mainly used for real-time run)
 export startCDATE=201907121400              #yyyymmddhhmm - Starting day of retro run 
 export endCDATE=201907121400                #yyyymmddhhmm - Ending day of RTMA3D run (needed for both RETRO and REAL TIME). 
 export NET=rtma3d                           #selection of rtma3d (or rtma,urma)
@@ -78,7 +79,7 @@ export realtime="T"
 #       and different user and/or experiment.
 #====================================================================#
 
-   QUEUE=debug
+   QUEUE=dev
 #  QUEUE=dev_shared                        #user-specified processing queue
   QUEUE_DBG="debug"                    #user-specified processing queue -- debug
   QUEUE_SVC="dev_transfer"                  #user-specified transfer queue
@@ -1144,20 +1145,24 @@ EOF
 
 cat >> ${NWROOT}/xml/${RUN}_${expname}_subhr.xml <<EOF 
 
-<workflow realtime="$realtime" scheduler="${SCHD_ATTRB}" cyclethrottle="1" taskthrottle="200" cyclelifespan="00:03:00:00">
+<workflow realtime="$realtime" scheduler="${SCHD_ATTRB}" cyclethrottle="96" taskthrottle="50" cyclelifespan="00:12:00:00">
 
   <log>
     <cyclestr>&LOG_DIR;/&NET;_workflow_&envir;_@Y@m@d@H@M.log</cyclestr>
   </log>
 
-  <cycledef group="15min">*/15 ${ExpDateWindows}</cycledef>
+  <cycledef group="00hr">*/15 00,12 ${ExpDateWindows}</cycledef>
+
+  <cycledef group="01hr">*/15 01,13 ${ExpDateWindows}</cycledef>
+
+  <cycledef group="02-11hr">*/15 02-11,14-23 ${ExpDateWindows}</cycledef>
 
 EOF
 
 if [ ${obsprep_lghtn} -eq 1 ] ; then
 cat >> ${NWROOT}/xml/${RUN}_${expname}_subhr.xml <<EOF 
 
-  <task name="&NET;_obsprep_lghtn_task_@Y@m@d@H@M" cycledefs="15min" maxtries="&maxtries;">
+  <task name="&NET;_obsprep_lghtn_task_@Y@m@d@H@M" cycledefs="02-11hr,00hr,01hr" maxtries="&maxtries;">
 
     &ENVARS;
     <envar>
@@ -1184,7 +1189,7 @@ fi
 if [ ${obsprep_cloud} -eq 1 ] ; then
 cat >> ${NWROOT}/xml/${RUN}_${expname}_subhr.xml <<EOF    
 
-  <task name="&NET;_obsprep_cloud_task_@Y@m@d@H@M" cycledefs="15min" maxtries="&maxtries;">
+  <task name="&NET;_obsprep_cloud_task_@Y@m@d@H@M" cycledefs="02-11hr,00hr,01hr" maxtries="&maxtries;">
 
     &ENVARS;
     <envar>
@@ -1211,7 +1216,7 @@ fi
 if [ ${obsprep_radar} -eq 1 ] ; then
 cat >> ${NWROOT}/xml/${RUN}_${expname}_subhr.xml <<EOF 
 
-  <task name="&NET;_obsprep_radar_task_@Y@m@d@H@M" cycledefs="15min" maxtries="&maxtries;">
+  <task name="&NET;_obsprep_radar_task_@Y@m@d@H@M" cycledefs="02-11hr,00hr,01hr" maxtries="&maxtries;">
 
     &ENVARS;
    <envar>
@@ -1255,7 +1260,7 @@ fi
 
 cat >> ${NWROOT}/xml/${RUN}_${expname}_subhr.xml <<EOF 
 
-    <task name="&NET;_prepobs_task_@Y@m@d@H@M" cycledefs="15min" maxtries="&maxtries;">
+    <task name="&NET;_prepobs_task_@Y@m@d@H@M" cycledefs="02-11hr,00hr,01hr" maxtries="&maxtries;">
 
     &ENVARS;
     <envar>
@@ -1283,7 +1288,7 @@ cat >> ${NWROOT}/xml/${RUN}_${expname}_subhr.xml <<EOF
 
   </task>
 
-  <task name="&NET;_prepfgs_task_@Y@m@d@H@M" cycledefs="15min" maxtries="&maxtries;">
+  <task name="&NET;_prepfgs_task_@Y@m@d@H@M" cycledefs="02-11hr,00hr,01hr" maxtries="&maxtries;">
 
     &ENVARS;
     <envar>
@@ -1304,7 +1309,7 @@ cat >> ${NWROOT}/xml/${RUN}_${expname}_subhr.xml <<EOF
    </dependency>
    </task>
  
-  <task name="&NET;_gsianl_task_@Y@m@d@H@M" cycledefs="15min" maxtries="&maxtries;">
+  <task name="&NET;_gsianl_task_@Y@m@d@H@M" cycledefs="02-11hr,00hr,01hr" maxtries="&maxtries;">
 
     &ENVARS;
     &GSI_RESOURCES;
@@ -1330,7 +1335,7 @@ cat >> ${NWROOT}/xml/${RUN}_${expname}_subhr.xml <<EOF
 
   </task>
 
-  <task name="&NET;_post_task_@Y@m@d@H@M" cycledefs="15min" maxtries="&maxtries;">
+  <task name="&NET;_post_task_@Y@m@d@H@M" cycledefs="02-11hr,00hr,01hr" maxtries="&maxtries;">
 
     &ENVARS;
     &POST_RESOURCES;
@@ -1366,7 +1371,7 @@ EOF
 if [ ${run_verif} -gt 0 ] ; then
   cat >> ${NWROOT}/xml/${RUN}_${expname}_subhr.xml <<EOF
 
-  <task name="&NET;_verif_task_@Y@m@d@H@M" cycledefs="15min" maxtries="&maxtries;">
+  <task name="&NET;_verif_task_@Y@m@d@H@M" cycledefs="02-11hr,00hr,01hr" maxtries="&maxtries;">
     &ENVARS;
     &VERIF_RESOURCES;
     &VERIF_RESERVATION;
@@ -1391,7 +1396,7 @@ fi
 if [ $run_arch -gt 0 ] ;then
 cat >> ${NWROOT}/xml/${RUN}_${expname}_subhr.xml <<EOF 
 
-  <task name="&NET;_arch_task_@Y@m@d@H@M" cycledefs="15min" maxtries="&maxtries;">
+  <task name="&NET;_arch_task_@Y@m@d@H@M" cycledefs="02-11hr,00hr,01hr" maxtries="&maxtries;">
     &ENVARS;
     &ARCH_RESOURCES;
     &ARCH_RESERVATION;
@@ -1414,7 +1419,7 @@ fi
 
 if [ ${run_plt} -gt 0 ] ; then
 cat >> ${NWROOT}/xml/${RUN}_${expname}_subhr.xml <<EOF 
-  <task name="&NET;_post4fgs_task_@Y@m@d@H@M" cycledefs="15min" maxtries="&maxtries;">
+  <task name="&NET;_post4fgs_task_@Y@m@d@H@M" cycledefs="02-11hr,00hr,01hr" maxtries="&maxtries;">
 
     &ENVARS;
     &POST_RESOURCES;
@@ -1437,7 +1442,7 @@ cat >> ${NWROOT}/xml/${RUN}_${expname}_subhr.xml <<EOF
   </task>
 
 
-  <task name="&NET;_plotgrads_task_@Y@m@d@H@M" cycledefs="15min" maxtries="&maxtries;">
+  <task name="&NET;_plotgrads_task_@Y@m@d@H@M" cycledefs="02-11hr,00hr,01hr" maxtries="&maxtries;">
 
     &ENVARS;
     &PLOT_RESOURCES;
