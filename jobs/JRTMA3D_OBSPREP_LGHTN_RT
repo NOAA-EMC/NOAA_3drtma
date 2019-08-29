@@ -46,9 +46,9 @@ cd $DATA
 #    setpdy.sh needs the variables 
 #    $PDY and $cyc already defined in advance
 #####################################################
-export cycle=${cycle:-t${cyc}${subcyc}z}
-#setpdy.sh
-#. ${DATA}/PDY
+export cycle=${cycle:-t${cyc}z} 
+setpdy.sh
+. ${DATA}/PDY
 
 export subcyc=${subcyc} #Note: Must define subcyc in upper level script. Can be 00, 15, 30, or 45 /MPondeca, 30Jun2017
                          #only used for rurtma2p5
@@ -59,7 +59,7 @@ export PDYHH="${PDY}${cyc}"
 export LOG_JJOB=${LOG_JJOB:-$COMROOT/logs/jlogfiles}
 export jlogfile=${jlogfile:-$LOG_JJOB/jlogfile.${jobid}}
 # export pgmout=${pgmout:-"OUTPUT.$$"}
-export pgmout=${pgmout:-"OUTPUT.${PDY}${cyc}${subcyc}.${jobid}"}
+export pgmout=${pgmout:-"OUTPUT.${PDY}${cyc}.${jobid}"}
 if [ ! -d ${LOG_JJOB} ] ; then
    mkdir -p ${LOG_JJOB}
 fi
@@ -91,11 +91,11 @@ export COMIN=${COMIN:-${COMROOT}/${NET}/${envir}/${RUN}.${PDY}}
 export COMOUT=${COMOUT:-${COMROOT}/${NET}/${envir}/${RUN}.${PDY}}
 
 ### Observations Products/Input from RAP
-export COMINrap=${COMINrap:-"${COMIN}/rap.${PDY}"}
-export COMINhrrr=${COMINhrrr:-"${COMIN}/hrrr.${PDY}/conus"}
+export COMINrap=${COMINRAP}/rap.${PDY}
+export COMINhrrr=${COMINHRRR}/hrrr.${PDY}/${domain}
 export COMINlightning=${COMINlightning:-"${COMIN}/lightning.${PDY}"}
 export COMINmosaic=${COMINmosaic:-"${COMIN}/radar.${PDY}"}
-export COMINradar=${COMINradar:-"${COMINRADAR}/radar.${PDY}${cyc}"}
+export COMINradar=${COMINradar:-"${COMIN}/radar.${PDY}"}
 
 ### Observations Products/Input for the RTMA3D (prepbufr files) 
 export COMINobsproc_rtma3d=${COMINobsproc_rtma3d:-"${COMIN}/obsprd.${cycle}"}
@@ -117,32 +117,29 @@ fi
 
 ###########################################################
 #
-# The following variables are used in exrtma3d_obsprep_radar.ksh
+# The following variables are used in exrtma3d_obsprep_lghtn.ksh
 #
 ###########################################################
 
 #   Set the name to the executable
-    export exefile_name_radar=${exefile_name_radar:-"rtma3d_process_mosaic"}
+    export exefile_name_lightning=${exefile_name_lightning:-"rtma3d_process_lightning"}
 
 #   Set the path to the GSI static files
-    export FIXgsi=${FIXgsi:-"${FIXrtma3d}/gsi"}
-    export FIXcrtm=${FIXcrtm:-"${FIXrtma3d}/crtm"}
+    export FIXgsi=${FIX_GSI:-"${FIXrtma3d}/gsi"}
+    export FIXcrtm=${FIX_CRTM:-"${FIXrtma3d}/crtm"}
     export FIXwps=${FIXwps:-"${FIXrtma3d}/wps"}
 
     export PARMupp=${PARMupp:-"${PARMrtma3d}/upp"}
     export PARMwrf=${PARMwrf:-"${PARMrtma3d}/wrf"}
 
     export OBS_USELIST=${OBS_USELIST:-"${FIXrtma3d}/gsi"}
-    export SFCOBS_USELIST=${SFCOBS_USELIST:-"${FIXrtma3d}/gsi"}
-    export AIRCRAFT_REJECT=${AIRCRAFT_REJECT:-"${FIXrtma3d}/gsi"}
-    export SFCOBS_PROVIDER=${SFCOBS_PROVIDER:-"${FIXrtma3d}/gsi"}
 
 ##########################################################
 
 ######################
 # Execute the script.
 ######################
-${exSCR_OBSPREP_RADAR:-$HOMErtma3d/scripts/ex${RUN}_obsprep_radar_sub.ksh}
+${exSCR_OBSPREP_LGHTN:-$HOMErtma3d/scripts/ex${RUN}_obsprep_lghtn.ksh}
 export err=$?; err_chk
 
 msg="$0 of $job completed normally"
