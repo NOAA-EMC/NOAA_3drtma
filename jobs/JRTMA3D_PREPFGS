@@ -87,9 +87,9 @@ export COMIN=${COMIN:-${COMROOT}/${NET}/${envir}/${RUN}.${PDY}}
 export COMOUT=${COMOUT:-${COMROOT}/${NET}/${envir}/${RUN}.${PDY}}
 
 # Directory to store the firstguess as input for the RTMA3D (NETCDF?) 
-
-export COMINrap=${COMIN}/rap.${PDY}
-export COMINhrrr=${COMIN}/hrrr.${PDY}/${domain}
+export COMINrap=${COMINrap:-${COMIN}/rap.${PDY}}
+export COMINhrrr=${COMINhrrr:-${COMIN}/hrrr.${PDY}/${domain}}
+export GESINhrrr=${GESINhrrr:-${COMIN}/hrrr/hrrrges_sfc/${domain}}
 export GESINhrrr_rtma3d=${GESINhrrr_rtma3d:-"${COMIN}/fgsprd.${cycle}"}
 export PDYHH_cycm1=$($NDATE -01  "${PDYHH}")
 export PDYHH_cycp1=$($NDATE +01  "${PDYHH}")
@@ -123,8 +123,9 @@ if [ ! -d "${COMINhrrr}" ] ; then
   exit 1
 fi
 if [ ! -d "${COMINhrrr_cycp1}" ] ; then
-  ${ECHO} "ERROR: ${COMINhrrr_cycp1} does not exist!"
-  exit 1
+   mkdir -p ${COMINhrrr_cycp1}
+#  ${ECHO} "ERROR: ${COMINhrrr_cycp1} does not exist!"
+#  exit 1
 fi
 
 ###########################################################
