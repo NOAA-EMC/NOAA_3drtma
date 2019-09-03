@@ -129,93 +129,104 @@ set +x
 
    export w1=ecolon
 
-   export w2=$rzdm
+#   export w2=$rzdm
 
 #   ftppath0=/home/people/emc/ftp/mmb/rtma/v${vernum}/${NET}/para
 
-   ftppath0=/home/people/emc/ftp/mmb/rtma/${NET}/para_TEST
+   ftppath0=/home/people/emc/www/htdocs/mmb/rtma/3drtma
 
-   ftppath=${ftppath0}/${RUN}.${PDY}
+   ftppath=${ftppath0}/3drtma.${PDY}/t${cyc}${subcyc}z
 
    ssh ${w1}@emcrzdm "mkdir -p ${ftppath}"
 
 #   wwwpath0=/home/people/emc/www/htdocs/mmb/aor/rtma/v${vernum}/${NET}/para
 
-   wwwpath0=/home/people/emc/www/htdocs/mmb/aor/${NET}/para_TEST
+   wwwpath0=//www.emc.ncep.noaa.gov/mmb/rtma/3drtma
 
-   wwwpath=${wwwpath0}/${RUN}.${PDY}/${cyc}${subcyc}z
+   wwwpath=${wwwpath0}/3drtma.${PDY}/${cyc}${subcyc}z
 
    ssh ${w1}@emcrzdm "mkdir -p ${wwwpath}"
 
-   ftp -n -v -i << EOF > $LLOGS1/ftp_to_server_${RUN}_${CDATE}.log
+   ftp -n -v -i << EOF > ${LOG_DIR}/ftp_to_server_${RUN}_${PDY}${cyc}${subcyc}.log
 
    open emcrzdm.ncep.noaa.gov
 
-   user $w1 $w2
+#   user $w1 $w2
+   user $w1
 
    binary
 
    cd ${ftppath}
 
-   lcd $COMOUT
+   lcd $COMOUTpost_rtma3d
 
-   put ${RUN}.${cycle}.2dvaranl_ndfd.grb2
+   put ${PROD_HEAD}.fgs.wrfprs_hrconus_${FCST_TIME}.grib2
+   
+   put ${PROD_HEAD}.fgs.wrftwo_hrconus_${FCST_TIME}.grib2
 
-   put ${RUN}.${cycle}.2dvarges_ndfd.grb2
+   put ${PROD_HEAD}.fgs.wrfnat_hrconus_${FCST_TIME}.grib2
 
-   put ${RUN}.${cycle}.2dvarerr_ndfd.grb2
+   put ${PROD_HEAD}.wrfprs_hrconus_${FCST_TIME}.grib2
 
-   put ${RUN}.${cycle}.2dvaranl_ndfd.grb2_wexp
+   put ${PROD_HEAD}.wrftwo_hrconus_${FCST_TIME}.grib2
 
-   put ${RUN}.${cycle}.2dvarges_ndfd.grb2_wexp
-
-   put ${RUN}.${cycle}.2dvarerr_ndfd.grb2_wexp
-
-   put ${RUN}.${cycle}.2dvaranl_nwrfc.grb2
-
-   put ${RUN}.${cycle}.2dvarges_nwrfc.grb2
-
-   put ${RUN}.${cycle}.2dvarerr_nwrfc.grb2
-
-   put ${RUN}.${cycle}.2dvaranl_ndfd_3p0.grb2
-
-   put ${RUN}.${cycle}.2dvarges_ndfd_3p0.grb2
-
-   put ${RUN}.${cycle}.2dvarerr_ndfd_3p0.grb2
+   put ${PROD_HEAD}.wrfnat_hrconus_${FCST_TIME}.grib2
 
    cd ${wwwpath}
 
-   mput ${RUN}.${cycle}.*_obs.listing_iter_*
+#   mput ${RUN}.${cycle}.*_obs.listing_iter_*
 
    bye
 
 EOF
 
-   list="${PDYm3} ${PDYm4}"
+    ssh ${w1}@emcrzdm "ls -d ${ftppath0}/${PROD_HEAD}.fgs.wrfprs_hrconus_${FCST_TIME}.grib2
+    err1=$?
+    if (( $err1 == 0 )) ; then
+           ssh ${w1}@emcrzdm "ls -d ${ftppath0}/${PROD_HEAD}.fgs.wrftwo_hrconus_${FCST_TIME}.grib2
+           err2=$?
+    if (( $err2 == 0 )) ; then
+           ssh ${w1}@emcrzdm "ls -d ${ftppath0}/${PROD_HEAD}.fgs.wrfnat_hrconus_${FCST_TIME}.grib2
+           err3=$?
+    if (( $err3 == 0 )) ; then 
+           ssh ${w1}@emcrzdm "ls -d ${ftppath0}/${PROD_HEAD}.wrfprs_hrconus_${FCST_TIME}.grib2
+           err4=$?
+    if (( $err4 == 0 )) ; then 
+           ssh ${w1}@emcrzdm "ls -d ${ftppath0}/${PROD_HEAD}.wrftwo_hrconus_${FCST_TIME}.grib2
+           err5=$?
+    if (( $err5 == 0 )) ; then
+           ssh ${w1}@emcrzdm "ls -d ${ftppath0}/${PROD_HEAD}.wrftwo_hrconus_${FCST_TIME}.grib2
+           err6=$?
+    if (( $err6 == 0 )) ; then 
+           echo "All of the UPP output files have not been tranferred to RZDM."
+    fi
+          
+        
+#   list="${PDYm3} ${PDYm4}"
 
-   for item in $list ; do
+#   for item in $list ; do
 
-      ssh ${w1}@emcrzdm "ls -d ${ftppath0}/${RUN}.${item}"
+#      ssh ${w1}@emcrzdm "ls -d ${ftppath0}/${RUN}.${item}"
 
-      err1=$?
+#      err1=$?
 
-      if (( $err1 == 0 )) ; then
+#      if (( $err1 == 0 )) ; then
 
-         ssh ${w1}@emcrzdm "rm -rf ${ftppath0}/${RUN}.${item}"
+#         ssh ${w1}@emcrzdm "rm -rf ${ftppath0}/${RUN}.${item}"
 
-      fi
+#      fi
 
-      ssh ${w1}@emcrzdm "ls -d ${wwwpath0}/${RUN}.${item}"
+#      ssh ${w1}@emcrzdm "ls -d ${wwwpath0}/${RUN}.${item}"
 
-      err2=$?
+#      err2=$?
 
-      if (( $err2 == 0 )) ; then
+#      if (( $err2 == 0 )) ; then
 
-         ssh ${w1}@emcrzdm "rm -rf ${wwwpath0}/${RUN}.${item}"
+#         ssh ${w1}@emcrzdm "rm -rf ${wwwpath0}/${RUN}.${item}"
 
-      fi
+#      fi
 
-   done
+#   done
 
 fi
 
