@@ -1,4 +1,4 @@
-#!/bin/ksh --login
+#!/bin/ksh 
 
 ulimit -s 512000
 

@@ -1,4 +1,4 @@
-#!/bin/ksh --login
+#!/bin/ksh 
 
 # loading modules and set common unix commands from outside
 #   in jobs/launch.sh and/or modulefile

@@ -53,15 +53,15 @@ set -x
 
 
 CYCLE=`${MDATE}`
-YYYYMMDDHHm1=`$MDATE -60 ${CYCLE}`
+YYYYMMDDHHm1=`$MDATE -00 ${CYCLE}`
 
 YYYY=`echo ${YYYYMMDDHHm1} | cut -c 1-4`
 MM=`echo ${YYYYMMDDHHm1} | cut -c 5-6`
-DD=`echo ${YYYYMMDDHHm1} | cut -c 7-8`
+#DD=`echo ${YYYYMMDDHHm1} | cut -c 7-8`
 #HH=`echo ${YYYYMMDDHHm1} | cut -c 9-10`
 
 #export ExpDateWindows="$HH $DD $MM $YYYY *"        # HH DD HH YYYY weekday (crontab-like date format, mainly used for real-time run)
-export ExpDateWindows="$DD $MM $YYYY *"        # HH DD HH YYYY weekday (crontab-like date format, mainly used for real-time run)
+export ExpDateWindows="* $MM $YYYY *"        # HH DD HH YYYY weekday (crontab-like date format, mainly used for real-time run)
 export startCDATE=201907121400              #yyyymmddhhmm - Starting day of retro run 
 export endCDATE=201907121400                #yyyymmddhhmm - Ending day of RTMA3D run (needed for both RETRO and REAL TIME). 
 export NET=rtma3d                           #selection of rtma3d (or rtma,urma)
@@ -89,9 +89,9 @@ export realtime="T"
 
   DATABASE_DIR=${ptmp_base}            # (equivalent to ptmp_base)
   HOMEBASE_DIR=${NWROOT}               # path to system home directory
-  COMINRAP="/gpfs/tp2/ptmp/Jeff.Whiting/CHKOUT_TMP/com3d/rtma/prod"
+  COMINRAP="/gpfs/gp2/ptmp/Jeff.Whiting/CHKOUT_TMP/com3d/rtma/prod"
   COMINHRRR="/gpfs/hps/nco/ops/com/hrrr/prod"
-  COMINRADAR="/gpfs/tp1/nco/ops/com/hourly/prod"
+  COMINRADAR="/gpfs/gp1/nco/ops/com/hourly/prod"
   GESINHRRR="/gpfs/dell1/ptmp/Annette.Gibbs/com/hrrr/prod"
 # Computational resources
   ACCOUNT="RTMA-T2O"                    #account for CPU resources
@@ -774,10 +774,6 @@ cat > ${NWROOT}/xml/${RUN}_${expname}_subhr.xml <<EOF
         <value>&LOG_WRKFLW;</value>
    </envar>
    <envar>
-        <name>LOG_DIR</name>
-        <value>&LOG_DIR;</value>
-   </envar>
-   <envar>
         <name>LOG_JJOB</name>
         <value>&LOG_JJOB;</value>
    </envar>
@@ -1102,11 +1098,7 @@ cat > ${NWROOT}/xml/${RUN}_${expname}_subhr.xml <<EOF
     </envar> 
     <envar>
         <name>write_to_rzdm</name>
-        <value>no</value>
-    </envar>
-    <envar>
-        <name>write_to_rzdm</name>
-        <value>no</value>
+        <value>yes</value>
     </envar>
     <envar>
       <name>exSCR_ARCH</name>

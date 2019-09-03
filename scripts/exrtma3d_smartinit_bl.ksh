@@ -1,4 +1,4 @@
-#!/bin/ksh --login
+#!/bin/ksh 
 ################################################################################
 ####  UNIX Script Documentation Block
 #                      .                                             .
@@ -71,7 +71,7 @@ ln -sf HRRRCS${fhr}.tm00      fort.71
 rm -rf smart.ksh
 varEOF=EOF
 cat > smart.ksh <<EOF
-#!/bin/ksh -l
+#!/bin/ksh
 ${EXEChrrr} <<EOF >> smartinitcs.out${fhr}
 $fhr
 $cyc

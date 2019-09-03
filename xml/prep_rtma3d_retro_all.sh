@@ -1700,7 +1700,7 @@ fi
 
 if [ ${MACHINE} = 'theia' ] || [ ${MACHINE} = 'jet' ] || [ ${MACHINE} = 'dell' ] ; then
   cat > ${NWROOT}/xml/run_${RUN}_${expname}.sh <<EOF 
-#!/bin/ksh --login
+#!/bin/ksh 
 
 EOF
 
@@ -1751,7 +1751,7 @@ echo "RTMA3D is ready to go! Run using run_${RUN}_${expname}.sh.  Make sure your
 #####################################################
 if [ ${MACHINE} = 'theia' ] || [ ${MACHINE} = 'jet' ] || [ ${MACHINE} = 'dell' ] ; then
   cat > ${NWROOT}/xml/chk_${RUN}_${expname}.sh <<EOF 
-#!/bin/ksh --login
+#!/bin/ksh 
 
 EOF
 

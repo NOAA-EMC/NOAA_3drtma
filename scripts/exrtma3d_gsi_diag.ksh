@@ -1,4 +1,4 @@
-#!/bin/ksh --login
+#!/bin/ksh 
 
 # Read conventional observation diag files
 

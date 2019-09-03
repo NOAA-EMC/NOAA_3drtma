@@ -1,4 +1,4 @@
-#!/bin/ksh --login
+#!/bin/ksh 
 
 # Copy the prepbufr to obs directory so we never do I/O to /public directly
 if [ ${EARLY} -eq 0 ]; then
