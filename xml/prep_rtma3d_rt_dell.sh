@@ -524,7 +524,7 @@ export exefile_name_cloud="rtma3d_process_cloud"
 
 #--- option to plot the firstguess/analysis/increment
 
-  export run_plt=0        # default is 1 to plot with GrADS
+  export run_plt=1        # default is 1 to plot with GrADS
 
                           # >0: plot (and post-process of firstguess fields)
 

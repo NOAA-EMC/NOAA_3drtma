@@ -8,7 +8,7 @@ date
 
 # branch_post: POST master branch in repository EMC_post
 # branch_post_gsd="master"
-  branch_post_gsd="RAPHRRR_201902_master3b5f724"
+  branch_post_gsd="ncep_post_raphrrr.v5.0"
 
 # branch_post_source: source branch  # the user-specified branch to check out.
                                      # if not specified by user, 

@@ -350,7 +350,8 @@ export exefile_name_cloud="rtma3d_process_cloud"
   export gsi_2steps=0     # default is single step (var + cloud anl in one step)
                           # 1: two-step analysis
 
-
+  export run_fgspost=1    #  0: do not run upp for the first guess forecast
+                          #  1: run upp for the first guess forecast
 #----option to compute verification statistics using MET
   export run_verif=1      # 0: No not process verification statistics
                           # 1: Compute verification statistics including cloud ceiling and visibility
@@ -362,6 +363,12 @@ export exefile_name_cloud="rtma3d_process_cloud"
 
 #--- option to plot the firstguess/analysis/increment
   export run_plt=1        # default is 1 to plot with GrADS
+                          # >0: plot (and post-process of firstguess fields)
+                          # =1: plot with GrADS 
+                          # =2: plot with NCL (not available yet)
+                          # =3: plot with Python (not available yet)
+                          #<=0: no plot (and no post-process of firstguess fields)
+ export run_rzdm_plt=1   # default is 1 to plot with GrADS
                           # >0: plot (and post-process of firstguess fields)
                           # =1: plot with GrADS 
                           # =2: plot with NCL (not available yet)
@@ -477,6 +484,7 @@ cat > ${NWROOT}/xml/${RUN}_${expname}_subhr.xml <<EOF
 <!ENTITY DATA_POST      "&DATA_RUNDIR;/postprd">
 <!ENTITY DATA_POST4FGS  "&DATA_RUNDIR;/postprd4fgs">
 <!ENTITY DATA_PLOTGRADS "&DATA_RUNDIR;/plotgrads">
+<!ENTITY DATA_PLOTRZDM "&DATA_RUNDIR;/plotrzdm">
 <!ENTITY DATA_VERIF     "&DATA_RUNDIR;/verifprd">
 <!ENTITY DATA_ARCH     "&DATA_RUNDIR;/archprd">
 <!ENTITY DATA_OBSPREP_LGHTN    "&DATA_RUNDIR;/obsprep_lghtn">
@@ -532,6 +540,8 @@ cat > ${NWROOT}/xml/${RUN}_${expname}_subhr.xml <<EOF
 <!ENTITY exSCR_POST4FGS  "&SCRIPT_DIR;/ex&RUN;_post4fgs_subhr.ksh">
 <!ENTITY JJOB_PLOTGRADS  "&JJOB_DIR;/J&CAP_RUN;_PLOTGRADS_SUBHR">
 <!ENTITY exSCR_PLOTGRADS "&SCRIPT_DIR;/ex&RUN;_plotgrads_subhr.ksh">
+<!ENTITY JJOB_PLOTRZDM  "&JJOB_DIR;/J&CAP_RUN;_PLOTRZDM_SUBHR">
+<!ENTITY exSCR_PLOTRZDM "&SCRIPT_DIR;/ex&RUN;_plotrzdm_subhr.ksh">
 <!ENTITY JJOB_VERIF     "&JJOB_DIR;/J&CAP_RUN;_VERIF_SUBHR">
 <!ENTITY exSCR_VERIF    "&SCRIPT_DIR;/ex&RUN;_verif_subhr.ksh">
 <!ENTITY JJOB_ARCH     "&JJOB_DIR;/J&CAP_RUN;_ARCH_SUBHR">
@@ -595,6 +605,10 @@ cat > ${NWROOT}/xml/${RUN}_${expname}_subhr.xml <<EOF
 <!ENTITY PLOT_PROC "${PLOT_PROC}">
 <!ENTITY PLOT_RESOURCES '${PLOT_RESOURCES}'>
 <!ENTITY PLOT_RESERVATION '${PLOT_RESERVATION}'>
+
+<!ENTITY RZDM_PROC "${RZDM_PROC}">
+<!ENTITY RZDM_RESOURCES '${RZDM_RESOURCES}'>
+<!ENTITY RZDM_RESERVATION '${RZDM_RESERVATION}'>
 
 <!ENTITY VERIF_PROC "${VERIF_PROC}">
 <!ENTITY VERIF_RESOURCES '${VERIF_RESOURCES}'>
@@ -856,6 +870,10 @@ cat > ${NWROOT}/xml/${RUN}_${expname}_subhr.xml <<EOF
    <envar>
       <name>DATA_VERIF</name>
       <value><cyclestr>&DATA_VERIF;</cyclestr></value>
+   </envar>
+   <envar>
+      <name>DATA_PLOTGRADS</name>
+      <value><cyclestr>&DATA_PLOTGRADS;</cyclestr></value>
    </envar>
    <envar>
       <name>DATA_PLOTGRADS</name>
@@ -1385,31 +1403,8 @@ if [ ${run_verif} -gt 0 ] ; then
 EOF
 fi
 
-if [ $run_arch -gt 0 ] ;then
-cat >> ${NWROOT}/xml/${RUN}_${expname}_subhr.xml <<EOF 
+if [ ${run_fgspost} -gt 0 ]; then
 
-  <task name="&NET;_arch_task_@Y@m@d@H@M" cycledefs="02-11hr,00hr,01hr" maxtries="&maxtries;">
-    &ENVARS;
-    &ARCH_RESOURCES;
-    &ARCH_RESERVATION;
-    <envar>
-       <name>rundir_task</name>
-       <value><cyclestr>&DATA_ARCH;</cyclestr></value>
-    </envar>
-    <command>&JJOB_DIR;/launch.ksh &JJOB_ARCH;</command>
-    <jobname><cyclestr>&NET;_arch_job_@Y@m@d@H@M</cyclestr></jobname>
-    <join><cyclestr>&LOG_SCHDLR;/&NET;_&envir;_arch_@Y@m@d@H@M.log</cyclestr></join>
-    &ENVARS_ARCH;
-    <dependency>
-          <taskdep task="&NET;_post_task_@Y@m@d@H@M"/>
-    </dependency>
-  </task>
-EOF
-fi
-
-
-
-if [ ${run_plt} -gt 0 ] ; then
 cat >> ${NWROOT}/xml/${RUN}_${expname}_subhr.xml <<EOF 
   <task name="&NET;_post4fgs_task_@Y@m@d@H@M" cycledefs="02-11hr,00hr,01hr" maxtries="&maxtries;">
 
@@ -1432,7 +1427,10 @@ cat >> ${NWROOT}/xml/${RUN}_${expname}_subhr.xml <<EOF
     </dependency>
 
   </task>
+EOF
+fi
 
+if [ ${run_plt} -gt "0" ]  &&  [ ${run_fgspost} -gt "0" ] ; then
 
   <task name="&NET;_plotgrads_task_@Y@m@d@H@M" cycledefs="02-11hr,00hr,01hr" maxtries="&maxtries;">
 
@@ -1459,7 +1457,62 @@ cat >> ${NWROOT}/xml/${RUN}_${expname}_subhr.xml <<EOF
 
   </task>
 EOF
+
 fi
+
+if [ ${run_rzdm_plt} -gt "0" ] && [ ${run_fgspost} -gt "0" ] ; then
+
+  <task name="&NET;_plotrzdm_task_@Y@m@d@H@M" cycledefs="02-11hr,00hr,01hr" maxtries="&maxtries;">
+
+    &ENVARS;
+    &RZDM_RESOURCES;
+    &RZDM_RESERVATION;
+    <envar>
+       <name>rundir_task</name>
+       <value><cyclestr>&DATA_PLOTRZDM;</cyclestr></value>
+    </envar>
+
+    <command>&JJOB_DIR;/launch.ksh &JJOB_PLOTRZDM;</command>
+    <jobname><cyclestr>&NET;_plotrzdm_job_@Y@m@d@H@M</cyclestr></jobname>
+    <join><cyclestr>&LOG_SCHDLR;/&NET;_&envir;_plotrzdm_@Y@m@d@H@M.log</cyclestr></join>
+
+    &ENVARS_RZDM;
+
+    <dependency>
+      <and>
+          <taskdep task="&NET;_post_task_@Y@m@d@H@M"/>
+          <taskdep task="&NET;_post4fgs_task_@Y@m@d@H@M"/>
+      </and>
+    </dependency>
+
+  </task>
+EOF
+fi
+
+if [ $run_arch -gt 0 ] ;then
+cat >> ${NWROOT}/xml/${RUN}_${expname}_subhr.xml <<EOF 
+
+  <task name="&NET;_arch_task_@Y@m@d@H@M" cycledefs="02-11hr,00hr,01hr" maxtries="&maxtries;">
+    &ENVARS;
+    &ARCH_RESOURCES;
+    &ARCH_RESERVATION;
+    <envar>
+       <name>rundir_task</name>
+       <value><cyclestr>&DATA_ARCH;</cyclestr></value>
+    </envar>
+    <command>&JJOB_DIR;/launch.ksh &JJOB_ARCH;</command>
+    <jobname><cyclestr>&NET;_arch_job_@Y@m@d@H@M</cyclestr></jobname>
+    <join><cyclestr>&LOG_SCHDLR;/&NET;_&envir;_arch_@Y@m@d@H@M.log</cyclestr></join>
+    &ENVARS_ARCH;
+    <dependency>
+          <taskdep task="&NET;_post_task_@Y@m@d@H@M"/>
+    </dependency>
+  </task>
+EOF
+fi
+
+
+
 
 cat >> ${NWROOT}/xml/${RUN}_${expname}_subhr.xml <<EOF 
 

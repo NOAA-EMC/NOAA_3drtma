@@ -7,7 +7,8 @@ date
 # User define the following variables:
 
 # branch_gsi_gsd: GSD RAP/HRRR-based GSI branch in repository of ProdGSI
-branch_gsi_gsd="gsd/i_lgt_data_type"
+#branch_gsi_gsd="gsd/i_lgt_data_type"
+branch_gsi_gsd="gsd/develop"
 # branch_gsi_gsd="feature/gsd_raphrrr_july2018" 
 # branch_gsi_gsd="master"
 # branch_gsi_source: source branch  # the user-specified branch to check out.
