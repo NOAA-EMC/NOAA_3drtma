@@ -1098,7 +1098,7 @@ cat > ${NWROOT}/xml/${RUN}_${expname}_subhr.xml <<EOF
     </envar> 
     <envar>
         <name>write_to_rzdm</name>
-        <value>yes</value>
+        <value>no</value>
     </envar>
     <envar>
       <name>exSCR_ARCH</name>
@@ -1137,7 +1137,7 @@ EOF
 
 cat >> ${NWROOT}/xml/${RUN}_${expname}_subhr.xml <<EOF 
 
-<workflow realtime="$realtime" scheduler="${SCHD_ATTRB}" cyclethrottle="96" taskthrottle="50" cyclelifespan="00:12:00:00">
+<workflow realtime="$realtime" scheduler="${SCHD_ATTRB}" cyclethrottle="1" taskthrottle="50" cyclelifespan="00:12:00:00">
 
   <log>
     <cyclestr>&LOG_DIR;/&NET;_workflow_&envir;_@Y@m@d@H@M.log</cyclestr>

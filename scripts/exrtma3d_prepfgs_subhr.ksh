@@ -103,7 +103,7 @@ postmsg "$jlogfile" "$msg"
 # Look for bqckground from pre-forecast background
 FGShrrr_FNAME0="wrfout_d01_${time_str}"
 FGShrrr_FNAME1="hrrr.t${HH}z.wrfguess"
-FGShrrr_FNAME2="hrrr.t${HH}00z.f01${subcyc}.netcdf"
+FGShrrr_FNAME2="hrrr.t${HH_cycm1}00z.f01${subcyc}.netcdf"
 FGShrrr_FNAME3="hrrr.t${HH_cycp1}z.wrfguess_rap"
 # FGShrrr_FNAME3="hrrr_*f001"
 

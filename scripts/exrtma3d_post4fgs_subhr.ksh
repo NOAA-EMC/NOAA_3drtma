@@ -149,7 +149,7 @@ EOF
 
 ${RM} -f fort.*
 ${RM} -f post_avblflds.xml params_grib2_tbl_new postcntrl.xml postxconfig-NT.txt eta_micro_lookup.dat
-${RM} -f WRF???.GrbF??.??
+${RM} -f WRF???.GrbF??
 
 # set up the namelist/control/config input files
 # hrrr"x": means experimental testing.
@@ -227,10 +227,6 @@ if [ ${err} -ne 0 ]; then
   ${ECHO} "rtma3d_wrfpost crashed!  Exit status=${err}"
   exit ${err}
 fi
-
-mv WRFPRS.GrbF00.?? WRFPRS.GrbF00
-mv WRFTWO.GrbF00.?? WRFTWO.GrbF00
-mv WRFNAT.GrbF00.?? WRFNAT.GrbF00
 
 GrbFiles=`ls WRF???.GrbF??`
 for i in ${GrbFiles}

@@ -125,7 +125,7 @@ if [ ${write_to_rzdm} = yes ] ; then
 
 set +x
 
-. /u/${USER}/.Utils
+#. /u/${USER}/.Utils
 
    export w1=ecolon
 
@@ -180,26 +180,26 @@ set +x
 
 EOF
 
-    ssh ${w1}@emcrzdm "ls -d ${ftppath0}/${PROD_HEAD}.fgs.wrfprs_hrconus_${FCST_TIME}.grib2
-    err1=$?
-    if (( $err1 == 0 )) ; then
-           ssh ${w1}@emcrzdm "ls -d ${ftppath0}/${PROD_HEAD}.fgs.wrftwo_hrconus_${FCST_TIME}.grib2
-           err2=$?
-    if (( $err2 == 0 )) ; then
-           ssh ${w1}@emcrzdm "ls -d ${ftppath0}/${PROD_HEAD}.fgs.wrfnat_hrconus_${FCST_TIME}.grib2
-           err3=$?
-    if (( $err3 == 0 )) ; then 
-           ssh ${w1}@emcrzdm "ls -d ${ftppath0}/${PROD_HEAD}.wrfprs_hrconus_${FCST_TIME}.grib2
-           err4=$?
-    if (( $err4 == 0 )) ; then 
-           ssh ${w1}@emcrzdm "ls -d ${ftppath0}/${PROD_HEAD}.wrftwo_hrconus_${FCST_TIME}.grib2
-           err5=$?
-    if (( $err5 == 0 )) ; then
-           ssh ${w1}@emcrzdm "ls -d ${ftppath0}/${PROD_HEAD}.wrftwo_hrconus_${FCST_TIME}.grib2
-           err6=$?
-    if (( $err6 == 0 )) ; then 
-           echo "All of the UPP output files have not been tranferred to RZDM."
-    fi
+#    ssh ${w1}@emcrzdm "ls -d ${ftppath0}/${PROD_HEAD}.fgs.wrfprs_hrconus_${FCST_TIME}.grib2
+#    err1=$?
+#    if (( $err1 == 0 )) ; then
+#           ssh ${w1}@emcrzdm "ls -d ${ftppath0}/${PROD_HEAD}.fgs.wrftwo_hrconus_${FCST_TIME}.grib2
+#           err2=$?
+#    if (( $err2 == 0 )) ; then
+#           ssh ${w1}@emcrzdm "ls -d ${ftppath0}/${PROD_HEAD}.fgs.wrfnat_hrconus_${FCST_TIME}.grib2
+#           err3=$?
+#    if (( $err3 == 0 )) ; then 
+#           ssh ${w1}@emcrzdm "ls -d ${ftppath0}/${PROD_HEAD}.wrfprs_hrconus_${FCST_TIME}.grib2
+#           err4=$?
+#    if (( $err4 == 0 )) ; then 
+#           ssh ${w1}@emcrzdm "ls -d ${ftppath0}/${PROD_HEAD}.wrftwo_hrconus_${FCST_TIME}.grib2
+#           err5=$?
+#    if (( $err5 == 0 )) ; then
+#           ssh ${w1}@emcrzdm "ls -d ${ftppath0}/${PROD_HEAD}.wrftwo_hrconus_${FCST_TIME}.grib2
+#           err6=$?
+#    if (( $err6 == 0 )) ; then 
+#           echo "All of the UPP output files have not been tranferred to RZDM."
+#    fi
           
         
 #   list="${PDYm3} ${PDYm4}"
