@@ -228,6 +228,10 @@ if [ ${err} -ne 0 ]; then
   exit ${err}
 fi
 
+mv WRFPRS.GrbF01.?? WRFPRS.GrbF00
+mv WRFTWO.GrbF01.?? WRFTWO.GrbF00
+mv WRFNAT.GrbF01.?? WRFNAT.GrbF00
+
 GrbFiles=`ls WRF???.GrbF??`
 for i in ${GrbFiles}
 do
