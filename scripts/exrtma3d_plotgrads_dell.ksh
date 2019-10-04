@@ -60,8 +60,8 @@ if [ ! -d ${PLTDIR} ] ; then
 fi
 cd $PLTDIR
 
-${GRIBMAP}=/gpfs/dell3/usrx/local/dev/packages/grads/2.2.0/grads-2.2.0/bin
-${WGRIB2}=/gpfs/dell2/u/Wesley.Ebisuzaki/bin
+GRIBMAP=/gpfs/dell3/usrx/local/dev/packages/grads/2.2.0/grads-2.2.0/bin
+WGRIB2=/gpfs/dell2/u/Wesley.Ebisuzaki/bin
 
 #
 # grib2 to Grads

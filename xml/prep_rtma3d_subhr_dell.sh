@@ -352,16 +352,16 @@ export exefile_name_cloud="rtma3d_process_cloud"
 
 
 #----option to compute verification statistics using MET
-  export run_verif=1      # 0: No not process verification statistics
+  export run_verif=0      # 0: No not process verification statistics
                           # 1: Compute verification statistics including cloud ceiling and visibility
 
 #--- option for archiving results on hpss
-  export run_arch=1    # 0: No archiving of 3d rtma post-processed output
+  export run_arch=0    # 0: No archiving of 3d rtma post-processed output
                           # 1: Archiving of 3d rtma results performed on hpss
 
 
 #--- option to plot the firstguess/analysis/increment
-  export run_plt=1        # default is 1 to plot with GrADS
+  export run_plt=0        # default is 1 to plot with GrADS
                           # >0: plot (and post-process of firstguess fields)
                           # =1: plot with GrADS 
                           # =2: plot with NCL (not available yet)
@@ -531,7 +531,7 @@ cat > ${NWROOT}/xml/${RUN}_${expname}_subhr.xml <<EOF
 <!ENTITY JJOB_POST4FGS   "&JJOB_DIR;/J&CAP_RUN;_POST4FGS_SUBHR">
 <!ENTITY exSCR_POST4FGS  "&SCRIPT_DIR;/ex&RUN;_post4fgs_subhr.ksh">
 <!ENTITY JJOB_PLOTGRADS  "&JJOB_DIR;/J&CAP_RUN;_PLOTGRADS_SUBHR">
-<!ENTITY exSCR_PLOTGRADS "&SCRIPT_DIR;/ex&RUN;_plotgrads_subhr.ksh">
+<!ENTITY exSCR_PLOTGRADS "&SCRIPT_DIR;/ex&RUN;_plotgrads_dell.ksh">
 <!ENTITY JJOB_VERIF     "&JJOB_DIR;/J&CAP_RUN;_VERIF_SUBHR">
 <!ENTITY exSCR_VERIF    "&SCRIPT_DIR;/ex&RUN;_verif_subhr.ksh">
 <!ENTITY JJOB_ARCH     "&JJOB_DIR;/J&CAP_RUN;_ARCH_SUBHR">
@@ -1137,7 +1137,7 @@ EOF
 
 cat >> ${NWROOT}/xml/${RUN}_${expname}_subhr.xml <<EOF 
 
-<workflow realtime="$realtime" scheduler="${SCHD_ATTRB}" cyclethrottle="1" taskthrottle="50" cyclelifespan="00:12:00:00">
+<workflow realtime="$realtime" scheduler="${SCHD_ATTRB}" cyclethrottle="12" taskthrottle="60" cyclelifespan="00:12:00:00">
 
   <log>
     <cyclestr>&LOG_DIR;/&NET;_workflow_&envir;_@Y@m@d@H@M.log</cyclestr>
@@ -1358,6 +1358,28 @@ cat >> ${NWROOT}/xml/${RUN}_${expname}_subhr.xml <<EOF
 
   </task>
 
+  <task name="&NET;_post4fgs_task_@Y@m@d@H@M" cycledefs="02-11hr,00hr,01hr" maxtries="&maxtries;">
+
+    &ENVARS;
+    &POST_RESOURCES;
+    &POST_RESERVATION;
+    <envar>
+       <name>rundir_task</name>
+       <value><cyclestr>&DATA_POST4FGS;</cyclestr></value>
+    </envar>
+
+    <command>&JJOB_DIR;/launch.ksh &JJOB_POST4FGS;</command>
+    <jobname><cyclestr>&NET;_post4fgs_job_@Y@m@d@H@M</cyclestr></jobname>
+    <join><cyclestr>&LOG_SCHDLR;/&NET;_&envir;_post4fgs_@Y@m@d@H@M.log</cyclestr></join>
+
+    &ENVARS_POST;
+
+    <dependency>
+          <taskdep task="&NET;_gsianl_task_@Y@m@d@H@M"/>
+    </dependency>
+
+  </task>
+
 EOF
 
 if [ ${run_verif} -gt 0 ] ; then
@@ -1411,29 +1433,6 @@ fi
 
 if [ ${run_plt} -gt 0 ] ; then
 cat >> ${NWROOT}/xml/${RUN}_${expname}_subhr.xml <<EOF 
-  <task name="&NET;_post4fgs_task_@Y@m@d@H@M" cycledefs="02-11hr,00hr,01hr" maxtries="&maxtries;">
-
-    &ENVARS;
-    &POST_RESOURCES;
-    &POST_RESERVATION;
-    <envar>
-       <name>rundir_task</name>
-       <value><cyclestr>&DATA_POST4FGS;</cyclestr></value>
-    </envar>
-
-    <command>&JJOB_DIR;/launch.ksh &JJOB_POST4FGS;</command>
-    <jobname><cyclestr>&NET;_post4fgs_job_@Y@m@d@H@M</cyclestr></jobname>
-    <join><cyclestr>&LOG_SCHDLR;/&NET;_&envir;_post4fgs_@Y@m@d@H@M.log</cyclestr></join>
-
-    &ENVARS_POST;
-
-    <dependency>
-          <taskdep task="&NET;_gsianl_task_@Y@m@d@H@M"/>
-    </dependency>
-
-  </task>
-
-
   <task name="&NET;_plotgrads_task_@Y@m@d@H@M" cycledefs="02-11hr,00hr,01hr" maxtries="&maxtries;">
 
     &ENVARS;

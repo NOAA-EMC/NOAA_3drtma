@@ -53,6 +53,7 @@ time_run=${time_str}
 export PLTDIR=$DATA
 # export myg2tool="/home/Gang.Zhao/local/grib/g2ctl"
 export myg2tool="${UTILrtma3d_dev}/plot/grads/g2ctl"
+export EXEC="/gpfs/dell3/usrx/local/dev/packages/grads/2.2.0/grads-2.2.0/bin"
 
 if [ ! -d ${PLTDIR} ] ; then
   echo " running/plotting directory is not found. Abort!"
@@ -100,7 +101,7 @@ do
   rm -f $ctlfile $idxfile
   $myg2tool/g2ctl.0.1.4 -0 $g2file > $ctlfile
 #  $myg2tool/g2ctl -0 $g2file > $ctlfile
-  gribmap -0 -i $ctlfile
+  ${EXEC}/gribmap -0 -i $ctlfile
   if [ ! -f $ctlfile ] || [ ! -f $idxfile ] ; then
     echo "g2ctl step failed. Abort!"
     exit 111
