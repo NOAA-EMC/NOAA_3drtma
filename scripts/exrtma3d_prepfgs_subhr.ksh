@@ -103,32 +103,47 @@ postmsg "$jlogfile" "$msg"
 # Look for bqckground from pre-forecast background
 FGShrrr_FNAME2="hrrr.t${HH_cycm1}00z.f01${subcyc}.netcdf"
 
-if [ ${HH_cycm1} -eq 23 ]; then
+if  [ ${HH_cycm1} -eq 23 ]; then
 
-GESINhrrrsub = $(GESINhrrrm1}
+	if [ -r ${GESINhrrrm1}/${FGShrrr_FNAME2} ] ; then
+  		fgs_size=$(ls -l ${GESINhrrrm1}/${FGShrrr_FNAME2} | awk '{ print $5 }')
+  		echo "fgs_file size=${fgs_size}"
+  		while [[ ${fgs_size} != ${file_size} ]]; do
+       			sleep 120
+       			fgs_size=$(ls -l ${GESINhrrrm1}/${FGShrrr_FNAME2} | awk '{ print $5 }')
+  		done
+  		${LN} -sf ${GESINhrrrm1}/${FGShrrr_FNAME2}   ${GESINhrrr_rtma3d}/${FGSrtma3d_FNAME}
+  		${LN} -sf ${GESINhrrr_rtma3d}/${FGSrtma3d_FNAME}     ${DATA}/${FGSrtma3d_FNAME}
+  		${ECHO} " Cycle ${YYYYMMDDHH}: PREPFGS background --> ${DATA}/${FGShrrr_FNAME2} "
+	else
+  		${ECHO} "ERROR: No background file for analysis at ${time_run}!!!!"
+  		${ECHO} " Cycle ${YYYYMMDDHH}: PREPFGS failed because of no background" >> ${pgmout}
+  		exit 1
+	fi
 
 else
 
-GESINhrrrsub = ${GESINhrrr}
+        if [ -r ${GESINhrrr}/${FGShrrr_FNAME2} ] ; then
+                fgs_size=$(ls -l ${GESINhrrr}/${FGShrrr_FNAME2} | awk '{ print $5 }')
+                echo "fgs_file size=${fgs_size}"
+                while [[ ${fgs_size} != ${file_size} ]]; do
+                        sleep 120
+                        fgs_size=$(ls -l ${GESINhrrr}/${FGShrrr_FNAME2} | awk '{ print $5 }')
+                done
+                ${LN} -sf ${GESINhrrr}/${FGShrrr_FNAME2}   ${GESINhrrr_rtma3d}/${FGSrtma3d_FNAME}
+                ${LN} -sf ${GESINhrrr_rtma3d}/${FGSrtma3d_FNAME}     ${DATA}/${FGSrtma3d_FNAME}
+                ${ECHO} " Cycle ${YYYYMMDDHH}: PREPFGS background --> ${DATA}/${FGShrrr_FNAME2} "
+        else
+                ${ECHO} "ERROR: No background file for analysis at ${time_run}!!!!"
+                ${ECHO} " Cycle ${YYYYMMDDHH}: PREPFGS failed because of no background" >> ${pgmout}
+                exit 1
+        fi
 
 fi
 
 
-if [ -r ${GESINhrrrsub}/${FGShrrr_FNAME2} ] ; then
-  fgs_size=$(ls -l ${GESINhrrrsub}/${FGShrrr_FNAME2} | awk '{ print $5 }')
-  echo "fgs_file size=${fgs_size}"
-  while [[ ${fgs_size} != ${file_size} ]]; do
-       sleep 120
-       fgs_size=$(ls -l ${GESINhrrrsub}/${FGShrrr_FNAME2} | awk '{ print $5 }')
-  done
-  ${LN} -sf ${GESINhrrrsub}/${FGShrrr_FNAME2}   ${GESINhrrr_rtma3d}/${FGSrtma3d_FNAME}
-  ${LN} -sf ${GESINhrrr_rtma3d}/${FGSrtma3d_FNAME}     ${DATA}/${FGSrtma3d_FNAME}
-  ${ECHO} " Cycle ${YYYYMMDDHH}: PREPFGS background --> ${DATA}/${FGShrrr_FNAME2} "
-else
-  ${ECHO} "ERROR: No background file for analysis at ${time_run}!!!!"
-  ${ECHO} " Cycle ${YYYYMMDDHH}: PREPFGS failed because of no background" >> ${pgmout} 
-  exit 1
-fi
+
+
 
 # Snow cover building and trimming currently set to run in the 00z cycle
 
