@@ -55,6 +55,7 @@ export subcyc=${subcyc} #Note: Must define subcyc in upper level script. Can be 
 
 export cycle=${cycle:-t${cyc}${subcyc}z}
 export PDYHH="${PDY}${cyc}"
+PDYm1=`$NDATE -24 ${PDY}${cyc} | cut -c 1-8`
 
 ####################################
 # Determine Job Output Name on System
@@ -92,6 +93,7 @@ export COMOUT=${COMOUT:-${COMROOT}/${NET}/${envir}/${RUN}.${PDY}}
 export COMINrap=${COMINRAP}/rap.${PDY}
 export COMINhrrr=${COMINHRRR}/hrrr.${PDY}/${domain}
 export GESINhrrr=${GESINHRRR}/hrrr.${PDY}/conus
+export GESINhrrrm1=${GESINHRRR}/hrrr.${PDYm1}/conus
 
 export GESINhrrr_rtma3d=${GESINhrrr_rtma3d:-"${COMIN}/fgsprd.${cycle}"}
 export PDYHH_cycm1=$($NDATE -01  "${PDYHH}")
