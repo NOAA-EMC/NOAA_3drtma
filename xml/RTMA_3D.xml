@@ -14,10 +14,9 @@
 
 <!ENTITY SYSTEM_ID "RTMA_3D"> 
 <!ENTITY HOMEBASE_DIR "/lfs1/projects/nrtrr/workflow/RTMA_3D_RU">
-<!ENTITY DATABASE_DIR "/home/rtrr/rtma_3d_databasedir">
-<!ENTITY JOBNAME_PRE "RTMA3D_reg">
+<!ENTITY DATABASE_DIR "/lfs1/projects/nrtrr/RTMA_3D_RU">
+<!ENTITY JOBNAME_PRE "RTMA3D_RU">
 
-<!ENTITY OBS_DIR "/public/data">
 <!ENTITY NCL_VER "6.5.0">
 <!ENTITY SCRIPTS "&HOMEBASE_DIR;/scripts">
 <!ENTITY STATIC_DIR "&HOMEBASE_DIR;/fix">
@@ -36,9 +35,10 @@
 
 <!ENTITY SCRIPT_DIR "&HOMEBASE_DIR;/scripts">
 <!ENTITY JJOB_DIR   "&HOMEBASE_DIR;/jobs">
-<!ENTITY WRKFLW_DIR "&HOMEBASE_DIR;/workflow">
+<!ENTITY WRKFLW_DIR "&HOMEBASE_DIR;/xml">
 
 <!ENTITY MACHINE    "jet">
+<!ENTITY OBS_DIR "/public/data">
 <!ENTITY HRRR_DIR "/home/rtrr/hrrr">
 <!ENTITY SST_DIR "&OBS_DIR;/grids/ncep/sst/0p083deg/grib2">
 
@@ -122,9 +122,9 @@
 <!ENTITY WALL_LIMIT_UV '<deadline><cyclestr offset="&DEADLINE_UV;">@Y@m@d@H@M</cyclestr></deadline>'>
 
 <!ENTITY RESERVATION '<native>--mail-type=NONE</native><queue>&QUEUE;</queue><account>&ACCOUNT;</account><partition>&PARTITION;</partition>'>
-<!ENTITY RESERVATION_PRE '<native>--mail-type=NONE --reservation=&RES_DA;</native><queue>&QUEUE;</queue><account>&ACCOUNT;</account><partition>&PARTITION;</partition>'>
-<!ENTITY RESERVATION_DA '<native>--mail-type=NONE --reservation=&RES_DA;</native><queue>&QUEUE;</queue><account>&ACCOUNT_DA;</account><partition>&PARTITION_DA;</partition>'>
-<!ENTITY RESERVATION_POST '<native>--mail-type=NONE --reservation=&RES_DA;</native><queue>&QUEUE;</queue><account>&ACCOUNT;</account><partition>&PARTITION;</partition>'>
+<!ENTITY RESERVATION_PRE '<native>--mail-type=NONE </native><queue>&QUEUE;</queue><account>&ACCOUNT;</account><partition>&PARTITION;</partition>'>
+<!ENTITY RESERVATION_DA '<native>--mail-type=NONE </native><queue>&QUEUE;</queue><account>&ACCOUNT_DA;</account><partition>&PARTITION_DA;</partition>'>
+<!ENTITY RESERVATION_POST '<native>--mail-type=NONE </native><queue>&QUEUE;</queue><account>&ACCOUNT;</account><partition>&PARTITION;</partition>'>
 <!ENTITY RESERVATION_SMARTINIT '<native>--mail-type=NONE</native><queue>&QUEUE;</queue><account>&ACCOUNT;</account><partition>&PARTITION;</partition>'>
 
 <!ENTITY COMMONVARS
