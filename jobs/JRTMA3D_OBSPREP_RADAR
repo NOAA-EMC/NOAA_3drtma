@@ -46,7 +46,15 @@ cd $DATA
 #    setpdy.sh needs the variables 
 #    $PDY and $cyc already defined in advance
 #####################################################
-export cycle=${cycle:-t${cyc}${subcyc}z}
+if [[ "${subcyc}" = "99" ]]; then
+  export cycle=${cycle:-t${cyc}z}
+  export pgmout=${pgmout:-"OUTPUT.${PDY}${cyc}.${jobid}"}
+  export COMINradar=${COMINradar:-"${COMINRADAR}/radar.${PDY}"}
+else
+  export cycle=${cycle:-t${cyc}${subcyc}z}
+  export pgmout=${pgmout:-"OUTPUT.${PDY}${cyc}${subcyc}.${jobid}"}
+  export COMINradar=${COMINradar:-"${COMINRADAR}/radar.${PDY}${cyc}"}
+fi
 #setpdy.sh
 #. ${DATA}/PDY
 
@@ -58,8 +66,6 @@ export PDYHH="${PDY}${cyc}"
 ####################################
 export LOG_JJOB=${LOG_JJOB:-$COMROOT/logs/jlogfiles}
 export jlogfile=${jlogfile:-$LOG_JJOB/jlogfile.${jobid}}
-# export pgmout=${pgmout:-"OUTPUT.$$"}
-export pgmout=${pgmout:-"OUTPUT.${PDY}${cyc}${subcyc}.${jobid}"}
 if [ ! -d ${LOG_JJOB} ] ; then
    mkdir -p ${LOG_JJOB}
 fi
@@ -95,7 +101,6 @@ export COMINrap=${COMINrap:-"${COMIN}/rap.${PDY}"}
 export COMINhrrr=${COMINhrrr:-"${COMIN}/hrrr.${PDY}/conus"}
 export COMINlightning=${COMINlightning:-"${COMIN}/lightning.${PDY}"}
 export COMINmosaic=${COMINmosaic:-"${COMIN}/radar.${PDY}"}
-export COMINradar=${COMINradar:-"${COMINRADAR}/radar.${PDY}${cyc}"}
 
 ### Observations Products/Input for the RTMA3D (prepbufr files) 
 export COMINobsproc_rtma3d=${COMINobsproc_rtma3d:-"${COMIN}/obsprd.${cycle}"}
