@@ -46,7 +46,7 @@ cd $DATA
 #    setpdy.sh needs the variables 
 #    $PDY and $cyc already defined in advance
 #####################################################
-if [[ "${subcyc}" = "99" ]]; then
+if [[ "${subcyc}" == "99" ]]; then
   export cycle=${cycle:-t${cyc}z}
   export pgmout=${pgmout:-"OUTPUT.${PDY}${cyc}.${jobid}"}
   export COMINradar=${COMINradar:-"${COMINRADAR}/radar.${PDY}"}
@@ -108,16 +108,18 @@ export COMINobsproc_rtma3d=${COMINobsproc_rtma3d:-"${COMIN}/obsprd.${cycle}"}
 ### Firstguess Products/Input for the RTMA3D (prepbufr files) 
 export GESINhrrr_rtma3d=${GESINhrrr_rtma3d:-"${COMIN}/fgsprd.${cycle}"}
 
-if [ ! -d "${COMIN}" ] ; then
-   mkdir -p $COMIN
-fi
-if [ ! -d "${COMOUT}" ] ; then
-   mkdir -p $COMOUT
-fi
-if [ ! -d "${COMINobsproc_rtma3d}" ] ; then
-# echo " Directory of obs data does NOT exist. Job abort!"
-# err_exit
-  mkdir -p $COMINobsproc_rtma3d
+if [[ "${envir}" != "expr" ]]; then #Jet expr runs don't need COM
+  if [ ! -d "${COMIN}" ] ; then
+     mkdir -p $COMIN
+  fi
+  if [ ! -d "${COMOUT}" ] ; then
+     mkdir -p $COMOUT
+  fi
+  if [ ! -d "${COMINobsproc_rtma3d}" ] ; then
+  # echo " Directory of obs data does NOT exist. Job abort!"
+  # err_exit
+    mkdir -p $COMINobsproc_rtma3d
+  fi
 fi
 
 ###########################################################
@@ -147,7 +149,7 @@ fi
 ######################
 # Execute the script.
 ######################
-${exSCR_OBSPREP_RADAR:-$HOMErtma3d/scripts/ex${RUN}_obsprep_radar_sub.ksh}
+${exSCR_OBSPREP_RADAR:-$HOMErtma3d/scripts/ex${NET}_obsprep_radar.ksh}
 export err=$?; err_chk
 
 msg="$0 of $job completed normally"
