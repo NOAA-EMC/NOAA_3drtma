@@ -2,7 +2,6 @@
 ############################################################################
 
 set -x
-
 # make sure executable exists
 if [ ! -f ${EXECrtma3d}/${exefile_name_cloud} ] ; then
   ${ECHO} "ERROR: NASA cloud obs prcoessing executable '${EXECrtma3d}/${exefile_name_cloud}' does not exist!"
@@ -76,11 +75,7 @@ ${LN} -s ${FIXwps}/hrrr_geo_em.d01.nc           ./geo_em.d01.nc
 # echo ${YYYYMMDDHH} > ./nasaLaRC_cycle_date
 
 # Run process lightning
-
-  if [ -f errfile ] ; then 
-    rm -f errfile
-  fi
-
+  pgm=${RUN}_cloud
   . prep_step
 
   startmsg

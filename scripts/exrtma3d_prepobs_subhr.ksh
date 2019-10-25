@@ -81,7 +81,7 @@ cd ${workdir}
 time_str=`${DATE} "+%Y-%m-%d_%H_%M_%S" -d "${START_TIME}"`
 ${ECHO} " time_str = ${time_str}"
 time_run=${time_str}
-
+pgm=${RUN}_prepobs
 . prep_step
 
 startmsg

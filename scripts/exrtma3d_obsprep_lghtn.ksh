@@ -116,10 +116,7 @@ fi
 
 # Run process lightning
 
-if [ -f errfile ] ; then 
-  rm -f errfile
-fi
-
+pgm=${RUN}_lghtn
 . prep_step
 
 startmsg

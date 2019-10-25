@@ -2,6 +2,8 @@
 
 set -x
 
+
+pgm=${RUN}_arch
 . prep_step
 
 startmsg

@@ -2,7 +2,6 @@
 ############################################################################
 
 set -x
-
 # make sure executable exists
 if [ ! -f ${EXECrtma3d}/${exefile_name_lightning} ] ; then
   ${ECHO} "ERROR: lightning obs prcoessing executable '${EXECrtma3d}/${exefile_name_lightning}' does not exist!"
@@ -113,11 +112,7 @@ EOF
 fi
 
 # Run process lightning
-
-if [ -f errfile ] ; then 
-  rm -f errfile
-fi
-
+pgm=${RUN}_lghtn
 . prep_step
 
 startmsg

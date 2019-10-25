@@ -100,11 +100,7 @@ cat << EOF > mosaic.namelist
  /
 
 EOF
-
-if [ -f errfile ] ; then 
-  rm -f errfile
-fi
-
+pgm=${RUN}_radar
 . prep_step
 
 startmsg

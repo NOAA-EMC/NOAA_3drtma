@@ -3,6 +3,7 @@
 
 set -x
 
+
 # make sure executable exists
 if [ ! -f ${EXECrtma3d}/${exefile_name_radar} ] ; then
   ${ECHO} "ERROR: mosaic radar obs prcoessing executable '${EXECrtma3d}/${exefile_name_radar}' does not exist!"
@@ -178,11 +179,7 @@ cat << EOF > mosaic.namelist
  /
 
 EOF
-
-if [ -f errfile ] ; then 
-  rm -f errfile
-fi
-
+pgm=${RUN}_radar
 . prep_step
 
 startmsg

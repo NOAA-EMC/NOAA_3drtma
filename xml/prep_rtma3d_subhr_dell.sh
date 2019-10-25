@@ -89,9 +89,9 @@ export realtime="T"
 
   DATABASE_DIR=${ptmp_base}            # (equivalent to ptmp_base)
   HOMEBASE_DIR=${NWROOT}               # path to system home directory
-  COMINRAP="/gpfs/gp2/ptmp/Jeff.Whiting/CHKOUT_TMP/com3d/rtma/prod"
+  COMINRAP="/gpfs/tp2/ptmp/Jeff.Whiting/CHKOUT_TMP/com3d/rtma/prod"
   COMINHRRR="/gpfs/hps/nco/ops/com/hrrr/prod"
-  COMINRADAR="/gpfs/gp1/nco/ops/com/hourly/prod"
+  COMINRADAR="/gpfs/tp1/nco/ops/com/hourly/prod"
   GESINHRRR="/gpfs/dell1/ptmp/Annette.Gibbs/com/hrrr/prod"
 # Computational resources
   ACCOUNT="RTMA-T2O"                    #account for CPU resources

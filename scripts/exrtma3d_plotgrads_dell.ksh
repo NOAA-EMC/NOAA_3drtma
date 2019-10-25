@@ -4,6 +4,7 @@ date
 
 # set -x
 ulimit -S -s unlimited
+
 #------------------------------------------------------------------#
 #
 # set up of Analysis Time 
@@ -130,6 +131,7 @@ sed -i 's/Y4M2D2H2M2/'${adate}'/g'  ./plt_fai.gs
 rm -f ./${gmf_fhead}_*.gmf ./${gmf_fhead}_*.ps  ./${gmf_fhead}_*.png ./${gmf_fhead}_*.pdf
 
 #
+pgm=${RUN}_plot
 . prep_step
 startmsg
 

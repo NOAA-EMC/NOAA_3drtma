@@ -1,7 +1,6 @@
 #!/bin/ksh 
 
 set -x
-
 export OMP_NUM_THREADS=1
 
 # Make sure we are using GMT time zone for time computations
@@ -199,10 +198,7 @@ done
 #
 # Run unipost
 #
-if [ -f errfile ] ; then
-    rm -f errfile
-fi
-
+pgm=${RUN}_post
 . prep_step
 
 startmsg

@@ -1,7 +1,6 @@
 #!/bin/ksh
 
 set -x 
-
 #-- Testing the status of some important variables. --#
 # Make sure these variables for key directories are defined and exists
 if [ ! "${COMINhrrr}" ]; then
@@ -89,7 +88,7 @@ cd ${workdir}
 time_str=`${DATE} "+%Y-%m-%d_%H_%M_%S" -d "${START_TIME}"`
 ${ECHO} " time_str = ${time_str}"
 time_run=${time_str}
-
+pgm=${RUN}_prepfgs
 . prep_step
 
 startmsg

@@ -200,10 +200,7 @@ done
 #
 # Run unipost
 #
-if [ -f errfile ] ; then
-    rm -f errfile
-fi
-
+pgm=${RUN}_post
 . prep_step
 
 startmsg

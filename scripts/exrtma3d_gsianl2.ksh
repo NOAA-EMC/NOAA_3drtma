@@ -327,10 +327,6 @@ cp ${FIXgsi}/rap_satbias_pc_starting_file.txt ./satbias_pc
 
 # Run GSI
 
-if [ -f errfile ] ; then
-    rm -f errfile
-fi
-
 . prep_step
 
 startmsg
@@ -442,9 +438,6 @@ cat << EOF > gsiparm.anl
 $gsi_namelist
 EOF
 
-if [ -f errfile ] ; then
-    rm -f errfile
-fi
 
 . prep_step
 
