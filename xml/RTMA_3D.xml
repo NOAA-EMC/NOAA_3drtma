@@ -151,22 +151,24 @@
 <workflow realtime="T" scheduler="&SCHEDULER;" cyclethrottle="30" cyclelifespan="01:00:00:00">
 
   <log>
-    <cyclestr>&LOG_DIR;/workflow_@Y@m@d@H.log</cyclestr>
+    <cyclestr>&LOG_DIR;/workflow_@Y@m@d@H@M.log</cyclestr>
   </log>
 
-  <cycledef group="00hr">00 00,12 * * 2019-2020 *</cycledef>
-  <cycledef group="01hr">00 01,13 * * 2019-2020 *</cycledef>
-  <cycledef group="02-11hr">00 02-11,14-23 * * 2019-2020 *</cycledef>
+  <cycledef group="all">00,15,30,45  *  *  *  2019-2021 *</cycledef>
+  <cycledef group="C00">00 01-11,13-23  *  *  2019-2021 *</cycledef>
+  <cycledef group="C15">15 01-11,13-23  *  *  2019-2021 *</cycledef>
+  <cycledef group="C30">30 00-10,12-22  *  *  2019-2021 *</cycledef>
+  <cycledef group="C45">45 00-10,12-22  *  *  2019-2021 *</cycledef>
+  <cycledef group="E00">00 00,12        *  *  2019-2021 *</cycledef>
+  <cycledef group="E15">15 00,12        *  *  2019-2021 *</cycledef>
+  <cycledef group="E30">30 11,23        *  *  2019-2021 *</cycledef>
+  <cycledef group="E45">45 11,23        *  *  2019-2021 *</cycledef>
 
-  <metatask>
 <!-- only need 60 for hourly running
     <var name="min">15 30 45 60</var>
     <var name="off">00:45:00 00:30:00 00:15:00 00:00:00</var>
 -->
-    <var name="min">60</var>
-    <var name="off">00:00:00</var>
-
-  <task name="lightning_gsi_#min#" cycledefs="02-11hr,00hr,01hr" maxtries="3">
+  <task name="lightning_gsi" cycledefs="all" maxtries="3">
 
     &LIGHTNING_RESOURCES;
     &WALL_LIMIT_DA;
@@ -175,7 +177,7 @@
     <command>&JJOB_DIR;/launch.ksh &JJOB_DIR;/JRTMA3D_LIGHTNING</command>
     <cores>&LIGHTNING_PROC;</cores>
     <jobname><cyclestr>&JOBNAME_PRE;_lightning_@H_#min#</cyclestr></jobname>
-    <join><cyclestr>&LOG_DIR;/lightning_gsi_@Y@m@d@H00_#min#.log</cyclestr></join>
+    <join><cyclestr>&LOG_DIR;/lightning_gsi_@Y@m@d@H@M.log</cyclestr></join>
 
     &COMMONVARS;
     <envar>
@@ -184,7 +186,7 @@
     </envar>
     <envar>
       <name>SUBH_TIME</name>
-      <value>#min#</value>
+      <value><cyclestr>@M</cyclestr></value>
     </envar>
     <envar>
       <name>DATAROOT</name>
@@ -221,65 +223,15 @@
   </task>
   </metatask>
 
-  <metatask>
-  <var name="min">15 30 45 60 00 </var>
-  <var name="mm1">13 29 44 57 00 </var>
-  <var name="mm2">14 30 45 58 01 </var>
-  <var name="mm3">15 31 46 59 02 </var>
-  <var name="offset">-1:00:00 -1:00:00 -1:00:00 -1:00:00 00:00:00</var>
-  <task name="radar_link_#min#" cycledefs="02-11hr,00hr,01hr" maxtries="3">
-
+  <task name="radar_gsi" cycledefs="all" maxtries="3">
     &RADAR_RESOURCES;
     &WALL_LIMIT_DA;
-    &RESERVATION_PRE;
-
-    <command>&JJOB_DIR;/launch.ksh &JJOB_DIR;/JRTMA3D_RADAR_LINKS</command>
-    <cores>&RADARLINKS_PROC;</cores>
-    <jobname><cyclestr>&JOBNAME_PRE;_radarlink_#min#_@H</cyclestr></jobname>
-    <join><cyclestr>&LOG_DIR;/radar_link_#min#_@Y@m@d@H00.log</cyclestr></join>
-
-    &COMMONVARS;
-    <envar>
-      <name>START_TIME</name>
-      <value><cyclestr offset="-01:00:00">@Y@m@d@H</cyclestr></value>
-    </envar>
-    <envar>
-      <name>DATAHOME</name>
-      <value><cyclestr>&DATAROOT;/@Y@m@d@H/obsprd</cyclestr></value>
-    </envar>
-    <envar>
-      <name>NSSL</name>
-      <value>&RADAR_DIR;</value>
-    </envar>
-    <envar>
-      <name>SUBH_TIME</name>
-      <value>#min#</value>
-    </envar>
-
-    <dependency>
-    <or>
-      <!-- for testing correctness of cyclestr in the ruby snippet
-      <sh> ls <cyclestr offset="-#offset#">&RADAR_DIR;/@Y@m@d-@H#mm1#*.MRMS_MergedReflectivityQC_00.50_@Y@m@d-@H*.grib2</cyclestr> </sh>
-      -->
-      <rb><cyclestr offset="#offset#">!Dir.glob('&RADAR_DIR;/@Y@m@d-@H#mm1#*.MRMS_MergedReflectivityQC_00.50_@Y@m@d-@H*.grib2').empty?</cyclestr></rb>
-      <rb><cyclestr offset="#offset#">!Dir.glob('&RADAR_DIR;/@Y@m@d-@H#mm2#*.MRMS_MergedReflectivityQC_00.50_@Y@m@d-@H*.grib2').empty?</cyclestr></rb>
-      <rb><cyclestr offset="#offset#">!Dir.glob('&RADAR_DIR;/@Y@m@d-@H#mm3#*.MRMS_MergedReflectivityQC_00.50_@Y@m@d-@H*.grib2').empty?</cyclestr></rb>
-    </or>
-    </dependency>
-
-  </task>
-  </metatask>
-
-  <task name="radar_gsi" cycledefs="02-11hr,00hr,01hr" maxtries="3">
-
-    &RADAR_RESOURCES;
-    &WALL_LIMIT_DA;
-    &RESERVATION_PRE;
+    &RESERVATION_POST;
 
     <command>&JJOB_DIR;/launch.ksh &JJOB_DIR;/JRTMA3D_RADAR</command>
     <cores>&RADAR_PROC;</cores>
-    <jobname><cyclestr>&JOBNAME_PRE;_radar_@H</cyclestr></jobname>
-    <join><cyclestr>&LOG_DIR;/radar_gsi_@Y@m@d@H00.log</cyclestr></join>
+    <jobname><cyclestr>&JOBNAME_PRE;_radar_@H@M</cyclestr></jobname>
+    <join><cyclestr>&LOG_DIR;/radar_gsi_@Y@m@d@H@M.log</cyclestr></join>
 
     &COMMONVARS;
     <envar>
@@ -287,16 +239,24 @@
       <value><cyclestr>@Y@m@d@H</cyclestr></value>
     </envar>
     <envar>
-      <name>SUBH_TIME</name>
-      <value>00</value>
-    </envar>      
+      <name>subcyc</name>
+      <value><cyclestr>@M</cyclestr></value>
+    </envar>
     <envar>
-      <name>DATAROOT</name>
-      <value>&DATAROOT;</value>
+      <name>MM1</name>
+      <value><cyclestr offset="-0:01:00">@M</cyclestr></value>
+    </envar>
+    <envar>
+      <name>MM2</name>
+      <value><cyclestr>@M</cyclestr></value>
+    </envar>
+    <envar>
+      <name>MM3</name>
+      <value><cyclestr offset="0:01:00">@M</cyclestr></value>
     </envar>
     <envar>
       <name>DATAHOME</name>
-      <value><cyclestr>&DATAROOT;/@Y@m@d@H/obsprd</cyclestr></value>
+      <value><cyclestr>&DATAROOT;/@Y@m@d@H@M/obsprd</cyclestr></value>
     </envar>
     <envar>
       <name>GSI_ROOT</name>
@@ -317,71 +277,14 @@
 
     <dependency>
       <or>
-        <datadep minsize="128B"><cyclestr>&DATAROOT;/@Y@m@d@H/obsprd/filelist_mrms</cyclestr></datadep>
         <timedep><cyclestr offset="&START_TIME_RADAR;">@Y@m@d@H@M00</cyclestr></timedep>
+        <rb><cyclestr offset="-0:01:00">!Dir.glob('&RADAR_DIR;/@Y@m@d-@H@M*.MRMS_MergedReflectivityQC_00.50_@Y@m@d-@H*.grib2').empty?</cyclestr></rb>
+        <rb><cyclestr>!Dir.glob('&RADAR_DIR;/@Y@m@d-@H@M*.MRMS_MergedReflectivityQC_00.50_@Y@m@d-@H*.grib2').empty?</cyclestr></rb>
+        <rb><cyclestr offset="0:01:00">!Dir.glob('&RADAR_DIR;/@Y@m@d-@H@M*.MRMS_MergedReflectivityQC_00.50_@Y@m@d-@H*.grib2').empty?</cyclestr></rb>
       </or>
     </dependency>
 
   </task>
-
-<!-- don't need subhour radar_gsi for hourly run
-  <metatask>
-    <var name="subh">15 30 45 60</var>
-    <task name="radar_gsi_#subh#" cycledefs="02-11hr,00hr,01hr" maxtries="3">
-
-      &RADAR_RESOURCES;
-      &WALL_LIMIT_DA;
-      &RESERVATION_PRE;
-
-      <command>&JJOB_DIR;/launch.ksh &JJOB_DIR;/JRTMA3D_RADAR</command>
-      <cores>&RADAR_PROC;</cores>
-      <jobname><cyclestr>&JOBNAME_PRE;_radar_@H_#subh#</cyclestr></jobname>
-      <join><cyclestr>&LOG_DIR;/radar_gsi_@Y@m@d@H00_#subh#.log</cyclestr></join>
-
-      &COMMONVARS;
-      <envar>
-        <name>START_TIME</name>
-        <value><cyclestr offset="-01:00:00">@Y@m@d@H</cyclestr></value>
-      </envar>
-      <envar>
-        <name>SUBH_TIME</name>
-        <value>#subh#</value>
-      </envar>
-      <envar>
-        <name>DATAROOT</name>
-        <value>&DATAROOT;</value>
-      </envar>
-      <envar>
-        <name>DATAHOME</name>
-        <value><cyclestr>&DATAROOT;/@Y@m@d@H/obsprd/#subh#</cyclestr></value>
-      </envar>
-      <envar>
-        <name>GSI_ROOT</name>
-        <value>&GSI_ROOT;</value>
-      </envar>
-      <envar>
-        <name>FIX_ROOT</name>
-        <value>&FIX_ROOT;</value>
-      </envar>
-      <envar>
-        <name>STATIC_DIR</name>
-        <value>&STATIC_DIR;/WPS</value>
-      </envar>
-      <envar>
-        <name>NSSL</name>
-        <value>&RADAR_DIR;</value>
-      </envar>
-
-      <dependency>
-        <or>
-          <datadep><cyclestr>&DATAROOT;/@Y@m@d@H/obsprd/#subh#/filelist_mrms</cyclestr></datadep>
-          <timedep><cyclestr offset="&START_TIME_RADAR;">@Y@m@d@H@M00</cyclestr></timedep>
-        </or>
-      </dependency>
-
-    </task>
-  </metatask>
--->
 
   <task name="satellite_gsi_bufr" cycledefs="02-11hr,01hr" maxtries="3">
 
@@ -576,99 +479,6 @@
 
   </task>
 
-  <task name="conventional_gsi_early" cycledefs="00hr" maxtries="3">
-
-    &CONVENTIONAL_RESOURCES;
-    &WALL_LIMIT_DA;
-    &RESERVATION_PRE;
-
-    <command>&JJOB_DIR;/launch.ksh &JJOB_DIR;/JRTMA3D_CONVENTIONAL</command>
-    <cores>&CONVENTIONAL_PROC;</cores>
-    <jobname><cyclestr>&JOBNAME_PRE;_conventional_early_@H</cyclestr></jobname>
-    <join><cyclestr>&LOG_DIR;/conventional_gsi_early_@Y@m@d@H00.log</cyclestr></join>
-
-    &COMMONVARS;
-    <envar>
-      <name>START_TIME</name>
-      <value><cyclestr>@Y@m@d@H</cyclestr></value>
-    </envar>
-    <envar>
-      <name>EARLY</name>
-      <value>1</value>
-    </envar>
-    <envar>
-      <name>DATAHOME</name>
-      <value><cyclestr>&DATAROOT;/@Y@m@d@H/obsprd</cyclestr></value>
-    </envar>
-    <envar>
-      <name>GSI_ROOT</name>
-      <value>&GSI_ROOT;</value>
-    </envar>
-    <envar>
-      <name>PREPBUFR</name>
-      <value>&PREPBUFR_DIR;</value>
-    </envar>
-    <envar>
-      <name>PREPBUFR_SAT</name>
-      <value>&PREPBUFR_SAT_DIR;</value>
-    </envar>
-    <envar>
-      <name>BUFRLIGHTNING</name>
-      <value>&BUFRLIGHTNING_DIR;</value>
-    </envar>
-    <envar>
-      <name>RADVELLEV2_DIR</name>
-      <value>&RADVELLEV2_DIR;</value>
-    </envar>
-    <envar>
-      <name>RADVELLEV2P5_DIR</name>
-      <value>&RADVELLEV2P5_DIR;</value>
-    </envar>
-    <envar>
-      <name>SATWND_DIR</name>
-      <value>&SATWND_DIR;</value>
-    </envar>
-    <envar>
-      <name>TAMDAR_ROOT</name>
-      <value>&TAMDAR_DIR;</value>
-    </envar>
-    <envar>
-      <name>NACELLE_RSD</name>
-      <value>&NACELLE_RSD;</value>
-    </envar>
-    <envar>
-      <name>TOWER_RSD</name>
-      <value>&TOWER_RSD;</value>
-    </envar>
-    <envar>
-      <name>TOWER_NRSD</name>
-      <value>&TOWER_NRSD;</value>
-    </envar>
-    <envar>
-      <name>SODAR_NRSD</name>
-      <value>&SODAR_NRSD;</value>
-    </envar>
-    <envar>
-      <name>TCVITALS_DIR</name>
-      <value>&TCVITALS_DIR;</value>
-    </envar>
-    <envar>
-      <name>STICKNET</name>
-      <value>&STICKNET_DIR;</value>
-    </envar>
-
-    <dependency>
-      <or>
-        <and>
-          <datadep><cyclestr>&PREPBUFR_DIR;/@Y@j@H00.rap_e.t@Hz.prepbufr.tm00.@Y@m@d</cyclestr></datadep>
-          <datadep><cyclestr>&SODAR_NRSD;/@y@j@H000015o</cyclestr></datadep>
-        </and>
-        <timedep><cyclestr offset="&START_TIME_CONVENTIONAL;">@Y@m@d@H@M00</cyclestr></timedep>
-      </or>
-    </dependency>
-
-  </task>
-
   <task name="gsi_hyb" cycledefs="02-11hr,00hr,01hr" maxtries="3">
 
     &GSI_HYB_RESOURCES;
@@ -768,7 +578,6 @@
             <taskdep task="satellite_gsi_bufr"/>
             <or>
               <taskdep task="conventional_gsi"/>
-              <taskdep task="conventional_gsi_early"/>
             </or>
           </and>
           <timedep><cyclestr offset="&START_TIME_GSI;">@Y@m@d@H@M00</cyclestr></timedep>

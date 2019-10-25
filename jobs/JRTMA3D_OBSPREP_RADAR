@@ -35,8 +35,10 @@ export CNVGRIB=${CNVGRIB:-cnvgrib}
 ##########################################################
 export DATA=${DATA:-$DATAROOT/${jobid:?}} #jobid ($job.$LSB_JOBID MUST BE DEFINED IN TERMS OF $RUN IN UPPER LEVEL SCRIPT /MPondeca, 26Jul2015
 if [ -d $DATA ] ; then
-   rm  -rf $DATA/*
+   {ECHO} "$DATA exists, remove its content"
+   rm -rf $DATA/*
 else
+   {ECHO} "$DATA does not exist, create it"
    mkdir -p $DATA
 fi
 cd $DATA
@@ -46,7 +48,7 @@ cd $DATA
 #    setpdy.sh needs the variables 
 #    $PDY and $cyc already defined in advance
 #####################################################
-if [[ "${subcyc}" == "99" ]]; then
+if [[ "${subcyc}" == "-1" ]]; then #it's hourly run
   export cycle=${cycle:-t${cyc}z}
   export pgmout=${pgmout:-"OUTPUT.${PDY}${cyc}.${jobid}"}
   export COMINradar=${COMINradar:-"${COMINRADAR}/radar.${PDY}"}
@@ -108,7 +110,7 @@ export COMINobsproc_rtma3d=${COMINobsproc_rtma3d:-"${COMIN}/obsprd.${cycle}"}
 ### Firstguess Products/Input for the RTMA3D (prepbufr files) 
 export GESINhrrr_rtma3d=${GESINhrrr_rtma3d:-"${COMIN}/fgsprd.${cycle}"}
 
-if [[ "${envir}" != "expr" ]]; then #Jet expr runs don't need COM
+if [[ "${envir}" != "expr" ]]; then #Jet expr runs don't need COMIN COMOUT
   if [ ! -d "${COMIN}" ] ; then
      mkdir -p $COMIN
   fi
@@ -157,7 +159,7 @@ postmsg $jlogfile "$msg"
 
 if [ -e "${pgmout}" ] ; then
    cat $pgmout
-   cp -p $pgmout   ${LOG_PGMOUT}
+   cp -p $pgmout ${LOG_PGMOUT}
 fi
 
 ##############################
