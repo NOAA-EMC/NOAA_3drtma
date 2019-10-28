@@ -46,54 +46,64 @@ postmsg "$jlogfile" "$msg"
 # copy/link the prepbufr obs data
 # Jet: Copy the prepbufr to obs directory so don't do I/O to /public directly
 if [ "${envir}" != "esrl"  ]; then #For Jet expr runs
-  targetfile="prepbufr"
+  DFILE="prepbufr"
+  RUNS[1]="rtma_ru";FILES[1]="${PREPBUFR}/${date_str}.${RUNS[1]}.${tz_str}.${DFILE}.tm00.${YYYYMMDD}"
+  RUNS[2]="rap";    FILES[2]="${PREPBUFR}/${date_str}.${RUNS[2]}.${tz_str}.${DFILE}.tm00.${YYYYMMDD}"
+  RUNS[3]="rap_e";  FILES[3]="${PREPBUFR}/${date_str}.${RUNS[3]}.${tz_str}.${DFILE}.tm00.${YYYYMMDD}"
+  RUNS[4]="rap";    FILES[4]="${PREPBUFR}_test/${date_str}.${RUNS[4]}.${tz_str}.${DFILE}.tm00.${YYYYMMDD}.test"
+  RUNS[5]="rap_e";  FILES[5]="${PREPBUFR}_test/${date_str}.${RUNS[5]}.${tz_str}.${DFILE}.tm00.${YYYYMMDD}.test"
   if [ "${subcyc}" == "-1" ]; then #hourly run
-    MRUN="rap"
-    if [ -r "${PREPBUFR}/${date_str}.${MRUN}.${tz_str}.prepbufr.tm00.${YYYYMMDD}" ]; then
-      ${CP} ${PREPBUFR}/${date_str}.${MRUN}.${tz_str}.prepbufr.tm00.${YYYYMMDD} ${COMINobsproc_rtma3d}/${tz_str}.${targetfile}
-      ${LN} ${COMINobsproc_rtma3d}/${tz_str}.${targetfile} newgblav.${YYYYMMDD}.${MRUN}.${tz_str}.prepbufr
-    elif [ -r "${PREPBUFR}/${date_str}.${MRUN}_e.${tz_str}.prepbufr.tm00.${YYYYMMDD}" ]; then
-      ${CP} ${PREPBUFR}/${date_str}.${MRUN}_e.${tz_str}.prepbufr.tm00.${YYYYMMDD} ${COMINobsproc_rtma3d}/${tz_str}.${targetfile}
-      ${LN} ${COMINobsproc_rtma3d}/${tz_str}.${targetfile} newgblav.${YYYYMMDD}.${MRUN}.${tz_str}.prepbufr
-    else
-      ${ECHO} "Warning: ${srcfile} does not exist!"
-      ${ECHO} "ERROR: No prepbufr files exist!"
-      exit 1
-    fi
+    casecade="2 3" #5 4 for prepbufr_test
   else
-    MRUN="rtma_ru"
-    srcfile=${PREPBUFR}/${date_str}.${MRUN}.${tz_str}.prepbufr.tm00.${YYYYMMDD}
-    if [ -r "${srcfile}" ]; then
-      ${CP} ${srcfile} ${COMINobsproc_rtma3d}/${tz_str}.${targetfile}
-      ${LN} ${COMINobsproc_rtma3d}/${tz_str}.${targetfile} newgblav.${YYYYMMDD}.${MRUN}.${tz_str}.prepbufr
-    else
-      ${ECHO} "Warning: ${srcfile} does not exist!"
-      ${ECHO} "ERROR: No prepbufr files exist!"
-      exit 1
+    casecade="1"
+  fi
+  for i in $casecade; do
+    ${ECHO} "checking ${FILES[$i]}"
+    if [ -r ${FILES[$i]} ]; then
+      ${CP} ${FILES[$i]}  ${COMINobsproc_rtma3d}/${YYYYMMDD}.${RUNS[$i]}.${tz_str}.${DFILE}
+      ${LN} -snf ${COMINobsproc_rtma3d}/${YYYYMMDD}.${RUNS[$i]}.${tz_str}.${DFILE}  ${DFILE}
+      break
     fi
+  done
+  if [ ! -s ${DFILE} ]; then
+    ${ECHO} "ERROR: No ${DFILE} files exist!"
+    exit 1
   fi
 
-  # Radial velocity data
-# targetfile="nexrad_l2rw"
-# if [ -r "${RADVELLEV2_DIR}/${YYYYJJJHH00}.rap.t${HH}z.nexrad.tm00.bufr_d" ]; then
-#   ${CP} ${RADVELLEV2_DIR}/${YYYYJJJHH00}.rap.t${HH}z.nexrad.tm00.bufr_d ${COMINobsproc_rtma3d}/${tz_str}.${targetfile}
-#   ${LN} -s ${COMINobsproc_rtma3d}/${tz_str}.${targetfile} newgblav.${YYYYMMDD}.rap.${tz_str}.nexrad
-# elif [ -r "${RADVELLEV2_DIR}/${YYYYJJJHH00}.rap_e.t${HH}z.nexrad.tm00.bufr_d" ]; then
-#   ${CP} ${RADVELLEV2_DIR}/${YYYYJJJHH00}.rap_e.t${HH}z.nexrad.tm00.bufr_d ${COMINobsproc_rtma3d}/${tz_str}.${targetfile}
-#   ${LN} -s ${COMINobsproc_rtma3d}/${tz_str}.${targetfile} newgblav.${YYYYMMDD}.rap.${tz_str}.nexrad
-# else
-#   ${ECHO} "Warning: ${RADVELLEV2_DIR}/${YYYYJJJHH00}.rap[_e].t${HH}z.nexrad.tm00.bufr_d does not exist!"
+# # Radial velocity data
+# DFILE="nexrad"
+# RUNS[2]="rap";    FILES[2]="${RADVELLEV2_DIR}/${YYYYJJJHH00}.${RUNS[2]}.t${HH}z.${DFILE}.tm00.bufr_d"
+# RUNS[3]="rap_e";  FILES[3]="${RADVELLEV2_DIR}/${YYYYJJJHH00}.${RUNS[3]}.t${HH}z.${DFILE}.tm00.bufr_d"
+# casecade="2 3" #5 4 for prepbufr_test
+# for i in $casecade; do
+#   ${ECHO} "checking ${FILES[$i]}"
+#   if [ -r ${FILES[$i]} ]; then
+#     ${CP} ${FILES[$i]}  ${COMINobsproc_rtma3d}/${YYYYMMDD}.${RUNS[$i]}.${tz_str}.${DFILE}
+#     ${LN} -snf ${COMINobsproc_rtma3d}/${YYYYMMDD}.${RUNS[$i]}.${tz_str}.${DFILE}  ${DFILE}
+#     break
+#   fi
+# done
+# if [ ! -s ${DFILE} ]; then
+#   ${ECHO} "ERROR: No ${DFILE} files exist!"
+#   exit 1
 # fi
-  #  AMV wind
-# targetfile="satwnd"
-# if [ -r "${SATWND_DIR}/${YYYYJJJHH00}.rap.t${HH}z.satwnd.tm00.bufr_d" ]; then
-#   ${CP} ${SATWND_DIR}/${YYYYJJJHH00}.rap.t${HH}z.satwnd.tm00.bufr_d ${COMINobsproc_rtma3d}/${tz_str}.${targetfile}
-#   ${LN} -s ${COMINobsproc_rtma3d}/${tz_str}.${targetfile} newgblav.${YYYYMMDD}.rap.${tz_str}.satwnd
-# elif [ -r "${SATWND_DIR}/${YYYYJJJHH00}.rap.t${HH}z.satwnd.tm00.bufr_d" ]; then
-#   ${CP} ${SATWND_DIR}/${YYYYJJJHH00}.rap.t${HH}z.satwnd.tm00.bufr_d ${COMINobsproc_rtma3d}/${tz_str}.${targetfile}
-#   ${LN} -s ${COMINobsproc_rtma3d}/${tz_str}.${targetfile} newgblav.${YYYYMMDD}.rap.${tz_str}.satwnd
-# else
-#   ${ECHO} "Warning: ${SATWND_DIR}/${YYYYJJJHH00}.rap[_e].t${HH}z.satwnd.tm00.bufr_d does not exist!"
+
+# #  AMV wind
+# DFILE="satwnd"
+# RUNS[2]="rap";    FILES[2]="${SATWND_DIR}/${YYYYJJJHH00}.${RUNS[2]}.t${HH}z.${DFILE}.tm00.bufr_d"
+# RUNS[3]="rap_e";  FILES[3]="${SATWND_DIR}/${YYYYJJJHH00}.${RUNS[3]}.t${HH}z.${DFILE}.tm00.bufr_d"
+# casecade="2 3" #5 4 for prepbufr_test
+# for i in $casecade; do
+#   ${ECHO} "checking ${FILES[$i]}"
+#   if [ -r ${FILES[$i]} ]; then
+#     ${CP} ${FILES[$i]}  ${COMINobsproc_rtma3d}/${YYYYMMDD}.${RUNS[$i]}.${tz_str}.${DFILE}
+#     ${LN} -snf ${COMINobsproc_rtma3d}/${YYYYMMDD}.${RUNS[$i]}.${tz_str}.${DFILE}  ${DFILE}
+#     break
+#   fi
+# done
+# if [ ! -s ${DFILE} ]; then
+#   ${ECHO} "ERROR: No ${DFILE} files exist!"
+#   exit 1
 # fi
 
 else #--------- on WCOSS ---------------------------------------------------------------------
