@@ -1,0 +1,1 @@
+/lfs1/projects/nrtrr/FIX_EXEC_MODULE/fix/wps/hrrr_geo_em.d01.nc
