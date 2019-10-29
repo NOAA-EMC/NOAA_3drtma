@@ -1,206 +1,250 @@
-#!/bin/ksh
+#!/bin/ksh --login
+set -x
+check_if_defined() { #usage: check_if_defined "var1_name" "var2_name" ...
+  for str in "$@"; do
+    eval "path=\${$str}"
+    if [ -z "${path}" ]; then
+      ${ECHO} "ERROR: \$${str} is not defined"; exit 1
+    fi
+ done
+}
+check_dirs_exist() { #usage: check_dirs_exist "var1_name" "var2_name" ...
+  for str in "$@"; do
+    eval "path=\${$str}"
+    if [ ! -d ${path} ]; then
+      ${ECHO} "ERROR: ${path}/ does not exist"; exit 1
+    fi
+ done
+}
 
-set -x 
-
-#
-#-- This script is goint to run GSI analysis (3DVar and Cloud analysis) in one-step
-#
-echo " This script is goint to run GSI analysis (3DVar and Cloud analysis) in one-step"
-
-#-- Testing the status of some important variables. --#
-# Make sure DATAHOME is defined and exists
-if [ ! "${DATAHOME}" ]; then
-  ${ECHO} "ERROR: \$DATAHOME is not defined!"
-  exit 1
-fi
-if [ ! -d "${DATAHOME}" ]; then
-  ${ECHO} "ERROR: DATAHOME directory '${DATAHOME}' does not exist!"
-  exit 1
-fi
-# Make sure DATAOBSHOME is defined and exists
-if [ ! "${DATAOBSHOME}" ]; then
-  ${ECHO} "ERROR: \$DATAOBSHOME is not defined!"
-  exit 1
-fi
-if [ ! -d "${DATAOBSHOME}" ]; then
-  ${ECHO} "ERROR: DATAOBSHOME directory '${DATAOBSHOME}' does not exist!"
-  exit 1
-fi
-# Make sure DATAHOME_BK is defined and exists
-if [ ! "${DATAHOME_BK}" ]; then
-  ${ECHO} "ERROR: \$DATAHOME_BK is not defined!"
-  exit 1
-fi
-if [ ! -d "${DATAHOME_BK}" ]; then
-  ${ECHO} "ERROR: DATAHOME_BK directory '${DATAHOME_BK}' does not exist!"
-  exit 1
-fi
-
-
-# test the existence of script genating namelist file for gsi
-if [ ! -f ${PARMgsi}/gsiparm.anl.sh ] ; then
-  ${ECHO} "ERROR: ${PARMgsi}/gsiparm.anl.sh does not exist!"
-   exit 1
-fi
-
-# 
-if [  "${DATA_GSIANL}" ]; then
-  ${RM} -rf ${DATA_GSIANL}
-  ${LN} -sf ${DATA} ${DATA_GSIANL}
-fi
-
-#  PREPBUFR
-
-#  NCEPSNOW
-
-# Make sure the GSI executable exists
-if [ ! -f "${EXECrtma3d}/${exefile_name_gsi}" ]; then
+# make sure executable exists
+if [ ! -f ${EXECrtma3d}/${exefile_name_gsi} ]; then
   ${ECHO} "ERROR: GSI Analysis executable '${EXECrtma3d}/${exefile_name_gsi}' does not exist!"
   exit 1
 fi
 
-# Check to make sure the number of processors for running GSI was specified
-if [ -z "${GSIPROC}" ]; then
-  ${ECHO} "ERROR: The variable $GSIPROC must be set to contain the number of processors to run GSI"
-  exit 1
-fi
+# Check to make sure required directory defined and existed
+check_if_defined "ENKF_FCST" "HRRRDAS_DIR" "HRRR_DIR" "OBS_DIR"
+check_dirs_exist "ENKF_FCST" "HRRRDAS_DIR" "HRRR_DIR" "OBS_DIR"
 
-# Check to make sure that fix direcory exists
-
-# Check to make sure that ENKF_FCST exists
-
-# Check to make sure that FULLCYC exists
-if [ ! "${FULLCYC}" ]; then
-  ${ECHO} "ERROR: FULLCYC '${FULLCYC}' does not exist"
-  exit 1
-fi
-
-# Make sure START_TIME is defined and in the correct format
-
-mm=$subcyc
-subhtime=$subcyc
-${ECHO} $PDY $cyc $mm
-# START_TIME=${PDY}' '${cyc}     # YYYYMMDD HH
-# START_TIME="${PDY}${cyc}"      # YYYYMMDDHH
-  START_TIME=${START_TIME:-"{PDY} ${cyc}"}      # YYYYMMDD HH
-# START_TIME="${PDY} ${cyc} ${subcyc} minutes"  # YYYYMMDD HH MN 
-
-echo $START_TIME
-echo $subhtime
-if [ ! "${START_TIME}" ]; then
-  ${ECHO} "ERROR: \$START_TIME is not defined!"
-  exit 1
+if [ "${subcyc}" == "-1" ]; then #hourly run
+  SUBH_TIME='00'
+  tz_str=t${cyc}z
 else
-  if [ `${ECHO} "${START_TIME}" | ${AWK} '/^[[:digit:]]{10}$/'` ]; then
-    START_TIME=`${ECHO} "${START_TIME}" | ${SED} 's/\([[:digit:]]\{2\}\)$/ \1/'`
-  elif [ ! "`${ECHO} "${START_TIME}" | ${AWK} '/^[[:digit:]]{8}[[:blank:]]{1}[[:digit:]]{2}$/'`" ]; then
-    ${ECHO} "ERROR: start time, '${START_TIME}', is not in 'yyyymmddhh' or 'yyyymmdd hh' format"
-    exit 1
-  fi
-  START_TIME=`${DATE} -d "${START_TIME} ${subhtime} minutes"`
+  SUBH_TIME=${subcyc}
+  tz_str=t${cyc}${subcyc}z
 fi
-echo $START_TIME
+START_TIME=`${DATE} -d "${PDY} ${cyc} ${SUBH_TIME} minutes"`
 
 # Compute date & time components for the analysis time
-YYYYJJJHH00=`${DATE} +"%Y%j%H00" -d "${START_TIME}"`
 YYYYMMDDHH=`${DATE} +"%Y%m%d%H" -d "${START_TIME}"`
-YYYYMMDD=`${DATE} +"%Y%m%d" -d "${START_TIME}"`
-YYYY=`${DATE} +"%Y" -d "${START_TIME}"`
-MM=`${DATE} +"%m" -d "${START_TIME}"`
-DD=`${DATE} +"%d" -d "${START_TIME}"`
-HH=`${DATE} +"%H" -d "${START_TIME}"`
+YYYYMMDDHHMM=`${DATE} +"%Y%m%d%H%M" -d "${START_TIME}"`
+time_1hour_ago=`${DATE} -d "${START_TIME} 1 hour ago" +%Y%m%d%H`
+time_str=`${DATE} "+%Y-%m-%d_%H_%M_%S" -d "${START_TIME}"`
+time_str2=`${DATE} "+%Y-%m-%d_%H_00_00" -d "${START_TIME}"`
 
-HH_cycp1=`echo ${PDYHH_cycp1} | cut -c 9-10`
-# Create the working directory and cd into it
-workdir=${DATAHOME}
-# ${RM} -rf ${workdir}
-# ${MKDIR} -p ${workdir}
-# if [ "`stat -f -c %T ${workdir}`" == "lustre" ]; then
-#  lfs setstripe --count 8 ${workdir}
-# fi
-cd ${workdir}
+#----- enter working directory -------
+cd ${DATA}
+${ECHO} "enter working directory:${DATA}"
 
-# Define the output log file depending on if this is the full or partial cycle
+# Define the loghistory file depending on if this is the full or partial cycle
 ifsoilnudge=.true.
+if [ "${envir}" == "esrl" ]; then
+  if [ "${FULLCYC}" == "0" ]; then
+    loghistoryfile=${COMROOT}/loghistory/HRRR_GSI_HYB_PCYC.log
+    ifsoilnudge=.true.
+  elif [ "${FULLCYC}" == "2" ]; then
+    loghistoryfile=${COMROOT}/loghistory/HRRR_GSI_HYB_early.log
+    ifsoilnudge=.true.
+  else
+    loghistoryfile=${COMROOT}/loghistory/HRRR_GSI_HYB.log
+    ifsoilnudge=.true.
+  fi
+fi
 
 # Bring over background field (it's modified by GSI so we can't link to it)
-time_str=`${DATE} "+%Y-%m-%d_%H_%M_%S" -d "${START_TIME}"`
-${ECHO} " time_str = ${time_str}"
-time_run=${time_str}
-
-# Look for bqckground from pre-forecast background
-if [ -r ${DATAHOME_BK}/${FGSrtma3d_FNAME} ]; then
-# copy the background to running directory (it is going to updatd by analysis)
-  cpfs ${DATAHOME_BK}/${FGSrtma3d_FNAME}    ./wrf_inout
-  ${ECHO} " Cycle ${YYYYMMDDHH}: GSI background=${DATAHOME_BK}/${FGSrtma3d_FNAME}"
+if [ "${subcyc}" == "-1" ]; then #hourly run
+   cycle_str=${YYYYMMDDHH}
 else
-# No background available so abort
-  ${ECHO} "${DATAHOME_BK}/${FGSrtma3d_FNAME} does not exist!!"
-  ${ECHO} "ERROR: No background file for analysis at ${time_run}!!!!"
-  ${ECHO} " Cycle ${YYYYMMDDHH}: GSI failed because of no background" >> ${pgmout}
+   cycle_str=${YYYYMMDDHHMM}
+fi
+
+# Look for background field for GSI analysis
+if [ "${envar}" == "esrl" ]; then
+  if [ "${subcyc}" == "45" ]; then #45 subcyc uses 45min fcst from current hrrr cycle
+    GSIbackground=${HRRR_DIR}/${YYYYMMDDHH}/wrfprd/wrfout_d01_${time_str}
+  else #all other subcyc's use 1h fcst from previous hrrr cycle
+    GSIbackground=${HRRR_DIR}/${time_1hour_ago}/wrfprd/wrfout_d01_${time_str}
+  fi
+else
+  GSIbackground=${BKG_DIR}/${FGSrtma3d_FNAME}
+fi
+if [ -r ${GSIbackground} ]; then
+  cpfs ${GSIbackground} ./wrf_inout
+  ${ECHO} " Cycle ${cycle_str}: GSI background=${GSIbackground}"
+  if [ "${envar}" == "esrl" ]; then
+    ${ECHO} " Cycle ${cycle_str}: GSI background=${GSIbackground}" >> ${loghistoryfile}
+  fi
+else
+  # No background available so abort
+  ${ECHO} "${GSIbackground} does not exist!!"
+  ${ECHO} "FATAL ERROR: No background file for analysis at ${time_str}!!!!"
+  if [ "${envar}" == "esrl" ]; then
+    ${ECHO} " Cycle ${cycle_str}: GSI failed because of no background" >> ${loghistoryfile}
+  fi
   exit 1
 fi
 
-# Snow cover building and trimming currently set to run in the 00z cycle
-
 # Update SST currently set to run in the 01z cycle
+update_SST='00'
 
 # Link to the prepbufr data
-
-if [ -r ${DATAOBSHOME}/newgblav.${YYYYMMDD}.rap.t${HH}z.prepbufr ] ; then
-  ${LN} -s ${DATAOBSHOME}/newgblav.${YYYYMMDD}.rap.t${HH}z.prepbufr ./prepbufr
-elif [ -r ${DATAOBSHOME}/rap.t${HH}z.prepbufr.tm00 ] ; then
-  ${LN} -s ${DATAOBSHOME}/rap.t${HH}z.prepbufr.tm00 ./prepbufr
+if [ -r ${OBS_DIR}/prepbufr ] ; then
+  ${LN} -s ${OBS_DIR}/prepbufr ./prepbufr
 else
-  ${ECHO} "Warning: either ${DATAOBSHOME}/newgblav.${YYYYMMDD}.rap.t${HH}z.prepbufr or rap.t${HH}z.prepbufr.tm00 does not exist!"
+  ${ECHO} "Warning: ${OBS_DIR}/prepbufr does not exist"
 fi
 
-if [ -r "${DATAOBSHOME}/NSSLRefInGSI.bufr" ]; then
-  ${LN} -s ${DATAOBSHOME}/NSSLRefInGSI.bufr ./refInGSI
-elif [ -r "${DATAOBSHOME}/hrrr.t${HH}z.NSSLRefInGSI.bufr" ]; then
-  ${LN} -s ${DATAOBSHOME}/hrrr.t${HH}z.NSSLRefInGSI.bufr ./refInGSI
-elif [ -r "${DATAOBSHOME}/${RUN}.t${HH}z.NSSLRefInGSI.bufr" ]; then
-  ${LN} -s ${DATAOBSHOME}/${RUN}.t${HH}z.NSSLRefInGSI.bufr ./refInGSI
+if [ -r "${OBS_DIR}/NSSLRefInGSI.bufr" ]; then
+  ${LN} -s ${OBS_DIR}/NSSLRefInGSI.bufr ./refInGSI
+elif [ -r "${OBS_DIR}/hrrr.${tz_str}.NSSLRefInGSI.bufr" ]; then
+  ${LN} -s ${OBS_DIR}/hrrr.${tz_str}.NSSLRefInGSI.bufr ./refInGSI
+elif [ -r "${OBS_DIR}/${RUN}.${tz_str}.NSSLRefInGSI.bufr" ]; then
+  ${LN} -s ${OBS_DIR}/${RUN}.${tz_str}.NSSLRefInGSI.bufr ./refInGSI
 else
-  ${ECHO} "Warning: ${DATAOBSHOME}:NSSLRefInGSI.bufr does not exist!"
+  ${ECHO} "Warning: ${OBS_DIR}: NSSLRefInGSI.bufr does not exist!"
 fi
 
-if [ -r "${DATAOBSHOME}/LightningInGSI.bufr" ]; then
-  ${LN} -s ${DATAOBSHOME}/LightningInGSI.bufr ./lghtInGSI
-elif [ -r "${DATAOBSHOME}/hrrr.t${HH}z.LightningInGSI.bufr" ]; then
-  ${LN} -s ${DATAOBSHOME}/hrrr.t${HH}z.LightningInGSI.bufr ./lghtInGSI
-elif [ -r "${DATAOBSHOME}/${RUN}.t${HH}z.LightningInGSI.bufr" ]; then
-  ${LN} -s ${DATAOBSHOME}/${RUN}.t${HH}z.LightningInGSI.bufr ./lghtInGSI
-elif [ -r "${DATAOBSHOME}/${RUN}.t${HH}z.LightningInGSI_bufr.bufr" ]; then
-  ${LN} -s ${DATAOBSHOME}/${RUN}.t${HH}z.LightningInGSI_bufr.bufr ./lghtInGSI
+if [ -r "${OBS_DIR}/LightningInGSI.bufr" ]; then
+  ${LN} -s ${OBS_DIR}/LightningInGSI.bufr ./lghtInGSI
+elif [ -r "${OBS_DIR}/hrrr.{tz_str}.LightningInGSI.bufr" ]; then
+  ${LN} -s ${OBS_DIR}/hrrr.{tz_str}.LightningInGSI.bufr ./lghtInGSI
+elif [ -r "${OBS_DIR}/${RUN}.{tz_str}.LightningInGSI.bufr" ]; then
+  ${LN} -s ${OBS_DIR}/${RUN}.{tz_str}.LightningInGSI.bufr ./lghtInGSI
+elif [ -r "${OBS_DIR}/${RUN}.{tz_str}.LightningInGSI_bufr.bufr" ]; then
+  ${LN} -s ${OBS_DIR}/${RUN}.{tz_str}.LightningInGSI_bufr.bufr ./lghtInGSI
 else
-  ${ECHO} "Warning: ${DATAOBSHOME}: LightningInGSI.bufr does not exist!"
+  ${ECHO} "Warning: ${OBS_DIR}: LightningInGSI.bufr does not exist!"
 fi
 
-if [ -r "${DATAOBSHOME}/NASALaRCCloudInGSI.bufr" ]; then
-  ${LN} -s ${DATAOBSHOME}/NASALaRCCloudInGSI.bufr ./larcInGSI
-elif [ -r "${DATAOBSHOME}/hrrr.t${HH}z.NASALaRCCloudInGSI.bufr" ]; then
-  ${LN} -s ${DATAOBSHOME}/hrrr.t${HH}z.NASALaRCCloudInGSI.bufr ./larcInGSI
-elif [ -r "${DATAOBSHOME}/${RUN}.t${HH}z.NASALaRCCloudInGSI.bufr" ]; then
-  ${LN} -s ${DATAOBSHOME}/${RUN}.t${HH}z.NASALaRCCloudInGSI.bufr ./larcInGSI
+if [ -r "${OBS_DIR}/NASALaRCCloudInGSI.bufr" ]; then
+  ${LN} -s ${OBS_DIR}/NASALaRCCloudInGSI.bufr ./larcInGSI
+elif [ -r "${OBS_DIR}/hrrr.{tz_str}.NASALaRCCloudInGSI.bufr" ]; then
+  ${LN} -s ${OBS_DIR}/hrrr.{tz_str}.NASALaRCCloudInGSI.bufr ./larcInGSI
+elif [ -r "${OBS_DIR}/${RUN}.{tz_str}.NASALaRCCloudInGSI.bufr" ]; then
+  ${LN} -s ${OBS_DIR}/${RUN}.{tz_str}.NASALaRCCloudInGSI.bufr ./larcInGSI
+elif [ -r "${OBS_DIR}/rtma_ru.{tz_str}.lgycld.tm00.bufr_d" ]; then
+  ${LN} -s ${OBS_DIR}/rtma_ru.{tz_str}.lgycld.tm00.bufr_d ./larcInGSI
 else
-  ${ECHO} "Warning: ${DATAOBSHOME}: NASALaRCCloudInGSI.bufr does not exist!"
+  ${ECHO} "Warning: ${OBS_DIR}: NASALaRCCloudInGSI.bufr does not exist!"
 fi
-
-# Link statellite radiance data
-
-# Link the radial velocity data
 
 ## 
 ## Find closest GFS EnKF forecast to analysis time
-##
+# Make a list of the latest GFS EnKF ensemble
+stampcycle=`date -d "${START_TIME}" +%s`
+minHourDiff=100
+loops="009"
+for loop in $loops; do
+  for timelist in `ls ${ENKF_FCST}/*.gdas.t*z.atmf${loop}s.mem080.nemsio`; do
+    availtimeyy=`basename ${timelist} | cut -c 1-2`
+    availtimeyyyy=20${availtimeyy}
+    availtimejjj=`basename ${timelist} | cut -c 3-5`
+    availtimemm=`date -d "${availtimeyyyy}0101 +$(( 10#${availtimejjj} - 1 )) days" +%m`
+    availtimedd=`date -d "${availtimeyyyy}0101 +$(( 10#${availtimejjj} - 1 )) days" +%d`
+    availtimehh=`basename ${timelist} | cut -c 6-7`
+    availtime=${availtimeyyyy}${availtimemm}${availtimedd}${availtimehh}
+    AVAIL_TIME=`${ECHO} "${availtime}" | ${SED} 's/\([[:digit:]]\{2\}\)$/ \1/'`
+    AVAIL_TIME=`${DATE} -d "${AVAIL_TIME}"`
+
+    stamp_avail=`date -d "${AVAIL_TIME} ${loop} hours" +%s`
+
+    hourDiff=`echo "($stampcycle - $stamp_avail) / (60 * 60 )" | bc`;
+    if [[ ${stampcycle} -lt ${stamp_avail} ]]; then
+       hourDiff=`echo "($stamp_avail - $stampcycle) / (60 * 60 )" | bc`;
+    fi
+
+    if [[ ${hourDiff} -lt ${minHourDiff} ]]; then
+       minHourDiff=${hourDiff}
+       enkfcstname=${availtimeyy}${availtimejjj}${availtimehh}00.gdas.t${availtimehh}z.atmf${loop}s
+    fi
+  done
+done
+EYYYYMMDD=$(echo ${availtime} | cut -c1-8)
+EHH=$(echo ${availtime} | cut -c9-10)
+${LS} ${ENKF_FCST}/${enkfcstname}.mem???.nemsio > filelist03
+#${LS} ${ENKF_FCST}/${enkfcstname}.mem???.nemsio > filelist.tmp
+#head -n 36 filelist.tmp > filelist03
+
 ## 
 ## Link to pre-processed GFS EnKF forecast members
 ##
+# for mem in `ls ${DATAROOT}/gfsenkf/enspreproc_arw_mem???`
+# do
+#   memname=`basename ${mem}`
+#   ${LN} -s ${mem} ${memname}
+# done
+# ${LS} enspreproc_arw_mem??? > filelist
+
+if [ ${HRRRDAS_BEC} -eq 1 ]; then
+  ${ECHO} "\$HRRRDAS_BEC=${HRRRDAS_BEC}, so HRRRDAS will be used if available"
+  #----------------------------------------------------
+  # generate list of HRRRDAS members for ensemble covariances
+  # Use 1-hr forecasts from the HRRRDAS cycling
+  if [ ${HRRRDAS_SMALL} -eq 1 ]; then
+    {LS} ${HRRRDAS_DIR}/${time_1hour_ago}/wrfprd_mem????/wrfout_small_d02_${time_str2} > filelist.hrrrdas
+  else
+    {LS} ${HRRRDAS_DIR}/${time_1hour_ago}/wrfprd_mem????/wrfout_d02_${time_str2} > filelist.hrrrdas
+  fi
+  c=1
+  while [[ $c -le 36 ]]; do
+   if [ $c -lt 10 ]; then
+    cc="0"$c
+   else
+    cc=$c
+   fi
+   if [ ${HRRRDAS_SMALL} -eq 1 ]; then
+     hrrre_file=${HRRRDAS_DIR}/${time_1hour_ago}/wrfprd_mem00${cc}/wrfout_small_d02_${time_str2}
+   else
+     hrrre_file=${HRRRDAS_DIR}/${time_1hour_ago}/wrfprd_mem00${cc}/wrfout_d02_${time_str2}
+   fi
+   {LN} -sf ${hrrre_file} wrf_en0${cc}
+   ((c = c + 1))
+  done
+else
+  ${ECHO} "\$HRRRDAS_BEC=${HRRRDAS_BEC}, so HRRRDAS will NOT be used"
+  ${TOUCH} filelist.hrrrdas #so as to avoid "no such file" error message
+fi
 
 # Determine if hybrid option is available
 beta1_inv=1.0
 ifhyb=.false.
+nummem=`more filelist03 | wc -l`
+nummem=$((nummem - 3 ))
+hrrrmem=`more filelist.hrrrdas | wc -l`
+hrrrmem=$((hrrrmem - 3 ))
+if [[ ${hrrrmem} -gt 30 ]] && [[ ${HRRRDAS_BEC} -eq 1  ]]; then #if HRRRDAS BEC is available, use it as first choice
+  echo "Do hybrid with HRRRDAS BEC"
+  nummem=${hrrrmem}
+  cp filelist.hrrrdas filelist03
+
+  beta1_inv=0.50 #0.15
+  ifhyb=.true.
+  regional_ensemble_option=3
+  grid_ratio_ens=1
+  i_en_perts_io=0
+  ens_fast_read=.true. 
+  ${ECHO} " Cycle ${YYYYMMDDHH}: GSI hybrid uses HRRRDAS BEC with n_ens=${nummem}" >> ${logfile}
+elif [[ ${nummem} -eq 80 ]]; then
+  echo "Do hybrid with GDAS directly"
+  beta1_inv=0.50 ##0.15
+  ifhyb=.true.
+  regional_ensemble_option=1
+  grid_ratio_ens=12 #ensemble resolution=3 * grid_ratio * grid_ratio_ens
+  i_en_perts_io=3
+  ens_fast_read=.false. 
+  ${ECHO} " Cycle ${YYYYMMDDHH}: GSI hybrid uses GDAS directly with n_ens=${nummem}" >> ${logfile}
+fi
 
 # Set fixed files
 #   berror   = forecast model background error statistics
@@ -221,8 +265,7 @@ ifhyb=.false.
 anavinfo=${FIXgsi}/anavinfo_arw_netcdf
 BERROR=${FIXgsi}/rap_berror_stats_global_RAP_tune
 SATANGL=${FIXgsi}/global_satangbias.txt
-#SATINFO=${FIXgsi}/global_satinfo.txt
-SATINFO=${FIXgsi}/rap_global_satinfo.txt
+SATINFO=${FIXgsi}/global_satinfo.txt
 CONVINFO=${FIXgsi}/nam_regional_convinfo_RAP.txt
 OZINFO=${FIXgsi}/global_ozinfo.txt    
 PCPINFO=${FIXgsi}/global_pcpinfo.txt
@@ -248,7 +291,7 @@ emiscoef_VISice=${FIXcrtm}/NPOESS.VISice.EmisCoeff.bin
 emiscoef_VISland=${FIXcrtm}/NPOESS.VISland.EmisCoeff.bin
 emiscoef_VISsnow=${FIXcrtm}/NPOESS.VISsnow.EmisCoeff.bin
 emiscoef_VISwater=${FIXcrtm}/NPOESS.VISwater.EmisCoeff.bin
-emiscoef_MWwater=${FIXcrtm}/FASTEM5.MWwater.EmisCoeff.bin
+emiscoef_MWwater=${FIXcrtm}/FASTEM6.MWwater.EmisCoeff.bin
 aercoef=${FIXcrtm}/AerosolCoeff.bin
 cldcoef=${FIXcrtm}/CloudCoeff.bin
 
@@ -260,7 +303,7 @@ ln -s $emiscoef_VISice ./NPOESS.VISice.EmisCoeff.bin
 ln -s $emiscoef_VISland ./NPOESS.VISland.EmisCoeff.bin
 ln -s $emiscoef_VISsnow ./NPOESS.VISsnow.EmisCoeff.bin
 ln -s $emiscoef_VISwater ./NPOESS.VISwater.EmisCoeff.bin
-ln -s $emiscoef_MWwater ./FASTEM5.MWwater.EmisCoeff.bin
+ln -s $emiscoef_MWwater ./FASTEM6.MWwater.EmisCoeff.bin
 ln -s $aercoef  ./AerosolCoeff.bin
 ln -s $cldcoef  ./CloudCoeff.bin
 
@@ -270,118 +313,98 @@ for file in `awk '{if($1!~"!"){print $1}}' ./satinfo | sort | uniq` ;do
    ln -s ${FIXcrtm}/${file}.TauCoeff.bin ./
 done
 
-# Get aircraft reject list
-cp ${AIRCRAFT_REJECT}/current_bad_aircraft.txt current_bad_aircraft
-
-sfcuselists_path=${SFCOBS_USELIST}
-sfcuselists=current_mesonet_uselist.txt
-#sfcuselists=${YYYY}-${MM}-${DD}_meso_uselist.txt
-cp ${sfcuselists_path}/${sfcuselists} gsd_sfcobs_uselist.txt
-
-cp ${SFCOBS_PROVIDER}/gsd_sfcobs_provider.txt gsd_sfcobs_provider.txt
+# Get aircraft reject list, mesonet_uselist, sfcobs_provider
+{CP} ${FIXgsi}/current_bad_aircraft.txt current_bad_aircraft
+{CP} ${FIXgsi}/current_mesonet_uselist.txt gsd_sfcobs_uselist.txt
+{CP} ${FIXgsi}/gsd_sfcobs_provider.txt gsd_sfcobs_provider.txt
 
 # Only need this file for single obs test
 bufrtable=${FIXgsi}/prepobs_prep.bufrtable
-cp $bufrtable ./prepobs_prep.bufrtable
+{CP} $bufrtable ./prepobs_prep.bufrtable
 
 # Set some parameters for use by the GSI executable and to build the namelist
 export JCAP=${JCAP:-62}
 export LEVS=${LEVS:-60}
 export DELTIM=${DELTIM:-$((3600/($JCAP/20)))}
 
-ndatrap=67  #62 ?
-
-# 3DVar and Cloud analysis in one-step
-grid_ratio=${GSI_grid_ratio_in_var:-1}
-cloudanalysistype=1
+# set GSI namelist according to grid resolution of the variational part
+# cloud analysis always runs at 3km but GSIANL may run at 12km or 3km
+if [ "${GSIANL_RES}" == "12km" ]; then
+  grid_ratio=4
+  cloudanalysistype=5
+  ens_h=40 #110
+  ens_v=3
+  run_gsi_2times='YES'
+else
+  run_gsi_2times='NO'
+  grid_ratio=1
+  cloudanalysistype=1
+  ens_h=20 #40 #110
+  ens_v=1 #3
+fi
 
 # option for hybrid vertical coordinate (HVC) in WRF-ARW
-
-if [ "$NCDUMP" ] ; then
-  n_c3f=`$NCDUMP -h ./wrf_inout | grep -i "C3F:" | wc -l`
-  n_c4f=`$NCDUMP -h ./wrf_inout | grep -i "C4F:" | wc -l`
-  n_c3h=`$NCDUMP -h ./wrf_inout | grep -i "C3H:" | wc -l`
-  n_c4h=`$NCDUMP -h ./wrf_inout | grep -i "C4H:" | wc -l`
-  if [[ $n_c3f -gt "1"  && $n_c4f -gt "1" && $n_c3h -gt "1" && $n_c4h -gt "1" ]] ; then
-    hybridcord=".true."
+if [ "${envir}" != "esrl" ]; then ## skip the following for Jet experimental runs
+  if [ "$NCDUMP" ] ; then
+    n_c3f=`$NCDUMP -h ./wrf_inout | grep -i "C3F:" | wc -l`
+    n_c4f=`$NCDUMP -h ./wrf_inout | grep -i "C4F:" | wc -l`
+    n_c3h=`$NCDUMP -h ./wrf_inout | grep -i "C3H:" | wc -l`
+    n_c4h=`$NCDUMP -h ./wrf_inout | grep -i "C4H:" | wc -l`
+    if [[ $n_c3f -gt "1"  && $n_c4f -gt "1" && $n_c3h -gt "1" && $n_c4h -gt "1" ]] ; then
+      hybridcord=".true."
+    else
+      hybridcord=".false."
+    fi
   else
-    hybridcord=".false."
+    if [ ${YYYYMMDDHH} -lt "2018071118" ] ; then
+      hybridcord=".false."
+    else
+      hybridcord=".true."
+    fi
   fi
-else
-  if [ ${YYYYMMDDHH} -lt "2018071118" ] ; then
-    hybridcord=".false."
-  else
-    hybridcord=".true."
-  fi
+  echo "HVC option is $hybridcord"
 fi
-echo "HVC option is $hybridcord"
 
 # Build the GSI namelist on-the-fly
-cp ${PARMgsi}/gsiparm.anl.sh ./
-. ./gsiparm.anl.sh
+${CP} ${PARMgsi}/gsiparm.anl.sh ./
+source ./gsiparm.anl.sh
 cat << EOF > gsiparm.anl
 $gsi_namelist
 EOF
 
 ## satellite bias correction
-cp ${FIXgsi}/rap_satbias_starting_file.txt ./satbias_in
-cp ${FIXgsi}/rap_satbias_pc_starting_file.txt ./satbias_pc
+{CP} ${FIXgsi}/rap_satbias_starting_file.txt ./satbias_in
+{CP} ${FIXgsi}/rap_satbias_pc_starting_file.txt ./satbias_pc
 
 # Run GSI
-
-if [ -f errfile ] ; then
-    rm -f errfile
-fi
-
+export pgm="rtma3d_gsi"
 . prep_step
-
 startmsg
-msg="***************************************************************************"
+msg="***********************************************************"
 postmsg "$jlogfile" "$msg"
-msg="  begin gsi analysis  : variational + cloud analysis in one-step"
+if [ "${run_gsi_2times}" == "NO" ];  then
+  msg="  begin gsi analysis (var+cloudanx)"
+else
+  msg="  begin first gsi analysis - variational analysis"
+fi
 postmsg "$jlogfile" "$msg"
-msg="***************************************************************************"
+msg="***********************************************************"
 postmsg "$jlogfile" "$msg"
 
-# Save a copy of the GSI executable in the workdir
-${CP} ${EXECrtma3d}/${exefile_name_gsi}   ./rtma3d_gsi
-
- runline="${MPIRUN}         ./rtma3d_gsi"
-$runline < gsiparm.anl >> ${pgmout} 2>errfile
-export err=$? ; err_chk
-
-#===========================================================#
-# error checking used in GSD script
-#===========================================================#
-export pgmout_stdout="stdout"
-cat ${pgmout} > ${pgmout_stdout}
-if [ -f errfile ] ; then
-    cat errfile >> ${pgmout_stdout}
+${CP} ${EXECrtma3d}/${exefile_name_gsi} ${pgm}
+if [ "${envir}" == "esrl" ];  then ##GSI on Jet needs special treatment
+  module load contrib wrap-mpi
+  mpirun ${pgm} < gsiparm.anl > ${pgmout} 2>errfile
+else
+  ${MPIRUN} ${pgm} < gsiparm.anl > ${pgmout} 2>errfile
 fi
-
-export error=$err
-if [ ${error} -ne 0 ]; then
-  ${ECHO} "ERROR: ${GSI} crashed  Exit status=${error}"
-  cp -p ${pgmout_stdout}  ../.
-  exit ${error}
-fi
-
-ls -l > GSI_workdir_list
-
-# Look for successful completion messages in rsl files
-nsuccess=`${TAIL} -200 ${pgmout_stdout} | ${AWK} '/PROGRAM GSI_ANL HAS ENDED/' | ${WC} -l`
-ntotal=1 
-${ECHO} "Found ${nsuccess} of ${ntotal} completion messages"
-if [ ${nsuccess} -ne ${ntotal} ]; then
-   ${ECHO} "ERROR: ${GSI} did not complete sucessfully  Exit status=${error}"
-   cp -p ${pgmout_stdout}  ../.
-   cp GSI_workdir_list ../.
-   if [ ${error} -ne 0 ]; then
-     exit ${error}
-   else
-     exit 1
-   fi
-fi
+##save some information for possible debugging before err_chk
+${CAT} fort.* >   fits_${cycle_str}.txt
+{LS} -l > GSI_workdir_list
+${CAT} errfile GSI_workdir_list >> ${pgmout}
+${CP} -p ${pgmout} ${COMOUTgsi_rtma3d}
+${CP} -p fits_${cycle_str}.txt ${COMOUTgsi_rtma3d}
+export err=$?; err_chk
 
 # Loop over first and last outer loops to generate innovation
 # diagnostic files for indicated observation types (groups)
@@ -409,44 +432,82 @@ esac
    for type in $listall; do
       count=`ls pe*.${type}_${loop}* | wc -l`
       if [[ $count -gt 0 ]]; then
-         `cat pe*.${type}_${loop}* > diag_${type}_${string}.${YYYYMMDDHH}`
+         `${CAT} pe*.${type}_${loop}* > diag_${type}_${string}.${cycle_str}`
       fi
    done
 done
 
-# save results from 1st run
-${CP} fort.201    fit_p1.${YYYYMMDDHH}
-${CP} fort.202    fit_w1.${YYYYMMDDHH}
-${CP} fort.203    fit_t1.${YYYYMMDDHH}
-${CP} fort.204    fit_q1.${YYYYMMDDHH}
-${CP} fort.207    fit_rad1.${YYYYMMDDHH}
-cat   fort.* >    fits_${YYYYMMDDHH}.txt
-${CP} -p fort.220 minimization_fort220.${YYYYMMDDHH}
-# cat fort.* > ${COMOUT}/fits_${YYYYMMDDHH}.txt
+## link fort files with user-friendly file name
+if [ "${envir}" != "esrl" ]; then
+  ${LN} fort.201    fit_p1.${cycle_str}
+  ${LN} fort.202    fit_w1.${cycle_str}
+  ${LN} fort.203    fit_t1.${cycle_str}
+  ${LN} fort.204    fit_q1.${cycle_str}
+  ${LN} fort.207    fit_rad1.${cycle_str}
+  ${LN} fort.220 minimization_fort220.${cycle_str}
+fi
 
+###### second GSI run if needed
+if [ "${run_gsi_2times}" == "YES" ];  then
+  mv gsiparm.anl gsiparm.anl_var
+  mv sigf03 sigf03_step1
+  mv siganl sigf03
+  grid_ratio=1
+  cloudanalysistype=6
+  ifhyb=.false.
+  # Build the GSI namelist on-the-fly
+  {CP} ${PARMgsi}/gsiparm.anl.sh ./
+  source ./gsiparm.anl.sh
+cat << EOF > gsiparm.anl
+$gsi_namelist
+EOF
+  . prep_step
+  startmsg
+  msg="***********************************************************"
+  postmsg "$jlogfile" "$msg"
+  msg="  begin second step gsi analysis: cloud analysis"
+  postmsg "$jlogfile" "$msg"
+  msg="***********************************************************"
+  postmsg "$jlogfile" "$msg"
+  if [ "${envir}" == "esrl" ];  then ##GSI on Jet needs special treatment
+    module load contrib wrap-mpi
+    mpirun ${pgm} < gsiparm.anl > ${pgmout} 2>errfile
+  else
+    ${MPIRUN} ${pgm} < gsiparm.anl > ${pgmout} 2>errfile
+  fi
+  {LS} -l > GSI_workdir_list
+  ${CAT} errfile GSI_workdir_list >> ${pgmout}
+  ${CP} -p ${pgmout} ${COMOUTgsi_rtma3d}/${pgmout}.cloudana
+  export err=$?; err_chk
+
+fi ###### second GSI run
 
 # Saving ANALYSIS, DIAG, Obs-Fitting files TO COM2 DIRECTORY AS PRODUCT for archive
-${CP} -p ${DATA}/wrf_inout                  ${COMOUTgsi_rtma3d}/${ANLrtma3d_FNAME}
-${CP} -p ${pgmout_stdout}                   ${COMOUTgsi_rtma3d}/${pgmout_stdout}_gsianl.${YYYYMMDDHH}
-${CP} -p fits_${YYYYMMDDHH}.txt             ${COMOUTgsi_rtma3d}
-${CP} -p minimization_fort220.${YYYYMMDDHH} ${COMOUTgsi_rtma3d}
-${CP} -p gsiparm.anl                        ${COMOUTgsi_rtma3d}/gsiparm.anl.${YYYYMMDDHH}
-${CP} -p diag_*                             ${COMOUTgsi_rtma3d}
+${CP} -p gsiparm.anl  ${COMOUTgsi_rtma3d}/gsiparm.anl_${cycle_str}
+${TAR} -zcvf ${COMOUTgsi_rtma3d}/diag_${cycle_str} diag_*
 
-tar -zcvf obsfit_fort220.tgz  ./fort.* ./fit_*
-${CP} -p  obsfit_fort220.tgz                 ${COMOUTgsi_rtma3d}
-tar -zcvf misc_info.tgz       ./*info ./errtable ./prepobs_prep.bufrtable  ./*bias*  ./current_bad_aircraft ./gsd_sfcobs_uselist.txt ./gsd_sfcobs_provider.txt ./GSI_workdir_list
-${CP} -p  misc_info.tgz                      ${COMOUTgsi_rtma3d}
-gzip ${COMOUTgsi_rtma3d}/diag_*
+if [ "${envir}" != "esrl" ]; then
+  ${MV} -p ${DATA}/wrf_inout                  ${COMOUTgsi_rtma3d}/${ANLrtma3d_FNAME}
+  ${CP} -p minimization_fort220.${cycle_str} ${COMOUTgsi_rtma3d}
+  ${CP} -p diag_*                             ${COMOUTgsi_rtma3d}
+  ${TAR} -zcvf obsfit_fort220.tgz  ./fort.* ./fit_*
+  ${CP} -p  obsfit_fort220.tgz                ${COMOUTgsi_rtma3d}
+  tar -zcvf misc_info.tgz  ./*info ./errtable ./prepobs_prep.bufrtable  ./*bias*  \
+    ./current_bad_aircraft ./gsd_sfcobs_uselist.txt ./gsd_sfcobs_provider.txt ./GSI_workdir_list
+  ${CP} -p  misc_info.tgz                      ${COMOUTgsi_rtma3d}
+  gzip ${COMOUTgsi_rtma3d}/diag_*
 
-# extra backup (NOT necessary)
-#${LN} -sf ${COMOUTgsi_rtma3d}/${ANLrtma3d_FNAME} ${COMOUT}/${ANLrtma3d_FNAME}
-#${CP} -p  ${pgmout_stdout}                       ${COMOUT}/${pgmout_stdout}_gsianl.${YYYYMMDDHH}
-#${CP} -p  fits_${YYYYMMDDHH}.txt                 ${COMOUT}/fits_${YYYYMMDDHH}.txt
+  # extra backup (NOT necessary)
+  #${LN} -sf ${COMOUTgsi_rtma3d}/${ANLrtma3d_FNAME} ${COMOUT}/${ANLrtma3d_FNAME}
+  #${CP} -p ${pgmout_stdout}        ${COMOUT}/${pgmout_stdout}_gsianl.${cycle_str}
+  #${CP} -p fits_${cycle_str}.txt  ${COMOUT}/fits_${cycle_str}.txt
+fi
 
-/bin/rm -f ${DATA}/wrf_inout
-/bin/rm -f ${DATA}/sig*
-/bin/rm -f ${DATA}/obs*
-/bin/rm -f ${DATA}/pe*
+{RM} -f ${DATA}/sig*
+{RM} -f ${DATA}/obs*
+{RM} -f ${DATA}/pe*
+
+msg="JOB $job FOR $RUN HAS COMPLETED NORMALLY"
+postmsg "$jlogfile" "$msg"
 
 exit 0

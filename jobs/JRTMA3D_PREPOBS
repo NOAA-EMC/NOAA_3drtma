@@ -21,7 +21,6 @@ export NET=${NET:-rtma3d}
 export RUN=${RUN:-rtma3d}
 export model=${model:-rtma3d}
 
-export domain=${domain:-conus}
 ##########################################################
 # obtain unique process id (pid)
 ##########################################################
@@ -36,9 +35,11 @@ export CNVGRIB=${CNVGRIB:-cnvgrib}
 ##########################################################
 export DATA=${DATA:-$DATAROOT/${jobid:?}} #jobid ($job.$LSB_JOBID MUST BE DEFINED IN TERMS OF $RUN IN UPPER LEVEL SCRIPT /MPondeca, 26Jul2015
 if [ -d $DATA ] ; then
-   rm  -rf $DATA/*
+   {ECHO} "$DATA exists, remove its content"
+   {RM} -rf $DATA/*
 else
-   mkdir -p $DATA
+   {ECHO} "$DATA does not exist, create it"
+   {MKDIR} -p $DATA
 fi
 cd $DATA
 
@@ -47,9 +48,15 @@ cd $DATA
 #    setpdy.sh needs the variables 
 #    $PDY and $cyc already defined in advance
 #####################################################
-export cycle=${cycle:-t${cyc}z} 
-setpdy.sh
-. ${DATA}/PDY
+#setpdy.sh
+#. ${DATA}/PDY
+if [[ "${subcyc}" == "-1" ]]; then #it's hourly run
+  export cycle=${cycle:-t${cyc}z}
+  export pgmout=${pgmout:-"OUTPUT.${PDY}${cyc}.${jobid}"}
+else
+  export cycle=${cycle:-t${cyc}${subcyc}z}
+  export pgmout=${pgmout:-"OUTPUT.${PDY}${cyc}${subcyc}.${jobid}"}
+fi
 
 export subcyc=${subcyc} #Note: Must define subcyc in upper level script. Can be 00, 15, 30, or 45 /MPondeca, 30Jun2017
                          #only used for rurtma2p5
@@ -59,8 +66,6 @@ export subcyc=${subcyc} #Note: Must define subcyc in upper level script. Can be 
 ####################################
 export LOG_JJOB=${LOG_JJOB:-$COMROOT/logs/jlogfiles}
 export jlogfile=${jlogfile:-$LOG_JJOB/jlogfile.${jobid}}
-# export pgmout=${pgmout:-"OUTPUT.$$"}
-export pgmout=${pgmout:-"OUTPUT.${PDY}${cyc}.${jobid}"}
 if [ ! -d ${LOG_JJOB} ] ; then
    mkdir -p ${LOG_JJOB}
 fi
@@ -85,18 +90,24 @@ export UTILrtma3d=${UTILrtma3d:-$HOMErtma3d/util/${RUN}}
 export COMIN=${COMIN:-${COMROOT}/${NET}/${envir}/${RUN}.${PDY}}
 export COMOUT=${COMOUT:-${COMROOT}/${NET}/${envir}/${RUN}.${PDY}}
 
-# Directory to store the Pre-processed obs and ready as input for the RTMA3D (BUFR?) 
-export COMINrap=${COMINrap:-${COMIN}/rap.${PDY}}
-export COMINhrrr=${COMINhrrr:-${COMIN}/hrrr.${PDY}/${domain}}
-export COMINobsproc_rtma3d=${COMINobsproc_rtma3d:-"${COMIN}/obsprd.${cycle}"}
-# export OBS_DIR_CYCLE=${OBS_DIR}/${PDY}${cyc}
-
-if [ ! -d "${COMOUT}" ] ; then
-   mkdir -p $COMOUT
+# observation Products/Input
+export domain=${domain:-conus}
+if [ "${subcyc}" == "-1" ]; then; hourly
+  export COMINrap=${COMINrap:-"${COMIN}/rap.${PDY}"}
+  export COMINhrrr=${COMINhrrr:-"${COMIN}/hrrr.${PDY}/${domain}"}
+else
+  export COMINrap=${COMINRAP}/rtma_ru.${PDY}
+  export COMINhrrr=${COMINHRRR}/hrrr.${PDY}/${domain}
 fi
 
-if [ ! -d "${COMINobsproc_rtma3d}" ] ; then
-   mkdir -p $COMINobsproc_rtma3d
+### Processed Observations ready to be used by RTMA3D_gsi
+export COMINobsproc_rtma3d=${COMINobsproc_rtma3d:-"${COMIN}/obsprd.${cycle}"}
+
+if [ ! -d "${COMIN}" ] ; then
+   mkdir -p $COMIN
+fi
+if [ ! -d "${COMOUT}" ] ; then
+   mkdir -p $COMOUT
 fi
 
 # obs data from HPSS
@@ -109,12 +120,22 @@ if [ ! -d "${COMINhrrr}" ] ; then
   exit 1
 fi
 
-###########################################################
+if [ ! -d "${COMINobsproc_rtma3d}" ] ; then
+  mkdir -p $COMINobsproc_rtma3d
+fi
 
+###########################################################
+#
+# The following variables are used in exrtma3d_obsprep_conv.ksh
+#
+###########################################################
+#   Set the name to the executable
+#    export exefile_name_xxxx=${exefile_name_xxxx:-"rtma3d_process_xxxx"}
+# save for future use
 ######################
 # Execute the script.
 ######################
-${exSCR_PREPOBS:-$HOMErtma3d/scripts/ex${RUN}_prepobs.ksh}
+${exSCR_OBSPREP_CONV:-$HOMErtma3d/scripts/ex${NET}_obsprep_conv.ksh}
 export err=$?; err_chk
 
 msg="$0 of $job completed normally"
@@ -122,7 +143,7 @@ postmsg $jlogfile "$msg"
 
 if [ -e "${pgmout}" ] ; then
    cat $pgmout
-   cp -p $pgmout   ${LOG_PGMOUT}
+   cp -p $pgmout ${LOG_PGMOUT}
 fi
 
 ##############################

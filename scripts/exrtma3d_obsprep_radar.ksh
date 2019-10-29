@@ -16,40 +16,37 @@ if [ ! -d "${NSSL}" ]; then
   exit 1
 fi
 
-# Make sure minutes are defined
-if [ ! "${MM1}" ]; then
-  ${ECHO} "ERROR: \$MM1 is not defined!"
-  exit 1
-fi
-if [ ! "${MM2}" ]; then
-  ${ECHO} "ERROR: \$MM2 is not defined!"
-  exit 1
-fi
-if [ ! "${MM3}" ]; then
-  ${ECHO} "ERROR: \$MM3 is not defined!"
-  exit 1
-fi
-
-# Make sure START_TIME is defined and in the correct format
-SUBH_TIME=${subcyc}
-if [ "subcyc" == "-1" ]; then #hourly run
+if [ "${subcyc}" == "-1" ]; then #hourly run
   SUBH_TIME='00'
-fi
-if [ ! "${START_TIME}" ]; then
-  ${ECHO} "ERROR: \$START_TIME is not defined!"
-  exit 1
+  tz_str=t${cyc}z
 else
-  if [ `${ECHO} "${START_TIME}" | ${AWK} '/^[[:digit:]]{10}$/'` ]; then
-    START_TIME=`${ECHO} "${START_TIME}" | ${SED} 's/\([[:digit:]]\{2\}\)$/ \1/'`
-  elif [ ! "`${ECHO} "${START_TIME}" | ${AWK} '/^[[:digit:]]{8}[[:blank:]]{1}[[:digit:]]{2}$/'`" ]; then
-    ${ECHO} "ERROR: start time, '${START_TIME}', is not in 'yyyymmddhh' or 'yyyymmdd hh' format"
-    exit 1
-  fi
-  START_TIME=`${DATE} -d "${START_TIME} ${SUBH_TIME} minutes"`
+  SUBH_TIME=${subcyc}
+  tz_str=t${cyc}${subcyc}z
 fi
-
+START_TIME=`${DATE} -d "${PDY} ${cyc} ${SUBH_TIME} minutes"`
+#assgin MM1, MM2, MM3
+if [ "${SUBH_TIME}" == "00" ]; then
+  MM1=0
+  MM2=1
+  MM2=2
+elif [ "${SUBH_TIME}" == "15" ]; then
+  MM1=15
+  MM2=14
+  MM2=16
+elif [ "${SUBH_TIME}" == "30" ]; then
+  MM1=30
+  MM2=29
+  MM2=31
+elif [ "${SUBH_TIME}" == "45" ]; then
+  MM1=45
+  MM2=44
+  MM2=46
+elif [ "${SUBH_TIME}" == "60" ]; then
+  MM1=59
+  MM2=58
+  MM2=57
+fi
 # Compute date & time components for the analysis time
-YYYYJJJHH00=`${DATE} +"%Y%j%H00" -d "${START_TIME}"`
 YYYYMMDDHH=`${DATE} +"%Y%m%d%H" -d "${START_TIME}"`
 YYYY=`${DATE} +"%Y" -d "${START_TIME}"`
 MM=`${DATE} +"%m" -d "${START_TIME}"`
@@ -66,28 +63,23 @@ fi
 
 #----- enter working directory -------
 cd ${DATA}
-${ECHO} "enter workign directory:${DATA}"
+${ECHO} "enter working directory:${DATA}"
 
 # BUFR Table including the description for HREF
-${CP} ${FIXgsi}/prepobs_prep_RAP.bufrtable   ./prepobs_prep.bufrtable
-if [ -s "./prepobs_prep.bufrtable" ]; then
-  ${ECHO} "prepobs_prep.bufrtable sucessfully copied"
-else
+${LN} ${FIXgsi}/prepobs_prep_RAP.bufrtable ./prepobs_prep.bufrtable
+if [ ! -s "./prepobs_prep.bufrtable" ]; then
   ${ECHO} "prepobs_prep.bufrtable does not exist or not readable"
   exit 1
 fi
 
 # WPS GEO_GRID Data
 ${LN} -s ${FIXwps}/hrrr_geo_em.d01.nc ./geo_em.d01.nc 
-if [ -s "./geo_em.d01.nc" ]; then
-  ${ECHO} "geo_em.d01.nc sucessfully linked"
-else
+if [ ! -s "./geo_em.d01.nc" ]; then
   ${ECHO} "geo_em.d01.nc does not exist or not readable"
   exit 1 
 fi
 
 # print parameters for linking/processing
-${ECHO} "working directory: "${DATA}
 ${ECHO} "START_TIME: "${START_TIME}
 if [ ${SUBH_TIME} -eq 60 ]; then
   ${ECHO} "time_01hago: "${time_01hago}
@@ -151,27 +143,28 @@ export pgm="rtma3d_process_mosaic"
 startmsg
 msg="***********************************************************"
 postmsg "$jlogfile" "$msg"
-msg="  begin pre-processing MRMS MOSAIC RADAR Reflectivity Obs DATA"
+msg="  begin processing MRMS MOSAIC RADAR Reflectivity Obs DATA"
 postmsg "$jlogfile" "$msg"
 msg="***********************************************************"
 postmsg "$jlogfile" "$msg"
 
-${CP} ${EXECrtma3d}/${exefile_name_radar}   ./rtma3d_process_mosaic
+${CP} ${EXECrtma3d}/${exefile_name_radar} ${pgm}
 ${MPIRUN} ${pgm} > ${pgmout} 2>errfile
 export err=$?; err_chk
 
 msg="JOB $job FOR $RUN HAS COMPLETED NORMALLY"
 postmsg "$jlogfile" "$msg"
 
-if [ -f ${DATA}/NSSLRefInGSI.bufr ] ; then
-  if [ "${envir}" == "expr" ]; then
-    ${ECHO} "" #Jet experimental run does not need to copy to COM
+targetfile="NSSLRefInGSI.bufr"
+if [ -f ${DATA}/${targetfile} ] ; then
+  if [ "${envir}" == "esrl" ]; then
+    mv ${DATA}/${targetfile} ${COMINobsproc_rtma3d}/${tz_str}.${targetfile} #to save disk space
+    ${LN} -snf ${COMINobsproc_rtma3d}/${tz_str}.${targetfile} ${DATA}/${targetfile}
   else
-    cpreq ${DATA}/NSSLRefInGSI.bufr ${COMOUT}/hrrr.t${cyc}${subcyc}z.NSSLRefInGSI.bufr
-    cpreq ${DATA}/NSSLRefInGSI.bufr ${COMINobsproc_rtma3d}/${RUN}.t${cyc}${subcyc}z.NSSLRefInGSI.bufr
+    cpreq ${DATA}/${targetfile} ${COMINobsproc_rtma3d}/${RUN}.${tz_str}.${targetfile}
   fi
 else
-  msg="WARNING $pgm terminated normally but ${DATA}/NSSLRefInGSI.bufr does NOT exist."
+  msg="WARNING $pgm terminated normally but ${DATA}/${targetfile} does NOT exist."
   ${ECHO} "$msg"
   postmsg "$jlogfile" "$msg"
   exit 1

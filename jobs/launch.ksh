@@ -157,18 +157,30 @@ elif [ "${machine}" = "jet" ] ;  then
   export jobid=${jobid:-"${job}.${jid}"}
   echo " number of cores : $np for job $job with id as $jobid "
 
-  if [ "${rundir_task}" ]; then
-    export DATA=${rundir_task} #Jet expr run will not append ${jid} to rundir
+  if [ -z "${rundir_task}" ]; then
+    ${ECHO} "Fatal error: \$rundir_task is not defined"
+    exit 1
   fi
-  if [[ "${envir}"=="expr"  ]]; then # Jet expr runs
+  export DATA=${rundir_task} #Jet experimental run will not append ${jid} to rundir
+  if [[ "${envir}"=="esrl"  ]]; then # Jet experimental runs
     export EXECrtma3d=${EXECrtma3d:-$HOMErtma3d/exec}
     export FIXrtma3d=${FIXrtma3d:-$HOMErtma3d/fix}
     export PARMrtma3d=${PARMrtma3d:-$HOMErtma3d/parm}
     export USHrtma3d=${USHrtma3d:-$HOMErtma3d/ush}
     export UTILrtma3d=${UTILrtma3d:-$HOMErtma3d/util}
-    export LOG_PGMOUT="${COMROOT}/pgmout"
-    export LOG_JJOB="${COMROOT}/logs/${PDY}"
+    export LOG_PGMOUT="${COMROOT}/stdout"
     export pgmout="output_${PDY}.${jobid}"
+    export LOG_JJOB="${COMROOT}/log/${PDY}"
+    {MKDIR} ${COMROOT}/loghistory
+    export COMINobsproc_rtma3d="${COMROOT}/ptmp/obs/${PDY}"
+    export COMOUTgsi_rtma3d="${COMROOT}/ptmp/gsi/${PDY}"
+
+    # the following is to pass dir check for Jet esrl runs
+    export GESINhrrr_rtma3d="/tmp" 
+    export COMIN="/tmp"
+    export COMOUT="/tmp"
+    export COMINrap="/tmp"
+    export COMINhrrr="/tmp"
   fi
 
 #----------- for Dell ------------------------------------------------------------------------

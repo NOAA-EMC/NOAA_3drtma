@@ -1,6 +1,4 @@
-#!/bin/ksh
-############################################################################
-
+#!/bin/ksh --login
 set -x
 
 # make sure executable exists
@@ -9,153 +7,145 @@ if [ ! -f ${EXECrtma3d}/${exefile_name_lightning} ] ; then
   exit 1
 fi
 
-# working directory
-workdir=${DATA}
-cd ${workdir}
+if [ ! "${LIGHTNING_ROOT}" ]; then
+  ${ECHO} "ERROR: \$LIGHTNING_ROOT is not defined!"
+  exit 1
+fi
+if [ ! -d "${LIGHTNING_ROOT}" ]; then
+  ${ECHO} "ERROR: LIGHTNING_ROOT directory '${LIGHTNING_ROOT}' does not exist!"
+  exit 1
+fi
 
-# export MV2_ON_DEMAND_THRESHOLD=256    # if load module mvapich2 ?
-
-mm=$subcyc
-subhtime=$subcyc
-${ECHO} $PDY $cyc $mm
-# START_TIME="${PDY}${cyc}"      # YYYYMMDDHH
-  START_TIME=${START_TIME:-"{PDY} ${cyc}"}      # YYYYMMDD HH
-# START_TIME="${PDY} ${cyc} ${subcyc} minutes"  # YYYYMMDD HH MN 
-
-${ECHO} "${START_TIME}"
-echo `echo "${START_TIME}" | ${AWK} '/^[[:digit:]]{10}$/'`
- if [ `echo "${START_TIME}" | ${AWK} '/^[[:digit:]]{10}$/'` ]; then
-   START_TIME=`echo "${START_TIME}" | ${SED} 's/\([[:digit:]]\{2\}\)$/ \1/'`
- elif [ ! "`echo "${START_TIME}" | ${AWK} '/^[[:digit:]]{8}[[:blank:]]{1}[[:digit:]]{2}$/'`" ]; then
-   echo "FATAL ERROR: start time, '${START_TIME}', is not in 'yyyymmddhh' or 'yyyymmdd hh' format"
-   err_exit 1
- fi
- START_TIME=`${DATE} -d "${START_TIME} ${subhtime} minutes"`
-echo $START_TIME
+if [ "${subcyc}" == "-1" ]; then #hourly run
+  SUBH_TIME='00'
+  tz_str=t${cyc}z
+else
+  SUBH_TIME=${subcyc}
+  tz_str=t${cyc}${subcyc}z
+fi
+START_TIME=`${DATE} -d "${PDY} ${cyc} ${SUBH_TIME} minutes"`
+#for HRRR pre-forecast
+#CYCLE_TIME=`${DATE} -d "${PDY} ${cyc} ${SUBH_TIME} minutes"`
+#START_TIME=`${DATE} -d "${CYCLE_TIME} -1 hour"`
 
 # Compute date & time components for the analysis time
-YYYYJJJHH00=`${DATE} +"%Y%j%H00" -d "${START_TIME}"`
 YYYYMMDDHH=`${DATE} +"%Y%m%d%H" -d "${START_TIME}"`
-YYYY=`${DATE} +"%Y" -d "${START_TIME}"`
-MM=`${DATE} +"%m" -d "${START_TIME}"`
-DD=`${DATE} +"%d" -d "${START_TIME}"`
-HH=`${DATE} +"%H" -d "${START_TIME}"`
+YJH=`${DATE} +"%y%j%H" -d "${START_TIME}"`
+NEXTYJH=`${DATE} +"%y%j%H" -d "${START_TIME} 1 hour"`
+PREVYJH=`${DATE} +"%y%j%H" -d "${START_TIME} -1 hour"`
 
-# Julian Day in format YYJJJHH
-YYJJJHH=`${DATE} +"%Y%j%H" -d "${START_TIME}"`
+if [ ${SUBH_TIME} -eq 0 ]; then
+  file1=${PREVYJH}500005r
+  file2=${PREVYJH}550005r
+  file3=${YJH}000005r
+elif [ ${SUBH_TIME} -eq 15 ]; then
+  file1=${YJH}050005r
+  file2=${YJH}100005r
+  file3=${YJH}150005r
+elif [ ${SUBH_TIME} -eq 30 ]; then
+  file1=${YJH}200005r
+  file2=${YJH}250005r
+  file3=${YJH}300005r
+elif [ ${SUBH_TIME} -eq 45 ]; then
+  file1=${YJH}350005r
+  file2=${YJH}400005r
+  file3=${YJH}450005r
+elif [ ${SUBH_TIME} -eq 60 ]; then
+  file1=${YJH}500005r
+  file2=${YJH}550005r
+  file3=${NEXTYJH}000005r
+else
+  ${ECHO} "ERROR: obsprep_lghtn.ksh not set up for SUBH_TIME = $SUBH_TIME"
+  exit 1
+fi
 
-PREVCYC_TIME=${PDYHH_cycm1}
-${ECHO} "${PREVCYC_TIME}"
- if [ `echo "${PREVCYC_TIME}" | ${AWK} '/^[[:digit:]]{10}$/'` ]; then
-   PREVCYC_TIME=`echo "${PREVCYC_TIME}" | ${SED} 's/\([[:digit:]]\{2\}\)$/ \1/'`
- elif [ ! "`echo "${PREVCYC_TIME}" | ${AWK} '/^[[:digit:]]{8}[[:blank:]]{1}[[:digit:]]{2}$/'`" ]; then
-   echo "FATAL ERROR: previous cycle time, '${PREVCYC_TIME}', is not in 'yyyymmddhh' or 'yyyymmdd hh' format"
-   err_exit 1
- fi
- PREVCYC_TIME=`${DATE} -d "${PREVCYC_TIME} ${subhtime} minutes"`
-echo $PREVCYC_TIME
+#----- enter working directory -------
+cd ${DATA}
+${ECHO} "enter working directory:${DATA}"
 
-# Julian Day in format YYJJJHH (two-digits year, day of year, hour.)
-YYJJJHH=`${DATE} +"%y%j%H" -d "${START_TIME}"`
-PREYYJJJHH=`${DATE} +"%y%j%H" -d "${PREVCYC_TIME}"`
+# BUFR Table including the description for HREF
+${LN} ${FIXgsi}/prepobs_prep_RAP.bufrtable ./prepobs_prep.bufrtable
+if [ ! -s "./prepobs_prep.bufrtable" ]; then
+  ${ECHO} "prepobs_prep.bufrtable does not exist or not readable"
+  exit 1
+fi
 
-typeset -Z2 mm mmp1 mmp2 mmp3              # <<-- "-Z2" only work for K-Shell
-mm=`${DATE} +"%M" -d "${START_TIME}"`
-mmp1=$((${mm}+1))
-mmp2=$((${mm}+2))
-mmp3=$((${mm}+3))
-# mm=`printf "%2.2i\n" $mm`
-# mmp1=`printf "%2.2i\n" $mmp1`
-# mmp2=`printf "%2.2i\n" $mmp2`
-# mmp3=`printf "%2.2i\n" $mmp3`
-
-ymd=`${DATE} +"%Y%m%d" -d "${START_TIME}"`
-ymdh=${YYYYMMDDHH}
-hh=$HH
-
-# BUFR Table includingthe description for HREF
-${CP} -p ${FIXgsi}/prepobs_prep_RAP.bufrtable   ./prepobs_prep.bufrtable
 # WPS GEO_GRID Data
-${LN} -s ${FIXwps}/hrrr_geo_em.d01.nc           ./geo_em.d01.nc 
+${LN} -s ${FIXwps}/hrrr_geo_em.d01.nc ./geo_em.d01.nc 
+if [ ! -s "./geo_em.d01.nc" ]; then
+  ${ECHO} "geo_em.d01.nc does not exist or not readable"
+  exit 1 
+fi
 
+# print parameters for linking/processing
+${ECHO} "START_TIME: "${START_TIME}
+${ECHO} "SUBH_TIME: "${SUBH_TIME}
+${ECHO} "YYYYMMDDHH: "${YYYYMMDDHH}
+
+# Link to the NLDN data
 #
-#--- 
-#
-if [ ${obsprep_lghtn} -eq 1 ] ; then
+filenum=0
+LIGHTNING_FILE=${LIGHTNING_ROOT}/vaisala/netcdf/${file1}
+if [ -r ${LIGHTNING_FILE} ]; then
+  ((filenum += 1 ))
+  ${LN} -sf ${LIGHTNING_FILE} ./NLDN_lightning_${filenum}
+else
+   ${ECHO} " ${LIGHTNING_FILE} does not exist"
+fi
+LIGHTNING_FILE=${LIGHTNING_ROOT}/vaisala/netcdf/${file2}
+if [ -r ${LIGHTNING_FILE} ]; then
+  ((filenum += 1 ))
+  ${LN} -sf ${LIGHTNING_FILE} ./NLDN_lightning_${filenum}
+else
+   ${ECHO} " ${LIGHTNING_FILE} does not exist"
+fi
+LIGHTNING_FILE=${LIGHTNING_ROOT}/vaisala/netcdf/${file3}
+if [ -r ${LIGHTNING_FILE} ]; then
+  ((filenum += 1 ))
+  ${LN} -sf ${LIGHTNING_FILE} ./NLDN_lightning_${filenum}
+else
+   ${ECHO} " ${LIGHTNING_FILE} does not exist"
+fi
+${ECHO} "found GLD360 files: ${filenum}"
 
-  ${ECHO} " processing NCEP BUFR Lightning Data"
-
-# find lightning bufr file
-  if [ -s $COMINrap/rap.t${cyc}z.lghtng.tm00.bufr_d ] ; then
-    cp $COMINrap/rap.t${cyc}z.lghtng.tm00.bufr_d ./rap.t${cyc}z.lghtng.tm00.bufr_d
-  elif [ -s $COMINrap_e/rap.t${cyc}z.lghtng.tm00.bufr_d ] ; then
-    cp $COMINrap_e/rap.t${cyc}z.lghtng.tm00.bufr_d ./rap.t${cyc}z.lghtng.tm00.bufr_d
-  else
-    echo 'No bufr file found for lightning processing'
-  fi
-
-  ln -s rap.t${cyc}z.lghtng.tm00.bufr_d lghtngbufr
-
-  echo ${PDY}${cyc} > ./lightning_cycle_date
-
-  YYYYMMDDHH=${PDY}${cyc}
-  minutetime=$subcyc
-
+ifalaska=false
 # Build the namelist on-the-fly
-  rm -f ./lightning_bufr.namelist
-  cat << EOF > lightning_bufr.namelist
+${CAT} << EOF > lightning.namelist
  &SETUP
-  analysis_time = ${YYYYMMDDHH},
-  minute=${minutetime},
-  trange_start=-15.0,
-  trange_end=0.0,
+   analysis_time = ${YYYYMMDDHH},
+   NLDN_filenum  = ${filenum},
+   IfAlaska    = ${ifalaska},
  /
 EOF
 
-fi
-
-# Run process lightning
-
-if [ -f errfile ] ; then 
-  rm -f errfile
-fi
-
+# Run obs processor
+export pgm="rtma3d_process_lightning"
 . prep_step
-
 startmsg
 msg="***********************************************************"
 postmsg "$jlogfile" "$msg"
-if [ $obsprep_lghtn -eq 1 ] ; then  
-  msg="  begin pre-processing NCEP BUFR lightning data"
-fi
+msg="  begin processing lightning data"
 postmsg "$jlogfile" "$msg"
 msg="***********************************************************"
 postmsg "$jlogfile" "$msg"
 
-# Run Processing lightning
-# copy the excutable file of processing RAP BUFR format lightning data
-${CP} ${EXECrtma3d}/${exefile_name_lightning}  ./rtma3d_process_lightning
-
-runline="${MPIRUN}             ./rtma3d_process_lightning"
-if [ ${obsprep_lghtn} -eq 1 ] ; then
-  $runline  > ${pgmout} 2>errfile
-else
-  $runline < lightning.namelist > ${pgmout} 2>errfile
-fi
+${CP} ${EXECrtma3d}/${exefile_name_lightning} ${pgm}
+${MPIRUN} ${pgm} < lightning.namelist > ${pgmout} 2>errfile
 export err=$?; err_chk
 
 msg="JOB $job FOR $RUN HAS COMPLETED NORMALLY"
 postmsg "$jlogfile" "$msg"
 
-if [ $obsprep_lghtn -eq 1 ] ; then
-  lghtng_bufr="LightningInGSI_bufr.bufr"
+targetfile="LightningInGSI.bufr"
+if [ -f ${DATA}/${targetfile} ] ; then
+  if [ "${envir}" == "esrl" ]; then
+    mv ${DATA}/${targetfile} ${COMINobsproc_rtma3d}/${tz_str}.${targetfile} #to save disk space
+    ${LN} -snf ${COMINobsproc_rtma3d}/${tz_str}.${targetfile} ${DATA}/${targetfile}
+  else
+    cpreq ${DATA}/${targetfile} ${COMINobsproc_rtma3d}/${RUN}.${tz_str}.${targetfile}
+  fi
 else
-  lghtng_bufr="LightningInGSI.bufr"
-fi
-if [ -f ${DATA}/${lghtng_bufr} ] ; then
-  cpreq ${DATA}/${lghtng_bufr} ${COMINobsproc_rtma3d}/${RUN}.t${cyc}z.${lghtng_bufr}
-else
-  msg="WARNING $pgm terminated normally but ${DATA}/${lghtng_bufr} does NOT exist."
+  msg="WARNING $pgm terminated normally but ${DATA}/${targetfile} does NOT exist."
   ${ECHO} "$msg"
   postmsg "$jlogfile" "$msg"
   exit 1

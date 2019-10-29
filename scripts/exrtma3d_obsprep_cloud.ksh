@@ -1,6 +1,4 @@
-#!/bin/ksh
-############################################################################
-
+#!/bin/ksh --login
 set -x
 
 # make sure executable exists
@@ -9,106 +7,104 @@ if [ ! -f ${EXECrtma3d}/${exefile_name_cloud} ] ; then
   exit 1
 fi
 
-# working directory
-workdir=${DATA}
-cd ${workdir}
+if [ ! "${NASALARC_DATA}" ]; then
+  ${ECHO} "ERROR: \$NASALARC_DATA is not defined!"
+  exit 1
+fi
+if [ ! -d "${NASALARC_DATA}" ]; then
+  ${ECHO} "ERROR: NASALARC_DATA directory '${NASALARC_DATA}' does not exist!"
+  exit 1
+fi
 
-# export MV2_ON_DEMAND_THRESHOLD=256    # if load module mvapich2 ?
-
-mm=$subcyc
-subhtime=$subcyc
-${ECHO} $PDY $cyc $mm
-# START_TIME="${PDY}${cyc}"      # YYYYMMDDHH
-  START_TIME=${START_TIME:-"{PDY} ${cyc}"}      # YYYYMMDD HH
-# START_TIME="${PDY} ${cyc} ${subcyc} minutes"  # YYYYMMDD HH MN 
-
-${ECHO} "${START_TIME}"
-echo `echo "${START_TIME}" | ${AWK} '/^[[:digit:]]{10}$/'`
- if [ `echo "${START_TIME}" | ${AWK} '/^[[:digit:]]{10}$/'` ]; then
-   START_TIME=`echo "${START_TIME}" | ${SED} 's/\([[:digit:]]\{2\}\)$/ \1/'`
- elif [ ! "`echo "${START_TIME}" | ${AWK} '/^[[:digit:]]{8}[[:blank:]]{1}[[:digit:]]{2}$/'`" ]; then
-   echo "FATAL ERROR: start time, '${START_TIME}', is not in 'yyyymmddhh' or 'yyyymmdd hh' format"
-   err_exit 1
- fi
- START_TIME=`${DATE} -d "${START_TIME} ${subhtime} minutes"`
-echo $START_TIME
+if [ "${subcyc}" == "-1" ]; then #hourly run
+  SUBH_TIME='00'
+  tz_str=t${cyc}z
+else
+  SUBH_TIME=${subcyc}
+  tz_str=t${cyc}${subcyc}z
+fi
+START_TIME=`${DATE} -d "${PDY} ${cyc} ${SUBH_TIME} minutes"`
 
 # Compute date & time components for the analysis time
-YYYYJJJHH00=`${DATE} +"%Y%j%H00" -d "${START_TIME}"`
 YYYYMMDDHH=`${DATE} +"%Y%m%d%H" -d "${START_TIME}"`
-YYYY=`${DATE} +"%Y" -d "${START_TIME}"`
-MM=`${DATE} +"%m" -d "${START_TIME}"`
-DD=`${DATE} +"%d" -d "${START_TIME}"`
+YYYYJJJHH=`${DATE} +"%Y%j%H" -d "${START_TIME}"`
 HH=`${DATE} +"%H" -d "${START_TIME}"`
 
-typeset -Z2 mm mmp1 mmp2 mmp3              # <<-- "-Z2" only work for K-Shell
-mm=`${DATE} +"%M" -d "${START_TIME}"`
-mmp1=$((${mm}+1))
-mmp2=$((${mm}+2))
-mmp3=$((${mm}+3))
-# mm=`printf "%2.2i\n" $mm`
-# mmp1=`printf "%2.2i\n" $mmp1`
-# mmp2=`printf "%2.2i\n" $mmp2`
-# mmp3=`printf "%2.2i\n" $mmp3`
+#----- enter working directory -------
+cd ${DATA}
+${ECHO} "enter working directory:${DATA}"
 
-ymd=`${DATE} +"%Y%m%d" -d "${START_TIME}"`
-ymdh=${YYYYMMDDHH}
-hh=$HH
+# BUFR Table including the description for HREF
+${LN} ${FIXgsi}/prepobs_prep_RAP.bufrtable ./prepobs_prep.bufrtable
+if [ ! -s "./prepobs_prep.bufrtable" ]; then
+  ${ECHO} "prepobs_prep.bufrtable does not exist or not readable"
+  exit 1
+fi
 
-# BUFR Table includingthe description for HREF
-${CP} -p ${FIXgsi}/prepobs_prep_RAP.bufrtable   ./prepobs_prep.bufrtable
 # WPS GEO_GRID Data
-${LN} -s ${FIXwps}/hrrr_geo_em.d01.nc           ./geo_em.d01.nc 
+${LN} -s ${FIXwps}/hrrr_geo_em.d01.nc ./geo_em.d01.nc 
+if [ ! -s "./geo_em.d01.nc" ]; then
+  ${ECHO} "geo_em.d01.nc does not exist or not readable"
+  exit 1 
+fi
 
-#
-#--- 
-#
+# print parameters for linking/processing
+${ECHO} "START_TIME: "${START_TIME}
+${ECHO} "SUBH_TIME: "${SUBH_TIME}
+${ECHO} "YYYYMMDDHH: "${YYYYMMDDHH}
 
-# find rap bufr lgycld data file and link to the bufr file
-  if [ -s $COMINrap/rap.t${cyc}z.lgycld.tm00.bufr_d ] ; then
-    ${CP} -p $COMINrap/rap.t${cyc}z.lgycld.tm00.bufr_d ./rap.t${cyc}z.lgycld.tm00.bufr_d
-    ${LN} -sf ./rap.t${cyc}z.lgycld.tm00.bufr_d ./NASA_LaRC_cloud.bufr
+# Link to the NASA LaRC cloud data
+if [ "${HH}" = 12 ] || [ "${HH}" = "00" ] ; then
+  ${LN} -s ${NASALARC_DATA}/${YYYYJJJHH}00.rap_e.t${HH}z.lgycld.tm00.bufr_d ./NASA_LaRC_cloud.bufr
+else
+  ${LN} -s ${NASALARC_DATA}/${YYYYJJJHH}00.rap.t${HH}z.lgycld.tm00.bufr_d ./NASA_LaRC_cloud.bufr
+fi
+if [ ! -s "NASA_LaRC_cloud.bufr" ]; then
+  ${ECHO} "./NASA_LaRC_cloud.bufr does not exist or not readable"
+  exit 1
+fi
+
+# Build the namelist on-the-fly
+${CAT} << EOF > namelist_nasalarc
+&SETUP
+  analysis_time = ${YYYYMMDDHH},
+  bufrfile='NASALaRCCloudInGSI.bufr',
+  npts_rad=3,
+  ioption = 2,
+/
+EOF
+
+# Run obs processor
+export pgm="rtma3d_process_cloud"
+. prep_step
+startmsg
+msg="***********************************************************"
+postmsg "$jlogfile" "$msg"
+msg="  begin processing NASA LaRC cloud data"
+postmsg "$jlogfile" "$msg"
+msg="***********************************************************"
+postmsg "$jlogfile" "$msg"
+
+${CP} ${EXECrtma3d}/${exefile_name_cloud} ${pgm}
+${MPIRUN} ${pgm} > ${pgmout} 2>errfile
+export err=$?; err_chk
+
+msg="JOB $job FOR $RUN HAS COMPLETED NORMALLY"
+postmsg "$jlogfile" "$msg"
+
+targetfile="NASALaRCCloudInGSI.bufr"
+if [ -f ${DATA}/${targetfile} ] ; then
+  if [ "${envir}" == "esrl" ]; then
+    mv ${DATA}/${targetfile} ${COMINobsproc_rtma3d}/${tz_str}.${targetfile} #to save disk space
+    ${LN} -snf ${COMINobsproc_rtma3d}/${tz_str}.${targetfile} ${DATA}/${targetfile}
   else
-    echo 'No bufr file found for nasa LaRC cloud data processing'
+    cpreq ${DATA}/${targetfile} ${COMINobsproc_rtma3d}/${RUN}.${tz_str}.${targetfile}
   fi
-
-  echo ${PDY}${cyc} > ./nasaLaRC_cycle_date
-# echo ${YYYYMMDDHH} > ./nasaLaRC_cycle_date
-
-# Run process lightning
-
-  if [ -f errfile ] ; then 
-    rm -f errfile
-  fi
-
-  . prep_step
-
-  startmsg
-  msg="***********************************************************"
+else
+  msg="WARNING $pgm terminated normally but ${DATA}/${targetfile} does NOT exist."
+  ${ECHO} "$msg"
   postmsg "$jlogfile" "$msg"
-  msg="  begin pre-processing RAP bufr lightning data"
-  postmsg "$jlogfile" "$msg"
-  msg="***********************************************************"
-  postmsg "$jlogfile" "$msg"
-
-# Run Processing lightning
-# copy the excutable file of processing NASA LaRC Cloud data
-  ${CP} ${EXECrtma3d}/${exefile_name_cloud}   ./rtma3d_process_cloud
-
-  runline="${MPIRUN}             ./rtma3d_process_cloud"
-  $runline >> ${pgmout} 2>errfile
-  export err=$?; err_chk
-
-  msg="JOB $job FOR $RUN HAS COMPLETED NORMALLY"
-  postmsg "$jlogfile" "$msg"
-
-  if [ -f ${DATA}/NASALaRCCloudInGSI.bufr ] ; then
-    cpreq ${DATA}/NASALaRCCloudInGSI.bufr ${COMINobsproc_rtma3d}/${RUN}.t${cyc}z.NASALaRCCloudInGSI.bufr
-  else
-    msg="WARNING $pgm terminated normally but ${DATA}/NASALaRCCloudInGSI_bufr.bufr does NOT exist."
-    ${ECHO} "$msg"
-    postmsg "$jlogfile" "$msg"
-    exit 1
-  fi
+  exit 1
+fi
 
 exit 0

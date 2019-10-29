@@ -30,7 +30,7 @@ date_str=${YYYYJJJHHMM}
 
 #----- enter working directory -------
 cd ${DATA}
-${ECHO} "enter workign directory:${DATA}"
+${ECHO} "enter working directory:${DATA}"
 
 ### prepare basic observations (prepbufr, satwnd, radiance, ... )
 pgm="obsprep_basic"
