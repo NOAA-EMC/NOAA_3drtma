@@ -20,8 +20,10 @@ sorc/**/log_*
 #
 **/log.*
 log
+logs
 loghistory
 run
+save4later
 #
 #  
 #
