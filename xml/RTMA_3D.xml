@@ -16,6 +16,8 @@
 <!ENTITY HOMEBASE_DIR "/lfs1/projects/nrtrr/workflow/RTMA_3D_RU">
 <!ENTITY DATABASE_DIR "/lfs1/projects/nrtrr/RTMA_3D_RU">
 <!ENTITY JOBNAME_PRE "RTMA3D_RU">
+<!ENTITY envir "esrl"> 
+<!ENTITY KEEPDATA "YES">
 
 <!ENTITY NCL_VER "6.5.0">
 <!ENTITY SCRIPTS "&HOMEBASE_DIR;/scripts">
@@ -30,8 +32,9 @@
 <!ENTITY GSI_ROOT "&HOMEBASE_DIR;/exec/GSI">
 <!ENTITY FIX_ROOT "&STATIC_DIR;/GSI">
 
-<!ENTITY MODULE_DIR "/home/rtrr/PARM_EXEC/modulefiles">
+<!ENTITY MODULE_DIR "/lfs1/projects/nrtrr/FIX_EXEC_MODULE">
 <!ENTITY MODULE_FILE "&MODULE_DIR;/modulefile.jet.RAPHRRR">
+<!ENTITY MODULE_NCO  "&MODULE_DIR;/modulefile.jet.NCOworkflow">
 
 <!ENTITY SCRIPT_DIR "&HOMEBASE_DIR;/scripts">
 <!ENTITY JJOB_DIR   "&HOMEBASE_DIR;/jobs">
@@ -72,8 +75,6 @@
 <!ENTITY LOG_DIR "&DATABASE_DIR;/log">
 <!ENTITY DATAROOT_ENS "&DATABASE_DIR;/gfsenkf">
 <!ENTITY DATAROOT "&DATABASE_DIR;/run">
-<!ENTITY DATAROOT_BC "&DATABASE_DIR;/run">
-<!ENTITY DATAROOT_PCYC "&DATABASE_DIR;/run">
 
 <!ENTITY POST_NAME "hrconus">
 <!ENTITY FCST_LENGTH "20"> <!--20 secconds -->
@@ -85,7 +86,6 @@
 <!ENTITY SATELLITE_PROC "1">
 <!ENTITY GSI_HYB_PROC "280">
 <!ENTITY GSI_DIAG_PROC "1">
-<!ENTITY RADARLINKS_PROC "1">
 
 <!ENTITY POST_PROC "32">
 <!ENTITY NCL_PROC "1">
@@ -96,7 +96,7 @@
 <!ENTITY CLEAN_RESOURCES "<walltime>00:45:00</walltime><memory>500M</memory>">
 <!ENTITY LIGHTNING_RESOURCES "<walltime>00:05:00</walltime><memory>4G</memory>">
 <!ENTITY CONVENTIONAL_RESOURCES "<walltime>00:05:00</walltime><memory>2G</memory>">
-<!ENTITY RADAR_RESOURCES "<walltime>00:05:00</walltime>">
+<!ENTITY RADAR_RESOURCES "<walltime>00:10:00</walltime>">
 <!ENTITY SATELLITE_RESOURCES "<walltime>00:05:00</walltime><memory>10G</memory>">
 <!ENTITY GSI_HYB_RESOURCES "<walltime>00:40:00</walltime>">
 <!ENTITY GSI_DIAG_RESOURCES "<walltime>00:05:00</walltime><memory>600M</memory>">
@@ -109,9 +109,9 @@
 <!-- End gsi_hyb by 3 hr -->
 <!-- End all post-processing by 6 hrs -->
 
-<!ENTITY START_TIME_RADARLINKS "00:05:00">
-<!ENTITY START_TIME_RADAR "00:15:00">
-<!ENTITY START_TIME_CONVENTIONAL "00:37:00">
+<!ENTITY START_TIME_RADAR "00:10:00">
+<!ENTITY START_TIME_CONVENTIONAL "00:30:00">
+<!ENTITY START_TIME_NASACLOUD   "00:50:00">
 <!ENTITY START_TIME_GSI "01:40:00">
 <!ENTITY DEADLINE_DA "03:00:00">
 <!ENTITY DEADLINE_UV "03:00:00">
@@ -133,16 +133,44 @@
       <value>&HOMEBASE_DIR;</value>
     </envar>
     <envar>
+      <name>envir</name>
+      <value>&envir;</value>
+    </envar>
+    <envar>
       <name>SCHEDULER</name>
       <value>&SCHEDULER;</value>
     </envar>
     <envar>
-      <name>MACHINE</name>
+      <name>modulefile_jet</name>
+      <value>&MODULE_NCO;</value>
+    </envar>
+    <envar>
+      <name>machine</name>
       <value>&MACHINE;</value>
     </envar>
     <envar>
+      <name>COMROOT</name>
+      <value>&DATABASE_DIR;</value>
+    </envar>
+    <envar>
       <name>jlogfile</name>
-      <value>&LOG_DIR;/jlogfiles</value>
+      <value><cyclestr>&LOG_DIR;/@Y@m@d/jlogfile_@Y@m@d@H@M</cyclestr></value>
+    </envar>
+    <envar>
+       <name>PDY</name>
+       <value><cyclestr>@Y@m@d</cyclestr></value>
+    </envar>
+    <envar>
+       <name>cyc</name>
+       <value><cyclestr>@H</cyclestr></value>
+    </envar>
+    <envar>
+       <name>subcyc</name>
+       <value><cyclestr>@M</cyclestr></value>
+    </envar>
+    <envar>
+      <name>KEEPDATA</name>
+      <value>&KEEPDATA;</value>
     </envar>
 '>
 
@@ -151,62 +179,28 @@
 <workflow realtime="T" scheduler="&SCHEDULER;" cyclethrottle="30" cyclelifespan="01:00:00:00">
 
   <log>
-    <cyclestr>&LOG_DIR;/workflow_@Y@m@d@H@M.log</cyclestr>
+    <cyclestr>&LOG_DIR;/@Y@m@d/workflow_@Y@m@d@H@M.log</cyclestr>
   </log>
 
   <cycledef group="all">00,15,30,45  *  *  *  2019-2021 *</cycledef>
-  <cycledef group="C00">00 01-11,13-23  *  *  2019-2021 *</cycledef>
-  <cycledef group="C15">15 01-11,13-23  *  *  2019-2021 *</cycledef>
-  <cycledef group="C30">30 00-10,12-22  *  *  2019-2021 *</cycledef>
-  <cycledef group="C45">45 00-10,12-22  *  *  2019-2021 *</cycledef>
-  <cycledef group="E00">00 00,12        *  *  2019-2021 *</cycledef>
-  <cycledef group="E15">15 00,12        *  *  2019-2021 *</cycledef>
-  <cycledef group="E30">30 11,23        *  *  2019-2021 *</cycledef>
-  <cycledef group="E45">45 11,23        *  *  2019-2021 *</cycledef>
+  <cycledef group="normal">00,15,30,45 01-11,13-23  *  *  2019-2021 *</cycledef>
+  <cycledef group="early">00,15,30,45  00,12        *  *  2019-2021 *</cycledef>
 
-<!-- only need 60 for hourly running
-    <var name="min">15 30 45 60</var>
-    <var name="off">00:45:00 00:30:00 00:15:00 00:00:00</var>
--->
-  <task name="lightning_gsi" cycledefs="all" maxtries="3">
+  <task name="obsprep_lghtn" cycledefs="all" maxtries="3">
 
     &LIGHTNING_RESOURCES;
     &WALL_LIMIT_DA;
     &RESERVATION_PRE;
 
-    <command>&JJOB_DIR;/launch.ksh &JJOB_DIR;/JRTMA3D_LIGHTNING</command>
+    <command>&JJOB_DIR;/launch.ksh &JJOB_DIR;/JRTMA3D_OBSPREP_LGHTN</command>
     <cores>&LIGHTNING_PROC;</cores>
-    <jobname><cyclestr>&JOBNAME_PRE;_lightning_@H_#min#</cyclestr></jobname>
-    <join><cyclestr>&LOG_DIR;/lightning_gsi_@Y@m@d@H@M.log</cyclestr></join>
+    <jobname><cyclestr>&JOBNAME_PRE;_lightning_@H@M</cyclestr></jobname>
+    <join><cyclestr>&LOG_DIR;/@Y@m@d/obsprep_lghtn_@Y@m@d@H@M.log</cyclestr></join>
 
     &COMMONVARS;
     <envar>
-      <name>START_TIME</name>
-      <value><cyclestr offset="-1:00:00">@Y@m@d@H</cyclestr></value>
-    </envar>
-    <envar>
-      <name>SUBH_TIME</name>
-      <value><cyclestr>@M</cyclestr></value>
-    </envar>
-    <envar>
-      <name>DATAROOT</name>
-      <value>&DATAROOT;</value>
-    </envar>
-    <envar>
-      <name>DATAHOME</name>
-      <value><cyclestr>&DATAROOT;/@Y@m@d@H/obsprd/#min#</cyclestr></value>
-    </envar>
-    <envar>
-      <name>GSI_ROOT</name>
-      <value>&GSI_ROOT;</value>
-    </envar>
-    <envar>
-      <name>FIX_ROOT</name>
-      <value>&FIX_ROOT;</value>
-    </envar>
-    <envar>
-      <name>STATIC_DIR</name>
-      <value>&STATIC_DIR;/WPS</value>
+      <name>rundir_task</name>
+      <value><cyclestr>&DATAROOT;/@Y@m@d@H@M/obsprd</cyclestr></value>
     </envar>
     <envar>
       <name>LIGHTNING_ROOT</name>
@@ -215,60 +209,26 @@
 
       <dependency>
         <or>
-          <datadep><cyclestr offset="-#off#">&LIGHTNING_DIR;/vaisala/netcdf/@y@j@H@M0005r</cyclestr></datadep>
+          <datadep><cyclestr>&LIGHTNING_DIR;/vaisala/netcdf/@y@j@H@M0005r</cyclestr></datadep>
           <timedep><cyclestr offset="&START_TIME_RADAR;">@Y@m@d@H@M00</cyclestr></timedep>
         </or>
       </dependency>
-
   </task>
-  </metatask>
 
-  <task name="radar_gsi" cycledefs="all" maxtries="3">
+  <task name="obsprep_radar" cycledefs="all" maxtries="3">
     &RADAR_RESOURCES;
     &WALL_LIMIT_DA;
     &RESERVATION_POST;
 
-    <command>&JJOB_DIR;/launch.ksh &JJOB_DIR;/JRTMA3D_RADAR</command>
+    <command>&JJOB_DIR;/launch.ksh &JJOB_DIR;/JRTMA3D_OBSPREP_RADAR</command>
     <cores>&RADAR_PROC;</cores>
     <jobname><cyclestr>&JOBNAME_PRE;_radar_@H@M</cyclestr></jobname>
-    <join><cyclestr>&LOG_DIR;/radar_gsi_@Y@m@d@H@M.log</cyclestr></join>
+    <join><cyclestr>&LOG_DIR;/@Y@m@d/obsprep_radar_@Y@m@d@H@M.log</cyclestr></join>
 
     &COMMONVARS;
     <envar>
-      <name>START_TIME</name>
-      <value><cyclestr>@Y@m@d@H</cyclestr></value>
-    </envar>
-    <envar>
-      <name>subcyc</name>
-      <value><cyclestr>@M</cyclestr></value>
-    </envar>
-    <envar>
-      <name>MM1</name>
-      <value><cyclestr offset="-0:01:00">@M</cyclestr></value>
-    </envar>
-    <envar>
-      <name>MM2</name>
-      <value><cyclestr>@M</cyclestr></value>
-    </envar>
-    <envar>
-      <name>MM3</name>
-      <value><cyclestr offset="0:01:00">@M</cyclestr></value>
-    </envar>
-    <envar>
-      <name>DATAHOME</name>
+      <name>rundir_task</name>
       <value><cyclestr>&DATAROOT;/@Y@m@d@H@M/obsprd</cyclestr></value>
-    </envar>
-    <envar>
-      <name>GSI_ROOT</name>
-      <value>&GSI_ROOT;</value>
-    </envar>
-    <envar>
-      <name>FIX_ROOT</name>
-      <value>&FIX_ROOT;</value>
-    </envar>
-    <envar>
-      <name>STATIC_DIR</name>
-      <value>&STATIC_DIR;/WPS</value>
     </envar>
     <envar>
       <name>NSSL</name>
@@ -281,46 +241,25 @@
         <rb><cyclestr offset="-0:01:00">!Dir.glob('&RADAR_DIR;/@Y@m@d-@H@M*.MRMS_MergedReflectivityQC_00.50_@Y@m@d-@H*.grib2').empty?</cyclestr></rb>
         <rb><cyclestr>!Dir.glob('&RADAR_DIR;/@Y@m@d-@H@M*.MRMS_MergedReflectivityQC_00.50_@Y@m@d-@H*.grib2').empty?</cyclestr></rb>
         <rb><cyclestr offset="0:01:00">!Dir.glob('&RADAR_DIR;/@Y@m@d-@H@M*.MRMS_MergedReflectivityQC_00.50_@Y@m@d-@H*.grib2').empty?</cyclestr></rb>
+        <rb><cyclestr offset="0:02:00">!Dir.glob('&RADAR_DIR;/@Y@m@d-@H@M*.MRMS_MergedReflectivityQC_00.50_@Y@m@d-@H*.grib2').empty?</cyclestr></rb>
       </or>
     </dependency>
-
   </task>
 
-  <task name="satellite_gsi_bufr" cycledefs="02-11hr,01hr" maxtries="3">
-
+  <task name="obsprep_cloud" cycledefs="all" maxtries="3">
     &SATELLITE_RESOURCES;
     &WALL_LIMIT_DA;
     &RESERVATION_PRE;
 
-    <command>&JJOB_DIR;/launch.ksh &JJOB_DIR;/JRTMA3D_SATELLITE_BUFR</command>
+    <command>&JJOB_DIR;/launch.ksh &JJOB_DIR;/JRTMA3D_OBSPREP_CLOUD</command>
     <cores>&SATELLITE_PROC;</cores>
-    <jobname><cyclestr>&JOBNAME_PRE;_satellite_bufr_@H</cyclestr></jobname>
-    <join><cyclestr>&LOG_DIR;/satellite_gsi_bufr_@Y@m@d@H00.log</cyclestr></join>
+    <jobname><cyclestr>&JOBNAME_PRE;_cloud_@H@M</cyclestr></jobname>
+    <join><cyclestr>&LOG_DIR;/@Y@m@d/obsprep_cloud_@Y@m@d@H@M.log</cyclestr></join>
 
     &COMMONVARS;
     <envar>
-      <name>START_TIME</name>
-      <value><cyclestr>@Y@m@d@H</cyclestr></value>
-    </envar>
-    <envar>
-      <name>DATAROOT</name>
-      <value>&DATAROOT;</value>
-    </envar>
-    <envar>
-      <name>DATAHOME</name>
-      <value><cyclestr>&DATAROOT;/@Y@m@d@H/obsprd</cyclestr></value>
-    </envar>
-    <envar>
-      <name>GSI_ROOT</name>
-      <value>&GSI_ROOT;</value>
-    </envar>
-    <envar>
-      <name>FIX_ROOT</name>
-      <value>&FIX_ROOT;</value>
-    </envar>
-    <envar>
-      <name>STATIC_DIR</name>
-      <value>&STATIC_DIR;/WPS</value>
+      <name>rundir_task</name>
+      <value><cyclestr>&DATAROOT;/@Y@m@d@H@M/obsprd</cyclestr></value>
     </envar>
     <envar>
       <name>NASALARC_DATA</name>
@@ -330,148 +269,49 @@
     <dependency>
       <or>
         <datadep><cyclestr>&LANGLEY_BUFR_DIR;/@Y@j@H00.rap.t@Hz.lgycld.tm00.bufr_d</cyclestr></datadep>
-        <timedep><cyclestr offset="&START_TIME_CONVENTIONAL;">@Y@m@d@H@M00</cyclestr></timedep>
-      </or>
-    </dependency>
-
-  </task>
-
-  <task name="satellite_gsi_bufr_early" cycledefs="00hr" maxtries="3">
-
-    &SATELLITE_RESOURCES;
-    &WALL_LIMIT_DA;
-    &RESERVATION_PRE;
-
-    <command>&JJOB_DIR;/launch.ksh &JJOB_DIR;/JRTMA3D_SATELLITE_BUFR</command>
-    <cores>&SATELLITE_PROC;</cores>
-    <jobname><cyclestr>&JOBNAME_PRE;_satellite_bufr_@H</cyclestr></jobname>
-    <join><cyclestr>&LOG_DIR;/satellite_gsi_bufr_@Y@m@d@H00.log</cyclestr></join>
-
-    &COMMONVARS;
-    <envar>
-      <name>START_TIME</name>
-      <value><cyclestr>@Y@m@d@H</cyclestr></value>
-    </envar>
-    <envar>
-      <name>DATAROOT</name>
-      <value>&DATAROOT;</value>
-    </envar>
-    <envar>
-      <name>DATAHOME</name>
-      <value><cyclestr>&DATAROOT;/@Y@m@d@H/obsprd</cyclestr></value>
-    </envar>
-    <envar>
-      <name>GSI_ROOT</name>
-      <value>&GSI_ROOT;</value>
-    </envar>
-    <envar>
-      <name>FIX_ROOT</name>
-      <value>&FIX_ROOT;</value>
-    </envar>
-    <envar>
-      <name>STATIC_DIR</name>
-      <value>&STATIC_DIR;/WPS</value>
-    </envar>
-    <envar>
-      <name>NASALARC_DATA</name>
-      <value>&LANGLEY_BUFR_DIR;</value>
-    </envar>
-
-    <dependency>
-      <or>
         <datadep><cyclestr>&LANGLEY_BUFR_DIR;/@Y@j@H00.rap_e.t@Hz.lgycld.tm00.bufr_d</cyclestr></datadep>
-        <timedep><cyclestr offset="&START_TIME_CONVENTIONAL;">@Y@m@d@H@M00</cyclestr></timedep>
+        <timedep><cyclestr offset="&START_TIME_NASACLOUD;">@Y@m@d@H@M00</cyclestr></timedep>
       </or>
     </dependency>
-
   </task>
 
-  <task name="conventional_gsi" cycledefs="02-11hr,01hr" maxtries="3">
+  <task name="obsprep_basic" cycledefs="all" maxtries="3">
 
     &CONVENTIONAL_RESOURCES;
     &WALL_LIMIT_DA;
     &RESERVATION_PRE;
 
-    <command>&JJOB_DIR;/launch.ksh &JJOB_DIR;/JRTMA3D_CONVENTIONAL</command>
+    <command>&JJOB_DIR;/launch.ksh &JJOB_DIR;/JRTMA3D_OBSPREP_BASIC</command>
     <cores>&CONVENTIONAL_PROC;</cores>
-    <jobname><cyclestr>&JOBNAME_PRE;_conventional_@H</cyclestr></jobname>
-    <join><cyclestr>&LOG_DIR;/conventional_gsi_@Y@m@d@H00.log</cyclestr></join>
+    <jobname><cyclestr>&JOBNAME_PRE;_obsbasic_@H@M</cyclestr></jobname>
+    <join><cyclestr>&LOG_DIR;/@Y@m@d/obsprep_basic_@Y@m@d@H@M.log</cyclestr></join>
 
     &COMMONVARS;
     <envar>
-      <name>START_TIME</name>
-      <value><cyclestr>@Y@m@d@H</cyclestr></value>
-    </envar>
-    <envar>
-      <name>EARLY</name>
-      <value>0</value>
-    </envar>
-    <envar>
-      <name>DATAHOME</name>
-      <value><cyclestr>&DATAROOT;/@Y@m@d@H/obsprd</cyclestr></value>
-    </envar>
-    <envar>
-      <name>GSI_ROOT</name>
-      <value>&GSI_ROOT;</value>
+      <name>rundir_task</name>
+      <value><cyclestr>&DATAROOT;/@Y@m@d@H@M/obsprd</cyclestr></value>
     </envar>
     <envar>
       <name>PREPBUFR</name>
       <value>&PREPBUFR_DIR;</value>
     </envar>
     <envar>
-      <name>PREPBUFR_SAT</name>
-      <value>&PREPBUFR_SAT_DIR;</value>
-    </envar>
-    <envar>
-      <name>BUFRLIGHTNING</name>
-      <value>&BUFRLIGHTNING_DIR;</value>
-    </envar>
-    <envar>
       <name>RADVELLEV2_DIR</name>
       <value>&RADVELLEV2_DIR;</value>
-    </envar>
-    <envar>
-      <name>RADVELLEV2P5_DIR</name>
-      <value>&RADVELLEV2P5_DIR;</value>
     </envar>
     <envar>
       <name>SATWND_DIR</name>
       <value>&SATWND_DIR;</value>
     </envar>
-    <envar>
-      <name>TAMDAR_ROOT</name>
-      <value>&TAMDAR_DIR;</value>
-    </envar>
-    <envar>
-      <name>NACELLE_RSD</name>
-      <value>&NACELLE_RSD;</value>
-    </envar>
-    <envar>
-      <name>TOWER_RSD</name>
-      <value>&TOWER_RSD;</value>
-    </envar>
-    <envar>
-      <name>TOWER_NRSD</name>
-      <value>&TOWER_NRSD;</value>
-    </envar>
-    <envar>
-      <name>SODAR_NRSD</name>
-      <value>&SODAR_NRSD;</value>
-    </envar>
-    <envar>
-      <name>TCVITALS_DIR</name>
-      <value>&TCVITALS_DIR;</value>
-    </envar>
-    <envar>
-      <name>STICKNET</name>
-      <value>&STICKNET_DIR;</value>
-    </envar>
 
     <dependency>
       <or>
         <and>
+ <!--for hourly run
           <datadep><cyclestr>&PREPBUFR_DIR;/@Y@j@H00.rap.t@Hz.prepbufr.tm00.@Y@m@d</cyclestr></datadep>
-          <datadep><cyclestr>&SODAR_NRSD;/@y@j@H000015o</cyclestr></datadep>
+          <datadep><cyclestr>&PREPBUFR_DIR;/@Y@j@H00.rap_e.t@Hz.prepbufr.tm00.@Y@m@d</cyclestr></datadep>
+-->
+          <datadep><cyclestr>&PREPBUFR_DIR;/@Y@j@H@M.rtma_ru.t@H@Mz.prepbufr.tm00.@Y@m@d</cyclestr></datadep>
         </and>
         <timedep><cyclestr offset="&START_TIME_CONVENTIONAL;">@Y@m@d@H@M00</cyclestr></timedep>
       </or>
@@ -479,106 +319,59 @@
 
   </task>
 
-  <task name="gsi_hyb" cycledefs="02-11hr,00hr,01hr" maxtries="3">
+  <task name="gsi_anl" cycledefs="all" maxtries="3">
 
     &GSI_HYB_RESOURCES;
     &WALL_LIMIT_DA;
     &RESERVATION_DA;
 
-    <command>&JJOB_DIR;/launch.ksh &JJOB_DIR;/JRTMA3D_GSI_HYB</command>
+    <command>&JJOB_DIR;/launch.ksh &JJOB_DIR;/JRTMA3D_GSI_ANL</command>
     <cores>&GSI_HYB_PROC;</cores>
-    <jobname><cyclestr>&JOBNAME_PRE;_gsi_hyb_@H</cyclestr></jobname>
-    <join><cyclestr>&LOG_DIR;/gsi_hyb_@Y@m@d@H00.log</cyclestr></join>
+    <jobname><cyclestr>&JOBNAME_PRE;_gsi_anl_@H@M</cyclestr></jobname>
+    <join><cyclestr>&LOG_DIR;/@Y@m@d/gsi_hyb_@Y@m@d@H@M.log</cyclestr></join>
 
     &COMMONVARS;
     <envar>
-      <name>SYSTEM_ID</name>
-      <value>&SYSTEM_ID;</value>
+      <name>rundir_task</name>
+      <value><cyclestr>&DATAROOT;/@Y@m@d@H@M/gsiprd</cyclestr></value>
     </envar>
     <envar>
-      <name>GSIPROC</name>
-      <value>&GSI_HYB_PROC;</value>
+      <name>HRRR_DIR</name>
+      <value>&HRRR_DIR;</cyclestr></value>
     </envar>
     <envar>
-      <name>START_TIME</name>
-      <value><cyclestr>@Y@m@d@H</cyclestr></value>
-    </envar>
-    <envar>
-      <name>FULLCYC</name>
-      <value>1</value>
-    </envar>
-    <envar>
-      <name>DATABASE_DIR</name>
-      <value>&DATABASE_DIR;</value>
-    </envar>
-    <envar>
-      <name>DATAROOT</name>
-      <value>&DATAROOT;</value>
-    </envar>
-    <envar>
-      <name>DATAHOME_BK</name>
-      <value><cyclestr offset="-1:00:00">&HRRR_DIR;/@Y@m@d@H/wrfprd</cyclestr></value>
-    </envar>
-    <envar>
-      <name>DATAHOME</name>
-      <value><cyclestr>&DATAROOT;/@Y@m@d@H/gsiprd</cyclestr></value>
-    </envar>
-    <envar>
-      <name>DATAOBSHOME</name>
+      <name>OBS_DIR</name>
       <value><cyclestr>&DATAROOT;/@Y@m@d@H/obsprd</cyclestr></value>
-    </envar>
-    <envar>
-      <name>GSI_ROOT</name>
-      <value>&GSI_ROOT;</value>
-    </envar>
-    <envar>
-      <name>FIX_ROOT</name>
-      <value>&FIX_ROOT;</value>
-    </envar>
-    <envar>
-      <name>STATIC_DIR</name>
-      <value>&STATIC_DIR;</value>
-    </envar>
-    <envar>
-      <name>AIRCRAFT_REJECT</name>
-      <value>&AIRCRAFT_REJECT;</value>
-    </envar>
-    <envar>
-      <name>SFCOBS_USELIST</name>
-      <value>&SFCOBS_USELIST;</value>
-    </envar>
-    <envar>
-      <name>PREPBUFR</name>
-      <value>&PREPBUFR_DIR;</value>
-    </envar>
-    <envar>
-      <name>NCEPSNOW</name>
-      <value>&NCEPSNOW_DIR;</value>
-    </envar>
-    <envar>
-      <name>SST_ROOT</name>
-      <value>&HIGHRES_SST_DIR;</value>
-    </envar>
-    <envar>
-      <name>SST_ROOT14km</name>
-      <value>&HIGHRES_SST14KM_DIR;</value>
     </envar>
     <envar>
       <name>ENKF_FCST</name>
       <value>&ENKFFCST_DIR;</value>
     </envar>
+    <envar>
+      <name>HRRRDAS_DIR</name>
+      <value>&HRRRDAS_DIR;</value>
+    </envar>
+    <envar>
+      <name>HRRRDAS_SMALL</name>
+      <value>1</value>
+    </envar>
+    <envar>
+      <name>HRRRDAS_BEC</name>
+      <value>0</value>
+    </envar>
+    <envar>
+      <name>GSIANL_RES</name>
+      <value>12km</value>
+    </envar>
 
     <dependency>
       <and>
-          <datadep>&HRRR_DIR;/<cyclestr offset="-1:00:00">@Y@m@d@H</cyclestr>/wrfprd/<cyclestr>wrfout_d01_@Y-@m-@d_@H_00_00</cyclestr></datadep>
+        <datadep age="00:06:00">&HRRR_DIR;/<cyclestr offset="-0:45:00">@Y@m@d@H</cyclestr>/wrfprd/<cyclestr>wrfout_d01_@Y-@m-@d_@H_00_00</cyclestr></datadep>
         <or> 
           <and>
-            <datadep age="00:02:00"><cyclestr>&DATAROOT;/@Y@m@d@H/obsprd/NSSLRefInGSI.bufr</cyclestr></datadep>
-            <taskdep task="lightning_gsi_60"/>
-            <taskdep task="satellite_gsi_bufr"/>
-            <or>
-              <taskdep task="conventional_gsi"/>
-            </or>
+            <taskdep task="obsprep_radar"/>
+            <taskdep task="obsprep_lghtn"/>
+            <taskdep task="obsprep_basic"/>
           </and>
           <timedep><cyclestr offset="&START_TIME_GSI;">@Y@m@d@H@M00</cyclestr></timedep>
         </or>
@@ -587,6 +380,7 @@
 
   </task>
 
+<!--
   <task name="gsi_diag" cycledefs="02-11hr,00hr,01hr" maxtries="3">
 
     &GSI_DIAG_RESOURCES;
@@ -1100,5 +894,6 @@
     </dependency>
     
   </task>
+-->
 
 </workflow>
