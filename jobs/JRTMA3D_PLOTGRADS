@@ -46,9 +46,15 @@ cd $DATA
 #    setpdy.sh needs the variables 
 #    $PDY and $cyc already defined in advance
 #####################################################
-export cycle=${cycle:-t${cyc}z} 
-setpdy.sh
-. ${DATA}/PDY
+#setpdy.sh
+#. ${DATA}/PDY
+if [[ "${subcyc}" == "-1" ]]; then #it's hourly run
+  export cycle=${cycle:-t${cyc}z}
+  export pgmout=${pgmout:-"OUTPUT.${PDY}${cyc}.${jobid}"}
+else
+  export cycle=${cycle:-t${cyc}${subcyc}z}
+  export pgmout=${pgmout:-"OUTPUT.${PDY}${cyc}${subcyc}.${jobid}"}
+if
 
 export subcyc=${subcyc} #Note: Must define subcyc in upper level script. Can be 00, 15, 30, or 45 /MPondeca, 30Jun2017
                          #only used for rurtma2p5
@@ -59,7 +65,6 @@ export PDYHH="${PDY}${cyc}"
 export LOG_JJOB=${LOG_JJOB:-$COMROOT/logs/jlogfiles}
 export jlogfile=${jlogfile:-$LOG_JJOB/jlogfile.${jobid}}
 # export pgmout=${pgmout:-"OUTPUT.$$"}
-export pgmout=${pgmout:-"OUTPUT.${PDY}${cyc}.${jobid}"}
 if [ ! -d ${LOG_JJOB} ] ; then
    mkdir -p ${LOG_JJOB}
 fi
@@ -68,7 +73,7 @@ if [ ! -d ${LOG_PGMOUT} ] ; then
 fi
 
 # specify the file head for the file names of the archived data files
-export PROD_HEAD=${PROD_HEAD:-"${RUN}.t${cyc}z"}
+export PROD_HEAD=${PROD_HEAD:-"${RUN}.${cycle}"}
 
 # Specify Execution Areas
 export HOMErtma3d=${HOMErtma3d:-$NWROOT/rtma.${rtma_ver}}
@@ -124,8 +129,8 @@ fi
 ###########################################################
 #   set the file name of the final analysis file for archive
     if [ ! "${PROD_HEAD}" ] ; then
-      export ANLrtma3d_FNAME="${RUN}.t${cyc}z.wrf_inout.nc"
-      export FGSrtma3d_FNAME="${RUN}.t${cyc}z.firstguess.nc"
+      export ANLrtma3d_FNAME="${RUN}.${cycle}.wrf_inout.nc"
+      export FGSrtma3d_FNAME="${RUN}.${cycle}.firstguess.nc"
     else
       export ANLrtma3d_FNAME="${PROD_HEAD}.wrf_inout.nc"
       export FGSrtma3d_FNAME="${PROD_HEAD}.firstguess.nc"

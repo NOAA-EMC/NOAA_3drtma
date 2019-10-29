@@ -53,6 +53,7 @@ time_run=${time_str}
 export PLTDIR=$DATA
 # export myg2tool="/home/Gang.Zhao/local/grib/g2ctl"
 export myg2tool="${UTILrtma3d_dev}/plot/grads/g2ctl"
+export EXEC="/gpfs/dell3/usrx/local/dev/packages/grads/2.2.0/grads-2.2.0/bin"
 
 if [ ! -d ${PLTDIR} ] ; then
   echo " running/plotting directory is not found. Abort!"
@@ -60,13 +61,18 @@ if [ ! -d ${PLTDIR} ] ; then
 fi
 cd $PLTDIR
 
+if [[ "${subcyc}" == "-1" ]]; then #it's hourly run
+  tz_str=t${cyc}z
+else
+  tz_str=t${cyc}${subcyc}z
+fi
 #
 # grib2 to Grads
 #
 #   linking grib2 data file for UPP post-processed firstguess
 if [ ! "${PROD_HEAD}" ] ; then
-  FGS_NAT_FNAME="${RUN}.t{cyc}z.fgs.wrfnat_hrconus_00.grib2"
-  FGS_PRS_FNAME="${RUN}.t{cyc}z.fgs.wrfprs_hrconus_00.grib2"
+  FGS_NAT_FNAME="${RUN}.${tz_str}.fgs.wrfnat_hrconus_00.grib2"
+  FGS_PRS_FNAME="${RUN}.${tz_str}.fgs.wrfprs_hrconus_00.grib2"
 else
   FGS_NAT_FNAME="${PROD_HEAD}.fgs.wrfnat_hrconus_00.grib2"
   FGS_PRS_FNAME="${PROD_HEAD}.fgs.wrfprs_hrconus_00.grib2"
@@ -77,8 +83,8 @@ ln -sf ${COMOUTpost_rtma3d}/${FGS_PRS_FNAME}  ./fgs_prs.grib2
 
 #   linking grib2 data file for UPP post-processed analysis
 if [ ! "${PROD_HEAD}" ] ; then
-  ANL_NAT_FNAME="${RUN}.t{cyc}z.wrfnat_hrconus_00.grib2"
-  ANL_PRS_FNAME="${RUN}.t{cyc}z.wrfprs_hrconus_00.grib2"
+  ANL_NAT_FNAME="${RUN}.${tz_str}.wrfnat_hrconus_00.grib2"
+  ANL_PRS_FNAME="${RUN}.${tz_str}.wrfprs_hrconus_00.grib2"
 else
   ANL_NAT_FNAME="${PROD_HEAD}.wrfnat_hrconus_00.grib2"
   ANL_PRS_FNAME="${PROD_HEAD}.wrfprs_hrconus_00.grib2"
@@ -100,7 +106,7 @@ do
   rm -f $ctlfile $idxfile
   $myg2tool/g2ctl.0.1.4 -0 $g2file > $ctlfile
 #  $myg2tool/g2ctl -0 $g2file > $ctlfile
-  gribmap -0 -i $ctlfile
+  ${EXEC}/gribmap -0 -i $ctlfile
   if [ ! -f $ctlfile ] || [ ! -f $idxfile ] ; then
     echo "g2ctl step failed. Abort!"
     exit 111
@@ -118,6 +124,7 @@ ulimit -S -s unlimited
 
 rm -f ./plt_fai.gs      ./variables_list_for_plot.txt      ./panels.gsf     ./cbarn.gs
 cp -p ${UTILrtma3d_dev}/plot/grads/script/plt_fai.tmplt.gs			./plt_fai.gs
+#cp -p ${UTILrtma3d_dev}/plot/grads/script/plt_fai.tmplt_dell.gs			./plt_fai.gs
 cp -p ${UTILrtma3d_dev}/plot/grads/script/variables_list_for_plot.txt	        ./variables_list_for_plot.txt
 cp -p ${UTILrtma3d_dev}/plot/grads/script/panels.gsf                            ./panels.gsf
 cp -p ${UTILrtma3d_dev}/plot/grads/script/cbarn.gs                              ./cbarn.gs

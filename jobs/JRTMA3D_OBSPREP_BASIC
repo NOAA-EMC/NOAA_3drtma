@@ -126,7 +126,7 @@ fi
 
 ###########################################################
 #
-# The following variables are used in exrtma3d_obsprep_conv.ksh
+# The following variables are used in exrtma3d_obsprep_basic.ksh
 #
 ###########################################################
 #   Set the name to the executable
@@ -135,7 +135,7 @@ fi
 ######################
 # Execute the script.
 ######################
-${exSCR_OBSPREP_CONV:-$HOMErtma3d/scripts/ex${NET}_obsprep_conv.ksh}
+${exSCR_OBSPREP_CONV:-$HOMErtma3d/scripts/ex${NET}_obsprep_basic.ksh}
 export err=$?; err_chk
 
 msg="$0 of $job completed normally"

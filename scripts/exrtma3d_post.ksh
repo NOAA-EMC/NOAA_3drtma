@@ -58,7 +58,13 @@ export DATAHOME=$DATA
 export MODEL="RAP"
 
 export DATAWRFHOME=${COMOUTgsi_rtma3d:-"$COMIN"}
-export DATAWRFFILE=${ANLrtma3d_FNAME:-"${RUN}.t${cyc}z.anl.wrf_inout.nc"}
+if [[ "${subcyc}" == "-1" ]]; then #it's hourly run
+  export mod=rap
+  tz_str=t${cyc}z
+else
+  tz_str=t${cyc}${subcyc}z
+fi
+export DATAWRFFILE=${ANLrtma3d_FNAME:-"${RUN}.${tz_str}.anl.wrf_inout.nc"}
 
 ##########################################################################
 

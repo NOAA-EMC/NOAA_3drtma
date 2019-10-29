@@ -30,7 +30,13 @@ cd $MET_DIR
 CYCLE=${PDY}${cyc}
 HH=`echo $CYCLE | cut -c 9-10`
 export fcsthrs=$HH
-export mod=rap
+if [[ "${subcyc}" == "-1" ]]; then #it's hourly run
+  export mod=rap
+  tz_str=t${cyc}z
+else
+  export mod=rtma_ru
+  tz_str=t${cyc}${subcyc}z
+fi
 # uncomment if running in realtime
 
 export MODEL=RAP
@@ -82,8 +88,8 @@ for dom1 in $dom_check; do
   fi
 
 
-pb2nc ${urma_dir_ops}/${mod}.t${HH}z.prepbufr.tm00 \
-      ${urma_dir}/${mod}.t${HH}z.prepbufr.tm00.nr.nc ${config_dir}/PB2NCConfig_DNG_new -v 2
+pb2nc ${urma_dir_ops}/${mod}.${tz_str}.prepbufr.tm00 \
+      ${urma_dir}/${mod}.${tz_str}.prepbufr.tm00.nr.nc ${config_dir}/PB2NCConfig_DNG_new -v 2
       export err=$? ; err_chk
       if [ ${err} -ne 0 ]; then
             ${ECHO} "pb2nc crashed!  Exit status=${err}"
@@ -96,7 +102,7 @@ for fld in $flds; do
   for exp in $exps; do
     mkdir -p $stat_dir/${dom_out}/${exp}/${fld}
         point_stat ${COMOUTpost_rtma3d}/${PROD_HEAD}.wrfprs_hrconus_00.grib2 \
-          ${urma_dir}/${mod}.t${HH}z.prepbufr.tm00.nr.nc \
+          ${urma_dir}/${mod}.${tz_str}.prepbufr.tm00.nr.nc \
           ${config_dir}/PointStatConfig_${dom_out}_ADPSFC_${mod}_${fld} -outdir $stat_dir/${dom_out}/${exp}/${fld} -v 2
           export err=$? ; err_chk
           if [ ${err} -ne 0 ]; then

@@ -73,9 +73,13 @@ export jlogfile=${jlogfile:-$COMROOT/logs/jlogfiles/jlogfile.$jobid}
 PDYm1=`$NDATE -24 ${PDY}${cyc} | cut -c 1-8`
 
 # export pgmout=${pgmout:-"OUTPUT.$$"}
-export pgmout=${pgmout:-"OUTPUT.${PDY}${cyc}.${jobid}"}
-
-export cycle=t${cyc}z 
+if [ "${subcyc}" == "-1" ]; then #hourly run
+  tz_str=t${cyc}z
+  export pgmout=${pgmout:-"OUTPUT.${PDY}${cyc}.${jobid}"}
+else
+  tz_str=t${cyc}${subcyc}z
+  export pgmout=${pgmout:-"OUTPUT.${PDY}${cyc}${subcyc}.${jobid}"}
+fi
 
 export subcyc=${subcyc}  #Note: Must define subcyc in upper level script. Can be 00, 15, 30, or 45 /MPondeca, 30Jun2017
 
@@ -85,7 +89,7 @@ export subcyc=${subcyc}  #Note: Must define subcyc in upper level script. Can be
 # Specify Execution Areas
 
 
-export PROD_HEAD=${PROD_HEAD:-"${RUN}.t${cyc}z"}
+export PROD_HEAD=${PROD_HEAD:-"${RUN}.${tz_str}"}
 
 export HOMErtma3d=${HOMErtma3d:-$NWROOT/rtma.${rtma_ver}}
 

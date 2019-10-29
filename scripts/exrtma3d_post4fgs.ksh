@@ -57,8 +57,13 @@ HH_fcstinit=`${ECHO} ${FCST_INI_TIME} | cut -c9-10 `
 export DATAHOME=$DATA
 export MODEL="RAP"
 
+if [[ "${subcyc}" == "-1" ]]; then #it's hourly run
+  tz_str=t${cyc}z
+else
+  tz_str=t${cyc}${subcyc}z
+fi
 export DATAWRFHOME=${GESINhrrr_rtma3d:-"$COMIN"}
-export DATAWRFFILE=${FGSrtma3d_FNAME:-"${RUN}.t${cyc}z.firstguess.nc"}
+export DATAWRFFILE=${FGSrtma3d_FNAME:-"${RUN}.${tz_str}.firstguess.nc"}
 export PROD_HEAD2="${PROD_HEAD}.fgs"
 
 ##########################################################################
@@ -228,6 +233,9 @@ if [ ${err} -ne 0 ]; then
   exit ${err}
 fi
 
+mv WRFPRS.GrbF01.?? WRFPRS.GrbF00
+mv WRFTWO.GrbF01.?? WRFTWO.GrbF00
+mv WRFNAT.GrbF01.?? WRFNAT.GrbF00
 # Linking GrbF{HH} to GrbF00 (esp. for firstguess which is from WRF forecast)
 GrbFiles=`ls WRF???.GrbF??`
 for i in ${GrbFiles}
