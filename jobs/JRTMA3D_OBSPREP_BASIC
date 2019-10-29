@@ -35,11 +35,11 @@ export CNVGRIB=${CNVGRIB:-cnvgrib}
 ##########################################################
 export DATA=${DATA:-$DATAROOT/${jobid:?}} #jobid ($job.$LSB_JOBID MUST BE DEFINED IN TERMS OF $RUN IN UPPER LEVEL SCRIPT /MPondeca, 26Jul2015
 if [ -d $DATA ] ; then
-   {ECHO} "$DATA exists, remove its content"
-   {RM} -rf $DATA/*
+   ${ECHO} "$DATA exists, remove its content"
+   #${RM} -rf $DATA/*
 else
-   {ECHO} "$DATA does not exist, create it"
-   {MKDIR} -p $DATA
+   ${ECHO} "$DATA does not exist, create it"
+   ${MKDIR} -p $DATA
 fi
 cd $DATA
 
@@ -96,8 +96,8 @@ if [ "${subcyc}" == "-1" ]; then; hourly
   export COMINrap=${COMINrap:-"${COMIN}/rap.${PDY}"}
   export COMINhrrr=${COMINhrrr:-"${COMIN}/hrrr.${PDY}/${domain}"}
 else
-  export COMINrap=${COMINRAP}/rtma_ru.${PDY}
-  export COMINhrrr=${COMINHRRR}/hrrr.${PDY}/${domain}
+  export COMINrap=${COMINrap:-"COMINRAP}/rtma_ru.${PDY}"}
+  export COMINhrrr=${COMINhrrr:-"COMINHRRR}/hrrr.${PDY}/${domain}"}
 fi
 
 ### Processed Observations ready to be used by RTMA3D_gsi
@@ -121,7 +121,7 @@ if [ ! -d "${COMINhrrr}" ] ; then
 fi
 
 if [ ! -d "${COMINobsproc_rtma3d}" ] ; then
-  mkdir -p $COMINobsproc_rtma3d
+  ${MKDIR} -p $COMINobsproc_rtma3d
 fi
 
 ###########################################################
@@ -135,6 +135,7 @@ fi
 ######################
 # Execute the script.
 ######################
+${ECHO} "start the ex{NET} script......" 
 ${exSCR_OBSPREP_CONV:-$HOMErtma3d/scripts/ex${NET}_obsprep_basic.ksh}
 export err=$?; err_chk
 

@@ -35,11 +35,11 @@ export CNVGRIB=${CNVGRIB:-cnvgrib}
 ##########################################################
 export DATA=${DATA:-$DATAROOT/${jobid:?}} #jobid ($job.$LSB_JOBID MUST BE DEFINED IN TERMS OF $RUN IN UPPER LEVEL SCRIPT /MPondeca, 26Jul2015
 if [ -d $DATA ] ; then
-   {ECHO} "$DATA exists, remove its content"
-   {RM} -rf $DATA/*
+   ${ECHO} "$DATA exists, remove its content"
+   #${RM} -rf $DATA/*
 else
-   {ECHO} "$DATA does not exist, create it"
-   {MKDIR} -p $DATA
+   ${ECHO} "$DATA does not exist, create it"
+   ${MKDIR} -p $DATA
 fi
 cd $DATA
 
@@ -122,7 +122,7 @@ if [ ! -d "${COMOUT}" ] ; then
    mkdir -p $COMOUT
 fi
 if [ ! -d "${COMOUTgsi_rtma3d}" ] ; then
-   mkdir -p ${COMOUTgsi_rtma3d}
+  ${MKDIR} -p ${COMOUTgsi_rtma3d}
 fi
 
 ###########################################################
