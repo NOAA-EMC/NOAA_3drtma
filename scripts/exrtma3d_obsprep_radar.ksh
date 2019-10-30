@@ -148,7 +148,12 @@ postmsg "$jlogfile" "$msg"
 msg="***********************************************************"
 postmsg "$jlogfile" "$msg"
 
-${CP} ${EXECrtma3d}/${exefile_name_radar} ${pgm}
+if [ "${envir}" == "esrl" ]; then
+  CP_LN=${LN}
+else
+  CP_LN=${CP}
+fi
+${CP_LN} ${EXECrtma3d}/${exefile_name_radar} ${pgm}
 ${MPIRUN} ${pgm} > ${pgmout} 2>errfile
 export err=$?; err_chk
 

@@ -168,14 +168,14 @@ elif [ "${machine}" = "jet" ] ;  then
     export PARMrtma3d=${PARMrtma3d:-$HOMErtma3d/parm}
     export USHrtma3d=${USHrtma3d:-$HOMErtma3d/ush}
     export UTILrtma3d=${UTILrtma3d:-$HOMErtma3d/util}
-    export LOG_PGMOUT="${COMROOT}/stdout"
-    export pgmout="output_${PDY}.${jobid}"
+    export LOG_PGMOUT="${COMROOT}/stdout/${PDY}"
+    export pgmout="output_${PDY}.${job}"
     export LOG_JJOB="${COMROOT}/log/${PDY}"
-    {MKDIR} ${COMROOT}/loghistory
+    [ ! -d ${COMROOT}/loghistory ] && ${MKDIR} -p ${COMROOT}/loghistory
     export COMINobsproc_rtma3d="${COMROOT}/ptmp/obs/${PDY}"
     export COMOUTgsi_rtma3d="${COMROOT}/ptmp/gsi/${PDY}"
 
-    # the following is to pass dir check for Jet esrl runs
+    # the following is just to pass dir check for Jet esrl runs
     export GESINhrrr_rtma3d="/tmp" 
     export COMIN="/tmp"
     export COMOUT="/tmp"

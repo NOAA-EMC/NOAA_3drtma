@@ -22,7 +22,7 @@ sorc/**/log_*
 log
 logs
 loghistory
-run
+run/
 save4later
 #
 #  
@@ -59,12 +59,8 @@ modulefiles/*/build/build_ncep_post.*
 #
 #  # special ignoring rules for workflow/
 #
-xml/*.sh
-#
-xml/*.ksh
-#
-xml/*.xml
 #
 xml/*.db
+test.xml
 #
 #  # exceptional pattern is led by sign "!"

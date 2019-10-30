@@ -184,9 +184,7 @@
     <cyclestr>&LOG_DIR;/@Y@m@d/workflow_@Y@m@d@H@M.log</cyclestr>
   </log>
 
-  <cycledef group="all">00,15,30,45  *  *  *  2019-2021 *</cycledef>
-  <cycledef group="normal">00,15,30,45 01-11,13-23  *  *  2019-2021 *</cycledef>
-  <cycledef group="early">00,15,30,45  00,12        *  *  2019-2021 *</cycledef>
+  <cycledef group="all">*/15 *  *  *  2019-2021 *</cycledef>
 
   <task name="obsprep_lghtn" cycledefs="all" maxtries="3">
 
@@ -196,7 +194,7 @@
 
     <command>&JJOB_DIR;/launch.ksh &JJOB_DIR;/JRTMA3D_OBSPREP_LGHTN</command>
     <cores>&LIGHTNING_PROC;</cores>
-    <jobname><cyclestr>&JOBNAME_PRE;_lightning_@H@M</cyclestr></jobname>
+    <jobname><cyclestr>&JOBNAME_PRE;_obsprep_lghtn_@H@M</cyclestr></jobname>
     <join><cyclestr>&LOG_DIR;/@Y@m@d/obsprep_lghtn_@Y@m@d@H@M.log</cyclestr></join>
 
     &COMMONVARS;
@@ -224,7 +222,7 @@
 
     <command>&JJOB_DIR;/launch.ksh &JJOB_DIR;/JRTMA3D_OBSPREP_RADAR</command>
     <cores>&RADAR_PROC;</cores>
-    <jobname><cyclestr>&JOBNAME_PRE;_radar_@H@M</cyclestr></jobname>
+    <jobname><cyclestr>&JOBNAME_PRE;_obsprep_radar_@H@M</cyclestr></jobname>
     <join><cyclestr>&LOG_DIR;/@Y@m@d/obsprep_radar_@Y@m@d@H@M.log</cyclestr></join>
 
     &COMMONVARS;
@@ -255,7 +253,7 @@
 
     <command>&JJOB_DIR;/launch.ksh &JJOB_DIR;/JRTMA3D_OBSPREP_CLOUD</command>
     <cores>&SATELLITE_PROC;</cores>
-    <jobname><cyclestr>&JOBNAME_PRE;_cloud_@H@M</cyclestr></jobname>
+    <jobname><cyclestr>&JOBNAME_PRE;_obsprep_cloud_@H@M</cyclestr></jobname>
     <join><cyclestr>&LOG_DIR;/@Y@m@d/obsprep_cloud_@Y@m@d@H@M.log</cyclestr></join>
 
     &COMMONVARS;
@@ -285,7 +283,7 @@
 
     <command>&JJOB_DIR;/launch.ksh &JJOB_DIR;/JRTMA3D_OBSPREP_BASIC</command>
     <cores>&CONVENTIONAL_PROC;</cores>
-    <jobname><cyclestr>&JOBNAME_PRE;_obsbasic_@H@M</cyclestr></jobname>
+    <jobname><cyclestr>&JOBNAME_PRE;_obsprep_basic_@H@M</cyclestr></jobname>
     <join><cyclestr>&LOG_DIR;/@Y@m@d/obsprep_basic_@Y@m@d@H@M.log</cyclestr></join>
 
     &COMMONVARS;
@@ -309,7 +307,7 @@
     <dependency>
       <or>
         <and>
- <!--for hourly run
+<!--for hourly run
           <datadep><cyclestr>&PREPBUFR_DIR;/@Y@j@H00.rap.t@Hz.prepbufr.tm00.@Y@m@d</cyclestr></datadep>
           <datadep><cyclestr>&PREPBUFR_DIR;/@Y@j@H00.rap_e.t@Hz.prepbufr.tm00.@Y@m@d</cyclestr></datadep>
 -->
@@ -321,16 +319,16 @@
 
   </task>
 
-  <task name="gsi_anl" cycledefs="all" maxtries="3">
+  <task name="gsianl" cycledefs="all" maxtries="3">
 
     &GSI_HYB_RESOURCES;
     &WALL_LIMIT_DA;
     &RESERVATION_DA;
 
-    <command>&JJOB_DIR;/launch.ksh &JJOB_DIR;/JRTMA3D_GSI_ANL</command>
+    <command>&JJOB_DIR;/launch.ksh &JJOB_DIR;/JRTMA3D_GSIANL</command>
     <cores>&GSI_HYB_PROC;</cores>
-    <jobname><cyclestr>&JOBNAME_PRE;_gsi_anl_@H@M</cyclestr></jobname>
-    <join><cyclestr>&LOG_DIR;/@Y@m@d/gsi_hyb_@Y@m@d@H@M.log</cyclestr></join>
+    <jobname><cyclestr>&JOBNAME_PRE;_gsianl_@H@M</cyclestr></jobname>
+    <join><cyclestr>&LOG_DIR;/@Y@m@d/gsianl_@Y@m@d@H@M.log</cyclestr></join>
 
     &COMMONVARS;
     <envar>
@@ -343,7 +341,7 @@
     </envar>
     <envar>
       <name>OBS_DIR</name>
-      <value><cyclestr>&DATAROOT;/@Y@m@d@H/obsprd</cyclestr></value>
+      <value><cyclestr>&DATAROOT;/@Y@m@d@H@M/obsprd</cyclestr></value>
     </envar>
     <envar>
       <name>ENKF_FCST</name>
@@ -368,7 +366,7 @@
 
     <dependency>
       <and>
-        <datadep age="00:06:00">&HRRR_DIR;/<cyclestr offset="-0:45:00">@Y@m@d@H</cyclestr>/wrfprd/<cyclestr>wrfout_d01_@Y-@m-@d_@H_00_00</cyclestr></datadep>
+        <datadep age="00:06:00">&HRRR_DIR;/<cyclestr offset="-1:00:00">@Y@m@d@H</cyclestr>/wrfprd/<cyclestr>wrfout_d01_@Y-@m-@d_@H_00_00</cyclestr></datadep>
         <or> 
           <and>
             <taskdep task="obsprep_radar"/>

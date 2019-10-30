@@ -6,7 +6,7 @@ check_if_defined() { #usage: check_if_defined "var1_name" "var2_name" ...
     if [ -z "${path}" ]; then
       ${ECHO} "ERROR: \$${str} is not defined"; exit 1
     fi
- done
+  done
 }
 check_dirs_exist() { #usage: check_dirs_exist "var1_name" "var2_name" ...
   for str in "$@"; do
@@ -14,7 +14,7 @@ check_dirs_exist() { #usage: check_dirs_exist "var1_name" "var2_name" ...
     if [ ! -d ${path} ]; then
       ${ECHO} "ERROR: ${path}/ does not exist"; exit 1
     fi
- done
+  done
 }
 
 # make sure executable exists
@@ -70,26 +70,22 @@ else
 fi
 
 # Look for background field for GSI analysis
-if [ "${envar}" == "esrl" ]; then
-  if [ "${subcyc}" == "45" ]; then #45 subcyc uses 45min fcst from current hrrr cycle
-    GSIbackground=${HRRR_DIR}/${YYYYMMDDHH}/wrfprd/wrfout_d01_${time_str}
-  else #all other subcyc's use 1h fcst from previous hrrr cycle
-    GSIbackground=${HRRR_DIR}/${time_1hour_ago}/wrfprd/wrfout_d01_${time_str}
-  fi
+if [ "${envir}" == "esrl" ]; then
+  GSIbackground=${HRRR_DIR}/${time_1hour_ago}/wrfprd/wrfout_d01_${time_str}
 else
   GSIbackground=${BKG_DIR}/${FGSrtma3d_FNAME}
 fi
 if [ -r ${GSIbackground} ]; then
   cpfs ${GSIbackground} ./wrf_inout
   ${ECHO} " Cycle ${cycle_str}: GSI background=${GSIbackground}"
-  if [ "${envar}" == "esrl" ]; then
+  if [ "${envir}" == "esrl" ]; then
     ${ECHO} " Cycle ${cycle_str}: GSI background=${GSIbackground}" >> ${loghistoryfile}
   fi
 else
   # No background available so abort
   ${ECHO} "${GSIbackground} does not exist!!"
   ${ECHO} "FATAL ERROR: No background file for analysis at ${time_str}!!!!"
-  if [ "${envar}" == "esrl" ]; then
+  if [ "${envir}" == "esrl" ]; then
     ${ECHO} " Cycle ${cycle_str}: GSI failed because of no background" >> ${loghistoryfile}
   fi
   exit 1
@@ -192,9 +188,9 @@ if [ ${HRRRDAS_BEC} -eq 1 ]; then
   # generate list of HRRRDAS members for ensemble covariances
   # Use 1-hr forecasts from the HRRRDAS cycling
   if [ ${HRRRDAS_SMALL} -eq 1 ]; then
-    {LS} ${HRRRDAS_DIR}/${time_1hour_ago}/wrfprd_mem????/wrfout_small_d02_${time_str2} > filelist.hrrrdas
+    ${LS} ${HRRRDAS_DIR}/${time_1hour_ago}/wrfprd_mem????/wrfout_small_d02_${time_str2} > filelist.hrrrdas
   else
-    {LS} ${HRRRDAS_DIR}/${time_1hour_ago}/wrfprd_mem????/wrfout_d02_${time_str2} > filelist.hrrrdas
+    ${LS} ${HRRRDAS_DIR}/${time_1hour_ago}/wrfprd_mem????/wrfout_d02_${time_str2} > filelist.hrrrdas
   fi
   c=1
   while [[ $c -le 36 ]]; do
@@ -314,13 +310,13 @@ for file in `awk '{if($1!~"!"){print $1}}' ./satinfo | sort | uniq` ;do
 done
 
 # Get aircraft reject list, mesonet_uselist, sfcobs_provider
-{CP} ${FIXgsi}/current_bad_aircraft.txt current_bad_aircraft
-{CP} ${FIXgsi}/current_mesonet_uselist.txt gsd_sfcobs_uselist.txt
-{CP} ${FIXgsi}/gsd_sfcobs_provider.txt gsd_sfcobs_provider.txt
+${CP} ${FIXgsi}/current_bad_aircraft.txt current_bad_aircraft
+${CP} ${FIXgsi}/current_mesonet_uselist.txt gsd_sfcobs_uselist.txt
+${CP} ${FIXgsi}/gsd_sfcobs_provider.txt gsd_sfcobs_provider.txt
 
 # Only need this file for single obs test
 bufrtable=${FIXgsi}/prepobs_prep.bufrtable
-{CP} $bufrtable ./prepobs_prep.bufrtable
+${CP} $bufrtable ./prepobs_prep.bufrtable
 
 # Set some parameters for use by the GSI executable and to build the namelist
 export JCAP=${JCAP:-62}
@@ -373,8 +369,8 @@ $gsi_namelist
 EOF
 
 ## satellite bias correction
-{CP} ${FIXgsi}/rap_satbias_starting_file.txt ./satbias_in
-{CP} ${FIXgsi}/rap_satbias_pc_starting_file.txt ./satbias_pc
+${CP} ${FIXgsi}/rap_satbias_starting_file.txt ./satbias_in
+${CP} ${FIXgsi}/rap_satbias_pc_starting_file.txt ./satbias_pc
 
 # Run GSI
 export pgm="rtma3d_gsi"
@@ -391,16 +387,21 @@ postmsg "$jlogfile" "$msg"
 msg="***********************************************************"
 postmsg "$jlogfile" "$msg"
 
-${CP} ${EXECrtma3d}/${exefile_name_gsi} ${pgm}
+if [ "${envir}" == "esrl" ]; then
+  CP_LN=${LN}
+else
+  CP_LN=${CP}
+fi
+${CP_LN} ${EXECrtma3d}/${exefile_name_gsi} ${pgm}
 if [ "${envir}" == "esrl" ];  then ##GSI on Jet needs special treatment
-  module load contrib wrap-mpi
-  mpirun ${pgm} < gsiparm.anl > ${pgmout} 2>errfile
+  module load contrib wrap-mpi >/dev/null
+  mpirun ${DATA}/${pgm} < gsiparm.anl > ${pgmout} 2>errfile
 else
   ${MPIRUN} ${pgm} < gsiparm.anl > ${pgmout} 2>errfile
 fi
 ##save some information for possible debugging before err_chk
 ${CAT} fort.* >   fits_${cycle_str}.txt
-{LS} -l > GSI_workdir_list
+${LS} -l > GSI_workdir_list
 ${CAT} errfile GSI_workdir_list >> ${pgmout}
 ${CP} -p ${pgmout} ${COMOUTgsi_rtma3d}
 ${CP} -p fits_${cycle_str}.txt ${COMOUTgsi_rtma3d}
@@ -456,7 +457,6 @@ if [ "${run_gsi_2times}" == "YES" ];  then
   cloudanalysistype=6
   ifhyb=.false.
   # Build the GSI namelist on-the-fly
-  {CP} ${PARMgsi}/gsiparm.anl.sh ./
   source ./gsiparm.anl.sh
 cat << EOF > gsiparm.anl
 $gsi_namelist
@@ -470,12 +470,12 @@ EOF
   msg="***********************************************************"
   postmsg "$jlogfile" "$msg"
   if [ "${envir}" == "esrl" ];  then ##GSI on Jet needs special treatment
-    module load contrib wrap-mpi
-    mpirun ${pgm} < gsiparm.anl > ${pgmout} 2>errfile
+    module load contrib wrap-mpi >/dev/null
+    mpirun ${DATA}/${pgm} < gsiparm.anl > ${pgmout} 2>errfile
   else
     ${MPIRUN} ${pgm} < gsiparm.anl > ${pgmout} 2>errfile
   fi
-  {LS} -l > GSI_workdir_list
+  ${LS} -l > GSI_workdir_list
   ${CAT} errfile GSI_workdir_list >> ${pgmout}
   ${CP} -p ${pgmout} ${COMOUTgsi_rtma3d}/${pgmout}.cloudana
   export err=$?; err_chk
@@ -503,9 +503,9 @@ if [ "${envir}" != "esrl" ]; then
   #${CP} -p fits_${cycle_str}.txt  ${COMOUT}/fits_${cycle_str}.txt
 fi
 
-{RM} -f ${DATA}/sig*
-{RM} -f ${DATA}/obs*
-{RM} -f ${DATA}/pe*
+${RM} -f ${DATA}/sig*
+${RM} -f ${DATA}/obs*
+${RM} -f ${DATA}/pe*
 
 msg="JOB $job FOR $RUN HAS COMPLETED NORMALLY"
 postmsg "$jlogfile" "$msg"
