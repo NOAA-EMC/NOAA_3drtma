@@ -85,7 +85,7 @@ export realtime="T"
   QUEUE_SVC="dev_transfer"                  #user-specified transfer queue
 
 # Path to top running and archiving directory
-  ptmp_base="/gpfs/dell2/stmp/${USER}/${NET}_wrkdir_retro"
+  ptmp_base="/gpfs/dell2/stmp/${USER}/${NET}_wrkdir_realtime"
 
   DATABASE_DIR=${ptmp_base}            # (equivalent to ptmp_base)
   HOMEBASE_DIR=${NWROOT}               # path to system home directory
