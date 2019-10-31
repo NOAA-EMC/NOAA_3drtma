@@ -36,7 +36,11 @@ export CNVGRIB=${CNVGRIB:-cnvgrib}
 export DATA=${DATA:-$DATAROOT/${jobid:?}} #jobid ($job.$LSB_JOBID MUST BE DEFINED IN TERMS OF $RUN IN UPPER LEVEL SCRIPT /MPondeca, 26Jul2015
 if [ -d $DATA ] ; then
    ${ECHO} "$DATA exists, remove its content"
-   #${RM} -rf $DATA/*
+   if [ "${envir}" == "esrl" ]; then #Jet
+     ${RM} -rf $DATA/output_${PDY}*
+   else
+     ${RM} -rf $DATA/*
+   fi
 else
    ${ECHO} "$DATA does not exist, create it"
    ${MKDIR} -p $DATA
@@ -133,7 +137,7 @@ fi
 #   Set the name to the executable
     export exefile_name_gsi=${exefile_name_gsi:-"rtma3d_gsi"}
 
-if [ "$envar" != "esrl" ]; then #Jet esrl runs don't do this
+if [ "${envir}" != "esrl" ]; then #WCOSS
 #   set the file name of the final analysis file for archive
     if [ ! "${PROD_HEAD}" ] ; then
       if [ "${subcyc}" == "-1" ]; then #hourly run

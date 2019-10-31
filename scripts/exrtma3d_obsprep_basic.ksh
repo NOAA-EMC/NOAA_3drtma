@@ -45,7 +45,7 @@ postmsg "$jlogfile" "$msg"
 
 # copy/link the prepbufr obs data
 # Jet: Copy the prepbufr to obs directory so don't do I/O to /public directly
-if [ "${envir}" != "esrl"  ]; then #For Jet expr runs
+if [ "${envir}" == "esrl"  ]; then #For Jet expr runs
   DFILE="prepbufr"
   RUNS[1]="rtma_ru";FILES[1]="${PREPBUFR}/${date_str}.${RUNS[1]}.${tz_str}.${DFILE}.tm00.${YYYYMMDD}"
   RUNS[2]="rap";    FILES[2]="${PREPBUFR}/${date_str}.${RUNS[2]}.${tz_str}.${DFILE}.tm00.${YYYYMMDD}"

@@ -49,7 +49,7 @@ ${ECHO} "enter working directory:${DATA}"
 
 # Define the loghistory file depending on if this is the full or partial cycle
 ifsoilnudge=.true.
-if [ "${envir}" == "esrl" ]; then
+if [ "${envir}" == "esrl" ]; then #Jet
   if [ "${FULLCYC}" == "0" ]; then
     loghistoryfile=${COMROOT}/loghistory/HRRR_GSI_HYB_PCYC.log
     ifsoilnudge=.true.
@@ -70,7 +70,7 @@ else
 fi
 
 # Look for background field for GSI analysis
-if [ "${envir}" == "esrl" ]; then
+if [ "${envir}" == "esrl" ]; then #Jet expr runs
   GSIbackground=${HRRR_DIR}/${time_1hour_ago}/wrfprd/wrfout_d01_${time_str}
 else
   GSIbackground=${BKG_DIR}/${FGSrtma3d_FNAME}
@@ -78,14 +78,14 @@ fi
 if [ -r ${GSIbackground} ]; then
   cpfs ${GSIbackground} ./wrf_inout
   ${ECHO} " Cycle ${cycle_str}: GSI background=${GSIbackground}"
-  if [ "${envir}" == "esrl" ]; then
+  if [ "${envir}" == "esrl" ]; then #Jet expr runs
     ${ECHO} " Cycle ${cycle_str}: GSI background=${GSIbackground}" >> ${loghistoryfile}
   fi
 else
   # No background available so abort
   ${ECHO} "${GSIbackground} does not exist!!"
   ${ECHO} "FATAL ERROR: No background file for analysis at ${time_str}!!!!"
-  if [ "${envir}" == "esrl" ]; then
+  if [ "${envir}" == "esrl" ]; then #Jet expr runs
     ${ECHO} " Cycle ${cycle_str}: GSI failed because of no background" >> ${loghistoryfile}
   fi
   exit 1
@@ -96,41 +96,41 @@ update_SST='00'
 
 # Link to the prepbufr data
 if [ -r ${OBS_DIR}/prepbufr ] ; then
-  ${LN} -s ${OBS_DIR}/prepbufr ./prepbufr
+  ${LN} -sf ${OBS_DIR}/prepbufr ./prepbufr
 else
   ${ECHO} "Warning: ${OBS_DIR}/prepbufr does not exist"
 fi
 
 if [ -r "${OBS_DIR}/NSSLRefInGSI.bufr" ]; then
-  ${LN} -s ${OBS_DIR}/NSSLRefInGSI.bufr ./refInGSI
+  ${LN} -sf ${OBS_DIR}/NSSLRefInGSI.bufr ./refInGSI
 elif [ -r "${OBS_DIR}/hrrr.${tz_str}.NSSLRefInGSI.bufr" ]; then
-  ${LN} -s ${OBS_DIR}/hrrr.${tz_str}.NSSLRefInGSI.bufr ./refInGSI
+  ${LN} -sf ${OBS_DIR}/hrrr.${tz_str}.NSSLRefInGSI.bufr ./refInGSI
 elif [ -r "${OBS_DIR}/${RUN}.${tz_str}.NSSLRefInGSI.bufr" ]; then
-  ${LN} -s ${OBS_DIR}/${RUN}.${tz_str}.NSSLRefInGSI.bufr ./refInGSI
+  ${LN} -sf ${OBS_DIR}/${RUN}.${tz_str}.NSSLRefInGSI.bufr ./refInGSI
 else
   ${ECHO} "Warning: ${OBS_DIR}: NSSLRefInGSI.bufr does not exist!"
 fi
 
 if [ -r "${OBS_DIR}/LightningInGSI.bufr" ]; then
-  ${LN} -s ${OBS_DIR}/LightningInGSI.bufr ./lghtInGSI
+  ${LN} -sf ${OBS_DIR}/LightningInGSI.bufr ./lghtInGSI
 elif [ -r "${OBS_DIR}/hrrr.{tz_str}.LightningInGSI.bufr" ]; then
-  ${LN} -s ${OBS_DIR}/hrrr.{tz_str}.LightningInGSI.bufr ./lghtInGSI
+  ${LN} -sf ${OBS_DIR}/hrrr.{tz_str}.LightningInGSI.bufr ./lghtInGSI
 elif [ -r "${OBS_DIR}/${RUN}.{tz_str}.LightningInGSI.bufr" ]; then
-  ${LN} -s ${OBS_DIR}/${RUN}.{tz_str}.LightningInGSI.bufr ./lghtInGSI
+  ${LN} -sf ${OBS_DIR}/${RUN}.{tz_str}.LightningInGSI.bufr ./lghtInGSI
 elif [ -r "${OBS_DIR}/${RUN}.{tz_str}.LightningInGSI_bufr.bufr" ]; then
-  ${LN} -s ${OBS_DIR}/${RUN}.{tz_str}.LightningInGSI_bufr.bufr ./lghtInGSI
+  ${LN} -sf ${OBS_DIR}/${RUN}.{tz_str}.LightningInGSI_bufr.bufr ./lghtInGSI
 else
   ${ECHO} "Warning: ${OBS_DIR}: LightningInGSI.bufr does not exist!"
 fi
 
 if [ -r "${OBS_DIR}/NASALaRCCloudInGSI.bufr" ]; then
-  ${LN} -s ${OBS_DIR}/NASALaRCCloudInGSI.bufr ./larcInGSI
+  ${LN} -sf ${OBS_DIR}/NASALaRCCloudInGSI.bufr ./larcInGSI
 elif [ -r "${OBS_DIR}/hrrr.{tz_str}.NASALaRCCloudInGSI.bufr" ]; then
-  ${LN} -s ${OBS_DIR}/hrrr.{tz_str}.NASALaRCCloudInGSI.bufr ./larcInGSI
+  ${LN} -sf ${OBS_DIR}/hrrr.{tz_str}.NASALaRCCloudInGSI.bufr ./larcInGSI
 elif [ -r "${OBS_DIR}/${RUN}.{tz_str}.NASALaRCCloudInGSI.bufr" ]; then
-  ${LN} -s ${OBS_DIR}/${RUN}.{tz_str}.NASALaRCCloudInGSI.bufr ./larcInGSI
+  ${LN} -sf ${OBS_DIR}/${RUN}.{tz_str}.NASALaRCCloudInGSI.bufr ./larcInGSI
 elif [ -r "${OBS_DIR}/rtma_ru.{tz_str}.lgycld.tm00.bufr_d" ]; then
-  ${LN} -s ${OBS_DIR}/rtma_ru.{tz_str}.lgycld.tm00.bufr_d ./larcInGSI
+  ${LN} -sf ${OBS_DIR}/rtma_ru.{tz_str}.lgycld.tm00.bufr_d ./larcInGSI
 else
   ${ECHO} "Warning: ${OBS_DIR}: NASALaRCCloudInGSI.bufr does not exist!"
 fi
@@ -178,7 +178,7 @@ ${LS} ${ENKF_FCST}/${enkfcstname}.mem???.nemsio > filelist03
 # for mem in `ls ${DATAROOT}/gfsenkf/enspreproc_arw_mem???`
 # do
 #   memname=`basename ${mem}`
-#   ${LN} -s ${mem} ${memname}
+#   ${LN} -sf ${mem} ${memname}
 # done
 # ${LS} enspreproc_arw_mem??? > filelist
 
@@ -237,7 +237,7 @@ elif [[ ${nummem} -eq 80 ]]; then
   ifhyb=.true.
   regional_ensemble_option=1
   grid_ratio_ens=12 #ensemble resolution=3 * grid_ratio * grid_ratio_ens
-  i_en_perts_io=3
+  i_en_perts_io=0
   ens_fast_read=.false. 
   ${ECHO} " Cycle ${YYYYMMDDHH}: GSI hybrid uses GDAS directly with n_ens=${nummem}" >> ${logfile}
 fi
@@ -340,7 +340,7 @@ else
 fi
 
 # option for hybrid vertical coordinate (HVC) in WRF-ARW
-if [ "${envir}" != "esrl" ]; then ## skip the following for Jet experimental runs
+if [ "${envir}" != "esrl" ]; then #WCOSS
   if [ "$NCDUMP" ] ; then
     n_c3f=`$NCDUMP -h ./wrf_inout | grep -i "C3F:" | wc -l`
     n_c4f=`$NCDUMP -h ./wrf_inout | grep -i "C4F:" | wc -l`
@@ -387,23 +387,25 @@ postmsg "$jlogfile" "$msg"
 msg="***********************************************************"
 postmsg "$jlogfile" "$msg"
 
-if [ "${envir}" == "esrl" ]; then
-  CP_LN=${LN}
+if [ "${envir}" == "esrl" ]; then #Jet
+  CP_LN="${LN} -sf"
 else
   CP_LN=${CP}
 fi
 ${CP_LN} ${EXECrtma3d}/${exefile_name_gsi} ${pgm}
 if [ "${envir}" == "esrl" ];  then ##GSI on Jet needs special treatment
+  set +x
   module load contrib wrap-mpi >/dev/null
+  set -x
   mpirun ${DATA}/${pgm} < gsiparm.anl > ${pgmout} 2>errfile
 else
   ${MPIRUN} ${pgm} < gsiparm.anl > ${pgmout} 2>errfile
 fi
 ##save some information for possible debugging before err_chk
 ${CAT} fort.* >   fits_${cycle_str}.txt
-${LS} -l > GSI_workdir_list
-${CAT} errfile GSI_workdir_list >> ${pgmout}
-${CP} -p ${pgmout} ${COMOUTgsi_rtma3d}
+#${LS} -l > GSI_workdir_list
+${CAT} errfile >> ${pgmout}
+#${MV} ${pgmout} ${pgmout}.var
 ${CP} -p fits_${cycle_str}.txt ${COMOUTgsi_rtma3d}
 export err=$?; err_chk
 
@@ -439,13 +441,13 @@ esac
 done
 
 ## link fort files with user-friendly file name
-if [ "${envir}" != "esrl" ]; then
-  ${LN} fort.201    fit_p1.${cycle_str}
-  ${LN} fort.202    fit_w1.${cycle_str}
-  ${LN} fort.203    fit_t1.${cycle_str}
-  ${LN} fort.204    fit_q1.${cycle_str}
-  ${LN} fort.207    fit_rad1.${cycle_str}
-  ${LN} fort.220 minimization_fort220.${cycle_str}
+if [ "${envir}" != "esrl" ]; then #wcoss
+  ${LN} -sf fort.201    fit_p1.${cycle_str}
+  ${LN} -sf fort.202    fit_w1.${cycle_str}
+  ${LN} -sf fort.203    fit_t1.${cycle_str}
+  ${LN} -sf fort.204    fit_q1.${cycle_str}
+  ${LN} -sf fort.207    fit_rad1.${cycle_str}
+  ${LN} -sf fort.220 minimization_fort220.${cycle_str}
 fi
 
 ###### second GSI run if needed
@@ -469,24 +471,28 @@ EOF
   postmsg "$jlogfile" "$msg"
   msg="***********************************************************"
   postmsg "$jlogfile" "$msg"
+  ${ECHO} -e "\n\n@@@@@@@@@ second GSI run standard output\n" >> ${pgmout}
   if [ "${envir}" == "esrl" ];  then ##GSI on Jet needs special treatment
+    set +x
     module load contrib wrap-mpi >/dev/null
-    mpirun ${DATA}/${pgm} < gsiparm.anl > ${pgmout} 2>errfile
+    set -x
+    mpirun ${DATA}/${pgm} < gsiparm.anl >> ${pgmout} 2>errfile
   else
-    ${MPIRUN} ${pgm} < gsiparm.anl > ${pgmout} 2>errfile
+    ${MPIRUN} ${pgm} < gsiparm.anl >> ${pgmout} 2>errfile
   fi
-  ${LS} -l > GSI_workdir_list
-  ${CAT} errfile GSI_workdir_list >> ${pgmout}
-  ${CP} -p ${pgmout} ${COMOUTgsi_rtma3d}/${pgmout}.cloudana
+  #${LS} -l > GSI_workdir_list
+  ${CAT} errfile >> ${pgmout}
+  ${ECHO} -e "\n\n -- End of second GSI --\n" >> ${pgmout}
+  #${CP} -p ${pgmout} ${COMOUTgsi_rtma3d}/${pgmout}.cloudana #this output should be in $LLOG_PGMOUT
   export err=$?; err_chk
 
 fi ###### second GSI run
 
 # Saving ANALYSIS, DIAG, Obs-Fitting files TO COM2 DIRECTORY AS PRODUCT for archive
 ${CP} -p gsiparm.anl  ${COMOUTgsi_rtma3d}/gsiparm.anl_${cycle_str}
-${TAR} -zcvf ${COMOUTgsi_rtma3d}/diag_${cycle_str} diag_*
+${TAR} -zcvf ${COMOUTgsi_rtma3d}/diag_${cycle_str}.tgz diag_*
 
-if [ "${envir}" != "esrl" ]; then
+if [ "${envir}" != "esrl" ]; then #wcoss
   ${MV} -p ${DATA}/wrf_inout                  ${COMOUTgsi_rtma3d}/${ANLrtma3d_FNAME}
   ${CP} -p minimization_fort220.${cycle_str} ${COMOUTgsi_rtma3d}
   ${CP} -p diag_*                             ${COMOUTgsi_rtma3d}

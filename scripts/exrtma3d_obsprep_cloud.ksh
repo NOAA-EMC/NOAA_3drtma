@@ -35,14 +35,14 @@ cd ${DATA}
 ${ECHO} "enter working directory:${DATA}"
 
 # BUFR Table including the description for HREF
-${LN} ${FIXgsi}/prepobs_prep_RAP.bufrtable ./prepobs_prep.bufrtable
+${LN} -sf ${FIXgsi}/prepobs_prep_RAP.bufrtable ./prepobs_prep.bufrtable
 if [ ! -s "./prepobs_prep.bufrtable" ]; then
   ${ECHO} "prepobs_prep.bufrtable does not exist or not readable"
   exit 1
 fi
 
 # WPS GEO_GRID Data
-${LN} -s ${FIXwps}/hrrr_geo_em.d01.nc ./geo_em.d01.nc 
+${LN} -sf ${FIXwps}/hrrr_geo_em.d01.nc ./geo_em.d01.nc 
 if [ ! -s "./geo_em.d01.nc" ]; then
   ${ECHO} "geo_em.d01.nc does not exist or not readable"
   exit 1 
@@ -55,9 +55,9 @@ ${ECHO} "YYYYMMDDHH: "${YYYYMMDDHH}
 
 # Link to the NASA LaRC cloud data
 if [ "${HH}" = 12 ] || [ "${HH}" = "00" ] ; then
-  ${LN} -s ${NASALARC_DATA}/${YYYYJJJHH}00.rap_e.t${HH}z.lgycld.tm00.bufr_d ./NASA_LaRC_cloud.bufr
+  ${LN} -sf ${NASALARC_DATA}/${YYYYJJJHH}00.rap_e.t${HH}z.lgycld.tm00.bufr_d ./NASA_LaRC_cloud.bufr
 else
-  ${LN} -s ${NASALARC_DATA}/${YYYYJJJHH}00.rap.t${HH}z.lgycld.tm00.bufr_d ./NASA_LaRC_cloud.bufr
+  ${LN} -sf ${NASALARC_DATA}/${YYYYJJJHH}00.rap.t${HH}z.lgycld.tm00.bufr_d ./NASA_LaRC_cloud.bufr
 fi
 if [ ! -s "NASA_LaRC_cloud.bufr" ]; then
   ${ECHO} "./NASA_LaRC_cloud.bufr does not exist or not readable"
@@ -85,8 +85,8 @@ postmsg "$jlogfile" "$msg"
 msg="***********************************************************"
 postmsg "$jlogfile" "$msg"
 
-if [ "${envir}" == "esrl" ]; then
-  CP_LN=${LN}
+if [ "${envir}" == "esrl" ]; then #Jet
+  CP_LN="${LN} -sf"
 else
   CP_LN=${CP}
 fi
@@ -99,7 +99,7 @@ postmsg "$jlogfile" "$msg"
 
 targetfile="NASALaRCCloudInGSI.bufr"
 if [ -f ${DATA}/${targetfile} ] ; then
-  if [ "${envir}" == "esrl" ]; then
+  if [ "${envir}" == "esrl" ]; then #Jet
     mv ${DATA}/${targetfile} ${COMINobsproc_rtma3d}/${tz_str}.${targetfile} #to save disk space
     ${LN} -snf ${COMINobsproc_rtma3d}/${tz_str}.${targetfile} ${DATA}/${targetfile}
   else

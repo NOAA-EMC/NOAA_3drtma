@@ -44,10 +44,12 @@ if [ "${machine}" = "theia" ] ; then
   esac
   module list
 elif [ "${machine}" = "jet" ] ; then
+  set +x
   . /etc/profile
   . /etc/profile.d/modules.sh >/dev/null # Module Support
   source ${modulefile_jet}
   module list
+  set -x
 
 elif [ "${machine}" = "dell" ] ; then
   . /etc/profile
@@ -143,7 +145,9 @@ EOF
 elif [ "${machine}" = "jet" ] ;  then
   case ${SCHEDULER} in
     SLURM|slurm)
+      set +x
       module load rocoto
+      set -x
       np=${SLURM_NTASKS}
       export MPIRUN="srun"
       ;;
@@ -156,6 +160,7 @@ elif [ "${machine}" = "jet" ] ;  then
   export jid=`echo ${SLURM_JOB_ID} | cut -f1 -d.`  # removal of tailing sub-server string
   export jobid=${jobid:-"${job}.${jid}"}
   echo " number of cores : $np for job $job with id as $jobid "
+  __ms_shell=ksh
 
   if [ -z "${rundir_task}" ]; then
     ${ECHO} "Fatal error: \$rundir_task is not defined"

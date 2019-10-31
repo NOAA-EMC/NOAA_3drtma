@@ -35,7 +35,7 @@ export CNVGRIB=${CNVGRIB:-cnvgrib}
 ##########################################################
 export DATA=${DATA:-$DATAROOT/${jobid:?}} #jobid ($job.$LSB_JOBID MUST BE DEFINED IN TERMS OF $RUN IN UPPER LEVEL SCRIPT /MPondeca, 26Jul2015
 if [ -d $DATA ] ; then
-  if [ "${envir}" == "esrl" ]; then
+  if [ "${envir}" == "esrl" ]; then #Jet
     ${RM} -f $DATA/NASALaRCCloudInGSI.bufr
   else
     ${ECHO} "$DATA exists, remove its content"
