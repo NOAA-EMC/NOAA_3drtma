@@ -87,7 +87,7 @@
 <!ENTITY SATELLITE_PROC "1">
 <!ENTITY GSI_HYB_PROC "280">
 <!ENTITY WRF_PROC "280">
-<!ENTITY GSI_DIAG_PROC "1">
+<!ENTITY DIAG_STATS_PROC "1">
 
 <!ENTITY POST_PROC "32">
 <!ENTITY NCL_PROC "1">
@@ -101,7 +101,7 @@
 <!ENTITY RADAR_RESOURCES "<walltime>00:10:00</walltime>">
 <!ENTITY SATELLITE_RESOURCES "<walltime>00:05:00</walltime><memory>10G</memory>">
 <!ENTITY GSI_HYB_RESOURCES "<walltime>00:40:00</walltime>">
-<!ENTITY GSI_DIAG_RESOURCES "<walltime>00:05:00</walltime><memory>600M</memory>">
+<!ENTITY DIAG_STATS_RESOURCES "<walltime>00:05:00</walltime><memory>600M</memory>">
 <!ENTITY POST_RESOURCES "<walltime>00:45:00</walltime>">
 <!ENTITY NCL_RESOURCES "<walltime>00:55:00</walltime>">
 <!ENTITY NCL_SKEWT_RESOURCES "<walltime>00:25:00</walltime><memory>9G</memory>">
@@ -372,6 +372,8 @@
             <taskdep task="obsprep_radar"/>
             <taskdep task="obsprep_lghtn"/>
             <taskdep task="obsprep_basic"/>
+            <taskdep task="obsprep_cloud"/>
+            <!--to use HRRRDAS BEC, need to add other dependencies here  -->
           </and>
           <timedep><cyclestr offset="&START_TIME_GSI;">@Y@m@d@H@M00</cyclestr></timedep>
         </or>
@@ -380,152 +382,86 @@
 
   </task>
 
-<!--
-  <task name="gsi_diag" cycledefs="02-11hr,00hr,01hr" maxtries="3">
+  <task name="diagstats" cycledefs="02-11hr,00hr,01hr" maxtries="3">
 
-    &GSI_DIAG_RESOURCES;
+    &DIAG_STATS_RESOURCES;
     &WALL_LIMIT_DA;
     &RESERVATION;
 
-    <command>&JJOB_DIR;/launch.ksh &JJOB_DIR;/JRTMA3D_GSI_DIAG</command>
-    <cores>&GSI_DIAG_PROC;</cores>
-    <jobname><cyclestr>&JOBNAME_PRE;_gsi_diag_@H</cyclestr></jobname>
-    <join><cyclestr>&LOG_DIR;/gsi_diag_@Y@m@d@H00.log</cyclestr></join>
+    <command>&JJOB_DIR;/launch.ksh &JJOB_DIR;/JRTMA3D_DIAGSTATS</command>
+    <cores>&DIAG_STATS_PROC;</cores>
+    <jobname><cyclestr>&JOBNAME_PRE;_diag_stats_@H@M</cyclestr></jobname>
+    <join><cyclestr>&LOG_DIR;/@Y@m@d/diag_stats_@Y@m@d@H@M.log</cyclestr></join>
 
     &COMMONVARS;
     <envar>
-      <name>GSIPROC</name>
-      <value>&GSI_DIAG_PROC;</value>
+      <name>rundir_task</name>
+      <value><cyclestr>&DATAROOT;/@Y@m@d@H@M/gsiprd</cyclestr></value>
     </envar>
-    <envar>
-      <name>START_TIME</name>
-      <value><cyclestr>@Y@m@d@H</cyclestr></value>
-    </envar>
-    <envar>
-      <name>DATABASE_DIR</name>
-      <value>&DATABASE_DIR;</value>
-    </envar>
-    <envar>
-      <name>DATAHOME</name>
-      <value><cyclestr>&DATAROOT;/@Y@m@d@H</cyclestr></value>
-    </envar>
-    <envar>
-      <name>GSI_ROOT</name>
-      <value>&GSI_ROOT;</value>
-    </envar>
-
     <dependency>
-      <taskdep task="gsi_hyb"/>
+      <taskdep task="gsianl"/>
     </dependency>
 
   </task>
 
-  <task name="update_vars" cycledefs="02-11hr,00hr,01hr" maxtries="3">
+  <task name="updatevars" cycledefs="all" maxtries="3">
 
     &UPDATE_VARS_RESOURCES;
     &WALL_LIMIT_UV;
     &RESERVATION_DA;
 
-    <command>&JJOB_DIR;/launch.ksh &JJOB_DIR;/JRTMA3D_UPDATE_VARS</command>
-    <cores>&GSI_HYB_PROC;</cores>
-    <jobname><cyclestr>&JOBNAME_PRE;_update_vars_@H</cyclestr></jobname>
-    <join><cyclestr>&LOG_DIR;/update_vars_@Y@m@d@H00.log</cyclestr></join>
+    <command>&JJOB_DIR;/launch.ksh &JJOB_DIR;/JRTMA3D_UPDATEVARS</command>
+    <cores>&WRF_PROC;</cores>
+    <jobname><cyclestr>&JOBNAME_PRE;_updatevars_@H@M</cyclestr></jobname>
+    <join><cyclestr>&LOG_DIR;/@Y@m@d/updatevars_@Y@m@d@H@M.log</cyclestr></join>
 
     &COMMONVARS;
-    <envar>
-      <name>START_TIME</name>
-      <value><cyclestr>@Y@m@d@H</cyclestr></value>
-    </envar>
-    <envar>
-      <name>DATABASE_DIR</name>
-      <value>&DATABASE_DIR;</value>
-    </envar>
-    <envar>
-      <name>GSI_ROOT</name>
-      <value>&GSI_ROOT;</value>
-    </envar>
     <envar>
       <name>FCST_LENGTH</name>
       <value>&FCST_LENGTH;</value>
     </envar>
     <envar>
-      <name>WRF_ROOT</name>
-      <value>&WRF_ROOT;</value>
-    </envar>
-    <envar>
-      <name>STATIC_DIR</name>
-      <value>&STATIC_DIR;/WRF</value>
-    </envar>
-    <envar>
-      <name>DATAROOT</name>
-      <value>&DATAROOT;</value>
-    </envar>
-    <envar>
-      <name>DATAGSIHOME</name>
+      <name>GSIRUN_DIR</name>
       <value><cyclestr>&DATAROOT;/@Y@m@d@H/gsiprd</cyclestr></value>
     </envar>
     <envar>
-      <name>DATAHOME</name>
+      <name>rundir_task</name>
       <value><cyclestr>&DATAROOT;/@Y@m@d@H/wrfprd</cyclestr></value>
     </envar>
 
     <dependency>
-        <taskdep task="gsi_hyb"/>
+        <taskdep task="gsianl"/>
     </dependency>
 
   </task>
 
-  <task name="post_00" cycledefs="02-11hr,00hr,01hr" maxtries="3">
+  <task name="post" cycledefs="all" maxtries="3">
 
     &POST_RESOURCES;
     &WALL_LIMIT_PP;
     &RESERVATION_POST;
 
-    <command>&JJOB_DIR;/launch.ksh &JJOB_DIR;/JRTMA3D_UNIPOST</command>
+    <command>&JJOB_DIR;/launch.ksh &JJOB_DIR;/JRTMA3D_POST</command>
     <cores>&POST_PROC;</cores>
-    <jobname><cyclestr>&JOBNAME_PRE;_post_@H_00</cyclestr></jobname>
-    <join><cyclestr>&LOG_DIR;/post_@Y@m@d@H00_00.log</cyclestr></join>
+    <jobname><cyclestr>&JOBNAME_PRE;_post_@H@M</cyclestr></jobname>
+    <join><cyclestr>&LOG_DIR;/@Y@m@d/post_@Y@m@d@H@M.log</cyclestr></join>
 
     &COMMONVARS;
     <envar>
-      <name>START_TIME</name>
-      <value><cyclestr>@Y@m@d@H</cyclestr></value>
+      <name>FIXcrtm</name>
+      <value>/lfs1/projects/nrtrr/FIX_EXEC_MODULE/crtm/CRTM_v2.2.6</value>
     </envar>
     <envar>
       <name>FCST_TIME</name>
       <value>00</value>
     </envar>
     <envar>
-      <name>STATICWRF_DIR</name>
-      <value>&STATIC_DIR;/WRF</value>
-    </envar>
-    <envar>
-      <name>WRF_ROOT</name>
-      <value>&WRF_ROOT;</value>
-    </envar>
-    <envar>
-      <name>EXE_ROOT</name>
-      <value>&UNIPOST_EXEC;</value>
-    </envar>
-    <envar>
-      <name>DATAROOT</name>
-      <value>&DATAROOT;</value>
-    </envar>
-    <envar>
-      <name>DATAHOME</name>
+      <name>rundir_task</name>
       <value><cyclestr>&DATAROOT;/@Y@m@d@H/postprd</cyclestr></value>
     </envar>
     <envar>
-      <name>DATAWRFHOME</name>
+      <name>WRFOUT_DIR</name>
       <value><cyclestr>&DATAROOT;/@Y@m@d@H/gsiprd</cyclestr></value>
-    </envar>
-    <envar>
-      <name>MODEL</name>
-      <value>RAP</value>
-    </envar>
-    <envar>
-      <name>STATIC_DIR</name>
-      <value>&STATIC_DIR;/UPP</value>
     </envar>
     <envar>
       <name>POST_NAME</name>
@@ -533,11 +469,12 @@
     </envar>
 
     <dependency>
-      <taskdep task="update_vars"/>
+      <taskdep task="updatevars"/>
     </dependency>
 
   </task>
 
+<!--
   <task name="smartinit_bl" cycledefs="02-11hr,00hr,01hr" maxtries="3">
 
     &SMARTINIT_RESOURCES;
