@@ -11,8 +11,8 @@ gsi_namelist="
    newpc4pred=.true.,adp_anglebc=.true.,angord=4,
    passive_bc=.true.,use_edges=.false.,emiss_bc=.true.,
    diag_precon=.true.,step_start=1.e-3,
-   diag_light=.false.,print_obs_para=.true.,diag_radardbz=.true.,
-   reset_bad_radbc=.true.,
+   diag_light=.false.,print_obs_para=.true.,diag_radardbz=.false.,
+   reset_bad_radbc=.false.,
    l4densvar=.false.,nhr_obsbin=3,
    use_gfs_nemsio=.true.,
  /     
