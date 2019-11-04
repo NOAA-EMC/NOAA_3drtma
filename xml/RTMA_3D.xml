@@ -364,7 +364,7 @@
     </envar>
     <envar>
       <name>GSIANL_RES</name>
-      <value>12km</value>
+      <value>3km</value>
     </envar>
 
     <dependency>
