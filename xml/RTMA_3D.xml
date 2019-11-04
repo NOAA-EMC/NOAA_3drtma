@@ -186,7 +186,8 @@
     <cyclestr>&LOG_DIR;/@Y@m@d/workflow_@Y@m@d@H@M.log</cyclestr>
   </log>
 
-  <cycledef group="all">*/15 *  *  *  2019-2021 *</cycledef>
+  <cycledef group="all">*/15 *    *  *  2019-2022 *</cycledef>
+  <cycledef group="clean">00 */12 *  *  2019-2022 *</cycledef>
 
   <task name="obsprep_lghtn" cycledefs="all" maxtries="3">
 
@@ -843,5 +844,27 @@
     
   </task>
 -->
+
+  <task name="clean" cycledefs="clean" maxtries="3">
+
+    &CLEAN_RESOURCES;
+    &WALL_LIMIT_PP;
+    &RESERVATION_POST;
+
+    <command>&JJOB_DIR;/launch.ksh &SCRIPTS;/clean.ksh</command>
+    <cores>&CLEAN_PROC;</cores>
+    <jobname><cyclestr>&JOBNAME_PRE;_clean_@H@M</cyclestr></jobname>
+    <join><cyclestr>&LOG_DIR;/@Y@m@d/clean_@Y@m@d@H@M.log</cyclestr></join>
+
+    <envar>
+      <name>WORK_ROOT</name>
+      <value>&DATABASE_DIR;</value>
+    </envar>
+    <envar>
+      <name>CYCLE_HOUR</name>
+      <value><cyclestr>@H</cyclestr></value>
+    </envar>
+
+  </task>
 
 </workflow>

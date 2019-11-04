@@ -107,12 +107,12 @@ export err=$?; err_chk
 #   export err=$?; err_chk
 
 #  Data number summary
-${CAT} << EOF > namelist.conv
+${CAT} << EOF > namelist.count_obs
  &iosetup
   infilename='obs_para.txt',
   outfilename='summary_count_obs.txt',
   cdate='${YYYYMMDDHHMM}',
-  npe='${GSIRUN_CORES}',
+  npe=${GSIRUN_CORES},
  /     
 EOF
 export pgm="rtma3d_count_obs.exe"

@@ -26,9 +26,9 @@ fi
 START_TIME=`${DATE} -d "${PDY} ${cyc} ${SUBH_TIME} minutes"`
 #assgin MM1, MM2, MM3
 if [ "${SUBH_TIME}" == "00" ]; then
-  MM1=0
-  MM2=1
-  MM2=2
+  MM1=00
+  MM2=01
+  MM2=02
 elif [ "${SUBH_TIME}" == "15" ]; then
   MM1=15
   MM2=14
@@ -59,6 +59,13 @@ if [ ${SUBH_TIME} -eq 60 ]; then
   DD=`${DATE} +"%d" -d "${time_01hago}"`
   HH=`${DATE} +"%H" -d "${time_01hago}"`
   YYYYMMDDHH=`${DATE} +"%Y%m%d%H" -d "${time_01hago}"`
+fi
+
+if [ "${envir}" == "esrl" ]; then #jet
+  CP_LN="${LN} -sf"
+  sleep 60 #sleep 1 minute
+else
+  CP_LN=${CP}
 fi
 
 #----- enter working directory -------
@@ -148,11 +155,6 @@ postmsg "$jlogfile" "$msg"
 msg="***********************************************************"
 postmsg "$jlogfile" "$msg"
 
-if [ "${envir}" == "esrl" ]; then #jet
-  CP_LN="${LN} -sf"
-else
-  CP_LN=${CP}
-fi
 ${CP_LN} ${EXECrtma3d}/${exefile_name_radar} ${pgm}
 ${MPIRUN} ${pgm} > ${pgmout} 2>errfile
 export err=$?; err_chk

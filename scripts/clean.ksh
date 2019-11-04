@@ -1,24 +1,25 @@
 #!/bin/ksh 
+set -x
+check_if_defined() { #usage: check_if_defined "var1_name" "var2_name" ...
+  for str in "$@"; do
+    eval "path=\${$str}"
+    if [ -z "${path}" ]; then
+      ${ECHO} "ERROR: \$${str} is not defined"; exit 1
+    fi
+  done
+}
+check_dirs_exist() { #usage: check_dirs_exist "var1_name" "var2_name" ...
+  for str in "$@"; do
+    eval "path=\${$str}"
+    if [ ! -d ${path} ]; then
+      ${ECHO} "ERROR: ${path}/ does not exist"; exit 1
+    fi
+  done
+}
 
-ulimit -s 512000
-
-np=`cat $PBS_NODEFILE | wc -l`
-
-source /home/rtrr/PARM_EXEC/modulefiles/modulefile.jet.GSI_UPP_WRF
-
-# Make sure WORK_ROOT is defined and exists
-if [ ! "${WORK_ROOT}" ]; then
-  ${ECHO} "ERROR: WORK_ROOT is not defined!"
-  exit 1
-fi
-if [ ! -d "${WORK_ROOT}" ]; then
-  ${ECHO} "ERROR: WORK_ROOT directory '${WORK_ROOT}' does not exist!"
-  exit 1
-fi
-if [ ! "${CYCLE_HOUR}" ]; then
-  ${ECHO} "ERROR: CYCLE_HOUR is not defined!"
-  exit 1
-fi
+# make sure variables/dirs exist
+check_if_defined "WORK_ROOT" "CYCLE_HOUR"
+check_dirs_exist "WORK_ROOT"
 
 currentime=`date`
 cyclehour=${CYCLE_HOUR}
@@ -32,7 +33,7 @@ echo "Delete directory before ${deletetime}"
 for currentdir in ${workdir[*]}; do
   cd ${currentdir}
   echo "Working on directory ${currentdir}"
-  set -A XX `ls -d 20* | sort -r`
+  set -A XX `ls -d 20??????* | sort -r`
   maxnum=${#XX[*]}
   for onetime in ${XX[*]};do
     if [[ ${onetime} -le ${deletetime} ]]; then
@@ -42,29 +43,19 @@ for currentdir in ${workdir[*]}; do
   done
 done
 
-# Save recent logs into directory
-echo "Cycle hour = ${cyclehour}"
-saveloghour='03'
-if [ ${cyclehour} -eq ${saveloghour} ]; then
-  echo "Save log file"
-  cd ${mainroot}/log
-  mkdir ${savelogtime}
-  mv *${savelogtime}*.log ./${savelogtime}
-  mv *${savelogtime}*.log.* ./${savelogtime}
-  mv *${savelogtime}*.txt ./${savelogtime}
-fi
-
-# Delete log file directories
-deletetime=`date +%Y%m%d -d "${currentime}  720 hours ago"`
-set -A workdir "${mainroot}/log"
+# Delete wrfout files
+deletetime=`date +%Y%m%d%H -d "${currentime}  12 hours ago"`
+set -A workdir "${mainroot}/run"
+echo "Delete wrfouts before ${deletetime}"
 cd ${workdir}
-set -A XX `ls -d 20*`
-for dir in ${XX[*]}; do
-  if [[ ${dir} -le ${deletetime} ]]; then
-    echo "Delete log directory : ${dir}"
-    rm -rf ${dir}
+echo "Working on directory ${workdir}"
+set -A XX `ls -d 20??????* | sort -r`
+maxnum=${#XX[*]}
+for onetime in ${XX[*]};do
+  if [[ ${onetime} -le ${deletetime} ]]; then
+    echo "Delete wrfout files in ${onetime}/wrfprd"
+    rm -f ${onetime}/wrfprd/wrfout_d01_*
   fi
 done
-
 
 exit 0
