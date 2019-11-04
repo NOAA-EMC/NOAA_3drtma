@@ -29,8 +29,10 @@ fi
 
 if [[ "${subcyc}" == "-1" ]]; then #it's hourly run
   tz_str=t${cyc}z
+  SUBH_TIME=00
 else
   tz_str=t${cyc}${subcyc}z
+  SUBH_TIME=${subcyc}
 fi
 START_TIME=`${DATE} -d "${PDY} ${cyc} ${SUBH_TIME} minutes"`
 
@@ -70,12 +72,13 @@ ${VALIDTIMEUNITS}
 EOF
 
 #link fix files
-ln -sf ${FIXupp}/post_avblflds.xml post_avblflds.xml
-ln -sf ${FIXupp}/params_grib2_tbl_new params_grib2_tbl_new
-ln -sf ${FIXupp}/postcntrl.xml postcntrl.xml
-ln -sf ${FIXupp}/postxconfig-NT.txt postxconfig-NT.txt  ##postcntrl_subh.xml postxconfig_subh-NT.txt??
-ln -sf ${FIXupp}/gtg.config.raphrrr gtg.config
-ln -sf ${FIXupp}/run/ETAMPNEW_DATA eta_micro_lookup.dat
+ln -sf ${PARMupp}/post_avblflds.xml post_avblflds.xml
+ln -sf ${PARMupp}/params_grib2_tbl_new params_grib2_tbl_new
+ln -sf ${PARMupp}/postcntrl.xml postcntrl.xml
+ln -sf ${PARMupp}/postxconfig-NT.txt postxconfig-NT.txt  ##postcntrl_subh.xml postxconfig_subh-NT.txt??
+ln -sf ${PARMupp}/gtg.config.raphrrr gtg.config
+
+ln -sf ${FIXupp}/ETAMPNEW_DATA eta_micro_lookup.dat
 
 #link CRTM coefficients
 for dsis in "imgr_g11" "imgr_g12" "imgr_g13" "imgr_g15" "imgr_mt1r" "imgr_mt2" \
@@ -151,7 +154,7 @@ if [ "${envir}" == "esrl" ]; then #Jet expr runs
   ln -s ${DATA}/wrfprs_${POST_NAME}_${FCST_TIME}.grib2 ${DATA}/wrfprs_${basetime}${FCST_TIME}00
   ln -s ${DATA}/wrftwo_${POST_NAME}_${FCST_TIME}.grib2 ${DATA}/wrftwo_${basetime}${FCST_TIME}00
   ln -s ${DATA}/wrfnat_${POST_NAME}_${FCST_TIME}.grib2 ${DATA}/wrfnat_${basetime}${FCST_TIME}00
-  ln -s ${DATA}/wrfmsl_${POST_NAME}_${FCST_TIME}.grib2 ${DATA}/wrfmsl_${basetime}${FCST_TIME}00
+  #ln -s ${DATA}/wrfmsl_${POST_NAME}_${FCST_TIME}.grib2 ${DATA}/wrfmsl_${basetime}${FCST_TIME}00
 
 else #wcoss
   # transfer the output grib2 files to $COMOUTpost_rtma3d

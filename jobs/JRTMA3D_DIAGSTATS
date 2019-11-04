@@ -136,28 +136,28 @@ fi
 ###########################################################
 #   Set the name to the executable
 #   export exefile_name_=${exefile_name_:-"rtma3d_diag"}
-exef_diagconv="${EXECrtma3d}/rtma3d_read_diag_conv"
-exef_diagrad="${EXECrtma3d}/rtma3d_read_diag_rad"
-exef_count="${EXECrtma3d}/rtma3d_count_obs"
+export exef_diagconv="${EXECrtma3d}/rtma3d_read_diag_conv"
+export exef_diagrad="${EXECrtma3d}/rtma3d_read_diag_rad"
+export exef_count="${EXECrtma3d}/rtma3d_count_obs"
 
 if [ "${envir}" != "esrl" ]; then #WCOSS
 #   set the file name of the final analysis file for archive
-#    some logics at WCOSS
+    ${ECHO} "some logics at WCOSS..."
 fi
 
 #   Set the path to the GSI static files
-    export FIXgsi=${FIXgsi:-"${FIXrtma3d}/gsi"}
-    export FIXcrtm=${FIXcrtm:-"${FIXrtma3d}/crtm"}
-    export FIXwps=${FIXwps:-"${FIXrtma3d}/wps"}
+export FIXgsi=${FIXgsi:-"${FIXrtma3d}/gsi"}
+export FIXcrtm=${FIXcrtm:-"${FIXrtma3d}/crtm"}
+export FIXwps=${FIXwps:-"${FIXrtma3d}/wps"}
 
-    export PARMgsi=${PARMgsi:-"${PARMrtma3d}/gsi"}
-    export PARMupp=${PARMupp:-"${PARMrtma3d}/upp"}
-    export PARMwrf=${PARMwrf:-"${PARMrtma3d}/wrf"}
+export PARMgsi=${PARMgsi:-"${PARMrtma3d}/gsi"}
+export PARMupp=${PARMupp:-"${PARMrtma3d}/upp"}
+export PARMwrf=${PARMwrf:-"${PARMrtma3d}/wrf"}
 
-    export OBS_USELIST=${OBS_USELIST:-"${FIXrtma3d}/gsi"}
-    export SFCOBS_USELIST=${SFCOBS_USELIST:-"${FIXrtma3d}/gsi"}
-    export AIRCRAFT_REJECT=${AIRCRAFT_REJECT:-"${FIXrtma3d}/gsi"}
-    export SFCOBS_PROVIDER=${SFCOBS_PROVIDER:-"${FIXrtma3d}/gsi"}
+export OBS_USELIST=${OBS_USELIST:-"${FIXrtma3d}/gsi"}
+export SFCOBS_USELIST=${SFCOBS_USELIST:-"${FIXrtma3d}/gsi"}
+export AIRCRAFT_REJECT=${AIRCRAFT_REJECT:-"${FIXrtma3d}/gsi"}
+export SFCOBS_PROVIDER=${SFCOBS_PROVIDER:-"${FIXrtma3d}/gsi"}
 
 ##########################################################
 

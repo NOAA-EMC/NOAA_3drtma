@@ -135,7 +135,7 @@ fi
 #
 ###########################################################
 #   Set the name to the executable
-    export exefile_name_wrf=${exefile_name_wrf:-"rtma3d_wrf"}
+    export exefile_name_updatevars=${exefile_name_updatevars:-"rtma3d_updatevars"}
 
 if [ "${envir}" != "esrl" ]; then #WCOSS
 #   set the file name of the final analysis file for archive
@@ -173,7 +173,7 @@ fi
 #   Set the path to the GSI static files
     export FIXgsi=${FIXgsi:-"${FIXrtma3d}/gsi"}
     export FIXcrtm=${FIXcrtm:-"${FIXrtma3d}/crtm"}
-    export FIXwps=${FIXwps:-"${FIXrtma3d}/wps"}
+    export FIXwrf=${FIXwrf:-"${FIXrtma3d}/wrf"}
 
     export PARMgsi=${PARMgsi:-"${PARMrtma3d}/gsi"}
     export PARMupp=${PARMupp:-"${PARMrtma3d}/upp"}

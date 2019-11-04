@@ -85,7 +85,9 @@
 <!ENTITY LIGHTNING_PROC "1">
 <!ENTITY RADAR_PROC "33">
 <!ENTITY SATELLITE_PROC "1">
+<!-- ENTITY GSI_HYB_PROC "9:ppn=20" -->
 <!ENTITY GSI_HYB_PROC "280">
+<!ENTITY GSIRUN_CORES "280">
 <!ENTITY WRF_PROC "280">
 <!ENTITY DIAG_STATS_PROC "1">
 
@@ -382,7 +384,7 @@
 
   </task>
 
-  <task name="diagstats" cycledefs="02-11hr,00hr,01hr" maxtries="3">
+  <task name="diagstats" cycledefs="all" maxtries="3">
 
     &DIAG_STATS_RESOURCES;
     &WALL_LIMIT_DA;
@@ -396,8 +398,17 @@
     &COMMONVARS;
     <envar>
       <name>rundir_task</name>
+      <value><cyclestr>&DATAROOT;/@Y@m@d@H@M/diagprd</cyclestr></value>
+    </envar>
+    <envar>
+      <name>GSIRUN_DIR</name>
       <value><cyclestr>&DATAROOT;/@Y@m@d@H@M/gsiprd</cyclestr></value>
     </envar>
+    <envar>
+      <name>GSIRUN_CORES</name>
+      <value>&GSIRUN_CORES;</value>
+    </envar>
+
     <dependency>
       <taskdep task="gsianl"/>
     </dependency>
@@ -417,16 +428,16 @@
 
     &COMMONVARS;
     <envar>
+      <name>rundir_task</name>
+      <value><cyclestr>&DATAROOT;/@Y@m@d@H@M/wrfprd</cyclestr></value>
+    </envar>
+    <envar>
       <name>FCST_LENGTH</name>
       <value>&FCST_LENGTH;</value>
     </envar>
     <envar>
       <name>GSIRUN_DIR</name>
-      <value><cyclestr>&DATAROOT;/@Y@m@d@H/gsiprd</cyclestr></value>
-    </envar>
-    <envar>
-      <name>rundir_task</name>
-      <value><cyclestr>&DATAROOT;/@Y@m@d@H/wrfprd</cyclestr></value>
+      <value><cyclestr>&DATAROOT;/@Y@m@d@H@M/gsiprd</cyclestr></value>
     </envar>
 
     <dependency>
@@ -448,6 +459,10 @@
 
     &COMMONVARS;
     <envar>
+      <name>rundir_task</name>
+      <value><cyclestr>&DATAROOT;/@Y@m@d@H@M/postprd</cyclestr></value>
+    </envar>
+    <envar>
       <name>FIXcrtm</name>
       <value>/lfs1/projects/nrtrr/FIX_EXEC_MODULE/crtm/CRTM_v2.2.6</value>
     </envar>
@@ -456,12 +471,8 @@
       <value>00</value>
     </envar>
     <envar>
-      <name>rundir_task</name>
-      <value><cyclestr>&DATAROOT;/@Y@m@d@H/postprd</cyclestr></value>
-    </envar>
-    <envar>
       <name>WRFOUT_DIR</name>
-      <value><cyclestr>&DATAROOT;/@Y@m@d@H/gsiprd</cyclestr></value>
+      <value><cyclestr>&DATAROOT;/@Y@m@d@H@M/gsiprd</cyclestr></value>
     </envar>
     <envar>
       <name>POST_NAME</name>
@@ -475,7 +486,7 @@
   </task>
 
 <!--
-  <task name="smartinit_bl" cycledefs="02-11hr,00hr,01hr" maxtries="3">
+  <task name="smartinit_bl" cycledefs="all" maxtries="3">
 
     &SMARTINIT_RESOURCES;
     &WALL_LIMIT_PP;
@@ -484,7 +495,7 @@
     <command>&JJOB_DIR;/launch.ksh &JJOB_DIR;/JRTMA3D_SMARTINIT_BL</command>
     <cores>&SMARTINIT_PROC;</cores>
     <jobname><cyclestr>&JOBNAME_PRE;_smartinit_@H_bl</cyclestr></jobname>
-    <join><cyclestr>&LOG_DIR;/smartinit_@Y@m@d@H00_bl.log</cyclestr></join>
+    <join><cyclestr>&LOG_DIR;/@Y@m@d/smartinit_@Y@m@d@H00_bl.log</cyclestr></join>
 
     &COMMONVARS;
     <envar>
@@ -521,12 +532,12 @@
     </envar>
 
     <dependency>
-      <datadep age="00:02:00">&DATAROOT;/<cyclestr>@Y@m@d@H</cyclestr>/postprd<cyclestr>/wrfnat_hrconus_00.grib2</cyclestr></datadep>
+      <datadep age="00:02:00">&DATAROOT;/<cyclestr>@Y@m@d@H@M</cyclestr>/postprd<cyclestr>/wrfnat_hrconus_00.grib2</cyclestr></datadep>
     </dependency>
 
   </task>
 
-  <task name="smartinit_nb" cycledefs="02-11hr,00hr,01hr" maxtries="3">
+  <task name="smartinit_nb" cycledefs="all" maxtries="3">
 
     &SMARTINIT_RESOURCES;
     &WALL_LIMIT_PP;
@@ -535,7 +546,7 @@
     <command>&JJOB_DIR;/launch.ksh &JJOB_DIR;/JRTMA3D_SMARTINIT_NB</command>
     <cores>&SMARTINIT_PROC;</cores>
     <jobname><cyclestr>&JOBNAME_PRE;_smartinit_@H_nb</cyclestr></jobname>
-    <join><cyclestr>&LOG_DIR;/smartinit_@Y@m@d@H00_nb.log</cyclestr></join>
+    <join><cyclestr>&LOG_DIR;/@Y@m@d/smartinit_@Y@m@d@H00_nb.log</cyclestr></join>
 
     &COMMONVARS;
     <envar>
@@ -572,12 +583,12 @@
     </envar>
 
     <dependency>
-      <datadep age="00:02:00">&DATAROOT;/<cyclestr>@Y@m@d@H</cyclestr>/postprd<cyclestr>/wrfnat_hrconus_00.grib2</cyclestr></datadep>
+      <datadep age="00:02:00">&DATAROOT;/<cyclestr>@Y@m@d@H@M</cyclestr>/postprd<cyclestr>/wrfnat_hrconus_00.grib2</cyclestr></datadep>
     </dependency>
 
   </task>
 
-  <task name="ncl_00" cycledefs="02-11hr,00hr,01hr" maxtries="3">
+  <task name="ncl_00" cycledefs="all" maxtries="3">
 
     &NCL_RESOURCES;
     &WALL_LIMIT_PP;
@@ -585,8 +596,8 @@
 
     <command>&SCRIPTS;/NCL/ncl_hrrr.ksh</command>
     <cores>&NCL_MAIN_PROC;</cores>
-    <jobname><cyclestr>&JOBNAME_PRE;_ncl_@H_00</cyclestr></jobname>
-    <join><cyclestr>&LOG_DIR;/ncl_@Y@m@d@H00_00.log</cyclestr></join>
+    <jobname><cyclestr>&JOBNAME_PRE;_ncl_@H_@M</cyclestr></jobname>
+    <join><cyclestr>&LOG_DIR;/@Y@m@d/ncl_@Y@m@d@H@M_00.log</cyclestr></join>
 
     <envar>
       <name>MODULE_FILE</name>
@@ -594,7 +605,7 @@
     </envar>
     <envar>
       <name>START_TIME</name>
-      <value><cyclestr>@Y@m@d@H</cyclestr></value>
+      <value><cyclestr>@Y@m@d@H@M</cyclestr></value>
     </envar>
     <envar>
       <name>FCST_TIME</name>
@@ -610,7 +621,7 @@
     </envar>
     <envar>
       <name>DATAHOME</name>
-      <value><cyclestr>&DATAROOT;/@Y@m@d@H</cyclestr></value>
+      <value><cyclestr>&DATAROOT;/@Y@m@d@H@M</cyclestr></value>
     </envar>
     <envar>
       <name>MODEL</name>
@@ -618,7 +629,7 @@
     </envar>
 
     <dependency>
-      <taskdep task="post_00"/>
+      <taskdep task="post"/>
     </dependency>
 
   </task>
@@ -626,7 +637,7 @@
   <metatask>
     <var name="skewt">skewt1 skewt2 skewt3 skewt4 skewt5</var>
 
-    <task name="ncl_00_#skewt#" cycledefs="02-11hr,00hr,01hr" maxtries="3">
+    <task name="ncl_00_#skewt#" cycledefs="all" maxtries="3">
 
       &NCL_SKEWT_RESOURCES;
       &WALL_LIMIT_PP;
@@ -634,8 +645,8 @@
 
       <command>&SCRIPTS;/NCL/ncl_hrrr_#skewt#.ksh</command>
       <cores>&NCL_PROC;</cores>
-      <jobname><cyclestr>&JOBNAME_PRE;_ncl_@H_00_#skewt#</cyclestr></jobname>
-      <join><cyclestr>&LOG_DIR;/ncl_@Y@m@d@H00_00_#skewt#.log</cyclestr></join>
+      <jobname><cyclestr>&JOBNAME_PRE;_ncl_@H_@M_#skewt#</cyclestr></jobname>
+      <join><cyclestr>&LOG_DIR;/@Y@m@d/ncl_@Y@m@d@H@M_00_#skewt#.log</cyclestr></join>
 
       <envar>
         <name>MODULE_FILE</name>
@@ -643,7 +654,7 @@
       </envar>
       <envar>
         <name>START_TIME</name>
-        <value><cyclestr>@Y@m@d@H</cyclestr></value>
+        <value><cyclestr>@Y@m@d@H@M</cyclestr></value>
       </envar>
       <envar>
         <name>FCST_TIME</name>
@@ -659,7 +670,7 @@
       </envar>
       <envar>
         <name>DATAHOME</name>
-        <value><cyclestr>&DATAROOT;/@Y@m@d@H</cyclestr></value>
+        <value><cyclestr>&DATAROOT;/@Y@m@d@H@M</cyclestr></value>
       </envar>
       <envar>
         <name>MODEL</name>
@@ -667,7 +678,7 @@
       </envar>
 
       <dependency>
-        <taskdep task="post_00"/>
+        <taskdep task="post"/>
       </dependency>
 
     </task>
@@ -677,7 +688,7 @@
   <metatask>
     <var name="htxs">htxs1</var>
 
-    <task name="ncl_00_#htxs#" cycledefs="02-11hr,00hr,01hr" maxtries="3">
+    <task name="ncl_00_#htxs#" cycledefs="all" maxtries="3">
 
       &NCL_HTXS_RESOURCES;
       &WALL_LIMIT_PP;
@@ -685,8 +696,8 @@
 
       <command>&SCRIPTS;/NCL/ncl_hrrr_#htxs#.ksh</command>
       <cores>&NCL_PROC;</cores>
-      <jobname><cyclestr>&JOBNAME_PRE;_ncl_@H_00_#htxs#</cyclestr></jobname>
-      <join><cyclestr>&LOG_DIR;/ncl_@Y@m@d@H00_00_#htxs#.log</cyclestr></join>
+      <jobname><cyclestr>&JOBNAME_PRE;_ncl_@H_@M_#htxs#</cyclestr></jobname>
+      <join><cyclestr>&LOG_DIR;/@Y@m@d/ncl_@Y@m@d@H@M_00_#htxs#.log</cyclestr></join>
 
       <envar>
         <name>MODULE_FILE</name>
@@ -694,7 +705,7 @@
       </envar>
       <envar>
         <name>START_TIME</name>
-        <value><cyclestr>@Y@m@d@H</cyclestr></value>
+        <value><cyclestr>@Y@m@d@H@M</cyclestr></value>
       </envar>
       <envar>
         <name>FCST_TIME</name>
@@ -710,7 +721,7 @@
       </envar>
       <envar>
         <name>DATAHOME</name>
-        <value><cyclestr>&DATAROOT;/@Y@m@d@H</cyclestr></value>
+        <value><cyclestr>&DATAROOT;/@Y@m@d@H@M</cyclestr></value>
       </envar>
       <envar>
         <name>MODEL</name>
@@ -718,14 +729,14 @@
       </envar>
 
       <dependency>
-        <taskdep task="post_00"/>
+        <taskdep task="post"/>
       </dependency>
 
     </task>
 
   </metatask>
 
-  <task name="ncl_zip" cycledefs="02-11hr,00hr,01hr" maxtries="3">
+  <task name="ncl_zip" cycledefs="all" maxtries="3">
 
     &NCL_RESOURCES;
     &WALL_LIMIT_PP;
@@ -733,12 +744,12 @@
 
     <command>&SCRIPTS;/NCL/ncl_hrrr_zip.ksh</command>
     <cores>&NCL_PROC;</cores>
-    <jobname><cyclestr>&JOBNAME_PRE;_ncl_@H_zip</cyclestr></jobname>
-    <join><cyclestr>&LOG_DIR;/ncl_@Y@m@d@H00_zip.log</cyclestr></join>
+    <jobname><cyclestr>&JOBNAME_PRE;_ncl_@H_@M_zip</cyclestr></jobname>
+    <join><cyclestr>&LOG_DIR;/@Y@m@d/ncl_@Y@m@d@H@M_zip.log</cyclestr></join>
 
     <envar>
       <name>START_TIME</name>
-      <value><cyclestr>@Y@m@d@H</cyclestr></value>
+      <value><cyclestr>@Y@m@d@H@M</cyclestr></value>
     </envar>
     <envar>
       <name>DATAROOT</name>
@@ -746,7 +757,7 @@
     </envar>
     <envar>
       <name>DATAHOME</name>
-      <value><cyclestr>&DATAROOT;/@Y@m@d@H</cyclestr></value>
+      <value><cyclestr>&DATAROOT;/@Y@m@d@H@M</cyclestr></value>
     </envar>
 
     <dependency>
@@ -758,7 +769,7 @@
     
   </task>
 
-  <task name="ncl_skewt_zip" cycledefs="02-11hr,00hr,01hr" maxtries="3">
+  <task name="ncl_skewt_zip" cycledefs="all" maxtries="3">
 
     &NCL_RESOURCES;
     &WALL_LIMIT_PP;
@@ -766,12 +777,12 @@
 
     <command>&SCRIPTS;/NCL/ncl_hrrr_skewt_zip.ksh</command>
     <cores>&NCL_PROC;</cores>
-    <jobname><cyclestr>&JOBNAME_PRE;_ncl_@H_skewt_zip</cyclestr></jobname>
-    <join><cyclestr>&LOG_DIR;/ncl_@Y@m@d@H00_skewt_zip.log</cyclestr></join>
+    <jobname><cyclestr>&JOBNAME_PRE;_ncl_@H_@M_skewt_zip</cyclestr></jobname>
+    <join><cyclestr>&LOG_DIR;/@Y@m@d/ncl_@Y@m@d@H@M_skewt_zip.log</cyclestr></join>
 
     <envar>
       <name>START_TIME</name>
-      <value><cyclestr>@Y@m@d@H</cyclestr></value>
+      <value><cyclestr>@Y@m@d@H@M</cyclestr></value>
     </envar>
     <envar>
       <name>DATAROOT</name>
@@ -779,7 +790,7 @@
     </envar>
     <envar>
       <name>DATAHOME</name>
-      <value><cyclestr>&DATAROOT;/@Y@m@d@H</cyclestr></value>
+      <value><cyclestr>&DATAROOT;/@Y@m@d@H@M</cyclestr></value>
     </envar>
 
     <dependency>
@@ -797,7 +808,7 @@
     
   </task>
 
-  <task name="ncl_htxs_zip" cycledefs="02-11hr,00hr,01hr" maxtries="3">
+  <task name="ncl_htxs_zip" cycledefs="all" maxtries="3">
 
     &NCL_RESOURCES;
     &WALL_LIMIT_PP;
@@ -805,12 +816,12 @@
 
     <command>&SCRIPTS;/NCL/ncl_hrrr_htxs_zip.ksh</command>
     <cores>&NCL_PROC;</cores>
-    <jobname><cyclestr>&JOBNAME_PRE;_ncl_@H_htxs_zip</cyclestr></jobname>
-    <join><cyclestr>&LOG_DIR;/ncl_@Y@m@d@H00_htxs_zip.log</cyclestr></join>
+    <jobname><cyclestr>&JOBNAME_PRE;_ncl_@H_@M_htxs_zip</cyclestr></jobname>
+    <join><cyclestr>&LOG_DIR;/@Y@m@d/ncl_@Y@m@d@H@M_htxs_zip.log</cyclestr></join>
 
     <envar>
       <name>START_TIME</name>
-      <value><cyclestr>@Y@m@d@H</cyclestr></value>
+      <value><cyclestr>@Y@m@d@H@M</cyclestr></value>
     </envar>
     <envar>
       <name>DATAROOT</name>
@@ -818,7 +829,7 @@
     </envar>
     <envar>
       <name>DATAHOME</name>
-      <value><cyclestr>&DATAROOT;/@Y@m@d@H</cyclestr></value>
+      <value><cyclestr>&DATAROOT;/@Y@m@d@H@M</cyclestr></value>
     </envar>
 
     <dependency>

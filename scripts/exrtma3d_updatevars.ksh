@@ -24,58 +24,58 @@ if [ "${envir}" == "esrl" ]; then
 fi
 
 # make sure executable exists
-if [ ! -f ${EXECrtma3d}/${exefile_name_wrf} ]; then
-  ${ECHO} "ERROR: WRF executable '${EXECrtma3d}/${exefile_name_wrf}' does not exist!"
+if [ ! -f ${EXECrtma3d}/${exefile_name_updatevars} ]; then
+  ${ECHO} "ERROR: executable '${EXECrtma3d}/${exefile_name_updatevars}' does not exist!"
   exit 1
 fi
 
 # Check to make sure required directory defined and existed
-check_if_defined "FCST_LENGTH" "GSIRUN_DIR"
-check_dirs_exist "GSIRUN_DIR"
+check_if_defined "FCST_LENGTH" "GSIRUN_DIR" "FIXwrf" "PDY" "cyc" "subcyc"
+check_dirs_exist "GSIRUN_DIR" "FIXwrf"
 
 # Initialize an array of WRF input dat files that need to be linked
-set -A WRF_DAT_FILES ${STATIC_DIR}/run/LANDUSE.TBL          \
-                     ${STATIC_DIR}/run/RRTM_DATA            \
-                     ${STATIC_DIR}/run/RRTM_DATA_DBL        \
-                     ${STATIC_DIR}/run/RRTMG_LW_DATA        \
-                     ${STATIC_DIR}/run/RRTMG_LW_DATA_DBL    \
-                     ${STATIC_DIR}/run/RRTMG_SW_DATA        \
-                     ${STATIC_DIR}/run/RRTMG_SW_DATA_DBL    \
-                     ${STATIC_DIR}/run/VEGPARM.TBL          \
-                     ${STATIC_DIR}/run/GENPARM.TBL          \
-                     ${STATIC_DIR}/run/SOILPARM.TBL         \
-                     ${STATIC_DIR}/run/MPTABLE.TBL          \
-                     ${STATIC_DIR}/run/URBPARM.TBL          \
-                     ${STATIC_DIR}/run/URBPARM_UZE.TBL      \
-                     ${STATIC_DIR}/run/ETAMPNEW_DATA        \
-                     ${STATIC_DIR}/run/ETAMPNEW_DATA.expanded_rain        \
-                     ${STATIC_DIR}/run/ETAMPNEW_DATA.expanded_rain_DBL    \
-                     ${STATIC_DIR}/run/ETAMPNEW_DATA_DBL    \
-                     ${STATIC_DIR}/run/co2_trans            \
-                     ${STATIC_DIR}/run/ozone.formatted      \
-                     ${STATIC_DIR}/run/ozone_lat.formatted  \
-                     ${STATIC_DIR}/run/ozone_plev.formatted \
-                     ${STATIC_DIR}/run/bulkdens.asc_s_0_03_0_9 \
-                     ${STATIC_DIR}/run/bulkradii.asc_s_0_03_0_9  \
-                     ${STATIC_DIR}/run/capacity.asc         \
-                     ${STATIC_DIR}/run/CCN_ACTIVATE.BIN     \
-                     ${STATIC_DIR}/run/coeff_p.asc          \
-                     ${STATIC_DIR}/run/coeff_q.asc          \
-                     ${STATIC_DIR}/run/constants.asc        \
-                     ${STATIC_DIR}/run/kernels.asc_s_0_03_0_9  \
-                     ${STATIC_DIR}/run/kernels_z.asc           \
-                     ${STATIC_DIR}/run/masses.asc              \
-                     ${STATIC_DIR}/run/termvels.asc            \
-                     ${STATIC_DIR}/run/wind-turbine-1.tbl      \
-                     ${STATIC_DIR}/run/tr49t85              \
-                     ${STATIC_DIR}/run/tr49t67              \
-                     ${STATIC_DIR}/run/tr67t85              \
-                     ${STATIC_DIR}/run/grib2map.tbl         \
-                     ${STATIC_DIR}/run/gribmap.txt          \
-                     ${STATIC_DIR}/run/freezeH2O.dat        \
-                     ${STATIC_DIR}/run/qr_acr_qg.dat        \
-                     ${STATIC_DIR}/run/qr_acr_qs.dat        \
-                     ${STATIC_DIR}/run/eclipse_besselian_elements.dat
+set -A WRF_DAT_FILES ${FIXwrf}/run/LANDUSE.TBL          \
+                     ${FIXwrf}/run/RRTM_DATA            \
+                     ${FIXwrf}/run/RRTM_DATA_DBL        \
+                     ${FIXwrf}/run/RRTMG_LW_DATA        \
+                     ${FIXwrf}/run/RRTMG_LW_DATA_DBL    \
+                     ${FIXwrf}/run/RRTMG_SW_DATA        \
+                     ${FIXwrf}/run/RRTMG_SW_DATA_DBL    \
+                     ${FIXwrf}/run/VEGPARM.TBL          \
+                     ${FIXwrf}/run/GENPARM.TBL          \
+                     ${FIXwrf}/run/SOILPARM.TBL         \
+                     ${FIXwrf}/run/MPTABLE.TBL          \
+                     ${FIXwrf}/run/URBPARM.TBL          \
+                     ${FIXwrf}/run/URBPARM_UZE.TBL      \
+                     ${FIXwrf}/run/ETAMPNEW_DATA        \
+                     ${FIXwrf}/run/ETAMPNEW_DATA.expanded_rain        \
+                     ${FIXwrf}/run/ETAMPNEW_DATA.expanded_rain_DBL    \
+                     ${FIXwrf}/run/ETAMPNEW_DATA_DBL    \
+                     ${FIXwrf}/run/co2_trans            \
+                     ${FIXwrf}/run/ozone.formatted      \
+                     ${FIXwrf}/run/ozone_lat.formatted  \
+                     ${FIXwrf}/run/ozone_plev.formatted \
+                     ${FIXwrf}/run/bulkdens.asc_s_0_03_0_9 \
+                     ${FIXwrf}/run/bulkradii.asc_s_0_03_0_9  \
+                     ${FIXwrf}/run/capacity.asc         \
+                     ${FIXwrf}/run/CCN_ACTIVATE.BIN     \
+                     ${FIXwrf}/run/coeff_p.asc          \
+                     ${FIXwrf}/run/coeff_q.asc          \
+                     ${FIXwrf}/run/constants.asc        \
+                     ${FIXwrf}/run/kernels.asc_s_0_03_0_9  \
+                     ${FIXwrf}/run/kernels_z.asc           \
+                     ${FIXwrf}/run/masses.asc              \
+                     ${FIXwrf}/run/termvels.asc            \
+                     ${FIXwrf}/run/wind-turbine-1.tbl      \
+                     ${FIXwrf}/run/tr49t85              \
+                     ${FIXwrf}/run/tr49t67              \
+                     ${FIXwrf}/run/tr67t85              \
+                     ${FIXwrf}/run/grib2map.tbl         \
+                     ${FIXwrf}/run/gribmap.txt          \
+                     ${FIXwrf}/run/freezeH2O.dat        \
+                     ${FIXwrf}/run/qr_acr_qg.dat        \
+                     ${FIXwrf}/run/qr_acr_qs.dat        \
+                     ${FIXwrf}/run/eclipse_besselian_elements.dat
 for file in ${WRF_DAT_FILES[@]}; do
   if [ ! -s ${file} ]; then
     ${ECHO} "ERROR: ${file} either does not exist or is empty"
@@ -152,32 +152,25 @@ hour=[Hh][Oo][Uu][Rr]
 minute=[Mm][Ii][Nn][Uu][Tt][Ee]
 second=[Ss][Ee][Cc][Oo][Nn][Dd]
 
-# Update the run_days in wrf namelist.input
-${CAT} ${WRF_NAMELIST} | ${SED} "s/\(${run}_${day}[Ss]\)${equal}[[:digit:]]\{1,\}/\1 = ${run_days}/" \
-   > ${WRF_NAMELIST}.new
-${MV} ${WRF_NAMELIST}.new ${WRF_NAMELIST}
-
-# Update the run_hours in wrf namelist
-${CAT} ${WRF_NAMELIST} | ${SED} "s/\(${run}_${hour}[Ss]\)${equal}[[:digit:]]\{1,\}/\1 = ${run_hours}/" \
-   > ${WRF_NAMELIST}.new
-${MV} ${WRF_NAMELIST}.new ${WRF_NAMELIST}
-
-# Update the start time in wrf namelist
-${SED} -i "s/\(${start}_${year}\)${equal}[[:digit:]]\{4\}/\1 = ${start_year}/" \
-   | ${SED} "s/\(${start}_${month}\)${equal}[[:digit:]]\{2\}/\1 = ${start_month}/"                   \
-   | ${SED} "s/\(${start}_${day}\)${equal}[[:digit:]]\{2\}/\1 = ${start_day}/"                       \
-   | ${SED} "s/\(${start}_${hour}\)${equal}[[:digit:]]\{2\}/\1 = ${start_hour}/"                     \
-   | ${SED} "s/\(${start}_${minute}\)${equal}[[:digit:]]\{2\}/\1 = ${start_minute}/"                 \
-   | ${SED} "s/\(${start}_${second}\)${equal}[[:digit:]]\{2\}/\1 = ${start_second}/"                 \
-    ${WRF_NAMELIST}
-# Update end time in wrf namelist
-${SED} -i "s/\(${end}_${year}\)${equal}[[:digit:]]\{4\}/\1 = ${end_year}/" \
-   | ${SED} "s/\(${end}_${month}\)${equal}[[:digit:]]\{2\}/\1 = ${end_month}/"                   \
-   | ${SED} "s/\(${end}_${day}\)${equal}[[:digit:]]\{2\}/\1 = ${end_day}/"                       \
-   | ${SED} "s/\(${end}_${hour}\)${equal}[[:digit:]]\{2\}/\1 = ${end_hour}/"                     \
-   | ${SED} "s/\(${end}_${minute}\)${equal}[[:digit:]]\{2\}/\1 = ${end_minute}/"                 \
-   | ${SED} "s/\(${end}_${second}\)${equal}[[:digit:]]\{2\}/\1 = ${end_second}/"                 \
-   ${WRF_NAMELIST}
+# Update the run_days,run_hours,start_time,end_time in wrf namelist.input
+${SED} -i "\
+   s/\(${run}_${day}[Ss]\)${equal}[[:digit:]]\{1,\}/\1 = ${run_days}/;    \
+   s/\(${run}_${hour}[Ss]\)${equal}[[:digit:]]\{1,\}/\1 = ${run_hours}/;  \
+\
+   s/\(${start}_${year}\)${equal}[[:digit:]]\{4\}/\1 = ${start_year}/;    \
+   s/\(${start}_${month}\)${equal}[[:digit:]]\{2\}/\1 = ${start_month}/;  \
+   s/\(${start}_${day}\)${equal}[[:digit:]]\{2\}/\1 = ${start_day}/;      \
+   s/\(${start}_${hour}\)${equal}[[:digit:]]\{2\}/\1 = ${start_hour}/;    \
+   s/\(${start}_${minute}\)${equal}[[:digit:]]\{2\}/\1 = ${start_minute}/;\
+   s/\(${start}_${second}\)${equal}[[:digit:]]\{2\}/\1 = ${start_second}/;\
+\
+   s/\(${end}_${year}\)${equal}[[:digit:]]\{4\}/\1 = ${end_year}/;        \
+   s/\(${end}_${month}\)${equal}[[:digit:]]\{2\}/\1 = ${end_month}/;      \
+   s/\(${end}_${day}\)${equal}[[:digit:]]\{2\}/\1 = ${end_day}/;          \
+   s/\(${end}_${hour}\)${equal}[[:digit:]]\{2\}/\1 = ${end_hour}/;        \
+   s/\(${end}_${minute}\)${equal}[[:digit:]]\{2\}/\1 = ${end_minute}/;    \
+   s/\(${end}_${second}\)${equal}[[:digit:]]\{2\}/\1 = ${end_second}/;    \
+" ${WRF_NAMELIST}
 
 # Move existing rsl files to a subdir if there are any
 ${ECHO} "Checking for pre-existing rsl files"
@@ -191,8 +184,8 @@ else
   ${ECHO} "No pre-existing rsl files were found"
 fi
 
-# Run WRF
-export pgm="rtma3d_wrf"
+# Run WRF to update reflectivity fields
+export pgm="rtma3d_updatevars"
 . prep_step
 startmsg
 msg="***********************************************************"
@@ -207,7 +200,7 @@ if [ "${envir}" == "esrl" ]; then #Jet
 else
   CP_LN=${CP}
 fi
-${CP_LN} ${EXECrtma3d}/${exefile_name_wrf} ${pgm}
+${CP_LN} ${EXECrtma3d}/${exefile_name_updatevars} ${pgm}
 now=`${DATE} +%Y%m%d%H%M%S`
 ${MPIRUN} ${pgm}
 export err=$?; err_chk
@@ -220,7 +213,7 @@ mv rsl.error.* ${rsldir}
 
 # Check to see if the 0h output is there:
 if [ ! -e "wrfout_d01_${time_str}" ]; then
-  ${ECHO} "${WRF} failed at the first time step!"
+  ${ECHO} "WRF failed at the first time step!"
   exit 1
 fi 
 

@@ -139,7 +139,7 @@ else
 fi
 
 #   Set the name to the post executable
-export exefile_name_post=${exefile_name_post:-"rtma3d_wrfpost"}
+export exefile_name_post=${exefile_name_post:-"rtma3d_post"}
 
 #   Set the path to the fix/ and parm/ files
 export FIXgsi=${FIXgsi:-"${FIXrtma3d}/gsi"}
