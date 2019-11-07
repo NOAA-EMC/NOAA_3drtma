@@ -23,11 +23,10 @@ check_dirs_exist "WORK_ROOT"
 
 currentime=`date`
 cyclehour=${CYCLE_HOUR}
-savelogtime=`date +%Y%m%d -d "${currentime}  2 days ago"`
 mainroot=${WORK_ROOT}
 
 # Delete run directories
-deletetime=`date +%Y%m%d%H -d "${currentime}  42 hours ago"`
+deletetime=`date +%Y%m%d%H%M -d "${currentime}  24 hours ago"`
 set -A workdir "${mainroot}/run"
 echo "Delete directory before ${deletetime}"
 for currentdir in ${workdir[*]}; do
@@ -44,17 +43,18 @@ for currentdir in ${workdir[*]}; do
 done
 
 # Delete wrfout files
-deletetime=`date +%Y%m%d%H -d "${currentime}  12 hours ago"`
+deletetime=`date +%Y%m%d%H%M -d "${currentime}  3 hours ago"`  #4 cycles per hour, so keeping latest 12 cycles is enough
 set -A workdir "${mainroot}/run"
-echo "Delete wrfouts before ${deletetime}"
+echo "Delete wrfouts/wrf_inout before ${deletetime}"
 cd ${workdir}
 echo "Working on directory ${workdir}"
 set -A XX `ls -d 20??????* | sort -r`
 maxnum=${#XX[*]}
 for onetime in ${XX[*]};do
   if [[ ${onetime} -le ${deletetime} ]]; then
-    echo "Delete wrfout files in ${onetime}/wrfprd"
+    echo "${onetime}: Delete wrfout_d01* in wrfprd/ and wrf_inout in gsiprd/"
     rm -f ${onetime}/wrfprd/wrfout_d01_*
+    rm -f ${onetime}/gsiprd/wrf_inout
   fi
 done
 

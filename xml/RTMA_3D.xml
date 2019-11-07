@@ -187,7 +187,7 @@
   </log>
 
   <cycledef group="all">*/15 *    *  *  2019-2022 *</cycledef>
-  <cycledef group="clean">00 */12 *  *  2019-2022 *</cycledef>
+  <cycledef group="clean">45 *    *  *  2019-2022 *</cycledef>
 
   <task name="obsprep_lghtn" cycledefs="all" maxtries="3">
 
@@ -856,6 +856,7 @@
     <jobname><cyclestr>&JOBNAME_PRE;_clean_@H@M</cyclestr></jobname>
     <join><cyclestr>&LOG_DIR;/@Y@m@d/clean_@Y@m@d@H@M.log</cyclestr></join>
 
+    &COMMONVARS;
     <envar>
       <name>WORK_ROOT</name>
       <value>&DATABASE_DIR;</value>
@@ -863,6 +864,10 @@
     <envar>
       <name>CYCLE_HOUR</name>
       <value><cyclestr>@H</cyclestr></value>
+    </envar>
+    <envar>
+      <name>rundir_task</name>
+      <value>none</value>
     </envar>
 
   </task>

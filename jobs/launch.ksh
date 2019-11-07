@@ -177,9 +177,9 @@ elif [ "${machine}" = "jet" ] ;  then
     export pgmout="output_${PDY}.${job}"
     export LOG_JJOB="${COMROOT}/log/${PDY}"
     [ ! -d ${COMROOT}/loghistory ] && ${MKDIR} -p ${COMROOT}/loghistory
-    export COMINobsproc_rtma3d="${COMROOT}/ptmp/obs/${PDY}"
-    export COMOUTgsi_rtma3d="${COMROOT}/ptmp/gsi/${PDY}"
-    export COMOUTwrf_rtma3d="${COMROOT}/ptmp/wrf/${PDY}"
+    export COMINobsproc_rtma3d="${COMROOT}/ptmp/${PDY}/obs"
+    export COMOUTgsi_rtma3d="${COMROOT}/ptmp/${PDY}/gsi"
+    export COMOUTwrf_rtma3d="${COMROOT}/ptmp/${PDY}/wrf"
 
     # the following is just to pass dir check for Jet esrl runs
     export GESINhrrr_rtma3d="/tmp" 
