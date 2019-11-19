@@ -28,7 +28,7 @@ mainroot=${WORK_ROOT}
 # Delete run directories
 deletetime=`date +%Y%m%d%H%M -d "${currentime}  24 hours ago"`
 set -A workdir "${mainroot}/run"
-echo "Delete directory before ${deletetime}"
+echo "Delete run directory before ${deletetime}"
 for currentdir in ${workdir[*]}; do
   cd ${currentdir}
   echo "Working on directory ${currentdir}"
@@ -56,6 +56,23 @@ for onetime in ${XX[*]};do
     rm -f ${onetime}/wrfprd/wrfout_d01_*
     rm -f ${onetime}/gsiprd/wrf_inout
   fi
+done
+
+# Delete ptmp directories
+deletetime=`date +%Y%m%d%H%M -d "${currentime}  10 days ago"`
+set -A workdir "${mainroot}/ptmp"
+echo "Delete ptmp directory before ${deletetime}"
+for currentdir in ${workdir[*]}; do
+  cd ${currentdir}
+  echo "Working on directory ${currentdir}"
+  set -A XX `ls -d 20??????* | sort -r`
+  maxnum=${#XX[*]}
+  for onetime in ${XX[*]};do
+    if [[ ${onetime} -le ${deletetime} ]]; then
+      echo "Delete data in ${onetime}"
+      rm -rf ${onetime}
+    fi
+  done
 done
 
 exit 0
