@@ -84,7 +84,6 @@ YYYYMMDDHH_m1hr=`echo ${PDYHH_cycm1} | cut -c 1-10`
 # Create the working directory and cd into it
 workdir=${DATA}
 cd ${workdir}
-file_size=15870850680
 time_str=`${DATE} "+%Y-%m-%d_%H_%M_%S" -d "${START_TIME}"`
 ${ECHO} " time_str = ${time_str}"
 time_run=${time_str}
@@ -105,12 +104,6 @@ FGShrrr_FNAME2="hrrr.t${HH_cycm1}00z.f01${subcyc}.netcdf"
 if  [ ${HH_cycm1} -eq 23 ]; then
 
 	if [ -r ${GESINhrrrm1}/${FGShrrr_FNAME2} ] ; then
-  		fgs_size=$(ls -l ${GESINhrrrm1}/${FGShrrr_FNAME2} | awk '{ print $5 }')
-  		echo "fgs_file size=${fgs_size}"
-  		while [[ ${fgs_size} != ${file_size} ]]; do
-       			sleep 120
-       			fgs_size=$(ls -l ${GESINhrrrm1}/${FGShrrr_FNAME2} | awk '{ print $5 }')
-  		done
   		${LN} -sf ${GESINhrrrm1}/${FGShrrr_FNAME2}   ${GESINhrrr_rtma3d}/${FGSrtma3d_FNAME}
   		${LN} -sf ${GESINhrrr_rtma3d}/${FGSrtma3d_FNAME}     ${DATA}/${FGSrtma3d_FNAME}
   		${ECHO} " Cycle ${YYYYMMDDHH}: PREPFGS background --> ${DATA}/${FGShrrr_FNAME2} "
@@ -123,12 +116,6 @@ if  [ ${HH_cycm1} -eq 23 ]; then
 else
 
         if [ -r ${GESINhrrr}/${FGShrrr_FNAME2} ] ; then
-                fgs_size=$(ls -l ${GESINhrrr}/${FGShrrr_FNAME2} | awk '{ print $5 }')
-                echo "fgs_file size=${fgs_size}"
-                while [[ ${fgs_size} != ${file_size} ]]; do
-                        sleep 120
-                        fgs_size=$(ls -l ${GESINhrrr}/${FGShrrr_FNAME2} | awk '{ print $5 }')
-                done
                 ${LN} -sf ${GESINhrrr}/${FGShrrr_FNAME2}   ${GESINhrrr_rtma3d}/${FGSrtma3d_FNAME}
                 ${LN} -sf ${GESINhrrr_rtma3d}/${FGSrtma3d_FNAME}     ${DATA}/${FGSrtma3d_FNAME}
                 ${ECHO} " Cycle ${YYYYMMDDHH}: PREPFGS background --> ${DATA}/${FGShrrr_FNAME2} "

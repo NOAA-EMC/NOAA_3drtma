@@ -73,6 +73,7 @@ export SCHD_ATTRB="lsf"
 export envir="${SCHD_ATTRB}"                      #environment (test, prod, dev, etc.)
 export expname="${envir}"                   # experiment name
 export realtime="T"
+export HRRRDAS_BEC=0                        #Use HRRRDAS 1-hr forecast during hybrid analysis (0=no,1=yes)
 #====================================================================#
 # Note: Definition for the following variables 
 #       depends on the machine platform, 
@@ -85,14 +86,16 @@ export realtime="T"
   QUEUE_SVC="dev_transfer"                  #user-specified transfer queue
 
 # Path to top running and archiving directory
-  ptmp_base="/gpfs/dell2/stmp/${USER}/${NET}_wrkdir_realtime"
+  ptmp_base="/gpfs/dell2/stmp/${USER}/${NET}_wrkdir_realtime_test"
 
   DATABASE_DIR=${ptmp_base}            # (equivalent to ptmp_base)
   HOMEBASE_DIR=${NWROOT}               # path to system home directory
   COMINRAP="/gpfs/tp2/ptmp/Jeff.Whiting/CHKOUT_TMP/com3d/rtma/prod"
   COMINHRRR="/gpfs/hps/nco/ops/com/hrrr/prod"
-  COMINRADAR="/gpfs/tp1/nco/ops/com/hourly/prod"
+  COMINRADAR="/gpfs/tp1/nco/ops/dcom/us007003/ldmdata/obs/upperair/mrms/conus"
   GESINHRRR="/gpfs/dell1/ptmp/Annette.Gibbs/com/hrrr/prod"
+  COMINGDAS="/gpfs/dell1/nco/ops/com/gfs/prod"
+  COMINHRRRDAS="/gpfs/dell2/stmp/Annette.Gibbs/com/hrrr/prod"
 # Computational resources
   ACCOUNT="RTMA-T2O"                    #account for CPU resources
   RESERVATION="<native>-R rusage[mem=2000] -R affinity[core]</native><queue>&QUEUE;</queue><account>&ACCOUNT;</account>"
@@ -108,11 +111,11 @@ export realtime="T"
 
 # General definition of computation resources for each task
 #  OBSPREP_RADAR_PROC="112"
-  OBSPREP_RADAR_PROC=14
+  OBSPREP_RADAR_PROC=17
   RADAR_THREADS=1
   RADAR_OMP_STACKSIZE="512M"
 #  OBSPREP_RADAR_RESOURCES="<cores>&OBSPREP_RADAR_PROC;</cores><walltime>00:30:00</walltime>"
-  OBSPREP_RADAR_RESOURCES="<nodes>16:ppn=&OBSPREP_RADAR_PROC;</nodes><walltime>00:30:00</walltime>"
+  OBSPREP_RADAR_RESOURCES="<nodes>2:ppn=&OBSPREP_RADAR_PROC;</nodes><walltime>00:30:00</walltime>"
   OBSPREP_RADAR_RESERVATION=${RESERVATION_RADAR}
 
   OBSPREP_LGHTN_PROC="1"
@@ -166,6 +169,8 @@ export realtime="T"
 #     echo " Abort! "
 #     exit 1
 # fi
+
+
 
 export CAP_NET=`echo ${NET} | tr '[:lower:]' '[:upper:]'`
 export CAP_RUN=`echo ${RUN} | tr '[:lower:]' '[:upper:]'`
@@ -410,6 +415,7 @@ cat > ${NWROOT}/xml/${RUN}_${expname}_subhr.xml <<EOF
 <!ENTITY CAP_ENVIR	"${CAP_ENVIR}">
 <!ENTITY CAP_RUN_ENVIR	"${CAP_RUN_ENVIR}">
 <!ENTITY model		"&RUN;">
+<!ENTITY HRRRDAS_BEC     "${HRRRDAS_BEC}">
 
 <!ENTITY MACHINE	"${MACHINE}">
 <!ENTITY machine	"&MACHINE;">
@@ -423,6 +429,8 @@ cat > ${NWROOT}/xml/${RUN}_${expname}_subhr.xml <<EOF
 <!ENTITY COMINHRRR      "${COMINHRRR}">
 <!ENTITY COMINRADAR      "${COMINRADAR}">
 <!ENTITY GESINHRRR      "${GESINHRRR}">
+<!ENTITY COMINHRRRDAS   "${COMINHRRRDAS}">
+<!ENTITY COMINGDAS      "${COMINGDAS}">
 <!ENTITY NWROOT		"${NWROOT}">
 
 <!ENTITY OBS_DIR	"/scratch4/NCEPDEV/fv3-cam/save/Gang.Zhao/Data/GSD_GSI_Case/obs">
@@ -583,6 +591,7 @@ cat > ${NWROOT}/xml/${RUN}_${expname}_subhr.xml <<EOF
 
 <!ENTITY GSI_START_TIME "00:40:00">
 <!ENTITY GSI_DEADLINE   "01:30:00">
+<!ENTITY START_TIME_RADAR "00:10:00">
 <!ENTITY GSI_WALL_LIMIT 
    '<deadline><cyclestr offset="&GSI_DEADLINE;">@Y@m@d@H@M</cyclestr></deadline>'>
 
@@ -672,6 +681,14 @@ cat > ${NWROOT}/xml/${RUN}_${expname}_subhr.xml <<EOF
    <envar>
         <name>COMINRADAR</name>
         <value>&COMINRADAR;</value>
+   </envar>
+   <envar>
+        <name>COMINGDAS</name>
+        <value>&COMINGDAS;</value>
+   </envar>
+   <envar>
+        <name>COMINHRRRDAS</name>
+        <value>&COMINHRRRDAS;</value>
    </envar>
    <envar>
         <name>GESINHRRR</name>
@@ -932,6 +949,14 @@ cat > ${NWROOT}/xml/${RUN}_${expname}_subhr.xml <<EOF
       <value>1</value>
     </envar>
     <envar>
+      <name>HRRRDAS_BEC</name>
+      <value>&HRRRDAS_BEC;</value>
+    </envar>
+    <envar>
+      <name>GSIANL_RES</name>
+      <value>3km</value>
+    </envar>
+    <envar>
       <name>DATABASE_DIR</name>
       <value>&DATABASE_DIR;</value>
     </envar>
@@ -1148,6 +1173,13 @@ cat >> ${NWROOT}/xml/${RUN}_${expname}_subhr.xml <<EOF
   <cycledef group="01hr">*/15 01,13 ${ExpDateWindows}</cycledef>
 
   <cycledef group="02-11hr">*/15 02-11,14-23 ${ExpDateWindows}</cycledef>
+  
+  <cycledef group="radar-proc1">11,26,41,56 00,12 ${ExpDateWindows}</cycledef>
+
+  <cycledef group="radar-proc2">11,26,41,56 01,13 ${ExpDateWindows}</cycledef>
+
+  <cycledef group="radar-proc3">11,26,41,56 02-11,14-23 ${ExpDateWindows}</cycledef>
+
 
 EOF
 
@@ -1172,7 +1204,7 @@ cat >> ${NWROOT}/xml/${RUN}_${expname}_subhr.xml <<EOF
     &ENVARS_PREPJOB;
 
    <dependency>
-       <datadep><cyclestr>&COMINRAP;/rtma_ru.@Y@m@d/rtma_ru.t@H@Mz.lghtng.tm00.bufr_d</cyclestr></datadep>
+       <datadep age="120"><cyclestr>&COMINRAP;/rtma_ru.@Y@m@d/rtma_ru.t@H@Mz.lghtng.tm00.bufr_d</cyclestr></datadep>
    </dependency>
   </task>
 EOF
@@ -1199,7 +1231,7 @@ cat >> ${NWROOT}/xml/${RUN}_${expname}_subhr.xml <<EOF
     &ENVARS_PREPJOB; 
 
    <dependency>
-       <datadep><cyclestr>&COMINRAP;/rtma_ru.@Y@m@d/rtma_ru.t@H@Mz.lgycld.tm00.bufr_d</cyclestr></datadep>
+       <datadep age="120"><cyclestr>&COMINRAP;/rtma_ru.@Y@m@d/rtma_ru.t@H@Mz.lgycld.tm00.bufr_d</cyclestr></datadep>
    </dependency>
   </task>
 EOF
@@ -1233,17 +1265,14 @@ cat >> ${NWROOT}/xml/${RUN}_${expname}_subhr.xml <<EOF
     &ENVARS_PREPJOB;
 
 
-   <dependency>
-       <and>
-       <datadep><cyclestr>&COMINRADAR;/radar.@Y@m@d@H/tile1/@Y@m@d_@H@M.mosaic</cyclestr></datadep>
-       <datadep><cyclestr>&COMINRADAR;/radar.@Y@m@d@H/tile2/@Y@m@d_@H@M.mosaic</cyclestr></datadep>
-       <datadep><cyclestr>&COMINRADAR;/radar.@Y@m@d@H/tile3/@Y@m@d_@H@M.mosaic</cyclestr></datadep>
-       <datadep><cyclestr>&COMINRADAR;/radar.@Y@m@d@H/tile4/@Y@m@d_@H@M.mosaic</cyclestr></datadep>
-       <datadep><cyclestr>&COMINRADAR;/radar.@Y@m@d@H/tile5/@Y@m@d_@H@M.mosaic</cyclestr></datadep>
-       <datadep><cyclestr>&COMINRADAR;/radar.@Y@m@d@H/tile6/@Y@m@d_@H@M.mosaic</cyclestr></datadep>
-       <datadep><cyclestr>&COMINRADAR;/radar.@Y@m@d@H/tile7/@Y@m@d_@H@M.mosaic</cyclestr></datadep>
-       <datadep><cyclestr>&COMINRADAR;/radar.@Y@m@d@H/tile8/@Y@m@d_@H@M.mosaic</cyclestr></datadep>
-       </and>
+    <dependency>
+      <or>
+        <timedep><cyclestr offset="&START_TIME_RADAR;">@Y@m@d@H@M00</cyclestr></timedep>
+        <rb><cyclestr offset="-0:01:00">!Dir.glob('&COMINRADAR;/MergedReflectivityQC/MergedReflectivityQC_00.50_@Y@m@d-@H@M*.grib2.gz').empty?</cyclestr></rb>
+        <rb><cyclestr>!Dir.glob('&COMINRADAR;/MergedReflectivityQC/MergedReflectivityQC_00.50_@Y@m@d-@H@M*.grib2.gz').empty?</cyclestr></rb>
+        <rb><cyclestr offset="0:01:00">!Dir.glob('&COMINRADAR;/MergedReflectivityQC/MergedReflectivityQC_00.50_@Y@m@d-@H@M*.grib2.gz').empty?</cyclestr></rb>
+        <rb><cyclestr offset="0:02:00">!Dir.glob('&COMINRADAR;/MergedReflectivityQC/MergedReflectivityQC_00.50_@Y@m@d-@H@M*.grib2.gz').empty?</cyclestr></rb>
+      </or>
    </dependency>
   </task>
 EOF
@@ -1271,9 +1300,9 @@ cat >> ${NWROOT}/xml/${RUN}_${expname}_subhr.xml <<EOF
 
    <dependency>
        <and>
-       <datadep><cyclestr>&COMINRAP;/rtma_ru.@Y@m@d/rtma_ru.t@H@Mz.lghtng.tm00.bufr_d</cyclestr></datadep>
-       <datadep><cyclestr>&COMINRAP;/rtma_ru.@Y@m@d/rtma_ru.t@H@Mz.lgycld.tm00.bufr_d</cyclestr></datadep> 
-       <datadep><cyclestr>&COMINRAP;/rtma_ru.@Y@m@d/rtma_ru.t@H@Mz.prepbufr.tm00</cyclestr></datadep>       
+       <datadep age="120"><cyclestr>&COMINRAP;/rtma_ru.@Y@m@d/rtma_ru.t@H@Mz.lghtng.tm00.bufr_d</cyclestr></datadep>
+       <datadep age="120"><cyclestr>&COMINRAP;/rtma_ru.@Y@m@d/rtma_ru.t@H@Mz.lgycld.tm00.bufr_d</cyclestr></datadep> 
+       <datadep age="120"><cyclestr>&COMINRAP;/rtma_ru.@Y@m@d/rtma_ru.t@H@Mz.prepbufr.tm00</cyclestr></datadep>       
        <taskdep task="&NET;_obsprep_radar_task_@Y@m@d@H@M"/>
        </and>   
    </dependency>
@@ -1297,10 +1326,13 @@ cat >> ${NWROOT}/xml/${RUN}_${expname}_subhr.xml <<EOF
 
     &ENVARS_PREPJOB;
    <dependency>
-       <datadep><cyclestr>&GESINHRRR;/hrrr.@Y@m@d/conus/hrrr.t@H00z.f01@M.netcdf</cyclestr></datadep>
+       <datadep age="120" minsize="15000M"><cyclestr>&GESINHRRR;/hrrr.@Y@m@d/conus/hrrr.t@H00z.f01@M.netcdf</cyclestr></datadep>
    </dependency>
    </task>
- 
+EOF
+
+if [ ${HRRRDAS_BEC} -gt 0 ] ; then
+cat >> ${NWROOT}/xml/${RUN}_${expname}_subhr.xml <<EOF 
   <task name="&NET;_gsianl_task_@Y@m@d@H@M" cycledefs="02-11hr,00hr,01hr" maxtries="&maxtries;">
 
     &ENVARS;
@@ -1311,6 +1343,71 @@ cat >> ${NWROOT}/xml/${RUN}_${expname}_subhr.xml <<EOF
        <name>rundir_task</name>
        <value><cyclestr>&DATA_GSIANL;</cyclestr></value>
     </envar>
+
+
+    <command>&JJOB_DIR;/launch.ksh &JJOB_GSIANL;</command>
+    <jobname><cyclestr>&NET;_gsianl_job_@Y@m@d@H@M</cyclestr></jobname>
+    <join><cyclestr>&LOG_SCHDLR;/&NET;_&envir;_gsianl_@Y@m@d@H@M.log</cyclestr></join>
+
+    &ENVARS_GSI;
+
+    <dependency>
+      <and>
+          <taskdep task="&NET;_prepobs_task_@Y@m@d@H@M"/>
+          <taskdep task="&NET;_prepfgs_task_@Y@m@d@H@M"/>
+          <datadep age="120" minsize="12600M"><cyclestr>&COMINHRRRDAS;/hrrr.@Y@m@d/conus/hrrr.t@H00z.f0100.mem0001.netcdf</cyclestr></datadep> 
+          <datadep age="120" minsize="12600M"><cyclestr>&COMINHRRRDAS;/hrrr.@Y@m@d/conus/hrrr.t@H00z.f0100.mem0002.netcdf</cyclestr></datadep> 
+          <datadep age="120" minsize="12600M"><cyclestr>&COMINHRRRDAS;/hrrr.@Y@m@d/conus/hrrr.t@H00z.f0100.mem0003.netcdf</cyclestr></datadep> 
+          <datadep age="120" minsize="12600M"><cyclestr>&COMINHRRRDAS;/hrrr.@Y@m@d/conus/hrrr.t@H00z.f0100.mem0004.netcdf</cyclestr></datadep> 
+          <datadep age="120" minsize="12600M"><cyclestr>&COMINHRRRDAS;/hrrr.@Y@m@d/conus/hrrr.t@H00z.f0100.mem0005.netcdf</cyclestr></datadep> 
+          <datadep age="120" minsize="12600M"><cyclestr>&COMINHRRRDAS;/hrrr.@Y@m@d/conus/hrrr.t@H00z.f0100.mem0006.netcdf</cyclestr></datadep> 
+          <datadep age="120" minsize="12600M"><cyclestr>&COMINHRRRDAS;/hrrr.@Y@m@d/conus/hrrr.t@H00z.f0100.mem0007.netcdf</cyclestr></datadep> 
+          <datadep age="120" minsize="12600M"><cyclestr>&COMINHRRRDAS;/hrrr.@Y@m@d/conus/hrrr.t@H00z.f0100.mem0008.netcdf</cyclestr></datadep> 
+          <datadep age="120" minsize="12600M"><cyclestr>&COMINHRRRDAS;/hrrr.@Y@m@d/conus/hrrr.t@H00z.f0100.mem0009.netcdf</cyclestr></datadep> 
+          <datadep age="120" minsize="12600M"><cyclestr>&COMINHRRRDAS;/hrrr.@Y@m@d/conus/hrrr.t@H00z.f0100.mem0010.netcdf</cyclestr></datadep> 
+          <datadep age="120" minsize="12600M"><cyclestr>&COMINHRRRDAS;/hrrr.@Y@m@d/conus/hrrr.t@H00z.f0100.mem0011.netcdf</cyclestr></datadep> 
+          <datadep age="120" minsize="12600M"><cyclestr>&COMINHRRRDAS;/hrrr.@Y@m@d/conus/hrrr.t@H00z.f0100.mem0012.netcdf</cyclestr></datadep> 
+          <datadep age="120" minsize="12600M"><cyclestr>&COMINHRRRDAS;/hrrr.@Y@m@d/conus/hrrr.t@H00z.f0100.mem0013.netcdf</cyclestr></datadep> 
+          <datadep age="120" minsize="12600M"><cyclestr>&COMINHRRRDAS;/hrrr.@Y@m@d/conus/hrrr.t@H00z.f0100.mem0014.netcdf</cyclestr></datadep> 
+          <datadep age="120" minsize="12600M"><cyclestr>&COMINHRRRDAS;/hrrr.@Y@m@d/conus/hrrr.t@H00z.f0100.mem0015.netcdf</cyclestr></datadep> 
+          <datadep age="120" minsize="12600M"><cyclestr>&COMINHRRRDAS;/hrrr.@Y@m@d/conus/hrrr.t@H00z.f0100.mem0016.netcdf</cyclestr></datadep> 
+          <datadep age="120" minsize="12600M"><cyclestr>&COMINHRRRDAS;/hrrr.@Y@m@d/conus/hrrr.t@H00z.f0100.mem0017.netcdf</cyclestr></datadep> 
+          <datadep age="120" minsize="12600M"><cyclestr>&COMINHRRRDAS;/hrrr.@Y@m@d/conus/hrrr.t@H00z.f0100.mem0018.netcdf</cyclestr></datadep> 
+          <datadep age="120" minsize="12600M"><cyclestr>&COMINHRRRDAS;/hrrr.@Y@m@d/conus/hrrr.t@H00z.f0100.mem0019.netcdf</cyclestr></datadep> 
+          <datadep age="120" minsize="12600M"><cyclestr>&COMINHRRRDAS;/hrrr.@Y@m@d/conus/hrrr.t@H00z.f0100.mem0020.netcdf</cyclestr></datadep> 
+          <datadep age="120" minsize="12600M"><cyclestr>&COMINHRRRDAS;/hrrr.@Y@m@d/conus/hrrr.t@H00z.f0100.mem0021.netcdf</cyclestr></datadep> 
+          <datadep age="120" minsize="12600M"><cyclestr>&COMINHRRRDAS;/hrrr.@Y@m@d/conus/hrrr.t@H00z.f0100.mem0022.netcdf</cyclestr></datadep> 
+          <datadep age="120" minsize="12600M"><cyclestr>&COMINHRRRDAS;/hrrr.@Y@m@d/conus/hrrr.t@H00z.f0100.mem0023.netcdf</cyclestr></datadep> 
+          <datadep age="120" minsize="12600M"><cyclestr>&COMINHRRRDAS;/hrrr.@Y@m@d/conus/hrrr.t@H00z.f0100.mem0024.netcdf</cyclestr></datadep> 
+          <datadep age="120" minsize="12600M"><cyclestr>&COMINHRRRDAS;/hrrr.@Y@m@d/conus/hrrr.t@H00z.f0100.mem0025.netcdf</cyclestr></datadep> 
+          <datadep age="120" minsize="12600M"><cyclestr>&COMINHRRRDAS;/hrrr.@Y@m@d/conus/hrrr.t@H00z.f0100.mem0026.netcdf</cyclestr></datadep> 
+          <datadep age="120" minsize="12600M"><cyclestr>&COMINHRRRDAS;/hrrr.@Y@m@d/conus/hrrr.t@H00z.f0100.mem0027.netcdf</cyclestr></datadep> 
+          <datadep age="120" minsize="12600M"><cyclestr>&COMINHRRRDAS;/hrrr.@Y@m@d/conus/hrrr.t@H00z.f0100.mem0028.netcdf</cyclestr></datadep> 
+          <datadep age="120" minsize="12600M"><cyclestr>&COMINHRRRDAS;/hrrr.@Y@m@d/conus/hrrr.t@H00z.f0100.mem0029.netcdf</cyclestr></datadep> 
+          <datadep age="120" minsize="12600M"><cyclestr>&COMINHRRRDAS;/hrrr.@Y@m@d/conus/hrrr.t@H00z.f0100.mem0030.netcdf</cyclestr></datadep> 
+          <datadep age="120" minsize="12600M"><cyclestr>&COMINHRRRDAS;/hrrr.@Y@m@d/conus/hrrr.t@H00z.f0100.mem0031.netcdf</cyclestr></datadep> 
+          <datadep age="120" minsize="12600M"><cyclestr>&COMINHRRRDAS;/hrrr.@Y@m@d/conus/hrrr.t@H00z.f0100.mem0032.netcdf</cyclestr></datadep> 
+          <datadep age="120" minsize="12600M"><cyclestr>&COMINHRRRDAS;/hrrr.@Y@m@d/conus/hrrr.t@H00z.f0100.mem0033.netcdf</cyclestr></datadep> 
+          <datadep age="120" minsize="12600M"><cyclestr>&COMINHRRRDAS;/hrrr.@Y@m@d/conus/hrrr.t@H00z.f0100.mem0034.netcdf</cyclestr></datadep> 
+          <datadep age="120" minsize="12600M"><cyclestr>&COMINHRRRDAS;/hrrr.@Y@m@d/conus/hrrr.t@H00z.f0100.mem0035.netcdf</cyclestr></datadep> 
+          <datadep age="120" minsize="12600M"><cyclestr>&COMINHRRRDAS;/hrrr.@Y@m@d/conus/hrrr.t@H00z.f0100.mem0036.netcdf</cyclestr></datadep> 
+      </and>
+    </dependency>
+  </task>
+EOF
+else 
+cat >> ${NWROOT}/xml/${RUN}_${expname}_subhr.xml <<EOF 
+  <task name="&NET;_gsianl_task_@Y@m@d@H@M" cycledefs="02-11hr,00hr,01hr" maxtries="&maxtries;">
+
+    &ENVARS;
+    &GSI_RESOURCES;
+    &GSI_RESERVATION;
+    &OPTIMIZATIONS_GSI;
+    <envar>
+       <name>rundir_task</name>
+       <value><cyclestr>&DATA_GSIANL;</cyclestr></value>
+    </envar>
+
 
     <command>&JJOB_DIR;/launch.ksh &JJOB_GSIANL;</command>
     <jobname><cyclestr>&NET;_gsianl_job_@Y@m@d@H@M</cyclestr></jobname>
@@ -1324,8 +1421,12 @@ cat >> ${NWROOT}/xml/${RUN}_${expname}_subhr.xml <<EOF
           <taskdep task="&NET;_prepfgs_task_@Y@m@d@H@M"/>
       </and>
     </dependency>
-
   </task>
+EOF
+
+fi
+
+cat >> ${NWROOT}/xml/${RUN}_${expname}_subhr.xml <<EOF 
 
   <task name="&NET;_post_task_@Y@m@d@H@M" cycledefs="02-11hr,00hr,01hr" maxtries="&maxtries;">
 

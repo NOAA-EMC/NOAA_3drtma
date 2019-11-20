@@ -107,7 +107,7 @@ fi
 
 ### 3DRTMA GSIANL Products (netcdf)
 export COMOUTgsi_rtma3d=${COMOUTgsi_rtma3d:-"${COMOUT}/gsiprd.${cycle}"}
-
+export COMINhrrrdas=${COMINhrrrdas:-"${COMINHRRRDAS}/hrrr.${PDY}/conus"}
 if [ ! -d "${COMIN}" ] ; then
    mkdir -p $COMIN
 fi

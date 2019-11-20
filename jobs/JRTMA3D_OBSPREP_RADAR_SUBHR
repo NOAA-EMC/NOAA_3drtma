@@ -95,7 +95,7 @@ export COMINrap=${COMINrap:-"${COMIN}/rap.${PDY}"}
 export COMINhrrr=${COMINhrrr:-"${COMIN}/hrrr.${PDY}/conus"}
 export COMINlightning=${COMINlightning:-"${COMIN}/lightning.${PDY}"}
 export COMINmosaic=${COMINmosaic:-"${COMIN}/radar.${PDY}"}
-export COMINradar=${COMINradar:-"${COMINRADAR}/radar.${PDY}${cyc}"}
+export COMINradar=${COMINradar:-"${COMINRADAR}"}
 
 ### Observations Products/Input for the RTMA3D (prepbufr files) 
 export COMINobsproc_rtma3d=${COMINobsproc_rtma3d:-"${COMIN}/obsprd.${cycle}"}
