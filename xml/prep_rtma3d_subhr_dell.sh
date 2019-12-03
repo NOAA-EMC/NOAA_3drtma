@@ -86,7 +86,7 @@ export HRRRDAS_BEC=0                        #Use HRRRDAS 1-hr forecast during hy
   QUEUE_SVC="dev_transfer"                  #user-specified transfer queue
 
 # Path to top running and archiving directory
-  ptmp_base="/gpfs/dell2/stmp/${USER}/${NET}_wrkdir_realtime_test"
+  ptmp_base="/gpfs/dell2/stmp/${USER}/${NET}_wrkdir_realtime"
 
   DATABASE_DIR=${ptmp_base}            # (equivalent to ptmp_base)
   HOMEBASE_DIR=${NWROOT}               # path to system home directory
@@ -1174,13 +1174,6 @@ cat >> ${NWROOT}/xml/${RUN}_${expname}_subhr.xml <<EOF
 
   <cycledef group="02-11hr">*/15 02-11,14-23 ${ExpDateWindows}</cycledef>
   
-  <cycledef group="radar-proc1">11,26,41,56 00,12 ${ExpDateWindows}</cycledef>
-
-  <cycledef group="radar-proc2">11,26,41,56 01,13 ${ExpDateWindows}</cycledef>
-
-  <cycledef group="radar-proc3">11,26,41,56 02-11,14-23 ${ExpDateWindows}</cycledef>
-
-
 EOF
 
 if [ ${obsprep_lghtn} -eq 1 ] ; then
@@ -1204,7 +1197,7 @@ cat >> ${NWROOT}/xml/${RUN}_${expname}_subhr.xml <<EOF
     &ENVARS_PREPJOB;
 
    <dependency>
-       <datadep age="120"><cyclestr>&COMINRAP;/rtma_ru.@Y@m@d/rtma_ru.t@H@Mz.lghtng.tm00.bufr_d</cyclestr></datadep>
+       <datadep age="15"><cyclestr>&COMINRAP;/rtma_ru.@Y@m@d/rtma_ru.t@H@Mz.lghtng.tm00.bufr_d</cyclestr></datadep>
    </dependency>
   </task>
 EOF
@@ -1231,7 +1224,7 @@ cat >> ${NWROOT}/xml/${RUN}_${expname}_subhr.xml <<EOF
     &ENVARS_PREPJOB; 
 
    <dependency>
-       <datadep age="120"><cyclestr>&COMINRAP;/rtma_ru.@Y@m@d/rtma_ru.t@H@Mz.lgycld.tm00.bufr_d</cyclestr></datadep>
+       <datadep age="15"><cyclestr>&COMINRAP;/rtma_ru.@Y@m@d/rtma_ru.t@H@Mz.lgycld.tm00.bufr_d</cyclestr></datadep>
    </dependency>
   </task>
 EOF
@@ -1300,9 +1293,9 @@ cat >> ${NWROOT}/xml/${RUN}_${expname}_subhr.xml <<EOF
 
    <dependency>
        <and>
-       <datadep age="120"><cyclestr>&COMINRAP;/rtma_ru.@Y@m@d/rtma_ru.t@H@Mz.lghtng.tm00.bufr_d</cyclestr></datadep>
-       <datadep age="120"><cyclestr>&COMINRAP;/rtma_ru.@Y@m@d/rtma_ru.t@H@Mz.lgycld.tm00.bufr_d</cyclestr></datadep> 
-       <datadep age="120"><cyclestr>&COMINRAP;/rtma_ru.@Y@m@d/rtma_ru.t@H@Mz.prepbufr.tm00</cyclestr></datadep>       
+       <datadep age="15"><cyclestr>&COMINRAP;/rtma_ru.@Y@m@d/rtma_ru.t@H@Mz.lghtng.tm00.bufr_d</cyclestr></datadep>
+       <datadep age="15"><cyclestr>&COMINRAP;/rtma_ru.@Y@m@d/rtma_ru.t@H@Mz.lgycld.tm00.bufr_d</cyclestr></datadep> 
+       <datadep age="15"><cyclestr>&COMINRAP;/rtma_ru.@Y@m@d/rtma_ru.t@H@Mz.prepbufr.tm00</cyclestr></datadep>       
        <taskdep task="&NET;_obsprep_radar_task_@Y@m@d@H@M"/>
        </and>   
    </dependency>
@@ -1326,7 +1319,7 @@ cat >> ${NWROOT}/xml/${RUN}_${expname}_subhr.xml <<EOF
 
     &ENVARS_PREPJOB;
    <dependency>
-       <datadep age="120" minsize="15000M"><cyclestr>&GESINHRRR;/hrrr.@Y@m@d/conus/hrrr.t@H00z.f01@M.netcdf</cyclestr></datadep>
+       <datadep age="15" minsize="15000M"><cyclestr>&GESINHRRR;/hrrr.@Y@m@d/conus/hrrr.t@H00z.f01@M.netcdf</cyclestr></datadep>
    </dependency>
    </task>
 EOF
@@ -1355,42 +1348,42 @@ cat >> ${NWROOT}/xml/${RUN}_${expname}_subhr.xml <<EOF
       <and>
           <taskdep task="&NET;_prepobs_task_@Y@m@d@H@M"/>
           <taskdep task="&NET;_prepfgs_task_@Y@m@d@H@M"/>
-          <datadep age="120" minsize="12600M"><cyclestr>&COMINHRRRDAS;/hrrr.@Y@m@d/conus/hrrr.t@H00z.f0100.mem0001.netcdf</cyclestr></datadep> 
-          <datadep age="120" minsize="12600M"><cyclestr>&COMINHRRRDAS;/hrrr.@Y@m@d/conus/hrrr.t@H00z.f0100.mem0002.netcdf</cyclestr></datadep> 
-          <datadep age="120" minsize="12600M"><cyclestr>&COMINHRRRDAS;/hrrr.@Y@m@d/conus/hrrr.t@H00z.f0100.mem0003.netcdf</cyclestr></datadep> 
-          <datadep age="120" minsize="12600M"><cyclestr>&COMINHRRRDAS;/hrrr.@Y@m@d/conus/hrrr.t@H00z.f0100.mem0004.netcdf</cyclestr></datadep> 
-          <datadep age="120" minsize="12600M"><cyclestr>&COMINHRRRDAS;/hrrr.@Y@m@d/conus/hrrr.t@H00z.f0100.mem0005.netcdf</cyclestr></datadep> 
-          <datadep age="120" minsize="12600M"><cyclestr>&COMINHRRRDAS;/hrrr.@Y@m@d/conus/hrrr.t@H00z.f0100.mem0006.netcdf</cyclestr></datadep> 
-          <datadep age="120" minsize="12600M"><cyclestr>&COMINHRRRDAS;/hrrr.@Y@m@d/conus/hrrr.t@H00z.f0100.mem0007.netcdf</cyclestr></datadep> 
-          <datadep age="120" minsize="12600M"><cyclestr>&COMINHRRRDAS;/hrrr.@Y@m@d/conus/hrrr.t@H00z.f0100.mem0008.netcdf</cyclestr></datadep> 
-          <datadep age="120" minsize="12600M"><cyclestr>&COMINHRRRDAS;/hrrr.@Y@m@d/conus/hrrr.t@H00z.f0100.mem0009.netcdf</cyclestr></datadep> 
-          <datadep age="120" minsize="12600M"><cyclestr>&COMINHRRRDAS;/hrrr.@Y@m@d/conus/hrrr.t@H00z.f0100.mem0010.netcdf</cyclestr></datadep> 
-          <datadep age="120" minsize="12600M"><cyclestr>&COMINHRRRDAS;/hrrr.@Y@m@d/conus/hrrr.t@H00z.f0100.mem0011.netcdf</cyclestr></datadep> 
-          <datadep age="120" minsize="12600M"><cyclestr>&COMINHRRRDAS;/hrrr.@Y@m@d/conus/hrrr.t@H00z.f0100.mem0012.netcdf</cyclestr></datadep> 
-          <datadep age="120" minsize="12600M"><cyclestr>&COMINHRRRDAS;/hrrr.@Y@m@d/conus/hrrr.t@H00z.f0100.mem0013.netcdf</cyclestr></datadep> 
-          <datadep age="120" minsize="12600M"><cyclestr>&COMINHRRRDAS;/hrrr.@Y@m@d/conus/hrrr.t@H00z.f0100.mem0014.netcdf</cyclestr></datadep> 
-          <datadep age="120" minsize="12600M"><cyclestr>&COMINHRRRDAS;/hrrr.@Y@m@d/conus/hrrr.t@H00z.f0100.mem0015.netcdf</cyclestr></datadep> 
-          <datadep age="120" minsize="12600M"><cyclestr>&COMINHRRRDAS;/hrrr.@Y@m@d/conus/hrrr.t@H00z.f0100.mem0016.netcdf</cyclestr></datadep> 
-          <datadep age="120" minsize="12600M"><cyclestr>&COMINHRRRDAS;/hrrr.@Y@m@d/conus/hrrr.t@H00z.f0100.mem0017.netcdf</cyclestr></datadep> 
-          <datadep age="120" minsize="12600M"><cyclestr>&COMINHRRRDAS;/hrrr.@Y@m@d/conus/hrrr.t@H00z.f0100.mem0018.netcdf</cyclestr></datadep> 
-          <datadep age="120" minsize="12600M"><cyclestr>&COMINHRRRDAS;/hrrr.@Y@m@d/conus/hrrr.t@H00z.f0100.mem0019.netcdf</cyclestr></datadep> 
-          <datadep age="120" minsize="12600M"><cyclestr>&COMINHRRRDAS;/hrrr.@Y@m@d/conus/hrrr.t@H00z.f0100.mem0020.netcdf</cyclestr></datadep> 
-          <datadep age="120" minsize="12600M"><cyclestr>&COMINHRRRDAS;/hrrr.@Y@m@d/conus/hrrr.t@H00z.f0100.mem0021.netcdf</cyclestr></datadep> 
-          <datadep age="120" minsize="12600M"><cyclestr>&COMINHRRRDAS;/hrrr.@Y@m@d/conus/hrrr.t@H00z.f0100.mem0022.netcdf</cyclestr></datadep> 
-          <datadep age="120" minsize="12600M"><cyclestr>&COMINHRRRDAS;/hrrr.@Y@m@d/conus/hrrr.t@H00z.f0100.mem0023.netcdf</cyclestr></datadep> 
-          <datadep age="120" minsize="12600M"><cyclestr>&COMINHRRRDAS;/hrrr.@Y@m@d/conus/hrrr.t@H00z.f0100.mem0024.netcdf</cyclestr></datadep> 
-          <datadep age="120" minsize="12600M"><cyclestr>&COMINHRRRDAS;/hrrr.@Y@m@d/conus/hrrr.t@H00z.f0100.mem0025.netcdf</cyclestr></datadep> 
-          <datadep age="120" minsize="12600M"><cyclestr>&COMINHRRRDAS;/hrrr.@Y@m@d/conus/hrrr.t@H00z.f0100.mem0026.netcdf</cyclestr></datadep> 
-          <datadep age="120" minsize="12600M"><cyclestr>&COMINHRRRDAS;/hrrr.@Y@m@d/conus/hrrr.t@H00z.f0100.mem0027.netcdf</cyclestr></datadep> 
-          <datadep age="120" minsize="12600M"><cyclestr>&COMINHRRRDAS;/hrrr.@Y@m@d/conus/hrrr.t@H00z.f0100.mem0028.netcdf</cyclestr></datadep> 
-          <datadep age="120" minsize="12600M"><cyclestr>&COMINHRRRDAS;/hrrr.@Y@m@d/conus/hrrr.t@H00z.f0100.mem0029.netcdf</cyclestr></datadep> 
-          <datadep age="120" minsize="12600M"><cyclestr>&COMINHRRRDAS;/hrrr.@Y@m@d/conus/hrrr.t@H00z.f0100.mem0030.netcdf</cyclestr></datadep> 
-          <datadep age="120" minsize="12600M"><cyclestr>&COMINHRRRDAS;/hrrr.@Y@m@d/conus/hrrr.t@H00z.f0100.mem0031.netcdf</cyclestr></datadep> 
-          <datadep age="120" minsize="12600M"><cyclestr>&COMINHRRRDAS;/hrrr.@Y@m@d/conus/hrrr.t@H00z.f0100.mem0032.netcdf</cyclestr></datadep> 
-          <datadep age="120" minsize="12600M"><cyclestr>&COMINHRRRDAS;/hrrr.@Y@m@d/conus/hrrr.t@H00z.f0100.mem0033.netcdf</cyclestr></datadep> 
-          <datadep age="120" minsize="12600M"><cyclestr>&COMINHRRRDAS;/hrrr.@Y@m@d/conus/hrrr.t@H00z.f0100.mem0034.netcdf</cyclestr></datadep> 
-          <datadep age="120" minsize="12600M"><cyclestr>&COMINHRRRDAS;/hrrr.@Y@m@d/conus/hrrr.t@H00z.f0100.mem0035.netcdf</cyclestr></datadep> 
-          <datadep age="120" minsize="12600M"><cyclestr>&COMINHRRRDAS;/hrrr.@Y@m@d/conus/hrrr.t@H00z.f0100.mem0036.netcdf</cyclestr></datadep> 
+          <datadep age="15" minsize="12600M"><cyclestr>&COMINHRRRDAS;/hrrr.@Y@m@d/conus/hrrr.t@H00z.f0100.mem0001.netcdf</cyclestr></datadep> 
+          <datadep age="15" minsize="12600M"><cyclestr>&COMINHRRRDAS;/hrrr.@Y@m@d/conus/hrrr.t@H00z.f0100.mem0002.netcdf</cyclestr></datadep> 
+          <datadep age="15" minsize="12600M"><cyclestr>&COMINHRRRDAS;/hrrr.@Y@m@d/conus/hrrr.t@H00z.f0100.mem0003.netcdf</cyclestr></datadep> 
+          <datadep age="15" minsize="12600M"><cyclestr>&COMINHRRRDAS;/hrrr.@Y@m@d/conus/hrrr.t@H00z.f0100.mem0004.netcdf</cyclestr></datadep> 
+          <datadep age="15" minsize="12600M"><cyclestr>&COMINHRRRDAS;/hrrr.@Y@m@d/conus/hrrr.t@H00z.f0100.mem0005.netcdf</cyclestr></datadep> 
+          <datadep age="15" minsize="12600M"><cyclestr>&COMINHRRRDAS;/hrrr.@Y@m@d/conus/hrrr.t@H00z.f0100.mem0006.netcdf</cyclestr></datadep> 
+          <datadep age="15" minsize="12600M"><cyclestr>&COMINHRRRDAS;/hrrr.@Y@m@d/conus/hrrr.t@H00z.f0100.mem0007.netcdf</cyclestr></datadep> 
+          <datadep age="15" minsize="12600M"><cyclestr>&COMINHRRRDAS;/hrrr.@Y@m@d/conus/hrrr.t@H00z.f0100.mem0008.netcdf</cyclestr></datadep> 
+          <datadep age="15" minsize="12600M"><cyclestr>&COMINHRRRDAS;/hrrr.@Y@m@d/conus/hrrr.t@H00z.f0100.mem0009.netcdf</cyclestr></datadep> 
+          <datadep age="15" minsize="12600M"><cyclestr>&COMINHRRRDAS;/hrrr.@Y@m@d/conus/hrrr.t@H00z.f0100.mem0010.netcdf</cyclestr></datadep> 
+          <datadep age="15" minsize="12600M"><cyclestr>&COMINHRRRDAS;/hrrr.@Y@m@d/conus/hrrr.t@H00z.f0100.mem0011.netcdf</cyclestr></datadep> 
+          <datadep age="15" minsize="12600M"><cyclestr>&COMINHRRRDAS;/hrrr.@Y@m@d/conus/hrrr.t@H00z.f0100.mem0012.netcdf</cyclestr></datadep> 
+          <datadep age="15" minsize="12600M"><cyclestr>&COMINHRRRDAS;/hrrr.@Y@m@d/conus/hrrr.t@H00z.f0100.mem0013.netcdf</cyclestr></datadep> 
+          <datadep age="15" minsize="12600M"><cyclestr>&COMINHRRRDAS;/hrrr.@Y@m@d/conus/hrrr.t@H00z.f0100.mem0014.netcdf</cyclestr></datadep> 
+          <datadep age="15" minsize="12600M"><cyclestr>&COMINHRRRDAS;/hrrr.@Y@m@d/conus/hrrr.t@H00z.f0100.mem0015.netcdf</cyclestr></datadep> 
+          <datadep age="15" minsize="12600M"><cyclestr>&COMINHRRRDAS;/hrrr.@Y@m@d/conus/hrrr.t@H00z.f0100.mem0016.netcdf</cyclestr></datadep> 
+          <datadep age="15" minsize="12600M"><cyclestr>&COMINHRRRDAS;/hrrr.@Y@m@d/conus/hrrr.t@H00z.f0100.mem0017.netcdf</cyclestr></datadep> 
+          <datadep age="15" minsize="12600M"><cyclestr>&COMINHRRRDAS;/hrrr.@Y@m@d/conus/hrrr.t@H00z.f0100.mem0018.netcdf</cyclestr></datadep> 
+          <datadep age="15" minsize="12600M"><cyclestr>&COMINHRRRDAS;/hrrr.@Y@m@d/conus/hrrr.t@H00z.f0100.mem0019.netcdf</cyclestr></datadep> 
+          <datadep age="15" minsize="12600M"><cyclestr>&COMINHRRRDAS;/hrrr.@Y@m@d/conus/hrrr.t@H00z.f0100.mem0020.netcdf</cyclestr></datadep> 
+          <datadep age="15" minsize="12600M"><cyclestr>&COMINHRRRDAS;/hrrr.@Y@m@d/conus/hrrr.t@H00z.f0100.mem0021.netcdf</cyclestr></datadep> 
+          <datadep age="15" minsize="12600M"><cyclestr>&COMINHRRRDAS;/hrrr.@Y@m@d/conus/hrrr.t@H00z.f0100.mem0022.netcdf</cyclestr></datadep> 
+          <datadep age="15" minsize="12600M"><cyclestr>&COMINHRRRDAS;/hrrr.@Y@m@d/conus/hrrr.t@H00z.f0100.mem0023.netcdf</cyclestr></datadep> 
+          <datadep age="15" minsize="12600M"><cyclestr>&COMINHRRRDAS;/hrrr.@Y@m@d/conus/hrrr.t@H00z.f0100.mem0024.netcdf</cyclestr></datadep> 
+          <datadep age="15" minsize="12600M"><cyclestr>&COMINHRRRDAS;/hrrr.@Y@m@d/conus/hrrr.t@H00z.f0100.mem0025.netcdf</cyclestr></datadep> 
+          <datadep age="15" minsize="12600M"><cyclestr>&COMINHRRRDAS;/hrrr.@Y@m@d/conus/hrrr.t@H00z.f0100.mem0026.netcdf</cyclestr></datadep> 
+          <datadep age="15" minsize="12600M"><cyclestr>&COMINHRRRDAS;/hrrr.@Y@m@d/conus/hrrr.t@H00z.f0100.mem0027.netcdf</cyclestr></datadep> 
+          <datadep age="15" minsize="12600M"><cyclestr>&COMINHRRRDAS;/hrrr.@Y@m@d/conus/hrrr.t@H00z.f0100.mem0028.netcdf</cyclestr></datadep> 
+          <datadep age="15" minsize="12600M"><cyclestr>&COMINHRRRDAS;/hrrr.@Y@m@d/conus/hrrr.t@H00z.f0100.mem0029.netcdf</cyclestr></datadep> 
+          <datadep age="15" minsize="12600M"><cyclestr>&COMINHRRRDAS;/hrrr.@Y@m@d/conus/hrrr.t@H00z.f0100.mem0030.netcdf</cyclestr></datadep> 
+          <datadep age="15" minsize="12600M"><cyclestr>&COMINHRRRDAS;/hrrr.@Y@m@d/conus/hrrr.t@H00z.f0100.mem0031.netcdf</cyclestr></datadep> 
+          <datadep age="15" minsize="12600M"><cyclestr>&COMINHRRRDAS;/hrrr.@Y@m@d/conus/hrrr.t@H00z.f0100.mem0032.netcdf</cyclestr></datadep> 
+          <datadep age="15" minsize="12600M"><cyclestr>&COMINHRRRDAS;/hrrr.@Y@m@d/conus/hrrr.t@H00z.f0100.mem0033.netcdf</cyclestr></datadep> 
+          <datadep age="15" minsize="12600M"><cyclestr>&COMINHRRRDAS;/hrrr.@Y@m@d/conus/hrrr.t@H00z.f0100.mem0034.netcdf</cyclestr></datadep> 
+          <datadep age="15" minsize="12600M"><cyclestr>&COMINHRRRDAS;/hrrr.@Y@m@d/conus/hrrr.t@H00z.f0100.mem0035.netcdf</cyclestr></datadep> 
+          <datadep age="15" minsize="12600M"><cyclestr>&COMINHRRRDAS;/hrrr.@Y@m@d/conus/hrrr.t@H00z.f0100.mem0036.netcdf</cyclestr></datadep> 
       </and>
     </dependency>
   </task>
