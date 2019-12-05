@@ -66,11 +66,11 @@ cd $PLTDIR
 #
 #   linking grib2 data file for UPP post-processed firstguess
 if [ ! "${PROD_HEAD}" ] ; then
-  FGS_NAT_FNAME="${RUN}.t{cyc}${subcyc}z.fgs.wrfnat_hrconus_00.grib2"
-  FGS_PRS_FNAME="${RUN}.t{cyc}${subcyc}z.fgs.wrfprs_hrconus_00.grib2"
+  FGS_NAT_FNAME="${RUN}.t{cyc}${subcyc}z.fgs.wrfnat_subhrconus_00.grib2"
+  FGS_PRS_FNAME="${RUN}.t{cyc}${subcyc}z.fgs.wrfprs_subhrconus_00.grib2"
 else
-  FGS_NAT_FNAME="${PROD_HEAD}.fgs.wrfnat_hrconus_00.grib2"
-  FGS_PRS_FNAME="${PROD_HEAD}.fgs.wrfprs_hrconus_00.grib2"
+  FGS_NAT_FNAME="${PROD_HEAD}.fgs.wrfnat_subhrconus_00.grib2"
+  FGS_PRS_FNAME="${PROD_HEAD}.fgs.wrfprs_subhrconus_00.grib2"
 fi
 rm -f ./fgs_nat.grib2 ./fgs_prs.grib2
 ln -sf ${COMOUTpost_rtma3d}/${FGS_NAT_FNAME}  ./fgs_nat.grib2
@@ -78,11 +78,11 @@ ln -sf ${COMOUTpost_rtma3d}/${FGS_PRS_FNAME}  ./fgs_prs.grib2
 
 #   linking grib2 data file for UPP post-processed analysis
 if [ ! "${PROD_HEAD}" ] ; then
-  ANL_NAT_FNAME="${RUN}.t{cyc}${subcyc}z.wrfnat_hrconus_00.grib2"
-  ANL_PRS_FNAME="${RUN}.t{cyc}${subcyc}z.wrfprs_hrconus_00.grib2"
+  ANL_NAT_FNAME="${RUN}.t{cyc}${subcyc}z.wrfnat_subhrconus_00.grib2"
+  ANL_PRS_FNAME="${RUN}.t{cyc}${subcyc}z.wrfprs_subhrconus_00.grib2"
 else
-  ANL_NAT_FNAME="${PROD_HEAD}.wrfnat_hrconus_00.grib2"
-  ANL_PRS_FNAME="${PROD_HEAD}.wrfprs_hrconus_00.grib2"
+  ANL_NAT_FNAME="${PROD_HEAD}.wrfnat_subhrconus_00.grib2"
+  ANL_PRS_FNAME="${PROD_HEAD}.wrfprs_subhrconus_00.grib2"
 fi
 rm -f ./anl_nat.grib2 ./anl_prs.grib2
 ln -sf ${COMOUTpost_rtma3d}/${ANL_NAT_FNAME}  ./anl_nat.grib2

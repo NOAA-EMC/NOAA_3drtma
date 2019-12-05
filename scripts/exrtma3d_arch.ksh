@@ -91,7 +91,7 @@ DRY_RUN_ONLY=NO
 
 iflg=0
 
-suffixlist="wrfprs_hrconus wrftwo_hrconus wrfnat_hrconus"
+suffixlist="wrfprs_subhrconus wrftwo_subhrconus wrfnat_subhrconus"
 
     
 
@@ -260,17 +260,17 @@ cp $COMOUTgsi_rtma3d/gsiparm.anl* .
 
 cp $COMOUTgsi_rtma3d/diag_* .
 
-cp $COMOUTpost_rtma3d/${PROD_HEAD}.fgs.wrfprs_hrconus_${FCST_TIME}.grib2 .
+cp $COMOUTpost_rtma3d/${PROD_HEAD}.fgs.wrfprs_subhrconus_${FCST_TIME}.grib2 .
 
-cp $COMOUTpost_rtma3d/${PROD_HEAD}.fgs.wrftwo_hrconus_${FCST_TIME}.grib2 .
+cp $COMOUTpost_rtma3d/${PROD_HEAD}.fgs.wrftwo_subhrconus_${FCST_TIME}.grib2 .
 
-cp ${COMOUTpost_rtma3d}/${PROD_HEAD}.fgs.wrfnat_hrconus_${FCST_TIME}.grib2 .
+cp ${COMOUTpost_rtma3d}/${PROD_HEAD}.fgs.wrfnat_subhrconus_${FCST_TIME}.grib2 .
 
-cp $COMOUTpost_rtma3d/${PROD_HEAD}.wrfprs_hrconus_${FCST_TIME}.grib2 .
+cp $COMOUTpost_rtma3d/${PROD_HEAD}.wrfprs_subhrconus_${FCST_TIME}.grib2 .
 
-cp $COMOUTpost_rtma3d/${PROD_HEAD}.wrftwo_hrconus_${FCST_TIME}.grib2 .
+cp $COMOUTpost_rtma3d/${PROD_HEAD}.wrftwo_subhrconus_${FCST_TIME}.grib2 .
 
-cp ${COMOUTpost_rtma3d}/${PROD_HEAD}.wrfnat_hrconus_${FCST_TIME}.grib2 .
+cp ${COMOUTpost_rtma3d}/${PROD_HEAD}.wrfnat_subhrconus_${FCST_TIME}.grib2 .
 
 
    export HPSSOUT=$hpsspath0
@@ -333,7 +333,7 @@ ls -1 $DATA_RHIST | grep -E "${cyclist}" | grep -v bufr_d.listing | awk '
 
             /wrf_inout/ { print "./"$0 > "perm" ; next }
 
-            /hrconus/ { print "./"$0 > "perm" ; next }'
+            /subhrconus/ { print "./"$0 > "perm" ; next }'
 
 ls -1 $DATA_RHIST | grep -E "${cyclist}" | awk ' 
 
