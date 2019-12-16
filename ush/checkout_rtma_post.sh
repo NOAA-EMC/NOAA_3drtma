@@ -8,7 +8,7 @@ date
 
 # branch_post: POST master branch in repository EMC_post
 # branch_post_gsd="master"
-  branch_post_gsd="RAPHRRR_201902_master3b5f724"
+  branch_post_gsd="master"
 
 # branch_post_source: source branch  # the user-specified branch to check out.
                                      # if not specified by user, 
@@ -111,7 +111,7 @@ if [ -d ${DIRNAME_POST} ] ; then
 fi
 
 echo " ====> git clone gerrit:EMC_post  ./${DIRNAME_POST} "
-git clone gerrit:EMC_post  ./${DIRNAME_POST}
+git clone gerrit:GSD_UPP  ./${DIRNAME_POST}
 cd ./${DIRNAME_POST}
 scp -p gerrit:hooks/commit-msg  .git/hooks
 

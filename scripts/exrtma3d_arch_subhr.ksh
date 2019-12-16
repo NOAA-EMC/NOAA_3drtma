@@ -90,13 +90,13 @@ DRY_RUN_ONLY=NO
 
 iflg=0
 
-suffixlist="wrfprs_subhrconus wrftwo_subhrconus wrfnat_subhrconus"
+suffixlist="wrfsubhprs wrfsubhspl wrfsubhnat"
 
     
 
 for suffix in $suffixlist ; do
 
-      if [ -s ${COMOUTpost_rtma3d}/${PROD_HEAD}.${suffix}_${FCST_TIME}.grib2 ] ; then
+      if [ -s ${COMOUTpost_rtma3d}/${PROD_HEAD}.${suffix}.grib2 ] ; then
 
           let "iflg=iflg+0"
 
@@ -161,17 +161,17 @@ set +x
 
    lcd $COMOUTpost_rtma3d
 
-   put ${PROD_HEAD}.fgs.wrfprs_subhrconus_${FCST_TIME}.grib2
+   put ${PROD_HEAD}.wrfsubhprs_fgs.grib2
    
-   put ${PROD_HEAD}.fgs.wrftwo_subhrconus_${FCST_TIME}.grib2
+   put ${PROD_HEAD}.wrfsubhspl_fgs.grib2
 
-   put ${PROD_HEAD}.fgs.wrfnat_subhrconus_${FCST_TIME}.grib2
+   put ${PROD_HEAD}.wrfsubhnat_fgs.grib2
 
-   put ${PROD_HEAD}.wrfprs_subhrconus_${FCST_TIME}.grib2
+   put ${PROD_HEAD}.wrfsubhprs.grib2
+   
+   put ${PROD_HEAD}.wrfsubhspl.grib2
 
-   put ${PROD_HEAD}.wrftwo_subhrconus_${FCST_TIME}.grib2
-
-   put ${PROD_HEAD}.wrfnat_subhrconus_${FCST_TIME}.grib2
+   put ${PROD_HEAD}.wrfsubhnat.grib2
 
    cd ${wwwpath}
 
@@ -269,17 +269,17 @@ cp $COMOUTgsi_rtma3d/gsiparm.anl* .
 
 cp $COMOUTgsi_rtma3d/diag_* .
 
-cp $COMOUTpost_rtma3d/${PROD_HEAD}.fgs.wrfprs_subhrconus_${FCST_TIME}.grib2 .
+cp $COMOUTpost_rtma3d/${PROD_HEAD}.wrfsubhprs_fgs.grib2 .
 
-cp $COMOUTpost_rtma3d/${PROD_HEAD}.fgs.wrftwo_subhrconus_${FCST_TIME}.grib2 .
+cp $COMOUTpost_rtma3d/${PROD_HEAD}.wrfsubhspl_fgs.grib2 .
 
-cp ${COMOUTpost_rtma3d}/${PROD_HEAD}.fgs.wrfnat_subhrconus_${FCST_TIME}.grib2 .
+cp $COMOUTpost_rtma3d/${PROD_HEAD}.wrfsubhnat_fgs.grib2 .
 
-cp $COMOUTpost_rtma3d/${PROD_HEAD}.wrfprs_subhrconus_${FCST_TIME}.grib2 .
+cp $COMOUTpost_rtma3d/${PROD_HEAD}.wrfsubhprs.grib2 .
 
-cp $COMOUTpost_rtma3d/${PROD_HEAD}.wrftwo_subhrconus_${FCST_TIME}.grib2 .
+cp $COMOUTpost_rtma3d/${PROD_HEAD}.wrfsubhspl.grib2 .
 
-cp ${COMOUTpost_rtma3d}/${PROD_HEAD}.wrfnat_subhrconus_${FCST_TIME}.grib2 .
+cp $COMOUTpost_rtma3d/${PROD_HEAD}.wrfsubhnat.grib2 .
 
 
    export HPSSOUT=$hpsspath0
@@ -410,9 +410,11 @@ ls -1 $DATA_RHIST | grep -E "${cyclist}" | grep -v bufr_d.listing | awk '
 
             /LightningInGSI.bufr/ { print "./"$0 > "perm" ; next }
 
-            /wrf_inout/ { print "./"$0 > "perm" ; next }
+            /wrf_inout/ { print "./"$0 > "perm" ; next } 
 
-            /subhrconus/ { print "./"$0 > "perm" ; next }'
+            /subhprs/ { print "./"$0 > "perm" ; next } 
+
+            /subhnat/ { print "./"$0 > "perm" ; next }'
 
 ls -1 $DATA_RHIST | grep -E "${cyclist}" | awk ' 
 
