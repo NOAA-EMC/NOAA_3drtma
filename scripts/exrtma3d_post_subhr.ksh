@@ -236,32 +236,32 @@ done
 
 # Append entire wrftwo to wrfprs
 ${CAT} ${workdir}/WRFPRS.GrbF${FCST_TIME}     ${workdir}/WRFTWO.GrbF${FCST_TIME} > ${workdir}/WRFPRS.GrbF${FCST_TIME}.new
-${MV}  ${workdir}/WRFPRS.GrbF${FCST_TIME}.new ${workdir}/wrfprs_subhrconus_${FCST_TIME}.grib2
+${MV}  ${workdir}/WRFPRS.GrbF${FCST_TIME}.new ${workdir}/wrfsubhprs.grib2
 
 # Append entire wrftwo to wrfnat
 ${CAT} ${workdir}/WRFNAT.GrbF${FCST_TIME}     ${workdir}/WRFTWO.GrbF${FCST_TIME} > ${workdir}/WRFNAT.GrbF${FCST_TIME}.new
-${MV}  ${workdir}/WRFNAT.GrbF${FCST_TIME}.new ${workdir}/wrfnat_subhrconus_${FCST_TIME}.grib2
+${MV}  ${workdir}/WRFNAT.GrbF${FCST_TIME}.new ${workdir}/wrfsubhnat.grib2
 
-${CP}  ${workdir}/WRFTWO.GrbF${FCST_TIME}     ${workdir}/wrftwo_subhrconus_${FCST_TIME}.grib2
+${CP}  ${workdir}/WRFTWO.GrbF${FCST_TIME}     ${workdir}/wrfsubhspl.grib2
 
 # Check to make sure all Post  output files were produced
-if [ ! -s "${workdir}/wrfprs_subhrconus_${FCST_TIME}.grib2" ]; then
-  ${ECHO} "unipost crashed! wrfprs_subhrconus_${FCST_TIME}.grib2 is missing"
+if [ ! -s "${workdir}/wrfsubhprs.grib2" ]; then
+  ${ECHO} "unipost crashed! wrfsubhprs.grib2 is missing"
   exit 1
 fi
-if [ ! -s "${workdir}/wrftwo_subhrconus_${FCST_TIME}.grib2" ]; then
-  ${ECHO} "unipost crashed! wrftwo_subhrconus_${FCST_TIME}.grib2 is missing"
+if [ ! -s "${workdir}/wrfsubhspl.grib2" ]; then
+  ${ECHO} "unipost crashed! wrfsubhspl.grib2 is missing"
   exit 1
 fi
-if [ ! -s "${workdir}/wrfnat_subhrconus_${FCST_TIME}.grib2" ]; then
-  ${ECHO} "unipost crashed! wrfnat_subhrconus_${FCST_TIME}.grib2 is missing"
+if [ ! -s "${workdir}/wrfsubhnat.grib2" ]; then
+  ${ECHO} "unipost crashed! wrfsubhnat.grib2 is missing"
   exit 1
 fi
 
 # transfer the output grib2 files to $COMOUTpost_rtma3d
-${CP} ${workdir}/wrfprs_subhrconus_${FCST_TIME}.grib2 ${COMOUTpost_rtma3d}/${PROD_HEAD}.wrfprs_subhrconus_${FCST_TIME}.grib2
-${CP} ${workdir}/wrftwo_subhrconus_${FCST_TIME}.grib2 ${COMOUTpost_rtma3d}/${PROD_HEAD}.wrftwo_subhrconus_${FCST_TIME}.grib2
-${CP} ${workdir}/wrfnat_subhrconus_${FCST_TIME}.grib2 ${COMOUTpost_rtma3d}/${PROD_HEAD}.wrfnat_subhrconus_${FCST_TIME}.grib2
+${CP} ${workdir}/wrfsubhprs.grib2 ${COMOUTpost_rtma3d}/${PROD_HEAD}.wrfsubhprs.grib2
+${CP} ${workdir}/wrfsubhspl.grib2 ${COMOUTpost_rtma3d}/${PROD_HEAD}.wrfsubhspl.grib2
+${CP} ${workdir}/wrfsubhnat.grib2 ${COMOUTpost_rtma3d}/${PROD_HEAD}.wrfsubhnat.grib2
 
 # softlinks with Julian date
 #basetime=`${DATE} +%y%j%H%M -d "${START_TIME}"`
@@ -278,7 +278,7 @@ ${CP} ${workdir}/wrfnat_subhrconus_${FCST_TIME}.grib2 ${COMOUTpost_rtma3d}/${PRO
 # ${MV} ${workdir}/wrfnat_subhrconus_${FCST_TIME}.grib2 ${DATAHOME}/wrfnat_subhrconus_${FCST_TIME}.grib2
 
 # ${RM} -rf ${workdir}
-  ${RM} -f  ${workdir}/wrf???_subhrconus_*.grib2
+  ${RM} -f  ${workdir}/wrfsubh???.grib2
   ${RM} -f  ${workdir}/WRF???.GrbF??
 
 # Create softlinks for transfer

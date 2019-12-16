@@ -2,7 +2,7 @@
 
 date
 
-# set -x
+ set -x
 ulimit -S -s unlimited
 
 #------------------------------------------------------------------#
@@ -63,17 +63,18 @@ cd $PLTDIR
 
 GRIBMAP=/gpfs/dell3/usrx/local/dev/packages/grads/2.2.0/grads-2.2.0/bin
 WGRIB2=/gpfs/dell2/u/Wesley.Ebisuzaki/bin
+GRADS=/gpfs/dell3/usrx/local/dev/packages/grads/2.2.0/grads-2.2.0/bin/grads
 
 #
 # grib2 to Grads
 #
 #   linking grib2 data file for UPP post-processed firstguess
 if [ ! "${PROD_HEAD}" ] ; then
-  FGS_NAT_FNAME="${RUN}.t{cyc}z.fgs.wrfnat_subhrconus_00.grib2"
-  FGS_PRS_FNAME="${RUN}.t{cyc}z.fgs.wrfprs_subhrconus_00.grib2"
+  FGS_NAT_FNAME="${RUN}.t${cyc}${subcyc}z.wrfsubhnat_fgs.grib2"
+  FGS_PRS_FNAME="${RUN}.t${cyc}${subcyc}z.wrfsubhprs_fgs.grib2"
 else
-  FGS_NAT_FNAME="${PROD_HEAD}.fgs.wrfnat_subhrconus_00.grib2"
-  FGS_PRS_FNAME="${PROD_HEAD}.fgs.wrfprs_subhrconus_00.grib2"
+  FGS_NAT_FNAME="${PROD_HEAD}.wrfsubhnat_fgs.grib2"
+  FGS_PRS_FNAME="${PROD_HEAD}.wrfsubhprs_fgs.grib2"
 fi
 rm -f ./fgs_nat.grib2 ./fgs_prs.grib2
 ln -sf ${COMOUTpost_rtma3d}/${FGS_NAT_FNAME}  ./fgs_nat.grib2
@@ -81,12 +82,13 @@ ln -sf ${COMOUTpost_rtma3d}/${FGS_PRS_FNAME}  ./fgs_prs.grib2
 
 #   linking grib2 data file for UPP post-processed analysis
 if [ ! "${PROD_HEAD}" ] ; then
-  ANL_NAT_FNAME="${RUN}.t{cyc}z.wrfnat_subhrconus_00.grib2"
-  ANL_PRS_FNAME="${RUN}.t{cyc}z.wrfprs_subhrconus_00.grib2"
+  ANL_NAT_FNAME="${RUN}.t${cyc}${subcyc}z.wrfsubhnat.grib2"
+  ANL_PRS_FNAME="${RUN}.t${cyc}${subcyc}z.wrfsubhprs.grib2"
 else
-  ANL_NAT_FNAME="${PROD_HEAD}.wrfnat_subhrconus_00.grib2"
-  ANL_PRS_FNAME="${PROD_HEAD}.wrfprs_subhrconus_00.grib2"
+  ANL_NAT_FNAME="${PROD_HEAD}.wrfsubhnat.grib2"
+  ANL_PRS_FNAME="${PROD_HEAD}.wrfsubhprs.grib2"
 fi
+
 rm -f ./anl_nat.grib2 ./anl_prs.grib2
 ln -sf ${COMOUTpost_rtma3d}/${ANL_NAT_FNAME}  ./anl_nat.grib2
 ln -sf ${COMOUTpost_rtma3d}/${ANL_PRS_FNAME}  ./anl_prs.grib2
@@ -135,7 +137,7 @@ pgm=${RUN}_plot
 . prep_step
 startmsg
 
-grads -lbcx ./plt_fai.gs
+$GRADS -lbcx ./plt_fai.gs
 
 gmf_fname=`ls ${gmf_fhead}_*.gmf`
 nv=0
