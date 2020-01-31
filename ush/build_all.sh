@@ -164,6 +164,17 @@ echo " running build_rtma_process_lightning.sh to build obs process ENLTN lightn
 ./build_rtma_process_lightning.sh > log.build_rtma_process_lightning 2>&1
 
 #
+#--- build updatevars executable (WRFV3.9) needed to generate updated reflectivities."
+#
+cd ${USH_DIR}
+echo " running build_rtma_updatevars.sh to build  FV3.9 executable..."
+./build_rtma_updatevars.sh > log.build_rtma_updatevars 2>&1
+
+cd ${USH_DIR}
+echo " running build_rtma_update_ncfields.sh to build  FV3.9 executable..."
+./build_rtma_update_ncfields.sh > log.build_rtma_update_ncfields 2>&1
+
+#
 #--- check out uni-post package(UPP:EMC_post)
 #
 cd ${USH_DIR}

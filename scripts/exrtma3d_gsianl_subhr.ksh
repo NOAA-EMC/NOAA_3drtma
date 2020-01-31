@@ -42,13 +42,13 @@ if [ ! -f ${PARMgsi}/gsiparm.anl.sh ] ; then
    exit 1
 fi
 
-# 
 if [  "${DATA_GSIANL}" ]; then
   ${RM} -rf ${DATA_GSIANL}
   ${LN} -sf ${DATA} ${DATA_GSIANL}
 fi
 
-#  PREPBUFR
+
+
 
 #  NCEPSNOW
 
@@ -525,7 +525,7 @@ ${CP} -p fort.220 minimization_fort220.${YYYYMMDDHHMU}
 
 
 # Saving ANALYSIS, DIAG, Obs-Fitting files TO COM2 DIRECTORY AS PRODUCT for archive
-${CP} -p ${DATA}/wrf_inout                  ${COMOUTgsi_rtma3d}/${ANLrtma3d_FNAME}
+#${CP} -p ${DATA}/wrf_inout                  ${COMOUTgsi_rtma3d}/${ANLrtma3d_FNAME}
 ${CP} -p ${pgmout_stdout}                   ${COMOUTgsi_rtma3d}/${pgmout_stdout}_gsianl.${YYYYMMDDHHMU}
 ${CP} -p fits_${YYYYMMDDHHMU}.txt             ${COMOUTgsi_rtma3d}/fits_${YYYYMMDDHHMU}.txt
 ${CP} -p minimization_fort220.${YYYYMMDDHHMU} ${COMOUTgsi_rtma3d}/minimization_fort220.${YYYYMMDDHHMU}
@@ -543,7 +543,7 @@ gzip ${COMOUTgsi_rtma3d}/diag_*
 #${CP} -p  ${pgmout_stdout}                       ${COMOUT}/${pgmout_stdout}_gsianl.${YYYYMMDDHHMU}
 #${CP} -p  fits_${YYYYMMDDHHMU}.txt                 ${COMOUT}/fits_${YYYYMMDDHHMU}.txt
 
-/bin/rm -f ${DATA}/wrf_inout
+#/bin/rm -f ${DATA}/wrf_inout
 /bin/rm -f ${DATA}/sig*
 /bin/rm -f ${DATA}/obs*
 /bin/rm -f ${DATA}/pe*

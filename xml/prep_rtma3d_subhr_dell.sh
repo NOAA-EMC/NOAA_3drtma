@@ -86,8 +86,7 @@ export HRRRDAS_BEC=0                        #Use HRRRDAS 1-hr forecast during hy
   QUEUE_SVC="dev_transfer"                  #user-specified transfer queue
 
 # Path to top running and archiving directory
-  ptmp_base="/gpfs/dell2/stmp/${USER}/${NET}_wrkdir_realtime"
-
+  ptmp_base="/gpfs/dell2/stmp/${USER}/${NET}_wrkdir_realtime_test"
   DATABASE_DIR=${ptmp_base}            # (equivalent to ptmp_base)
   HOMEBASE_DIR=${NWROOT}               # path to system home directory
   COMINRAP="/gpfs/tp2/ptmp/Jeff.Whiting/CHKOUT_TMP/com3d/rtma/prod"
@@ -96,10 +95,12 @@ export HRRRDAS_BEC=0                        #Use HRRRDAS 1-hr forecast during hy
   GESINHRRR="/gpfs/dell1/ptmp/Annette.Gibbs/com/hrrr/prod"
   COMINGDAS="/gpfs/dell1/nco/ops/com/gfs/prod"
   COMINHRRRDAS="/gpfs/dell2/stmp/Annette.Gibbs/com/hrrr/prod"
+  NCKS="/gpfs/dell1/usrx/local/prod/packages/ips/18.0.1/nco/4.7.0/bin/ncks"
 # Computational resources
   ACCOUNT="RTMA-T2O"                    #account for CPU resources
   RESERVATION="<native>-R rusage[mem=2000] -R affinity[core]</native><queue>&QUEUE;</queue><account>&ACCOUNT;</account>"
   RESERVATION_GSI="<native>-R rusage[mem=3300] -R affinity[core]</native><queue>&QUEUE;</queue><account>&ACCOUNT;</account>"
+  RESERVATION_UPDATEVARS="<native>-R rusage[mem=3300] -R affinity[core]</native><queue>&QUEUE;</queue><account>&ACCOUNT;</account>"
   RESERVATION_UPP="<native>-R rusage[mem=3300] -R affinity[core]</native><queue>&QUEUE;</queue><account>&ACCOUNT;</account>"
   RESERVATION_SVC="<native>-R rusage[mem=1000] -R affinity[core]</native><queue>&QUEUE_SVC;</queue><account>&ACCOUNT;</account>"
   RESERVATION_RADAR="<native>-R rusage[mem=3300] -R affinity[core]</native><queue>&QUEUE;</queue><account>&ACCOUNT;</account>"
@@ -141,6 +142,13 @@ export HRRRDAS_BEC=0                        #Use HRRRDAS 1-hr forecast during hy
 #  GSI_RESOURCES="<cores>&GSI_PROC;</cores><walltime>00:30:00</walltime>"
   GSI_RESOURCES="<nodes>28:ppn=&GSI_PROC;</nodes><walltime>00:30:00</walltime>"
   GSI_RESERVATION=${RESERVATION_GSI}
+
+#UPDATE_VARS
+  UPDATEVARS_PROC=14
+  UPDATEVARS_THREADS=1
+  UPDATEVARS_OMP_STACKSIZE="512M"
+  UPDATEVARS_RESOURCES="<nodes>28:ppn=&UPDATEVARS_PROC;</nodes><walltime>01:00:00</walltime>"
+  UPDATEVARS_RESERVATION=${RESERVATION_UPDATEVARS}
 
 #  POST_PROC="112"
   POST_PROC=14
@@ -187,6 +195,8 @@ export exefile_name_post="rtma3d_wrfpost"
 export exefile_name_radar="rtma3d_process_mosaic"
 export exefile_name_lightning="rtma3d_process_lightning"
 export exefile_name_cloud="rtma3d_process_cloud"
+export exefile_name_updatevars="rtma3d_updatevars"
+export exefile_name_update_ncfields="rtma3d_update_ncfields"
 #########################################################
 #--- define the path to the static data
 #    fix/
@@ -216,6 +226,7 @@ export exefile_name_cloud="rtma3d_process_cloud"
    export FIXgsi_udef="/gpfs/dell2/emc/modeling/noscrub/Edward.Colon/FixData/GSI-fix"
    export FIXcrtm_udef="/gpfs/dell2/emc/modeling/noscrub/Edward.Colon/FixData/CRTM-fix"
    export FIXwps_udef="/gpfs/dell2/emc/modeling/noscrub/Edward.Colon/FixData/wps"
+   export FIXwrf_udef="/gpfs/dell2/emc/modeling/noscrub/Edward.Colon/FixData/wrf"
 
    export OBS_USELIST_udef="/gpfs/dell2/emc/modeling/noscrub/Edward.Colon/FixData/obsuselist"
    export SFCOBS_USELIST_udef="/gpfs/dell2/emc/modeling/noscrub/Edward.Colon/FixData/obsuselist/mesonet_uselists"
@@ -235,6 +246,7 @@ export exefile_name_cloud="rtma3d_process_cloud"
   export FIXgsi="${FIXrtma3d}/gsi"
   export FIXcrtm="${FIXrtma3d}/crtm"
   export FIXwps="${FIXrtma3d}/wps"
+  export FIXwrf="${FIXrtma3d}/wrf"
 
   export OBS_USELIST="${FIXrtma3d}/obsuselist"
   export SFCOBS_USELIST="${OBS_USELIST}/mesonet_uselists"
@@ -280,6 +292,9 @@ export exefile_name_cloud="rtma3d_process_cloud"
     rm -rf $FIXwps
     echo " ln -sf ${FIXwps_udef}        ${FIXwps}"
     ln -sf ${FIXwps_udef}        ${FIXwps}
+    rm -rf $FIXwrf
+    echo " ln -sf ${FIXwrf_udef}        ${FIXwrf}"
+    ln -sf ${FIXwrf_udef}        ${FIXwrf}
 
     cd ${OBS_USELIST}
     rm -rf $SFCOBS_USELIST
@@ -459,6 +474,7 @@ cat > ${NWROOT}/xml/${RUN}_${expname}_subhr.xml <<EOF
 <!ENTITY FIXcrtm        "${FIXcrtm}">
 <!ENTITY FIXgsi         "${FIXgsi}">
 <!ENTITY FIXwps         "${FIXwps}">
+<!ENTITY FIXwrf         "${FIXwrf}">
 <!ENTITY OBS_USELIST    "${OBS_USELIST}">
 <!ENTITY AIRCRAFT_REJECT        "${AIRCRAFT_REJECT}">
 <!ENTITY SFCOBS_USELIST         "${SFCOBS_USELIST}">
@@ -510,7 +526,7 @@ cat > ${NWROOT}/xml/${RUN}_${expname}_subhr.xml <<EOF
 
 <!-- for workflow -->
 
-<!ENTITY maxtries	"10">
+<!ENTITY maxtries	"3">
 <!ENTITY KEEPDATA	"YES">
 <!ENTITY SENDCOM	"YES">
 
@@ -533,6 +549,11 @@ cat > ${NWROOT}/xml/${RUN}_${expname}_subhr.xml <<EOF
 <!ENTITY JJOB_GSIANL	 "&JJOB_DIR;/J&CAP_RUN;_GSIANL${gsi2}_SUBHR">
 <!ENTITY exSCR_GSIANL	 "&SCRIPT_DIR;/ex&RUN;_gsianl${gsi2}_subhr.ksh">
 <!ENTITY exefile_name_gsi      "${exefile_name_gsi}">
+<!ENTITY JJOB_UPDATEVARS     "&JJOB_DIR;/J&CAP_RUN;_UPDATEVARS_SUBHR">
+<!ENTITY exSCR_UPDATEVARS    "&SCRIPT_DIR;/ex&RUN;_updatevars_subhr.ksh">
+<!ENTITY exefile_name_updatevars  "${exefile_name_updatevars}">
+<!ENTITY exefile_name_update_ncfields  "${exefile_name_update_ncfields}">
+
 <!ENTITY JJOB_POST  	 "&JJOB_DIR;/J&CAP_RUN;_POST_SUBHR">
 <!ENTITY exSCR_POST      "&SCRIPT_DIR;/ex&RUN;_post_subhr.ksh">
 <!ENTITY exefile_name_post     "${exefile_name_post}">
@@ -595,6 +616,13 @@ cat > ${NWROOT}/xml/${RUN}_${expname}_subhr.xml <<EOF
 <!ENTITY GSI_WALL_LIMIT 
    '<deadline><cyclestr offset="&GSI_DEADLINE;">@Y@m@d@H@M</cyclestr></deadline>'>
 
+<!ENTITY UPDATEVARS_PROC "${UPDATEVARS_PROC}">
+<!ENTITY UPDATEVARS_THREADS "${UPDATEVARS_THREADS}">
+<!ENTITY UPDATEVARS_OMP_STACKSIZE "${UPDATEVARS_OMP_STACKSIZE}">
+<!ENTITY UPDATEVARS_RESOURCES '${UPDATEVARS_RESOURCES}'> 
+<!ENTITY UPDATEVARS_RESERVATION '${UPDATEVARS_RESERVATION}'>
+<!ENTITY FCST_LENGTH "20"> <!--20 secconds -->
+
 <!ENTITY POST_PROC "${POST_PROC}">
 <!ENTITY POST_THREADS "${POST_THREADS}">
 <!ENTITY POST_OMP_STACKSIZE "${POST_OMP_STACKSIZE}">
@@ -612,7 +640,7 @@ cat > ${NWROOT}/xml/${RUN}_${expname}_subhr.xml <<EOF
 <!ENTITY ARCH_PROC "${ARCH_PROC}">
 <!ENTITY ARCH_RESOURCES '${ARCH_RESOURCES}'>
 <!ENTITY ARCH_RESERVATION '${ARCH_RESERVATION}'>
-
+<!ENTITY NCKS '${NCKS}'>
 
 <!-- Variables in Namelist -->
 <!ENTITY GSI_grid_ratio_in_var       "${gsi_grid_ratio_in_var}">
@@ -749,6 +777,10 @@ cat > ${NWROOT}/xml/${RUN}_${expname}_subhr.xml <<EOF
    <envar>
         <name>FIXwps</name>
         <value>&FIXwps;</value>
+   </envar>
+   <envar>
+        <name>FIXwrf</name>
+        <value>&FIXwrf;</value>
    </envar>
    <envar>
         <name>PARMwrf</name>
@@ -917,6 +949,14 @@ cat > ${NWROOT}/xml/${RUN}_${expname}_subhr.xml <<EOF
    <envar>
       <name>exefile_name_cloud</name>
       <value><cyclestr>&exefile_name_cloud;</cyclestr></value>
+   </envar>
+   <envar>
+      <name>exefile_name_updatevars</name>
+      <value><cyclestr>&exefile_name_updatevars;</cyclestr></value>
+   </envar>
+   <envar>
+      <name>exefile_name_update_ncfields</name>
+      <value><cyclestr>&exefile_name_update_ncfields;</cyclestr></value>
    </envar>
    <envar>
         <name>SENDCOM</name>
@@ -1090,6 +1130,32 @@ cat > ${NWROOT}/xml/${RUN}_${expname}_subhr.xml <<EOF
       <value>&JJOB_POST;</value>
     </envar>'>
 
+<!ENTITY ENVARS_UPDATEVARS
+    '<envar>
+      <name>START_TIME</name>
+      <value><cyclestr>@Y@m@d@H</cyclestr></value>
+    </envar>
+    <envar>
+      <name>DATABASE_DIR</name>
+      <value>&DATABASE_DIR;</value>
+    </envar>
+    <envar>
+      <name>exSCR_UPDATEVARS</name>
+      <value>&exSCR_UPDATEVARS;</value>
+    </envar>
+    <envar>
+      <name>JJOB_UPDATEVARS</name>
+      <value>&JJOB_UPDATEVARS;</value>
+    </envar>
+    <envar>
+      <name>NCKS</name>
+      <value>&NCKS;</value>
+    </envar>
+    <envar>
+      <name>FCST_LENGTH</name>
+      <value>&FCST_LENGTH;</value>
+    </envar>'>
+
 <!ENTITY ENVARS_VERIF
     '<envar>
       <name>START_TIME</name>
@@ -1174,6 +1240,7 @@ cat >> ${NWROOT}/xml/${RUN}_${expname}_subhr.xml <<EOF
 
   <cycledef group="02-11hr">*/15 02-11,14-23 ${ExpDateWindows}</cycledef>
   
+
 EOF
 
 if [ ${obsprep_lghtn} -eq 1 ] ; then
@@ -1421,6 +1488,25 @@ fi
 
 cat >> ${NWROOT}/xml/${RUN}_${expname}_subhr.xml <<EOF 
 
+
+ <task name="&NET;_updatevars_task_@Y@m@d@H@M" cycledefs="02-11hr,00hr,01hr" maxtries="&maxtries;">
+
+    &ENVARS;
+    &UPDATEVARS_RESOURCES;
+    &UPDATEVARS_RESERVATION;
+
+    <command>&JJOB_DIR;/launch.ksh &JJOB_UPDATEVARS;</command>
+    <jobname><cyclestr>&NET;_updatevars_job_@Y@m@d@H@M</cyclestr></jobname>
+    <join><cyclestr>&LOG_SCHDLR;/&NET;_&envir;_updatevars_@Y@m@d@H@M.log</cyclestr></join>
+
+    &ENVARS_UPDATEVARS;
+
+    <dependency>
+          <taskdep task="&NET;_gsianl_task_@Y@m@d@H@M"/>
+    </dependency>
+
+  </task>
+
   <task name="&NET;_post_task_@Y@m@d@H@M" cycledefs="02-11hr,00hr,01hr" maxtries="&maxtries;">
 
     &ENVARS;
@@ -1447,7 +1533,7 @@ cat >> ${NWROOT}/xml/${RUN}_${expname}_subhr.xml <<EOF
     &ENVARS_POST;
 
     <dependency>
-          <taskdep task="&NET;_gsianl_task_@Y@m@d@H@M"/>
+          <taskdep task="&NET;_updatevars_task_@Y@m@d@H@M"/>
     </dependency>
 
   </task>
@@ -1469,7 +1555,7 @@ cat >> ${NWROOT}/xml/${RUN}_${expname}_subhr.xml <<EOF
     &ENVARS_POST;
 
     <dependency>
-          <taskdep task="&NET;_gsianl_task_@Y@m@d@H@M"/>
+          <taskdep task="&NET;_updatevars_task_@Y@m@d@H@M"/>
     </dependency>
 
   </task>

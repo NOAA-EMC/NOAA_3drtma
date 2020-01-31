@@ -1,0 +1,71 @@
+155,156c155,156
+< DM_FC           =       mpif90 -f90=$(SFC)
+< DM_CC           =       mpicc -cc=$(SCC) -DMPI2_SUPPORT
+---
+> DM_FC           =       mpiifort -f90=$(SFC)
+> DM_CC           =       mpiicc -cc=$(SCC) -DMPI2_SUPPORT
+163,164c163,164
+< CFLAGS_LOCAL    =       -w -O3 -ip #-xHost -fp-model fast=2 -no-prec-div -no-prec-sqrt -ftz -no-multibyte-chars
+< LDFLAGS_LOCAL   =       -ip #-xHost -fp-model fast=2 -no-prec-div -no-prec-sqrt -ftz -align all -fno-alias -fno-common
+---
+> CFLAGS_LOCAL    =       -vec-threshold0 -qoverride_limits -w -O3 -axSSE4.2,AVX,CORE-AVX2,CORE-AVX512 -ip #-xHost -fp-model fast=2 -no-prec-div -no-prec-sqrt -ftz -no-multibyte-chars
+> LDFLAGS_LOCAL   =       -vec-threshold0 -qoverride_limits -ip #-xHost -fp-model fast=2 -no-prec-div -no-prec-sqrt -ftz -align all -fno-alias -fno-common
+200a201
+>                       -DPNETCDF_QUILT \
+205c206
+<                        \
+---
+>                       -DHDF5 \
+221a223,224
+> FCFLAGS_THOMPSON =   $(FCOPTIM) -ip -fp-model precise -w -ftz -align all -fno-alias $(FORMAT_FREE) $(BYTESWAPIO)
+> FCFLAGS_MYNN     =   $(FCOPTIM) -ip -fp-model fast=2 -w -ftz -align all -fno-alias $(FORMAT_FREE) $(BYTESWAPIO)
+234c237,239
+<                       -I$(WRF_SRC_ROOT_DIR)/chem -I$(WRF_SRC_ROOT_DIR)/inc \
+---
+>                       -I$(WRF_SRC_ROOT_DIR)/chem \
+>                       -I$(WRF_SRC_ROOT_DIR)/smoke \
+>                       -I$(WRF_SRC_ROOT_DIR)/inc \
+251c256
+<                       $(WRF_SRC_ROOT_DIR)/external/io_netcdf/libwrfio_nf.a -L/usrx/local/prod/packages/ips/18.0.1/netcdf/4.5.0/lib -lnetcdff  -L$(WRF_SRC_ROOT_DIR)/external/io_pnetcdf -lwrfio_pnf -L/gpfs/dell1/usrx/local/prod/packages/ips/19.0.5/impi/19.0.5/PNetCDF/1.8.1/lib -lpnetcdf   
+---
+>                       -L$(WRF_SRC_ROOT_DIR)/external/io_netcdf -lwrfio_nf -L/apps/netcdf/4.2.1.1-intel/lib -lnetcdff -lnetcdf  -L$(WRF_SRC_ROOT_DIR)/external/io_pnetcdf -lwrfio_pnf -L/apps/pnetcdf/1.6.1-intel15-impi5/lib -lpnetcdf   -L/apps/hdf5/1.8.9-intel/lib -lhdf5_fortran -lhdf5 -lm -lz
+255c260
+< ENVCOMPDEFS     =     -DHYBRID_COORD=1 -DWRF_DFI_RADAR=1
+---
+> ENVCOMPDEFS     =    -DWRF_SMOKE -DBUILD_SMOKE=1 -DHYBRID_COORD=1 -DWRF_DFI_RADAR=1
+256a262
+> WRF_SMOKE       =    1
+258,259c264,265
+< NETCDFPATH      =    /usrx/local/prod/packages/ips/18.0.1/netcdf/4.5.0
+< HDF5PATH        =    
+---
+> NETCDFPATH      =    /apps/netcdf/4.2.1.1-intel
+> HDF5PATH        =    /apps/hdf5/1.8.9-intel
+262c268
+< PNETCDFPATH     =    /gpfs/dell1/usrx/local/prod/packages/ips/19.0.5/impi/19.0.5/PNetCDF/1.8.1
+---
+> PNETCDFPATH     =    /apps/pnetcdf/1.6.1-intel15-impi5
+408a415,433
+> module_mp_thompson.o : module_mp_thompson.F
+> 
+> module_mp_thompson.o :
+> 	$(RM) $@
+> 	$(CPP) -I$(WRF_SRC_ROOT_DIR)/inc $(CPPFLAGS) $(OMPCPP) $*.F  > $*.bb
+> 	$(SED_FTN) $*.bb | $(CPP) $(TRADFLAG) > $*.f90
+> 	$(RM) $*.b $*.bb
+> 	$(FC) -o $@ -vec-threshold0 -qoverride_limits -c $(FCFLAGS_THOMPSON) $(OMP) $(MODULE_DIRS) $(PROMOTION) $(FCSUFFIX) $*.f90
+> 
+> module_bl_mynn.o : module_bl_mynn.F
+> 
+> module_bl_mynn.o :
+> 	$(RM) $@
+> 	$(CPP) -I$(WRF_SRC_ROOT_DIR)/inc $(CPPFLAGS) $(OMPCPP) $*.F  > $*.bb
+> 	$(SED_FTN) $*.bb | $(CPP) $(TRADFLAG) > $*.f90
+> 	$(RM) $*.b $*.bb
+> 	$(FC) -o $@ -vec-threshold0 -qoverride_limits -c $(FCFLAGS_MYNN) $(OMP) $(MODULE_DIRS) $(PROMOTION) $(FCSUFFIX) $*.f90
+> 
+> 
+576c601
+< 	$(FC) -c $(PROMOTION) $(FCSUFFIX) $(FCNOOPT) $(FCBASEOPTS) $(MODULE_DIRS) $*.f90
+---
+> 	$(FC) -o $@ -vec-threshold0 -qoverride_limits -c $(FCFLAGS_THOMPSON) $(OMP) $(MODULE_DIRS) $(PROMOTION) $(FCSUFFIX) $*.f90
