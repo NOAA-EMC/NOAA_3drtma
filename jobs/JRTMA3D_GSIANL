@@ -53,6 +53,7 @@ setpdy.sh
 export subcyc=${subcyc} #Note: Must define subcyc in upper level script. Can be 00, 15, 30, or 45 /MPondeca, 30Jun2017
                          #only used for rurtma2p5
 export PDYHH="${PDY}${cyc}"
+export PDYm1=`$NDATE -24 $PDYHH | cut -c 1-8`
 ####################################
 # Determine Job Output Name on System
 ####################################
@@ -103,6 +104,8 @@ if [ ! -d "${GESINhrrr_rtma3d}" ] ; then
   echo " Directory of HRRRs fgs data does NOT exist. Job abort!"
   err_exit
 fi
+
+export COMINhrrrdas=${COMINhrrrdas:-"${COMINHRRRDAS}/hrrr.${PDY}/conus"}
 
 ### 3DRTMA GSIANL Products (netcdf)
 export COMOUTgsi_rtma3d=${COMOUTgsi_rtma3d:-"${COMOUT}/gsiprd.${cycle}"}

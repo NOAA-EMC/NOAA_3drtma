@@ -2,6 +2,7 @@
 
 set -x
 
+pgm=${RUN}_arch
 . prep_step
 
 startmsg
@@ -89,13 +90,13 @@ DRY_RUN_ONLY=NO
 
 iflg=0
 
-suffixlist="wrfprs_hrconus wrftwo_hrconus wrfnat_hrconus"
+suffixlist="wrfsubhprs wrfsubhspl wrfsubhnat"
 
     
 
 for suffix in $suffixlist ; do
 
-      if [ -s ${COMOUTpost_rtma3d}/${PROD_HEAD}.${suffix}_${FCST_TIME}.grib2 ] ; then
+      if [ -s ${COMOUTpost_rtma3d}/${PROD_HEAD}.${suffix}.grib2 ] ; then
 
           let "iflg=iflg+0"
 
@@ -125,7 +126,7 @@ if [ ${write_to_rzdm} = yes ] ; then
 
 set +x
 
-. /u/${USER}/.Utils
+#. /u/${USER}/.Utils
 
    export w1=ecolon
 
@@ -160,17 +161,17 @@ set +x
 
    lcd $COMOUTpost_rtma3d
 
-   put ${PROD_HEAD}.fgs.wrfprs_hrconus_${FCST_TIME}.grib2
+   put ${PROD_HEAD}.wrfsubhprs_fgs.grib2
    
-   put ${PROD_HEAD}.fgs.wrftwo_hrconus_${FCST_TIME}.grib2
+   put ${PROD_HEAD}.wrfsubhspl_fgs.grib2
 
-   put ${PROD_HEAD}.fgs.wrfnat_hrconus_${FCST_TIME}.grib2
+   put ${PROD_HEAD}.wrfsubhnat_fgs.grib2
 
-   put ${PROD_HEAD}.wrfprs_hrconus_${FCST_TIME}.grib2
+   put ${PROD_HEAD}.wrfsubhprs.grib2
+   
+   put ${PROD_HEAD}.wrfsubhspl.grib2
 
-   put ${PROD_HEAD}.wrftwo_hrconus_${FCST_TIME}.grib2
-
-   put ${PROD_HEAD}.wrfnat_hrconus_${FCST_TIME}.grib2
+   put ${PROD_HEAD}.wrfsubhnat.grib2
 
    cd ${wwwpath}
 
@@ -180,26 +181,26 @@ set +x
 
 EOF
 
-    ssh ${w1}@emcrzdm "ls -d ${ftppath0}/${PROD_HEAD}.fgs.wrfprs_hrconus_${FCST_TIME}.grib2
-    err1=$?
-    if (( $err1 == 0 )) ; then
-           ssh ${w1}@emcrzdm "ls -d ${ftppath0}/${PROD_HEAD}.fgs.wrftwo_hrconus_${FCST_TIME}.grib2
-           err2=$?
-    if (( $err2 == 0 )) ; then
-           ssh ${w1}@emcrzdm "ls -d ${ftppath0}/${PROD_HEAD}.fgs.wrfnat_hrconus_${FCST_TIME}.grib2
-           err3=$?
-    if (( $err3 == 0 )) ; then 
-           ssh ${w1}@emcrzdm "ls -d ${ftppath0}/${PROD_HEAD}.wrfprs_hrconus_${FCST_TIME}.grib2
-           err4=$?
-    if (( $err4 == 0 )) ; then 
-           ssh ${w1}@emcrzdm "ls -d ${ftppath0}/${PROD_HEAD}.wrftwo_hrconus_${FCST_TIME}.grib2
-           err5=$?
-    if (( $err5 == 0 )) ; then
-           ssh ${w1}@emcrzdm "ls -d ${ftppath0}/${PROD_HEAD}.wrftwo_hrconus_${FCST_TIME}.grib2
-           err6=$?
-    if (( $err6 == 0 )) ; then 
-           echo "All of the UPP output files have not been tranferred to RZDM."
-    fi
+#    ssh ${w1}@emcrzdm "ls -d ${ftppath0}/${PROD_HEAD}.fgs.wrfprs_subhrconus_${FCST_TIME}.grib2
+#    err1=$?
+#    if (( $err1 == 0 )) ; then
+#           ssh ${w1}@emcrzdm "ls -d ${ftppath0}/${PROD_HEAD}.fgs.wrftwo_subhrconus_${FCST_TIME}.grib2
+#           err2=$?
+#    if (( $err2 == 0 )) ; then
+#           ssh ${w1}@emcrzdm "ls -d ${ftppath0}/${PROD_HEAD}.fgs.wrfnat_subhrconus_${FCST_TIME}.grib2
+#           err3=$?
+#    if (( $err3 == 0 )) ; then 
+#           ssh ${w1}@emcrzdm "ls -d ${ftppath0}/${PROD_HEAD}.wrfprs_subhrconus_${FCST_TIME}.grib2
+#           err4=$?
+#    if (( $err4 == 0 )) ; then 
+#           ssh ${w1}@emcrzdm "ls -d ${ftppath0}/${PROD_HEAD}.wrftwo_subhrconus_${FCST_TIME}.grib2
+#           err5=$?
+#    if (( $err5 == 0 )) ; then
+#           ssh ${w1}@emcrzdm "ls -d ${ftppath0}/${PROD_HEAD}.wrftwo_subhrconus_${FCST_TIME}.grib2
+#           err6=$?
+#    if (( $err6 == 0 )) ; then 
+#           echo "All of the UPP output files have not been tranferred to RZDM."
+#    fi
           
         
 #   list="${PDYm3} ${PDYm4}"
@@ -268,17 +269,17 @@ cp $COMOUTgsi_rtma3d/gsiparm.anl* .
 
 cp $COMOUTgsi_rtma3d/diag_* .
 
-cp $COMOUTpost_rtma3d/${PROD_HEAD}.fgs.wrfprs_hrconus_${FCST_TIME}.grib2 .
+cp $COMOUTpost_rtma3d/${PROD_HEAD}.wrfsubhprs_fgs.grib2 .
 
-cp $COMOUTpost_rtma3d/${PROD_HEAD}.fgs.wrftwo_hrconus_${FCST_TIME}.grib2 .
+cp $COMOUTpost_rtma3d/${PROD_HEAD}.wrfsubhspl_fgs.grib2 .
 
-cp ${COMOUTpost_rtma3d}/${PROD_HEAD}.fgs.wrfnat_hrconus_${FCST_TIME}.grib2 .
+cp $COMOUTpost_rtma3d/${PROD_HEAD}.wrfsubhnat_fgs.grib2 .
 
-cp $COMOUTpost_rtma3d/${PROD_HEAD}.wrfprs_hrconus_${FCST_TIME}.grib2 .
+cp $COMOUTpost_rtma3d/${PROD_HEAD}.wrfsubhprs.grib2 .
 
-cp $COMOUTpost_rtma3d/${PROD_HEAD}.wrftwo_hrconus_${FCST_TIME}.grib2 .
+cp $COMOUTpost_rtma3d/${PROD_HEAD}.wrfsubhspl.grib2 .
 
-cp ${COMOUTpost_rtma3d}/${PROD_HEAD}.wrfnat_hrconus_${FCST_TIME}.grib2 .
+cp $COMOUTpost_rtma3d/${PROD_HEAD}.wrfsubhnat.grib2 .
 
 
    export HPSSOUT=$hpsspath0
@@ -409,9 +410,11 @@ ls -1 $DATA_RHIST | grep -E "${cyclist}" | grep -v bufr_d.listing | awk '
 
             /LightningInGSI.bufr/ { print "./"$0 > "perm" ; next }
 
-            /wrf_inout/ { print "./"$0 > "perm" ; next }
+            /wrf_inout/ { print "./"$0 > "perm" ; next } 
 
-            /hrconus/ { print "./"$0 > "perm" ; next }'
+            /subhprs/ { print "./"$0 > "perm" ; next } 
+
+            /subhnat/ { print "./"$0 > "perm" ; next }'
 
 ls -1 $DATA_RHIST | grep -E "${cyclist}" | awk ' 
 

@@ -95,7 +95,7 @@ flds="CandV"
 for fld in $flds; do
   for exp in $exps; do
     mkdir -p $stat_dir/${dom_out}/${exp}/${fld}
-        point_stat ${COMOUTpost_rtma3d}/${PROD_HEAD}.wrfprs_hrconus_00.grib2 \
+        point_stat ${COMOUTpost_rtma3d}/${PROD_HEAD}.wrfsubhprs.grib2 \
           ${urma_dir}/${mod}.t${HH}${subcyc}z.prepbufr.tm00.nr.nc \
           ${config_dir}/PointStatConfig_${dom_out}_ADPSFC_${mod}_${fld} -outdir $stat_dir/${dom_out}/${exp}/${fld} -v 2
           export err=$? ; err_chk

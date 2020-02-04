@@ -2,6 +2,7 @@
 
 set -x 
 
+
 #
 #-- This script is goint to run GSI analysis (3DVar and Cloud analysis) in one-step
 #
@@ -328,11 +329,7 @@ cp ${FIXgsi}/rap_satbias_starting_file.txt ./satbias_in
 cp ${FIXgsi}/rap_satbias_pc_starting_file.txt ./satbias_pc
 
 # Run GSI
-
-if [ -f errfile ] ; then
-    rm -f errfile
-fi
-
+pgm=${RUN}_gsianl
 . prep_step
 
 startmsg

@@ -53,6 +53,7 @@ time_run=${time_str}
 export PLTDIR=$DATA
 # export myg2tool="/home/Gang.Zhao/local/grib/g2ctl"
 export myg2tool="${UTILrtma3d_dev}/plot/grads/g2ctl"
+export EXEC="/gpfs/dell3/usrx/local/dev/packages/grads/2.2.0/grads-2.2.0/bin"
 
 if [ ! -d ${PLTDIR} ] ; then
   echo " running/plotting directory is not found. Abort!"
@@ -65,11 +66,11 @@ cd $PLTDIR
 #
 #   linking grib2 data file for UPP post-processed firstguess
 if [ ! "${PROD_HEAD}" ] ; then
-  FGS_NAT_FNAME="${RUN}.t{cyc}${subcyc}z.fgs.wrfnat_hrconus_00.grib2"
-  FGS_PRS_FNAME="${RUN}.t{cyc}${subcyc}z.fgs.wrfprs_hrconus_00.grib2"
+  FGS_NAT_FNAME="${RUN}.t{cyc}${subcyc}z.wrfsubhnat_fgs.grib2"
+  FGS_PRS_FNAME="${RUN}.t{cyc}${subcyc}z.wrfsubhprs_fgs.grib2"
 else
-  FGS_NAT_FNAME="${PROD_HEAD}.fgs.wrfnat_hrconus_00.grib2"
-  FGS_PRS_FNAME="${PROD_HEAD}.fgs.wrfprs_hrconus_00.grib2"
+  FGS_NAT_FNAME="${PROD_HEAD}.wrfsubhnat_fgs.grib2"
+  FGS_PRS_FNAME="${PROD_HEAD}.wrfsubhprs_fgs.grib2"
 fi
 rm -f ./fgs_nat.grib2 ./fgs_prs.grib2
 ln -sf ${COMOUTpost_rtma3d}/${FGS_NAT_FNAME}  ./fgs_nat.grib2
@@ -77,11 +78,11 @@ ln -sf ${COMOUTpost_rtma3d}/${FGS_PRS_FNAME}  ./fgs_prs.grib2
 
 #   linking grib2 data file for UPP post-processed analysis
 if [ ! "${PROD_HEAD}" ] ; then
-  ANL_NAT_FNAME="${RUN}.t{cyc}${subcyc}z.wrfnat_hrconus_00.grib2"
-  ANL_PRS_FNAME="${RUN}.t{cyc}${subcyc}z.wrfprs_hrconus_00.grib2"
+  ANL_NAT_FNAME="${RUN}.t{cyc}${subcyc}z.wrfsubhnat.grib2"
+  ANL_PRS_FNAME="${RUN}.t{cyc}${subcyc}z.wrfsubhprs.grib2"
 else
-  ANL_NAT_FNAME="${PROD_HEAD}.wrfnat_hrconus_00.grib2"
-  ANL_PRS_FNAME="${PROD_HEAD}.wrfprs_hrconus_00.grib2"
+  ANL_NAT_FNAME="${PROD_HEAD}.wrfsubhnat.grib2"
+  ANL_PRS_FNAME="${PROD_HEAD}.wrfsubhprs.grib2"
 fi
 rm -f ./anl_nat.grib2 ./anl_prs.grib2
 ln -sf ${COMOUTpost_rtma3d}/${ANL_NAT_FNAME}  ./anl_nat.grib2
@@ -100,7 +101,7 @@ do
   rm -f $ctlfile $idxfile
   $myg2tool/g2ctl.0.1.4 -0 $g2file > $ctlfile
 #  $myg2tool/g2ctl -0 $g2file > $ctlfile
-  gribmap -0 -i $ctlfile
+  ${EXEC}/gribmap -0 -i $ctlfile
   if [ ! -f $ctlfile ] || [ ! -f $idxfile ] ; then
     echo "g2ctl step failed. Abort!"
     exit 111
@@ -127,6 +128,7 @@ sed -i 's/Y4M2D2H2M2/'${adate}'/g'  ./plt_fai.gs
 rm -f ./${gmf_fhead}_*.gmf ./${gmf_fhead}_*.ps  ./${gmf_fhead}_*.png ./${gmf_fhead}_*.pdf
 
 #
+pgm=${RUN}_plot
 . prep_step
 startmsg
 

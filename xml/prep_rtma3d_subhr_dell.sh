@@ -73,6 +73,7 @@ export SCHD_ATTRB="lsf"
 export envir="${SCHD_ATTRB}"                      #environment (test, prod, dev, etc.)
 export expname="${envir}"                   # experiment name
 export realtime="T"
+export HRRRDAS_BEC=0                        #Use HRRRDAS 1-hr forecast during hybrid analysis (0=no,1=yes)
 #====================================================================#
 # Note: Definition for the following variables 
 #       depends on the machine platform, 
@@ -85,18 +86,21 @@ export realtime="T"
   QUEUE_SVC="dev_transfer"                  #user-specified transfer queue
 
 # Path to top running and archiving directory
-  ptmp_base="/gpfs/dell2/stmp/${USER}/${NET}_wrkdir_retro"
-
+  ptmp_base="/gpfs/dell2/stmp/${USER}/${NET}_wrkdir_realtime_test"
   DATABASE_DIR=${ptmp_base}            # (equivalent to ptmp_base)
   HOMEBASE_DIR=${NWROOT}               # path to system home directory
-  COMINRAP="/gpfs/gp2/ptmp/Jeff.Whiting/CHKOUT_TMP/com3d/rtma/prod"
+  COMINRAP="/gpfs/tp2/ptmp/Jeff.Whiting/CHKOUT_TMP/com3d/rtma/prod"
   COMINHRRR="/gpfs/hps/nco/ops/com/hrrr/prod"
-  COMINRADAR="/gpfs/gp1/nco/ops/com/hourly/prod"
+  COMINRADAR="/gpfs/dell1/nco/ops/dcom/prod/ldmdata/obs/upperair/mrms/conus"
   GESINHRRR="/gpfs/dell1/ptmp/Annette.Gibbs/com/hrrr/prod"
+  COMINGDAS="/gpfs/dell1/nco/ops/com/gfs/prod"
+  COMINHRRRDAS="/gpfs/dell2/stmp/Annette.Gibbs/com/hrrr/prod"
+  NCKS="/gpfs/dell1/usrx/local/prod/packages/ips/18.0.1/nco/4.7.0/bin/ncks"
 # Computational resources
   ACCOUNT="RTMA-T2O"                    #account for CPU resources
   RESERVATION="<native>-R rusage[mem=2000] -R affinity[core]</native><queue>&QUEUE;</queue><account>&ACCOUNT;</account>"
   RESERVATION_GSI="<native>-R rusage[mem=3300] -R affinity[core]</native><queue>&QUEUE;</queue><account>&ACCOUNT;</account>"
+  RESERVATION_UPDATEVARS="<native>-R rusage[mem=3300] -R affinity[core]</native><queue>&QUEUE;</queue><account>&ACCOUNT;</account>"
   RESERVATION_UPP="<native>-R rusage[mem=3300] -R affinity[core]</native><queue>&QUEUE;</queue><account>&ACCOUNT;</account>"
   RESERVATION_SVC="<native>-R rusage[mem=1000] -R affinity[core]</native><queue>&QUEUE_SVC;</queue><account>&ACCOUNT;</account>"
   RESERVATION_RADAR="<native>-R rusage[mem=3300] -R affinity[core]</native><queue>&QUEUE;</queue><account>&ACCOUNT;</account>"
@@ -108,11 +112,11 @@ export realtime="T"
 
 # General definition of computation resources for each task
 #  OBSPREP_RADAR_PROC="112"
-  OBSPREP_RADAR_PROC=14
+  OBSPREP_RADAR_PROC=17
   RADAR_THREADS=1
   RADAR_OMP_STACKSIZE="512M"
 #  OBSPREP_RADAR_RESOURCES="<cores>&OBSPREP_RADAR_PROC;</cores><walltime>00:30:00</walltime>"
-  OBSPREP_RADAR_RESOURCES="<nodes>16:ppn=&OBSPREP_RADAR_PROC;</nodes><walltime>00:30:00</walltime>"
+  OBSPREP_RADAR_RESOURCES="<nodes>2:ppn=&OBSPREP_RADAR_PROC;</nodes><walltime>00:30:00</walltime>"
   OBSPREP_RADAR_RESERVATION=${RESERVATION_RADAR}
 
   OBSPREP_LGHTN_PROC="1"
@@ -138,6 +142,13 @@ export realtime="T"
 #  GSI_RESOURCES="<cores>&GSI_PROC;</cores><walltime>00:30:00</walltime>"
   GSI_RESOURCES="<nodes>28:ppn=&GSI_PROC;</nodes><walltime>00:30:00</walltime>"
   GSI_RESERVATION=${RESERVATION_GSI}
+
+#UPDATE_VARS
+  UPDATEVARS_PROC=14
+  UPDATEVARS_THREADS=1
+  UPDATEVARS_OMP_STACKSIZE="512M"
+  UPDATEVARS_RESOURCES="<nodes>28:ppn=&UPDATEVARS_PROC;</nodes><walltime>01:00:00</walltime>"
+  UPDATEVARS_RESERVATION=${RESERVATION_UPDATEVARS}
 
 #  POST_PROC="112"
   POST_PROC=14
@@ -167,6 +178,8 @@ export realtime="T"
 #     exit 1
 # fi
 
+
+
 export CAP_NET=`echo ${NET} | tr '[:lower:]' '[:upper:]'`
 export CAP_RUN=`echo ${RUN} | tr '[:lower:]' '[:upper:]'`
 export CAP_ENVIR=`echo ${envir} | tr '[:lower:]' '[:upper:]'`
@@ -182,6 +195,8 @@ export exefile_name_post="rtma3d_wrfpost"
 export exefile_name_radar="rtma3d_process_mosaic"
 export exefile_name_lightning="rtma3d_process_lightning"
 export exefile_name_cloud="rtma3d_process_cloud"
+export exefile_name_updatevars="rtma3d_updatevars"
+export exefile_name_update_ncfields="rtma3d_update_ncfields"
 #########################################################
 #--- define the path to the static data
 #    fix/
@@ -211,6 +226,7 @@ export exefile_name_cloud="rtma3d_process_cloud"
    export FIXgsi_udef="/gpfs/dell2/emc/modeling/noscrub/Edward.Colon/FixData/GSI-fix"
    export FIXcrtm_udef="/gpfs/dell2/emc/modeling/noscrub/Edward.Colon/FixData/CRTM-fix"
    export FIXwps_udef="/gpfs/dell2/emc/modeling/noscrub/Edward.Colon/FixData/wps"
+   export FIXwrf_udef="/gpfs/dell2/emc/modeling/noscrub/Edward.Colon/FixData/wrf"
 
    export OBS_USELIST_udef="/gpfs/dell2/emc/modeling/noscrub/Edward.Colon/FixData/obsuselist"
    export SFCOBS_USELIST_udef="/gpfs/dell2/emc/modeling/noscrub/Edward.Colon/FixData/obsuselist/mesonet_uselists"
@@ -230,6 +246,7 @@ export exefile_name_cloud="rtma3d_process_cloud"
   export FIXgsi="${FIXrtma3d}/gsi"
   export FIXcrtm="${FIXrtma3d}/crtm"
   export FIXwps="${FIXrtma3d}/wps"
+  export FIXwrf="${FIXrtma3d}/wrf"
 
   export OBS_USELIST="${FIXrtma3d}/obsuselist"
   export SFCOBS_USELIST="${OBS_USELIST}/mesonet_uselists"
@@ -275,6 +292,9 @@ export exefile_name_cloud="rtma3d_process_cloud"
     rm -rf $FIXwps
     echo " ln -sf ${FIXwps_udef}        ${FIXwps}"
     ln -sf ${FIXwps_udef}        ${FIXwps}
+    rm -rf $FIXwrf
+    echo " ln -sf ${FIXwrf_udef}        ${FIXwrf}"
+    ln -sf ${FIXwrf_udef}        ${FIXwrf}
 
     cd ${OBS_USELIST}
     rm -rf $SFCOBS_USELIST
@@ -352,16 +372,16 @@ export exefile_name_cloud="rtma3d_process_cloud"
 
 
 #----option to compute verification statistics using MET
-  export run_verif=1      # 0: No not process verification statistics
+  export run_verif=0      # 0: No not process verification statistics
                           # 1: Compute verification statistics including cloud ceiling and visibility
 
 #--- option for archiving results on hpss
-  export run_arch=1    # 0: No archiving of 3d rtma post-processed output
+  export run_arch=0    # 0: No archiving of 3d rtma post-processed output
                           # 1: Archiving of 3d rtma results performed on hpss
 
 
 #--- option to plot the firstguess/analysis/increment
-  export run_plt=1        # default is 1 to plot with GrADS
+  export run_plt=0        # default is 1 to plot with GrADS
                           # >0: plot (and post-process of firstguess fields)
                           # =1: plot with GrADS 
                           # =2: plot with NCL (not available yet)
@@ -410,6 +430,7 @@ cat > ${NWROOT}/xml/${RUN}_${expname}_subhr.xml <<EOF
 <!ENTITY CAP_ENVIR	"${CAP_ENVIR}">
 <!ENTITY CAP_RUN_ENVIR	"${CAP_RUN_ENVIR}">
 <!ENTITY model		"&RUN;">
+<!ENTITY HRRRDAS_BEC     "${HRRRDAS_BEC}">
 
 <!ENTITY MACHINE	"${MACHINE}">
 <!ENTITY machine	"&MACHINE;">
@@ -423,6 +444,8 @@ cat > ${NWROOT}/xml/${RUN}_${expname}_subhr.xml <<EOF
 <!ENTITY COMINHRRR      "${COMINHRRR}">
 <!ENTITY COMINRADAR      "${COMINRADAR}">
 <!ENTITY GESINHRRR      "${GESINHRRR}">
+<!ENTITY COMINHRRRDAS   "${COMINHRRRDAS}">
+<!ENTITY COMINGDAS      "${COMINGDAS}">
 <!ENTITY NWROOT		"${NWROOT}">
 
 <!ENTITY OBS_DIR	"/scratch4/NCEPDEV/fv3-cam/save/Gang.Zhao/Data/GSD_GSI_Case/obs">
@@ -451,6 +474,7 @@ cat > ${NWROOT}/xml/${RUN}_${expname}_subhr.xml <<EOF
 <!ENTITY FIXcrtm        "${FIXcrtm}">
 <!ENTITY FIXgsi         "${FIXgsi}">
 <!ENTITY FIXwps         "${FIXwps}">
+<!ENTITY FIXwrf         "${FIXwrf}">
 <!ENTITY OBS_USELIST    "${OBS_USELIST}">
 <!ENTITY AIRCRAFT_REJECT        "${AIRCRAFT_REJECT}">
 <!ENTITY SFCOBS_USELIST         "${SFCOBS_USELIST}">
@@ -502,7 +526,7 @@ cat > ${NWROOT}/xml/${RUN}_${expname}_subhr.xml <<EOF
 
 <!-- for workflow -->
 
-<!ENTITY maxtries	"10">
+<!ENTITY maxtries	"3">
 <!ENTITY KEEPDATA	"YES">
 <!ENTITY SENDCOM	"YES">
 
@@ -525,13 +549,18 @@ cat > ${NWROOT}/xml/${RUN}_${expname}_subhr.xml <<EOF
 <!ENTITY JJOB_GSIANL	 "&JJOB_DIR;/J&CAP_RUN;_GSIANL${gsi2}_SUBHR">
 <!ENTITY exSCR_GSIANL	 "&SCRIPT_DIR;/ex&RUN;_gsianl${gsi2}_subhr.ksh">
 <!ENTITY exefile_name_gsi      "${exefile_name_gsi}">
+<!ENTITY JJOB_UPDATEVARS     "&JJOB_DIR;/J&CAP_RUN;_UPDATEVARS_SUBHR">
+<!ENTITY exSCR_UPDATEVARS    "&SCRIPT_DIR;/ex&RUN;_updatevars_subhr.ksh">
+<!ENTITY exefile_name_updatevars  "${exefile_name_updatevars}">
+<!ENTITY exefile_name_update_ncfields  "${exefile_name_update_ncfields}">
+
 <!ENTITY JJOB_POST  	 "&JJOB_DIR;/J&CAP_RUN;_POST_SUBHR">
 <!ENTITY exSCR_POST      "&SCRIPT_DIR;/ex&RUN;_post_subhr.ksh">
 <!ENTITY exefile_name_post     "${exefile_name_post}">
 <!ENTITY JJOB_POST4FGS   "&JJOB_DIR;/J&CAP_RUN;_POST4FGS_SUBHR">
 <!ENTITY exSCR_POST4FGS  "&SCRIPT_DIR;/ex&RUN;_post4fgs_subhr.ksh">
 <!ENTITY JJOB_PLOTGRADS  "&JJOB_DIR;/J&CAP_RUN;_PLOTGRADS_SUBHR">
-<!ENTITY exSCR_PLOTGRADS "&SCRIPT_DIR;/ex&RUN;_plotgrads_subhr.ksh">
+<!ENTITY exSCR_PLOTGRADS "&SCRIPT_DIR;/ex&RUN;_plotgrads_dell.ksh">
 <!ENTITY JJOB_VERIF     "&JJOB_DIR;/J&CAP_RUN;_VERIF_SUBHR">
 <!ENTITY exSCR_VERIF    "&SCRIPT_DIR;/ex&RUN;_verif_subhr.ksh">
 <!ENTITY JJOB_ARCH     "&JJOB_DIR;/J&CAP_RUN;_ARCH_SUBHR">
@@ -583,8 +612,16 @@ cat > ${NWROOT}/xml/${RUN}_${expname}_subhr.xml <<EOF
 
 <!ENTITY GSI_START_TIME "00:40:00">
 <!ENTITY GSI_DEADLINE   "01:30:00">
+<!ENTITY START_TIME_RADAR "00:10:00">
 <!ENTITY GSI_WALL_LIMIT 
    '<deadline><cyclestr offset="&GSI_DEADLINE;">@Y@m@d@H@M</cyclestr></deadline>'>
+
+<!ENTITY UPDATEVARS_PROC "${UPDATEVARS_PROC}">
+<!ENTITY UPDATEVARS_THREADS "${UPDATEVARS_THREADS}">
+<!ENTITY UPDATEVARS_OMP_STACKSIZE "${UPDATEVARS_OMP_STACKSIZE}">
+<!ENTITY UPDATEVARS_RESOURCES '${UPDATEVARS_RESOURCES}'> 
+<!ENTITY UPDATEVARS_RESERVATION '${UPDATEVARS_RESERVATION}'>
+<!ENTITY FCST_LENGTH "20"> <!--20 secconds -->
 
 <!ENTITY POST_PROC "${POST_PROC}">
 <!ENTITY POST_THREADS "${POST_THREADS}">
@@ -603,7 +640,7 @@ cat > ${NWROOT}/xml/${RUN}_${expname}_subhr.xml <<EOF
 <!ENTITY ARCH_PROC "${ARCH_PROC}">
 <!ENTITY ARCH_RESOURCES '${ARCH_RESOURCES}'>
 <!ENTITY ARCH_RESERVATION '${ARCH_RESERVATION}'>
-
+<!ENTITY NCKS '${NCKS}'>
 
 <!-- Variables in Namelist -->
 <!ENTITY GSI_grid_ratio_in_var       "${gsi_grid_ratio_in_var}">
@@ -674,6 +711,14 @@ cat > ${NWROOT}/xml/${RUN}_${expname}_subhr.xml <<EOF
         <value>&COMINRADAR;</value>
    </envar>
    <envar>
+        <name>COMINGDAS</name>
+        <value>&COMINGDAS;</value>
+   </envar>
+   <envar>
+        <name>COMINHRRRDAS</name>
+        <value>&COMINHRRRDAS;</value>
+   </envar>
+   <envar>
         <name>GESINHRRR</name>
         <value>&GESINHRRR;</value>
    </envar>
@@ -732,6 +777,10 @@ cat > ${NWROOT}/xml/${RUN}_${expname}_subhr.xml <<EOF
    <envar>
         <name>FIXwps</name>
         <value>&FIXwps;</value>
+   </envar>
+   <envar>
+        <name>FIXwrf</name>
+        <value>&FIXwrf;</value>
    </envar>
    <envar>
         <name>PARMwrf</name>
@@ -902,6 +951,14 @@ cat > ${NWROOT}/xml/${RUN}_${expname}_subhr.xml <<EOF
       <value><cyclestr>&exefile_name_cloud;</cyclestr></value>
    </envar>
    <envar>
+      <name>exefile_name_updatevars</name>
+      <value><cyclestr>&exefile_name_updatevars;</cyclestr></value>
+   </envar>
+   <envar>
+      <name>exefile_name_update_ncfields</name>
+      <value><cyclestr>&exefile_name_update_ncfields;</cyclestr></value>
+   </envar>
+   <envar>
         <name>SENDCOM</name>
         <value>&SENDCOM;</value>
    </envar>
@@ -930,6 +987,14 @@ cat > ${NWROOT}/xml/${RUN}_${expname}_subhr.xml <<EOF
     <envar>
       <name>FULLCYC</name>
       <value>1</value>
+    </envar>
+    <envar>
+      <name>HRRRDAS_BEC</name>
+      <value>&HRRRDAS_BEC;</value>
+    </envar>
+    <envar>
+      <name>GSIANL_RES</name>
+      <value>3km</value>
     </envar>
     <envar>
       <name>DATABASE_DIR</name>
@@ -1065,6 +1130,32 @@ cat > ${NWROOT}/xml/${RUN}_${expname}_subhr.xml <<EOF
       <value>&JJOB_POST;</value>
     </envar>'>
 
+<!ENTITY ENVARS_UPDATEVARS
+    '<envar>
+      <name>START_TIME</name>
+      <value><cyclestr>@Y@m@d@H</cyclestr></value>
+    </envar>
+    <envar>
+      <name>DATABASE_DIR</name>
+      <value>&DATABASE_DIR;</value>
+    </envar>
+    <envar>
+      <name>exSCR_UPDATEVARS</name>
+      <value>&exSCR_UPDATEVARS;</value>
+    </envar>
+    <envar>
+      <name>JJOB_UPDATEVARS</name>
+      <value>&JJOB_UPDATEVARS;</value>
+    </envar>
+    <envar>
+      <name>NCKS</name>
+      <value>&NCKS;</value>
+    </envar>
+    <envar>
+      <name>FCST_LENGTH</name>
+      <value>&FCST_LENGTH;</value>
+    </envar>'>
+
 <!ENTITY ENVARS_VERIF
     '<envar>
       <name>START_TIME</name>
@@ -1098,7 +1189,7 @@ cat > ${NWROOT}/xml/${RUN}_${expname}_subhr.xml <<EOF
     </envar> 
     <envar>
         <name>write_to_rzdm</name>
-        <value>yes</value>
+        <value>no</value>
     </envar>
     <envar>
       <name>exSCR_ARCH</name>
@@ -1137,7 +1228,7 @@ EOF
 
 cat >> ${NWROOT}/xml/${RUN}_${expname}_subhr.xml <<EOF 
 
-<workflow realtime="$realtime" scheduler="${SCHD_ATTRB}" cyclethrottle="96" taskthrottle="50" cyclelifespan="00:12:00:00">
+<workflow realtime="$realtime" scheduler="${SCHD_ATTRB}" cyclethrottle="12" taskthrottle="60" cyclelifespan="00:12:00:00">
 
   <log>
     <cyclestr>&LOG_DIR;/&NET;_workflow_&envir;_@Y@m@d@H@M.log</cyclestr>
@@ -1148,6 +1239,7 @@ cat >> ${NWROOT}/xml/${RUN}_${expname}_subhr.xml <<EOF
   <cycledef group="01hr">*/15 01,13 ${ExpDateWindows}</cycledef>
 
   <cycledef group="02-11hr">*/15 02-11,14-23 ${ExpDateWindows}</cycledef>
+  
 
 EOF
 
@@ -1172,7 +1264,7 @@ cat >> ${NWROOT}/xml/${RUN}_${expname}_subhr.xml <<EOF
     &ENVARS_PREPJOB;
 
    <dependency>
-       <datadep><cyclestr>&COMINRAP;/rtma_ru.@Y@m@d/rtma_ru.t@H@Mz.lghtng.tm00.bufr_d</cyclestr></datadep>
+       <datadep age="15"><cyclestr>&COMINRAP;/rtma_ru.@Y@m@d/rtma_ru.t@H@Mz.lghtng.tm00.bufr_d</cyclestr></datadep>
    </dependency>
   </task>
 EOF
@@ -1199,7 +1291,7 @@ cat >> ${NWROOT}/xml/${RUN}_${expname}_subhr.xml <<EOF
     &ENVARS_PREPJOB; 
 
    <dependency>
-       <datadep><cyclestr>&COMINRAP;/rtma_ru.@Y@m@d/rtma_ru.t@H@Mz.lgycld.tm00.bufr_d</cyclestr></datadep>
+       <datadep age="15"><cyclestr>&COMINRAP;/rtma_ru.@Y@m@d/rtma_ru.t@H@Mz.lgycld.tm00.bufr_d</cyclestr></datadep>
    </dependency>
   </task>
 EOF
@@ -1233,17 +1325,14 @@ cat >> ${NWROOT}/xml/${RUN}_${expname}_subhr.xml <<EOF
     &ENVARS_PREPJOB;
 
 
-   <dependency>
-       <and>
-       <datadep><cyclestr>&COMINRADAR;/radar.@Y@m@d@H/tile1/@Y@m@d_@H@M.mosaic</cyclestr></datadep>
-       <datadep><cyclestr>&COMINRADAR;/radar.@Y@m@d@H/tile2/@Y@m@d_@H@M.mosaic</cyclestr></datadep>
-       <datadep><cyclestr>&COMINRADAR;/radar.@Y@m@d@H/tile3/@Y@m@d_@H@M.mosaic</cyclestr></datadep>
-       <datadep><cyclestr>&COMINRADAR;/radar.@Y@m@d@H/tile4/@Y@m@d_@H@M.mosaic</cyclestr></datadep>
-       <datadep><cyclestr>&COMINRADAR;/radar.@Y@m@d@H/tile5/@Y@m@d_@H@M.mosaic</cyclestr></datadep>
-       <datadep><cyclestr>&COMINRADAR;/radar.@Y@m@d@H/tile6/@Y@m@d_@H@M.mosaic</cyclestr></datadep>
-       <datadep><cyclestr>&COMINRADAR;/radar.@Y@m@d@H/tile7/@Y@m@d_@H@M.mosaic</cyclestr></datadep>
-       <datadep><cyclestr>&COMINRADAR;/radar.@Y@m@d@H/tile8/@Y@m@d_@H@M.mosaic</cyclestr></datadep>
-       </and>
+    <dependency>
+      <or>
+        <timedep><cyclestr offset="&START_TIME_RADAR;">@Y@m@d@H@M00</cyclestr></timedep>
+        <rb><cyclestr offset="-0:01:00">!Dir.glob('&COMINRADAR;/MergedReflectivityQC/MergedReflectivityQC_00.50_@Y@m@d-@H@M*.grib2.gz').empty?</cyclestr></rb>
+        <rb><cyclestr>!Dir.glob('&COMINRADAR;/MergedReflectivityQC/MergedReflectivityQC_00.50_@Y@m@d-@H@M*.grib2.gz').empty?</cyclestr></rb>
+        <rb><cyclestr offset="0:01:00">!Dir.glob('&COMINRADAR;/MergedReflectivityQC/MergedReflectivityQC_00.50_@Y@m@d-@H@M*.grib2.gz').empty?</cyclestr></rb>
+        <rb><cyclestr offset="0:02:00">!Dir.glob('&COMINRADAR;/MergedReflectivityQC/MergedReflectivityQC_00.50_@Y@m@d-@H@M*.grib2.gz').empty?</cyclestr></rb>
+      </or>
    </dependency>
   </task>
 EOF
@@ -1271,9 +1360,9 @@ cat >> ${NWROOT}/xml/${RUN}_${expname}_subhr.xml <<EOF
 
    <dependency>
        <and>
-       <datadep><cyclestr>&COMINRAP;/rtma_ru.@Y@m@d/rtma_ru.t@H@Mz.lghtng.tm00.bufr_d</cyclestr></datadep>
-       <datadep><cyclestr>&COMINRAP;/rtma_ru.@Y@m@d/rtma_ru.t@H@Mz.lgycld.tm00.bufr_d</cyclestr></datadep> 
-       <datadep><cyclestr>&COMINRAP;/rtma_ru.@Y@m@d/rtma_ru.t@H@Mz.prepbufr.tm00</cyclestr></datadep>       
+       <datadep age="15"><cyclestr>&COMINRAP;/rtma_ru.@Y@m@d/rtma_ru.t@H@Mz.lghtng.tm00.bufr_d</cyclestr></datadep>
+       <datadep age="15"><cyclestr>&COMINRAP;/rtma_ru.@Y@m@d/rtma_ru.t@H@Mz.lgycld.tm00.bufr_d</cyclestr></datadep> 
+       <datadep age="15"><cyclestr>&COMINRAP;/rtma_ru.@Y@m@d/rtma_ru.t@H@Mz.prepbufr.tm00</cyclestr></datadep>       
        <taskdep task="&NET;_obsprep_radar_task_@Y@m@d@H@M"/>
        </and>   
    </dependency>
@@ -1297,10 +1386,13 @@ cat >> ${NWROOT}/xml/${RUN}_${expname}_subhr.xml <<EOF
 
     &ENVARS_PREPJOB;
    <dependency>
-       <datadep><cyclestr>&GESINHRRR;/hrrr.@Y@m@d/conus/hrrr.t@H00z.f01@M.netcdf</cyclestr></datadep>
+       <datadep age="15" minsize="15000M"><cyclestr>&GESINHRRR;/hrrr.@Y@m@d/conus/hrrr.t@H00z.f01@M.netcdf</cyclestr></datadep>
    </dependency>
    </task>
- 
+EOF
+
+if [ ${HRRRDAS_BEC} -gt 0 ] ; then
+cat >> ${NWROOT}/xml/${RUN}_${expname}_subhr.xml <<EOF 
   <task name="&NET;_gsianl_task_@Y@m@d@H@M" cycledefs="02-11hr,00hr,01hr" maxtries="&maxtries;">
 
     &ENVARS;
@@ -1311,6 +1403,71 @@ cat >> ${NWROOT}/xml/${RUN}_${expname}_subhr.xml <<EOF
        <name>rundir_task</name>
        <value><cyclestr>&DATA_GSIANL;</cyclestr></value>
     </envar>
+
+
+    <command>&JJOB_DIR;/launch.ksh &JJOB_GSIANL;</command>
+    <jobname><cyclestr>&NET;_gsianl_job_@Y@m@d@H@M</cyclestr></jobname>
+    <join><cyclestr>&LOG_SCHDLR;/&NET;_&envir;_gsianl_@Y@m@d@H@M.log</cyclestr></join>
+
+    &ENVARS_GSI;
+
+    <dependency>
+      <and>
+          <taskdep task="&NET;_prepobs_task_@Y@m@d@H@M"/>
+          <taskdep task="&NET;_prepfgs_task_@Y@m@d@H@M"/>
+          <datadep age="15" minsize="12600M"><cyclestr>&COMINHRRRDAS;/hrrr.@Y@m@d/conus/hrrr.t@H00z.f0100.mem0001.netcdf</cyclestr></datadep> 
+          <datadep age="15" minsize="12600M"><cyclestr>&COMINHRRRDAS;/hrrr.@Y@m@d/conus/hrrr.t@H00z.f0100.mem0002.netcdf</cyclestr></datadep> 
+          <datadep age="15" minsize="12600M"><cyclestr>&COMINHRRRDAS;/hrrr.@Y@m@d/conus/hrrr.t@H00z.f0100.mem0003.netcdf</cyclestr></datadep> 
+          <datadep age="15" minsize="12600M"><cyclestr>&COMINHRRRDAS;/hrrr.@Y@m@d/conus/hrrr.t@H00z.f0100.mem0004.netcdf</cyclestr></datadep> 
+          <datadep age="15" minsize="12600M"><cyclestr>&COMINHRRRDAS;/hrrr.@Y@m@d/conus/hrrr.t@H00z.f0100.mem0005.netcdf</cyclestr></datadep> 
+          <datadep age="15" minsize="12600M"><cyclestr>&COMINHRRRDAS;/hrrr.@Y@m@d/conus/hrrr.t@H00z.f0100.mem0006.netcdf</cyclestr></datadep> 
+          <datadep age="15" minsize="12600M"><cyclestr>&COMINHRRRDAS;/hrrr.@Y@m@d/conus/hrrr.t@H00z.f0100.mem0007.netcdf</cyclestr></datadep> 
+          <datadep age="15" minsize="12600M"><cyclestr>&COMINHRRRDAS;/hrrr.@Y@m@d/conus/hrrr.t@H00z.f0100.mem0008.netcdf</cyclestr></datadep> 
+          <datadep age="15" minsize="12600M"><cyclestr>&COMINHRRRDAS;/hrrr.@Y@m@d/conus/hrrr.t@H00z.f0100.mem0009.netcdf</cyclestr></datadep> 
+          <datadep age="15" minsize="12600M"><cyclestr>&COMINHRRRDAS;/hrrr.@Y@m@d/conus/hrrr.t@H00z.f0100.mem0010.netcdf</cyclestr></datadep> 
+          <datadep age="15" minsize="12600M"><cyclestr>&COMINHRRRDAS;/hrrr.@Y@m@d/conus/hrrr.t@H00z.f0100.mem0011.netcdf</cyclestr></datadep> 
+          <datadep age="15" minsize="12600M"><cyclestr>&COMINHRRRDAS;/hrrr.@Y@m@d/conus/hrrr.t@H00z.f0100.mem0012.netcdf</cyclestr></datadep> 
+          <datadep age="15" minsize="12600M"><cyclestr>&COMINHRRRDAS;/hrrr.@Y@m@d/conus/hrrr.t@H00z.f0100.mem0013.netcdf</cyclestr></datadep> 
+          <datadep age="15" minsize="12600M"><cyclestr>&COMINHRRRDAS;/hrrr.@Y@m@d/conus/hrrr.t@H00z.f0100.mem0014.netcdf</cyclestr></datadep> 
+          <datadep age="15" minsize="12600M"><cyclestr>&COMINHRRRDAS;/hrrr.@Y@m@d/conus/hrrr.t@H00z.f0100.mem0015.netcdf</cyclestr></datadep> 
+          <datadep age="15" minsize="12600M"><cyclestr>&COMINHRRRDAS;/hrrr.@Y@m@d/conus/hrrr.t@H00z.f0100.mem0016.netcdf</cyclestr></datadep> 
+          <datadep age="15" minsize="12600M"><cyclestr>&COMINHRRRDAS;/hrrr.@Y@m@d/conus/hrrr.t@H00z.f0100.mem0017.netcdf</cyclestr></datadep> 
+          <datadep age="15" minsize="12600M"><cyclestr>&COMINHRRRDAS;/hrrr.@Y@m@d/conus/hrrr.t@H00z.f0100.mem0018.netcdf</cyclestr></datadep> 
+          <datadep age="15" minsize="12600M"><cyclestr>&COMINHRRRDAS;/hrrr.@Y@m@d/conus/hrrr.t@H00z.f0100.mem0019.netcdf</cyclestr></datadep> 
+          <datadep age="15" minsize="12600M"><cyclestr>&COMINHRRRDAS;/hrrr.@Y@m@d/conus/hrrr.t@H00z.f0100.mem0020.netcdf</cyclestr></datadep> 
+          <datadep age="15" minsize="12600M"><cyclestr>&COMINHRRRDAS;/hrrr.@Y@m@d/conus/hrrr.t@H00z.f0100.mem0021.netcdf</cyclestr></datadep> 
+          <datadep age="15" minsize="12600M"><cyclestr>&COMINHRRRDAS;/hrrr.@Y@m@d/conus/hrrr.t@H00z.f0100.mem0022.netcdf</cyclestr></datadep> 
+          <datadep age="15" minsize="12600M"><cyclestr>&COMINHRRRDAS;/hrrr.@Y@m@d/conus/hrrr.t@H00z.f0100.mem0023.netcdf</cyclestr></datadep> 
+          <datadep age="15" minsize="12600M"><cyclestr>&COMINHRRRDAS;/hrrr.@Y@m@d/conus/hrrr.t@H00z.f0100.mem0024.netcdf</cyclestr></datadep> 
+          <datadep age="15" minsize="12600M"><cyclestr>&COMINHRRRDAS;/hrrr.@Y@m@d/conus/hrrr.t@H00z.f0100.mem0025.netcdf</cyclestr></datadep> 
+          <datadep age="15" minsize="12600M"><cyclestr>&COMINHRRRDAS;/hrrr.@Y@m@d/conus/hrrr.t@H00z.f0100.mem0026.netcdf</cyclestr></datadep> 
+          <datadep age="15" minsize="12600M"><cyclestr>&COMINHRRRDAS;/hrrr.@Y@m@d/conus/hrrr.t@H00z.f0100.mem0027.netcdf</cyclestr></datadep> 
+          <datadep age="15" minsize="12600M"><cyclestr>&COMINHRRRDAS;/hrrr.@Y@m@d/conus/hrrr.t@H00z.f0100.mem0028.netcdf</cyclestr></datadep> 
+          <datadep age="15" minsize="12600M"><cyclestr>&COMINHRRRDAS;/hrrr.@Y@m@d/conus/hrrr.t@H00z.f0100.mem0029.netcdf</cyclestr></datadep> 
+          <datadep age="15" minsize="12600M"><cyclestr>&COMINHRRRDAS;/hrrr.@Y@m@d/conus/hrrr.t@H00z.f0100.mem0030.netcdf</cyclestr></datadep> 
+          <datadep age="15" minsize="12600M"><cyclestr>&COMINHRRRDAS;/hrrr.@Y@m@d/conus/hrrr.t@H00z.f0100.mem0031.netcdf</cyclestr></datadep> 
+          <datadep age="15" minsize="12600M"><cyclestr>&COMINHRRRDAS;/hrrr.@Y@m@d/conus/hrrr.t@H00z.f0100.mem0032.netcdf</cyclestr></datadep> 
+          <datadep age="15" minsize="12600M"><cyclestr>&COMINHRRRDAS;/hrrr.@Y@m@d/conus/hrrr.t@H00z.f0100.mem0033.netcdf</cyclestr></datadep> 
+          <datadep age="15" minsize="12600M"><cyclestr>&COMINHRRRDAS;/hrrr.@Y@m@d/conus/hrrr.t@H00z.f0100.mem0034.netcdf</cyclestr></datadep> 
+          <datadep age="15" minsize="12600M"><cyclestr>&COMINHRRRDAS;/hrrr.@Y@m@d/conus/hrrr.t@H00z.f0100.mem0035.netcdf</cyclestr></datadep> 
+          <datadep age="15" minsize="12600M"><cyclestr>&COMINHRRRDAS;/hrrr.@Y@m@d/conus/hrrr.t@H00z.f0100.mem0036.netcdf</cyclestr></datadep> 
+      </and>
+    </dependency>
+  </task>
+EOF
+else 
+cat >> ${NWROOT}/xml/${RUN}_${expname}_subhr.xml <<EOF 
+  <task name="&NET;_gsianl_task_@Y@m@d@H@M" cycledefs="02-11hr,00hr,01hr" maxtries="&maxtries;">
+
+    &ENVARS;
+    &GSI_RESOURCES;
+    &GSI_RESERVATION;
+    &OPTIMIZATIONS_GSI;
+    <envar>
+       <name>rundir_task</name>
+       <value><cyclestr>&DATA_GSIANL;</cyclestr></value>
+    </envar>
+
 
     <command>&JJOB_DIR;/launch.ksh &JJOB_GSIANL;</command>
     <jobname><cyclestr>&NET;_gsianl_job_@Y@m@d@H@M</cyclestr></jobname>
@@ -1323,6 +1480,29 @@ cat >> ${NWROOT}/xml/${RUN}_${expname}_subhr.xml <<EOF
           <taskdep task="&NET;_prepobs_task_@Y@m@d@H@M"/>
           <taskdep task="&NET;_prepfgs_task_@Y@m@d@H@M"/>
       </and>
+    </dependency>
+  </task>
+EOF
+
+fi
+
+cat >> ${NWROOT}/xml/${RUN}_${expname}_subhr.xml <<EOF 
+
+
+ <task name="&NET;_updatevars_task_@Y@m@d@H@M" cycledefs="02-11hr,00hr,01hr" maxtries="&maxtries;">
+
+    &ENVARS;
+    &UPDATEVARS_RESOURCES;
+    &UPDATEVARS_RESERVATION;
+
+    <command>&JJOB_DIR;/launch.ksh &JJOB_UPDATEVARS;</command>
+    <jobname><cyclestr>&NET;_updatevars_job_@Y@m@d@H@M</cyclestr></jobname>
+    <join><cyclestr>&LOG_SCHDLR;/&NET;_&envir;_updatevars_@Y@m@d@H@M.log</cyclestr></join>
+
+    &ENVARS_UPDATEVARS;
+
+    <dependency>
+          <taskdep task="&NET;_gsianl_task_@Y@m@d@H@M"/>
     </dependency>
 
   </task>
@@ -1353,7 +1533,29 @@ cat >> ${NWROOT}/xml/${RUN}_${expname}_subhr.xml <<EOF
     &ENVARS_POST;
 
     <dependency>
-          <taskdep task="&NET;_gsianl_task_@Y@m@d@H@M"/>
+          <taskdep task="&NET;_updatevars_task_@Y@m@d@H@M"/>
+    </dependency>
+
+  </task>
+
+  <task name="&NET;_post4fgs_task_@Y@m@d@H@M" cycledefs="02-11hr,00hr,01hr" maxtries="&maxtries;">
+
+    &ENVARS;
+    &POST_RESOURCES;
+    &POST_RESERVATION;
+    <envar>
+       <name>rundir_task</name>
+       <value><cyclestr>&DATA_POST4FGS;</cyclestr></value>
+    </envar>
+
+    <command>&JJOB_DIR;/launch.ksh &JJOB_POST4FGS;</command>
+    <jobname><cyclestr>&NET;_post4fgs_job_@Y@m@d@H@M</cyclestr></jobname>
+    <join><cyclestr>&LOG_SCHDLR;/&NET;_&envir;_post4fgs_@Y@m@d@H@M.log</cyclestr></join>
+
+    &ENVARS_POST;
+
+    <dependency>
+          <taskdep task="&NET;_updatevars_task_@Y@m@d@H@M"/>
     </dependency>
 
   </task>
@@ -1411,29 +1613,6 @@ fi
 
 if [ ${run_plt} -gt 0 ] ; then
 cat >> ${NWROOT}/xml/${RUN}_${expname}_subhr.xml <<EOF 
-  <task name="&NET;_post4fgs_task_@Y@m@d@H@M" cycledefs="02-11hr,00hr,01hr" maxtries="&maxtries;">
-
-    &ENVARS;
-    &POST_RESOURCES;
-    &POST_RESERVATION;
-    <envar>
-       <name>rundir_task</name>
-       <value><cyclestr>&DATA_POST4FGS;</cyclestr></value>
-    </envar>
-
-    <command>&JJOB_DIR;/launch.ksh &JJOB_POST4FGS;</command>
-    <jobname><cyclestr>&NET;_post4fgs_job_@Y@m@d@H@M</cyclestr></jobname>
-    <join><cyclestr>&LOG_SCHDLR;/&NET;_&envir;_post4fgs_@Y@m@d@H@M.log</cyclestr></join>
-
-    &ENVARS_POST;
-
-    <dependency>
-          <taskdep task="&NET;_gsianl_task_@Y@m@d@H@M"/>
-    </dependency>
-
-  </task>
-
-
   <task name="&NET;_plotgrads_task_@Y@m@d@H@M" cycledefs="02-11hr,00hr,01hr" maxtries="&maxtries;">
 
     &ENVARS;
