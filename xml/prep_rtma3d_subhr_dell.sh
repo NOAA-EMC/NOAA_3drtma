@@ -61,7 +61,8 @@ MM=`echo ${YYYYMMDDHHm1} | cut -c 5-6`
 #HH=`echo ${YYYYMMDDHHm1} | cut -c 9-10`
 
 #export ExpDateWindows="$HH $DD $MM $YYYY *"        # HH DD HH YYYY weekday (crontab-like date format, mainly used for real-time run)
-export ExpDateWindows="* $MM $YYYY *"        # HH DD HH YYYY weekday (crontab-like date format, mainly used for real-time run)
+#export ExpDateWindows="* $MM $YYYY *"        # HH DD HH YYYY weekday (crontab-like date format, mainly used for real-time run)
+export ExpDateWindows="* 01-12 2019-2025 *"
 export startCDATE=201907121400              #yyyymmddhhmm - Starting day of retro run 
 export endCDATE=201907121400                #yyyymmddhhmm - Ending day of RTMA3D run (needed for both RETRO and REAL TIME). 
 export NET=rtma3d                           #selection of rtma3d (or rtma,urma)
@@ -86,7 +87,7 @@ export HRRRDAS_BEC=0                        #Use HRRRDAS 1-hr forecast during hy
   QUEUE_SVC="dev_transfer"                  #user-specified transfer queue
 
 # Path to top running and archiving directory
-  ptmp_base="/gpfs/dell2/stmp/${USER}/${NET}_wrkdir_realtime_test"
+  ptmp_base="/gpfs/dell2/stmp/${USER}/${NET}_wrkdir_realtime"
   DATABASE_DIR=${ptmp_base}            # (equivalent to ptmp_base)
   HOMEBASE_DIR=${NWROOT}               # path to system home directory
   COMINRAP="/gpfs/tp2/ptmp/Jeff.Whiting/CHKOUT_TMP/com3d/rtma/prod"
@@ -195,8 +196,9 @@ export exefile_name_post="rtma3d_wrfpost"
 export exefile_name_radar="rtma3d_process_mosaic"
 export exefile_name_lightning="rtma3d_process_lightning"
 export exefile_name_cloud="rtma3d_process_cloud"
-export exefile_name_updatevars="rtma3d_updatevars"
-export exefile_name_update_ncfields="rtma3d_update_ncfields"
+export exefile_name_updatevars_wrf="rtma3d_updatevars_wrf"
+export exefile_name_updatevars_ncfields="rtma3d_updatevars_ncfields"
+export exefile_name_updatevars_ndown="rtma3d_updatevars_ndown"
 #########################################################
 #--- define the path to the static data
 #    fix/
@@ -551,8 +553,9 @@ cat > ${NWROOT}/xml/${RUN}_${expname}_subhr.xml <<EOF
 <!ENTITY exefile_name_gsi      "${exefile_name_gsi}">
 <!ENTITY JJOB_UPDATEVARS     "&JJOB_DIR;/J&CAP_RUN;_UPDATEVARS_SUBHR">
 <!ENTITY exSCR_UPDATEVARS    "&SCRIPT_DIR;/ex&RUN;_updatevars_subhr.ksh">
-<!ENTITY exefile_name_updatevars  "${exefile_name_updatevars}">
-<!ENTITY exefile_name_update_ncfields  "${exefile_name_update_ncfields}">
+<!ENTITY exefile_name_updatevars_wrf  "${exefile_name_updatevars_wrf}">
+<!ENTITY exefile_name_updatevars_ncfields  "${exefile_name_updatevars_ncfields}">
+<!ENTITY exefile_name_updatevars_ndown  "${exefile_name_updatevars_ndown}">
 
 <!ENTITY JJOB_POST  	 "&JJOB_DIR;/J&CAP_RUN;_POST_SUBHR">
 <!ENTITY exSCR_POST      "&SCRIPT_DIR;/ex&RUN;_post_subhr.ksh">
@@ -951,12 +954,16 @@ cat > ${NWROOT}/xml/${RUN}_${expname}_subhr.xml <<EOF
       <value><cyclestr>&exefile_name_cloud;</cyclestr></value>
    </envar>
    <envar>
-      <name>exefile_name_updatevars</name>
-      <value><cyclestr>&exefile_name_updatevars;</cyclestr></value>
+      <name>exefile_name_updatevars_wrf</name>
+      <value><cyclestr>&exefile_name_updatevars_wrf;</cyclestr></value>
    </envar>
    <envar>
-      <name>exefile_name_update_ncfields</name>
-      <value><cyclestr>&exefile_name_update_ncfields;</cyclestr></value>
+      <name>exefile_name_updatevars_ncfields</name>
+      <value><cyclestr>&exefile_name_updatevars_ncfields;</cyclestr></value>
+   </envar>
+   <envar>
+      <name>exefile_name_updatevars_ndown</name>
+      <value><cyclestr>&exefile_name_updatevars_ndown;</cyclestr></value>
    </envar>
    <envar>
         <name>SENDCOM</name>
@@ -1488,7 +1495,6 @@ fi
 
 cat >> ${NWROOT}/xml/${RUN}_${expname}_subhr.xml <<EOF 
 
-
  <task name="&NET;_updatevars_task_@Y@m@d@H@M" cycledefs="02-11hr,00hr,01hr" maxtries="&maxtries;">
 
     &ENVARS;
@@ -1532,8 +1538,11 @@ cat >> ${NWROOT}/xml/${RUN}_${expname}_subhr.xml <<EOF
 
     &ENVARS_POST;
 
-    <dependency>
-          <taskdep task="&NET;_updatevars_task_@Y@m@d@H@M"/>
+    <dependency> 
+       <or>
+          <taskdep state="succeeded" task="&NET;_updatevars_task_@Y@m@d@H@M"/>
+          <taskdep state="Dead" task="&NET;_updatevars_task_@Y@m@d@H@M"/>
+       </or>
     </dependency>
 
   </task>
@@ -1554,9 +1563,13 @@ cat >> ${NWROOT}/xml/${RUN}_${expname}_subhr.xml <<EOF
 
     &ENVARS_POST;
 
-    <dependency>
-          <taskdep task="&NET;_updatevars_task_@Y@m@d@H@M"/>
+    <dependency> 
+       <or>
+          <taskdep state="succeeded" task="&NET;_updatevars_task_@Y@m@d@H@M"/>
+          <taskdep state="Dead" task="&NET;_updatevars_task_@Y@m@d@H@M"/>
+       </or>
     </dependency>
+
 
   </task>
 

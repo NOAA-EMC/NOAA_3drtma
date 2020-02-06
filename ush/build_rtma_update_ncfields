@@ -43,7 +43,7 @@ echo " This machine is $target ."
 # User define the following variables:
 
 dirname_source="rtma_update_ncfields.fd"
-exefile_name_update_ncfields="rtma3d_update_ncfields"
+exefile_name_update_ncfields="rtma3d_updatevars_ncfields"
 #=========================================================================#
 
 echo "*==================================================================*"
@@ -169,19 +169,19 @@ fi
 cd ${SOURCE_DIR}
 echo " ====>  compiling is under directory: ${SOURCE_DIR} "
 make clean -f makefile_${target}
-echo " make -f makefile_${target}  >& ./log.make.update_ncfields "
-make -f makefile_${target} >& ./log.make.update_ncfields
+echo " make -f makefile_${target}  >& ./log.make.updatevars_ncfields "
+make -f makefile_${target} >& ./log.make.updatevars_ncfields
 
 if [ $? -eq 0 ] ; then
   echo " code was built successfully."
-  echo " cp -p ${SOURCE_DIR}/rtma_update_ncfields   ${EXEC}/GSI/${exefile_name_update_ncfields} "
-  cp -p ${SOURCE_DIR}/rtma_update_ncfields   ${EXEC}/GSI/${exefile_name_update_ncfields}
-  ls -l ${EXEC}/GSI/${exefile_name_update_ncfields}
+  echo " cp -p ${SOURCE_DIR}/rtma_updatevars_ncfields   ${EXEC}/GSI/${exefile_name_updatevars_ncfields} "
+  cp -p ${SOURCE_DIR}/rtma_updatevars_ncfields   ${EXEC}/GSI/${exefile_name_updatevars_ncfields}
+  ls -l ${EXEC}/GSI/${exefile_name_updatevars_ncfields}
 else
   echo " ================ WARNING =============== " 
-  echo " Compilation of process_update_ncfields was failed."
+  echo " Compilation of process_updatevars_ncfields was failed."
   echo " Check up with the log file under ${SOURCE_DIR}"
-  echo "   ----> log.make.process_update_ncfields  : "
+  echo "   ----> log.make.process_updatevars_ncfields  : "
   echo " ================ WARNING =============== " 
 fi
 

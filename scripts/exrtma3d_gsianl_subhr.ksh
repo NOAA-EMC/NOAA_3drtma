@@ -525,7 +525,7 @@ ${CP} -p fort.220 minimization_fort220.${YYYYMMDDHHMU}
 
 
 # Saving ANALYSIS, DIAG, Obs-Fitting files TO COM2 DIRECTORY AS PRODUCT for archive
-#${CP} -p ${DATA}/wrf_inout                  ${COMOUTgsi_rtma3d}/${ANLrtma3d_FNAME}
+${CP} -p ${DATA}/wrf_inout                  ${COMOUTgsi_rtma3d}/${ANLrtma3d_FNAME}
 ${CP} -p ${pgmout_stdout}                   ${COMOUTgsi_rtma3d}/${pgmout_stdout}_gsianl.${YYYYMMDDHHMU}
 ${CP} -p fits_${YYYYMMDDHHMU}.txt             ${COMOUTgsi_rtma3d}/fits_${YYYYMMDDHHMU}.txt
 ${CP} -p minimization_fort220.${YYYYMMDDHHMU} ${COMOUTgsi_rtma3d}/minimization_fort220.${YYYYMMDDHHMU}

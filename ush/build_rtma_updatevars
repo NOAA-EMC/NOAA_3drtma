@@ -43,7 +43,8 @@ echo " This machine is $target ."
 # User define the following variables:
 
 dirname_source="rtma_updatevars.fd"
-exefile_name_updatevars="rtma3d_updatevars"
+exefile_name_updatevars_wrf="rtma3d_updatevars_wrf"
+exefile_name_updatevars_ndown="rtma3d_updatevars_ndown"
 #=========================================================================#
 
 echo "*==================================================================*"
@@ -170,14 +171,17 @@ cd ${SOURCE_DIR}
 echo " ====>  compiling is under directory: ${SOURCE_DIR} "
 ./clean -aa
 cp config_dell configure.wrf
-#echo "./compile -j 8 em_real >& ./log.make.updatevars"
-./compile -j 8 em_real >& ./log.make.updatevars
+#echo "./compile -j 8 em_real >& ./log.make.updatevars_wrf"
+./compile -j 8 em_real >& ./log.make.updatevars_wrf
 
 if [ $? -eq 0 ] ; then
   echo " code was built successfully."
-  echo " cp -p ${MAIN_DIR}/wrf.exe   ${EXEC}/GSI/${exefile_name_updatevars} "
-  cp -p ${MAIN_DIR}/wrf.exe   ${EXEC}/GSI/${exefile_name_updatevars}
-  ls -l ${EXEC}/GSI/${exefile_name_updatevars}
+  echo " cp -p ${MAIN_DIR}/wrf.exe   ${EXEC}/GSI/${exefile_name_updatevars_wrf} "
+  cp -p ${MAIN_DIR}/wrf.exe   ${EXEC}/GSI/${exefile_name_updatevars_wrf}
+  ls -l ${EXEC}/GSI/${exefile_name_updatevars_wrf}
+  echo " cp -p ${MAIN_DIR}/ndown.exe   ${EXEC}/GSI/${exefile_name_updatevars_ndown} "
+  cp -p ${MAIN_DIR}/ndown.exe   ${EXEC}/GSI/${exefile_name_updatevars_ndown}
+  ls -l ${EXEC}/GSI/${exefile_name_updatevars_ndown}
 else
   echo " ================ WARNING =============== " 
   echo " Compilation of process_NASA_cloud code was failed."
