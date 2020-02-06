@@ -135,8 +135,9 @@ fi
 #
 ###########################################################
 #   Set the name to the executable
-    export exefile_name_updatevars=${exefile_name_updatevars:-"rtma3d_updatevars"}
-    export exefile_name_update_ncfields=${exefile_name_update_ncfields:-"rtma3d_update_ncfields"}
+    export exefile_name_updatevars=${exefile_name_updatevars_wrf:-"rtma3d_updatevars_wrf"}
+    export exefile_name_update_ncfields=${exefile_name_updatevars_ncfields:-"rtma3d_updatevars_ncfields"}
+    export exefile_name_updatevars_ndown=${exefile_name_updatevars_ndown:-"rtma3d_updatevars_ndown"}
 
 if [ "${envir}" != "esrl" ]; then #WCOSS
 #   set the file name of the final analysis file for archive

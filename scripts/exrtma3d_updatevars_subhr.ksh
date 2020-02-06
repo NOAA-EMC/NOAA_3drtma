@@ -24,14 +24,19 @@ if [ "${envir}" == "esrl" ]; then
 fi
 
 # make sure executable exists
-if [ ! -f ${EXECrtma3d}/${exefile_name_updatevars} ]; then
-  ${ECHO} "ERROR: executable '${EXECrtma3d}/${exefile_name_updatevars}' does not exist!"
+if [ ! -f ${EXECrtma3d}/${exefile_name_updatevars_wrf} ]; then
+  ${ECHO} "ERROR: executable '${EXECrtma3d}/${exefile_name_updatevars_wrf}' does not exist!"
   exit 1
 fi
-if [ ! -f ${EXECrtma3d}/${exefile_name_update_ncfields} ]; then
-  ${ECHO} "ERROR: executable '${EXECrtma3d}/${exefile_name_update_ncfields}' does not exist!"
+if [ ! -f ${EXECrtma3d}/${exefile_name_updatevars_ncfields} ]; then
+  ${ECHO} "ERROR: executable '${EXECrtma3d}/${exefile_name_updatevars_ncfields}' does not exist!"
   exit 1
 fi
+if [ ! -f ${EXECrtma3d}/${exefile_name_updatevars_ndown} ]; then
+  ${ECHO} "ERROR: executable '${EXECrtma3d}/${exefile_name_updatevars_ndown}' does not exist!"
+  exit 1
+fi
+
 
 
 
@@ -253,27 +258,26 @@ ${LN} -s wrfout_d01_${time_str} wrfout_d01
 ${CP_LN} ${EXECrtma3d}/${exefile_name_update_ncfields} .
 
 # Output successful so write status to log
-#${ECHO} "Assemble  REFL_10CM,U10,V10 back into wrf_inout"
 ${ECHO} "Assemble Reflectivity fields back into wrf_inout"
+
 #${NCKS} -A -H -v REFL_10CM,COMPOSITE_REFL_10CM,REFL_10CM_1KM,REFL_10CM_4KM,U10,V10 wrfout_d01_${time_str} ${COMOUTgsi_rtma3d}/${ANLrtma3d_FNAME} 
 #${NCKS} -A -H -v REFL_10CM,COMPOSITE_REFL_10CM,REFL_10CM_1KM,REFL_10CM_4KM wrfout_d01_${time_str} ${COMOUTgsi_rtma3d}/${ANLrtma3d_FNAME} 
+
 ${exefile_name_update_ncfields} wrfout_d01 wrf_inout 
 export err=$?; err_chk
 
-${CP} -p wrf_inout ${COMOUTgsi_rtma3d}/${ANLrtma3d_FNAME}
+if [ -f ${COMOUTgsi_rtma3d}/${ANLrtma3d_FNAME} ]; then
+  ${ECHO} "Erasing the GSI generated analysis file to be replaced by modified analysis."
+  ${RM} ${COMOUTgsi_rtma3d}/${ANLrtma3d_FNAME}
+fi
+
+${CP_LN} -p wrf_inout ${COMOUTgsi_rtma3d}/${ANLrtma3d_FNAME}
 
 ${ECHO} "update_vars.ksh completed successfully at `${DATE}`"
 
 # Saving some files
 ${CP} -p namelist.input  ${COMOUTwrf_rtma3d}/namelist.input_${cycle_str}
 
-if [ "${envir}" != "esrl" ]; then #wcoss
-  echo "Doing some extra things..."
-fi
-
-${RM} -f ${DATAHOME}/sig*
-${RM} -f ${DATAHOME}/obs*
-${RM} -f ${DATAHOME}/pe*
 
 msg="JOB $job FOR $RUN HAS COMPLETED NORMALLY"
 postmsg "$jlogfile" "$msg"
