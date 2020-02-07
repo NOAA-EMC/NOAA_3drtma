@@ -81,11 +81,10 @@ export HRRRDAS_BEC=0                        #Use HRRRDAS 1-hr forecast during hy
 #       and different user and/or experiment.
 #====================================================================#
 
-   QUEUE=dev
-#  QUEUE=dev_shared                        #user-specified processing queue
+  QUEUE="dev"
   QUEUE_DBG="debug"                    #user-specified processing queue -- debug
   QUEUE_SVC="dev_transfer"                  #user-specified transfer queue
-
+  QUEUE_SHARED="dev_shared" 
 # Path to top running and archiving directory
   ptmp_base="/gpfs/dell2/stmp/${USER}/${NET}_wrkdir_realtime"
   DATABASE_DIR=${ptmp_base}            # (equivalent to ptmp_base)
@@ -99,7 +98,7 @@ export HRRRDAS_BEC=0                        #Use HRRRDAS 1-hr forecast during hy
   NCKS="/gpfs/dell1/usrx/local/prod/packages/ips/18.0.1/nco/4.7.0/bin/ncks"
 # Computational resources
   ACCOUNT="RTMA-T2O"                    #account for CPU resources
-  RESERVATION="<native>-R rusage[mem=2000] -R affinity[core]</native><queue>&QUEUE;</queue><account>&ACCOUNT;</account>"
+  RESERVATION="<native>-R rusage[mem=2000] -R affinity[core]</native><queue>&QUEUE_SHARED;</queue><account>&ACCOUNT;</account>"
   RESERVATION_GSI="<native>-R rusage[mem=3300] -R affinity[core]</native><queue>&QUEUE;</queue><account>&ACCOUNT;</account>"
   RESERVATION_UPDATEVARS="<native>-R rusage[mem=3300] -R affinity[core]</native><queue>&QUEUE;</queue><account>&ACCOUNT;</account>"
   RESERVATION_UPP="<native>-R rusage[mem=3300] -R affinity[core]</native><queue>&QUEUE;</queue><account>&ACCOUNT;</account>"
@@ -136,11 +135,9 @@ export HRRRDAS_BEC=0                        #Use HRRRDAS 1-hr forecast during hy
   PREPFGS_RESOURCES="<cores>&PREPFGS_PROC;</cores><walltime>00:30:00</walltime>"
   PREPFGS_RESERVATION=${RESERVATION}
 
-#  GSI_PROC="196"
   GSI_PROC=14
   GSI_THREADS=1
   GSI_OMP_STACKSIZE="512M"
-#  GSI_RESOURCES="<cores>&GSI_PROC;</cores><walltime>00:30:00</walltime>"
   GSI_RESOURCES="<nodes>28:ppn=&GSI_PROC;</nodes><walltime>00:30:00</walltime>"
   GSI_RESERVATION=${RESERVATION_GSI}
 
@@ -184,7 +181,6 @@ export HRRRDAS_BEC=0                        #Use HRRRDAS 1-hr forecast during hy
 export CAP_NET=`echo ${NET} | tr '[:lower:]' '[:upper:]'`
 export CAP_RUN=`echo ${RUN} | tr '[:lower:]' '[:upper:]'`
 export CAP_ENVIR=`echo ${envir} | tr '[:lower:]' '[:upper:]'`
-export CAP_RUN_ENVIR=`echo ${run_envir} | tr '[:lower:]' '[:upper:]'`
 
 #########################################################
 #
@@ -426,11 +422,11 @@ cat > ${NWROOT}/xml/${RUN}_${expname}_subhr.xml <<EOF
 <!ENTITY NET		"${NET}">
 <!ENTITY RUN		"${RUN}">
 <!ENTITY envir		"${envir}">
-<!ENTITY RUN_ENVIR	"${run_envir}">
+<!---<!ENTITY RUN_ENVIR	"${run_envir}"> -->
 <!ENTITY CAP_NET	"${CAP_NET}">
 <!ENTITY CAP_RUN	"${CAP_RUN}">
 <!ENTITY CAP_ENVIR	"${CAP_ENVIR}">
-<!ENTITY CAP_RUN_ENVIR	"${CAP_RUN_ENVIR}">
+<!--<!ENTITY CAP_RUN_ENVIR	"${CAP_RUN_ENVIR}"> -->
 <!ENTITY model		"&RUN;">
 <!ENTITY HRRRDAS_BEC     "${HRRRDAS_BEC}">
 
@@ -576,6 +572,7 @@ cat > ${NWROOT}/xml/${RUN}_${expname}_subhr.xml <<EOF
 <!ENTITY QUEUE           "${QUEUE}">
 <!ENTITY QUEUE_DBG       "${QUEUE_DBG}">
 <!ENTITY QUEUE_SVC       "${QUEUE_SVC}">
+<!ENTITY QUEUE_SHARED    "${QUEUE_SHARED}">
 
 <!ENTITY PARTITION       "${PARTITION}">
 <!ENTITY PARTITION_DA    "${PARTITION_DA}">
@@ -661,10 +658,10 @@ cat > ${NWROOT}/xml/${RUN}_${expname}_subhr.xml <<EOF
         <name>realtime</name>
         <value>&realtime;</value>
    </envar>
-   <envar>
+<!--   <envar>
         <name>RUN_ENVIR</name>
         <value>&RUN_ENVIR;</value>
-   </envar>
+   </envar> -->
    <envar>
         <name>machine</name>
         <value>&machine;</value>

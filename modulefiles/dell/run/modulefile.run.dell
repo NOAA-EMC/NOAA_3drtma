@@ -50,8 +50,8 @@
 
 #    module load wgrib
 #    module load wgrib2
-    export WGRIB=${WGRIB:-"/gpfs/dell2/u/Wesley.Ebisuzaki/bin/wgrib"}
-    export WGRIB2=${WGRIB2:-"/gpfs/dell2/u/Wesley.Ebisuzaki/bin/wgrib2"}
+#    export WGRIB=${WGRIB:-"/gpfs/dell2/u/Wesley.Ebisuzaki/bin/wgrib"}
+#    export WGRIB2=${WGRIB2:-"/gpfs/dell2/u/Wesley.Ebisuzaki/bin/wgrib2"}
 
 #   module load met/7.0        # MET (loaded in launch.ksh)
 
