@@ -35,7 +35,7 @@ fi
 
 ANLS_CYC_TIME=`${DATE} --date="${START_TIME}  0 hour " +"%Y%m%d%H%M"`
 FCST_INI_TIME=`${DATE} --date="${START_TIME} -${FCST_TIME} hour " +"%Y%m%d%H%M"`
-
+export WGRIB2=/gpfs/dell1/nco/ops/nwprod/grib_util.v1.1.0/exec/wgrib2
 # Compute date & time components for the analysis time
 YYYYMMDDHHMU=`${DATE} +"%Y%m%d%H%M" -d "${START_TIME}"`
 YYYYMMDDHH=`${DATE} +"%Y%m%d%H" -d "${START_TIME}"`
@@ -259,9 +259,11 @@ if [ ! -s "${workdir}/wrfsubhnat.grib2" ]; then
 fi
 
 # transfer the output grib2 files to $COMOUTpost_rtma3d
-${CP} ${workdir}/wrfsubhprs.grib2 ${COMOUTpost_rtma3d}/${PROD_HEAD}.wrfsubhprs.grib2
-${CP} ${workdir}/wrfsubhspl.grib2 ${COMOUTpost_rtma3d}/${PROD_HEAD}.wrfsubhspl.grib2
-${CP} ${workdir}/wrfsubhnat.grib2 ${COMOUTpost_rtma3d}/${PROD_HEAD}.wrfsubhnat.grib2
+
+${WGRIB2} ${workdir}/wrfsubhprs.grib2 -set center 7 -grib ${COMOUTpost_rtma3d}/${PROD_HEAD}.wrfsubhprs.grib2
+${WGRIB2} ${workdir}/wrfsubhspl.grib2 -set center 7 -grib ${COMOUTpost_rtma3d}/${PROD_HEAD}.wrfsubhspl.grib2
+${WGRIB2} ${workdir}/wrfsubhnat.grib2 -set center 7 -grib ${COMOUTpost_rtma3d}/${PROD_HEAD}.wrfsubhnat.grib2
+
 
 # softlinks with Julian date
 #basetime=`${DATE} +%y%j%H%M -d "${START_TIME}"`
