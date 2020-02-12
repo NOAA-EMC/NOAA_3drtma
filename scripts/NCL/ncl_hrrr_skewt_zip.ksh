@@ -47,8 +47,25 @@ zip_error=0
 i=0
 while [ ${i} -lt ${#domains[@]} ]; do
   dir=${DATAHOME}/nclprd/${domains[${i}]}
-  cd ${dir}
-  zip -n .png files.zip * -i \*.png 
+  if [ -d ${dir} ]; then
+    cd ${dir}
+    if (( `ls *.png 2> /dev/null|wc -l` ));then
+      zip -n .png files.zip * -i \*.png 
+      zip_error=$?
+      if [ zip_error -ne 0 ]; then
+        ${ECHO} "ERROR - zip failed!"
+        ${ECHO} " zip_error = ${zip_error}"
+      else
+        ${ECHO} "SUCCESS - zip file created"
+        ${ECHO} " zip_error = ${zip_error}"
+        rm -f *.png
+      fi  
+    else
+      ${ECHO} "no files to zip -- exiting"
+    fi  
+  else
+    ${ECHO} "${dir} does not exist"
+  fi  
 
   (( i=i + 1 ))
 done

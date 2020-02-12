@@ -588,6 +588,7 @@
     </dependency>
 
   </task>
+  -->
 
   <task name="ncl_00" cycledefs="all" maxtries="3">
 
@@ -626,7 +627,7 @@
     </envar>
     <envar>
       <name>MODEL</name>
-      <value>RTMA_3D</value>
+      <value>RTMA_3D_RU</value>
     </envar>
 
     <dependency>
@@ -634,7 +635,8 @@
     </dependency>
 
   </task>
-
+  
+<!--
   <metatask>
     <var name="skewt">skewt1 skewt2 skewt3 skewt4 skewt5</var>
 
