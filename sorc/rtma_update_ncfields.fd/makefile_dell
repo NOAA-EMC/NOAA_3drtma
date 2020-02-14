@@ -34,7 +34,7 @@ OBJS = kinds.o
 all: replace_fields_netcdf_mass
 
 replace_fields_netcdf_mass: ${OBJS} replace_fields_netcdf_mass.o
-	${FC} -o rtma_update_ncfields ${FLAGS} replace_fields_netcdf_mass.o ${OBJS} ${LIBS} 
+	${FC} -o rtma3d_updatevars_ncfields ${FLAGS} replace_fields_netcdf_mass.o ${OBJS} ${LIBS} 
 
 .SUFFIXES : .F90 .f90 .f .c .o
 
@@ -48,4 +48,4 @@ replace_fields_netcdf_mass: ${OBJS} replace_fields_netcdf_mass.o
 	${CC} ${CPPFLAGS} -c $<
 
 clean:
-	/bin/rm -f *.o *.exe *.mod rtma_update_ncfields
+	/bin/rm -f *.o *.exe *.mod rtma3d_updatevars_ncfields

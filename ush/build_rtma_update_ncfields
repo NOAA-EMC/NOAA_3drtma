@@ -174,9 +174,9 @@ make -f makefile_${target} >& ./log.make.updatevars_ncfields
 
 if [ $? -eq 0 ] ; then
   echo " code was built successfully."
-  echo " cp -p ${SOURCE_DIR}/rtma_updatevars_ncfields   ${EXEC}/GSI/${exefile_name_updatevars_ncfields} "
-  cp -p ${SOURCE_DIR}/rtma_updatevars_ncfields   ${EXEC}/GSI/${exefile_name_updatevars_ncfields}
-  ls -l ${EXEC}/GSI/${exefile_name_updatevars_ncfields}
+  echo " cp -p ${SOURCE_DIR}/rtma3d_updatevars_ncfields   ${EXEC}/GSI/${exefile_name_update_ncfields} "
+  cp -p ${SOURCE_DIR}/rtma3d_updatevars_ncfields   ${EXEC}/GSI/${exefile_name_update_ncfields}
+  ls -l ${EXEC}/GSI/${exefile_name_update_ncfields}
 else
   echo " ================ WARNING =============== " 
   echo " Compilation of process_updatevars_ncfields was failed."
