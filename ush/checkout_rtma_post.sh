@@ -8,7 +8,7 @@ date
 
 # branch_post: POST master branch in repository EMC_post
 # branch_post_gsd="master"
-  branch_post_gsd="master"
+  branch_post_gsd="post_3drtma"
 
 # branch_post_source: source branch  # the user-specified branch to check out.
                                      # if not specified by user, 

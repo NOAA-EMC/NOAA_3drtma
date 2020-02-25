@@ -103,12 +103,12 @@ if(mype==0) then
   rmse_var='REFL_10CM_4KM'
   call update_netcdf_mass(dh1,dh2,DateStr1,DateStr2,rmse_var)
 !  ------ update U10
-  rmse_var='U10'
-  call update_netcdf_mass(dh1,dh2,DateStr1,DateStr2,rmse_var)
+!  rmse_var='U10'
+!  call update_netcdf_mass(dh1,dh2,DateStr1,DateStr2,rmse_var)
 !
 !  ------ update V10
-  rmse_var='V10'
-  call update_netcdf_mass(dh1,dh2,DateStr1,DateStr2,rmse_var)
+!  rmse_var='V10'
+!  call update_netcdf_mass(dh1,dh2,DateStr1,DateStr2,rmse_var)
 !
 !
 !-------------  close files ----------------
