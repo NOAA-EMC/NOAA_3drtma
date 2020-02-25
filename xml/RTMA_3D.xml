@@ -51,7 +51,7 @@
 
 <!ENTITY AIRCRAFT_REJECT "/home/amb-verif/acars_RR/amdar_reject_lists">
 <!ENTITY SFCOBS_USELIST "/lfs1/projects/amb-verif/mesonet_uselists">
-<!ENTITY PREPBUFR_DIR "&OBS_DIR;/grids/rap/prepbufr">
+<!ENTITY PREPBUFR_DIR "&OBS_DIR;/grids/rap/prepbufr_para">
 <!ENTITY PREPBUFR_EARLY_DIR "&OBS_DIR;/grids/rap/prepbufr_test">
 <!ENTITY PREPBUFR_SAT_DIR "&OBS_DIR;/grids/rap/radiance">
 <!ENTITY LIGHTNING_DIR "&OBS_DIR;/lightning">
@@ -314,7 +314,7 @@
           <datadep><cyclestr>&PREPBUFR_DIR;/@Y@j@H00.rap.t@Hz.prepbufr.tm00.@Y@m@d</cyclestr></datadep>
           <datadep><cyclestr>&PREPBUFR_DIR;/@Y@j@H00.rap_e.t@Hz.prepbufr.tm00.@Y@m@d</cyclestr></datadep>
 -->
-          <datadep><cyclestr>&PREPBUFR_DIR;/@Y@j@H@M.rtma_ru.t@H@Mz.prepbufr.tm00.@Y@m@d</cyclestr></datadep>
+          <datadep><cyclestr>&PREPBUFR_DIR;/@Y@j@H@M.rtma_ru.t@H@Mz.prepbufr.tm00</cyclestr></datadep>
         </and>
         <timedep><cyclestr offset="&START_TIME_CONVENTIONAL;">@Y@m@d@H@M00</cyclestr></timedep>
       </or>
