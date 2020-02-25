@@ -72,7 +72,17 @@ ${LN} -s ${FIXwps}/hrrr_geo_em.d01.nc           ./geo_em.d01.nc
   fi
 
   echo ${PDY}${cyc} > ./nasaLaRC_cycle_date
+  YYYYMMDDHH=${PDY}${cyc}
 # echo ${YYYYMMDDHH} > ./nasaLaRC_cycle_date
+# Build the namelist on-the-fly
+${CAT} << EOF > namelist_nasalarc
+&SETUP
+  analysis_time = ${YYYYMMDDHH},
+  bufrfile='NASALaRCCloudInGSI.bufr',
+  npts_rad=3,
+  ioption = 2,
+/
+EOF
 
 # Run process lightning
   pgm=${RUN}_cloud
