@@ -15,7 +15,7 @@
 <!ENTITY SYSTEM_ID "RTMA_3D"> 
 <!ENTITY HOMEBASE_DIR "/lfs1/projects/nrtrr/workflow/RTMA_3D_RU">
 <!ENTITY DATABASE_DIR "/lfs1/projects/nrtrr/RTMA_3D_RU">
-<!ENTITY JOBNAME_PRE "RTMA3D_RU">
+<!ENTITY JOBNAME_PRE "RTMA3D">
 <!ENTITY envir "esrl"> 
 <!ENTITY KEEPDATA "YES">
 
@@ -170,7 +170,7 @@
     </envar>
     <envar>
        <name>subcyc</name>
-       <value><cyclestr>@M</cyclestr></value>
+       <value><cyclestr>-1</cyclestr></value>
     </envar>
     <envar>
       <name>KEEPDATA</name>
@@ -186,7 +186,7 @@
     <cyclestr>&LOG_DIR;/@Y@m@d/workflow_@Y@m@d@H@M.log</cyclestr>
   </log>
 
-  <cycledef group="all">*/15 *    *  *  2019-2022 *</cycledef>
+  <cycledef group="all">*  *    *  *  2019-2022 *</cycledef>
   <cycledef group="clean">45 *    *  *  2019-2022 *</cycledef>
 
   <task name="obsprep_lghtn" cycledefs="all" maxtries="3">
@@ -310,11 +310,13 @@
     <dependency>
       <or>
         <and>
-<!--for hourly run
-          <datadep><cyclestr>&PREPBUFR_DIR;/@Y@j@H00.rap.t@Hz.prepbufr.tm00.@Y@m@d</cyclestr></datadep>
-          <datadep><cyclestr>&PREPBUFR_DIR;/@Y@j@H00.rap_e.t@Hz.prepbufr.tm00.@Y@m@d</cyclestr></datadep>
--->
+          <or>
+            <datadep><cyclestr>&PREPBUFR_DIR;/@Y@j@H00.rap.t@Hz.prepbufr.tm00.@Y@m@d</cyclestr></datadep>
+            <datadep><cyclestr>&PREPBUFR_DIR;/@Y@j@H00.rap_e.t@Hz.prepbufr.tm00.@Y@m@d</cyclestr></datadep>
+          </or>
+<!--for sub-hourly run
           <datadep><cyclestr>&PREPBUFR_DIR;/@Y@j@H@M.rtma_ru.t@H@Mz.prepbufr.tm00</cyclestr></datadep>
+-->
         </and>
         <timedep><cyclestr offset="&START_TIME_CONVENTIONAL;">@Y@m@d@H@M00</cyclestr></timedep>
       </or>
@@ -627,7 +629,7 @@
     </envar>
     <envar>
       <name>MODEL</name>
-      <value>RTMA_3D_RU</value>
+      <value>RTMA_3D</value>
     </envar>
 
     <dependency>
@@ -635,10 +637,9 @@
     </dependency>
 
   </task>
-  
-<!--
+
   <metatask>
-    <var name="skewt">skewt1 skewt2 skewt3 skewt4 skewt5</var>
+    <var name="skewt">skewt1 skewt2 skewt5</var>
 
     <task name="ncl_00_#skewt#" cycledefs="all" maxtries="3">
 
@@ -801,8 +802,6 @@
         <and>
           <taskdep task="ncl_00_skewt1"/>
           <taskdep task="ncl_00_skewt2"/>
-          <taskdep task="ncl_00_skewt3"/>
-          <taskdep task="ncl_00_skewt4"/>
           <taskdep task="ncl_00_skewt5"/>
         </and>
         <timedep><cyclestr offset="03:00:00">@Y@m@d@H@M00</cyclestr></timedep>
@@ -845,7 +844,6 @@
     </dependency>
     
   </task>
--->
 
   <task name="clean" cycledefs="clean" maxtries="3">
 
