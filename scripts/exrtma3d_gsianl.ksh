@@ -24,8 +24,8 @@ if [ ! -f ${EXECrtma3d}/${exefile_name_gsi} ]; then
 fi
 
 # Check to make sure required directory defined and existed
-check_if_defined "ENKF_FCST" "HRRRDAS_DIR" "HRRR_DIR" "OBS_DIR"
-check_dirs_exist "ENKF_FCST" "HRRRDAS_DIR" "HRRR_DIR" "OBS_DIR"
+check_if_defined "ENKF_FCST" "HRRRDAS_DIR" "HRRR_DIR" "OBS_DIR" "AIRCRAFT_REJECT" "SFCOBS_USELIST"
+check_dirs_exist "ENKF_FCST" "HRRRDAS_DIR" "HRRR_DIR" "OBS_DIR" "AIRCRAFT_REJECT" "SFCOBS_USELIST"
 
 if [ "${subcyc}" == "-1" ]; then #hourly run
   SUBH_TIME='00'
@@ -310,8 +310,8 @@ for file in `awk '{if($1!~"!"){print $1}}' ./satinfo | sort | uniq` ;do
 done
 
 # Get aircraft reject list, mesonet_uselist, sfcobs_provider
-${CP} ${FIXgsi}/current_bad_aircraft.txt current_bad_aircraft
-${CP} ${FIXgsi}/current_mesonet_uselist.txt gsd_sfcobs_uselist.txt
+${CP} ${AIRCRAFT_REJECT}/current_bad_aircraft.txt current_bad_aircraft
+${CP} ${SFCOBS_USELIST}/current_mesonet_uselist.txt gsd_sfcobs_uselist.txt
 ${CP} ${FIXgsi}/gsd_sfcobs_provider.txt gsd_sfcobs_provider.txt
 
 # Only need this file for single obs test

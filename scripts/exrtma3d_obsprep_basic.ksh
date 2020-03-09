@@ -59,7 +59,7 @@ if [ "${envir}" == "esrl"  ]; then #For Jet expr runs
   fi
   for i in $casecade; do
     ${ECHO} "checking ${FILES[$i]}"
-    if [ -s ${FILES[$i]} ]; then
+    if [ -e ${FILES[$i]} ]; then
       ${CP} ${FILES[$i]}  ${COMINobsproc_rtma3d}/${YYYYMMDD}.${RUNS[$i]}.${tz_str}.${DFILE}
       ${LN} -snf ${COMINobsproc_rtma3d}/${YYYYMMDD}.${RUNS[$i]}.${tz_str}.${DFILE}  ${DFILE}
       break

@@ -180,14 +180,14 @@
 
 ]>
 
-<workflow realtime="T" scheduler="&SCHEDULER;" cyclethrottle="30" cyclelifespan="01:00:00:00">
+<workflow realtime="T" scheduler="&SCHEDULER;" cyclethrottle="100" cyclelifespan="01:00:00:00">
 
   <log>
     <cyclestr>&LOG_DIR;/@Y@m@d/workflow_@Y@m@d@H@M.log</cyclestr>
   </log>
 
-  <cycledef group="all">*/15 *    *  *  2019-2022 *</cycledef>
-  <cycledef group="clean">45 *    *  *  2019-2022 *</cycledef>
+  <cycledef group="all">*/15 *    *  *  2020-2021 *</cycledef>
+  <cycledef group="clean">45 *    *  *  2020-2021 *</cycledef>
 
   <task name="obsprep_lghtn" cycledefs="all" maxtries="3">
 
@@ -311,10 +311,12 @@
       <or>
         <and>
 <!--for hourly run
-          <datadep><cyclestr>&PREPBUFR_DIR;/@Y@j@H00.rap.t@Hz.prepbufr.tm00.@Y@m@d</cyclestr></datadep>
-          <datadep><cyclestr>&PREPBUFR_DIR;/@Y@j@H00.rap_e.t@Hz.prepbufr.tm00.@Y@m@d</cyclestr></datadep>
+          <or>
+            <datadep age="00:02:00"><cyclestr>&PREPBUFR_DIR;/@Y@j@H00.rap.t@Hz.prepbufr.tm00.@Y@m@d</cyclestr></datadep>
+            <datadep age="00:02:00"><cyclestr>&PREPBUFR_DIR;/@Y@j@H00.rap_e.t@Hz.prepbufr.tm00.@Y@m@d</cyclestr></datadep>
+          </or>
 -->
-          <datadep><cyclestr>&PREPBUFR_DIR;/@Y@j@H@M.rtma_ru.t@H@Mz.prepbufr.tm00</cyclestr></datadep>
+          <datadep age="00:02:00"><cyclestr>&PREPBUFR_DIR;/@Y@j@H@M.rtma_ru.t@H@Mz.prepbufr.tm00.@Y@m@d</cyclestr></datadep>
         </and>
         <timedep><cyclestr offset="&START_TIME_CONVENTIONAL;">@Y@m@d@H@M00</cyclestr></timedep>
       </or>
@@ -337,6 +339,14 @@
     <envar>
       <name>rundir_task</name>
       <value><cyclestr>&DATAROOT;/@Y@m@d@H@M/gsiprd</cyclestr></value>
+    </envar>
+    <envar>
+      <name>AIRCRAFT_REJECT</name>
+      <value>&AIRCRAFT_REJECT;</value>
+    </envar>
+    <envar>
+      <name>SFCOBS_USELIST</name>
+      <value>&SFCOBS_USELIST;</value>
     </envar>
     <envar>
       <name>HRRR_DIR</name>
@@ -638,7 +648,7 @@
   
 <!--
   <metatask>
-    <var name="skewt">skewt1 skewt2 skewt3 skewt4 skewt5</var>
+    <var name="skewt">skewt1 skewt2 skewt5</var>
 
     <task name="ncl_00_#skewt#" cycledefs="all" maxtries="3">
 
@@ -801,8 +811,6 @@
         <and>
           <taskdep task="ncl_00_skewt1"/>
           <taskdep task="ncl_00_skewt2"/>
-          <taskdep task="ncl_00_skewt3"/>
-          <taskdep task="ncl_00_skewt4"/>
           <taskdep task="ncl_00_skewt5"/>
         </and>
         <timedep><cyclestr offset="03:00:00">@Y@m@d@H@M00</cyclestr></timedep>
