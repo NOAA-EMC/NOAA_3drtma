@@ -13,8 +13,8 @@
 <!ENTITY RES_POST "rtma-kjet">
 
 <!ENTITY SYSTEM_ID "RTMA_3D"> 
-<!ENTITY HOMEBASE_DIR "/lfs1/projects/nrtrr/workflow/RTMA_3D_RU">
-<!ENTITY DATABASE_DIR "/lfs1/projects/nrtrr/RTMA_3D_RU">
+<!ENTITY HOMEBASE_DIR "/home/rtrr/RTMA_3D">
+<!ENTITY DATABASE_DIR "/lfs1/projects/nrtrr/RTMA_3D">
 <!ENTITY JOBNAME_PRE "RTMA3D">
 <!ENTITY envir "esrl"> 
 <!ENTITY KEEPDATA "YES">
@@ -51,7 +51,7 @@
 
 <!ENTITY AIRCRAFT_REJECT "/home/amb-verif/acars_RR/amdar_reject_lists">
 <!ENTITY SFCOBS_USELIST "/lfs1/projects/amb-verif/mesonet_uselists">
-<!ENTITY PREPBUFR_DIR "&OBS_DIR;/grids/rap/prepbufr_para">
+<!ENTITY PREPBUFR_DIR "&OBS_DIR;/grids/rap/prepbufr">
 <!ENTITY PREPBUFR_EARLY_DIR "&OBS_DIR;/grids/rap/prepbufr_test">
 <!ENTITY PREPBUFR_SAT_DIR "&OBS_DIR;/grids/rap/radiance">
 <!ENTITY LIGHTNING_DIR "&OBS_DIR;/lightning">
@@ -86,7 +86,7 @@
 <!ENTITY RADAR_PROC "33">
 <!ENTITY SATELLITE_PROC "1">
 <!-- ENTITY GSI_HYB_PROC "9:ppn=20" -->
-<!ENTITY GSI_HYB_PROC "400">
+<!ENTITY GSI_HYB_PROC "280">
 <!ENTITY GSIRUN_CORES "400">
 <!ENTITY WRF_PROC "280">
 <!ENTITY DIAG_STATS_PROC "1">
@@ -114,7 +114,7 @@
 <!-- End all post-processing by 6 hrs -->
 
 <!ENTITY START_TIME_RADAR "00:10:00">
-<!ENTITY START_TIME_CONVENTIONAL "00:30:00">
+<!ENTITY START_TIME_CONVENTIONAL "00:38:00">
 <!ENTITY START_TIME_NASACLOUD   "00:50:00">
 <!ENTITY START_TIME_GSI "01:40:00">
 <!ENTITY DEADLINE_DA "03:00:00">
@@ -186,8 +186,8 @@
     <cyclestr>&LOG_DIR;/@Y@m@d/workflow_@Y@m@d@H@M.log</cyclestr>
   </log>
 
-  <cycledef group="all">*  *    *  *  2019-2022 *</cycledef>
-  <cycledef group="clean">45 *    *  *  2019-2022 *</cycledef>
+  <cycledef group="all">00  *    *  *  2020-2021 *</cycledef>
+  <cycledef group="clean">00 *    *  *  2020-2021 *</cycledef>
 
   <task name="obsprep_lghtn" cycledefs="all" maxtries="3">
 
@@ -203,7 +203,7 @@
     &COMMONVARS;
     <envar>
       <name>rundir_task</name>
-      <value><cyclestr>&DATAROOT;/@Y@m@d@H@M/obsprd</cyclestr></value>
+      <value><cyclestr>&DATAROOT;/@Y@m@d@H/obsprd</cyclestr></value>
     </envar>
     <envar>
       <name>LIGHTNING_ROOT</name>
@@ -231,7 +231,7 @@
     &COMMONVARS;
     <envar>
       <name>rundir_task</name>
-      <value><cyclestr>&DATAROOT;/@Y@m@d@H@M/obsprd</cyclestr></value>
+      <value><cyclestr>&DATAROOT;/@Y@m@d@H/obsprd</cyclestr></value>
     </envar>
     <envar>
       <name>NSSL</name>
@@ -262,7 +262,7 @@
     &COMMONVARS;
     <envar>
       <name>rundir_task</name>
-      <value><cyclestr>&DATAROOT;/@Y@m@d@H@M/obsprd</cyclestr></value>
+      <value><cyclestr>&DATAROOT;/@Y@m@d@H/obsprd</cyclestr></value>
     </envar>
     <envar>
       <name>NASALARC_DATA</name>
@@ -292,7 +292,7 @@
     &COMMONVARS;
     <envar>
       <name>rundir_task</name>
-      <value><cyclestr>&DATAROOT;/@Y@m@d@H@M/obsprd</cyclestr></value>
+      <value><cyclestr>&DATAROOT;/@Y@m@d@H/obsprd</cyclestr></value>
     </envar>
     <envar>
       <name>PREPBUFR</name>
@@ -311,11 +311,11 @@
       <or>
         <and>
           <or>
-            <datadep><cyclestr>&PREPBUFR_DIR;/@Y@j@H00.rap.t@Hz.prepbufr.tm00.@Y@m@d</cyclestr></datadep>
-            <datadep><cyclestr>&PREPBUFR_DIR;/@Y@j@H00.rap_e.t@Hz.prepbufr.tm00.@Y@m@d</cyclestr></datadep>
+            <datadep age="00:02:00"><cyclestr>&PREPBUFR_DIR;/@Y@j@H00.rap.t@Hz.prepbufr.tm00.@Y@m@d</cyclestr></datadep>
+            <datadep age="00:02:00"><cyclestr>&PREPBUFR_DIR;/@Y@j@H00.rap_e.t@Hz.prepbufr.tm00.@Y@m@d</cyclestr></datadep>
           </or>
 <!--for sub-hourly run
-          <datadep><cyclestr>&PREPBUFR_DIR;/@Y@j@H@M.rtma_ru.t@H@Mz.prepbufr.tm00</cyclestr></datadep>
+          <datadep age="00:02:00"><cyclestr>&PREPBUFR_DIR;/@Y@j@H@M.rtma_ru.t@H@Mz.prepbufr.tm00.@Y@m@d</cyclestr></datadep>
 -->
         </and>
         <timedep><cyclestr offset="&START_TIME_CONVENTIONAL;">@Y@m@d@H@M00</cyclestr></timedep>
@@ -338,7 +338,15 @@
     &COMMONVARS;
     <envar>
       <name>rundir_task</name>
-      <value><cyclestr>&DATAROOT;/@Y@m@d@H@M/gsiprd</cyclestr></value>
+      <value><cyclestr>&DATAROOT;/@Y@m@d@H/gsiprd</cyclestr></value>
+    </envar>
+    <envar>
+      <name>AIRCRAFT_REJECT</name>
+      <value>&AIRCRAFT_REJECT;</value>
+    </envar>
+    <envar>
+      <name>SFCOBS_USELIST</name>
+      <value>&SFCOBS_USELIST;</value>
     </envar>
     <envar>
       <name>HRRR_DIR</name>
@@ -346,7 +354,7 @@
     </envar>
     <envar>
       <name>OBS_DIR</name>
-      <value><cyclestr>&DATAROOT;/@Y@m@d@H@M/obsprd</cyclestr></value>
+      <value><cyclestr>&DATAROOT;/@Y@m@d@H/obsprd</cyclestr></value>
     </envar>
     <envar>
       <name>ENKF_FCST</name>
@@ -401,11 +409,11 @@
     &COMMONVARS;
     <envar>
       <name>rundir_task</name>
-      <value><cyclestr>&DATAROOT;/@Y@m@d@H@M/diagprd</cyclestr></value>
+      <value><cyclestr>&DATAROOT;/@Y@m@d@H/diagprd</cyclestr></value>
     </envar>
     <envar>
       <name>GSIRUN_DIR</name>
-      <value><cyclestr>&DATAROOT;/@Y@m@d@H@M/gsiprd</cyclestr></value>
+      <value><cyclestr>&DATAROOT;/@Y@m@d@H/gsiprd</cyclestr></value>
     </envar>
     <envar>
       <name>GSIRUN_CORES</name>
@@ -432,7 +440,7 @@
     &COMMONVARS;
     <envar>
       <name>rundir_task</name>
-      <value><cyclestr>&DATAROOT;/@Y@m@d@H@M/wrfprd</cyclestr></value>
+      <value><cyclestr>&DATAROOT;/@Y@m@d@H/wrfprd</cyclestr></value>
     </envar>
     <envar>
       <name>FCST_LENGTH</name>
@@ -440,7 +448,7 @@
     </envar>
     <envar>
       <name>GSIRUN_DIR</name>
-      <value><cyclestr>&DATAROOT;/@Y@m@d@H@M/gsiprd</cyclestr></value>
+      <value><cyclestr>&DATAROOT;/@Y@m@d@H/gsiprd</cyclestr></value>
     </envar>
 
     <dependency>
@@ -463,7 +471,7 @@
     &COMMONVARS;
     <envar>
       <name>rundir_task</name>
-      <value><cyclestr>&DATAROOT;/@Y@m@d@H@M/postprd</cyclestr></value>
+      <value><cyclestr>&DATAROOT;/@Y@m@d@H/postprd</cyclestr></value>
     </envar>
     <envar>
       <name>FIXcrtm</name>
@@ -475,7 +483,7 @@
     </envar>
     <envar>
       <name>WRFOUT_DIR</name>
-      <value><cyclestr>&DATAROOT;/@Y@m@d@H@M/gsiprd</cyclestr></value>
+      <value><cyclestr>&DATAROOT;/@Y@m@d@H/gsiprd</cyclestr></value>
     </envar>
     <envar>
       <name>POST_NAME</name>
@@ -488,17 +496,16 @@
 
   </task>
 
-<!--
   <task name="smartinit_bl" cycledefs="all" maxtries="3">
 
     &SMARTINIT_RESOURCES;
     &WALL_LIMIT_PP;
     &RESERVATION_SMARTINIT;
 
-    <command>&JJOB_DIR;/launch.ksh &JJOB_DIR;/JRTMA3D_SMARTINIT_BL</command>
+    <command>&JJOB_DIR;/launch.ksh &SCRIPT_DIR;/JRTMA3D_SMARTINIT_BL</command>
     <cores>&SMARTINIT_PROC;</cores>
-    <jobname><cyclestr>&JOBNAME_PRE;_smartinit_@H_bl</cyclestr></jobname>
-    <join><cyclestr>&LOG_DIR;/@Y@m@d/smartinit_@Y@m@d@H00_bl.log</cyclestr></join>
+    <jobname><cyclestr>&JOBNAME_PRE;_smartinit_@H@M_bl</cyclestr></jobname>
+    <join><cyclestr>&LOG_DIR;/@Y@m@d/smartinit_@Y@m@d@H@M_bl.log</cyclestr></join>
 
     &COMMONVARS;
     <envar>
@@ -535,7 +542,7 @@
     </envar>
 
     <dependency>
-      <datadep age="00:02:00">&DATAROOT;/<cyclestr>@Y@m@d@H@M</cyclestr>/postprd<cyclestr>/wrfnat_hrconus_00.grib2</cyclestr></datadep>
+      <datadep age="00:02:00">&DATAROOT;/<cyclestr>@Y@m@d@H</cyclestr>/postprd<cyclestr>/wrfnat_hrconus_00.grib2</cyclestr></datadep>
     </dependency>
 
   </task>
@@ -546,10 +553,10 @@
     &WALL_LIMIT_PP;
     &RESERVATION_SMARTINIT;
 
-    <command>&JJOB_DIR;/launch.ksh &JJOB_DIR;/JRTMA3D_SMARTINIT_NB</command>
+    <command>&JJOB_DIR;/launch.ksh &SCRIPT_DIR;/JRTMA3D_SMARTINIT_NB</command>
     <cores>&SMARTINIT_PROC;</cores>
-    <jobname><cyclestr>&JOBNAME_PRE;_smartinit_@H_nb</cyclestr></jobname>
-    <join><cyclestr>&LOG_DIR;/@Y@m@d/smartinit_@Y@m@d@H00_nb.log</cyclestr></join>
+    <jobname><cyclestr>&JOBNAME_PRE;_smartinit_@H@M_nb</cyclestr></jobname>
+    <join><cyclestr>&LOG_DIR;/@Y@m@d/smartinit_@Y@m@d@H@M_nb.log</cyclestr></join>
 
     &COMMONVARS;
     <envar>
@@ -586,11 +593,10 @@
     </envar>
 
     <dependency>
-      <datadep age="00:02:00">&DATAROOT;/<cyclestr>@Y@m@d@H@M</cyclestr>/postprd<cyclestr>/wrfnat_hrconus_00.grib2</cyclestr></datadep>
+      <datadep age="00:02:00">&DATAROOT;/<cyclestr>@Y@m@d@H</cyclestr>/postprd<cyclestr>/wrfnat_hrconus_00.grib2</cyclestr></datadep>
     </dependency>
 
   </task>
-  -->
 
   <task name="ncl_00" cycledefs="all" maxtries="3">
 
@@ -609,7 +615,7 @@
     </envar>
     <envar>
       <name>START_TIME</name>
-      <value><cyclestr>@Y@m@d@H@M</cyclestr></value>
+      <value><cyclestr>@Y@m@d@H</cyclestr></value>
     </envar>
     <envar>
       <name>FCST_TIME</name>
@@ -625,7 +631,7 @@
     </envar>
     <envar>
       <name>DATAHOME</name>
-      <value><cyclestr>&DATAROOT;/@Y@m@d@H@M</cyclestr></value>
+      <value><cyclestr>&DATAROOT;/@Y@m@d@H</cyclestr></value>
     </envar>
     <envar>
       <name>MODEL</name>
@@ -658,7 +664,7 @@
       </envar>
       <envar>
         <name>START_TIME</name>
-        <value><cyclestr>@Y@m@d@H@M</cyclestr></value>
+        <value><cyclestr>@Y@m@d@H</cyclestr></value>
       </envar>
       <envar>
         <name>FCST_TIME</name>
@@ -674,7 +680,7 @@
       </envar>
       <envar>
         <name>DATAHOME</name>
-        <value><cyclestr>&DATAROOT;/@Y@m@d@H@M</cyclestr></value>
+        <value><cyclestr>&DATAROOT;/@Y@m@d@H</cyclestr></value>
       </envar>
       <envar>
         <name>MODEL</name>
@@ -709,7 +715,7 @@
       </envar>
       <envar>
         <name>START_TIME</name>
-        <value><cyclestr>@Y@m@d@H@M</cyclestr></value>
+        <value><cyclestr>@Y@m@d@H</cyclestr></value>
       </envar>
       <envar>
         <name>FCST_TIME</name>
@@ -725,7 +731,7 @@
       </envar>
       <envar>
         <name>DATAHOME</name>
-        <value><cyclestr>&DATAROOT;/@Y@m@d@H@M</cyclestr></value>
+        <value><cyclestr>&DATAROOT;/@Y@m@d@H</cyclestr></value>
       </envar>
       <envar>
         <name>MODEL</name>
@@ -748,12 +754,12 @@
 
     <command>&SCRIPTS;/NCL/ncl_hrrr_zip.ksh</command>
     <cores>&NCL_PROC;</cores>
-    <jobname><cyclestr>&JOBNAME_PRE;_ncl_@H_@M_zip</cyclestr></jobname>
+    <jobname><cyclestr>&JOBNAME_PRE;_ncl_@H_zip</cyclestr></jobname>
     <join><cyclestr>&LOG_DIR;/@Y@m@d/ncl_@Y@m@d@H@M_zip.log</cyclestr></join>
 
     <envar>
       <name>START_TIME</name>
-      <value><cyclestr>@Y@m@d@H@M</cyclestr></value>
+      <value><cyclestr>@Y@m@d@H</cyclestr></value>
     </envar>
     <envar>
       <name>DATAROOT</name>
@@ -761,7 +767,7 @@
     </envar>
     <envar>
       <name>DATAHOME</name>
-      <value><cyclestr>&DATAROOT;/@Y@m@d@H@M</cyclestr></value>
+      <value><cyclestr>&DATAROOT;/@Y@m@d@H</cyclestr></value>
     </envar>
 
     <dependency>
@@ -781,12 +787,12 @@
 
     <command>&SCRIPTS;/NCL/ncl_hrrr_skewt_zip.ksh</command>
     <cores>&NCL_PROC;</cores>
-    <jobname><cyclestr>&JOBNAME_PRE;_ncl_@H_@M_skewt_zip</cyclestr></jobname>
+    <jobname><cyclestr>&JOBNAME_PRE;_ncl_@H_skewt_zip</cyclestr></jobname>
     <join><cyclestr>&LOG_DIR;/@Y@m@d/ncl_@Y@m@d@H@M_skewt_zip.log</cyclestr></join>
 
     <envar>
       <name>START_TIME</name>
-      <value><cyclestr>@Y@m@d@H@M</cyclestr></value>
+      <value><cyclestr>@Y@m@d@H</cyclestr></value>
     </envar>
     <envar>
       <name>DATAROOT</name>
@@ -794,7 +800,7 @@
     </envar>
     <envar>
       <name>DATAHOME</name>
-      <value><cyclestr>&DATAROOT;/@Y@m@d@H@M</cyclestr></value>
+      <value><cyclestr>&DATAROOT;/@Y@m@d@H</cyclestr></value>
     </envar>
 
     <dependency>
@@ -818,12 +824,12 @@
 
     <command>&SCRIPTS;/NCL/ncl_hrrr_htxs_zip.ksh</command>
     <cores>&NCL_PROC;</cores>
-    <jobname><cyclestr>&JOBNAME_PRE;_ncl_@H_@M_htxs_zip</cyclestr></jobname>
+    <jobname><cyclestr>&JOBNAME_PRE;_ncl_@H_htxs_zip</cyclestr></jobname>
     <join><cyclestr>&LOG_DIR;/@Y@m@d/ncl_@Y@m@d@H@M_htxs_zip.log</cyclestr></join>
 
     <envar>
       <name>START_TIME</name>
-      <value><cyclestr>@Y@m@d@H@M</cyclestr></value>
+      <value><cyclestr>@Y@m@d@H</cyclestr></value>
     </envar>
     <envar>
       <name>DATAROOT</name>
@@ -831,7 +837,7 @@
     </envar>
     <envar>
       <name>DATAHOME</name>
-      <value><cyclestr>&DATAROOT;/@Y@m@d@H@M</cyclestr></value>
+      <value><cyclestr>&DATAROOT;/@Y@m@d@H</cyclestr></value>
     </envar>
 
     <dependency>
