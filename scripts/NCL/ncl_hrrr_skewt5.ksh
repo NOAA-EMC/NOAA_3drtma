@@ -16,6 +16,7 @@ export NCARG_ROOT="/apps/ncl/6.5.0-CentOS6.10_64bit_nodap_gnu447"
 export NCARG_LIB="/apps/ncl/6.5.0-CentOS6.10_64bit_nodap_gnu447/lib"
 export NCL_HOME="/whome/Brian.D.Jamison/fim/svncode/ncl/fimall"
 export UDUNITS2_XML_PATH=$NCARG_ROOT/lib/ncarg/udunits/udunits2.xml
+export MODEL="${MODEL}"
 
 # Set up paths to shell commands
 LS=/bin/ls
@@ -39,7 +40,7 @@ CONVERT=`which convert`
 MONTAGE=`which montage`
 PATH=${NCARG_ROOT}/bin:${PATH}
 
-typeset -RZ2 FCST_TIME
+# typeset -RZ2 FCST_TIME
 
 # ulimit -s 512000
 ulimit -s 1024000
@@ -106,9 +107,9 @@ ${LN} -s ${EXE_ROOT}/hrrrterrainland.grib2 hrrrterrainland.grib2
 
 set -A ncgms  sfc_skewt5
 
-set -A pngs sfc_skewt5-0.png   \
-            sfc_skewt5-1.png   \
-            sfc_skewt5-2.png
+set -A pngs sfc_skewt5.000001.png   \
+            sfc_skewt5.000002.png   \
+            sfc_skewt5.000003.png
 
 set -A webnames skewt_BAO_99999 \
                 skewt_GXY_99999 \
@@ -140,36 +141,36 @@ while [ ${i} -lt ${#ncgms[@]} ]; do
 
 done
 
-# Convert the .ps files into .png files
-i=0
-while [ ${i} -lt ${#ncgms[@]} ]; do
-
-  plot=${ncgms[${i}]}
-  ${ECHO} "Starting convert for ${plot} at `${DATE}`"
-
-  if [ -s ${plot}.ps ]; then
-# skewt image
-    ${CONVERT} -colors 128 -trim -density 300 -geometry 700x700 -border 25x25 -bordercolor black ${plot}.ps ${plot}.png
-    error=$?
-    if [ ${error} -ne 0 ]; then      ${ECHO} "ERROR: convert ${plot}.ps crashed!  Exit status=${error}"
-      ncl_error=${error}
-    fi
-    ${ECHO} "Finished convert for ${plot}.ps at `${DATE}`"
-  else
-    ${ECHO} "No file to convert, exit gracefully"
-    ncl_error=0
-  fi
-
-  (( i=i + 1 ))
-  
-done
+# # Convert the .ps files into .png files
+# i=0
+# while [ ${i} -lt ${#ncgms[@]} ]; do
+# 
+#   plot=${ncgms[${i}]}
+#   ${ECHO} "Starting convert for ${plot} at `${DATE}`"
+# 
+#   if [ -s ${plot}.ps ]; then
+# # skewt image
+#     ${CONVERT} -colors 128 -trim -density 300 -geometry 700x700 -border 25x25 -bordercolor black -depth 8 ${plot}.ps ${plot}.png
+#     error=$?
+#     if [ ${error} -ne 0 ]; then      ${ECHO} "ERROR: convert ${plot}.ps crashed!  Exit status=${error}"
+#       ncl_error=${error}
+#     fi
+#     ${ECHO} "Finished convert for ${plot}.ps at `${DATE}`"
+#   else
+#     ${ECHO} "No file to convert, exit gracefully"
+#     ncl_error=0
+#   fi
+# 
+#   (( i=i + 1 ))
+#   
+# done
 
 # Copy png files to their proper names
 i=0
 while [ ${i} -lt ${#pngs[@]} ]; do
   pngfile=${pngs[${i}]}
   webfile=${DATAHOME}/nclprd/skewt/${webnames[${i}]}_f${FCST_TIME}.png
-#  webfile=/whome/rtrr/HRRR3_conus/bin/nclprd/skewt/${webnames[${i}]}_f${FCST_TIME}.png    # for testing
+#  webfile=/home/rtrr/HRRR3_conus/bin/nclprd/skewt/${webnames[${i}]}_f${FCST_TIME}.png    # for testing
   ${MV} ${pngfile} ${webfile}
 
   (( i=i + 1 ))

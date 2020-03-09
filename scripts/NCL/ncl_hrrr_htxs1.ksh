@@ -1,7 +1,5 @@
 #!/bin/ksh --login
 
-np=`cat $PBS_NODEFILE | wc -l`
-
 # Load modules
 module purge
 module load szip/2.1

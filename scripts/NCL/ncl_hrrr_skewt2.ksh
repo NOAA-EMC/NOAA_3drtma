@@ -1,7 +1,5 @@
 #!/bin/ksh --login
 
-np=`cat $PBS_NODEFILE | wc -l`
-
 # Load modules
 module purge
 module load szip/2.1
@@ -18,6 +16,7 @@ export NCARG_ROOT="/apps/ncl/6.5.0-CentOS6.10_64bit_nodap_gnu447"
 export NCARG_LIB="/apps/ncl/6.5.0-CentOS6.10_64bit_nodap_gnu447/lib"
 export NCL_HOME="/whome/Brian.D.Jamison/fim/svncode/ncl/fimall"
 export UDUNITS2_XML_PATH=$NCARG_ROOT/lib/ncarg/udunits/udunits2.xml
+export MODEL="${MODEL}"
 
 # Set up paths to shell commands
 LS=/bin/ls
@@ -41,14 +40,14 @@ CONVERT=`which convert`
 MONTAGE=`which montage`
 PATH=${NCARG_ROOT}/bin:${PATH}
 
-typeset -RZ2 FCST_TIME
+# typeset -RZ2 FCST_TIME
 
 # ulimit -s 512000
 ulimit -s 1024000
 
 # Settings for testing
 EXE_ROOT=/misc/whome/wrfruc/bin/ncl/nclhrrr
-# START_TIME=2011101106
+# START_TIME=2011110206
 # FCST_TIME=12
 # DATAROOT=/home/rtrr/hrrr
 # DATAHOME=${DATAROOT}/${START_TIME}
@@ -108,51 +107,95 @@ ${LN} -s ${EXE_ROOT}/hrrrterrainland.grib2 hrrrterrainland.grib2
 
 set -A ncgms  sfc_skewt2
 
-set -A pngs sfc_skewt2-0.png   \
-            sfc_skewt2-1.png   \
-            sfc_skewt2-2.png   \
-            sfc_skewt2-3.png   \
-            sfc_skewt2-4.png   \
-            sfc_skewt2-5.png   \
-            sfc_skewt2-6.png   \
-            sfc_skewt2-7.png   \
-            sfc_skewt2-8.png   \
-            sfc_skewt2-9.png   \
-            sfc_skewt2-10.png  \
-            sfc_skewt2-11.png  \
-            sfc_skewt2-12.png  \
-            sfc_skewt2-13.png  \
-            sfc_skewt2-14.png  \
-            sfc_skewt2-15.png  \
-            sfc_skewt2-16.png  \
-            sfc_skewt2-17.png  \
-            sfc_skewt2-18.png  \
-            sfc_skewt2-19.png  \
-            sfc_skewt2-20.png  \
-            sfc_skewt2-21.png
+set -A pngs sfc_skewt2.000001.png  \
+            sfc_skewt2.000002.png  \
+            sfc_skewt2.000003.png  \
+            sfc_skewt2.000004.png  \
+            sfc_skewt2.000005.png  \
+            sfc_skewt2.000006.png  \
+            sfc_skewt2.000007.png  \
+            sfc_skewt2.000008.png  \
+            sfc_skewt2.000009.png  \
+            sfc_skewt2.000010.png  \
+            sfc_skewt2.000011.png  \
+            sfc_skewt2.000012.png  \
+            sfc_skewt2.000013.png  \
+            sfc_skewt2.000014.png  \
+            sfc_skewt2.000015.png  \
+            sfc_skewt2.000016.png  \
+            sfc_skewt2.000017.png  \
+            sfc_skewt2.000018.png  \
+            sfc_skewt2.000019.png  \
+            sfc_skewt2.000020.png  \
+            sfc_skewt2.000021.png  \
+            sfc_skewt2.000022.png  \
+            sfc_skewt2.000023.png  \
+            sfc_skewt2.000024.png  \
+            sfc_skewt2.000025.png  \
+            sfc_skewt2.000026.png  \
+            sfc_skewt2.000027.png  \
+            sfc_skewt2.000028.png  \
+            sfc_skewt2.000029.png  \
+            sfc_skewt2.000030.png  \
+            sfc_skewt2.000031.png  \
+            sfc_skewt2.000032.png  \
+            sfc_skewt2.000033.png  \
+            sfc_skewt2.000034.png  \
+            sfc_skewt2.000035.png  \
+            sfc_skewt2.000036.png  \
+            sfc_skewt2.000037.png  \
+            sfc_skewt2.000038.png  \
+            sfc_skewt2.000039.png  \
+            sfc_skewt2.000040.png  \
+            sfc_skewt2.000041.png  \
+            sfc_skewt2.000042.png  \
+            sfc_skewt2.000043.png  \
+            sfc_skewt2.000044.png
 
-set -A webnames skewt_XMR_74794 \
-                skewt_BRO_72250 \
-                skewt_CRP_72251 \
-                skewt_APG_74002 \
-                skewt_GSO_72317 \
-                skewt_ILN_72426 \
-                skewt_VPS_72221 \
-                skewt_CHS_72208 \
-                skewt_JAX_72206 \
-                skewt_BNA_72327 \
-                skewt_FSI_72355 \
-                skewt_SHV_72248 \
-                skewt_DDC_72451 \
-                skewt_SGF_72440 \
-                skewt_TOP_72456 \
-                skewt_CAR_72712 \
-                skewt_CHH_74494 \
-                skewt_BUF_72528 \
-                skewt_GRB_72645 \
-                skewt_INL_72747 \
-                skewt_ABR_72659 \
-                skewt_DRT_72261
+set -A webnames skewt_AMA_72363 \
+                skewt_ABQ_72365 \
+                skewt_DNR_72469 \
+                skewt_GJT_72476 \
+                skewt_TWC_72274 \
+                skewt_OAK_72493 \
+                skewt_BIS_72764 \
+                skewt_LBF_72562 \
+                skewt_RIW_72672 \
+                skewt_SLC_72572 \
+                skewt_BOI_72681 \
+                skewt_MFR_72597 \
+                skewt_SLE_72694 \
+                skewt_FGZ_72376 \
+                skewt_SIL_72233 \
+                skewt_FFC_72215 \
+                skewt_BMX_72230 \
+                skewt_RNK_72318 \
+                skewt_GYX_74389 \
+                skewt_ALY_72518 \
+                skewt_UPH_99999 \
+                skewt_MFL_72202 \
+                skewt_NTD_72391 \
+                skewt_NSI_72291 \
+                skewt_VBG_72393 \
+                skewt_IAD_72403 \
+                skewt_WAL_72402 \
+                skewt_MHX_72305 \
+                skewt_TLH_72214 \
+                skewt_GGW_72768 \
+                skewt_UNR_72662 \
+                skewt_UIL_72797 \
+                skewt_OKX_72501 \
+                skewt_PIT_72520 \
+                skewt_ORD_72530 \
+                skewt_OAX_72558 \
+                skewt_DVN_74455 \
+                skewt_MPX_72649 \
+                skewt_999_74001 \
+                skewt_999_74005 \
+                skewt_999_74626 \
+                skewt_LMN_74646 \
+                skewt_MSN_99999 \
+                skewt_MKE_99999
 
 ncl_error=0
 
@@ -179,29 +222,29 @@ while [ ${i} -lt ${#ncgms[@]} ]; do
 
 done
 
-# Convert the .ps files into .png files
-i=0
-while [ ${i} -lt ${#ncgms[@]} ]; do
-
-  plot=${ncgms[${i}]}
-  ${ECHO} "Starting convert for ${plot} at `${DATE}`"
-
-  if [ -s ${plot}.ps ]; then
-# skewt image
-    ${CONVERT} -colors 128 -trim -density 300 -geometry 700x700 -border 25x25 -bordercolor black ${plot}.ps ${plot}.png
-    error=$?
-    if [ ${error} -ne 0 ]; then      ${ECHO} "ERROR: convert ${plot}.ps crashed!  Exit status=${error}"
-      ncl_error=${error}
-    fi
-    ${ECHO} "Finished convert for ${plot}.ps at `${DATE}`"
-  else
-    ${ECHO} "No file to convert, exit gracefully"
-    ncl_error=0
-  fi
-
-  (( i=i + 1 ))
-  
-done
+# # Convert the .ps files into .png files
+# i=0
+# while [ ${i} -lt ${#ncgms[@]} ]; do
+# 
+#   plot=${ncgms[${i}]}
+#   ${ECHO} "Starting convert for ${plot} at `${DATE}`"
+# 
+#   if [ -s ${plot}.ps ]; then
+# # skewt image
+#     ${CONVERT} -colors 128 -trim -density 300 -geometry 700x700 -border 25x25 -bordercolor black -depth 8 ${plot}.ps ${plot}.png
+#     error=$?
+#     if [ ${error} -ne 0 ]; then      ${ECHO} "ERROR: convert ${plot}.ps crashed!  Exit status=${error}"
+#       ncl_error=${error}
+#     fi
+#     ${ECHO} "Finished convert for ${plot}.ps at `${DATE}`"
+#   else
+#     ${ECHO} "No file to convert, exit gracefully"
+#     ncl_error=0
+#   fi
+# 
+#   (( i=i + 1 ))
+#   
+# done
 
 # Copy png files to their proper names
 i=0
