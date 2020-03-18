@@ -502,12 +502,16 @@
     &WALL_LIMIT_PP;
     &RESERVATION_SMARTINIT;
 
-    <command>&JJOB_DIR;/launch.ksh &SCRIPT_DIR;/JRTMA3D_SMARTINIT_BL</command>
+    <command>&JJOB_DIR;/launch.ksh &SCRIPT_DIR;/exrtma3d_smartinit_bl.ksh</command>
     <cores>&SMARTINIT_PROC;</cores>
     <jobname><cyclestr>&JOBNAME_PRE;_smartinit_@H@M_bl</cyclestr></jobname>
     <join><cyclestr>&LOG_DIR;/@Y@m@d/smartinit_@Y@m@d@H@M_bl.log</cyclestr></join>
 
     &COMMONVARS;
+    <envar>
+      <name>rundir_task</name>
+      <value><cyclestr>&DATAROOT;/@Y@m@d@H/smtiprd</cyclestr></value>
+    </envar>
     <envar>
       <name>START_TIME</name>
       <value><cyclestr>@Y@m@d@H</cyclestr></value>
@@ -553,12 +557,16 @@
     &WALL_LIMIT_PP;
     &RESERVATION_SMARTINIT;
 
-    <command>&JJOB_DIR;/launch.ksh &SCRIPT_DIR;/JRTMA3D_SMARTINIT_NB</command>
+    <command>&JJOB_DIR;/launch.ksh &SCRIPT_DIR;/exrtma3d_smartinit_bl.ksh</command>
     <cores>&SMARTINIT_PROC;</cores>
     <jobname><cyclestr>&JOBNAME_PRE;_smartinit_@H@M_nb</cyclestr></jobname>
     <join><cyclestr>&LOG_DIR;/@Y@m@d/smartinit_@Y@m@d@H@M_nb.log</cyclestr></join>
 
     &COMMONVARS;
+    <envar>
+      <name>rundir_task</name>
+      <value><cyclestr>&DATAROOT;/@Y@m@d@H/smtiprd</cyclestr></value>
+    </envar>
     <envar>
       <name>START_TIME</name>
       <value><cyclestr>@Y@m@d@H</cyclestr></value>
