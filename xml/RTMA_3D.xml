@@ -557,7 +557,7 @@
     &WALL_LIMIT_PP;
     &RESERVATION_SMARTINIT;
 
-    <command>&JJOB_DIR;/launch.ksh &SCRIPT_DIR;/exrtma3d_smartinit_bl.ksh</command>
+    <command>&JJOB_DIR;/launch.ksh &SCRIPT_DIR;/exrtma3d_smartinit_nb.ksh</command>
     <cores>&SMARTINIT_PROC;</cores>
     <jobname><cyclestr>&JOBNAME_PRE;_smartinit_@H@M_nb</cyclestr></jobname>
     <join><cyclestr>&LOG_DIR;/@Y@m@d/smartinit_@Y@m@d@H@M_nb.log</cyclestr></join>
