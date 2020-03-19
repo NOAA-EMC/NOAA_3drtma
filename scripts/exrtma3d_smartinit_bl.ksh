@@ -90,6 +90,7 @@ typeset -Z2 fhr
 
 export tmmark=tm00
 
+set -x
 cp ${DATAPOSTHOME}/wrfnat_hrconus_${fhr}.grib2 WRFNAT${fhr}.tm00
 ${GRB2INDEX} WRFNAT${fhr}.tm00 WRFNAT${fhr}i.tm00
 
