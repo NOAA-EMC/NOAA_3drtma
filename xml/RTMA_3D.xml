@@ -12,10 +12,10 @@
 <!ENTITY RES_DA "rtma-kjet">
 <!ENTITY RES_POST "rtma-kjet">
 
-<!ENTITY SYSTEM_ID "RTMA_3D"> 
-<!ENTITY HOMEBASE_DIR "/home/rtrr/RTMA_3D">
-<!ENTITY DATABASE_DIR "/lfs1/projects/nrtrr/RTMA_3D">
-<!ENTITY JOBNAME_PRE "RTMA3D">
+<!ENTITY SYSTEM_ID "RTMA_3D_dev1">
+<!ENTITY HOMEBASE_DIR "/home/rtrr/RTMA_3D_dev1">
+<!ENTITY DATABASE_DIR "/lfs1/projects/nrtrr/RTMA_3D_dev1">
+<!ENTITY JOBNAME_PRE "RTMA3D_dev1">
 <!ENTITY envir "esrl"> 
 <!ENTITY KEEPDATA "YES">
 
@@ -557,7 +557,7 @@
     &WALL_LIMIT_PP;
     &RESERVATION_SMARTINIT;
 
-    <command>&JJOB_DIR;/launch.ksh &SCRIPT_DIR;/exrtma3d_smartinit_bl.ksh</command>
+    <command>&JJOB_DIR;/launch.ksh &SCRIPT_DIR;/exrtma3d_smartinit_nb.ksh</command>
     <cores>&SMARTINIT_PROC;</cores>
     <jobname><cyclestr>&JOBNAME_PRE;_smartinit_@H@M_nb</cyclestr></jobname>
     <join><cyclestr>&LOG_DIR;/@Y@m@d/smartinit_@Y@m@d@H@M_nb.log</cyclestr></join>
