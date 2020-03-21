@@ -12,7 +12,7 @@
 <!ENTITY RES_DA "rtma-kjet">
 <!ENTITY RES_POST "rtma-kjet">
 
-<!ENTITY SYSTEM_ID "RTMA_3D"> 
+<!ENTITY SYSTEM_ID "RTMA3D_RU"> 
 <!ENTITY HOMEBASE_DIR "/lfs1/projects/nrtrr/workflow/RTMA_3D_RU">
 <!ENTITY DATABASE_DIR "/lfs1/projects/nrtrr/RTMA_3D_RU">
 <!ENTITY JOBNAME_PRE "RTMA3D_RU">
@@ -503,12 +503,16 @@
     &WALL_LIMIT_PP;
     &RESERVATION_SMARTINIT;
 
-    <command>&JJOB_DIR;/launch.ksh &JJOB_DIR;/JRTMA3D_SMARTINIT_BL</command>
+    <command>&JJOB_DIR;/launch.ksh &SCRIPT_DIR;/exrtma3d_smartinit_bl.ksh</command>
     <cores>&SMARTINIT_PROC;</cores>
-    <jobname><cyclestr>&JOBNAME_PRE;_smartinit_@H_bl</cyclestr></jobname>
-    <join><cyclestr>&LOG_DIR;/@Y@m@d/smartinit_@Y@m@d@H00_bl.log</cyclestr></join>
+    <jobname><cyclestr>&JOBNAME_PRE;_smartinit_@H@M_bl</cyclestr></jobname>
+    <join><cyclestr>&LOG_DIR;/@Y@m@d/smartinit_@Y@m@d@H@M_bl.log</cyclestr></join>
 
     &COMMONVARS;
+    <envar>
+      <name>rundir_task</name>
+      <value><cyclestr>&DATAROOT;/@Y@m@d@H/smtiprd</cyclestr></value>
+    </envar>
     <envar>
       <name>START_TIME</name>
       <value><cyclestr>@Y@m@d@H</cyclestr></value>
@@ -554,12 +558,16 @@
     &WALL_LIMIT_PP;
     &RESERVATION_SMARTINIT;
 
-    <command>&JJOB_DIR;/launch.ksh &JJOB_DIR;/JRTMA3D_SMARTINIT_NB</command>
+    <command>&JJOB_DIR;/launch.ksh &SCRIPT_DIR;/exrtma3d_smartinit_nb.ksh</command>
     <cores>&SMARTINIT_PROC;</cores>
-    <jobname><cyclestr>&JOBNAME_PRE;_smartinit_@H_nb</cyclestr></jobname>
-    <join><cyclestr>&LOG_DIR;/@Y@m@d/smartinit_@Y@m@d@H00_nb.log</cyclestr></join>
+    <jobname><cyclestr>&JOBNAME_PRE;_smartinit_@H@M_nb</cyclestr></jobname>
+    <join><cyclestr>&LOG_DIR;/@Y@m@d/smartinit_@Y@m@d@H@M_nb.log</cyclestr></join>
 
     &COMMONVARS;
+    <envar>
+      <name>rundir_task</name>
+      <value><cyclestr>&DATAROOT;/@Y@m@d@H/smtiprd</cyclestr></value>
+    </envar>
     <envar>
       <name>START_TIME</name>
       <value><cyclestr>@Y@m@d@H</cyclestr></value>
@@ -637,7 +645,7 @@
     </envar>
     <envar>
       <name>MODEL</name>
-      <value>RTMA_3D_RU</value>
+      <value>&SYSTEM_ID;</value>
     </envar>
 
     <dependency>
@@ -687,7 +695,7 @@
       </envar>
       <envar>
         <name>MODEL</name>
-        <value>RTMA_3D</value>
+        <value>&SYSTEM_ID;</value>
       </envar>
 
       <dependency>
@@ -738,7 +746,7 @@
       </envar>
       <envar>
         <name>MODEL</name>
-        <value>RTMA_3D</value>
+        <value>&SYSTEM_ID;</value>
       </envar>
 
       <dependency>
