@@ -15,7 +15,7 @@
 <!ENTITY SYSTEM_ID "RTMA_3D"> 
 <!ENTITY HOMEBASE_DIR "/home/rtrr/RTMA_3D">
 <!ENTITY DATABASE_DIR "/lfs1/projects/nrtrr/RTMA_3D">
-<!ENTITY JOBNAME_PRE "RTMA3D">
+<!ENTITY JOBNAME_PRE "RTMA3D_reg">
 <!ENTITY envir "esrl"> 
 <!ENTITY KEEPDATA "YES">
 
@@ -126,9 +126,9 @@
 <!ENTITY WALL_LIMIT_UV '<deadline><cyclestr offset="&DEADLINE_UV;">@Y@m@d@H@M</cyclestr></deadline>'>
 
 <!ENTITY RESERVATION '<native>--mail-type=NONE</native><queue>&QUEUE;</queue><account>&ACCOUNT;</account><partition>&PARTITION;</partition>'>
-<!ENTITY RESERVATION_PRE '<native>--mail-type=NONE </native><queue>&QUEUE;</queue><account>&ACCOUNT;</account><partition>&PARTITION;</partition>'>
-<!ENTITY RESERVATION_DA '<native>--mail-type=NONE </native><queue>&QUEUE;</queue><account>&ACCOUNT_DA;</account><partition>&PARTITION_DA;</partition>'>
-<!ENTITY RESERVATION_POST '<native>--mail-type=NONE </native><queue>&QUEUE;</queue><account>&ACCOUNT;</account><partition>&PARTITION;</partition>'>
+<!ENTITY RESERVATION_PRE '<native>--mail-type=NONE --reservation=&RES_DA;</native><queue>&QUEUE;</queue><account>&ACCOUNT;</account><partition>&PARTITION;</partition>'>
+<!ENTITY RESERVATION_DA '<native>--mail-type=NONE --reservation=&RES_DA;</native><queue>&QUEUE;</queue><account>&ACCOUNT_DA;</account><partition>&PARTITION_DA;</partition>'>
+<!ENTITY RESERVATION_POST '<native>--mail-type=NONE --reservation=&RES_DA;</native><queue>&QUEUE;</queue><account>&ACCOUNT;</account><partition>&PARTITION;</partition>'>
 <!ENTITY RESERVATION_SMARTINIT '<native>--mail-type=NONE</native><queue>&QUEUE;</queue><account>&ACCOUNT;</account><partition>&PARTITION;</partition>'>
 
 <!ENTITY COMMONVARS
