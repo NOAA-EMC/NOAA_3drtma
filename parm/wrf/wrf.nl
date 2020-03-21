@@ -3,16 +3,16 @@
  run_hours                           = 0,
  run_minutes                         = 0,
  run_seconds                         = 0,
- start_year                          = 2018,
- start_month                         = 08,
- start_day                           = 26,
- start_hour                          = 12,
+ start_year                          = 2007,
+ start_month                         = 04,
+ start_day                           = 12,
+ start_hour                          = 00,
  start_minute                        = 00,
  start_second                        = 00,
- end_year                            = 2018,
- end_month                           = 08,
- end_day                             = 26,
- end_hour                            = 18,
+ end_year                            = 2007,
+ end_month                           = 04,
+ end_day                             = 12,
+ end_hour                            = 06,
  end_minute                          = 00,
  end_second                          = 00,
  interval_seconds                    = 10800,
@@ -53,9 +53,9 @@
  time_step_fract_den                 = 1,
  max_dom                             = 1,
  s_we                                = 1,     1,     1,
- e_we                                = 1800,    112,   94,
+ e_we                                = 1300,    112,   94,
  s_sn                                = 1,     1,     1,
- e_sn                                = 1060,    97,    91,
+ e_sn                                = 920,    97,    91,
  s_vert                              = 1,     1,     1,
  e_vert                              = 51,    28,    28,
  num_metgrid_levels                  = 51, 
@@ -111,7 +111,7 @@
  CO2TF                               = 1,
  sf_sfclay_physics                   = 5,     5,     1,
  sf_surface_physics                  = 3,     3,     1,
- sf_lake_physics                     = 1,     1,     1
+ sf_lake_physics                     = 0,     1,     1
  bl_pbl_physics                      = 5,     5,     1,
  bldt                                = 0,     0,     0,
  bl_mynn_tkebudget                   = 0,
@@ -143,7 +143,7 @@
  ensdim                              = 144,
  usemonalb                           = .true.,
  rdlai2d                             = .true.,
- num_land_cat                        = 21,
+ num_land_cat                        = 20,
  mosaic_lu                           = 1
  mosaic_soil                         = 1
  alb_sol                             = 1
@@ -180,7 +180,7 @@
  kvdif                               = 0,      0,      0,
  SMDIV                               = 0.1,    0.1,    0.1,
  EMDIV                               = 0.01,   0.01,   0.01,
- EPSSM                               = 0.1,    0.1,    0.1
+ EPSSM                               = 0.5,    0.1,    0.1
  non_hydrostatic                     = .true., .true., .true.,
  moist_adv_opt                       = 1,      2,      2,
  moist_adv_dfi_opt                   = 0,      1,     1,
@@ -220,6 +220,6 @@
  /
 
  &namelist_quilt
- nio_tasks_per_group = 16,
+ nio_tasks_per_group = 20,
  nio_groups = 1,
  /

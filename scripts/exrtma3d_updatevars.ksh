@@ -135,6 +135,11 @@ end_day=`${DATE} +%d -d "${END_TIME}"`
 end_hour=`${DATE} +%H -d "${END_TIME}"`
 end_minute=`${DATE} +%M -d "${END_TIME}"`
 end_second=`${DATE} +%S -d "${END_TIME}"`
+mod3=$(( $start_hour % 3  ))
+if [ $mod3 -eq 0 ]; then #don't run wrf since it will crash
+   echo "hour=$start_hour, skip wrf run"
+   exit 0
+fi
 
 # Compute number of days and hours for the run
 (( run_days = 0 ))
