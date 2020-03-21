@@ -44,8 +44,8 @@ source ${MODULE_FILE}
 
 # Make sure we are using GMT time zone for time computations
 # export DATAROOT="/home/rtrr/hrrr"  # for testing
-# export FCST_TIME=00  # for testing
-# export START_TIME=2019042712  # for testing
+# export FCST_TIME=3  # for testing
+# export START_TIME=2014111719  # for testing
 export TZ="GMT"
 export NCARG_ROOT="/apps/ncl/6.5.0-CentOS6.10_64bit_nodap_gnu447"
 export NCARG_LIB="/apps/ncl/6.5.0-CentOS6.10_64bit_nodap_gnu447/lib"
@@ -76,11 +76,11 @@ CONVERT=`which convert`
 MONTAGE=`which montage`
 PATH=${NCARG_ROOT}/bin:${PATH}
 
-#typeset -RZ2 FCST_TIME
-typeset -RZ2 FCST_TIME_AHEAD1
-typeset -RZ2 FCST_TIME_AHEAD2
-typeset -RZ2 FCST_TIME_BACK1
-typeset -RZ2 FCST_TIME_BACK3
+# typeset -RZ2 FCST_TIME
+# typeset -RZ2 FCST_TIME_AHEAD1
+# typeset -RZ2 FCST_TIME_AHEAD2
+# typeset -RZ2 FCST_TIME_BACK1
+# typeset -RZ2 FCST_TIME_BACK3
 typeset -Z6 j
 typeset -Z6 k
 
@@ -93,10 +93,6 @@ EXE_ROOT=/misc/whome/wrfruc/bin/ncl/nclalaska
 ${ECHO}
 ${ECHO} "ncl.ksh started at `${DATE}`"
 ${ECHO}
-${ECHO} "NCL = ${NCL}"
-${ECHO} "CTRANS = ${CTRANS}"
-${ECHO} "CONVERT = ${CONVERT}"
-${ECHO} "MONTAGE = ${MONTAGE}"
 ${ECHO} "DATAROOT = ${DATAROOT}"
 ${ECHO} "DATAHOME = ${DATAHOME}"
 ${ECHO} "     EXE_ROOT = ${EXE_ROOT}"
@@ -112,41 +108,37 @@ if [ ! -d ${DATAHOME} ]; then
   ${ECHO} "ERROR: DATAHOME, '${DATAHOME}', does not exist"
   exit 1
 fi
-
-${ECHO} "START_TIME defined and is ${START_TIME}"
-START_TIME=$( date +"%Y%m%d %H%M" -d "${START_TIME%????} ${START_TIME#????????}" )
-START_TIME_BACK1=$( date +"%Y%m%d %H%M" -d "${START_TIME} 1 hour ago" )
-START_TIME_BACK2=$( date +"%Y%m%d %H%M" -d "${START_TIME} 2 hours ago" )
-INIT_HOUR=$( date +"%H" -d "${START_TIME}" )
-START_TIME=$( date +"%Y%m%d%H%M" -d "${START_TIME}" )
-START_TIME_BACK1=$( date +"%Y%m%d%H%M" -d "${START_TIME_BACK1}" )
-START_TIME_BACK2=$( date +"%Y%m%d%H%M" -d "${START_TIME_BACK2}" )
-
-#INIT_HOUR=$( date +"%H" -d "${START_TIME}" )
+# If START_TIME is not defined, use the current time
+if [ ! "${START_TIME}" ]; then
+  ${ECHO} "START_TIME not defined - get from date"
+  START_TIME=$( date +"%Y%m%d %H" )
+  START_TIME_BACK1=$( date +"%Y%m%d %H" -d "1 hour ago" )
+  START_TIME_BACK2=$( date +"%Y%m%d %H" -d "2 hours ago" )
+  START_TIME=$( date +"%Y%m%d%H" -d "${START_TIME}" )
+  START_TIME_BACK1=$( date +"%Y%m%d%H" -d "${START_TIME_BACK1}" )
+  START_TIME_BACK2=$( date +"%Y%m%d%H" -d "${START_TIME_BACK2}" )
+else
+  ${ECHO} "START_TIME defined and is ${START_TIME}"
+  START_TIME=$( date +"%Y%m%d %H" -d "${START_TIME%??} ${START_TIME#????????}" )
+  START_TIME_BACK1=$( date +"%Y%m%d %H" -d "${START_TIME} 1 hour ago" )
+  START_TIME_BACK2=$( date +"%Y%m%d %H" -d "${START_TIME} 2 hours ago" )
+  START_TIME=$( date +"%Y%m%d%H" -d "${START_TIME}" )
+  START_TIME_BACK1=$( date +"%Y%m%d%H" -d "${START_TIME_BACK1}" )
+  START_TIME_BACK2=$( date +"%Y%m%d%H" -d "${START_TIME_BACK2}" )
+fi
 
 # To be valid at the same time, FCST_TIME_AHEAD1 matches with START_TIME_BACK1,
 # and FCST_TIME_AHEAD2 matches with START_TIME_BACK2
 
 FCST_TIME_AHEAD1=99
 FCST_TIME_AHEAD2=99
-if (( ${INIT_HOUR} == 00 || ${INIT_HOUR} == 06 || ${INIT_HOUR} == 12 || ${INIT_HOUR} == 18 )); then
-  if (( ${FCST_TIME} <= 34 )); then
-    FCST_TIME_AHEAD1=$(($FCST_TIME + 1))
-    FCST_TIME_AHEAD2=$(($FCST_TIME + 2))
-  else
-    if (( ${FCST_TIME} == 35 )); then
-      FCST_TIME_AHEAD1=$(($FCST_TIME + 1))
-    fi  
-  fi  
+if (( ${FCST_TIME} <= 22 )); then
+  FCST_TIME_AHEAD1=$(($FCST_TIME + 1))
+  FCST_TIME_AHEAD2=$(($FCST_TIME + 2))
 else
-  if (( ${FCST_TIME} <= 16 )); then
+  if (( ${FCST_TIME} == 23 )); then
     FCST_TIME_AHEAD1=$(($FCST_TIME + 1))
-    FCST_TIME_AHEAD2=$(($FCST_TIME + 2))
-  else
-    if (( ${FCST_TIME} == 17 )); then
-      FCST_TIME_AHEAD1=$(($FCST_TIME + 1))
-    fi  
-  fi  
+  fi
 fi
 
 # These used for 1hr 80m wind speed change, and esbl 1h 80m change
@@ -176,11 +168,10 @@ fi
 
 # Set up the work directory and cd into it
 # workdir=nclprd/${FCST_TIME}part1   # for testing
-workdir=${DATAHOME}/nclprd/${START_TIME}${FCST_TIME}
+workdir=${DATAHOME}/nclprd/${FCST_TIME}
 ${RM} -rf ${workdir}
 ${MKDIR} -p ${workdir}
 cd ${workdir}
-pwd
 
 # Link to input file
 BACK1_DATAROOT=${DATAROOT}/${START_TIME_BACK1}
@@ -188,37 +179,34 @@ BACK2_DATAROOT=${DATAROOT}/${START_TIME_BACK2}
 # DATAHOME=${DATAROOT}/${START_TIME}  # for testing
 ${LN} -s ${DATAHOME}/postprd/wrfprs_hrconus_${FCST_TIME}.grib2 hrrrfile.grb
 ${ECHO} "hrrrfile.grb" > arw_file.txt
-${LN} -s ${DATAHOME}/postprd/wrfnat_hrconus_${FCST_TIME}.grib2 hrrrnatfile.grb
-${ECHO} "hrrrnatfile.grb" > nat_file.txt
-if (( ${FCST_TIME_AHEAD1} != 99 )); then
-  ${LN} -s ${BACK1_DATAROOT}/postprd/wrfprs_hrconus_${FCST_TIME_AHEAD1}.grib2 back1file.grb
-  ${ECHO} "back1file.grb" > back1_file.txt
-  ${LN} -s ${BACK1_DATAROOT}/postprd/wrfprs_hrconus_${FCST_TIME}.grib2 back1fileback1hour.grb
-  ${ECHO} "back1fileback1hour.grb" > back1_file_back1_hour.txt
-fi
-if (( ${FCST_TIME_AHEAD2} != 99 )); then
-  ${LN} -s ${BACK2_DATAROOT}/postprd/wrfprs_hrconus_${FCST_TIME_AHEAD2}.grib2 back2file.grb
-  ${ECHO} "back2file.grb" > back2_file.txt
-  ${LN} -s ${BACK2_DATAROOT}/postprd/wrfprs_hrconus_${FCST_TIME_AHEAD1}.grib2 back2fileback1hour.grb
-  ${ECHO} "back2fileback1hour.grb" > back2_file_back1_hour.txt
-fi
-if (( ${FCST_TIME_BACK1} != -9 )); then
-  ${LN} -s ${DATAHOME}/postprd/wrfprs_hrconus_${FCST_TIME_BACK1}.grib2 back1hour.grb
-  ${ECHO} "back1hour.grb" > back1_hour.txt
-fi
-if (( ${FCST_TIME_BACK3} != -9 )); then
-  ${LN} -s ${DATAHOME}/postprd/wrfprs_hrconus_${FCST_TIME_BACK3}.grib2 back3file.grb
-  ${ECHO} "back3file.grb" > back3_file.txt
-fi
+# if (( ${FCST_TIME_AHEAD1} != 99 )); then
+#   ${LN} -s ${BACK1_DATAROOT}/postprd/wrfprs_hrconus_${FCST_TIME_AHEAD1}.grib2 back1file.grb
+#   ${ECHO} "back1file.grb" > back1_file.txt
+#   ${LN} -s ${BACK1_DATAROOT}/postprd/wrfprs_hrconus_${FCST_TIME}.grib2 back1fileback1hour.grb
+#   ${ECHO} "back1fileback1hour.grb" > back1_file_back1_hour.txt
+# fi
+# if (( ${FCST_TIME_AHEAD2} != 99 )); then
+#   ${LN} -s ${BACK2_DATAROOT}/postprd/wrfprs_hrconus_${FCST_TIME_AHEAD2}.grib2 back2file.grb
+#   ${ECHO} "back2file.grb" > back2_file.txt
+#   ${LN} -s ${BACK2_DATAROOT}/postprd/wrfprs_hrconus_${FCST_TIME_AHEAD1}.grib2 back2fileback1hour.grb
+#   ${ECHO} "back2fileback1hour.grb" > back2_file_back1_hour.txt
+# fi
+# if (( ${FCST_TIME_BACK1} != -9 )); then
+#   ${LN} -s ${DATAHOME}/postprd/wrfprs_hrconus_${FCST_TIME_BACK1}.grib2 back1hour.grb
+#   ${ECHO} "back1hour.grb" > back1_hour.txt
+# fi
+# if (( ${FCST_TIME_BACK3} != -9 )); then
+#   ${LN} -s ${DATAHOME}/postprd/wrfprs_hrconus_${FCST_TIME_BACK3}.grib2 back3file.grb
+#   ${ECHO} "back3file.grb" > back3_file.txt
+# fi
 
 ls -al hrrrfile.grb
-ls -al hrrrnatfile.grb
-ls -al back1file.grb
-ls -al back1fileback1hour.grb
-ls -al back2file.grb
-ls -al back2fileback1hour.grb
-ls -al back1hour.grb
-ls -al back3file.grb
+# ls -al back1file.grb
+# ls -al back1fileback1hour.grb
+# ls -al back2file.grb
+# ls -al back2fileback1hour.grb
+# ls -al back1hour.grb
+# ls -al back3file.grb
 
 set -A ncgms  sfc_temp   \
               2m_temp    \
@@ -228,10 +216,9 @@ set -A ncgms  sfc_temp   \
               2ds_temp   \
               10m_wind   \
               80m_wind   \
-              80m_wchg   \
               850_wind   \
               250_wind   \
-              500_vort   \
+              ua_vort    \
               sfc_pwtr   \
               sfc_totp   \
               sfc_cref   \
@@ -245,57 +232,18 @@ set -A ncgms  sfc_temp   \
               sfc_snod   \
               sfc_acsnod \
               sfc_acpcp  \
-              sfc_acfrzr \
-              sfc_acfrozr \
-              maxsfc_hail \
-              maxsfc_hailcast \
-              max_hail   \
               sfc_sfcp   \
               sfc_hpbl   \
               ua_rh      \
-              850_rh     \
+              ua_rh8     \
               sfc_rhpw   \
-              700_vvel   \
+              ua_vvel    \
               sfc_vis    \
               ua_ceil    \
-              ua_ceilexp \
-              ua_ceilexp2 \
               ua_ctop    \
-              max_wind   \
               10m_gust   \
-              mdn_wind   \
-              mup_wind   \
-              esbl_hlcy  \
-              esbl_cref  \
-              esbl_wchg  \
-              esbl_acp   \
-              esblmn_acp \
-              esbl_totp  \
-              esblmn_totp \
-              esbl_acsnw \
-              esblmn_acsnw \
-              esbl_hvyacp \
-              esbl_hvy1hsnw \
-              mx02_hlcy \
-              mx03_hlcy \
-              sfc_hlcy  \
-              mx16_hlcy \
-              mn02_hlcy \
-              mn03_hlcy \
-              mnsfc_hlcy \
-              mn16_hlcy \
               in25_hlcy \
               in16_hlcy \
-              mx02_hlcytot \
-              mx03_hlcytot \
-              mx25_hlcytot \
-              mx16_hlcytot \
-              mn02_hlcytot \
-              mn03_hlcytot \
-              mn25_hlcytot \
-              mn16_hlcytot \
-              mx01_vvort \
-              mx02_vvort \
               sfc_ltg1  \
               sfc_ltg2  \
               sfc_ltg3  \
@@ -305,15 +253,11 @@ set -A ncgms  sfc_temp   \
               sfc_lcc   \
               sfc_mcc   \
               sfc_hcc   \
-              sfc_blcc  \
-              sfc_mnvv  \
-              sfc_mref  \
               sfc_mucp  \
               sfc_mulcp \
               sfc_mxcp  \
               sfc_1hsm  \
               sfc_3hsm  \
-              sfc_vig   \
               sfc_s1shr \
               sfc_6kshr \
               500_temp  \
@@ -323,14 +267,9 @@ set -A ncgms  sfc_temp   \
               sfc_1ref  \
               sfc_bli   \
               nta_ulwrf \
-              nta_uswrf \
-              sfc_ulwrf \
-              sfc_uswrf \
               sfc_lhtfl \
               sfc_shtfl \
-              sfc_soilm \
               sfc_flru  \
-              80m_wpwr  \
               sfc_solar \
               sfc_ectp  \
               sfc_vil   \
@@ -339,59 +278,31 @@ set -A ncgms  sfc_temp   \
               sat_G114bt \
               sat_G123bt \
               sat_G124bt \
-              sfc_cpofp  \
               sfc_vbdsf  \
               sfc_vddsf  \
-              m10_ref    \
-              maxm10_ref \
-              sfc_slw  \
-              sfc_ssrun  \
-              sfc_soilt  \
-              1cm_soilt  \
-              4cm_soilt  \
-              10cm_soilt \
-              30cm_soilt \
-              60cm_soilt \
-              100cm_soilt \
-              160cm_soilt \
-              300cm_soilt \
-              sfc_soilw  \
-              1cm_soilw  \
-              4cm_soilw  \
-              10cm_soilw \
-              30cm_soilw \
-              60cm_soilw \
-              100cm_soilw \
-              160cm_soilw \
-              300cm_soilw
+              m10_ref
 
-set -A monpngs montage.png
+# set -A monpngs montage.png
 
-set -A webpfx temp temp ptemp dewp rh temp wind wind wchg wind wind vort pwtr totp cref \
-              ptyp cape cin acp weasd 1hsnw acsnw snod acsnod acpcp acfrzr acfrozr \
-              hail hailcast hail sfcp hpbl \
-              rh rh rhpw vvel vis ceil ceilexp ceilexp2 ctop wind gust wind wind hlcy cref wchg acp \
-              acp totp totp acsnw acsnw hvyacp hvy1hsnw hlcy hlcy hlcy hlcy hlcy hlcy hlcy hlcy hlcy \
-              hlcy hlcytot hlcytot hlcytot hlcytot hlcytot hlcytot hlcytot hlcytot \
-              vvort vvort ltg1 ltg2 ltg3 pchg lcl tcc lcc mcc hcc blcc \
-              mnvv mref mucp mulcp mxcp 1hsm 3hsm vig s1shr 6kshr temp temp temp temp \
-              1ref bli ulwrf uswrf ulwrf uswrf lhtfl shtfl soilm flru wpwr solar ectp vil rvil \
-              G113bt G114bt G123bt G124bt \
-              cpofp vbdsf vddsf ref ref slw ssrun soilt soilt soilt soilt soilt soilt soilt soilt \
-              soilt soilw soilw soilw soilw soilw soilw soilw soilw soilw
+set -A webpfx temp temp ptemp dewp rh temp wind wind wind wind vort pwtr totp cref \
+              ptyp cape cin acp weasd 1hsnw acsnw snod acsnod cpcp sfcp hpbl rh rh rhpw vvel vis ceil ctop \
+              gust hlcy hlcy \
+              ltg1 ltg2 ltg3 pchg lcl tcc lcc mcc hcc \
+              mucp mulcp mxcp 1hsm 3hsm s1shr 6kshr temp temp temp temp \
+              1ref bli ulwrf lhtfl shtfl flru solar ectp vil rvil G113bt G114bt G123bt G124bt \
+              vbdsf vddsf ref
 
-set -A websfx sfc 2m 2m 2m 2m 2ds 10m 80m 80m 850 250 500 sfc sfc sfc sfc sfc sfc sfc sfc sfc sfc \
-              sfc sfc sfc sfc sfc maxsfc maxsfc max sfc sfc 500 850 sfc 700 sfc ua ua ua ua max 10m \
-              mdn mup esbl esbl esbl esbl esblmn esbl esblmn esbl esblmn esbl esbl mx02 mx03 sfc mx16 \
-              mn02 mn03 mnsfc mn16 in25 in16 mx02 mx03 mx25 mx16 mn02 mn03 mn25 mn16 mx01 mx02 \
-              sfc sfc sfc sfc sfc sfc sfc sfc \
-              sfc sfc sfc sfc sfc sfc sfc sfc sfc sfc sfc sfc 500 700 850 925 sfc sfc nta nta sfc sfc \
-              sfc sfc sfc sfc 80m sfc sfc sfc sfc sat sat sat sat sfc sfc sfc m10 maxm10 sfc sfc \
-              sfc 1cm 4cm 10cm 30cm 60cm 100cm 160cm 300cm sfc 1cm 4cm 10cm 30cm 60cm 100cm 160cm 300cm
+set -A fhr 00 01 02 03 04 05 06 07 08 09 10 11 12 13 14 15
 
-set -A tiles dum t1 t2 t3 t4 t5 t6 t7 t8 z0 z1 z2 z3 z4 z5 z6 z7 z8 z9
+set -A websfx sfc 2m 2m 2m 2m 2ds 10m 80m 850 250 500 sfc sfc sfc sfc sfc sfc sfc sfc \
+              sfc sfc sfc sfc sfc sfc sfc 500 850 sfc 700 sfc ua ua 10m \
+              in25 in16 sfc sfc sfc sfc sfc sfc \
+              sfc sfc sfc sfc sfc sfc sfc sfc sfc sfc 500 700 850 925 sfc sfc nta sfc sfc \
+              sfc sfc sfc sfc sfc sat sat sat sat sfc sfc m10 
 
-set -A webmon montage
+set -A tiles dum t1 t2 t3 t4 t5 t6 t7 t8 z0 z1 z2 z3 z4 z5 z6 z7
+
+# set -A webmon montage
 
 i=0
 p=0
@@ -399,9 +310,9 @@ while [ ${i} -lt ${#ncgms[@]} ]; do
   j=000000
   k=000000
   numtiles=${#tiles[@]}
-  (( numtiles=numtiles - 1 )) 
+  (( numtiles=numtiles - 1 ))  
   while [ ${j} -le ${numtiles} ]; do
-    (( k=j + 1 )) 
+    (( k=j + 1 ))  
     pngs[${p}]=${ncgms[${i}]}.${k}.png
 #    echo ${pngs[${p}]}
     if [ ${j} -eq 000000 ]; then 
@@ -418,11 +329,11 @@ while [ ${i} -lt ${#ncgms[@]} ]; do
       fi   
     fi   
 #    echo ${webnames[${p}]}
-    (( j=j + 1 )) 
+    (( j=j + 1 ))  
 # p is total number of images (image index)
-    (( p=p + 1 )) 
+    (( p=p + 1 ))  
   done 
-  (( i=i + 1 )) 
+  (( i=i + 1 ))  
 done
 
 ncl_error=0
@@ -432,7 +343,7 @@ cp /whome/wrfruc/bin/ncl/Airpor* .
 cp ${EXE_ROOT}/names_grib2.txt .
 i=0
 echo "FIRST While, ${#ncgms[@]} items"
-CMDFN=/tmp/cmd.hrrrx.$$
+CMDFN=/tmp/cmd.hrrr_part1.$$
 ${RM} -f $CMDFN
 
 while [ ${i} -lt ${#ncgms[@]} ]; do
@@ -462,7 +373,7 @@ ${RM} -f $CMDFN
 # while [ ${i} -lt ${#ncgms[@]} ]; do
 # 
 #   plot=${ncgms[${i}]}
-#   ${ECHO} "Starting ctrans for ${plot}.ncgm at `${DATE}`"
+# #  ${ECHO} "Starting ctrans for ${plot}.ncgm at `${DATE}`"
 # ## normal image
 # #  ${CTRANS} -d sun ${plot}.ncgm -resolution 1132x906 > ${plot}.ras
 # #
@@ -497,7 +408,7 @@ ${RM} -f $CMDFN
 # 
 #   if [ -s ${plot}.ras ]; then 
 # # normal image
-# #    ${CONVERT} -colors 128 -trim -border 25x25 -bordercolor black ${plot}.ras ${plot}.png
+# #    ${CONVERT} -colors 128 -trim -border 5x5 -bordercolor black ${plot}.ras ${plot}.png
 # #    error=$?
 # #    if [ ${error} -ne 0 ]; then
 # #      ${ECHO} "ERROR: convert ${plot}.ras crashed!  Exit status=${error}"
@@ -680,22 +591,6 @@ while [ ${i} -lt ${#pngs[@]} ]; do
   z7dir=${DATAHOME}/nclprd/z7
   ${MKDIR} -p ${z7dir}
   webfile=${z7dir}/${webnames[${i}]}_f${FCST_TIME}.png
-  ${MV} ${pngfile} ${webfile}
-  (( i=i + 1 ))
-  pngfile=${pngs[${i}]}
-  ${CONVERT} -colors 255 -trim ${pngfile} ${pngfile}
-#  ${CONVERT} -colors 255 -border 25 -bordercolor black ${pngfile} ${pngfile}
-  z8dir=${DATAHOME}/nclprd/z8
-  ${MKDIR} -p ${z8dir}
-  webfile=${z8dir}/${webnames[${i}]}_f${FCST_TIME}.png
-  ${MV} ${pngfile} ${webfile}
-  (( i=i + 1 ))
-  pngfile=${pngs[${i}]}
-  ${CONVERT} -colors 255 -trim ${pngfile} ${pngfile}
-#  ${CONVERT} -colors 255 -border 25 -bordercolor black ${pngfile} ${pngfile}
-  z9dir=${DATAHOME}/nclprd/z9
-  ${MKDIR} -p ${z9dir}
-  webfile=${z9dir}/${webnames[${i}]}_f${FCST_TIME}.png
   ${MV} ${pngfile} ${webfile}
   (( i=i + 1 ))
 done
