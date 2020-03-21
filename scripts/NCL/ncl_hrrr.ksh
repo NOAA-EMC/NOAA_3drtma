@@ -87,7 +87,7 @@ typeset -Z6 k
 # ulimit -s 512000
 ulimit -s 1024000
 
-EXE_ROOT=/misc/whome/wrfruc/bin/ncl/nclhrrr
+EXE_ROOT=/misc/whome/wrfruc/bin/ncl/nclalaska
 
 # Print run parameters
 ${ECHO}
