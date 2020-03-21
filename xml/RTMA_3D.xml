@@ -655,7 +655,7 @@
     </envar>
     <envar>
       <name>MODEL</name>
-      <value>RTMA_3D</value>
+      <value>&JOBNAME_PRE;</value>
     </envar>
 
     <dependency>
@@ -704,7 +704,7 @@
       </envar>
       <envar>
         <name>MODEL</name>
-        <value>RTMA_3D</value>
+        <value>&JOBNAME_PRE;</value>
       </envar>
 
       <dependency>
@@ -755,7 +755,7 @@
       </envar>
       <envar>
         <name>MODEL</name>
-        <value>RTMA_3D</value>
+        <value>&JOBNAME_PRE;</value>
       </envar>
 
       <dependency>
