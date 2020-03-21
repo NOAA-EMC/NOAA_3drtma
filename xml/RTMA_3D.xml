@@ -12,7 +12,7 @@
 <!ENTITY RES_DA "rtma-kjet">
 <!ENTITY RES_POST "rtma-kjet">
 
-<!ENTITY SYSTEM_ID "RTMA_3D"> 
+<!ENTITY SYSTEM_ID "RTMA3D"> 
 <!ENTITY HOMEBASE_DIR "/home/rtrr/RTMA_3D">
 <!ENTITY DATABASE_DIR "/lfs1/projects/nrtrr/RTMA_3D">
 <!ENTITY JOBNAME_PRE "RTMA3D_reg">
@@ -643,7 +643,7 @@
     </envar>
     <envar>
       <name>MODEL</name>
-      <value>RTMA_3D</value>
+      <value>&SYSTEM_ID;</value>
     </envar>
 
     <dependency>
@@ -692,7 +692,7 @@
       </envar>
       <envar>
         <name>MODEL</name>
-        <value>RTMA_3D</value>
+        <value>&SYSTEM_ID;</value>
       </envar>
 
       <dependency>
@@ -743,7 +743,7 @@
       </envar>
       <envar>
         <name>MODEL</name>
-        <value>RTMA_3D</value>
+        <value>&SYSTEM_ID;</value>
       </envar>
 
       <dependency>
