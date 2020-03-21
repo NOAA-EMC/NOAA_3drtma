@@ -655,7 +655,7 @@
     </envar>
     <envar>
       <name>MODEL</name>
-      <value>&JOBNAME_PRE;</value>
+      <value>&SYSTEM_ID;</value>
     </envar>
 
     <dependency>
@@ -704,7 +704,7 @@
       </envar>
       <envar>
         <name>MODEL</name>
-        <value>&JOBNAME_PRE;</value>
+        <value>&SYSTEM_ID;</value>
       </envar>
 
       <dependency>
@@ -755,7 +755,7 @@
       </envar>
       <envar>
         <name>MODEL</name>
-        <value>&JOBNAME_PRE;</value>
+        <value>&SYSTEM_ID;</value>
       </envar>
 
       <dependency>
