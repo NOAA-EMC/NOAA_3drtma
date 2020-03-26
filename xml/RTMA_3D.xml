@@ -12,10 +12,12 @@
 <!ENTITY RES_DA "rtma-kjet">
 <!ENTITY RES_POST "rtma-kjet">
 
+<!ENTITY RETRO_HOME "/lfs1/projects/nrtrr/workflow/test_3drtma">
+
 <!ENTITY SYSTEM_ID "RTMA3D"> 
-<!ENTITY HOMEBASE_DIR "/home/rtrr/RTMA_3D">
-<!ENTITY DATABASE_DIR "/lfs1/projects/nrtrr/RTMA_3D">
-<!ENTITY JOBNAME_PRE "RTMA3D_reg">
+<!ENTITY HOMEBASE_DIR "&RETRO_HOME;">
+<!ENTITY DATABASE_DIR "&RETRO_HOME;/xml/retro">
+<!ENTITY JOBNAME_PRE "RTMA3DGE">
 <!ENTITY envir "esrl"> 
 <!ENTITY KEEPDATA "YES">
 
@@ -41,16 +43,16 @@
 <!ENTITY WRKFLW_DIR "&HOMEBASE_DIR;/xml">
 
 <!ENTITY MACHINE    "jet">
-<!ENTITY OBS_DIR "/public/data">
-<!ENTITY HRRR_DIR "/home/rtrr/hrrr">
+<!ENTITY OBS_DIR "&RETRO_HOME;/xml/archive">
+<!ENTITY HRRR_DIR "&RETRO_HOME;/xml/archive/hrrr">
 <!ENTITY SST_DIR "&OBS_DIR;/grids/ncep/sst/0p083deg/grib2">
 
 <!ENTITY GFS_DIR "&OBS_DIR;/grids/gfs/0p5deg/grib2">
 <!ENTITY ENKFFCST_DIR "&OBS_DIR;/grids/enkf/atm_v15">
 <!ENTITY HRRRDAS_DIR "/lfs1/projects/wrfruc/HRRRE/cycle">
 
-<!ENTITY AIRCRAFT_REJECT "/home/amb-verif/acars_RR/amdar_reject_lists">
-<!ENTITY SFCOBS_USELIST "/lfs1/projects/amb-verif/mesonet_uselists">
+<!ENTITY AIRCRAFT_REJECT "&RETRO_HOME;/xml/archive/amdar_reject_lists">
+<!ENTITY SFCOBS_USELIST "&RETRO_HOME;/xml/archive//mesonet_uselists">
 <!ENTITY PREPBUFR_DIR "&OBS_DIR;/grids/rap/prepbufr">
 <!ENTITY PREPBUFR_EARLY_DIR "&OBS_DIR;/grids/rap/prepbufr_test">
 <!ENTITY PREPBUFR_SAT_DIR "&OBS_DIR;/grids/rap/radiance">
@@ -121,14 +123,14 @@
 <!ENTITY DEADLINE_UV "03:00:00">
 <!ENTITY DEADLINE_PP "06:00:00">
 
-<!ENTITY WALL_LIMIT_DA '<deadline><cyclestr offset="&DEADLINE_DA;">@Y@m@d@H@M</cyclestr></deadline>'>
-<!ENTITY WALL_LIMIT_PP '<deadline><cyclestr offset="&DEADLINE_PP;">@Y@m@d@H@M</cyclestr></deadline>'>
-<!ENTITY WALL_LIMIT_UV '<deadline><cyclestr offset="&DEADLINE_UV;">@Y@m@d@H@M</cyclestr></deadline>'>
+<!ENTITY WALL_LIMIT_DA ''>
+<!ENTITY WALL_LIMIT_PP ''>
+<!ENTITY WALL_LIMIT_UV ''>
 
 <!ENTITY RESERVATION '<native>--mail-type=NONE</native><queue>&QUEUE;</queue><account>&ACCOUNT;</account><partition>&PARTITION;</partition>'>
-<!ENTITY RESERVATION_PRE '<native>--mail-type=NONE --reservation=&RES_DA;</native><queue>&QUEUE;</queue><account>&ACCOUNT;</account><partition>&PARTITION;</partition>'>
-<!ENTITY RESERVATION_DA '<native>--mail-type=NONE --reservation=&RES_DA;</native><queue>&QUEUE;</queue><account>&ACCOUNT_DA;</account><partition>&PARTITION_DA;</partition>'>
-<!ENTITY RESERVATION_POST '<native>--mail-type=NONE --reservation=&RES_DA;</native><queue>&QUEUE;</queue><account>&ACCOUNT;</account><partition>&PARTITION;</partition>'>
+<!ENTITY RESERVATION_PRE '<native>--mail-type=NONE</native><queue>&QUEUE;</queue><account>&ACCOUNT;</account><partition>&PARTITION;</partition>'>
+<!ENTITY RESERVATION_DA '<native>--mail-type=NONE</native><queue>&QUEUE;</queue><account>&ACCOUNT_DA;</account><partition>&PARTITION_DA;</partition>'>
+<!ENTITY RESERVATION_POST '<native>--mail-type=NONE</native><queue>&QUEUE;</queue><account>&ACCOUNT;</account><partition>&PARTITION;</partition>'>
 <!ENTITY RESERVATION_SMARTINIT '<native>--mail-type=NONE</native><queue>&QUEUE;</queue><account>&ACCOUNT;</account><partition>&PARTITION;</partition>'>
 
 <!ENTITY COMMONVARS
@@ -180,14 +182,13 @@
 
 ]>
 
-<workflow realtime="T" scheduler="&SCHEDULER;" cyclethrottle="30" cyclelifespan="01:00:00:00">
+<workflow realtime="F" scheduler="&SCHEDULER;" cyclethrottle="30" cyclelifespan="01:00:00:00">
 
   <log>
     <cyclestr>&LOG_DIR;/@Y@m@d/workflow_@Y@m@d@H@M.log</cyclestr>
   </log>
 
-  <cycledef group="all">00  *    *  *  2020-2021 *</cycledef>
-  <cycledef group="clean">00 *    *  *  2020-2021 *</cycledef>
+  <cycledef group="all">00  15    31  12  2019 *</cycledef>
 
   <task name="obsprep_lghtn" cycledefs="all" maxtries="3">
 
@@ -388,7 +389,6 @@
             <taskdep task="obsprep_cloud"/>
             <!--to use HRRRDAS BEC, need to add other dependencies here  -->
           </and>
-          <timedep><cyclestr offset="&START_TIME_GSI;">@Y@m@d@H@M00</cyclestr></timedep>
         </or>
       </and>
     </dependency>
@@ -754,6 +754,7 @@
 
   </metatask>
 
+<!--
   <task name="ncl_zip" cycledefs="all" maxtries="3">
 
     &NCL_RESOURCES;
@@ -885,5 +886,6 @@
     </envar>
 
   </task>
+-->
 
 </workflow>

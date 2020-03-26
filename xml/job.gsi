@@ -1,0 +1,23 @@
+#!/bin/bash
+#SBATCH -t 00:40:00
+#SBATCH --qos=batch
+#SBATCH --account=rtrr
+#SBATCH --partition=kjet
+#SBATCH --ntasks=280
+###SBATCH --nodes=9 --ntasks-per-node=20
+#SBATCH --job-name=gsianl
+#SBATCH -o output.job
+#SBATCH --mail-type=NONE
+
+source /home/rtrr/PARM_EXEC/modulefiles/modulefile.jet.RAPHRRR
+
+WORKPATH=./
+
+#export OMP_NUM_THREADS=1
+#export OMP_STACKSIZE=512M
+#srun gsi.x < gsiparm.anl > stdout 2>&1
+
+module load contrib wrap-mpi
+mpirun ./gsi.x < gsiparm.anl > stdout 2>&1
+
+

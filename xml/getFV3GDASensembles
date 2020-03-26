@@ -1,0 +1,40 @@
+#!/bin/bash
+# Download fv3 GDAS 80 ensemble members from HPSS
+# Only extract atmf009.nemsio files and make file links according to RAP/HRRR file name conventions.
+# Guoqing.Ge 03/25/2020
+#---------------------------------------------------
+
+#cyc=$1
+cyc=2019123106 #YYYYMMDDHH
+
+YYYY=${cyc:0:4}
+MM=${cyc:4:2}
+DD=${cyc:6:2}
+HH=${cyc:8:2}
+JDATE=`date -d  "${cyc:0:8} $HH" +%y%j%H00`
+echo $YYYY $MM $DD $HH $JDATE
+
+HPSSDIR=/NCEPPROD/5year/hpssprod/runhistory/rh${YYYY}/${YYYY}${MM}/${YYYY}${MM}${DD}
+module load hpss
+
+#make links
+for k in $(seq -w 1 80); do
+  ln -sf ./enkfgdas.${YYYY}${MM}${DD}/${HH}/mem0${k}/gdas.t${HH}z.atmf009.nemsio ${JDATE}.gdas.t${HH}z.atmf009s.mem0${k}.nemsio
+done
+
+#extract fv3GDAS 80 members
+for i in $(seq 1 8); do
+  if [[ $(( i % 3 )) -eq 0 ]]; then
+    echo "-----------wait--------------"
+    wait #only 3 cocurrent hpss sessions allowed
+  fi
+  tarfile=${HPSSDIR}/gpfs_dell1_nco_ops_com_gfs_prod_enkfgdas.${YYYY}${MM}${DD}_${HH}.enkfgdas_grp${i}.tar
+  k1=$(( $i * 10 -9  )); k2=$(( $i*10  ))
+  members=''
+  for k in $(seq -w $k1 $k2); do
+    members="${members} ./enkfgdas.${YYYY}${MM}${DD}/${HH}/mem0${k}/gdas.t${HH}z.atmf009.nemsio"
+  done
+  htar -xvf $tarfile $members&
+  #sleep 30s &
+done
+
