@@ -1,1 +1,1 @@
-/lfs1/projects/nrtrr/FIX_EXEC_MODULE/fix/gsi/nam_regional_convinfo_RAP.txt
+/lfs1/BMC/nrtrr/FIX_EXEC_MODULE/fix/gsi/nam_regional_convinfo_RAP.txt
