@@ -1,1 +1,1 @@
-/lfs1/projects/nrtrr/FIX_EXEC_MODULE/fix/gsi/rap_satbias_starting_file.txt
+/lfs1/BMC/nrtrr/FIX_EXEC_MODULE/fix/gsi/rap_satbias_starting_file.txt
