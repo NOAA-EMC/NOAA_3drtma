@@ -153,7 +153,7 @@ OBS_INPUT::
    dfi_radar_latent_heat_time_period=10.0,
    metar_impact_radius=20.0,
    metar_impact_radius_lowCloud=8.0,
-   l_metar_impact_radius_change = .true.,
+   l_metar_impact_radius_change = .false.,
    metar_impact_radius_max        = 50000.0,
    metar_impact_radius_min        = 20000.0,
    metar_impact_radius_max_height = 3000.0,
@@ -193,8 +193,9 @@ OBS_INPUT::
    l_use_hydroretrieval_all=.true.,
    ioption=1, 
    l_T_Q_adjust= .true.,
-   l_rtma3d            = .true.,
-   l_precip_vertical_check = .true.,
+   l_rtma3d            = .false.,
+   l_precip_vertical_check = .false.,
+   i_cloud_q_innovation=2,
  /
  &CHEM
  /
