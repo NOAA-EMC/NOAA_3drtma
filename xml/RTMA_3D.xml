@@ -12,7 +12,7 @@
 <!ENTITY RES_DA "rtma-kjet">
 <!ENTITY RES_POST "rtma-kjet">
 
-<!ENTITY RETRO_HOME "/lfs1/projects/nrtrr/workflow/test_3drtma">
+<!ENTITY RETRO_HOME "/lfs1/BMC/nrtrr/workflow/test_3drtma">
 
 <!ENTITY SYSTEM_ID "RTMA3D"> 
 <!ENTITY HOMEBASE_DIR "&RETRO_HOME;">
@@ -34,7 +34,7 @@
 <!ENTITY GSI_ROOT "&HOMEBASE_DIR;/exec/GSI">
 <!ENTITY FIX_ROOT "&STATIC_DIR;/GSI">
 
-<!ENTITY MODULE_DIR "/lfs1/projects/nrtrr/FIX_EXEC_MODULE/modulefiles">
+<!ENTITY MODULE_DIR "/lfs1/BMC/nrtrr/FIX_EXEC_MODULE/modulefiles">
 <!ENTITY MODULE_FILE "&MODULE_DIR;/modulefile.jet.RAPHRRR">
 <!ENTITY MODULE_NCO  "&MODULE_DIR;/modulefile.jet.NCOworkflow">
 
@@ -49,7 +49,7 @@
 
 <!ENTITY GFS_DIR "&OBS_DIR;/grids/gfs/0p5deg/grib2">
 <!ENTITY ENKFFCST_DIR "&OBS_DIR;/grids/enkf/atm_v15">
-<!ENTITY HRRRDAS_DIR "/lfs1/projects/wrfruc/HRRRE/cycle">
+<!ENTITY HRRRDAS_DIR "/lfs1/BMC/wrfruc/HRRRE/cycle">
 
 <!ENTITY AIRCRAFT_REJECT "&RETRO_HOME;/xml/archive/amdar_reject_lists">
 <!ENTITY SFCOBS_USELIST "&RETRO_HOME;/xml/archive//mesonet_uselists">
@@ -57,7 +57,7 @@
 <!ENTITY PREPBUFR_EARLY_DIR "&OBS_DIR;/grids/rap/prepbufr_test">
 <!ENTITY PREPBUFR_SAT_DIR "&OBS_DIR;/grids/rap/radiance">
 <!ENTITY LIGHTNING_DIR "&OBS_DIR;/lightning">
-<!ENTITY BUFRLIGHTNING_DIR "/mnt/lfs1/projects/rtwbl/mhu/rapobs/radiance">
+<!ENTITY BUFRLIGHTNING_DIR "/mnt/lfs1/BMC/rtwbl/mhu/rapobs/radiance">
 <!ENTITY RADAR_DIR "&OBS_DIR;/radar/mrms">
 <!ENTITY SATELLITE_DIR "&OBS_DIR;/sat/nasa">
 <!ENTITY LANGLEY_BUFR_DIR "&OBS_DIR;/grids/rap/langley">
@@ -475,7 +475,7 @@
     </envar>
     <envar>
       <name>FIXcrtm</name>
-      <value>/lfs1/projects/nrtrr/FIX_EXEC_MODULE/crtm/CRTM_v2.2.6</value>
+      <value>/lfs1/BMC/nrtrr/FIX_EXEC_MODULE/crtm/CRTM_v2.2.6</value>
     </envar>
     <envar>
       <name>FCST_TIME</name>
