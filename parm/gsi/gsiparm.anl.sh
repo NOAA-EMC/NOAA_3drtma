@@ -192,10 +192,9 @@ OBS_INPUT::
    i_gsdqc=2,
    l_use_hydroretrieval_all=.true.,
    ioption=1, 
-   l_T_Q_adjust= .false.,
+   l_T_Q_adjust= .true.,
    l_rtma3d            = .false.,
    l_precip_vertical_check = .false.,
-   i_cloud_q_innovation=2,
  /
  &CHEM
  /
