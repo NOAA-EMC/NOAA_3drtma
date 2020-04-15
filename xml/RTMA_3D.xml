@@ -114,12 +114,12 @@
 <!-- End all post-processing by 6 hrs -->
 
 <!ENTITY START_TIME_RADAR "00:10:00">
-<!ENTITY START_TIME_CONVENTIONAL "00:30:00">
+<!ENTITY START_TIME_CONVENTIONAL "01:30:00">
 <!ENTITY START_TIME_NASACLOUD   "00:50:00">
-<!ENTITY START_TIME_GSI "01:40:00">
-<!ENTITY DEADLINE_DA "03:00:00">
-<!ENTITY DEADLINE_UV "03:00:00">
-<!ENTITY DEADLINE_PP "06:00:00">
+<!ENTITY START_TIME_GSI "01:50:00">
+<!ENTITY DEADLINE_DA "04:00:00">
+<!ENTITY DEADLINE_UV "04:00:00">
+<!ENTITY DEADLINE_PP "08:00:00">
 
 <!ENTITY WALL_LIMIT_DA '<deadline><cyclestr offset="&DEADLINE_DA;">@Y@m@d@H@M</cyclestr></deadline>'>
 <!ENTITY WALL_LIMIT_PP '<deadline><cyclestr offset="&DEADLINE_PP;">@Y@m@d@H@M</cyclestr></deadline>'>
@@ -310,13 +310,14 @@
     <dependency>
       <or>
         <and>
-<!--for hourly run
           <or>
+<!--for hourly run
             <datadep age="00:02:00"><cyclestr>&PREPBUFR_DIR;/@Y@j@H00.rap.t@Hz.prepbufr.tm00.@Y@m@d</cyclestr></datadep>
             <datadep age="00:02:00"><cyclestr>&PREPBUFR_DIR;/@Y@j@H00.rap_e.t@Hz.prepbufr.tm00.@Y@m@d</cyclestr></datadep>
-          </or>
 -->
-          <datadep age="00:02:00"><cyclestr>&PREPBUFR_DIR;/@Y@j@H@M.rtma_ru.t@H@Mz.prepbufr.tm00.@Y@m@d</cyclestr></datadep>
+            <datadep age="00:02:00"><cyclestr>&PREPBUFR_DIR;/@Y@j@H@M.rtma_ru.t@H@Mz.prepbufr.tm00</cyclestr></datadep>
+            <datadep age="00:02:00"><cyclestr>&PREPBUFR_DIR;/@Y@j@H@M.rtma_ru.t@H@Mz.prepbufr.tm00.@Y@m@d</cyclestr></datadep>
+          </or>
         </and>
         <timedep><cyclestr offset="&START_TIME_CONVENTIONAL;">@Y@m@d@H@M00</cyclestr></timedep>
       </or>
