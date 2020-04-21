@@ -35,7 +35,7 @@ fi
 
 ANLS_CYC_TIME=`${DATE} --date="${START_TIME}  0 hour " +"%Y%m%d%H%M"`
 FCST_INI_TIME=`${DATE} --date="${START_TIME} -${FCST_TIME} hour " +"%Y%m%d%H%M"`
-export WGRIB2=/gpfs/dell1/nco/ops/nwprod/grib_util.v1.1.0/exec/wgrib2
+
 # Compute date & time components for the analysis time
 YYYYMMDDHHMU=`${DATE} +"%Y%m%d%H%M" -d "${START_TIME}"`
 YYYYMMDDHH=`${DATE} +"%Y%m%d%H" -d "${START_TIME}"`
@@ -56,8 +56,9 @@ HH_fcstinit=`${ECHO} ${FCST_INI_TIME} | cut -c9-10 `
 export DATAHOME=$DATA
 export MODEL="RAP"
 
-export DATAWRFHOME=${COMOUTgsi_rtma3d:-"$COMIN"}
-export DATAWRFFILE=${ANLrtma3d_FNAME:-"${RUN}.t${cyc}${subcyc}z.anl.wrf_inout.nc"}
+export DATAWRFHOME=${GESINhrrr_rtma3d:-"$COMIN"}
+export DATAWRFFILE=${FGSrtma3d_FNAME:-"${RUN}.t${cyc}z.firstguess.nc"}
+export PROD_HEAD2="${PROD_HEAD}.fgs"
 
 ##########################################################################
 
@@ -148,6 +149,7 @@ EOF
 ${RM} -f fort.*
 ${RM} -f post_avblflds.xml params_grib2_tbl_new postcntrl.xml postxconfig-NT.txt eta_micro_lookup.dat
 ${RM} -f WRF???.GrbF??
+
 # set up the namelist/control/config input files
 # hrrr"x": means experimental testing.
 # cp -p ${PARMupp}/hrrr_post_avblflds.xml          post_avblflds.xml
@@ -198,13 +200,13 @@ done
 #
 # Run unipost
 #
-pgm=${RUN}_post
+pgm=${RUN}_post4fgs
 . prep_step
 
 startmsg
 msg="***********************************************************"
 postmsg "$jlogfile" "$msg"
-msg="  begin Uni-Post step for 3DRTMA GSI Analysis"
+msg="  begin Uni-Post step for 3DRTMA First Guess"
 postmsg "$jlogfile" "$msg"
 msg="***********************************************************"
 postmsg "$jlogfile" "$msg"
@@ -236,40 +238,38 @@ done
 
 # Append entire wrftwo to wrfprs
 ${CAT} ${workdir}/WRFPRS.GrbF${FCST_TIME}     ${workdir}/WRFTWO.GrbF${FCST_TIME} > ${workdir}/WRFPRS.GrbF${FCST_TIME}.new
-${MV}  ${workdir}/WRFPRS.GrbF${FCST_TIME}.new ${workdir}/wrfsubhprs.grib2
+${MV}  ${workdir}/WRFPRS.GrbF${FCST_TIME}.new ${workdir}/wrfprs_subhrconus_${FCST_TIME}.grib2
 
 # Append entire wrftwo to wrfnat
 ${CAT} ${workdir}/WRFNAT.GrbF${FCST_TIME}     ${workdir}/WRFTWO.GrbF${FCST_TIME} > ${workdir}/WRFNAT.GrbF${FCST_TIME}.new
-${MV}  ${workdir}/WRFNAT.GrbF${FCST_TIME}.new ${workdir}/wrfsubhnat.grib2
+${MV}  ${workdir}/WRFNAT.GrbF${FCST_TIME}.new ${workdir}/wrfnat_subhrconus_${FCST_TIME}.grib2
 
-${CP}  ${workdir}/WRFTWO.GrbF${FCST_TIME}     ${workdir}/wrfsubhspl.grib2
+${CP}  ${workdir}/WRFTWO.GrbF${FCST_TIME}     ${workdir}/wrftwo_subhrconus_${FCST_TIME}.grib2
 
 # Check to make sure all Post  output files were produced
-if [ ! -s "${workdir}/wrfsubhprs.grib2" ]; then
-  ${ECHO} "unipost crashed! wrfsubhprs.grib2 is missing"
+if [ ! -s "${workdir}/wrfprs_subhrconus_${FCST_TIME}.grib2" ]; then
+  ${ECHO} "unipost crashed! wrfprs_subhrconus_${FCST_TIME}.grib2 is missing"
   exit 1
 fi
-if [ ! -s "${workdir}/wrfsubhspl.grib2" ]; then
-  ${ECHO} "unipost crashed! wrfsubhspl.grib2 is missing"
+if [ ! -s "${workdir}/wrftwo_subhrconus_${FCST_TIME}.grib2" ]; then
+  ${ECHO} "unipost crashed! wrftwo_subhrconus_${FCST_TIME}.grib2 is missing"
   exit 1
 fi
-if [ ! -s "${workdir}/wrfsubhnat.grib2" ]; then
-  ${ECHO} "unipost crashed! wrfsubhnat.grib2 is missing"
+if [ ! -s "${workdir}/wrfnat_subhrconus_${FCST_TIME}.grib2" ]; then
+  ${ECHO} "unipost crashed! wrfnat_subhrconus_${FCST_TIME}.grib2 is missing"
   exit 1
 fi
 
 # transfer the output grib2 files to $COMOUTpost_rtma3d
-
-${WGRIB2} ${workdir}/wrfsubhprs.grib2 -set center 7 -grib ${COMOUTpost_rtma3d}/${PROD_HEAD}.wrfsubhprs.grib2
-${WGRIB2} ${workdir}/wrfsubhspl.grib2 -set center 7 -grib ${COMOUTpost_rtma3d}/${PROD_HEAD}.wrfsubhspl.grib2
-${WGRIB2} ${workdir}/wrfsubhnat.grib2 -set center 7 -grib ${COMOUTpost_rtma3d}/${PROD_HEAD}.wrfsubhnat.grib2
-
+${CP} ${workdir}/wrfprs_subhrconus_${FCST_TIME}.grib2 ${COMOUTpost_rtma3d}/${PROD_HEAD2}.wrfprs_subhrconus_${FCST_TIME}.grib2
+${CP} ${workdir}/wrftwo_subhrconus_${FCST_TIME}.grib2 ${COMOUTpost_rtma3d}/${PROD_HEAD2}.wrftwo_subhrconus_${FCST_TIME}.grib2
+${CP} ${workdir}/wrfnat_subhrconus_${FCST_TIME}.grib2 ${COMOUTpost_rtma3d}/${PROD_HEAD2}.wrfnat_subhrconus_${FCST_TIME}.grib2
 
 # softlinks with Julian date
-#basetime=`${DATE} +%y%j%H%M -d "${START_TIME}"`
-#${LN} -sf ${COMOUTpost_rtma3d}/${PROD_HEAD}.wrfprs_subhrconus_${FCST_TIME}.grib2 ${COMOUTpost_rtma3d}/${PROD_HEAD}.wrfprs_${basetime}${FCST_TIME}00
-#${LN} -sf ${COMOUTpost_rtma3d}/${PROD_HEAD}.wrftwo_subhrconus_${FCST_TIME}.grib2 ${COMOUTpost_rtma3d}/${PROD_HEAD}.wrftwo_${basetime}${FCST_TIME}00
-#${LN} -sf ${COMOUTpost_rtma3d}/${PROD_HEAD}.wrfnat_subhrconus_${FCST_TIME}.grib2 ${COMOUTpost_rtma3d}/${PROD_HEAD}.wrfnat_${basetime}${FCST_TIME}00
+basetime=`${DATE} +%y%j%H%M -d "${START_TIME}"`
+${LN} -sf ${COMOUTpost_rtma3d}/${PROD_HEAD2}.wrfprs_subhrconus_${FCST_TIME}.grib2 ${COMOUTpost_rtma3d}/${PROD_HEAD2}.wrfprs_${basetime}${FCST_TIME}00
+${LN} -sf ${COMOUTpost_rtma3d}/${PROD_HEAD2}.wrftwo_subhrconus_${FCST_TIME}.grib2 ${COMOUTpost_rtma3d}/${PROD_HEAD2}.wrftwo_${basetime}${FCST_TIME}00
+${LN} -sf ${COMOUTpost_rtma3d}/${PROD_HEAD2}.wrfnat_subhrconus_${FCST_TIME}.grib2 ${COMOUTpost_rtma3d}/${PROD_HEAD2}.wrfnat_${basetime}${FCST_TIME}00
 
 #================================================================================#
 # The following data transferr is used in GSD old unipost script
@@ -280,7 +280,7 @@ ${WGRIB2} ${workdir}/wrfsubhnat.grib2 -set center 7 -grib ${COMOUTpost_rtma3d}/$
 # ${MV} ${workdir}/wrfnat_subhrconus_${FCST_TIME}.grib2 ${DATAHOME}/wrfnat_subhrconus_${FCST_TIME}.grib2
 
 # ${RM} -rf ${workdir}
-  ${RM} -f  ${workdir}/wrfsubh???.grib2
+  ${RM} -f  ${workdir}/wrf???_subhrconus_*.grib2
   ${RM} -f  ${workdir}/WRF???.GrbF??
 
 # Create softlinks for transfer

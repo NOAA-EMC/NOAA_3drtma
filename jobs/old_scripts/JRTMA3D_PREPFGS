@@ -47,15 +47,13 @@ cd $DATA
 #    setpdy.sh needs the variables 
 #    $PDY and $cyc already defined in advance
 #####################################################
+export cycle=${cycle:-t${cyc}z} 
 #setpdy.sh
 #. ${DATA}/PDY
 
 export subcyc=${subcyc} #Note: Must define subcyc in upper level script. Can be 00, 15, 30, or 45 /MPondeca, 30Jun2017
                          #only used for rurtma2p5
-
-export cycle=${cycle:-t${cyc}${subcyc}z}
 export PDYHH="${PDY}${cyc}"
-PDYm1=`$NDATE -24 ${PDY}${cyc} | cut -c 1-8`
 
 ####################################
 # Determine Job Output Name on System
@@ -63,7 +61,7 @@ PDYm1=`$NDATE -24 ${PDY}${cyc} | cut -c 1-8`
 export LOG_JJOB=${LOG_JJOB:-$COMROOT/logs/jlogfiles}
 export jlogfile=${jlogfile:-$LOG_JJOB/jlogfile.${jobid}}
 # export pgmout=${pgmout:-"OUTPUT.$$"}
-export pgmout=${pgmout:-"OUTPUT.${PDY}${cyc}${subcyc}.${jobid}"}
+export pgmout=${pgmout:-"OUTPUT.${PDY}${cyc}.${jobid}"}
 if [ ! -d ${LOG_JJOB} ] ; then
    mkdir -p ${LOG_JJOB}
 fi
@@ -72,7 +70,7 @@ if [ ! -d ${LOG_PGMOUT} ] ; then
 fi
 
 # specify the file head for the file names of the archived data files
-export PROD_HEAD=${PROD_HEAD:-${RUN}.t${cyc}z}
+export PROD_HEAD=${PROD_HEAD:-"${RUN}.t${cyc}z"}
 
 # Specify Execution Areas
 export HOMErtma3d=${HOMErtma3d:-$NWROOT/rtma.${rtma_ver}}
@@ -89,26 +87,23 @@ export COMIN=${COMIN:-${COMROOT}/${NET}/${envir}/${RUN}.${PDY}}
 export COMOUT=${COMOUT:-${COMROOT}/${NET}/${envir}/${RUN}.${PDY}}
 
 # Directory to store the firstguess as input for the RTMA3D (NETCDF?) 
-
-export COMINrap=${COMINRAP}/rap.${PDY}
-export COMINhrrr=${COMINHRRR}/hrrr.${PDY}/${domain}
-export GESINhrrr=${GESINHRRR}/hrrr.${PDY}/conus
-export GESINhrrrm1=${GESINHRRR}/hrrr.${PDYm1}/conus
-
+export COMINrap=${COMINrap:-${COMIN}/rap.${PDY}}
+export COMINhrrr=${COMINhrrr:-${COMIN}/hrrr.${PDY}/${domain}}
+export GESINhrrr=${GESINhrrr:-${COMIN}/hrrr/hrrrges_sfc/${domain}}
 export GESINhrrr_rtma3d=${GESINhrrr_rtma3d:-"${COMIN}/fgsprd.${cycle}"}
 export PDYHH_cycm1=$($NDATE -01  "${PDYHH}")
 export PDYHH_cycp1=$($NDATE +01  "${PDYHH}")
 
 PDY_cycp1=`echo ${PDYHH_cycp1} | cut -c 1-8`
 
-export COMINhrrr_cycp1=${COMINHRRR}/hrrr.${PDY_cycp1}/${domain}
+export COMINhrrr_cycp1=${COMIN}/hrrr.${PDY_cycp1}/${domain}
 
 export FGS_OPT=${FGS_OPT:-1}
 
 # set the file name of the firstguess for rtma3d
 if [ ! "${PROD_HEAD}" ] ; then
-  export ANLrtma3d_FNAME="${RUN}.${cycle}.wrf_inout.nc"
-  export FGSrtma3d_FNAME="${RUN}.${cycle}.firstguess.nc"
+  export ANLrtma3d_FNAME="${RUN}.t${cyc}z.wrf_inout.nc"
+  export FGSrtma3d_FNAME="${RUN}.t${cyc}z.firstguess.nc"
 else
   export ANLrtma3d_FNAME="${PROD_HEAD}.wrf_inout.nc"
   export FGSrtma3d_FNAME="${PROD_HEAD}.firstguess.nc"
@@ -123,21 +118,22 @@ if [ ! -d "${GESINhrrr_rtma3d}" ] ; then
 fi
 
 # fgs data from HPSS
-#if [ ! -d "${COMINhrrr}" ] ; then
-#  ${ECHO} "ERROR: ${COMINhrrr} does not exist!"
-#  exit 1
-#fi
-#if [ ! -d "${COMINhrrr_cycp1}" ] ; then
+if [ ! -d "${COMINhrrr}" ] ; then
+  ${ECHO} "ERROR: ${COMINhrrr} does not exist!"
+  exit 1
+fi
+if [ ! -d "${COMINhrrr_cycp1}" ] ; then
+   mkdir -p ${COMINhrrr_cycp1}
 #  ${ECHO} "ERROR: ${COMINhrrr_cycp1} does not exist!"
 #  exit 1
-#fi
+fi
 
 ###########################################################
 
 ######################
 # Execute the script.
 ######################
-${exSCR_PREPFGS:-$HOMErtma3d/scripts/ex${RUN}_prepfgs_subhr.ksh}
+${exSCR_PREPFGS:-$HOMErtma3d/scripts/ex${RUN}_prepfgs.ksh}
 export err=$?; err_chk
 
 msg="$0 of $job completed normally"
