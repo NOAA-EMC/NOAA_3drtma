@@ -24,14 +24,25 @@ if [ "${envir}" == "esrl" ]; then
 fi
 
 # make sure executable exists
-if [ ! -f ${EXECrtma3d}/${exefile_name_updatevars} ]; then
-  ${ECHO} "ERROR: executable '${EXECrtma3d}/${exefile_name_updatevars}' does not exist!"
+if [ ! -f ${EXECrtma3d}/${exefile_name_updatevars_wrf} ]; then
+  ${ECHO} "ERROR: executable '${EXECrtma3d}/${exefile_name_updatevars_wrf}' does not exist!"
+  exit 1
+fi
+if [ ! -f ${EXECrtma3d}/${exefile_name_updatevars_ncfields} ]; then
+  ${ECHO} "ERROR: executable '${EXECrtma3d}/${exefile_name_updatevars_ncfields}' does not exist!"
+  exit 1
+fi
+if [ ! -f ${EXECrtma3d}/${exefile_name_updatevars_ndown} ]; then
+  ${ECHO} "ERROR: executable '${EXECrtma3d}/${exefile_name_updatevars_ndown}' does not exist!"
   exit 1
 fi
 
+
+
+
 # Check to make sure required directory defined and existed
-check_if_defined "FCST_LENGTH" "GSIRUN_DIR" "FIXwrf" "PDY" "cyc" "subcyc"
-check_dirs_exist "GSIRUN_DIR" "FIXwrf"
+check_if_defined "FCST_LENGTH" "DATA_GSIANL" "FIXwrf" "PDY" "cyc" "subcyc"
+check_dirs_exist "DATA_GSIANL" "FIXwrf"
 
 # Initialize an array of WRF input dat files that need to be linked
 set -A WRF_DAT_FILES ${FIXwrf}/run/LANDUSE.TBL          \
@@ -101,21 +112,31 @@ time_str2=`${DATE} "+%Y-%m-%d_%H_00_00" -d "${START_TIME}"`
 END_TIME=`${DATE} -d "${START_TIME}  ${FCST_LENGTH} seconds"`
 
 #----- enter working directory -------
-cd ${DATA}
-${ECHO} "enter working directory:${DATA}"
+cd ${DATAHOME}
+${ECHO} "enter working directory:${DATAHOME}"
 
-export WRF_NAMELIST=${DATA}/namelist.input
+export WRF_NAMELIST=${DATAHOME}/namelist.input
 ${CP} ${PARMwrf}/wrf.nl ${WRF_NAMELIST}
 
 # Check to make sure the wrfinput_d01 file exists
-if [ -r ${GSIRUN_DIR}/wrf_inout ]; then
-  ${ECHO} " Initial condition ${GSIRUN_DIR}/wrf_inout "
-  ${LN} -s ${GSIRUN_DIR}/wrf_inout wrfinput_d01
-  #${LN} -s ${GSIRUN_DIR}/wrf_inout wrfvar_output
+#if [ -r ${COMOUTgsi_rtma3d}/${ANLrtma3d_FNAME} ]; then
+#  ${ECHO} " Initial condition ${COMOUTgsi_rtma3d}/${ANLrtma3d_FNAME} "
+#  ${LN} -s ${COMOUTgsi_rtma3d}/${ANLrtma3d_FNAME} wrfinput_d01
+#   ${CP} ${COMOUTgsi_rtma3d}/${ANLrtma3d_FNAME} wrfinput_d01
+#else
+#  ${ECHO} "ERROR: ${COMOUTgsi_rtma3d}/${ANLrtma3d_FNAME} does not exist, or is not readable"
+#  exit 1
+#fi
+
+if [ -r ${DATAHOME}/wrf_inout ]; then
+${ECHO} " Initial condition ${DATAHOME}/wrf_inout "
+${LN} -s ${DATAHOME}/wrf_inout wrfinput_d01
+#${LN} -s /gpfs/dell2/emc/modeling/noscrub/Edward.Colon/wrf_inout wrfinput_d01
 else
-  ${ECHO} "ERROR: ${GSIRUN_DIR}/wrf_inout does not exist, or is not readable"
+  ${ECHO} "ERROR: ${DATAHOME}/wrf_inout does not exist, or is not readable"
   exit 1
 fi
+
 
 # Make links to the WRF DAT files
 for file in ${WRF_DAT_FILES[@]}; do
@@ -135,6 +156,20 @@ end_day=`${DATE} +%d -d "${END_TIME}"`
 end_hour=`${DATE} +%H -d "${END_TIME}"`
 end_minute=`${DATE} +%M -d "${END_TIME}"`
 end_second=`${DATE} +%S -d "${END_TIME}"`
+
+#start_year=2020
+#start_month=01
+#start_day=22
+#start_hour=16
+#start_minute=00
+#start_second=00
+#end_year=2020
+#end_month=01
+#end_day=22
+#end_hour=16
+#end_minute=00
+#end_second=20
+
 
 # Compute number of days and hours for the run
 (( run_days = 0 ))
@@ -171,6 +206,8 @@ ${SED} -i "\
    s/\(${end}_${minute}\)${equal}[[:digit:]]\{2\}/\1 = ${end_minute}/;    \
    s/\(${end}_${second}\)${equal}[[:digit:]]\{2\}/\1 = ${end_second}/;    \
 " ${WRF_NAMELIST}
+
+chmod 755 ${WRF_NAMELIST}
 
 # Move existing rsl files to a subdir if there are any
 ${ECHO} "Checking for pre-existing rsl files"
@@ -217,24 +254,30 @@ if [ ! -e "wrfout_d01_${time_str}" ]; then
   exit 1
 fi 
 
+${LN} -s wrfout_d01_${time_str} wrfout_d01
+${CP_LN} ${EXECrtma3d}/${exefile_name_update_ncfields} .
+
 # Output successful so write status to log
-#${ECHO} "Assemble  REFL_10CM,U10,V10 back into wrf_inout"
 ${ECHO} "Assemble Reflectivity fields back into wrf_inout"
-#${NCKS} -A -H -v REFL_10CM,COMPOSITE_REFL_10CM,REFL_10CM_1KM,REFL_10CM_4KM,U10,V10 wrfout_d01_${time_str} ${GSIRUN_DIR}/wrf_inout
-${NCKS} -A -H -v REFL_10CM,COMPOSITE_REFL_10CM,REFL_10CM_1KM,REFL_10CM_4KM wrfout_d01_${time_str} ${GSIRUN_DIR}/wrf_inout
+
+#${NCKS} -A -H -v REFL_10CM,COMPOSITE_REFL_10CM,REFL_10CM_1KM,REFL_10CM_4KM,U10,V10 wrfout_d01_${time_str} ${COMOUTgsi_rtma3d}/${ANLrtma3d_FNAME} 
+#${NCKS} -A -H -v REFL_10CM,COMPOSITE_REFL_10CM,REFL_10CM_1KM,REFL_10CM_4KM wrfout_d01_${time_str} ${COMOUTgsi_rtma3d}/${ANLrtma3d_FNAME} 
+
+${exefile_name_update_ncfields} wrfout_d01 wrf_inout 
+export err=$?; err_chk
+
+if [ -f ${COMOUTgsi_rtma3d}/${ANLrtma3d_FNAME} ]; then
+  ${ECHO} "Erasing the GSI generated analysis file to be replaced by modified analysis."
+  ${RM} ${COMOUTgsi_rtma3d}/${ANLrtma3d_FNAME}
+fi
+
+${CP_LN} -p wrf_inout ${COMOUTgsi_rtma3d}/${ANLrtma3d_FNAME}
 
 ${ECHO} "update_vars.ksh completed successfully at `${DATE}`"
 
 # Saving some files
 ${CP} -p namelist.input  ${COMOUTwrf_rtma3d}/namelist.input_${cycle_str}
 
-if [ "${envir}" != "esrl" ]; then #wcoss
-  echo "Doing some extra things..."
-fi
-
-${RM} -f ${DATA}/sig*
-${RM} -f ${DATA}/obs*
-${RM} -f ${DATA}/pe*
 
 msg="JOB $job FOR $RUN HAS COMPLETED NORMALLY"
 postmsg "$jlogfile" "$msg"

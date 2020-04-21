@@ -20,7 +20,7 @@ MASS     =
 
 W3FLAGS = -I${W3EMC_INC4}
 NEMSIOFLAG = -I${NEMSIO_INC4}
-WRFPATH    = /gpfs/dell2/emc/modeling/noscrub/Edward.Colon/WRFV3.9
+WRFPATH    = /gpfs/dell2/emc/modeling/noscrub/Edward.Colon/NOAA_3drtma/sorc/rtma_updatevars.fd
 NWPLIBS =${W3EMC_LIB4} ${BACIO_LIB4}
 
 INCLD= -I${NETCDF}/include -I$(WRFPATH)/frame

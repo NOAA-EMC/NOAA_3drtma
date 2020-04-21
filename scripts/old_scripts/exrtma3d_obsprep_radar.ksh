@@ -1,7 +1,14 @@
-#!/bin/sh --login
+#!/bin/ksh
 ############################################################################
 
 set -x
+
+
+# make sure executable exists
+if [ ! -f ${EXECrtma3d}/${exefile_name_radar} ] ; then
+  ${ECHO} "ERROR: mosaic radar obs prcoessing executable '${EXECrtma3d}/${exefile_name_radar}' does not exist!"
+  exit 1
+fi
 
 # working directory
 workdir=${DATA}
@@ -41,24 +48,24 @@ MM=`${DATE} +"%m" -d "${START_TIME}"`
 DD=`${DATE} +"%d" -d "${START_TIME}"`
 HH=`${DATE} +"%H" -d "${START_TIME}"`
 
-# typeset -Z2 mm mmp1 mmp2 mmp3              # <<-- "-Z2" only work for K-Shell
+typeset -Z2 mm mmp1 mmp2 mmp3              # <<-- "-Z2" only work for K-Shell
 mm=`${DATE} +"%M" -d "${START_TIME}"`
 mmp1=$((${mm}+1))
 mmp2=$((${mm}+2))
 mmp3=$((${mm}+3))
-mm=`printf "%2.2i\n" $mm`                    # 0-padding with right-justification
-mmp1=`printf "%2.2i\n" $mmp1`
-mmp2=`printf "%2.2i\n" $mmp2`
-mmp3=`printf "%2.2i\n" $mmp3`
+# mm=`printf "%2.2i\n" $mm`                    # 0-padding with right-justification
+# mmp1=`printf "%2.2i\n" $mmp1`
+# mmp2=`printf "%2.2i\n" $mmp2`
+# mmp3=`printf "%2.2i\n" $mmp3`
 
 ymd=`${DATE} +"%Y%m%d" -d "${START_TIME}"`
 ymdh=${YYYYMMDDHH}
 hh=$HH
 
 # BUFR Table includingthe description for HREF
-${CP} -p ${FIX_GSI}/prepobs_prep_RAP.bufrtable   ./prepobs_prep.bufrtable
+${CP} -p ${FIXgsi}/prepobs_prep_RAP.bufrtable   ./prepobs_prep.bufrtable
 # WPS GEO_GRID Data
-${LN} -s ${PARM_WRF}/hrrr_geo_em.d01.nc          ./geo_em.d01.nc 
+${LN} -s ${FIXwps}/hrrr_geo_em.d01.nc           ./geo_em.d01.nc 
 
 # find NSSL grib2 mosaic files
 COM_MOSAIC_GRIB2=${COMINmosaic}/mrms.t${HH}z/conus
@@ -172,14 +179,7 @@ cat << EOF > mosaic.namelist
  /
 
 EOF
-
-# copy the excutable file of processing mosaic data
-export pgm=${MOSAIC_EXE:-"process_NSSL_mosaic.exe"}
-${CP} ${MOSAIC_EXEDIR}/${MOSAIC_EXE}   ./${pgm}
-if [ -f errfile ] ; then 
-  rm -f errfile
-fi
-
+pgm=${RUN}_radar
 . prep_step
 
 startmsg
@@ -191,7 +191,10 @@ msg="***********************************************************"
 postmsg "$jlogfile" "$msg"
 
 # Run Process_mosaic
-runline="${MPIRUN}  -np ${np}  ./${pgm}"
+# copy the excutable file of processing mosaic data
+${CP} ${EXECrtma3d}/${exefile_name_radar}   ./rtma3d_process_mosaic
+
+runline="${MPIRUN}             ./rtma3d_process_mosaic"
 $runline > ${pgmout} 2>errfile
 export err=$?; err_chk
 

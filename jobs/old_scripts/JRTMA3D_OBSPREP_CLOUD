@@ -46,13 +46,12 @@ cd $DATA
 #    setpdy.sh needs the variables 
 #    $PDY and $cyc already defined in advance
 #####################################################
-#setpdy.sh
-#. ${DATA}/PDY
+export cycle=${cycle:-t${cyc}z} 
+setpdy.sh
+. ${DATA}/PDY
 
 export subcyc=${subcyc} #Note: Must define subcyc in upper level script. Can be 00, 15, 30, or 45 /MPondeca, 30Jun2017
                          #only used for rurtma2p5
-
-export cycle=${cycle:-t${cyc}${subcyc}z}
 export PDYHH="${PDY}${cyc}"
 ####################################
 # Determine Job Output Name on System
@@ -60,7 +59,7 @@ export PDYHH="${PDY}${cyc}"
 export LOG_JJOB=${LOG_JJOB:-$COMROOT/logs/jlogfiles}
 export jlogfile=${jlogfile:-$LOG_JJOB/jlogfile.${jobid}}
 # export pgmout=${pgmout:-"OUTPUT.$$"}
-export pgmout=${pgmout:-"OUTPUT.${PDY}${cyc}${subcyc}.${jobid}"}
+export pgmout=${pgmout:-"OUTPUT.${PDY}${cyc}.${jobid}"}
 if [ ! -d ${LOG_JJOB} ] ; then
    mkdir -p ${LOG_JJOB}
 fi
@@ -92,17 +91,14 @@ export COMIN=${COMIN:-${COMROOT}/${NET}/${envir}/${RUN}.${PDY}}
 export COMOUT=${COMOUT:-${COMROOT}/${NET}/${envir}/${RUN}.${PDY}}
 
 ### Observations Products/Input from RAP
-export COMINrap=${COMINRAP}/rtma_ru.${PDY}
-export COMINhrrr=${COMINHRRR}/hrrr.${PDY}/${domain}
+export COMINrap=${COMINrap:-"${COMIN}/rap.${PDY}"}
+export COMINhrrr=${COMINhrrr:-"${COMIN}/hrrr.${PDY}/conus"}
 export COMINlightning=${COMINlightning:-"${COMIN}/lightning.${PDY}"}
 export COMINmosaic=${COMINmosaic:-"${COMIN}/radar.${PDY}"}
 export COMINradar=${COMINradar:-"${COMIN}/radar.${PDY}"}
 
 ### Observations Products/Input for the RTMA3D (prepbufr files) 
 export COMINobsproc_rtma3d=${COMINobsproc_rtma3d:-"${COMIN}/obsprd.${cycle}"}
-
-### Firstguess Products/Input for the RTMA3D (prepbufr files) 
-export GESINhrrr_rtma3d=${GESINhrrr_rtma3d:-"${COMIN}/fgsprd.${cycle}"}
 
 if [ ! -d "${COMIN}" ] ; then
    mkdir -p $COMIN
@@ -111,23 +107,21 @@ if [ ! -d "${COMOUT}" ] ; then
    mkdir -p $COMOUT
 fi
 if [ ! -d "${COMINobsproc_rtma3d}" ] ; then
-# echo " Directory of obs data does NOT exist. Job abort!"
-# err_exit
-  mkdir -p $COMINobsproc_rtma3d
+    mkdir -p ${COMINobsproc_rtma3d}
 fi
 
 ###########################################################
 #
-# The following variables are used in exrtma3d_obsprep_lghtn.ksh
+# The following variables are used in exrtma3d_obsprep_cloud.ksh
 #
 ###########################################################
 
 #   Set the name to the executable
-    export exefile_name_lightning=${exefile_name_lightning:-"rtma3d_process_lightning"}
+    export exefile_name_cloud=${exefile_name_cloud:-"rtma3d_process_cloud"}
 
 #   Set the path to the GSI static files
-    export FIXgsi=${FIX_GSI:-"${FIXrtma3d}/gsi"}
-    export FIXcrtm=${FIX_CRTM:-"${FIXrtma3d}/crtm"}
+    export FIXgsi=${FIXgsi:-"${FIXrtma3d}/gsi"}
+    export FIXcrtm=${FIXcrtm:-"${FIXrtma3d}/crtm"}
     export FIXwps=${FIXwps:-"${FIXrtma3d}/wps"}
 
     export PARMupp=${PARMupp:-"${PARMrtma3d}/upp"}
@@ -140,7 +134,7 @@ fi
 ######################
 # Execute the script.
 ######################
-${exSCR_OBSPREP_LGHTN:-$HOMErtma3d/scripts/ex${RUN}_obsprep_lghtn_subhr.ksh}
+${exSCR_OBSPREP_CLOUD:-$HOMErtma3d/scripts/${RUN}/ex${RUN}_cloud.ksh}
 export err=$?; err_chk
 
 msg="$0 of $job completed normally"

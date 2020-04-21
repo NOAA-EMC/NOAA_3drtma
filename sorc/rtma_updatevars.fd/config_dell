@@ -249,7 +249,7 @@ CC_TOOLS_CFLAGS = -DNMM_CORE=$(WRF_NMM_CORE)
                       $(WRF_SRC_ROOT_DIR)/frame/pack_utils.o 
 
  LIB_EXTERNAL    = \
-                      $(WRF_SRC_ROOT_DIR)/external/io_netcdf/libwrfio_nf.a -L/usrx/local/prod/packages/ips/18.0.1/netcdf/4.5.0/lib -lnetcdff  -L$(WRF_SRC_ROOT_DIR)/external/io_pnetcdf -lwrfio_pnf -L/gpfs/dell1/usrx/local/prod/packages/ips/19.0.5/impi/19.0.5/PNetCDF/1.8.1/lib -lpnetcdf   
+                      $(WRF_SRC_ROOT_DIR)/external/io_netcdf/libwrfio_nf.a -L/usrx/local/prod/packages/ips/18.0.1/netcdf/4.5.0/lib -lnetcdff  -L$(WRF_SRC_ROOT_DIR)/external/io_pnetcdf -lwrfio_pnf -L/gpfs/dell1/usrx/local/prod/packages/ips/18.0.1/impi/18.0.1/PNetCDF/1.8.1/lib -lpnetcdf   
 
 LIB             =    $(LIB_BUNDLED) $(LIB_EXTERNAL) $(LIB_LOCAL) $(LIB_WRF_HYDRO)
 LDFLAGS         =    $(OMP) $(FCFLAGS) $(LDFLAGS_LOCAL) 
@@ -260,7 +260,7 @@ NETCDFPATH      =    /usrx/local/prod/packages/ips/18.0.1/netcdf/4.5.0
 HDF5PATH        =    
 WRFPLUSPATH     =    
 RTTOVPATH       =    
-PNETCDFPATH     =    /gpfs/dell1/usrx/local/prod/packages/ips/19.0.5/impi/19.0.5/PNetCDF/1.8.1
+PNETCDFPATH     =   /gpfs/dell1/usrx/local/prod/packages/ips/18.0.1/impi/18.0.1/PNetCDF/1.8.1
 
 bundled:  io_only 
 external: io_only $(WRF_SRC_ROOT_DIR)/external/RSL_LITE/librsl_lite.a gen_comms_rsllite module_dm_rsllite $(ESMF_TARGET)

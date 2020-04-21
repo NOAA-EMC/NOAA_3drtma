@@ -64,9 +64,9 @@ ${LN} -s ${FIXwps}/hrrr_geo_em.d01.nc           ./geo_em.d01.nc
 #
 
 # find rap bufr lgycld data file and link to the bufr file
-  if [ -s $COMINrap/rtma_ru.t${cyc}${subcyc}z.lgycld.tm00.bufr_d ] ; then
-    ${CP} -p $COMINrap/rtma_ru.t${cyc}${subcyc}z.lgycld.tm00.bufr_d ./rtma_ru.t${cyc}${subcyc}z.lgycld.tm00.bufr_d
-    ${LN} -sf ./rtma_ru.t${cyc}${subcyc}z.lgycld.tm00.bufr_d ./NASA_LaRC_cloud.bufr
+  if [ -s $COMINrap/rap.t${cyc}z.lgycld.tm00.bufr_d ] ; then
+    ${CP} -p $COMINrap/rap.t${cyc}z.lgycld.tm00.bufr_d ./rap.t${cyc}z.lgycld.tm00.bufr_d
+    ${LN} -sf ./rap.t${cyc}z.lgycld.tm00.bufr_d ./NASA_LaRC_cloud.bufr
   else
     echo 'No bufr file found for nasa LaRC cloud data processing'
   fi
@@ -108,7 +108,7 @@ EOF
   postmsg "$jlogfile" "$msg"
 
   if [ -f ${DATA}/NASALaRCCloudInGSI.bufr ] ; then
-    cpreq ${DATA}/NASALaRCCloudInGSI.bufr ${COMINobsproc_rtma3d}/${RUN}.t${cyc}${subcyc}z.NASALaRCCloudInGSI.bufr
+    cpreq ${DATA}/NASALaRCCloudInGSI.bufr ${COMINobsproc_rtma3d}/${RUN}.t${cyc}z.NASALaRCCloudInGSI.bufr
   else
     msg="WARNING $pgm terminated normally but ${DATA}/NASALaRCCloudInGSI_bufr.bufr does NOT exist."
     ${ECHO} "$msg"

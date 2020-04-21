@@ -2,6 +2,7 @@
 ############################################################################
 
 set -x
+
 # make sure executable exists
 if [ ! -f ${EXECrtma3d}/${exefile_name_lightning} ] ; then
   ${ECHO} "ERROR: lightning obs prcoessing executable '${EXECrtma3d}/${exefile_name_lightning}' does not exist!"
@@ -85,13 +86,15 @@ if [ ${obsprep_lghtn} -eq 1 ] ; then
   ${ECHO} " processing NCEP BUFR Lightning Data"
 
 # find lightning bufr file
-  if [ -s $COMINrap/rtma_ru.t${cyc}${subcyc}z.lghtng.tm00.bufr_d ] ; then
-    cp $COMINrap/rtma_ru.t${cyc}${subcyc}z.lghtng.tm00.bufr_d ./rtma_ru.t${cyc}${subcyc}z.lghtng.tm00.bufr_d
+  if [ -s $COMINrap/rap.t${cyc}z.lghtng.tm00.bufr_d ] ; then
+    cp $COMINrap/rap.t${cyc}z.lghtng.tm00.bufr_d ./rap.t${cyc}z.lghtng.tm00.bufr_d
+  elif [ -s $COMINrap_e/rap.t${cyc}z.lghtng.tm00.bufr_d ] ; then
+    cp $COMINrap_e/rap.t${cyc}z.lghtng.tm00.bufr_d ./rap.t${cyc}z.lghtng.tm00.bufr_d
   else
     echo 'No bufr file found for lightning processing'
   fi
 
-  ln -s rtma_ru.t${cyc}${subcyc}z.lghtng.tm00.bufr_d lghtngbufr
+  ln -s rap.t${cyc}z.lghtng.tm00.bufr_d lghtngbufr
 
   echo ${PDY}${cyc} > ./lightning_cycle_date
 
@@ -112,6 +115,7 @@ EOF
 fi
 
 # Run process lightning
+
 pgm=${RUN}_lghtn
 . prep_step
 
@@ -146,7 +150,7 @@ else
   lghtng_bufr="LightningInGSI.bufr"
 fi
 if [ -f ${DATA}/${lghtng_bufr} ] ; then
-  cpreq ${DATA}/${lghtng_bufr} ${COMINobsproc_rtma3d}/${RUN}.t${cyc}${subcyc}z.${lghtng_bufr}
+  cpreq ${DATA}/${lghtng_bufr} ${COMINobsproc_rtma3d}/${RUN}.t${cyc}z.${lghtng_bufr}
 else
   msg="WARNING $pgm terminated normally but ${DATA}/${lghtng_bufr} does NOT exist."
   ${ECHO} "$msg"

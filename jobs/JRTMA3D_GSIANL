@@ -46,21 +46,21 @@ cd $DATA
 #    setpdy.sh needs the variables 
 #    $PDY and $cyc already defined in advance
 #####################################################
-export cycle=${cycle:-t${cyc}z} 
-setpdy.sh
-. ${DATA}/PDY
+#setpdy.sh
+#. ${DATA}/PDY
 
 export subcyc=${subcyc} #Note: Must define subcyc in upper level script. Can be 00, 15, 30, or 45 /MPondeca, 30Jun2017
                          #only used for rurtma2p5
+
+export cycle=${cycle:-t${cyc}${subcyc}z}
 export PDYHH="${PDY}${cyc}"
-export PDYm1=`$NDATE -24 $PDYHH | cut -c 1-8`
 ####################################
 # Determine Job Output Name on System
 ####################################
 export LOG_JJOB=${LOG_JJOB:-$COMROOT/logs/jlogfiles}
 export jlogfile=${jlogfile:-$LOG_JJOB/jlogfile.${jobid}}
 # export pgmout=${pgmout:-"OUTPUT.$$"}
-export pgmout=${pgmout:-"OUTPUT.${PDY}${cyc}.${jobid}"}
+export pgmout=${pgmout:-"OUTPUT.${PDY}${cyc}${subcyc}.${jobid}"}
 if [ ! -d ${LOG_JJOB} ] ; then
    mkdir -p ${LOG_JJOB}
 fi
@@ -105,11 +105,9 @@ if [ ! -d "${GESINhrrr_rtma3d}" ] ; then
   err_exit
 fi
 
-export COMINhrrrdas=${COMINhrrrdas:-"${COMINHRRRDAS}/hrrr.${PDY}/conus"}
-
 ### 3DRTMA GSIANL Products (netcdf)
 export COMOUTgsi_rtma3d=${COMOUTgsi_rtma3d:-"${COMOUT}/gsiprd.${cycle}"}
-
+export COMINhrrrdas=${COMINhrrrdas:-"${COMINHRRRDAS}/hrrr.${PDY}/conus"}
 if [ ! -d "${COMIN}" ] ; then
    mkdir -p $COMIN
 fi
@@ -128,8 +126,8 @@ fi
 ###########################################################
 #   set the file name of the final analysis file for archive
     if [ ! "${PROD_HEAD}" ] ; then
-      export ANLrtma3d_FNAME="${RUN}.t${cyc}z.wrf_inout.nc"
-      export FGSrtma3d_FNAME="${RUN}.t${cyc}z.firstguess.nc"
+      export ANLrtma3d_FNAME="${RUN}.t${cyc}${subcyc}z.wrf_inout.nc"
+      export FGSrtma3d_FNAME="${RUN}.t${cyc}${subcyc}z.firstguess.nc"
     else
       export ANLrtma3d_FNAME="${PROD_HEAD}.wrf_inout.nc"
       export FGSrtma3d_FNAME="${PROD_HEAD}.firstguess.nc"
@@ -141,15 +139,15 @@ fi
         mkdir -p ${DATA_RUNDIR}
     fi
     export DATAHOME=${DATA_RUNDIR}/gsiprd
-    ${RM} -rf ${DATAHOME}
+#    ${RM} -rf ${DATAHOME}
     ${LN} -s  ${DATA}  ${DATAHOME}
 
     export DATAOBSHOME=${DATA_RUNDIR}/obsprd
-    ${RM} -rf ${DATAOBSHOME}
+#    ${RM} -rf ${DATAOBSHOME}
     ${LN} -s  ${COMINobsproc_rtma3d}  ${DATAOBSHOME}
 
     export DATAHOME_BK=${DATA_RUNDIR}/fgsprd
-    ${RM} -rf ${DATAHOME_BK}
+#    ${RM} -rf ${DATAHOME_BK}
     ${LN} -s  ${GESINhrrr_rtma3d}  ${DATAHOME_BK}
 
 
@@ -175,7 +173,7 @@ fi
 ######################
 # Execute the script.
 ######################
-${exSCR_GSIANL:-$HOMErtma3d/scripts/ex${RUN}_gsianl.ksh}
+${exSCR_GSIANL:-$HOMErtma3d/scripts/ex${RUN}_gsianl_subhr.ksh}
 export err=$?; err_chk
 
 msg="$0 of $job completed normally"
