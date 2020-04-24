@@ -3,10 +3,11 @@ load "$NCARG_ROOT/lib/ncarg/nclscripts/csm/contributed.ncl"
 
 begin
 
-  nlon=648 
-  nlat=647  
-  nlon2=324 
-  nlat2=323  
+  lonlat = fbinrecread("./NASALaRC_cloud.bin",0,(/2/),"integer")
+  nlon=lonlat(0) 
+  nlat=lonlat(1)  
+  nlon2=nlon/2
+  nlat2=nlat/2 
 
   lon = fbinrecread("./NASALaRC_cloud.bin",1,(/nlat,nlon/),"float")
   lat = fbinrecread("./NASALaRC_cloud.bin",2,(/nlat,nlon/),"float")
@@ -14,6 +15,11 @@ begin
   tcld= fbinrecread("./NASALaRC_cloud.bin",5,(/nlat,nlon/),"float")
   frac= fbinrecread("./NASALaRC_cloud.bin",6,(/nlat,nlon/),"float")
   wlwp= fbinrecread("./NASALaRC_cloud.bin",7,(/nlat,nlon/),"float")
+;  print(lonlat)
+;  print(nlon)
+;  print(nlat)
+;  print(nlon2)
+;  print(nlat2)
 
   cover = new ((/nlat2,nlon2/), typeof(pcld))
   cover2 = new ((/nlat2,nlon2/), typeof(pcld))
@@ -82,10 +88,10 @@ begin
 
   resources@mpProjection       = "LambertConformal" ; choose projection
   resources@mpLimitMode        = "Corners"          ; choose range of map
-  resources@mpLeftCornerLatF      = 0.0
-  resources@mpLeftCornerLonF      = -131.
-  resources@mpRightCornerLatF     = 59.0
-  resources@mpRightCornerLonF     = -1.0
+  resources@mpLeftCornerLatF      = -11.0
+  resources@mpLeftCornerLonF      = -145.
+  resources@mpRightCornerLatF     = 48.0
+  resources@mpRightCornerLonF     = -0.1
 
   resources@mpLambertParallel1F   = 44.99997       ; ncl adds from grib file
   resources@mpLambertParallel2F   = 44.99997       ; ncl adds from grib file
@@ -115,13 +121,13 @@ begin
   resources@vpHeightF  = 0.6
 
   resources@tiMainString       ="RR NASA LaRC"
-;  resources@cnLevels    = (/1160., 1100.0, 1000.0,800.0,600.0,400.0,200.0,100.0,50.0/)	; set levels
-;  plot = gsn_contour_map(xwks, cover, resources)
+  resources@cnLevels    = (/1160., 1100.0, 1000.0,800.0,600.0,400.0,200.0,100.0,50.0/)	; set levels
+  plot = gsn_contour_map(xwks, cover, resources)
 ;  resources@cnLevels    = (/360., 345.0, 335.0,310.0,300.0,280.0,260.0,220.0,200.0/)	; set levels
 ;  plot = gsn_contour_map(xwks, cover2, resources)
-  resources@cnLevels    = (/-10.0,-5.0,-1.0,10.0,40.0,60.0,80.0,115.0,200.0/)	; set levels
+;  resources@cnLevels    = (/-10.0,-5.0,-1.0,10.0,40.0,60.0,80.0,115.0,200.0/)	; set levels
 ;  resources@cnLevels    = (/-10.0,-5.0,-1.0,0.0,20.0,40.0,60.0,80.0,115.0/)	; set levels
-  plot = gsn_contour_map(xwks, cover3, resources)
+;  plot = gsn_contour_map(xwks, cover3, resources)
 ;  resources@cnLevels    = (/-10.0,0.0,400.0,2000.0,4000.0,6500.0,7500.0,8500.0,9500.0/)
 ;  plot = gsn_contour_map(xwks, cover4, resources)
 

@@ -1,4 +1,4 @@
-  subroutine write_bufr_NASALaRC(nlon,nlat,dx,index,w_pcld,w_tcld,w_frac,w_lwp,nlev_cld)
+  subroutine write_bufr_NASALaRC(bufrfile,idate,nlon,nlat,dx,index,w_pcld,w_tcld,w_frac,w_lwp,nlev_cld)
 !$$$  subprogram documentation block
 !                .      .    .                                       .
 ! subprogram:   write_bufr_NASALaRC 
@@ -23,6 +23,8 @@
     implicit none
 
 !
+    character(len=*), intent(in) :: bufrfile
+    integer(i_kind),intent(in)   :: idate
     integer(i_kind), intent(in) :: nlon,nlat
     integer, intent(in)  ::   index(nlon,nlat)
     REAL(r_single), intent(in) ::   w_pcld(nlon,nlat)
@@ -40,24 +42,20 @@
     INTEGER(i_kind) :: ibfmsg = MXBF/4_i_kind
 
     character(8) subset,sid
-    integer(i_kind) :: ludx,lendian_in,idate
+    integer(i_kind) :: ludx,lendian_in
 
     INTEGER(i_kind)  ::  maxlvl, numref
     INTEGER(i_kind)  ::  i,j,n,k,iret
 
 
-    open(12,file='nasaLaRC_cycle_date')
-      read(12,*) idate
-    close(12)
     write(6,*) 'cycle time is :', idate
-!mhu    idate=2008120100
     subset='ADPUPA'
     sid='NASALaRC'
     ludx=22
     lendian_in=10
 
     open(ludx,file='prepobs_prep.bufrtable',action='read')
-    open(lendian_in,file='NASALaRCCloudInGSI.bufr',action='write',form='unformatted')
+    open(lendian_in,file=trim(bufrfile),action='write',form='unformatted')
 
     call datelen(10)
     call openbf(lendian_in,'OUT',ludx)
@@ -113,6 +111,7 @@
     enddo   !i
     enddo   !j
     call closbf(lendian_in)
+    write(6,*) 'write_to file',trim(bufrfile)
     write(6,*) 'write_bufr_nasaLaRC, DONE: write columns:',numref
 
 end subroutine  write_bufr_NASALaRC
