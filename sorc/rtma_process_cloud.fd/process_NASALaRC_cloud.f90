@@ -39,8 +39,12 @@ program  process_NASALaRC_cloud
 !
 ! MPI variables
   integer :: npe, mype,ierror
-!
+!SATID
+!  integer, parameter :: satidgoeswest=259  ! GOES 15  Stopped after March 2nd, 2020
+  integer, parameter :: satidgoeswest=271  ! GOES 17
+  integer, parameter :: satidgoeseast=270  ! GOES 16
   real     :: rad2deg = 180.0/3.1415926
+  integer,parameter  :: boxMAX=10
 !
   character*256 output_file
 !
@@ -89,7 +93,7 @@ program  process_NASALaRC_cloud
   REAL(r_single), allocatable ::   w_frac(:,:)
   REAL(r_single), allocatable ::   w_lwp (:,:)
   integer(i_kind),allocatable ::   nlev_cld(:,:)
-
+!
 !
 ! Working
   integer  nfov
@@ -98,11 +102,22 @@ program  process_NASALaRC_cloud
   real,allocatable  ::     xdist(:,:,:), xxxdist(:)
   real     fr,sqrt, qc, type
   integer,allocatable  ::  PHxx(:,:,:),index(:,:), jndex(:)
-  integer  ioption
   integer  ixx,ii,jj,med_pt,igrid,jgrid  &
                ,ncount,ncount1,ncount2,ii1,jj1,nobs,n
 
-  integer(i_kind) :: npts_rad
+!
+! namelist
+!
+  integer :: analysis_time
+  integer :: ioption
+  character(len=100) :: bufrfile
+  integer(i_kind) :: npts_rad, nptsx, nptsy
+  integer(i_kind) :: boxhalfx(boxMAX), boxhalfy(boxMAX)
+  real (r_kind)   :: boxlat0(boxMAX)
+  namelist/setup/ analysis_time, ioption, npts_rad,bufrfile, &
+     boxhalfx, boxhalfy, boxlat0
+   ! for area north of the latitude bigbox_lat0, a large radius npts_rad2 will be used.
+   ! this is to solve the cloud stripe issue in Alaska  -G. Ge Nov. 19, 2019 
 !
 !
 !  ** misc
@@ -114,9 +129,8 @@ program  process_NASALaRC_cloud
 
   logical     ::outside     ! .false., then point is inside x-y domain
                               ! .true.,  then point is outside x-y domain
-  logical     ::rtma       ! .true., then this is for an RTMA analysis
 
-  integer i,j,k,ipt,jpt,cfov
+  integer i,j,k,ipt,jpt,cfov,ibox
   Integer nf_status,nf_fid,nf_vid
 
   integer :: NCID
@@ -125,6 +139,7 @@ program  process_NASALaRC_cloud
 
   integer :: status
   character*10  atime
+  logical :: ifexist
 
 !**********************************************************************
 !
@@ -136,10 +151,36 @@ program  process_NASALaRC_cloud
   call MPI_COMM_RANK(mpi_comm_world,mype,ierror)
 
   if(mype==0) then
+!  get namelist
+!
+  analysis_time=2018051718
+  bufrfile='NASALaRCCloudInGSI_bufr.bufr'
+  npts_rad=1
+  boxhalfx=-1
+  boxhalfy=-1
+  boxlat0= 999.0 !don't use variable box by default
+      ! * ioption = 1 is nearest neighrhood
+      ! * ioption = 2 is median of cloudy fov
+  ioption = 2
+ 
+  inquire(file='namelist_nasalarc', EXIST=ifexist )
+  if(ifexist) then
+    open(10,file='namelist_nasalarc',status='old')
+       read(10,setup)
+    close(10)
+    write(*,*) 'Namelist setup are:'
+    write(*,setup)
+  else
+    write(*,*) 'No namelist file exist, use default values'
+    write(*,*) "analysis_time,bufrfile,npts_rad,ioption"
+    write(*,*) analysis_time, trim(bufrfile),npts_rad,ioption
+    write(*,*) "boxhalfx,boxhalfy,boxlat0"
+    write(*,*) boxhalfx,boxhalfy,boxlat0
+  endif
+ 
+
 ! set geogrid fle name
 !
-  npts_rad=1
-  rtma=.false.
 
   call init_constants_derived
 
@@ -194,8 +235,9 @@ program  process_NASALaRC_cloud
   index=0
 !
 !  read in the NASA LaRC cloud data
-  maxobs=(1800*700 + 1500*850)*1
+!  maxobs=(1800*700 + 1500*850)*1
   satfile='NASA_LaRC_cloud.bufr'
+  call read_NASALaRC_cloud_bufr_survey(satfile,satidgoeseast,satidgoeswest,east_time, west_time,maxobs)
   allocate(lat_l(maxobs))
   allocate(lon_l(maxobs))
   allocate(ptop_l(maxobs))
@@ -208,8 +250,7 @@ program  process_NASALaRC_cloud
   lon_l =-9.
   lwp_l =-9.
   phase_l=-9
-  call read_NASALaRC_cloud_bufr_survey(satfile,east_time, west_time)
-  call read_NASALaRC_cloud_bufr(satfile,atime,east_time, west_time,   &   
+  call read_NASALaRC_cloud_bufr(satfile,atime,satidgoeseast,satidgoeswest,east_time, west_time,   &   
             maxobs,numobs, ptop_l, teff_l, phase_l, lwp_l,lat_l, lon_l)
 
      write(6,*)'LaRC ptop =', (ptop_l(j),j=1,numobs,5000)
@@ -231,16 +272,6 @@ program  process_NASALaRC_cloud
 !     Map each FOV onto RR grid points 
 ! -----------------------------------------------------------
 ! -----------------------------------------------------------
-     if(userDX < 7000.0) then
-        npts_rad=3
-        if(CEN_LAT > 58.0 .and. CEN_LON < -150.0) then
-           npts_rad=3*3   ! increase FOV for Alaska HRRR
-        endif
-     else
-        npts_rad=1
-     endif
-     if (rtma .eq. .true.) npts_rad=1
-     write(*,*) 'The number of impact point is=',npts_rad
      do ipt=1,numobs
        if (phase_l(ipt).ge.0) then
 !  Indicates there is some data (not missing)
@@ -256,12 +287,24 @@ program  process_NASALaRC_cloud
 ! * Compute RR grid x/y at lat/lon of cloud data
 ! -----------------------------------------------------------
 ! * XC,YC should be within RR boundary, i.e., XC,YC >0
+      !to determine npts
+      nptsx=npts_rad !by default
+      nptsy=npts_rad !by default
+      if (lat_l(ipt) > boxlat0(1) ) then
+        do ibox=1,boxMAX !to get the largest possible npts
+          if (lat_l(ipt) > boxlat0(ibox)) then
+            if (boxhalfx(ibox)>0) nptsx=boxhalfx(ibox)
+            if (boxhalfy(ibox)>0) nptsy=boxhalfy(ibox)
+          endif
+        enddo
+      endif
+      !write(*,*) 'The number of impact point nx,ny=',npts_rad, npts
 
          ii1 = int(xc+0.5)
          jj1 = int(yc+0.5)
-         do jj = max(1,jj1-npts_rad), min(nlat,jj1+npts_rad)
+         do jj = max(1,jj1-nptsy), min(nlat,jj1+nptsy)
          if (jj1-1.ge.1 .and. jj1+1.le.nlat) then
-         do ii = max(1,ii1-npts_rad), min(nlon,ii1+npts_rad)
+         do ii = max(1,ii1-nptsx), min(nlon,ii1+nptsx)
          if (ii1-1.ge.1 .and. ii1+1.le.nlon) then
 !         if(XC .ge. 1. .and. XC .lt. nlon .and.        &
 !            YC .ge. 1. .and. YC .lt. nlat) then
@@ -282,9 +325,8 @@ program  process_NASALaRC_cloud
                    xdist(ii,jj,index(ii,jj)) = sqrt(      &
                       (XC+1-ii)**2 + (YC+1-jj)**2)
                  else
-                   write(6,*) ' too many data in one grid, increase nfov'
+                   write(6,*) 'ALERT: too many data in one grid, increase nfov'
                    write(6,*) nfov, ii,jj
-                   stop 1234
                  end if
          endif
          enddo ! ii
@@ -299,14 +341,6 @@ program  process_NASALaRC_cloud
 
 !
   write(6,*) 'The max index number is: ', maxval(index)
-
-  if (rtma .eq. .true.) then
-      ! * ioption = 1 is nearest neighrhood
-      ioption = 1
-  else
-      ! * ioption = 2 is median of cloudy fov
-      ioption = 2
-  endif
 
   allocate(w_pcld(nlon,nlat))
   allocate(w_tcld(nlon,nlat))
@@ -406,8 +440,9 @@ program  process_NASALaRC_cloud
 !
 !  write out results
 !
-  call write_bufr_NASALaRC(nlon,nlat,userDX,index,w_pcld,w_tcld,w_frac,w_lwp,nlev_cld)
+  call write_bufr_NASALaRC(bufrfile,analysis_time,nlon,nlat,userDX,index,w_pcld,w_tcld,w_frac,w_lwp,nlev_cld)
 !
+  write(6,*) "=== RAPHRRR PREPROCCESS SUCCESS ==="
 
   endif ! if mype==0 
 
@@ -421,7 +456,7 @@ program  process_NASALaRC_cloud
 !
 end program process_NASALaRC_cloud
 
-subroutine read_NASALaRC_cloud_bufr(satfile,atime,east_time, west_time, &
+subroutine read_NASALaRC_cloud_bufr(satfile,atime,satidgoeseast,satidgoeswest,east_time, west_time, &
              maxobs,numobs,ptop, teff, phase, lwp_iwp,lat, lon)
 !
 !   PRGMMR: Ming Hu          ORG: GSD        DATE: 2010-07-09
@@ -455,7 +490,7 @@ subroutine read_NASALaRC_cloud_bufr(satfile,atime,east_time, west_time, &
 !
 !
 !
-  character(80):: hdstr='YEAR  MNTH  DAYS HOUR  MINU  SECO'
+  character(80):: hdstr='YEAR  MNTH  DAYS HOUR  MINU  SECO SAID'
   character(80):: obstr='CLATH  CLONH CLDP HOCT CDTP EBBTH VILWC'
 ! CLDP     |  CLOUD PHASE
 ! HOCB     | HEIGHT OF BASE OF CLOUD
@@ -465,20 +500,25 @@ subroutine read_NASALaRC_cloud_bufr(satfile,atime,east_time, west_time, &
 ! EBBTH    | EQUIVALENT BLACK BODY TEMPERATURE  (KELVIN)
 ! VILWC    | VERTICALLY-INTEGRATED LIQUID WATER CONTENT
 
-  real(8) :: hdr(6),obs(7,1)
+  real(8) :: hdr(7),obs(7,1)
 
   INTEGER :: ireadmg,ireadsb
 
   character(8) subset
   integer :: unit_in=10,idate,iret,nmsg,ntb
+  integer :: satid
 
 !
 !  For NASA LaRC 
 !
-  CHARACTER*40   satfile
-  integer(i_kind) :: east_time, west_time
+  CHARACTER*40,intent(in) ::   satfile
+!SATID
+  integer,intent(in) :: satidgoeswest
+  integer,intent(in) :: satidgoeseast  
+  integer(i_kind),intent(in) :: east_time, west_time
 
-  INTEGER ::   maxobs, numobs  ! dimension
+  INTEGER,intent(in)  ::   maxobs! dimension
+  INTEGER,intent(out) ::   numobs  ! dimension
   INTEGER(i_kind) ::  obs_time
   REAL*8      time_offset
   REAL*4      lat                            (  maxobs)
@@ -509,30 +549,40 @@ subroutine read_NASALaRC_cloud_bufr(satfile,atime,east_time, west_time, &
    msg_report: do while (ireadmg(unit_in,subset,idate) == 0)
      nmsg=nmsg+1
      sb_report: do while (ireadsb(unit_in) == 0)
-       call ufbint(unit_in,hdr,6,1,iret,hdstr)
+       call ufbint(unit_in,hdr,7,1,iret,hdstr)
        obs_time=int((hdr(1)-2000.0)*100000000+hdr(2)*1000000+hdr(3)*10000+hdr(4)*100+hdr(5))
-       call ufbint(unit_in,obs,7,1,iret,obstr)
-       if(obs_time == east_time .or. obs_time == west_time ) then
-       if(abs(obs(3,1) -4.0) < 1.e-4) then
-         obs(7,1)=99999. ! clear
-         obs(6,1)=99999. ! clear
-         obs(5,1)=101300.0  ! clear (hpa)
-       endif
-       if(obs(5,1) < 1.e7 .and. obs(5,1) > 100.0 ) then
-       if(obs(6,1) < 1.e7 .and. obs(6,1) > 10.0) then
-         ntb = ntb+1
-         if(ntb > maxobs) then
-           write(*,*) 'Error: need to increase maxobs',maxobs, ntb
-           stop 1234
+       satid=int(hdr(7))
+       if( (obs_time == east_time .and. satid==satidgoeseast ) .or.  &
+           (obs_time == west_time .and. (satid==satidgoeswest .or. satid==259) ) ) then
+         call ufbint(unit_in,obs,7,1,iret,obstr)
+         if(abs(obs(3,1) -4.0) < 1.e-4) then
+           obs(7,1)=99999. ! clear
+           obs(6,1)=99999. ! clear
+           obs(5,1)=101300.0  ! clear (hpa)
          endif
-         lat(ntb)=obs(1,1)
-         lon(ntb)=obs(2,1)
-         phase(ntb)=int(obs(3,1))
-         lwp_iwp(ntb)=obs(7,1)
-         teff(ntb)=obs(6,1)
-         ptop(ntb)=obs(5,1)/100.0 ! pa to hpa
-       endif
-       endif
+         if(obs(5,1) < 1.e7 .and. obs(5,1) > 100.0 ) then
+         if(obs(6,1) < 1.e7 .and. obs(6,1) > 10.0) then
+           ntb = ntb+1
+           if(ntb > maxobs) then
+             write(*,*) 'ALERT: need to increase maxobs',maxobs, ntb
+             ntb = maxobs
+           endif
+
+           lwp_iwp(ntb)=99999.0
+           lat(ntb)=99999.0
+           lon(ntb)=99999.0
+           phase(ntb)=99999
+           teff(ntb)=99999.0
+           ptop(ntb)=99999.0
+           if(obs(1,1) < 1.e9) lat(ntb)=real(obs(1,1))
+           if(obs(2,1) < 1.e9) lon(ntb)=real(obs(2,1))
+           if(obs(3,1) < 1.e9) phase(ntb)=int(obs(3,1))
+           if(obs(7,1) < 1.e9) lwp_iwp(ntb)=real(obs(7,1))
+           if(obs(6,1) < 1.e9) teff(ntb)=real(obs(6,1))
+           if(obs(5,1) < 1.e9) ptop(ntb)=real(obs(5,1))/100.0 ! pa to hpa
+
+         endif
+         endif
        endif   ! east_time, west_time
      enddo sb_report
    enddo msg_report
@@ -560,7 +610,7 @@ subroutine sortmed(p,n,is)
       do 10 i=1,nm1
       ip1 = i+1
         do 10 j=ip1,n
-        if(p(i).le.p(j)) goto 10
+        if(p(i).le.p(j)) cycle
           temp = p(i)
           p(i) = p(j)
           p(j) = temp
@@ -571,7 +621,7 @@ subroutine sortmed(p,n,is)
       return
 end subroutine sortmed
 
-subroutine read_NASALaRC_cloud_bufr_survey(satfile,east_time, west_time)
+subroutine read_NASALaRC_cloud_bufr_survey(satfile,satidgoeseast,satidgoeswest,east_time, west_time,maxobs)
 !
 !   PRGMMR: Ming Hu          ORG: GSD        DATE: 2010-07-09
 !
@@ -602,10 +652,8 @@ subroutine read_NASALaRC_cloud_bufr_survey(satfile,east_time, west_time)
 
   implicit none
 !
-!
-!
-  character(80):: hdstr='YEAR  MNTH  DAYS HOUR  MINU  SECO'
-  real(8) :: hdr(6)
+  character(80):: hdstr='YEAR  MNTH  DAYS HOUR  MINU  SECO  SAID'
+  real(8) :: hdr(7)
 
   INTEGER :: ireadmg,ireadsb
 
@@ -616,25 +664,35 @@ subroutine read_NASALaRC_cloud_bufr_survey(satfile,east_time, west_time)
 !  For NASA LaRC 
 !
   CHARACTER*40, intent(in)    ::   satfile
+!SATID
+  integer,intent(in) :: satidgoeswest
+  integer,intent(in) :: satidgoeseast  
   integer(i_kind),intent(out) :: east_time, west_time
+  integer,intent(out) :: maxobs
 
-  INTEGER ::   maxobs, numobs  ! dimension
+  INTEGER ::   numobs  ! dimension
   INTEGER(i_kind) ::  obs_time
   REAL*8      time_offset
 
-  INTEGER(i_kind),parameter :: max_obstime=10
+  INTEGER(i_kind),parameter :: max_obstime=30
   integer(i_kind) :: num_obstime_all(max_obstime)
   integer(i_kind) :: num_subset_all(max_obstime)
   integer(i_kind) :: num_obstime_hh(max_obstime)
+  integer(i_kind) :: num_satid(max_obstime)
   integer(i_kind) :: num_obstime
 
 !
   character*10  atime
   integer :: i,ii,hhh
+  integer :: numobs_east, numobs_west
+  integer :: satid
 !
 !**********************************************************************
 !
  num_obstime=0
+ num_satid=0
+ num_obstime_all=0
+ num_subset_all=0
  hhh=99
  open(24,file='NASA.bufrtable')
  open(unit_in,file=trim(satfile),form='unformatted')
@@ -646,10 +704,11 @@ subroutine read_NASALaRC_cloud_bufr_survey(satfile,east_time, west_time)
      ntb = 0
      nmsg=nmsg+1
      sb_report: do while (ireadsb(unit_in) == 0)
-       call ufbint(unit_in,hdr,6,1,iret,hdstr)
+       call ufbint(unit_in,hdr,7,1,iret,hdstr)
        obs_time=int((hdr(1)-2000.0)*100000000+hdr(2)*1000000+hdr(3)*10000+hdr(4)*100+hdr(5))
        hhh=int(hdr(5))
        ntb=ntb+1
+       satid=int(hdr(7))
      enddo sb_report
 ! message inventory
      if(num_obstime == 0 ) then
@@ -657,10 +716,11 @@ subroutine read_NASALaRC_cloud_bufr_survey(satfile,east_time, west_time)
        num_obstime_all(num_obstime)=obs_time
        num_obstime_hh(num_obstime)=hhh
        num_subset_all(num_obstime)= ntb
+       num_satid(num_obstime)=satid
      else
        ii=0
        DO i=1,num_obstime
-          if(num_obstime_all(i) == obs_time ) ii=i
+          if(num_obstime_all(i) == obs_time .and. num_satid(i)== satid) ii=i
        ENDDO
        if( ii > 0 .and. ii <=num_obstime) then
           num_subset_all(ii)=num_subset_all(ii) + ntb
@@ -674,30 +734,44 @@ subroutine read_NASALaRC_cloud_bufr_survey(satfile,east_time, west_time)
           num_obstime_all(num_obstime)=obs_time
           num_obstime_hh(num_obstime)=hhh
           num_subset_all(num_obstime)=num_subset_all(num_obstime)+ntb
+          num_satid(num_obstime)=satid
        endif
      endif
    enddo msg_report
    write(*,*) 'message/reports num=',nmsg,ntb
  call closbf(unit_in)
 
- write(*,'(2x,a10,a10,a11)') 'time_level','subset_num'
+ write(*,'(2x,a15,a15,a15,a15)') 'time_level','satid','subset_num','hour'
  DO i=1,num_obstime
-   write(*,'(i2,i12,i11,i10)') i,num_obstime_all(i),num_subset_all(i),num_obstime_hh(i)
+   write(*,'(i2,i15,i15,i15,i15)') i,num_obstime_all(i),num_satid(i),num_subset_all(i),num_obstime_hh(i)
  ENDDO
-!  GOES EAST  : 1815, 1845, 1915, 2045
+!  GOES EAST  : 1815, 1845, 1915, 2045, no anymore, changed to 1830, 1900 just like WEST
 !  GOES WEST  : 1830, 1900, 2030
  east_time=0
  west_time=0
+ numobs_east=0
+ numobs_west=0
  DO i=1,num_obstime
    if(num_subset_all(i) > 10) then
-      if(num_obstime_hh(i) == 15 .or. num_obstime_hh(i) == 45 ) then
-         if(east_time < num_obstime_all(i)) east_time=num_obstime_all(i)
+      if(num_satid(i) == satidgoeseast ) then  
+         if(east_time < num_obstime_all(i)) then
+              east_time=num_obstime_all(i)
+              numobs_east=num_subset_all(i)
+         endif
       endif
-      if(num_obstime_hh(i) == 30 .or. num_obstime_hh(i) == 0 ) then
-         if(west_time < num_obstime_all(i)) west_time=num_obstime_all(i)
+      if(num_satid(i) == satidgoeswest .or. num_satid(i)==259 ) then
+         if(west_time < num_obstime_all(i)) then
+             west_time=num_obstime_all(i)
+             numobs_west=num_subset_all(i)
+         endif
       endif
    endif
  ENDDO
- write(*,*) 'east_time=',east_time
- write(*,*) 'west_time=',west_time
+ write(*,*) 'east_time and number=',east_time,numobs_east
+ write(*,*) 'west_time and number=',west_time,numobs_west
+ 
+ maxobs=numobs_west+numobs_east
+ maxobs=maxobs+int(maxobs*0.2)
+ write(*,*) 'maxobs=',maxobs
+
 end subroutine read_NASALaRC_cloud_bufr_survey

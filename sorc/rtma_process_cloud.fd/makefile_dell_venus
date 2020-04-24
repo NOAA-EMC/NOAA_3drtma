@@ -1,25 +1,16 @@
-# makefile for nasacloud_porcess
+# makefile for nssl_porcess
 #! /bin/sh -v
 
 # Define the fortran compiler and options
 
-# this is the WRF lib on WCOSS
 #WRFPATH    = /nwprod/sorc/wrf_shared.fd
-# this is the lib on Jet used by GSD
-#WRFPATH    = /mnt/lfs3/projects/rtwbl/mhu/rapcode/git_local/work/WRFV3.8_GSD_hybridcoord
-# this is the lib on theia (WRF v3.4 out-of-date)
-#WRFPATH    = /scratch3/NCEPDEV/nwprod/sorc/wrf_shared.v1.1.0
-# this is the lib on theia (WRF v3.7 also old)
- WRFPATH    = /ioddev_dell/dell1/nco/ops/nwtest/wrf_shared.v1.1.0
-
+WRFPATH    = /ioddev_dell/dell1/nco/ops/nwtest/wrf_shared.v1.1.0
 FC       = mpif90 -f90=ifort
 CPP      = /lib/cpp -P
 ARCH     =
 CPPFLAGS =  -DLINUX -Dfunder -DFortranByte=char -DFortranInt=int -DFortranLlong='long long' -D_UNDERSCORE
+#NWPLIBS =../../../lib -lw3emc_i4r8 -lw3nco_i4r8 -lbacio -lbufr_i4r8
 
-EXEFILE  = rap_process_cloud.exe
-
-# NWPROD LIBs (pre-installed on Theia)
 CORELIB  = /ioddev_dell/dell1/nco/ops/nwtest/lib.p2
 
 BUFR_VER=v11.2.0
@@ -31,11 +22,7 @@ W3NCO_VER=v2.0.6
 W3NCO_LIBd  =${CORELIB}/w3nco/$(W3NCO_VER)/libw3nco_$(W3NCO_VER)_d.a
 BACIO_VER=v2.0.2
 BACIO_LIB4  = ${CORELIB}/bacio/$(BACIO_VER)/libbacio_$(BACIO_VER)_4.a
-
-# NWPLIBS are also from nwprod lib (pre-installed on Theia, not re-compiled when installing GSI by user)
-# NWPLIBS =../../../lib -lw3emc_i4r8 -lw3nco_i4r8 -lbacio -lbufr_i4r8
 NWPLIBS = ${W3EMC_LIBd} ${W3NCO_LIBd} ${BACIO_LIB4} ${BUFR_LIBd}
-
 
 NETCDF      = /usrx/local/prod/packages/ips/18.0.1/netcdf/3.6.3
 NETCDF4     = /usrx/local/prod/packages/ips/18.0.1/netcdf/4.5.0
@@ -44,7 +31,6 @@ INCLD=  -I${NETCDF}/include -I$(WRFPATH)/frame
 LIBS =  -L${NWPLIBS} \
         $(WRFPATH)/external/io_netcdf/libwrfio_nf.a ${WRFPATH}/frame/pack_utils.o \
         -L${NETCDF4}/lib -lnetcdf -lnetcdff
-#       -L${NETCDF}/lib -lnetcdf
 # cio
 OBJS = kinds.o constants.o module_debug.o gridmod_gsi_map_utils.o \
        misc_definitions_module.o constants_module.o module_map_utils.o \
@@ -54,7 +40,7 @@ OBJS = kinds.o constants.o module_debug.o gridmod_gsi_map_utils.o \
 all: process_NASALaRC_cloud
 
 process_NASALaRC_cloud: ${OBJS}
-	${FC} -o ${EXEFILE} ${FLAGS} ${OBJS} ${LIBS} 
+	${FC} -o rap_process_cloud.exe ${FLAGS} ${OBJS} ${LIBS} 
 
 
 .SUFFIXES : .F90 .f90 .f .c .o
@@ -69,4 +55,4 @@ process_NASALaRC_cloud: ${OBJS}
 	${CC} ${CPPFLAGS} -c $<
 
 clean:
-	/bin/rm -f *.o *.exe *.mod ${EXEFILE}
+	/bin/rm -f *.o *.exe *.mod rap_process_cloud

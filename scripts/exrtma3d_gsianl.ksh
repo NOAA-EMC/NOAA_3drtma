@@ -5,7 +5,6 @@ set -x
 #-- This script is goint to run GSI analysis (3DVar and Cloud analysis) in one-step
 #
 echo " This script is goint to run GSI analysis (3DVar and Cloud analysis) in one-step"
-export HRRRDAS_BEC=0
 #-- Testing the status of some important variables. --#
 # Make sure DATAHOME is defined and exists
 if [ ! "${DATAHOME}" ]; then
@@ -236,8 +235,9 @@ if [ ${HRRRDAS_BEC} -gt 0 ]; then
   # generate list of HRRRDAS members for ensemble covariances
   # Use 1-hr forecasts from the HRRRDAS cyclin
   c=1
-   ${LS} ${COMINhrrrdas}/hrrr.t${HH}00z.f0100.mem000${c}.netcdf > filelist.hrrrdas
-
+  hrrre_file=${COMINhrrrdas}/hrrrdas_small_d02_${YYYYMMDD}${cyc}00f01_mem0001
+  ${LS} ${COMINhrrrdas}/hrrrdas_small_d02_${YYYYMMDD}${cyc}00f01_mem000${c} > filelist.hrrrdas
+  ${LN} -sf ${hrrre_file} wrf_en001
   c=2
   while [[ $c -le 36 ]]; do
    if [ $c -lt 10 ]; then
@@ -245,8 +245,8 @@ if [ ${HRRRDAS_BEC} -gt 0 ]; then
    else
     cc=$c
    fi
-   hrrre_file=${COMINhrrrdas}/hrrr.t${HH}00z.f0100.mem00${cc}.netcdf
-   ${LS} ${COMINhrrrdas}/hrrr.t1000z.f0100.mem00${cc}.netcdf >> filelist.hrrrdas
+   hrrre_file=${COMINhrrrdas}/hrrrdas_small_d02_${YYYYMMDD}${cyc}00f01_mem00${cc}
+   ${LS} ${COMINhrrrdas}/hrrrdas_small_d02_${YYYYMMDD}${cyc}00f01_mem00${cc} >> filelist.hrrrdas
    ${LN} -sf ${hrrre_file} wrf_en0${cc}
    ((c = c + 1))
   done
@@ -267,7 +267,7 @@ if [[ ${hrrrmem} -gt 30 ]] && [[ ${HRRRDAS_BEC} -eq 1  ]]; then #if HRRRDAS BEC 
   nummem=${hrrrmem}
   cp filelist.hrrrdas filelist03
 
-  beta1_inv=0.50 #0.15
+  beta1_inv=0.10 #0.15
   ifhyb=.true.
   regional_ensemble_option=3
   grid_ratio_ens=1
@@ -311,6 +311,7 @@ SATANGL=${FIXgsi}/global_satangbias.txt
 #SATINFO=${FIXgsi}/global_satinfo.txt
 SATINFO=${FIXgsi}/rap_global_satinfo.txt
 CONVINFO=${FIXgsi}/nam_regional_convinfo_RAP.txt
+#CONVINFO=${FIXgsi}/convinfo_NoUpperAirObs
 OZINFO=${FIXgsi}/global_ozinfo.txt    
 PCPINFO=${FIXgsi}/global_pcpinfo.txt
 OBERROR=${FIXgsi}/nam_errtable.r3dv
