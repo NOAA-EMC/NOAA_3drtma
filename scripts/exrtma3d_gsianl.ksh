@@ -361,6 +361,7 @@ if [ "${envir}" != "esrl" ]; then #WCOSS
   echo "HVC option is $hybridcord"
 fi
 
+${CP} ${PARMgsi}/hybens_info ./
 # Build the GSI namelist on-the-fly
 ${CP} ${PARMgsi}/gsiparm.anl.sh ./
 source ./gsiparm.anl.sh
