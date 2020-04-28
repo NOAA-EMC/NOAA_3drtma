@@ -335,8 +335,8 @@ else
   run_gsi_2times='NO'
   grid_ratio=1
   cloudanalysistype=1
-  ens_h=100 #20 #40 #110
-  ens_v=3 #1 #3
+  ens_h=20 #40 #110
+  ens_v=1 #3
 fi
 
 # option for hybrid vertical coordinate (HVC) in WRF-ARW
