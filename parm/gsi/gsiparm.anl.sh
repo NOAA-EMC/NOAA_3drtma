@@ -193,7 +193,7 @@ OBS_INPUT::
    ioption=1, 
    l_T_Q_adjust= .false.,
    l_rtma3d            = .true.,
-   l_precip_vertical_check = .true.,
+   i_precip_vertical_check = 3,
  /
  &CHEM
  /
