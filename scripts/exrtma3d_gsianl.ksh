@@ -235,8 +235,8 @@ if [ ${HRRRDAS_BEC} -gt 0 ]; then
   # generate list of HRRRDAS members for ensemble covariances
   # Use 1-hr forecasts from the HRRRDAS cyclin
   c=1
-  hrrre_file=${COMINhrrrdas}/hrrrdas_small_d02_${YYYYMMDD}${cyc}00f01_mem0001
-  ${LS} ${COMINhrrrdas}/hrrrdas_small_d02_${YYYYMMDD}${cyc}00f01_mem000${c} > filelist.hrrrdas
+  hrrre_file=${COMINhrrrdas}/hrrrdas_small_d02_${PDYHH_cycm1}00f01_mem0001
+  ${LS} ${COMINhrrrdas}/hrrrdas_small_d02_${PDYHH_cycm1}00f01_mem000${c} > filelist.hrrrdas
   ${LN} -sf ${hrrre_file} wrf_en001
   c=2
   while [[ $c -le 36 ]]; do
@@ -245,8 +245,8 @@ if [ ${HRRRDAS_BEC} -gt 0 ]; then
    else
     cc=$c
    fi
-   hrrre_file=${COMINhrrrdas}/hrrrdas_small_d02_${YYYYMMDD}${cyc}00f01_mem00${cc}
-   ${LS} ${COMINhrrrdas}/hrrrdas_small_d02_${YYYYMMDD}${cyc}00f01_mem00${cc} >> filelist.hrrrdas
+   hrrre_file=${COMINhrrrdas}/hrrrdas_small_d02_${PDYHH_cycm1}00f01_mem00${cc}
+   ${LS} ${COMINhrrrdas}/hrrrdas_small_d02_${PDYHH_cycm1}00f01_mem00${cc} >> filelist.hrrrdas
    ${LN} -sf ${hrrre_file} wrf_en0${cc}
    ((c = c + 1))
   done

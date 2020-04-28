@@ -82,7 +82,6 @@ export UTILrtma3d=${UTILrtma3d:-$HOMErtma3d/util/${RUN}}
 # date and time for previous and next cycle
 export PDYHH_cycm1=$($NDATE -01  "${PDYHH}")
 export PDYHH_cycp1=$($NDATE +01  "${PDYHH}")
-
 export FGS_OPT=${FGS_OPT:-1}
 
 #################################################
