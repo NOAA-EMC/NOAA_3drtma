@@ -62,7 +62,7 @@ for onetime in ${XX[*]};do
   if [[ ${onetime} -le ${deletetime} ]]; then
     echo "${onetime}: Delete wrfout_d01* in wrfprd/ and wrf_inout in gsiprd/"
     rm -f ${onetime}/wrfprd/wrfout_d01_*
-    rm -f ${onetime}/gsiprd/wrf_inout
+    rm -f ${onetime}/gsiprd/wrf_inout*
   fi
 done
 
