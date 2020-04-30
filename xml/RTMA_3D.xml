@@ -47,7 +47,7 @@
 
 <!ENTITY GFS_DIR "&OBS_DIR;/grids/gfs/0p5deg/grib2">
 <!ENTITY ENKFFCST_DIR "&OBS_DIR;/grids/enkf/atm_v15">
-<!ENTITY HRRRDAS_DIR "/lfs1/BMC/wrfruc/HRRRE/cycle">
+<!ENTITY HRRRDAS_DIR "/lfs4/BMC/wrfruc/HRRRE/cycle">
 
 <!ENTITY AIRCRAFT_REJECT "/home/amb-verif/acars_RR/amdar_reject_lists">
 <!ENTITY SFCOBS_USELIST "/lfs1/BMC/amb-verif/mesonet_uselists">
@@ -86,8 +86,8 @@
 <!ENTITY RADAR_PROC "33">
 <!ENTITY SATELLITE_PROC "1">
 <!-- ENTITY GSI_HYB_PROC "9:ppn=20" -->
-<!ENTITY GSI_HYB_PROC "400">
-<!ENTITY GSIRUN_CORES "400">
+<!ENTITY GSI_HYB_PROC "280">
+<!ENTITY GSIRUN_CORES "280">
 <!ENTITY WRF_PROC "280">
 <!ENTITY DIAG_STATS_PROC "1">
 
@@ -113,7 +113,7 @@
 <!-- End gsi_hyb by 3 hr -->
 <!-- End all post-processing by 6 hrs -->
 
-<!ENTITY START_TIME_RADAR "00:10:00">
+<!ENTITY START_TIME_RADAR "01:30:00">
 <!ENTITY START_TIME_CONVENTIONAL "01:30:00">
 <!ENTITY START_TIME_NASACLOUD   "00:50:00">
 <!ENTITY START_TIME_GSI "01:50:00">
@@ -317,6 +317,7 @@
 -->
             <datadep age="00:02:00"><cyclestr>&PREPBUFR_DIR;/@Y@j@H@M.rtma_ru.t@H@Mz.prepbufr.tm00</cyclestr></datadep>
             <datadep age="00:02:00"><cyclestr>&PREPBUFR_DIR;/@Y@j@H@M.rtma_ru.t@H@Mz.prepbufr.tm00.@Y@m@d</cyclestr></datadep>
+            <datadep age="00:02:00"><cyclestr>&PREPBUFR_DIR;/@Y@m@d@H.rtma_ru.t@H@Mz.prepbufr.tm00</cyclestr></datadep>
           </or>
         </and>
         <timedep><cyclestr offset="&START_TIME_CONVENTIONAL;">@Y@m@d@H@M00</cyclestr></timedep>
