@@ -508,6 +508,11 @@ if [ "${envir}" != "esrl" ]; then #wcoss
   #${LN} -sf ${COMOUTgsi_rtma3d}/${ANLrtma3d_FNAME} ${COMOUT}/${ANLrtma3d_FNAME}
   #${CP} -p ${pgmout_stdout}        ${COMOUT}/${pgmout_stdout}_gsianl.${cycle_str}
   #${CP} -p fits_${cycle_str}.txt  ${COMOUT}/fits_${cycle_str}.txt
+else
+  tar cvfz fixparm_gsi.${cycle_str}.tgz *info gsd*txt filelist03 satbias* berror_stats  \
+      current_bad_aircraft errtable gsiparm.anl
+  ${CP} -p fixparm_gsi.${cycle_str}.tgz ${LOG_PGMOUT}
+  ${CP} -p fixparm_gsi.${cycle_str}.tgz ${COMOUTgsi_rtma3d}
 fi
 
 ${RM} -f ${DATA}/sig*
