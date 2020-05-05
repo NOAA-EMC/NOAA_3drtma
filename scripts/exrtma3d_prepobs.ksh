@@ -102,7 +102,8 @@ elif [ -f ${COMINrap}/rtma_ru.t${HH}${subcyc}z.prepbufr.tm00 ] ; then
   cpreq ${COMINrap}/rtma_ru.t${HH}${subcyc}z.prepbufr.tm00                   ${COMINobsproc_rtma3d}/rtma_ru.t${HH}${subcyc}z.prepbufr.tm00
   ${LN} -sf ${COMINobsproc_rtma3d}/rtma_ru.t${HH}${subcyc}z.prepbufr.tm00    ${DATA}/rtma_ru.t${HH}${subcyc}z.prepbufr.tm00
 else
-  ${ECHO} "Warning: ${COMINrap}/rtma_ru.t${HH}${subcyc}z.prepbufr.tm00 does NOT exist! "
+  msg1="Warning: ${COMINrap}/rtma_ru.t${HH}${subcyc}z.prepbufr.tm00 does NOT exist!"
+  ${ECHO} "$msg1" | mail.py 
 fi
 
 # MRMS MOSAIC RADAR data (pre-processed bufr data/remapped on model grid )
@@ -119,7 +120,8 @@ else
   if [ -r ${COMINobsproc_rtma3d}/${RUN}.t${HH}${subcyc}z.NSSLRefInGSI.bufr ] ; then
     ${LN} -sf ${COMINobsproc_rtma3d}/${RUN}.t${HH}${subcyc}z.NSSLRefInGSI.bufr ${DATA}/${RUN}.t${HH}${subcyc}z.NSSLRefInGSI.bufr
   else
-    ${ECHO} "Warning: ${COMINobsproc_rtma3d}/${RUN}.t${HH}z.NSSLRefInGSI.bufr dones not exist!"
+    msg2="Warning: ${COMINobsproc_rtma3d}/${RUN}.t${HH}z.NSSLRefInGSI.bufr dones not exist!"
+    ${ECHO} "$msg2" | mail.py
   fi
 fi
 
@@ -139,7 +141,8 @@ else
     ${ECHO} "using preocessed RAP BUFR lightning data"
     ${LN} -sf ${COMINobsproc_rtma3d}/${RUN}.t${HH}${subcyc}z.LightningInGSI_bufr.bufr ${DATA}/${RUN}.t${HH}${subcyc}z.LightningInGSI_bufr.bufr
   else
-    ${ECHO} "Warning: ${COMINobsproc_rtma3d}/${RUN}.t${HH}${subcyc}z.LightningInGSI(_bufr).bufr  does not exist!"
+    msg3="Warning: ${COMINobsproc_rtma3d}/${RUN}.t${HH}${subcyc}z.LightningInGSI(_bufr).bufr  does not exist!"
+    ${ECHO} "$msg3" | mail.py
   fi
 fi
 
@@ -159,7 +162,8 @@ else
     ${ECHO} "using preocessed satellte cloud data from RAP bufr cloud data"
     ${LN} -sf ${COMINobsproc_rtma3d}/${RUN}.t${HH}${subcyc}z.NASALaRCCloudInGSI_bufr.bufr ${DATA}/${RUN}.t${HH}${subcyc}z.NASALaRCCloudInGSI_bufr.bufr
   else
-    ${ECHO} "Warning: ${COMINobsproc_rtma3d}/${RUN}.t${HH}${subcyc}z.NASALaRCCloudInGSI(_bufr).bufr  does not exist!"
+    msg4="Warning: ${COMINobsproc_rtma3d}/${RUN}.t${HH}${subcyc}z.NASALaRCCloudInGSI(_bufr).bufr  does not exist!"
+    ${ECHO} "$msg4" | mail.py
   fi
 fi
 
