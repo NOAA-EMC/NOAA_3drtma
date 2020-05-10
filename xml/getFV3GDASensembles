@@ -7,6 +7,12 @@
 #cyc=$1
 cyc=2019123106 #YYYYMMDDHH
 
+if [ $# -lt 1 ]; then
+  echo "usage: $0 YYYYMMDDHH"
+  exit
+fi
+cyc=$1
+
 YYYY=${cyc:0:4}
 MM=${cyc:4:2}
 DD=${cyc:6:2}

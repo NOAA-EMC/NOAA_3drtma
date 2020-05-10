@@ -338,6 +338,7 @@ else
   ens_h=20 #40 #110
   ens_v=1 #3
 fi
+#cloudanalysistype=0
 
 # option for hybrid vertical coordinate (HVC) in WRF-ARW
 if [ "${envir}" != "esrl" ]; then #WCOSS
@@ -361,6 +362,7 @@ if [ "${envir}" != "esrl" ]; then #WCOSS
   echo "HVC option is $hybridcord"
 fi
 
+${CP} ${PARMgsi}/hybens_info ./
 # Build the GSI namelist on-the-fly
 ${CP} ${PARMgsi}/gsiparm.anl.sh ./
 source ./gsiparm.anl.sh
@@ -507,6 +509,11 @@ if [ "${envir}" != "esrl" ]; then #wcoss
   #${LN} -sf ${COMOUTgsi_rtma3d}/${ANLrtma3d_FNAME} ${COMOUT}/${ANLrtma3d_FNAME}
   #${CP} -p ${pgmout_stdout}        ${COMOUT}/${pgmout_stdout}_gsianl.${cycle_str}
   #${CP} -p fits_${cycle_str}.txt  ${COMOUT}/fits_${cycle_str}.txt
+else
+  tar cvfz fixparm_gsi.${cycle_str}.tgz *info gsd*txt filelist03 satbias* berror_stats  \
+      current_bad_aircraft errtable gsiparm.anl
+  ${CP} -p fixparm_gsi.${cycle_str}.tgz ${LOG_PGMOUT}
+  ${CP} -p fixparm_gsi.${cycle_str}.tgz ${COMOUTgsi_rtma3d}
 fi
 
 ${RM} -f ${DATA}/sig*
