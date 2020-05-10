@@ -1,0 +1,52 @@
+
+mkdir -p retro archive
+cd archive
+mkdir -p hrrr amdar_reject_lists mesonet_uselists grids/rap/prepbufr grids/enkf/atm_v15 grids/rap/langley grids/rap/satwnd lightning/vaisala/netcdf  radar/mrms
+
+
+1. xml/RTMA_3D.xml
+-  <cycledef group="all">00  15    31  12  2019 *</cycledef>                          
++  <cycledef group="all">00  22    07  02  2020 *</cycledef> 
+
+2.  aircraft reject list
+cd xml/archive/amdar_reject_lists/
+cp -rp /home/amb-verif/acars_RR/amdar_reject_lists/20200207_rejects.txt .
+ln -snf 20200207_rejects.txt current_bad_aircraft.txt    
+
+3. mesonet use list
+cd ../mesonet_uselists/
+cp -rp /lfs1/BMC/amb-verif/mesonet_uselists/2019-11-22_meso_uselist.txt .
+ln -snf 2019-11-22_meso_uselist.txt current_mesonet_uselist.txt
+
+4. hrrr background wrfprd
+   [hsi get /BMC/rtrr/5year/hrrr_bkgd/2020/02/072020020721.tar.gz (1h fcst valid at 22z) ]
+htar -xvf /BMC/wrfruc/1year/hrrr_fcsts/2020/02/07/2020020721.1-2hfcst.tar 2020020721/wrfout_d01_2020-02-07_22_00_00.zip
+cd 2020020721/
+unzip wrfout_d01_2020-02-07_22_00_00.zip
+rm wrfout_d01_2020-02-07_22_00_00.zip
+mkdir wrfprd; mv wrfout* wrfprd
+
+5. GDAS   (00, 06 12, 18, not more than 9 hr  difference)
+cd xml/archive/grids/enkf/atm_v15
+ln -snf ../../../../getFV3GDASensembles .
+
+6. cd grids/rap/prepbufr            [00, 06, 12, 18]
+hsi get /BMC/fdr/Permanent/2020/02/07/data/grids/rap/prepbufr/202002071800.zip
+unzip 202002071800.zip
+rm *rtma_ru* -f
+
+7. cd grids/rap/langley           [00, 06, 12, 18]
+hsi get /BMC/fdr/Permanent/2020/02/07/data/grids/rap/langley/202002071800.zip
+unzip 202002071800.zip
+
+8. cd grids/rap/satwnd       [00, 06, 12, 18]
+         hsi get /BMC/fdr/Permanent/2019/12/31/data/grids/rap/satwnd/201912311200.zip
+
+9. cd lightning/vaisala/netcdf   (need previous 15 minutes data)         [0000]
+hsi get /BMC/fdr/Permanent/2020/02/07/data/lightning/vaisala/netcdf/202002070000.zip
+
+10. cd radar/mrms  (9.1G per file)      (hpss files every 3h)
+hsi get /BMC/fdr/Permanent/2020/02/07/data/radar/mrms/202002072200.zip
+           mkdir tmp; cd tmp; unzip ../201912311500.zip 201912311500.zip    (the zip contains file another 201912311500.zip);  unzip 201912311500.zip
+           mv *MRMS_MergedReflectivityQC*  ..
+           rm -rf tmp ../*.zip
