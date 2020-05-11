@@ -1,1 +1,1 @@
-/lfs1/BMC/nrtrr/FIX_EXEC_MODULE/parm/upp/postxconfig-NT-hrrrx.txt_20190820_0a07ff1f
+/home/rtrr/FIX_EXEC_MODULE/parm/upp/postxconfig-NT-hrrrx.txt_20190820_0a07ff1f

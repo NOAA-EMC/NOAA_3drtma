@@ -85,7 +85,7 @@ for currentdir in ${workdir[*]}; do
 done
 
 # Delete stdout directories
-deletetime=`date +%Y%m%d -d "${currentime}  300 days ago"`
+deletetime=`date +%Y%m%d -d "${currentime}  100 days ago"`
 set -A workdir "${mainroot}/stdout"
 echo "Delete stdout directory before ${deletetime}"
 for currentdir in ${workdir[*]}; do
