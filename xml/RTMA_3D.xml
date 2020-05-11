@@ -188,7 +188,7 @@
     <cyclestr>&LOG_DIR;/@Y@m@d/workflow_@Y@m@d@H@M.log</cyclestr>
   </log>
 
-  <cycledef group="all">00  15    31  12  2019 *</cycledef>
+  <cycledef group="all">00  22    07  02  2020 *</cycledef>
 
   <task name="obsprep_lghtn" cycledefs="all" maxtries="3">
 
