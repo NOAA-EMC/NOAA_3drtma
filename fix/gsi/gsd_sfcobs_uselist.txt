@@ -1,1 +1,1 @@
-/lfs1/BMC/nrtrr/FIX_EXEC_MODULE/fix/gsi/gsd_sfcobs_uselist.txt
+/home/rtrr/FIX_EXEC_MODULE/fix/gsi/gsd_sfcobs_uselist.txt
