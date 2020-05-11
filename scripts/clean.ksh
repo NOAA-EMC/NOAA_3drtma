@@ -68,9 +68,9 @@ done
 
 # Delete postprd/wrf*grib2 obsprd/*.dat files
 if [ "${subcyc}" == "-1" ]; then #hourly run
-  deletetime=`date +%Y%m%d%H -d "${currentime}  50 hours ago"`  # keeping latest 12 cycles is enough
+  deletetime=`date +%Y%m%d%H -d "${currentime}  50 hours ago"`
 else
-  deletetime=`date +%Y%m%d%H%M -d "${currentime} 50 hours ago"`  #4 cycles per hour, so keeping latest 12 cycles is enough
+  deletetime=`date +%Y%m%d%H%M -d "${currentime} 20 hours ago"`  #4 cycles per hour
 fi
 set -A workdir "${mainroot}/run"
 echo "Delete postprd/wrf*grib2 obsprd/*.dat before ${deletetime}"
@@ -92,7 +92,7 @@ done
 
 #=====================the following is to delete YYYYMMDD subdirectories under ptmp,stdout,log
 # Delete ptmp directories
-deletetime=`date +%Y%m%d -d "${currentime}  30 days ago"`
+deletetime=`date +%Y%m%d -d "${currentime}  10 days ago"`
 set -A workdir "${mainroot}/ptmp"
 echo "Delete ptmp directory before ${deletetime}"
 for currentdir in ${workdir[*]}; do
@@ -109,7 +109,7 @@ for currentdir in ${workdir[*]}; do
 done
 
 # Delete stdout directories
-deletetime=`date +%Y%m%d -d "${currentime}  500 days ago"`
+deletetime=`date +%Y%m%d -d "${currentime}  100 days ago"`
 set -A workdir "${mainroot}/stdout"
 echo "Delete stdout directory before ${deletetime}"
 for currentdir in ${workdir[*]}; do
@@ -126,7 +126,7 @@ for currentdir in ${workdir[*]}; do
 done
 
 # Delete log directories
-deletetime=`date +%Y%m%d -d "${currentime}  500 days ago"`
+deletetime=`date +%Y%m%d -d "${currentime}  300 days ago"`
 set -A workdir "${mainroot}/log"
 echo "Delete log directory before ${deletetime}"
 for currentdir in ${workdir[*]}; do
