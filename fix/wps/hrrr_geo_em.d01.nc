@@ -1,1 +1,1 @@
-/lfs1/BMC/nrtrr/FIX_EXEC_MODULE/fix/wps/hrrr_geo_em.d01.nc
+/home/rtrr/FIX_EXEC_MODULE/fix/wps/hrrr_geo_em.d01.nc

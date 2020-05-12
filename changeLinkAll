@@ -1,0 +1,20 @@
+#!/bin/bash
+
+for file in ./*/*/*
+do
+  src=`readlink $file | sed -e "s#/lfs1/BMC/nrtrr#/home/rtrr#g"`
+  if [ ! -z $src ]; then
+    ln -snf $src $file
+    echo "ln -snf $src $file"
+  fi
+done
+
+for file in ./*/*
+do
+  src=`readlink $file | sed -e "s#/lfs1/BMC/nrtrr#/home/rtrr#g"`
+  if [ ! -z $src ]; then
+    ln -snf $src $file
+    echo "ln -snf $src $file"
+  fi
+done
+

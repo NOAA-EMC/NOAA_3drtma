@@ -15,7 +15,7 @@ ln -snf 20200207_rejects.txt current_bad_aircraft.txt
 
 3. mesonet use list
 cd ../mesonet_uselists/
-cp -rp /lfs1/BMC/amb-verif/mesonet_uselists/2019-11-22_meso_uselist.txt .
+cp -rp /lfs4/BMC/amb-verif/mesonet_uselists/2019-11-22_meso_uselist.txt .
 ln -snf 2019-11-22_meso_uselist.txt current_mesonet_uselist.txt
 
 4. hrrr background wrfprd
