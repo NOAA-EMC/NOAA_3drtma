@@ -1,0 +1,38 @@
+errtable, berror
+hzscl, vs
+readin_localization
+ens_h
+ens_v
+hybens_info
+
+exp1: 
+   small ens_h at low levels, small ens_v under level 40 (hybens_info) 
+   small hzscl at low levels 
+   vs/8
+   small obs error for surface obs
+
+
+tuneB+R:
+     fctr(1) = 1.0_r_kind/8.0_r_kind
+     fctr(2) = 1.0_r_kind/8.0_r_kind
+     fctr(3) = 1.0_r_kind/8.0_r_kind
+     fctr(4) = 1.0_r_kind/7.0_r_kind  !
+     fctr(5) = 1.0_r_kind/6.0_r_kind
+     fctr(6) = 1.0_r_kind/5.0_r_kind
+     fctr(7) = 1.0_r_kind/4.0_r_kind
+     fctr(8) = 1.0_r_kind/2.0_r_kind
+     fctr(9) = 1.0_r_kind/1.0_r_kind  !about 1km AGL
+
+tuneB+R_2
+     fctr(1) = 1.0_r_kind/8.0_r_kind
+     fctr(2) = 1.0_r_kind/8.0_r_kind
+     fctr(3) = 1.0_r_kind/8.0_r_kind
+     fctr(4) = 1.0_r_kind/4.0_r_kind  !
+     fctr(5) = 1.0_r_kind/2.0_r_kind
+  also changed hybens_info
+
+
+tuneB+R_3
+     fctr(1) = 1.0_r_kind/8.0_r_kind
+     fctr(2) = 1.0_r_kind/8.0_r_kind
+  also changed hybens_info

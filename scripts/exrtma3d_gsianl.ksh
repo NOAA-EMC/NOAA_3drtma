@@ -338,7 +338,7 @@ else
   ens_h=20 #40 #110
   ens_v=1 #3
 fi
-#cloudanalysistype=0
+cloudanalysistype=0
 
 # option for hybrid vertical coordinate (HVC) in WRF-ARW
 if [ "${envir}" != "esrl" ]; then #WCOSS

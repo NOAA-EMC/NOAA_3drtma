@@ -104,9 +104,9 @@
 <!ENTITY CONVENTIONAL_RESOURCES "<walltime>00:05:00</walltime><memory>2G</memory>">
 <!ENTITY RADAR_RESOURCES "<walltime>00:10:00</walltime>">
 <!ENTITY SATELLITE_RESOURCES "<walltime>00:05:00</walltime><memory>10G</memory>">
-<!ENTITY GSI_HYB_RESOURCES "<walltime>00:18:00</walltime>">
+<!ENTITY GSI_HYB_RESOURCES "<walltime>00:40:00</walltime>">
 <!ENTITY DIAG_STATS_RESOURCES "<walltime>00:05:00</walltime><memory>600M</memory>">
-<!ENTITY POST_RESOURCES "<walltime>00:10:00</walltime>">
+<!ENTITY POST_RESOURCES "<walltime>00:45:00</walltime>">
 <!ENTITY NCL_RESOURCES "<walltime>00:55:00</walltime>">
 <!ENTITY NCL_SKEWT_RESOURCES "<walltime>00:25:00</walltime><memory>9G</memory>">
 <!ENTITY NCL_HTXS_RESOURCES "<walltime>00:25:00</walltime><memory>9G</memory>">
@@ -190,6 +190,141 @@
 
   <cycledef group="all">00  22    07  02  2020 *</cycledef>
 
+  <task name="obsprep_lghtn" cycledefs="all" maxtries="3">
+
+    &LIGHTNING_RESOURCES;
+    &WALL_LIMIT_DA;
+    &RESERVATION_PRE;
+
+    <command>&JJOB_DIR;/launch.ksh &JJOB_DIR;/JRTMA3D_OBSPREP_LGHTN</command>
+    <cores>&LIGHTNING_PROC;</cores>
+    <jobname><cyclestr>&JOBNAME_PRE;_obsprep_lghtn_@H@M</cyclestr></jobname>
+    <join><cyclestr>&LOG_DIR;/@Y@m@d/obsprep_lghtn_@Y@m@d@H@M.log</cyclestr></join>
+
+    &COMMONVARS;
+    <envar>
+      <name>rundir_task</name>
+      <value><cyclestr>&DATAROOT;/@Y@m@d@H/obsprd</cyclestr></value>
+    </envar>
+    <envar>
+      <name>LIGHTNING_ROOT</name>
+      <value>&LIGHTNING_DIR;</value>
+    </envar>
+
+      <dependency>
+        <or>
+          <datadep><cyclestr>&LIGHTNING_DIR;/vaisala/netcdf/@y@j@H@M0005r</cyclestr></datadep>
+          <timedep><cyclestr offset="&START_TIME_RADAR;">@Y@m@d@H@M00</cyclestr></timedep>
+        </or>
+      </dependency>
+  </task>
+
+  <task name="obsprep_radar" cycledefs="all" maxtries="3">
+    &RADAR_RESOURCES;
+    &WALL_LIMIT_DA;
+    &RESERVATION_POST;
+
+    <command>&JJOB_DIR;/launch.ksh &JJOB_DIR;/JRTMA3D_OBSPREP_RADAR</command>
+    <cores>&RADAR_PROC;</cores>
+    <jobname><cyclestr>&JOBNAME_PRE;_obsprep_radar_@H@M</cyclestr></jobname>
+    <join><cyclestr>&LOG_DIR;/@Y@m@d/obsprep_radar_@Y@m@d@H@M.log</cyclestr></join>
+
+    &COMMONVARS;
+    <envar>
+      <name>rundir_task</name>
+      <value><cyclestr>&DATAROOT;/@Y@m@d@H/obsprd</cyclestr></value>
+    </envar>
+    <envar>
+      <name>NSSL</name>
+      <value>&RADAR_DIR;</value>
+    </envar>
+
+    <dependency>
+      <or>
+        <timedep><cyclestr offset="&START_TIME_RADAR;">@Y@m@d@H@M00</cyclestr></timedep>
+        <rb><cyclestr offset="-0:01:00">!Dir.glob('&RADAR_DIR;/@Y@m@d-@H@M*.MRMS_MergedReflectivityQC_00.50_@Y@m@d-@H*.grib2').empty?</cyclestr></rb>
+        <rb><cyclestr>!Dir.glob('&RADAR_DIR;/@Y@m@d-@H@M*.MRMS_MergedReflectivityQC_00.50_@Y@m@d-@H*.grib2').empty?</cyclestr></rb>
+        <rb><cyclestr offset="0:01:00">!Dir.glob('&RADAR_DIR;/@Y@m@d-@H@M*.MRMS_MergedReflectivityQC_00.50_@Y@m@d-@H*.grib2').empty?</cyclestr></rb>
+        <rb><cyclestr offset="0:02:00">!Dir.glob('&RADAR_DIR;/@Y@m@d-@H@M*.MRMS_MergedReflectivityQC_00.50_@Y@m@d-@H*.grib2').empty?</cyclestr></rb>
+      </or>
+    </dependency>
+  </task>
+
+  <task name="obsprep_cloud" cycledefs="all" maxtries="3">
+    &SATELLITE_RESOURCES;
+    &WALL_LIMIT_DA;
+    &RESERVATION_PRE;
+
+    <command>&JJOB_DIR;/launch.ksh &JJOB_DIR;/JRTMA3D_OBSPREP_CLOUD</command>
+    <cores>&SATELLITE_PROC;</cores>
+    <jobname><cyclestr>&JOBNAME_PRE;_obsprep_cloud_@H@M</cyclestr></jobname>
+    <join><cyclestr>&LOG_DIR;/@Y@m@d/obsprep_cloud_@Y@m@d@H@M.log</cyclestr></join>
+
+    &COMMONVARS;
+    <envar>
+      <name>rundir_task</name>
+      <value><cyclestr>&DATAROOT;/@Y@m@d@H/obsprd</cyclestr></value>
+    </envar>
+    <envar>
+      <name>NASALARC_DATA</name>
+      <value>&LANGLEY_BUFR_DIR;</value>
+    </envar>
+
+    <dependency>
+      <or>
+        <datadep><cyclestr>&LANGLEY_BUFR_DIR;/@Y@j@H00.rap.t@Hz.lgycld.tm00.bufr_d</cyclestr></datadep>
+        <datadep><cyclestr>&LANGLEY_BUFR_DIR;/@Y@j@H00.rap_e.t@Hz.lgycld.tm00.bufr_d</cyclestr></datadep>
+        <timedep><cyclestr offset="&START_TIME_NASACLOUD;">@Y@m@d@H@M00</cyclestr></timedep>
+      </or>
+    </dependency>
+  </task>
+
+  <task name="obsprep_basic" cycledefs="all" maxtries="3">
+
+    &CONVENTIONAL_RESOURCES;
+    &WALL_LIMIT_DA;
+    &RESERVATION_PRE;
+
+    <command>&JJOB_DIR;/launch.ksh &JJOB_DIR;/JRTMA3D_OBSPREP_BASIC</command>
+    <cores>&CONVENTIONAL_PROC;</cores>
+    <jobname><cyclestr>&JOBNAME_PRE;_obsprep_basic_@H@M</cyclestr></jobname>
+    <join><cyclestr>&LOG_DIR;/@Y@m@d/obsprep_basic_@Y@m@d@H@M.log</cyclestr></join>
+
+    &COMMONVARS;
+    <envar>
+      <name>rundir_task</name>
+      <value><cyclestr>&DATAROOT;/@Y@m@d@H/obsprd</cyclestr></value>
+    </envar>
+    <envar>
+      <name>PREPBUFR</name>
+      <value>&PREPBUFR_DIR;</value>
+    </envar>
+    <envar>
+      <name>RADVELLEV2_DIR</name>
+      <value>&RADVELLEV2_DIR;</value>
+    </envar>
+    <envar>
+      <name>SATWND_DIR</name>
+      <value>&SATWND_DIR;</value>
+    </envar>
+
+    <dependency>
+      <or>
+        <and>
+          <or>
+            <datadep age="00:02:00"><cyclestr>&PREPBUFR_DIR;/@Y@j@H00.rap.t@Hz.prepbufr.tm00.@Y@m@d</cyclestr></datadep>
+            <datadep age="00:02:00"><cyclestr>&PREPBUFR_DIR;/@Y@j@H00.rap_e.t@Hz.prepbufr.tm00.@Y@m@d</cyclestr></datadep>
+          </or>
+<!--for sub-hourly run
+          <datadep age="00:02:00"><cyclestr>&PREPBUFR_DIR;/@Y@j@H@M.rtma_ru.t@H@Mz.prepbufr.tm00.@Y@m@d</cyclestr></datadep>
+-->
+        </and>
+        <timedep><cyclestr offset="&START_TIME_CONVENTIONAL;">@Y@m@d@H@M00</cyclestr></timedep>
+      </or>
+    </dependency>
+
+  </task>
+
   <task name="gsianl" cycledefs="all" maxtries="3">
 
     &GSI_HYB_RESOURCES;
@@ -244,11 +379,83 @@
     </envar>
 
     <dependency>
+      <and>
         <datadep age="00:06:00">&HRRR_DIR;/<cyclestr offset="-1:00:00">@Y@m@d@H</cyclestr>/wrfprd/<cyclestr>wrfout_d01_@Y-@m-@d_@H_00_00</cyclestr></datadep>
+        <or> 
+          <and>
+            <taskdep task="obsprep_radar"/>
+            <taskdep task="obsprep_lghtn"/>
+            <taskdep task="obsprep_basic"/>
+            <taskdep task="obsprep_cloud"/>
+            <!--to use HRRRDAS BEC, need to add other dependencies here  -->
+          </and>
+        </or>
+      </and>
     </dependency>
 
   </task>
 
+  <task name="diagstats" cycledefs="all" maxtries="3">
+
+    &DIAG_STATS_RESOURCES;
+    &WALL_LIMIT_DA;
+    &RESERVATION;
+
+    <command>&JJOB_DIR;/launch.ksh &JJOB_DIR;/JRTMA3D_DIAGSTATS</command>
+    <cores>&DIAG_STATS_PROC;</cores>
+    <jobname><cyclestr>&JOBNAME_PRE;_diag_stats_@H@M</cyclestr></jobname>
+    <join><cyclestr>&LOG_DIR;/@Y@m@d/diag_stats_@Y@m@d@H@M.log</cyclestr></join>
+
+    &COMMONVARS;
+    <envar>
+      <name>rundir_task</name>
+      <value><cyclestr>&DATAROOT;/@Y@m@d@H/diagprd</cyclestr></value>
+    </envar>
+    <envar>
+      <name>GSIRUN_DIR</name>
+      <value><cyclestr>&DATAROOT;/@Y@m@d@H/gsiprd</cyclestr></value>
+    </envar>
+    <envar>
+      <name>GSIRUN_CORES</name>
+      <value>&GSIRUN_CORES;</value>
+    </envar>
+
+    <dependency>
+      <taskdep task="gsianl"/>
+    </dependency>
+
+  </task>
+
+  <task name="updatevars" cycledefs="all" maxtries="3">
+
+    &UPDATE_VARS_RESOURCES;
+    &WALL_LIMIT_UV;
+    &RESERVATION_DA;
+
+    <command>&JJOB_DIR;/launch.ksh &JJOB_DIR;/JRTMA3D_UPDATEVARS</command>
+    <cores>&WRF_PROC;</cores>
+    <jobname><cyclestr>&JOBNAME_PRE;_updatevars_@H@M</cyclestr></jobname>
+    <join><cyclestr>&LOG_DIR;/@Y@m@d/updatevars_@Y@m@d@H@M.log</cyclestr></join>
+
+    &COMMONVARS;
+    <envar>
+      <name>rundir_task</name>
+      <value><cyclestr>&DATAROOT;/@Y@m@d@H/wrfprd</cyclestr></value>
+    </envar>
+    <envar>
+      <name>FCST_LENGTH</name>
+      <value>&FCST_LENGTH;</value>
+    </envar>
+    <envar>
+      <name>GSIRUN_DIR</name>
+      <value><cyclestr>&DATAROOT;/@Y@m@d@H/gsiprd</cyclestr></value>
+    </envar>
+
+    <dependency>
+        <taskdep task="gsianl"/>
+    </dependency>
+
+  </task>
 
   <task name="post" cycledefs="all" maxtries="3">
 
@@ -284,7 +491,117 @@
     </envar>
 
     <dependency>
-      <taskdep task="gsianl"/>
+      <taskdep task="updatevars"/>
+    </dependency>
+
+  </task>
+
+  <task name="smartinit_bl" cycledefs="all" maxtries="3">
+
+    &SMARTINIT_RESOURCES;
+    &WALL_LIMIT_PP;
+    &RESERVATION_SMARTINIT;
+
+    <command>&JJOB_DIR;/launch.ksh &SCRIPT_DIR;/exrtma3d_smartinit_bl.ksh</command>
+    <cores>&SMARTINIT_PROC;</cores>
+    <jobname><cyclestr>&JOBNAME_PRE;_smartinit_@H@M_bl</cyclestr></jobname>
+    <join><cyclestr>&LOG_DIR;/@Y@m@d/smartinit_@Y@m@d@H@M_bl.log</cyclestr></join>
+
+    &COMMONVARS;
+    <envar>
+      <name>rundir_task</name>
+      <value><cyclestr>&DATAROOT;/@Y@m@d@H/smtiprd</cyclestr></value>
+    </envar>
+    <envar>
+      <name>START_TIME</name>
+      <value><cyclestr>@Y@m@d@H</cyclestr></value>
+    </envar>
+    <envar>
+      <name>FCST_TIME</name>
+      <value>00</value>
+    </envar>
+    <envar>
+      <name>EXE_ROOT</name>
+      <value>&SMARTINIT_EXEC;</value>
+    </envar>
+    <envar>
+      <name>DATAROOT</name>
+      <value>&DATAROOT;</value>
+    </envar>
+    <envar>
+      <name>DATAHOME</name>
+      <value><cyclestr>&DATAROOT;/@Y@m@d@H/smtiprd</cyclestr></value>
+    </envar>
+    <envar>
+      <name>DATAPOSTHOME</name>
+      <value><cyclestr>&DATAROOT;/@Y@m@d@H/postprd</cyclestr></value>
+    </envar>
+    <envar>
+      <name>MODEL</name>
+      <value>HRRR</value>
+    </envar>
+    <envar>
+      <name>STATIC_DIR</name>
+      <value>&STATIC_DIR;/smartinit</value>
+    </envar>
+
+    <dependency>
+      <datadep age="00:02:00">&DATAROOT;/<cyclestr>@Y@m@d@H</cyclestr>/postprd<cyclestr>/wrfnat_hrconus_00.grib2</cyclestr></datadep>
+    </dependency>
+
+  </task>
+
+  <task name="smartinit_nb" cycledefs="all" maxtries="3">
+
+    &SMARTINIT_RESOURCES;
+    &WALL_LIMIT_PP;
+    &RESERVATION_SMARTINIT;
+
+    <command>&JJOB_DIR;/launch.ksh &SCRIPT_DIR;/exrtma3d_smartinit_nb.ksh</command>
+    <cores>&SMARTINIT_PROC;</cores>
+    <jobname><cyclestr>&JOBNAME_PRE;_smartinit_@H@M_nb</cyclestr></jobname>
+    <join><cyclestr>&LOG_DIR;/@Y@m@d/smartinit_@Y@m@d@H@M_nb.log</cyclestr></join>
+
+    &COMMONVARS;
+    <envar>
+      <name>rundir_task</name>
+      <value><cyclestr>&DATAROOT;/@Y@m@d@H/smtiprd</cyclestr></value>
+    </envar>
+    <envar>
+      <name>START_TIME</name>
+      <value><cyclestr>@Y@m@d@H</cyclestr></value>
+    </envar>
+    <envar>
+      <name>FCST_TIME</name>
+      <value>00</value>
+    </envar>
+    <envar>
+      <name>EXE_ROOT</name>
+      <value>&SMARTINIT_EXEC;</value>
+    </envar>
+    <envar>
+      <name>DATAROOT</name>
+      <value>&DATAROOT;</value>
+    </envar>
+    <envar>
+      <name>DATAHOME</name>
+      <value><cyclestr>&DATAROOT;/@Y@m@d@H/smtiprd</cyclestr></value>
+    </envar>
+    <envar>
+      <name>DATAPOSTHOME</name>
+      <value><cyclestr>&DATAROOT;/@Y@m@d@H/postprd</cyclestr></value>
+    </envar>
+    <envar>
+      <name>MODEL</name>
+      <value>HRRR</value>
+    </envar>
+    <envar>
+      <name>STATIC_DIR</name>
+      <value>&STATIC_DIR;/smartinit</value>
+    </envar>
+
+    <dependency>
+      <datadep age="00:02:00">&DATAROOT;/<cyclestr>@Y@m@d@H</cyclestr>/postprd<cyclestr>/wrfnat_hrconus_00.grib2</cyclestr></datadep>
     </dependency>
 
   </task>
@@ -334,6 +651,108 @@
     </dependency>
 
   </task>
+
+  <metatask>
+    <var name="skewt">skewt1 skewt2 skewt5</var>
+
+    <task name="ncl_00_#skewt#" cycledefs="all" maxtries="3">
+
+      &NCL_SKEWT_RESOURCES;
+      &WALL_LIMIT_PP;
+      &RESERVATION;
+
+      <command>&SCRIPTS;/NCL/ncl_hrrr_#skewt#.ksh</command>
+      <cores>&NCL_PROC;</cores>
+      <jobname><cyclestr>&JOBNAME_PRE;_ncl_@H_@M_#skewt#</cyclestr></jobname>
+      <join><cyclestr>&LOG_DIR;/@Y@m@d/ncl_@Y@m@d@H@M_00_#skewt#.log</cyclestr></join>
+
+      <envar>
+        <name>MODULE_FILE</name>
+        <value>&MODULE_FILE;</value>
+      </envar>
+      <envar>
+        <name>START_TIME</name>
+        <value><cyclestr>@Y@m@d@H</cyclestr></value>
+      </envar>
+      <envar>
+        <name>FCST_TIME</name>
+        <value>00</value>
+      </envar>
+      <envar>
+        <name>NCL_VER</name>
+        <value>&NCL_VER;</value>
+      </envar>
+      <envar>
+        <name>DATAROOT</name>
+        <value>&DATAROOT;</value>
+      </envar>
+      <envar>
+        <name>DATAHOME</name>
+        <value><cyclestr>&DATAROOT;/@Y@m@d@H</cyclestr></value>
+      </envar>
+      <envar>
+        <name>MODEL</name>
+        <value>&SYSTEM_ID;</value>
+      </envar>
+
+      <dependency>
+        <taskdep task="post"/>
+      </dependency>
+
+    </task>
+
+  </metatask>
+
+  <metatask>
+    <var name="htxs">htxs1</var>
+
+    <task name="ncl_00_#htxs#" cycledefs="all" maxtries="3">
+
+      &NCL_HTXS_RESOURCES;
+      &WALL_LIMIT_PP;
+      &RESERVATION;
+
+      <command>&SCRIPTS;/NCL/ncl_hrrr_#htxs#.ksh</command>
+      <cores>&NCL_PROC;</cores>
+      <jobname><cyclestr>&JOBNAME_PRE;_ncl_@H_@M_#htxs#</cyclestr></jobname>
+      <join><cyclestr>&LOG_DIR;/@Y@m@d/ncl_@Y@m@d@H@M_00_#htxs#.log</cyclestr></join>
+
+      <envar>
+        <name>MODULE_FILE</name>
+        <value>&MODULE_FILE;</value>
+      </envar>
+      <envar>
+        <name>START_TIME</name>
+        <value><cyclestr>@Y@m@d@H</cyclestr></value>
+      </envar>
+      <envar>
+        <name>FCST_TIME</name>
+        <value>00</value>
+      </envar>
+      <envar>
+        <name>NCL_VER</name>
+        <value>&NCL_VER;</value>
+      </envar>
+      <envar>
+        <name>DATAROOT</name>
+        <value>&DATAROOT;</value>
+      </envar>
+      <envar>
+        <name>DATAHOME</name>
+        <value><cyclestr>&DATAROOT;/@Y@m@d@H</cyclestr></value>
+      </envar>
+      <envar>
+        <name>MODEL</name>
+        <value>&SYSTEM_ID;</value>
+      </envar>
+
+      <dependency>
+        <taskdep task="post"/>
+      </dependency>
+
+    </task>
+
+  </metatask>
 
 <!--
   <task name="ncl_zip" cycledefs="all" maxtries="3">
