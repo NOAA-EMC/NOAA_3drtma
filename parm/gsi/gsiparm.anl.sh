@@ -25,10 +25,8 @@ gsi_namelist="
    wrf_mass_hybridcord=.true.,
  /
  &BKGERR
-   !vs=1.0,
-   vs=0.125,
-   hzscl=0.373,0.746,1.5,
-   !hzscl=0.046625,0.09325,0.1875 !hzscl/8
+   vs=0.125, !0.25 1.0
+   hzscl=0.373,0.746,1.5, !tuned in berror_stats
    bw=0.,fstat=.true.,
 /
  &ANBKGERR
@@ -196,6 +194,7 @@ OBS_INPUT::
    l_T_Q_adjust= .false.,
    l_rtma3d            = .true.,
    i_precip_vertical_check = 3,
+   !i_cloud_q_innovation=2,
  /
  &CHEM
  /

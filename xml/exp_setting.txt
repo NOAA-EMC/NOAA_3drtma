@@ -22,6 +22,7 @@ tuneB+R:
      fctr(7) = 1.0_r_kind/4.0_r_kind
      fctr(8) = 1.0_r_kind/2.0_r_kind
      fctr(9) = 1.0_r_kind/1.0_r_kind  !about 1km AGL
+  also changed hybens_info
 
 tuneB+R_2
      fctr(1) = 1.0_r_kind/8.0_r_kind
@@ -36,3 +37,82 @@ tuneB+R_3
      fctr(1) = 1.0_r_kind/8.0_r_kind
      fctr(2) = 1.0_r_kind/8.0_r_kind
   also changed hybens_info
+
+beta:
+     fctr(1) = 1.0_r_kind/8.0_r_kind
+     fctr(2) = 1.0_r_kind/8.0_r_kind
+     fctr(3) = 1.0_r_kind/7.0_r_kind
+     fctr(4) = 1.0_r_kind/7.0_r_kind
+     fctr(5) = 1.0_r_kind/6.0_r_kind
+     fctr(6) = 1.0_r_kind/6.0_r_kind
+     fctr(7) = 1.0_r_kind/5.0_r_kind
+     fctr(8) = 1.0_r_kind/5.0_r_kind
+     fctr(9) = 1.0_r_kind/4.0_r_kind
+     fctr(10) = 1.0_r_kind/4.0_r_kind
+     fctr(11) = 1.0_r_kind/3.0_r_kind
+     fctr(12) = 1.0_r_kind/3.0_r_kind
+     fctr(13:23) = 1.0_r_kind/2.0_r_kind
+     fctr(24:34) = 1.0_r_kind/1.5_r_kind
+also changed hybens_info
+
+tuneB+R_4
+     !tune4
+     fctr(1) = 1.0_r_kind/8.0_r_kind
+     fctr(2) = 1.0_r_kind/8.0_r_kind
+     fctr(3) = 1.0_r_kind/7.0_r_kind
+     fctr(4) = 1.0_r_kind/7.0_r_kind  !
+     fctr(5) = 1.0_r_kind/6.0_r_kind
+     fctr(6) = 1.0_r_kind/5.0_r_kind
+     fctr(7) = 1.0_r_kind/4.0_r_kind
+     fctr(8) = 1.0_r_kind/3.0_r_kind
+     fctr(9) = 1.0_r_kind/2.0_r_kind
+     fctr(10) = 1.0_r_kind
+vs/4 ens_v varies 1,1.5,2,2.5,3
+
+tuneB+R_5
+  hzll as in tuneB+R_4
+  vs as follows:
+     fctr(1:10)  = 1.0_r_kind*8.0_r_kind
+     fctr(11:15) = 1.0_r_kind*7.0_r_kind
+     fctr(16:20) = 1.0_r_kind*6.0_r_kind
+     fctr(21)    = 1.0_r_kind*5.0_r_kind
+     fctr(22)    = 1.0_r_kind*4.0_r_kind
+     fctr(23)    = 1.0_r_kind*3.0_r_kind
+     fctr(24)    = 1.0_r_kind*2.0_r_kind
+  ens_h, ens_v varies accordingly
+
+tuneB+R_6
+  hzll as in tuneB+R_4
+  vs as follows:
+     fctr(1)     = 1.0_r_kind*8.0_r_kind
+     fctr(2)     = 1.0_r_kind*7.0_r_kind
+     fctr(3)     = 1.0_r_kind*6.0_r_kind
+     fctr(4)     = 1.0_r_kind*5.0_r_kind
+     fctr(5)     = 1.0_r_kind*4.0_r_kind
+     fctr(6)     = 1.0_r_kind*3.0_r_kind
+     fctr(7)     = 1.0_r_kind*2.0_r_kind
+     !fctr(8)     = 1.0_r_kind*1.0_r_kind
+  ens_h, ens_v varies accordingly
+
+
+keepvs:
+   only change hzll, enh_h at the lowest two levels
+   vs still 1.0 and ens_v still 3.0 
+   hope to get rid of low level zigzig in the souding plots
+
+exp0
+  hzll:
+     !tune4 anc exp0
+     fctr(1) = 1.0_r_kind/8.0_r_kind
+     fctr(2) = 1.0_r_kind/8.0_r_kind
+     fctr(3) = 1.0_r_kind/7.0_r_kind
+     fctr(4) = 1.0_r_kind/7.0_r_kind  !
+     fctr(5) = 1.0_r_kind/6.0_r_kind
+     fctr(6) = 1.0_r_kind/5.0_r_kind
+     fctr(7) = 1.0_r_kind/4.0_r_kind
+     fctr(8) = 1.0_r_kind/3.0_r_kind
+     fctr(9) = 1.0_r_kind/2.0_r_kind
+     fctr(10) = 1.0_r_kind
+   vs/8, ens_v=1, ens_h varies according
+
+exp1: as exp0, but vs/6 (vs=0.167)
