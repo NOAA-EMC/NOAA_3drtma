@@ -3,23 +3,6 @@
 set -x 
 #-- Testing the status of some important variables. --#
 # Make sure these variables for key directories are defined and exists
-if [ ! "${COMINhrrr}" ]; then
-  ${ECHO} "ERROR: \$COMINhrrr is not defined!"
-  exit 1
-fi
-if [ ! -d "${COMINhrrr}" ]; then
-  ${ECHO} "ERROR: $COMINhrrr does not exist!"
-  exit 1
-fi
-if [ ! "${COMINhrrr_cycp1}" ]; then
-  ${ECHO} "ERROR: \$COMINhrrr_cycp1 is not defined!"
-  exit 1
-fi
-if [ ! -d "${COMINhrrr_cycp1}" ]; then
-  ${ECHO} "ERROR: $COMINhrrr_cycp1 does not exist!"
-  exit 1
-fi
-
 if [ ! "${GESINhrrr_rtma3d}" ]; then
   ${ECHO} "ERROR: \$GESINhrrr_rtma3d is not defined!"
   exit 1
