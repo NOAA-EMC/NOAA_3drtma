@@ -271,17 +271,17 @@ ${WGRIB2} ${workdir}/wrfsubhnat_fgs.grib2 -set center 7 -grib ${COMOUTpost_rtma3
 
 # softlinks with Julian date
 #basetime=`${DATE} +%y%j%H%M -d "${START_TIME}"`
-#${LN} -sf ${COMOUTpost_rtma3d}/${PROD_HEAD2}.wrfprs_subhrconus_${FCST_TIME}.grib2 ${COMOUTpost_rtma3d}/${PROD_HEAD2}.wrfprs_${basetime}${FCST_TIME}00
-#${LN} -sf ${COMOUTpost_rtma3d}/${PROD_HEAD2}.wrftwo_subhrconus_${FCST_TIME}.grib2 ${COMOUTpost_rtma3d}/${PROD_HEAD2}.wrftwo_${basetime}${FCST_TIME}00
-#${LN} -sf ${COMOUTpost_rtma3d}/${PROD_HEAD2}.wrfnat_subhrconus_${FCST_TIME}.grib2 ${COMOUTpost_rtma3d}/${PROD_HEAD2}.wrfnat_${basetime}${FCST_TIME}00
+#${LN} -sf ${COMOUTpost_rtma3d}/${PROD_HEAD2}.wrfprs_subhralaska_${FCST_TIME}.grib2 ${COMOUTpost_rtma3d}/${PROD_HEAD2}.wrfprs_${basetime}${FCST_TIME}00
+#${LN} -sf ${COMOUTpost_rtma3d}/${PROD_HEAD2}.wrftwo_subhralaska_${FCST_TIME}.grib2 ${COMOUTpost_rtma3d}/${PROD_HEAD2}.wrftwo_${basetime}${FCST_TIME}00
+#${LN} -sf ${COMOUTpost_rtma3d}/${PROD_HEAD2}.wrfnat_subhralaska_${FCST_TIME}.grib2 ${COMOUTpost_rtma3d}/${PROD_HEAD2}.wrfnat_${basetime}${FCST_TIME}00
 
 #================================================================================#
 # The following data transferr is used in GSD old unipost script
 #  (Should be removed for NCO usage)
 # Move the output files to postprd under $COMOUTpost_rtma3d
-# ${MV} ${workdir}/wrfprs_subhrconus_${FCST_TIME}.grib2 ${DATAHOME}/wrfprs_subhrconus_${FCST_TIME}.grib2
-# ${MV} ${workdir}/wrftwo_subhrconus_${FCST_TIME}.grib2 ${DATAHOME}/wrftwo_subhrconus_${FCST_TIME}.grib2
-# ${MV} ${workdir}/wrfnat_subhrconus_${FCST_TIME}.grib2 ${DATAHOME}/wrfnat_subhrconus_${FCST_TIME}.grib2
+# ${MV} ${workdir}/wrfprs_subhralaska_${FCST_TIME}.grib2 ${DATAHOME}/wrfprs_subhralaska_${FCST_TIME}.grib2
+# ${MV} ${workdir}/wrftwo_subhralaska_${FCST_TIME}.grib2 ${DATAHOME}/wrftwo_subhralaska_${FCST_TIME}.grib2
+# ${MV} ${workdir}/wrfnat_subhralaska_${FCST_TIME}.grib2 ${DATAHOME}/wrfnat_subhralaska_${FCST_TIME}.grib2
 
 # ${RM} -rf ${workdir}
   ${RM} -f  ${workdir}/wrfsubh???_fgs.grib2
@@ -289,9 +289,9 @@ ${WGRIB2} ${workdir}/wrfsubhnat_fgs.grib2 -set center 7 -grib ${COMOUTpost_rtma3
 
 # Create softlinks for transfer
 # basetime=`${DATE} +%y%j%H%M -d "${START_TIME}"`
-# ln -s ${DATAHOME}/wrfprs_subhrconus_${FCST_TIME}.grib2 ${DATAHOME}/wrfprs_${basetime}${FCST_TIME}00
-# ln -s ${DATAHOME}/wrftwo_subhrconus_${FCST_TIME}.grib2 ${DATAHOME}/wrftwo_${basetime}${FCST_TIME}00
-# ln -s ${DATAHOME}/wrfnat_subhrconus_${FCST_TIME}.grib2 ${DATAHOME}/wrfnat_${basetime}${FCST_TIME}00
+# ln -s ${DATAHOME}/wrfprs_subhralaska_${FCST_TIME}.grib2 ${DATAHOME}/wrfprs_${basetime}${FCST_TIME}00
+# ln -s ${DATAHOME}/wrftwo_subhralaska_${FCST_TIME}.grib2 ${DATAHOME}/wrftwo_${basetime}${FCST_TIME}00
+# ln -s ${DATAHOME}/wrfnat_subhralaska_${FCST_TIME}.grib2 ${DATAHOME}/wrfnat_${basetime}${FCST_TIME}00
 #================================================================================#
 
 ${ECHO} "unipost completed at `${DATE}`"

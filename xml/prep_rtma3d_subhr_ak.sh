@@ -86,13 +86,13 @@ export HRRRDAS_BEC=0                        #Use HRRRDAS 1-hr forecast during hy
   QUEUE_SVC="dev_transfer"                  #user-specified transfer queue
   QUEUE_SHARED="dev_shared" 
 # Path to top running and archiving directory
-  ptmp_base="/gpfs/dell2/stmp/${USER}/${NET}_wrkdir_realtime"
+  ptmp_base="/gpfs/dell2/stmp/${USER}/${NET}_wrkdir_realtime_ak"
   DATABASE_DIR=${ptmp_base}            # (equivalent to ptmp_base)
   HOMEBASE_DIR=${NWROOT}               # path to system home directory
   COMINRAP="/gpfs/dell2/emc/obsproc/noscrub/Jeff.Whiting/save/dev/rtma/3drtma/com3d/rtma/prod"
   COMINHRRR="/gpfs/hps/nco/ops/com/hrrr/prod"
   COMINRADAR="/gpfs/dell1/nco/ops/dcom/prod/ldmdata/obs/upperair/mrms/alaska"
-  GESINHRRR="/gpfs/dell1/ptmp/Annette.Gibbs/com/hrrr/para"
+  GESINHRRR="/gpfs/dell1/ptmp/Annette.Gibbs/com/hrrr/prod"
   COMINGDAS="/gpfs/dell1/nco/ops/com/gfs/prod"
   COMINHRRRDAS="/gpfs/hps/nco/ops/nwges/para/hrrr/hrrrdasges"
   NCKS="/gpfs/dell1/usrx/local/prod/packages/ips/18.0.1/nco/4.7.0/bin/ncks"
@@ -145,7 +145,7 @@ export HRRRDAS_BEC=0                        #Use HRRRDAS 1-hr forecast during hy
   UPDATEVARS_PROC=14
   UPDATEVARS_THREADS=1
   UPDATEVARS_OMP_STACKSIZE="512M"
-  UPDATEVARS_RESOURCES="<nodes>10:ppn=&UPDATEVARS_PROC;</nodes><walltime>00:05:00</walltime>"
+  UPDATEVARS_RESOURCES="<nodes>20:ppn=&UPDATEVARS_PROC;</nodes><walltime>00:05:00</walltime>"
   UPDATEVARS_RESERVATION=${RESERVATION_UPDATEVARS}
 
 #  POST_PROC="112"
@@ -422,7 +422,7 @@ cat > ${NWROOT}/xml/${RUN}_${expname}.xml <<EOF
 <!ENTITY GESROOT	"&ptmp_base;/nwges2/&NET;">
 
 <!ENTITY HOMErtma3d	"&NWROOT;">
-<!ENTITY LOG_DIR	"/gpfs/dell2/stmp/${USER}/logs">
+<!ENTITY LOG_DIR	"/gpfs/dell2/stmp/${USER}/logs_ak">
 <!ENTITY JJOB_DIR	"&HOMErtma3d;/jobs">
 <!ENTITY SCRIPT_DIR	"&HOMErtma3d;/scripts">
 <!ENTITY USHrtma3d	"&HOMErtma3d;/ush">
@@ -1115,6 +1115,8 @@ cat >> ${NWROOT}/xml/${RUN}_${expname}.xml <<EOF
   <cycledef group="01hr">*/15 01,13 ${ExpDateWindows}</cycledef>
 
   <cycledef group="02-11hr">*/15 02-11,14-23 ${ExpDateWindows}</cycledef>
+
+  <cycledef group="ak_cyc">00 01,04,07,10,13,16,19,22 ${ExpDateWindows}</cycledef>
   
 
 EOF
@@ -1122,7 +1124,7 @@ EOF
 if [ ${obsprep_lghtn} -eq 1 ] ; then
 cat >> ${NWROOT}/xml/${RUN}_${expname}.xml <<EOF 
 
-  <task name="&NET;_obsprep_lghtn_task_@Y@m@d@H@M" cycledefs="02-11hr,00hr,01hr" maxtries="&maxtries;">
+  <task name="&NET;_obsprep_lghtn_task_@Y@m@d@H@M" cycledefs="ak_cyc" maxtries="&maxtries;">
 
     &ENVARS;
     <envar>
@@ -1149,7 +1151,7 @@ fi
 if [ ${obsprep_cloud} -eq 1 ] ; then
 cat >> ${NWROOT}/xml/${RUN}_${expname}.xml <<EOF    
 
-  <task name="&NET;_obsprep_cloud_task_@Y@m@d@H@M" cycledefs="02-11hr,00hr,01hr" maxtries="&maxtries;">
+  <task name="&NET;_obsprep_cloud_task_@Y@m@d@H@M" cycledefs="ak_cyc" maxtries="&maxtries;">
 
     &ENVARS;
     <envar>
@@ -1176,7 +1178,7 @@ fi
 if [ ${obsprep_radar} -eq 1 ] ; then
 cat >> ${NWROOT}/xml/${RUN}_${expname}.xml <<EOF 
 
-  <task name="&NET;_obsprep_radar_task_@Y@m@d@H@M" cycledefs="02-11hr,00hr,01hr" maxtries="&maxtries;">
+  <task name="&NET;_obsprep_radar_task_@Y@m@d@H@M" cycledefs="ak_cyc" maxtries="&maxtries;">
 
     &ENVARS;
    <envar>
@@ -1217,7 +1219,7 @@ fi
 
 cat >> ${NWROOT}/xml/${RUN}_${expname}.xml <<EOF 
 
-    <task name="&NET;_prepobs_task_@Y@m@d@H@M" cycledefs="02-11hr,00hr,01hr" maxtries="&maxtries;">
+    <task name="&NET;_prepobs_task_@Y@m@d@H@M" cycledefs="ak_cyc" maxtries="&maxtries;">
 
     &ENVARS;
     <envar>
@@ -1246,9 +1248,10 @@ cat >> ${NWROOT}/xml/${RUN}_${expname}.xml <<EOF
        </and>   
    </dependency>
 
+
   </task>
 
-  <task name="&NET;_prepfgs_task_@Y@m@d@H@M" cycledefs="02-11hr,00hr,01hr" maxtries="&maxtries;">
+  <task name="&NET;_prepfgs_task_@Y@m@d@H@M" cycledefs="ak_cyc" maxtries="&maxtries;">
 
     &ENVARS;
     <envar>
@@ -1265,14 +1268,14 @@ cat >> ${NWROOT}/xml/${RUN}_${expname}.xml <<EOF
 
     &ENVARS_PREPJOB;
    <dependency>
-       <datadep age="15" minsize="15000M"><cyclestr offset="-3600">&GESINHRRR;/hrrr.@Y@m@d/alaska/hrrr.t@H00z.f01@M.netcdf</cyclestr></datadep>
+       <datadep age="15" minsize="9400M"><cyclestr offset="-3600">&GESINHRRR;/hrrr.@Y@m@d/alaska/hrrr.t@H00z.f01@M.netcdf</cyclestr></datadep>
    </dependency>
    </task>
 EOF
 
 if [ ${HRRRDAS_BEC} -gt 0 ] ; then
 cat >> ${NWROOT}/xml/${RUN}_${expname}.xml <<EOF 
-  <task name="&NET;_gsianl_task_@Y@m@d@H@M" cycledefs="02-11hr,00hr,01hr" maxtries="&maxtries;">
+  <task name="&NET;_gsianl_task_@Y@m@d@H@M" cycledefs="ak_cyc" maxtries="&maxtries;">
 
     &ENVARS;
     &GSI_RESOURCES;
@@ -1336,7 +1339,7 @@ cat >> ${NWROOT}/xml/${RUN}_${expname}.xml <<EOF
 EOF
 else 
 cat >> ${NWROOT}/xml/${RUN}_${expname}.xml <<EOF 
-  <task name="&NET;_gsianl_task_@Y@m@d@H@M" cycledefs="02-11hr,00hr,01hr" maxtries="&maxtries;">
+  <task name="&NET;_gsianl_task_@Y@m@d@H@M" cycledefs="ak_cyc" maxtries="&maxtries;">
 
     &ENVARS;
     &GSI_RESOURCES;
@@ -1367,7 +1370,7 @@ fi
 
 cat >> ${NWROOT}/xml/${RUN}_${expname}.xml <<EOF 
 
- <task name="&NET;_updatevars_task_@Y@m@d@H@M" cycledefs="02-11hr,00hr,01hr" maxtries="&maxtries;">
+ <task name="&NET;_updatevars_task_@Y@m@d@H@M" cycledefs="ak_cyc" maxtries="&maxtries;">
 
     &ENVARS;
     &UPDATEVARS_RESOURCES;
@@ -1385,7 +1388,7 @@ cat >> ${NWROOT}/xml/${RUN}_${expname}.xml <<EOF
 
   </task>
 
-  <task name="&NET;_post_task_@Y@m@d@H@M" cycledefs="02-11hr,00hr,01hr" maxtries="&maxtries;">
+  <task name="&NET;_post_task_@Y@m@d@H@M" cycledefs="ak_cyc" maxtries="&maxtries;">
 
     &ENVARS;
     &POST_RESOURCES;
@@ -1419,7 +1422,7 @@ cat >> ${NWROOT}/xml/${RUN}_${expname}.xml <<EOF
 
   </task>
 
-  <task name="&NET;_post4fgs_task_@Y@m@d@H@M" cycledefs="02-11hr,00hr,01hr" maxtries="&maxtries;">
+  <task name="&NET;_post4fgs_task_@Y@m@d@H@M" cycledefs="ak_cyc" maxtries="&maxtries;">
 
     &ENVARS;
     &POST_RESOURCES;

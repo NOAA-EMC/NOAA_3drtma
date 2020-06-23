@@ -116,7 +116,7 @@ cd ${DATAHOME}
 ${ECHO} "enter working directory:${DATAHOME}"
 
 export WRF_NAMELIST=${DATAHOME}/namelist.input
-${CP} ${PARMwrf}/wrf.nl ${WRF_NAMELIST}
+${CP} ${PARMwrf}/jet.nl ${WRF_NAMELIST}
 
 # Check to make sure the wrfinput_d01 file exists
 #if [ -r ${COMOUTgsi_rtma3d}/${ANLrtma3d_FNAME} ]; then

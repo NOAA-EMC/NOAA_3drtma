@@ -21,7 +21,7 @@ export NET=${NET:-rtma3d}
 export RUN=${RUN:-rtma3d}
 export model=${model:-rtma3d}
 
-export domain=${domain:-conus}
+export domain=${domain:-alaska}
 ##########################################################
 # obtain unique process id (pid)
 ##########################################################
