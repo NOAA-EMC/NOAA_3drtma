@@ -74,7 +74,7 @@ export SCHD_ATTRB="lsf"
 export envir="${SCHD_ATTRB}"                      #environment (test, prod, dev, etc.)
 export expname="${envir}"                   # experiment name
 export realtime="T"
-export HRRRDAS_BEC=1                        #Use HRRRDAS 1-hr forecast during hybrid analysis (0=no,1=yes)
+export HRRRDAS_BEC=0                        #Use HRRRDAS 1-hr forecast during hybrid analysis (0=no,1=yes)
 #====================================================================#
 # Note: Definition for the following variables 
 #       depends on the machine platform, 
@@ -92,7 +92,7 @@ export HRRRDAS_BEC=1                        #Use HRRRDAS 1-hr forecast during hy
   COMINRAP="/gpfs/dell2/emc/obsproc/noscrub/Jeff.Whiting/save/dev/rtma/3drtma/com3d/rtma/prod"
   COMINHRRR="/gpfs/hps/nco/ops/com/hrrr/prod"
   COMINRADAR="/gpfs/dell1/nco/ops/dcom/prod/ldmdata/obs/upperair/mrms/conus"
-  GESINHRRR="/gpfs/dell1/ptmp/Annette.Gibbs/com/hrrr/para"
+  GESINHRRR="/gpfs/dell1/ptmp/Annette.Gibbs/com/hrrr/prod"
   COMINGDAS="/gpfs/dell1/nco/ops/com/gfs/prod"
   COMINHRRRDAS="/gpfs/hps/nco/ops/nwges/para/hrrr/hrrrdasges"
   NCKS="/gpfs/dell1/usrx/local/prod/packages/ips/18.0.1/nco/4.7.0/bin/ncks"
