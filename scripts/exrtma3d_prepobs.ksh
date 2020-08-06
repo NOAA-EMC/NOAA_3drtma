@@ -17,10 +17,10 @@ if [ ! "${COMINhrrr}" ]; then
   ${ECHO} "ERROR: \${COMINhrrr} is not defined!"
   exit 1
 fi
-if [ ! -d "${COMINhrrr}" ]; then
-  ${ECHO} "ERROR: $COMINhrrr does not exist!"
-  exit 1
-fi
+#if [ ! -d "${COMINhrrr}" ]; then
+#  ${ECHO} "ERROR: $COMINhrrr does not exist!"
+#  exit 1
+#fi
 
 if [ ! "${COMINobsproc_rtma3d}" ]; then
   ${ECHO} "ERROR: \$COMINobsproc_rtma3d is not defined!"
