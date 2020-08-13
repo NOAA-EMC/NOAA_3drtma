@@ -1,0 +1,294 @@
+<?xml version="1.0"?>
+<!DOCTYPE workflow
+[
+
+<!ENTITY USER "Edward.Colon">
+<!ENTITY ACCOUNT "RTMA-T2O">
+
+<!ENTITY LOGDIR "/gpfs/dell2/stmp/&USER;">
+<!-- <!ENTITY OUTDIR "/gpfs/dell1/ptmp/emc.campara"> -->
+<!ENTITY INPUTDIR "/gpfs/dell2/stmp/&USER;/rtma3d_wrkdir_realtime">
+<!ENTITY COMRTMA3D "&INPUTDIR;/com2/rtma3d/lsf">
+<!ENTITY OUTDIR "/gpfs/dell1/ptmp/&USER;/rtma3dda">
+<!ENTITY PYTHONDIR "/gpfs/dell2/emc/modeling/noscrub/&USER;/python.rtma3d_retro">
+<!ENTITY llcrnrlon "-113.0" >
+<!ENTITY llcrnrlat "39.0" > 
+<!ENTITY urcrnrlon "-110.0" > 
+<!ENTITY urcrnrlat "42.0" > 
+<!ENTITY lat_0 "39.3" >  
+<!ENTITY lon_0 "-111.1" > 
+<!ENTITY xscale "0.17" > 
+<!ENTITY yscale "0.18" > 
+<!ENTITY graph_option "1" >  <!-- 0 - default ( standard domain suite and custom domain, 1 - standard domain suite only, 2 - custom domain only) -->
+
+
+<!ENTITY PLOT_RESERVATION '<queue>dev_shared</queue><account>&ACCOUNT;</account>'>
+<!ENTITY FETCH_RESERVATION '<queue>dev_transfer</queue><account>&ACCOUNT;</account>'>
+<!ENTITY PLOT_RESOURCES '<native>-R rusage[mem=2000] -R affinity[core]</native><walltime>00:45:00</walltime>'>
+<!ENTITY FETCH_RESOURCES '<walltime>00:45:00</walltime><memory>2048M</memory><cores>1</cores><native>-R affinity[core]</native>'>
+
+]>
+
+
+<!--  ************************************************************* -->
+<!--  ******************* STARTING THE WORKFLOW ******************* -->
+
+<!-- <workflow realtime="F" scheduler="lsf" taskthrottle="25"> -->
+<workflow realtime="F" scheduler="lsf" taskthrottle="360" cyclethrottle="96" cyclelifespan="00:48:00:00">
+
+ <cycledef>202007040000 202007040000 00:15:00</cycledef> 
+
+
+  <log>
+    <cyclestr>&LOGDIR;/transfer_logs/workflow_@Y@m@d@H@M.log</cyclestr>
+  </log>
+
+
+<!--  ******************************************************************  -->
+<!--  *************************Python plotting**************************  -->
+
+<!-- Low mid high cloud -->
+
+    <task name="fetch_grib2" maxtries="6">
+    &FETCH_RESERVATION;
+    &FETCH_RESOURCES;
+    <command>bash &PYTHONDIR;/fetch_grib2.ksh</command>
+    <jobname><cyclestr>fetch_grib2</cyclestr></jobname>
+    <join><cyclestr>&LOGDIR;/transfer_logs/log.fetch.grib2.@Y@m@d@H@M.out</cyclestr></join>
+
+      <envar>
+        <name>USER</name><value>&USER;</value>
+      </envar>
+      <envar>
+        <name>CDATE</name><value><cyclestr>@Y@m@d@H@M</cyclestr></value>
+      </envar>
+      <envar>
+        <name>YMD</name><value><cyclestr>@Y@m@d</cyclestr></value>
+      </envar>
+      <envar>
+        <name>cyc</name><value><cyclestr>@H</cyclestr></value>
+      </envar>
+      <envar>
+        <name>subcyc</name><value><cyclestr>@M</cyclestr></value>
+      </envar>
+      <envar>
+        <name>COMRTMA3D</name><value><cyclestr>&COMRTMA3D;</cyclestr></value>
+      </envar>
+      <envar>
+        <name>OUTDIR</name><value><cyclestr>&OUTDIR;</cyclestr></value>
+      </envar>
+      <envar>
+        <name>PYTHONDIR</name><value><cyclestr>&PYTHONDIR;</cyclestr></value>
+      </envar>
+
+
+
+
+    </task>
+
+
+    <task name="makeplots_compareDA_CLOUD" maxtries="15">
+    &PLOT_RESERVATION;
+    &PLOT_RESOURCES;
+    <cores>1</cores>
+      <command>&PYTHONDIR;/compare_da/launchCLOUD_retro</command>
+      <jobname><cyclestr>makeplots_compareDA_CLOUD</cyclestr></jobname>
+      <join><cyclestr>&LOGDIR;/transfer_logs/log.makeplotsCLOUD_compareDA.@Y@m@d@H@M.out</cyclestr></join>
+
+      <envar>
+        <name>USER</name><value>&USER;</value>
+      </envar>
+      <envar>
+        <name>CDATE</name><value><cyclestr>@Y@m@d@H@M</cyclestr></value>
+      </envar>
+      <envar>
+        <name>YMD</name><value><cyclestr>@Y@m@d</cyclestr></value>
+      </envar>
+      <envar>
+        <name>cyc</name><value><cyclestr>@H</cyclestr></value>
+      </envar>
+      <envar>
+        <name>subcyc</name><value><cyclestr>@M</cyclestr></value>
+      </envar>
+      <envar>
+         <name>OUTDIR</name><value><cyclestr>&OUTDIR;/@Y@m@d</cyclestr></value>
+      </envar>
+      <envar>
+	<name>llcrnrlon</name><value>&llcrnrlon;</value>
+      </envar>
+      <envar>
+        <name>llcrnrlat</name><value>&llcrnrlat;</value>  
+      </envar> 
+      <envar>
+        <name>urcrnrlon</name><value>&urcrnrlon;</value>
+      </envar>
+      <envar>
+        <name>urcrnrlat</name><value>&urcrnrlat;</value>
+      </envar>
+      <envar>
+        <name>lat_0</name><value>&lat_0;</value>
+      </envar>
+      <envar>
+        <name>lon_0</name><value>&lon_0;</value>
+      </envar>
+      <envar>
+        <name>xscale</name><value>&xscale;</value>
+      </envar>
+      <envar>
+        <name>yscale</name><value>&yscale;</value>
+      </envar>
+      <envar>
+        <name>graph_option</name><value>&graph_option;</value>
+      </envar>
+      <envar>
+        <name>COMRTMA3D</name><value><cyclestr>&COMRTMA3D;</cyclestr></value>
+      </envar>
+      <envar>
+        <name>PYTHONDIR</name><value><cyclestr>&PYTHONDIR;</cyclestr></value>
+      </envar>
+
+ 
+
+      <dependency>
+        <taskdep task="fetch_grib2"/>
+      </dependency>
+
+    </task>
+
+<!-- Everything else! -->
+
+    <task name="makeplots_compareDA" maxtries="6">
+    &PLOT_RESERVATION;
+    &PLOT_RESOURCES;
+    <nodes>1:ppn=16</nodes>
+      <command>&PYTHONDIR;/compare_da/launchALL_retro</command>
+      <jobname><cyclestr>makeplots_compareDA</cyclestr></jobname>
+      <join><cyclestr>&LOGDIR;/transfer_logs/log.makeplots.compareDA.@Y@m@d@H@M.out</cyclestr></join>
+
+      <envar>
+        <name>USER</name><value>&USER;</value>
+      </envar>
+      <envar>
+        <name>CDATE</name><value><cyclestr>@Y@m@d@H@M</cyclestr></value>
+      </envar>
+      <envar>
+        <name>YMD</name><value><cyclestr>@Y@m@d</cyclestr></value>
+      </envar>
+      <envar>
+        <name>cyc</name><value><cyclestr>@H</cyclestr></value>
+      </envar>
+      <envar>
+        <name>subcyc</name><value><cyclestr>@M</cyclestr></value>
+      </envar>
+      <envar>
+         <name>OUTDIR</name><value><cyclestr>&OUTDIR;/@Y@m@d</cyclestr></value>
+      </envar>
+      <envar>
+        <name>llcrnrlon</name><value>&llcrnrlon;</value>
+      </envar>
+      <envar>
+        <name>llcrnrlat</name><value>&llcrnrlat;</value>
+      </envar>
+      <envar>
+        <name>urcrnrlon</name><value>&urcrnrlon;</value>
+      </envar>
+      <envar>
+        <name>urcrnrlat</name><value>&urcrnrlat;</value>
+      </envar>
+      <envar>
+        <name>lat_0</name><value>&lat_0;</value>
+      </envar>
+      <envar>
+        <name>lon_0</name><value>&lon_0;</value>
+      </envar>
+      <envar>
+        <name>xscale</name><value>&xscale;</value>
+      </envar>
+      <envar>
+        <name>yscale</name><value>&yscale;</value>
+      </envar>
+      <envar>
+        <name>graph_option</name><value>&graph_option;</value>
+      </envar>
+      <envar>
+        <name>COMRTMA3D</name><value><cyclestr>&COMRTMA3D;</cyclestr></value>
+      </envar>
+      <envar>
+        <name>PYTHONDIR</name><value><cyclestr>&PYTHONDIR;</cyclestr></value>
+      </envar>
+
+
+      <dependency>
+        <taskdep task="fetch_grib2"/>
+      </dependency>
+
+    </task>
+
+
+    <task name="makeplots_compareDA2" maxtries="6">
+    &PLOT_RESERVATION;
+    &PLOT_RESOURCES;
+    <nodes>1:ppn=16</nodes>
+      <command>&PYTHONDIR;/compare_da/launchALL_retro2</command>
+      <jobname><cyclestr>makeplots_compareDA2</cyclestr></jobname>
+      <join><cyclestr>&LOGDIR;/transfer_logs/log.makeplots.compareDA2.@Y@m@d@H@M.out</cyclestr></join>
+
+      <envar>
+        <name>USER</name><value>&USER;</value>
+      </envar>
+      <envar>
+        <name>CDATE</name><value><cyclestr>@Y@m@d@H@M</cyclestr></value>
+      </envar>
+      <envar>
+        <name>YMD</name><value><cyclestr>@Y@m@d</cyclestr></value>
+      </envar>
+      <envar>
+        <name>cyc</name><value><cyclestr>@H</cyclestr></value>
+      </envar>
+      <envar>
+        <name>subcyc</name><value><cyclestr>@M</cyclestr></value>
+      </envar>
+      <envar>
+         <name>OUTDIR</name><value><cyclestr>&OUTDIR;/@Y@m@d</cyclestr></value>
+      </envar>
+      <envar>
+        <name>llcrnrlon</name><value>&llcrnrlon;</value>
+      </envar>
+      <envar>
+        <name>llcrnrlat</name><value>&llcrnrlat;</value>
+      </envar>
+      <envar>
+        <name>urcrnrlon</name><value>&urcrnrlon;</value>
+      </envar>
+      <envar>
+        <name>urcrnrlat</name><value>&urcrnrlat;</value>
+      </envar>
+      <envar>
+        <name>lat_0</name><value>&lat_0;</value>
+      </envar>
+      <envar>
+        <name>lon_0</name><value>&lon_0;</value>
+      </envar>
+      <envar>
+        <name>xscale</name><value>&xscale;</value>
+      </envar>
+      <envar>
+        <name>yscale</name><value>&yscale;</value>
+      </envar>
+      <envar>
+        <name>graph_option</name><value>&graph_option;</value>
+      </envar>
+      <envar>
+        <name>COMRTMA3D</name><value><cyclestr>&COMRTMA3D;</cyclestr></value>
+      </envar>
+      <envar>
+        <name>PYTHONDIR</name><value><cyclestr>&PYTHONDIR;</cyclestr></value>
+      </envar>
+
+      <dependency>
+        <taskdep task="fetch_grib2"/>
+      </dependency>
+
+    </task>
+
+</workflow>

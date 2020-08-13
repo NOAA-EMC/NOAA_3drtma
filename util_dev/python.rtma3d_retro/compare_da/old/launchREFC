@@ -1,0 +1,29 @@
+#!/bin/ksh
+set -x
+
+#USER=Benjamin.Blake
+#CDATE=2018103000
+#cyc=00
+
+echo 'into launchREFC'
+. /usrx/local/prod/lmod/lmod/init/sh
+source /u/${USER}/.bashrc
+
+mkdir /gpfs/dell2/stmp/${USER}
+mkdir /gpfs/dell2/stmp/${USER}/fv3da
+mkdir /gpfs/dell2/stmp/${USER}/fv3da/$cyc
+cd /gpfs/dell2/stmp/${USER}/fv3da/$cyc
+
+python /gpfs/dell2/emc/modeling/noscrub/${USER}/python.fv3/compare_da/plot_fv3_refc_${domain}_dif.py $CDATE
+#python /gpfs/dell2/emc/modeling/noscrub/${USER}/python.fv3/compare_da/plot_fv3_refc_conus_dif.py $CDATE &
+#python /gpfs/dell2/emc/modeling/noscrub/${USER}/python.fv3/compare_da/plot_fv3_refc_NC_dif.py $CDATE &
+#python /gpfs/dell2/emc/modeling/noscrub/${USER}/python.fv3/compare_da/plot_fv3_refc_NE_dif.py $CDATE &
+#python /gpfs/dell2/emc/modeling/noscrub/${USER}/python.fv3/compare_da/plot_fv3_refc_NW_dif.py $CDATE &
+#python /gpfs/dell2/emc/modeling/noscrub/${USER}/python.fv3/compare_da/plot_fv3_refc_OV_dif.py $CDATE &
+#python /gpfs/dell2/emc/modeling/noscrub/${USER}/python.fv3/compare_da/plot_fv3_refc_SC_dif.py $CDATE &
+#python /gpfs/dell2/emc/modeling/noscrub/${USER}/python.fv3/compare_da/plot_fv3_refc_SE_dif.py $CDATE &
+#python /gpfs/dell2/emc/modeling/noscrub/${USER}/python.fv3/compare_da/plot_fv3_refc_SW_dif.py $CDATE &
+#python /gpfs/dell2/emc/modeling/noscrub/${USER}/python.fv3/compare_da/plot_fv3_refc_UM_dif.py $CDATE &
+wait
+
+exit

@@ -1,0 +1,20 @@
+#!/bin/ksh
+set -x
+
+hhmm=$1
+CDATE=202003030${hhmm}
+echo 'into launchALL'
+. /usrx/local/prod/lmod/lmod/init/sh
+source /u/${USER}/.bashrc
+
+if [ ! -d /gpfs/dell1/ptmp/${USER}/rtma3dda_case ] ; then
+mkdir -p /gpfs/dell1/ptmp/${USER}/rtma3dda_case
+fi
+
+cd /gpfs/dell1/ptmp/${USER}/rtma3dda_case
+
+python /gpfs/dell2/emc/modeling/noscrub/${USER}/python.rtma3d/compare_da/plot_alldomains2_hel.py $CDATE
+
+exit
+
+

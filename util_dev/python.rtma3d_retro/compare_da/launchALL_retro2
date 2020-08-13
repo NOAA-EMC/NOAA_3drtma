@@ -1,0 +1,24 @@
+#!/bin/ksh
+set -x
+
+echo 'into launchALL2'
+. /usrx/local/prod/lmod/lmod/init/sh
+source /u/${USER}/.bashrc
+
+module load python/3.6.3
+module use -a /u/Benjamin.Blake/modulefiles
+module load python3/test
+export GRIB_DEFINITION_PATH=/usrx/local/nceplibs/dev/lib/grib_api/share/grib_api/definitions
+export PYTHONPATH="${PYTHONPATH}:/gpfs/dell2/emc/verification/noscrub/Logan.Dawson/python:/gpfs/dell2/emc/modeling/noscrub/Jacob.Carley/python/lib/python3.6/site-packages
+"
+
+if [ ! -d ${OUTDIR} ] ; then
+mkdir -p ${OUTDIR}
+fi
+
+cd ${OUTDIR}
+
+python ${PYTHONDIR}/compare_da/plot_alldomains2_retro.py $CDATE $graph_option $llcrnrlon $llcrnrlat $urcrnrlon $urcrnrlat $lat_0 $lon_0 $xscale $yscale $COMRTMA3D
+
+
+exit

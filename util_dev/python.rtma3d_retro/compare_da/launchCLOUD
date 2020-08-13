@@ -1,0 +1,27 @@
+#!/bin/ksh
+set -x
+
+echo 'into launchCLOUD'
+. /usrx/local/prod/lmod/lmod/init/sh
+source /u/${USER}/.bashrc
+
+if [ ! -d /gpfs/dell1/ptmp/${USER}/rtma3dda/${YMD} ] ; then
+mkdir -p /gpfs/dell1/ptmp/${USER}/rtma3dda/${YMD}
+fi
+
+
+module load python/3.6.3
+module use -a /u/Benjamin.Blake/modulefiles
+module load python3/test
+export GRIB_DEFINITION_PATH=/usrx/local/nceplibs/dev/lib/grib_api/share/grib_api/definitions
+export PYTHONPATH="${PYTHONPATH}:/gpfs/dell2/emc/verification/noscrub/Logan.Dawson/python:/gpfs/dell2/emc/modeling/noscrub/Jacob.Carley/python/lib/python3.6/site-packages
+"
+
+cd /gpfs/dell1/ptmp/${USER}/rtma3dda/${YMD}
+
+python /gpfs/dell2/emc/modeling/noscrub/${USER}/python.rtma3d/compare_da/plot_rtma3d_cloud_dif.py $CDATE $domain
+wait
+
+
+exit
+
