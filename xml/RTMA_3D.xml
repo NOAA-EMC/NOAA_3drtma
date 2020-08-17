@@ -41,7 +41,7 @@
 <!ENTITY WRKFLW_DIR "&HOMEBASE_DIR;/xml">
 
 <!ENTITY MACHINE    "jet">
-<!ENTITY OBS_DIR "/public/data">
+<!ENTITY OBS_DIR "/lfs4/BMC/public/data">
 <!ENTITY HRRR_DIR "/home/rtrr/hrrr_ak">
 <!ENTITY SST_DIR "&OBS_DIR;/grids/ncep/sst/0p083deg/grib2">
 
@@ -50,15 +50,15 @@
 <!ENTITY HRRRDAS_DIR "/lfs4/BMC/wrfruc/HRRRE/cycle">
 
 <!ENTITY AIRCRAFT_REJECT "/home/amb-verif/acars_RR/amdar_reject_lists">
-<!ENTITY SFCOBS_USELIST "/lfs1/BMC/amb-verif/mesonet_uselists">
-<!ENTITY PREPBUFR_DIR "&OBS_DIR;/grids/rap/prepbufr">
+<!ENTITY SFCOBS_USELIST "/home/amb-verif/ruc_madis_surface/mesonet_uselists">
+<!ENTITY PREPBUFR_DIR "&OBS_DIR;/grids/rap/obs">
 <!ENTITY PREPBUFR_EARLY_DIR "&OBS_DIR;/grids/rap/prepbufr_test">
 <!ENTITY PREPBUFR_SAT_DIR "&OBS_DIR;/grids/rap/radiance">
 <!ENTITY LIGHTNING_DIR "&OBS_DIR;/lightning">
-<!ENTITY BUFRLIGHTNING_DIR "/mnt/lfs1/BMC/rtwbl/mhu/rapobs/radiance">
+<!ENTITY BUFRLIGHTNING_DIR "/lfs4/BMC/rtwbl/mhu/rapobs/rapobs_para">
 <!ENTITY RADAR_DIR "&OBS_DIR;/radar/nssl/mrms/alaska">
 <!ENTITY SATELLITE_DIR "&OBS_DIR;/sat/nasa">
-<!ENTITY LANGLEY_BUFR_DIR "&OBS_DIR;/grids/rap/langley">
+<!ENTITY LANGLEY_BUFR_DIR "&OBS_DIR;/grids/rap/obs">
 <!ENTITY RADVELLEV2_DIR "&OBS_DIR;/grids/rap/nexrad">
 <!ENTITY RADVELLEV2P5_DIR "&OBS_DIR;/grids/rap/radwnd">
 <!ENTITY SATWND_DIR "&OBS_DIR;/grids/rap/satwnd">
@@ -271,8 +271,8 @@
 
     <dependency>
       <or>
-        <datadep><cyclestr>&LANGLEY_BUFR_DIR;/@Y@j@H00.rap.t@Hz.lgycld.tm00.bufr_d</cyclestr></datadep>
-        <datadep><cyclestr>&LANGLEY_BUFR_DIR;/@Y@j@H00.rap_e.t@Hz.lgycld.tm00.bufr_d</cyclestr></datadep>
+        <datadep><cyclestr>&LANGLEY_BUFR_DIR;/@Y@m@d@H.rap.t@Hz.lgycld.tm00.bufr_d</cyclestr></datadep>
+        <datadep><cyclestr>&LANGLEY_BUFR_DIR;/@Y@m@d@H.rap_e.t@Hz.lgycld.tm00.bufr_d</cyclestr></datadep>
         <timedep><cyclestr offset="&START_TIME_NASACLOUD;">@Y@m@d@H@M00</cyclestr></timedep>
       </or>
     </dependency>
@@ -311,11 +311,11 @@
       <or>
         <and>
           <or>
-            <datadep age="00:02:00"><cyclestr>&PREPBUFR_DIR;/@Y@j@H00.rap.t@Hz.prepbufr.tm00.@Y@m@d</cyclestr></datadep>
-            <datadep age="00:02:00"><cyclestr>&PREPBUFR_DIR;/@Y@j@H00.rap_e.t@Hz.prepbufr.tm00.@Y@m@d</cyclestr></datadep>
+            <datadep age="00:02:00"><cyclestr>&PREPBUFR_DIR;/@Y@m@d@H.rap.t@Hz.prepbufr.tm00</cyclestr></datadep>
+            <datadep age="00:02:00"><cyclestr>&PREPBUFR_DIR;/@Y@m@d@H.rap_e.t@Hz.prepbufr.tm00</cyclestr></datadep>
           </or>
 <!--for sub-hourly run
-          <datadep age="00:02:00"><cyclestr>&PREPBUFR_DIR;/@Y@j@H@M.rtma_ru.t@H@Mz.prepbufr.tm00.@Y@m@d</cyclestr></datadep>
+          <datadep age="00:02:00"><cyclestr>&PREPBUFR_DIR;/@Y@m@d@H@M.rtma_ru.t@H@Mz.prepbufr.tm00</cyclestr></datadep>
 -->
         </and>
         <timedep><cyclestr offset="&START_TIME_CONVENTIONAL;">@Y@m@d@H@M00</cyclestr></timedep>
