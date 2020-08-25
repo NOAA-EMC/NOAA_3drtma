@@ -396,7 +396,8 @@ fi
 ${CP_LN} ${EXECrtma3d}/${exefile_name_gsi} ${pgm}
 if [ "${envir}" == "esrl" ];  then ##GSI on Jet needs special treatment
   [[ "$-" == *"x"* ]] && set +x && prev_x="YES"
-  module load contrib wrap-mpi >/dev/null
+  module use -a /contrib/wrap-mpi/modulefiles > /dev/null
+  module load wrap-mpi >/dev/null
   [[ "${prev_x}" == "YES"  ]] && set -x
   mpirun ${DATA}/${pgm} < gsiparm.anl > ${pgmout} 2>errfile
 else
@@ -475,7 +476,8 @@ EOF
   ${ECHO} -e "\n\n@@@@@@@@@ second GSI run standard output\n" >> ${pgmout}
   if [ "${envir}" == "esrl" ];  then ##GSI on Jet needs special treatment
     [[ "$-" == *"x"* ]] && set +x && prev_x="YES"
-    module load contrib wrap-mpi >/dev/null
+    module use -a /contrib/wrap-mpi/modulefiles > /dev/null
+    module load wrap-mpi >/dev/null
     [[ "${prev_x}" == "YES"  ]] && set -x
     mpirun ${DATA}/${pgm} < gsiparm.anl >> ${pgmout} 2>errfile
   else
