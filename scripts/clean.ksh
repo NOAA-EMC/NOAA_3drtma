@@ -82,6 +82,7 @@ for onetime in ${XX[*]};do
   if [[ ${onetime} -le ${deletetime} ]]; then
     echo "${onetime}: Delete wrf*grib2 obsprd/*.dat in postprd/"
     rm -f ${onetime}/postprd/wrf*grib2
+    rm -f ${onetime}/postprd/*/output*
     rm -f ${onetime}/smtiprd/hrrr*grib2
     rm -f ${onetime}/obsprd/*.dat
     rm -f ${onetime}/obsprd/NASALaRC_cloud.bin

@@ -12,7 +12,7 @@ check_if_defined() { #usage: check_if_defined "var1_name" "var2_name" ...
 export TZ="GMT"
 #currently, UPP needs its own verion of CRTM
   #the post task in the xml file will define $FIXcrtm
-export CORE=RAPR #now only "RAPR" works -20191101
+export CORE=RAPRRTMA #submodelname='RTMA' to update 10m wind
 
 # Check to make sure the executable exists
 if [ ! -s ${EXECrtma3d}/${exefile_name_post} ]; then
@@ -147,7 +147,8 @@ if [ "${envir}" == "esrl" ]; then #Jet expr runs
   ${MV} ${workdir}/wrftwo_${POST_NAME}_${FCST_TIME}.grib2 ${DATA}
   ${MV} ${workdir}/wrfnat_${POST_NAME}_${FCST_TIME}.grib2 ${DATA}
   ${MV} ${workdir}/wrfmsl_${POST_NAME}_${FCST_TIME}.grib2 ${DATA}
-  ${RM} -rf ${workdir}
+  ${RM} -rf ${workdir}/WRFPRS.GrbF${FCST_TIME}
+  ${RM} -rf ${workdir}/WRFNAT.GrbF${FCST_TIME}
 
   # Create softlinks for transfer
   basetime=`${DATE} +%y%j%H%M -d "${START_TIME}"`
