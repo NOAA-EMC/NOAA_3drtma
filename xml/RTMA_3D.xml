@@ -41,7 +41,7 @@
 <!ENTITY WRKFLW_DIR "&HOMEBASE_DIR;/xml">
 
 <!ENTITY MACHINE    "jet">
-<!ENTITY OBS_DIR "/lfs4/BMC/public/data">
+<!ENTITY OBS_DIR "/public/data">
 <!ENTITY HRRR_DIR "/home/rtrr/hrrr">
 <!ENTITY SST_DIR "&OBS_DIR;/grids/ncep/sst/0p083deg/grib2">
 
