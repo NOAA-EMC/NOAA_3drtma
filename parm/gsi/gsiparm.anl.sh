@@ -25,10 +25,9 @@ gsi_namelist="
    wrf_mass_hybridcord=.true.,
  /
  &BKGERR
-   !vs=1.0,
-   vs=0.125,
-   !hzscl=0.373,0.746,1.5,
-   hzscl=0.046625,0.09325,0.1875 !hzscl/8
+   vs=0.125, !vs=1.0,
+   hzscl=0.373,0.746,1.5, !tuned in berror_stats
+   !hzscl=0.046625,0.09325,0.1875 !hzscl/8
    bw=0.,fstat=.true.,
 /
  &ANBKGERR
@@ -148,6 +147,7 @@ OBS_INPUT::
    i_en_perts_io=${i_en_perts_io},
    ens_fast_read=${ens_fast_read},
    jcap_ens=574,
+   readin_localization=.true.
  /
  &RAPIDREFRESH_CLDSURF
    dfi_radar_latent_heat_time_period=10.0,
@@ -192,9 +192,10 @@ OBS_INPUT::
    i_gsdqc=2,
    l_use_hydroretrieval_all=.true.,
    ioption=1, 
-   l_T_Q_adjust= .false.,
+   l_T_Q_adjust= 2,
    l_rtma3d            = .true.,
    i_precip_vertical_check = 3,
+   !i_cloud_q_innovation=2,
  /
  &CHEM
  /
