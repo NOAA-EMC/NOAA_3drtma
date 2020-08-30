@@ -1,0 +1,17 @@
+#!/bin/ksh
+set -x
+
+echo 'into launchALL'
+. /usrx/local/prod/lmod/lmod/init/sh
+source /u/${USER}/.bashrc
+
+mkdir -p /gpfs/dell2/stmp/${USER}
+mkdir -p /gpfs/dell2/stmp/${USER}/rtma3dda
+mkdir -p /gpfs/dell2/stmp/${USER}/rtma3dda/$cyc
+cd /gpfs/dell2/stmp/${USER}/rtma3dda/$cyc
+
+python /gpfs/dell2/emc/modeling/noscrub/${USER}/python.rtma3d/compare_da/plot_alldomains3.py $CDATE
+
+exit
+
+

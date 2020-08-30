@@ -1,0 +1,322 @@
+<?xml version="1.0"?>
+<!DOCTYPE workflow
+[
+
+<!ENTITY USER "Edward.Colon">
+<!ENTITY ACCOUNT "RTMA-T2O">
+
+<!ENTITY LOGDIR "/gpfs/dell2/stmp/&USER;">
+<!-- <!ENTITY OUTDIR "/gpfs/dell1/ptmp/emc.campara"> -->
+<!ENTITY OUTDIR "/gpfs/dell2/stmp/&USER;/rtma3d_wrkdir_realtime">
+<!ENTITY COMFV3 "&OUTDIR;/com2/rtma3d/lsf">
+<!ENTITY COMFV3DA "&OUTDIR;/com2/rtma3d/lsf">
+<!ENTITY COMNAM "/gpfs/dell1/nco/ops/com/nam/prod">
+<!ENTITY PYTHONDIR "/gpfs/dell2/emc/modeling/noscrub/&USER;/python.rtma3d">
+<!ENTITY STMPDIR1 "/gpfs/dell1/stmp/&USER;/rtma3d">
+<!ENTITY STMPDIR2 "/gpfs/dell2/stmp/&USER;/rtma3d">
+
+<!ENTITY RETRIEVE_RESERVATION '<queue>dev</queue><account>&ACCOUNT;</account>'>
+<!ENTITY PLOT_RESERVATION '<queue>dev</queue><account>&ACCOUNT;</account>'>
+<!ENTITY TRANS_RESERVATION '<queue>dev_transfer</queue><account>&ACCOUNT;</account>'>
+
+<!ENTITY RETRIEVE_RESOURCES '<walltime>00:30:00</walltime>'>
+<!ENTITY PLOT_RESOURCES '<walltime>00:45:00</walltime>'>
+<!ENTITY TRANS_RESOURCES '<walltime>00:45:00</walltime><memory>2048M</memory><cores>1</cores><native>-R affinity[core]</native>'>
+
+
+]>
+
+
+<!--  ************************************************************* -->
+<!--  ******************* STARTING THE WORKFLOW ******************* -->
+
+<!-- <workflow realtime="F" scheduler="lsf" taskthrottle="25"> -->
+<workflow realtime="F" scheduler="lsf" taskthrottle="360" cyclethrottle="96" cyclelifespan="00:48:00:00">
+
+ <cycledef>202005202030 202005210145 00:15:00</cycledef> 
+
+
+  <log>
+    <cyclestr>&LOGDIR;/transfer_logs/workflow_@Y@m@d@H@M.log</cyclestr>
+  </log>
+
+
+<!--  ******************************************************************  -->
+<!--  *************************Python plotting**************************  -->
+
+<!-- Low mid high cloud -->
+
+  <metatask>
+    <var name="dom">conus BN CE CO LA MA NC NE NW OV SC SE SF SP SW UM</var>
+    <task name="makeplots_compareDA_CLOUD_#dom#" maxtries="5">
+    &PLOT_RESERVATION;
+    &PLOT_RESOURCES;
+    <cores>1</cores>
+      <command>&PYTHONDIR;/compare_da/launchCLOUD</command>
+      <jobname><cyclestr>makeplots_compareDA_CLOUD_#dom#</cyclestr></jobname>
+      <join><cyclestr>&LOGDIR;/transfer_logs/log.makeplotsCLOUD_#dom#_compareDA.@Y@m@d@H@M.out</cyclestr></join>
+
+      <envar>
+        <name>USER</name><value>&USER;</value>
+      </envar>
+      <envar>
+        <name>CDATE</name><value><cyclestr>@Y@m@d@H@M</cyclestr></value>
+      </envar>
+      <envar>
+        <name>YMD</name><value><cyclestr>@Y@m@d</cyclestr></value>
+      </envar>
+      <envar>
+        <name>cyc</name><value><cyclestr>@H</cyclestr></value>
+      </envar>
+      <envar>
+        <name>subcyc</name><value><cyclestr>@M</cyclestr></value>
+      </envar>
+      <envar>
+        <name>domain</name><value>#dom#</value>
+      </envar>
+
+
+      <dependency>
+        <and>
+          <datadep age="05:00"><cyclestr>&COMFV3;/rtma3d.@Y@m@d/postprd.t@H@Mz/rtma3d.t@H@Mz.wrfsubhprs.grib2</cyclestr></datadep>
+          <datadep age="05:00"><cyclestr>&COMFV3DA;/rtma3d.@Y@m@d/postprd.t@H@Mz/rtma3d.t@H@Mz.wrfsubhprs_fgs.grib2</cyclestr></datadep>
+        </and>
+      </dependency>
+
+    </task>
+  </metatask>
+
+<!-- Everything else! -->
+
+    <task name="makeplots_compareDA" maxtries="5">
+    &PLOT_RESERVATION;
+    &PLOT_RESOURCES;
+    <nodes>1:ppn=16</nodes>
+      <command>&PYTHONDIR;/compare_da/launchALL</command>
+      <jobname><cyclestr>makeplots_compareDA</cyclestr></jobname>
+      <join><cyclestr>&LOGDIR;/transfer_logs/log.makeplots.compareDA.@Y@m@d@H@M.out</cyclestr></join>
+
+      <envar>
+        <name>USER</name><value>&USER;</value>
+      </envar>
+      <envar>
+        <name>CDATE</name><value><cyclestr>@Y@m@d@H@M</cyclestr></value>
+      </envar>
+      <envar>
+        <name>YMD</name><value><cyclestr>@Y@m@d</cyclestr></value>
+      </envar>
+      <envar>
+        <name>cyc</name><value><cyclestr>@H</cyclestr></value>
+      </envar>
+      <envar>
+        <name>subcyc</name><value><cyclestr>@M</cyclestr></value>
+      </envar>
+
+      <dependency>
+        <and>
+          <datadep age="05:00"><cyclestr>&COMFV3;/rtma3d.@Y@m@d/postprd.t@H@Mz/rtma3d.t@H@Mz.wrfsubhprs.grib2</cyclestr></datadep>
+          <datadep age="05:00"><cyclestr>&COMFV3DA;/rtma3d.@Y@m@d/postprd.t@H@Mz/rtma3d.t@H@Mz.wrfsubhprs_fgs.grib2</cyclestr></datadep>
+        </and>
+      </dependency>
+
+    </task>
+
+
+    <task name="makeplots_compareDA2" maxtries="5">
+    &PLOT_RESERVATION;
+    &PLOT_RESOURCES;
+    <nodes>1:ppn=16</nodes>
+      <command>&PYTHONDIR;/compare_da/launchALL2</command>
+      <jobname><cyclestr>makeplots_compareDA2</cyclestr></jobname>
+      <join><cyclestr>&LOGDIR;/transfer_logs/log.makeplots.compareDA2.@Y@m@d@H@M.out</cyclestr></join>
+
+      <envar>
+        <name>USER</name><value>&USER;</value>
+      </envar>
+      <envar>
+        <name>CDATE</name><value><cyclestr>@Y@m@d@H@M</cyclestr></value>
+      </envar>
+      <envar>
+        <name>YMD</name><value><cyclestr>@Y@m@d</cyclestr></value>
+      </envar>
+      <envar>
+        <name>cyc</name><value><cyclestr>@H</cyclestr></value>
+      </envar>
+      <envar>
+        <name>subcyc</name><value><cyclestr>@M</cyclestr></value>
+      </envar>
+
+      <dependency>
+        <and>
+          <datadep age="05:00"><cyclestr>&COMFV3;/rtma3d.@Y@m@d/postprd.t@H@Mz/rtma3d.t@H@Mz.wrfsubhprs.grib2</cyclestr></datadep>
+          <datadep age="05:00"><cyclestr>&COMFV3DA;/rtma3d.@Y@m@d/postprd.t@H@Mz/rtma3d.t@H@Mz.wrfsubhprs_fgs.grib2</cyclestr></datadep>
+        </and>
+      </dependency>
+
+    </task>
+
+    <task name="profile" maxtries="2">
+    &PLOT_RESERVATION;
+    &PLOT_RESOURCES;
+    <nodes>1:ppn=1</nodes>
+      <command>&PYTHONDIR;/jobs/launch.ksh &PYTHONDIR;/jobs/RTMA3D_PROFILE</command>
+      <jobname><cyclestr>profile</cyclestr></jobname>
+      <join><cyclestr>&LOGDIR;/transfer_logs/log.profile.@Y@m@d@H@M.out</cyclestr></join>
+
+      <envar>
+        <name>USER</name><value>&USER;</value>
+      </envar>
+      <envar>
+        <name>CDATE</name><value><cyclestr>@Y@m@d@H@M</cyclestr></value>
+      </envar>
+      <envar>
+        <name>YMD</name><value><cyclestr>@Y@m@d</cyclestr></value>
+      </envar>
+      <envar>
+        <name>cyc</name><value><cyclestr>@H</cyclestr></value>
+      </envar>
+      <envar>
+        <name>subcyc</name><value><cyclestr>@M</cyclestr></value>
+      </envar>
+      <envar>
+        <name>PYTHONDIR</name><value>&PYTHONDIR;</value>
+      </envar>
+      <envar>
+        <name>STMPDIR2</name><value>&STMPDIR2;</value>
+      </envar>
+      <envar>
+        <name>COMFV3</name><value>&COMFV3;</value>
+      </envar>
+      <envar>
+        <name>DATA</name><value><cyclestr>&COMFV3;/rtma3d.@Y@m@d/snds.t@H@Mz</cyclestr></value>
+      </envar>
+       <dependency>
+        <and>
+          <datadep age="05:00"><cyclestr>&COMFV3;/rtma3d.@Y@m@d/postprd.t@H@Mz/rtma3d.t@H@Mz.wrfsubhprs.grib2</cyclestr></datadep>
+          <datadep age="05:00"><cyclestr>&COMFV3DA;/rtma3d.@Y@m@d/postprd.t@H@Mz/rtma3d.t@H@Mz.wrfsubhprs_fgs.grib2</cyclestr></datadep>
+        </and>
+      </dependency>
+
+    </task>
+
+    <task name="verif" maxtries="5">
+    &PLOT_RESERVATION;
+    &PLOT_RESOURCES;
+    <nodes>1:ppn=1</nodes>
+      <command>&PYTHONDIR;/jobs/launch.ksh &PYTHONDIR;/jobs/RTMA3D_VERIF</command>
+      <jobname><cyclestr>verif</cyclestr></jobname>
+      <join><cyclestr>&LOGDIR;/transfer_logs/log.verif.@Y@m@d@H@M.out</cyclestr></join>
+
+      <envar>
+        <name>USER</name><value>&USER;</value>
+      </envar>
+      <envar>
+        <name>CDATE</name><value><cyclestr>@Y@m@d@H@M</cyclestr></value>
+      </envar>
+      <envar>
+        <name>YMD</name><value><cyclestr>@Y@m@d</cyclestr></value>
+      </envar>
+      <envar>
+        <name>cyc</name><value><cyclestr>@H</cyclestr></value>
+      </envar>
+      <envar>
+        <name>subcyc</name><value><cyclestr>@M</cyclestr></value>
+      </envar>
+      <envar>
+        <name>PYTHONDIR</name><value>&PYTHONDIR;</value>
+      </envar>
+      <envar>
+        <name>STMPDIR2</name><value>&STMPDIR2;</value>
+      </envar>
+      <envar>
+        <name>COMFV3</name><value>&COMFV3;</value>
+      </envar>
+      <envar>
+        <name>DATA</name><value><cyclestr>&COMFV3;/rtma3d.@Y@m@d/verifprd.t@H@Mz</cyclestr></value>
+      </envar>
+       <dependency>
+        <and>
+          <datadep age="05:00"><cyclestr>&COMFV3;/rtma3d.@Y@m@d/postprd.t@H@Mz/rtma3d.t@H@Mz.wrfsubhprs.grib2</cyclestr></datadep>
+          <datadep age="05:00"><cyclestr>&COMFV3;/rtma3d.@Y@m@d/postprd.t@H@Mz/rtma3d.t@H@Mz.wrfsubhprs_fgs.grib2</cyclestr></datadep>
+          <datadep age="05:00"><cyclestr>&COMFV3;/rtma3d.@Y@m@d/obsprd.t@H@Mz/rtma_ru.t@H@Mz.prepbufr.tm00</cyclestr></datadep>
+        </and>
+      </dependency>
+
+    </task>
+
+
+
+
+<!--  ****************************************************************  -->
+<!--  ************************** Transfer Jobs ***********************  -->
+ 
+ <task name="transfer_compareDA" maxtries="5">
+  &TRANS_RESERVATION;
+  &TRANS_RESOURCES;
+    <command>bash &PYTHONDIR;/transfer_compareDA.ksh</command>
+    <jobname><cyclestr>transfer_compareDA</cyclestr></jobname>
+    <join><cyclestr>&LOGDIR;/transfer_logs/log.transfer.compareDA.@Y@m@d@H@M.out</cyclestr></join>
+
+    <envar>
+      <name>USER</name><value>&USER;</value>
+    </envar>
+    <envar>
+      <name>CDATE</name><value><cyclestr>@Y@m@d@H</cyclestr></value>
+    </envar>
+    <envar>
+        <name>YMD</name><value><cyclestr>@Y@m@d</cyclestr></value>
+    </envar>
+    <envar>
+      <name>cyc</name><value><cyclestr>@H</cyclestr></value>
+    </envar>
+    <envar>
+       <name>subcyc</name><value><cyclestr>@M</cyclestr></value>
+    </envar>
+    <dependency>
+      <and>
+        <taskdep task="makeplots_compareDA_CLOUD_conus"/>
+        <taskdep task="makeplots_compareDA"/>
+        <taskdep task="makeplots_compareDA2"/>
+      </and>
+    </dependency>
+  </task> 
+ 
+ <task name="transfer_grib2" maxtries="6">
+  &TRANS_RESERVATION;
+  &TRANS_RESOURCES;
+    <command>bash &PYTHONDIR;/transfer_grib2.ksh</command>
+    <jobname><cyclestr>transfer_grib2</cyclestr></jobname>
+    <join><cyclestr>&LOGDIR;/transfer_logs/log.transfer.grib2.@Y@m@d@H@M.out</cyclestr></join>
+
+    <envar>
+      <name>USER</name><value>&USER;</value>
+    </envar>
+    <envar>
+      <name>CDATE</name><value><cyclestr>@Y@m@d@H</cyclestr></value>
+    </envar>
+    <envar>
+        <name>YMD</name><value><cyclestr>@Y@m@d</cyclestr></value>
+    </envar>
+    <envar>
+      <name>cyc</name><value><cyclestr>@H</cyclestr></value>
+    </envar>
+    <envar>
+      <name>subcyc</name><value><cyclestr>@M</cyclestr></value>
+    </envar>
+    <envar>
+      <name>COMFV3</name><value><cyclestr>&COMFV3;</cyclestr></value>
+    </envar>
+    <dependency>
+        <and>
+          <datadep age="05:00"><cyclestr>&COMFV3;/rtma3d.@Y@m@d/postprd.t@H@Mz/rtma3d.t@H@Mz.wrfsubhprs.grib2</cyclestr></datadep>
+          <datadep age="05:00"><cyclestr>&COMFV3;/rtma3d.@Y@m@d/postprd.t@H@Mz/rtma3d.t@H@Mz.wrfsubhnat.grib2</cyclestr></datadep>
+          <datadep age="05:00"><cyclestr>&COMFV3;/rtma3d.@Y@m@d/postprd.t@H@Mz/rtma3d.t@H@Mz.wrfsubhprs_fgs.grib2</cyclestr></datadep>
+          <datadep age="05:00"><cyclestr>&COMFV3;/rtma3d.@Y@m@d/postprd.t@H@Mz/rtma3d.t@H@Mz.wrfsubhnat_fgs.grib2</cyclestr></datadep>
+          <datadep age="05:00"><cyclestr>&COMFV3;/rtma3d.@Y@m@d/snds.t@H@Mz/rtma3d.t@H@Mz.snds.grib2</cyclestr></datadep>
+          <datadep age="05:00"><cyclestr>&COMFV3;/rtma3d.@Y@m@d/snds.t@H@Mz/rtma3d.t@H@Mz.snds.gem</cyclestr></datadep>
+          <datadep age="05:00"><cyclestr>&COMFV3;/rtma3d.@Y@m@d/snds.t@H@Mz/rtma3d.t@H@Mz.snds_fgs.grib2</cyclestr></datadep>
+          <datadep age="05:00"><cyclestr>&COMFV3;/rtma3d.@Y@m@d/snds.t@H@Mz/rtma3d.t@H@Mz.snds_fgs.gem</cyclestr></datadep>
+        </and>
+    </dependency>
+  </task>
+</workflow>

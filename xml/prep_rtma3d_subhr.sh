@@ -86,7 +86,7 @@ export HRRRDAS_BEC=0                        #Use HRRRDAS 1-hr forecast during hy
   QUEUE_SVC="dev_transfer"                  #user-specified transfer queue
   QUEUE_SHARED="dev_shared" 
 # Path to top running and archiving directory
-  ptmp_base="/gpfs/dell2/stmp/${USER}/${NET}_wrkdir_realtime"
+  ptmp_base="/gpfs/dell3/stmp/${USER}/${NET}_wrkdir_realtime"
   DATABASE_DIR=${ptmp_base}            # (equivalent to ptmp_base)
   HOMEBASE_DIR=${NWROOT}               # path to system home directory
   COMINRAP="/gpfs/dell2/emc/obsproc/noscrub/Jeff.Whiting/save/dev/rtma/3drtma/com3d/rtma/prod"
@@ -422,7 +422,7 @@ cat > ${NWROOT}/xml/${RUN}_${expname}.xml <<EOF
 <!ENTITY GESROOT	"&ptmp_base;/nwges2/&NET;">
 
 <!ENTITY HOMErtma3d	"&NWROOT;">
-<!ENTITY LOG_DIR	"/gpfs/dell2/stmp/${USER}/logs">
+<!ENTITY LOG_DIR	"/gpfs/dell3/stmp/${USER}/logs">
 <!ENTITY JJOB_DIR	"&HOMErtma3d;/jobs">
 <!ENTITY SCRIPT_DIR	"&HOMErtma3d;/scripts">
 <!ENTITY USHrtma3d	"&HOMErtma3d;/ush">

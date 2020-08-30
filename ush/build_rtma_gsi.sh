@@ -1,7 +1,7 @@
 #!/bin/sh
 
 date
-# set -x
+set -x
 #
 
 #=========================================================================#
@@ -66,6 +66,7 @@ fi
 
 USH_DIR=${TOP_RTMA}/ush
 MODULEFILES_DIR=${TOP_RTMA}/modulefiles
+PARM_DIR=${TOP_RTMA}/parm/gsi
 
 cd $TOP_RTMA
 EXEC=${TOP_RTMA}/exec
@@ -91,75 +92,107 @@ then
   exit 2
 fi
 
+
+#
+#--- Building of GSILIBS
+#
+# working branch
+cd ${TOP_SORC}/GSILIBS
+mkdir build
+cd build
+module unload bufr
+cmake -DBUILD_CORELIBS=ON ..
+make -j8
+
+
+
+#--- Building of NCEPLIBS
+#
+# working branch
+
+cd ${TOP_SORC}/NCEPLIBS
+cp ${PARM_DIR}/CMakeLists.txt .
+mkdir build
+cd build
+cmake ..
+make -j8 CXXFLAGS='icpc' CCFLAGS='ic' FCFLAGS='ifort'
+make install
+
+cd ${TOP_SORC}/NCEPLIBS/build/install/lib
+${TOP_SORC}/GSILIBS/linklibs
+
+
+
+
 #
 #--- compilation of GSI
 #
 # working branch
+
+
 wrking_branch=${branch_gsi_source}
 cd ${SORCDIR_GSI}
-echo " ----> check out working branch "
-echo " ----> git checkout ${wrking_branch} "
-git checkout ${wrking_branch}
+#echo " ----> check out working branch "
+#echo " ----> git checkout ${wrking_branch} "
+#git checkout ${wrking_branch}
 
-if [ $? -ne 0 ] ; then
-  echo " failed to check out the branch ${wrking_branch} and abort "
-  exit 1
-fi
+#if [ $? -ne 0 ] ; then
+#  echo " failed to check out the branch ${wrking_branch} and abort "
+#  exit 1
+#fi
+
+sROOT=ROOT
+
+rm ${SORCDIR_GSI}/ush/build.comgsi
+
+#cat ${PARM_DIR}/build.comgsi_tmp | sed "s/${sROOT//\\/\\\\}/${TOP_SORC//\\/\\\\}/g" > ${SORCDIR_GSI}/ush/build.comgsi
+
+#sed "s!ROOT!${TOP_SORC}!ig" ${PARM_DIR}/build.comgsi_tmp > ${SORCDIR_GSI}/ush/build.comgsi
+
+sed -e "s/${sROOT//\//\\/}/${TOP_RTMA//\//\\/}/g" ${PARM_DIR}/build.comgsi_tmp > ${SORCDIR_GSI}/ush/build.comgsi
+
+chmod 755 ${SORCDIR_GSI}/ush/build.comgsi
+#if [[ -d /scratch3 ]] ; then ### theia
+#source /etc/profile.d/modules.sh
+#    modulefile="${PARM_DIR}/modulefile.theia.GSI_UPP_WRF"
+#elif [[ -d /jetmon ]] ; then ### jet
+#source /etc/profile.d/modules.sh
+#    modulefile="${PARM_DIR}/modulefile.jet.GSI_UPP_WRF"
+#elif [[ -d /glade ]] ; then  ### cheyenne
+#source /etc/profile.d/modules.sh
+#    modulefile="${PARM_DIR}/modulefile.cheyenne.GSI_UPP_WRF"
+#elif [[ -d /ioddev_dell ]] ; then ### dell
+#source /usrx/local/prod/lmod/lmod/init/sh
+#    modulefile="${PARM_DIR}/modulefile.dell.GSI_UPP_WRF"
+#else
+#    echo "unknown machine"
+#    exit 9
+#fi
 
 
-dir_root=$(pwd)
 
-if [[ -d /scratch3 ]] ; then ### theia
-source /etc/profile.d/modules.sh
-    modulefile="/home/rtrr/PARM_EXEC/modulefiles/modulefile.theia.GSI_UPP_WRF"
-elif [[ -d /jetmon ]] ; then ### jet
-source /etc/profile.d/modules.sh
-    modulefile="/home/rtrr/PARM_EXEC/modulefiles/modulefile.jet.GSI_UPP_WRF"
-elif [[ -d /glade ]] ; then  ### cheyenne
-source /etc/profile.d/modules.sh
-    modulefile="/glade/p/ral/jntp/gge/modulefiles/modulefile.cheyenne.GSI_UPP_WRF"
-elif [[ -d /ioddev_dell ]] ; then ### dell
-source /usrx/local/prod/lmod/lmod/init/sh
-    modulefile="/u/Edward.Colon/rtrr/PARM_EXEC/modulefiles/modulefile.dell.GSI_UPP_WRF"
-else
-    echo "unknown machine"
-    exit 9
-fi
+#if [ ! -f $modulefile ]; then
+#    echo "modulefiles $modulefile does not exist"
+#    exit 10
+#fi
+#source $modulefile
 
-if [ ! -f $modulefile ]; then
-    echo "modulefiles $modulefile does not exist"
-    exit 10
-fi
-source $modulefile
-
-cd ${BUILD_GSI}
+cd ${SORCDIR_GSI}
 
 echo "compiled at the node:" >> ${USH_DIR}/log.build_rtma_gsi
 hostname  >> ${USH_DIR}/log.build_rtma_gsi
-module list >> ${USH_DIR}/log.build_rtma_gsi
-echo -e "\nThe branch name:" >> ${USH_DIR}/log.build_rtma_gsi
-git branch | grep "*"  >> ${USH_DIR}/log.build_rtma_gsi
-echo -e "\nThe commit ID:" >> ${USH_DIR}/log.build_rtma_gsi
-git log -1 | head -n1 >> ${USH_DIR}/log.build_rtma_gsi
-echo -e "\ngit status:" >> ${USH_DIR}/log.build_rtma_gsi
-git status >> ${USH_DIR}/log.build_rtma_gsi
-echo -e "\nCompiling commands:" >> ${USH_DIR}/log.build_rtma_gsi
-echo "  cmake -DENKF_MODE=WRF -DBUILD_CORELIBS=ON -DBUILD_GSDCLOUD_ARW=ON -DBUILD_UTIL_COM=ON .." >> ${USH_DIR}/log.build_rtma_gsi
-echo "  make -j8" >> ${USH_DIR}/log.build_rtma_gsi
-cat ${USH_DIR}/log.build_rtma_gsi
+#module list >> ${USH_DIR}/log.build_rtma_gsi
+#echo -e "\nThe branch name:" >> ${USH_DIR}/log.build_rtma_gsi
+#git branch | grep "*"  >> ${USH_DIR}/log.build_rtma_gsi
+#echo -e "\nThe commit ID:" >> ${USH_DIR}/log.build_rtma_gsi
+#git log -1 | head -n1 >> ${USH_DIR}/log.build_rtma_gsi
+#echo -e "\ngit status:" >> ${USH_DIR}/log.build_rtma_gsi
+#git status >> ${USH_DIR}/log.build_rtma_gsi
+#echo -e "\nCompiling commands:" >> ${USH_DIR}/log.build_rtma_gsi
+echo "${SORCDIR_GSI}/ush/build.comgsi"  >> ${USH_DIR}/log.build_rtma_gsi
+#cat ${USH_DIR}/log.build_rtma_gsi
 
-
-cmake -DENKF_MODE=WRF -DBUILD_CORELIBS=ON -DBUILD_GSDCLOUD_ARW=ON -DBUILD_UTIL_COM=ON ..  2>&1  | tee ${BUILD_LOG}/log.cmake.${DIRNAME_GSI}.txt
-if [ $? -ne 0 ] ; then
-  echo " ================ WARNING =============== " 
-  echo " CMake step failed."
-  echo " Check up with the log.cmake file under build/build_log/"
-  echo "   ----> log.cmake.${DIRNAME_GSI}.txt : "
-  echo " ================ WARNING =============== " 
-fi
-
-echo " make VERBOSE=1 -j 8 >& ${BUILD_LOG}/log.make.${DIRNAME_GSI}.txt "
-make -j 8 2>&1 | tee ${BUILD_LOG}/log.make.${DIRNAME_GSI}.txt
+./ush/build.comgsi >&  ${BUILD_LOG}/log.make.${DIRNAME_GSI}.txt
 
 if [ $? -eq 0 ] ; then
   echo " GSI code and utility codes were built successfully."
@@ -182,7 +215,6 @@ else
   echo " ================ WARNING =============== " 
   echo " Compilation of GSI code was failed."
   echo " Check up with the log file under "
-  echo "   ----> log.cmake.${DIRNAME_GSI}.txt : "
   echo "   ----> log.make.${DIRNAME_GSI}.txt  : "
   echo " ================ WARNING =============== " 
 fi

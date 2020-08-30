@@ -38,7 +38,7 @@ echo " This machine is $target ."
 
 # branch_post_gsd: GSD RAP/HRRR-based POST branch in repository of POST
 # branch_post_gsd="master"
-branch_post_gsd="post_3drtma"
+branch_post_gsd="develop"
 
 # branch_post_source: source branch  # the user-specified branch to build on.
                                     # if not specified by user, 

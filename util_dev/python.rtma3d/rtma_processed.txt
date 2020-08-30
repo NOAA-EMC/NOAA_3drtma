@@ -1,0 +1,1 @@
+/gpfs/dell2/stmp/Edward.Colon/rtma3d_wrkdir_realtime/com2/rtma3d/lsf/rtma3d.20200331/postprd.t1230z/rtma3d.t1230z.wrfsubhprs.grib2

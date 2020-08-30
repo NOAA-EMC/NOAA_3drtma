@@ -1,0 +1,641 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+
+<head>
+<title>FV3-SAR vs FV3-Nest</title>
+<!--<link rel="stylesheet" type="text/css" href="https://www.emc.ncep.noaa.gov/mmb/rtma/rtma3d/fv3.css"> -->
+<link rel="stylesheet" type="text/css" href="https://www.emc.ncep.noaa.gov/mmb/bblake/fv3/fv3.css">
+
+<meta http-equiv="content-type" content="text/html; charset=utf-8" />
+
+<!--<meta http-equiv="Content-Style-Type" content="text/css" />-->
+
+<!--- IMPORTANT PART THAT WILL BE MODIFIED ONCE THE JAVASCRIPT REFRESH PART GETS ADDED IN -->
+	
+<!--<meta http-equiv="refresh" content="600" />-->
+
+<!--<link rel="stylesheet" href="http://www.emc.ncep.noaa.gov/mmb/mmbpll/css/href.css" type="text/css" media="all" />-->
+
+<!--<script src="https://www.emc.ncep.noaa.gov/mmb/rtma/rtma3d/js/looper.js" type="text/javascript"></script>
+<script src="https://www.emc.ncep.noaa.gov/mmb/rtma/rtma3d/js/slidingBox.js" type="text/javascript"></script>
+<script src="https://www.emc.ncep.noaa.gov/mmb/rtma/rtma3d/js/keycommands.js" type="text/javascript"></script>
+<script src="https://d3js.org/d3.v4.min.js"></script> -->
+
+<script src="https://www.emc.ncep.noaa.gov/mmb/bblake/fv3/js/looper.js" type="text/javascript"></script>
+<script src="https://www.emc.ncep.noaa.gov/mmb/bblake/fv3/js/slidingBox.js" type="text/javascript"></script>
+<script src="https://www.emc.ncep.noaa.gov/mmb/bblake/fv3/js/keycommands.js" type="text/javascript"></script>
+<script src="https://d3js.org/d3.v4.min.js"></script>
+
+
+</head>
+
+<?php
+$randomtoken = base64_encode( openssl_random_pseudo_bytes(32));
+$_SESSION['csrfToken']=$randomtoken;
+?>
+
+<body>
+
+<!-- div for each dropdown menu-->
+<div id="divpps">
+  <select id="pps"></select>
+  <div id="afterpps"></div>
+</div>
+<div id="divcsa">
+  <select id="csa"></select>
+  <div id="aftercsa"></div>
+</div>
+<div id="divsf">
+  <select id="sf"></select>
+  <div id="aftersf"></div>
+</div>
+<div id="divcld">
+  <select id="cld"></select>
+  <div id="aftercld"></div>
+</div>
+<div id="divupa">
+  <select id="upa"></select>
+  <div id="afterupa"></div>
+</div>
+<div id="divdom">
+  <select id="dom"></select>
+  <div id="afterdom"></div>
+</div>
+<div id="divcyc">
+  <select id="cyc"></select>
+  <div id="aftercyc"></div>
+</div>
+
+<table id="prodMenu">
+
+<tr><td>
+
+<div id="mainDiv">
+
+<div id="pageContents">
+
+ <div id="keyCodeMenu" style="display:none;opacity:.9;filter:alpha(opacity=90);background-color:#FFFFFF;position:absolute;left:700px;top:480px;border:1px solid #DDDDDD;">
+ <div style="width:200px;background-color:#EEEEEE;border-bottom:1px solid #997033;"><a href="javascript:open_key()"><b>Close</b> (or press 1 again)</a></div>
+ <div style="display:none" id="loadingBox">Images loading, please wait . . .</div>
+
+Type in these keys to control the <br />
+
+         animation from your keyboard. <br />
+         You do not need to press the shift key. <br />
+         <table> 
+
+            <tr>
+               <td>
+                  <b>p</b> Play<br />
+                  <b>o</b> Stop<br />
+                  <b>+</b> Increase Speed<br />
+                  <b>-</b> Decrease Speed<br />
+                  <b>]</b> Forward<br />
+                  <b>[</b> Reverse<br />
+               </td>
+
+               <td>
+                  <b>r</b> Rock (on/off)<br />
+                  <b>></b> Forward Step<br />
+                  <b>&#60;</b> Back Step<br /> 
+                  <b>d</b> Dwell (on/off)<br />
+                  <b>w</b> increase Dwell<br /> 
+                  <b>q</b> decrease Dwell<br />
+               </td>
+            </tr>
+         </table>
+         <b>m</b> Turn on/off rollover times
+      </div>
+
+   <!--PAGE CONTENTS -->
+
+<form name="form" method="post" action="">
+<input type="hidden" id="fh" name="csrfToken" value='<?php echo($_SESSION["csrfToken"]) ?>'/>
+
+     <table border="0" cellspacing="0" cellpadding="0" width="125%" bgcolor="#D5D5D5" style="border-bottom:1px solid #DDDDDD">
+        <tr>
+	  <td style="padding:0 2px 0 2px;text-align:center;">
+            <input value="Start" onclick="start_play();" name="button3" type="button" class="mapbutton" style="float:left" />
+            <input value="Stop" onclick="stop_play();" name="button" type="button" class="mapbutton" style="float:right" />
+          </td>
+
+          <td bgcolor="" style="border-left:1px solid #BBBBBB;text-align:center;"><font style="font-size:10px;"><b>FRM</b></font></td>
+	  <td>
+            <input value="" name="frame" size="6" type="text" class="maptext" />
+	  </td>
+
+          <td bgcolor="" style="border-left:1px solid #BBBBBB;text-align:center;"><font style="font-size:10px;"><b>SPD</b></font></td>
+	  <td> 
+            <input value="&lt;&lt;" onclick="delay=delay*inc; show_delay();" class="mapbutton2" name="button2" type="button" />
+            <input value="&gt;&gt;" onclick="delay=delay/inc; show_delay();" class="mapbutton2" name="button2" type="button" />
+	    <input value="" name="dly" size="2" type="text" class="maptext" />img/sec
+	  </td>
+
+           <td bgcolor="" style="border-left:1px solid #BBBBBB;text-align:center;"><font style="font-size:10px;"><b>STEP (Keyboard Arrows)</b></font></td>
+           <td style="text-align:center">
+             <input value=" &lt; " onclick="backstep();" name="button2" type="button" class="mapbutton2" />
+             <input value=" &gt; " onclick="forwardstep();" name="button2" type="button" class="mapbutton2" />
+           </td>
+
+
+	</tr>
+    </table>
+</table>
+
+<table id="prodMenu2" border="0" cellspacing="0" cellpadding="0" width="125%" bgcolor="#D5D5D5" style="border-bottom:1px solid #DDDDDD; display: none">
+       <tr>        
+          <td bgcolor="" style="border-left:1px solid #BBBBBB;text-align:center;"><font style="font-size:10px;"><b>DWELL</b></font></td>
+          <td>
+           <label><input type="checkbox" name="dwell" onclick="show_dwell();" checked="checked" />Dwell</label> 
+            <input type="button" value=" - " onclick="decDwell(); show_dwell();" class="mapbutton2" />
+            <input type="button" value=" + " onclick="incDwell(); show_dwell();" class="mapbutton2" />
+            <input type="text" size="2" name="dwl" class="maptext" />sec
+          </td>
+
+          <td bgcolor="" style="border-left:1px solid #BBBBBB;text-align:center;"><font style="font-size:10px;"><b>STEP</b></font></td>
+	  <td style="text-align:center">
+            <input value=" &lt; " onclick="backstep();" name="button2" type="button" class="mapbutton2" />
+            <input value=" &gt; " onclick="forwardstep();" name="button2" type="button" class="mapbutton2" />
+	  </td>
+
+	  <td><label><input type="checkbox" checked="checked" name="nostep"/>On/Off</label></td>
+
+	</tr>
+</table> 
+<div class="mapbox">
+<center>
+<img src="cyc/compare/images/compare2mt_conus_t????z.png" name="animation" alt="Loading..." ondblclick="document.location.href = this.src" />
+</center>
+<br />
+<div id="text1" style="position: absolute; left:225px;">
+<span>
+<CENTER><H2>Double-click this frame to see individual image.<br>Quick keyboard cmds: use arrow keys, or &#60; Forward Step &#62; Back Step.<br>Page style is from <a class="sublink" href="https://www.spc.noaa.gov">https://www.spc.noaa.gov</a>.
+</H2></CENTER>
+</span>
+</div>
+ </div>
+
+<!--  Delay (ms): <INPUT TYPE=text VALUE="" NAME="delay" SIZE=6> //-->
+</form>
+
+<script type='text/javascript'>
+
+//allow the use of arrow keys for advancing images
+window.addEventListener("keydown", function(e) {
+    if([37,39].indexOf(e.keyCode) > -1) {
+        e.preventDefault();
+        }
+});
+document.onkeydown = checkKey;
+function checkKey(e) {
+  e = e || window.event;
+  if (e.keyCode == '37') {
+     backstep();
+    }
+  if (e.keyCode == '39') {
+      forwardstep();
+    }
+  }
+
+//variables and functions for dropping menu if not already dropped and 
+//retracting menu if it is already dropped when clicked
+var dropped=0;
+var droppedpps=0;
+var droppedcsa=0;
+var droppedsf=0;
+var droppedcld=0;
+var droppedupa=0;
+var droppeddom=0;
+var droppedcyc=0;
+
+function change() {
+  if (dropped==0) {
+    afterdate.attr("class","select-styled active");
+    uldate.style("display","block")
+    dropped=1;
+   }
+   else {
+    dropped=0;
+    uldate.style("display","none");
+    afterdate.attr("class","select-styled");
+    showdate.attr("class","select");};
+  subul.style("display","none");
+};
+function changepps() {
+  if (droppedpps==0) {
+    afterpps.attr("class","select-styled active");
+    ulpps.style("display","block")
+    droppedpps=1;
+   }
+   else {
+    droppedpps=0;
+    ulpps.style("display","none");
+    afterpps.attr("class","select-styled");
+    showpps.attr("class","selectpps");};
+};
+function changecsa() {
+  if (droppedcsa==0) {
+    aftercsa.attr("class","select-styled active");
+    ulcsa.style("display","block")
+    droppedcsa=1;
+   }
+   else {
+    droppedcsa=0;
+    ulcsa.style("display","none");
+    aftercsa.attr("class","select-styled");
+    showcsa.attr("class","selectpps");};
+};
+function changesf() {
+  if (droppedsf==0) {
+    aftersf.attr("class","select-styled active");
+    ulsf.style("display","block")
+    droppedsf=1;
+   }
+   else {
+    droppedsf=0;
+    ulsf.style("display","none");
+    aftersf.attr("class","select-styled");
+    showsf.attr("class","selectpps");};
+};
+function changecld() {
+  if (droppedcld==0) {
+    aftercld.attr("class","select-styled active");
+    ulcld.style("display","block")
+    droppedcld=1;
+   }
+   else {
+    droppedcld=0;
+    ulcld.style("display","none");
+    aftercld.attr("class","select-styled");
+    showcld.attr("class","selectpps");};
+};
+function changeupa() {
+  if (droppedupa==0) {
+    afterupa.attr("class","select-styled active");
+    ulupa.style("display","block")
+    droppedupa=1;
+   }
+   else {
+    droppedupa=0;
+    ulupa.style("display","none");
+    afterupa.attr("class","select-styled");
+    showupa.attr("class","selectpps");};
+};
+function changedom() {
+  if (droppeddom==0) {
+    afterdom.attr("class","select-styled active");
+    uldom.style("display","block")
+    droppeddom=1;
+   }
+   else {
+    droppeddom=0;
+    uldom.style("display","none");
+    afterdom.attr("class","select-styled");
+    showdom.attr("class","selectdom");};
+};
+
+function changecyc() {
+  if (droppedcyc==0) {
+    aftercyc.attr("class","select-styled active");
+    ulcyc.style("display","block")
+    droppedcyc=1;
+   }
+   else {
+    droppedcyc=0;
+    ulcyc.style("display","none");
+    aftercyc.attr("class","select-styled");
+    showcyc.attr("class","selectcycs");};
+};
+
+
+//a bunch of arrays and variables to keep track of which image is currently being looped
+var field="2mt";
+var dom="conus";
+var cyc="cyc/compare";
+var imax=96;
+var datelist=[""];
+var ppslist=["Percent Frozen Precip","Snow Depth","Hybrid Lvl 1 Cloud Water","Hybrid Lvl 1 Rain","Hybrid Lvl 1 Snow"];
+var ppsdata=["pofp","snow","clwmr","rwmr","snmr"];
+var imaxespps=[96,96,96,96,96];
+
+var csalist=["0-3 km Storm Relative Helicity","0-1 km Storm Relative Helicity"];
+var csadata=["hel3km","hel1km"];  
+var imaxescsa=[96,96];
+
+var sflist=["2-m Temperature","2-m Dew Point Temperature", "10-m Wind Speed","Terrain Height","0-10 cm Soil Temperature"];
+var sfdata=["2mt","2mdew","10mwind","terra","soilw_0_10","tsoil_0_10","soilw_10_40","tsoil_10_40"];
+var imaxessf=[96,96,96,96,96,96,96,96];
+
+var cldlist=["Precipitable Water","Low/Mid/High Cloud Cover","Cloud Base Height","Cloud Ceiling Height","Cloud Top Height","EMC Surface Visibility","Latent Heat Flux","Sensible Heat Flux","Ground Heat Flux","Skin Temperature","Downward Shortwave","Upward Shortwave","Downward Longwave","Upward Longwave"];
+var clddata=["pw","cloud","zbase","zceil","ztop","vis","lhfx","snhfx","gdhfx","tsfc","swdown","swup","lwdown","lwup"];
+var imaxescld=[96,96,96,96,96,96,96,96,96,96,96,96,96,96];
+
+var upalist=["850 mb Theta-e","700 mb Omega & RH","500mb Heights, Winds, & Vorticity","250 mb Winds"];
+var upadata=["850t","700","500","250wind"];
+var imaxesupa=[96,96,96,96];
+
+var domlist=["CONUS"];
+var domdata=["conus"]
+
+var cyclist=["20191008","20191007","20191006","20191005","20191004","20191003"]
+var cycdata=["cyc\/compare","cycm1\/compare","cycm2\/compare","cycm3\/compare","cycm4\/compare","cycm5\/compare"]
+
+//function for loading images
+function loadimages() {
+  window.pauseOnStart = true;
+  window.pauseWhere = 0;
+  if (imax==96) {
+  var fhours=["0000","0015","0030","0045","0100","0115","0130","0145","0200","0215","0230","0245","0300","0315","0330","0345","0400","0415","0430","0445","0500","0515","0530","0545","0600","0615","0630","0645","0700","0715","0730","0745","0800","0815","0830","0845","0900","0915","0930","0945","1000","1015","1030","1045","1100","1115","1130","1145","1200","1215","1230","1245","1300","1315","1330","1345","1400","1415","1430","1445","1500","1515","1530","1545","1600","1615","1630","1645","1700","1715","1730","1745","1800","1815","1830","1845","1900","1915","1930","1945","2000","2015","2030","2045","2100","2115","2130","2145","2200","2215","2230","2245","2300","2315","2330","2345"];
+ }
+  window.temp_list=[];
+  window.temp_list = new Array(imax);
+  for (i=0;i<imax;i++) {
+   window.temp_list[i]=cyc+'/images/compare'+field+'_'+dom+'_t'+String(fhours[i])+'z.png'  
+  }
+  initialize_looper();
+};
+
+//initial call for loading images
+loadimages();
+
+//precipitation, p-type, snow menu creation
+var hidepps=d3.select("#pps")
+  .attr("class","select-hidden");
+hidepps.selectAll("option")
+  .data(ppslist)
+  .enter().append("option")
+    .text(function(d) { return d; });
+hidepps.property("value","precipitation|p-type");
+var showpps=d3.select("#divpps")
+  .attr("class","selectpps")
+  .style("left","5px");
+var afterpps=d3.select("#afterpps")
+  .attr("class","select-styled")
+  .text("Precipitation|P-Type|Snow")
+  .on("click",changepps);
+afterpps.property("value","precipitation|p-type|snow");
+var ulpps=d3.select("#divpps").append("ul")
+  .attr("class","uldate");
+ulpps.selectAll("li")
+  .data(ppslist)
+  .enter().append("li")
+    .attr("class","mainlipps")
+    .text(function(d,i) { return ppslist[i]; })
+    .attr("id",function(d) { return "MD"+String(d);});
+ulpps.style("display","none");
+ulpps.selectAll(".mainlipps").on("click",function(d) {
+  for (i=0;i<ppslist.length;i++) {
+    if (ppslist[i]==d) {
+      field=ppsdata[i];
+      imax=imaxespps[i];
+    }
+   }
+    droppedpps=0;
+    ulpps.style("display","none");
+    afterpps.attr("class","select-styled");
+    showpps.attr("class","selectpps");
+  loadimages();
+})
+
+//convection, severe, aviation menu creation
+var hidecsa=d3.select("#csa")
+  .attr("class","select-hidden");
+hidecsa.selectAll("option")
+  .data(csalist)
+  .enter().append("option")
+    .text(function(d) { return d; });
+hidecsa.property("value","convection|severe");
+var showcsa=d3.select("#divcsa")
+  .attr("class","selectpps")
+  .style("left","215px");
+var aftercsa=d3.select("#aftercsa")
+  .attr("class","select-styled")
+  .text("Convection|Severe Wx")
+  .on("click",changecsa);
+aftercsa.property("value","convection|severe");
+var ulcsa=d3.select("#divcsa").append("ul")
+  .attr("class","uldate");
+ulcsa.selectAll("li")
+  .data(csalist)
+  .enter().append("li")
+    .attr("class","mainlipps")
+    .text(function(d,i) { return csalist[i]; })
+    .attr("id",function(d) { return "MD"+String(d);});
+ulcsa.style("display","none");
+ulcsa.selectAll(".mainlipps").on("click",function(d) {
+  for (i=0;i<csalist.length;i++) {
+    if (csalist[i]==d) {
+      field=csadata[i];
+      imax=imaxescsa[i];
+    }
+   }
+    droppedcsa=0;
+    ulcsa.style("display","none");
+    aftercsa.attr("class","select-styled");
+    showcsa.attr("class","selectpps");
+  loadimages();
+})
+
+//surface fields menu creation
+
+var hidesf=d3.select("#sf")
+  .attr("class","select-hidden");
+hidesf.selectAll("option")
+  .data(sflist)
+  .enter().append("option")
+    .text(function(d) { return d; });
+hidesf.property("value","surface");
+var showsf=d3.select("#divsf")
+  .attr("class","selectpps")
+  .style("left","425px");
+var aftersf=d3.select("#aftersf")
+  .attr("class","select-styled")
+  .text("Surface Fields")
+  .on("click",changesf);
+aftersf.property("value","surface fields");
+var ulsf=d3.select("#divsf").append("ul")
+  .attr("class","uldate");
+ulsf.selectAll("li")
+  .data(sflist)
+  .enter().append("li")
+    .attr("class","mainlipps")
+    .text(function(d,i) { return sflist[i]; })
+    .attr("id",function(d) { return "MD"+String(d);});
+ulsf.style("display","none");
+ulsf.selectAll(".mainlipps").on("click",function(d) {
+  for (i=0;i<sflist.length;i++) {
+    if (sflist[i]==d) {
+      field=sfdata[i];
+      imax=imaxessf[i];
+    }
+   }
+    droppedsf=0;
+    ulsf.style("display","none");
+    aftersf.attr("class","select-styled");
+    showsf.attr("class","selectpps");
+  loadimages();
+})
+
+
+//cloud variables
+var hidecld=d3.select("#cld")
+  .attr("class","select-hidden");
+hidecld.selectAll("option")
+  .data(cldlist)
+  .enter().append("option")
+    .text(function(d) { return d; });
+hidecld.property("value","Cloud");
+var showcld=d3.select("#divcld")
+  .attr("class","selectpps")
+  .style("left","635px");
+var aftercld=d3.select("#aftercld")
+  .attr("class","select-styled")
+  .text("Cloud|Sfc Fluxes")
+  .on("click",changecld);
+aftercld.property("value","Cloud");
+var ulcld=d3.select("#divcld").append("ul")
+  .attr("class","uldate");
+ulcld.selectAll("li")
+  .data(cldlist)
+  .enter().append("li")
+    .attr("class","mainlipps")
+    .text(function(d,i) { return cldlist[i]; })
+    .attr("id",function(d) { return "MD"+String(d);});
+ulcld.style("display","none");
+ulcld.selectAll(".mainlipps").on("click",function(d) {
+  for (i=0;i<cldlist.length;i++) {
+    if (cldlist[i]==d) {
+      field=clddata[i];
+      imax=imaxescld[i];
+    }
+   }
+    droppedcld=0;
+    ulcld.style("display","none");
+    aftercld.attr("class","select-styled");
+    showcld.attr("class","selectpps");
+  loadimages();
+})
+
+//upper level variables
+
+var hideupa=d3.select("#upa")
+  .attr("class","select-hidden");
+hideupa.selectAll("option")
+  .data(upalist)
+  .enter().append("option")
+    .text(function(d) { return d; });
+hideupa.property("value","Upper Air");
+var showupa=d3.select("#divupa")
+  .attr("class","selectpps")
+  .style("left","845px");
+var afterupa=d3.select("#afterupa")
+  .attr("class","select-styled")
+  .text("Upper Air Fields")
+  .on("click",changeupa);
+afterupa.property("value","Upper Air");
+var ulupa=d3.select("#divupa").append("ul")
+  .attr("class","uldate");
+ulupa.selectAll("li")
+  .data(upalist)
+  .enter().append("li")
+    .attr("class","mainlipps")
+    .text(function(d,i) { return upalist[i]; })
+    .attr("id",function(d) { return "MD"+String(d);});
+ulupa.style("display","none");
+ulupa.selectAll(".mainlipps").on("click",function(d) {
+  for (i=0;i<upalist.length;i++) {
+    if (upalist[i]==d) {
+      field=upadata[i];
+      imax=imaxesupa[i];
+    }
+   }
+    droppedupa=0;
+    ulupa.style("display","none");
+    afterupa.attr("class","select-styled");
+    showupa.attr("class","selectpps");
+  loadimages();
+})
+
+//region menu creation
+var hidedom=d3.select("#dom")
+  .attr("class","select-hidden");
+hidedom.selectAll("option")
+  .data(domlist)
+  .enter().append("option")
+    .text(function(d) { return d; });
+hidedom.property("value","region");
+var showdom=d3.select("#divdom")
+  .attr("class","selectdom")
+  .style("left","555px");
+var afterdom=d3.select("#afterdom")
+  .attr("class","select-styled")
+  .text("Region")
+  .on("click",changedom);
+afterdom.property("value","region");
+var uldom=d3.select("#divdom").append("ul")
+  .attr("class","uldate");
+uldom.selectAll("li")
+  .data(domlist)
+  .enter().append("li")
+    .attr("class","mainli")
+    .text(function(d,i) { return domlist[i]; })
+    .attr("id",function(d) { return "MD"+String(d);});
+uldom.style("display","none");
+uldom.selectAll(".mainli").on("click",function(d) {
+  for (i=0;i<domlist.length;i++) {
+    if (domlist[i]==d) {
+      dom=domdata[i];
+    }
+   }
+    droppeddom=0;
+    uldom.style("display","none");
+    afterdom.attr("class","select-styled");
+    showdom.attr("class","selectdom");
+  loadimages();
+})
+
+//cycle menu creation
+var hidecyc=d3.select("#cyc")
+  .attr("class","select-hidden");
+hidecyc.selectAll("option")
+  .data(cyclist)
+  .enter().append("option")
+    .text(function(d) { return d; });
+hidecyc.property("value","cycle");
+var showcyc=d3.select("#divcyc")
+  .attr("class","selectcycs")
+  .style("left","345px");
+var aftercyc=d3.select("#aftercyc")
+  .attr("class","select-styled")
+  .text("Cycle")
+  .on("click",changecyc);
+aftercyc.property("value","cycle");
+var ulcyc=d3.select("#divcyc").append("ul")
+  .attr("class","uldate");
+ulcyc.selectAll("li")
+  .data(cyclist)
+  .enter().append("li")
+    .attr("class","mainli")
+    .text(function(d,i) { return cyclist[i]; })
+    .attr("id",function(d) { return "MD"+String(d);});
+ulcyc.style("display","none");
+ulcyc.selectAll(".mainli").on("click",function(d) {
+  for (i=0;i<cyclist.length;i++) {
+    if (cyclist[i]==d) {
+      cyc=cycdata[i];
+    }
+   }
+    droppedcyc=0;
+    ulcyc.style("display","none");
+    aftercyc.attr("class","select-styled");
+    showcyc.attr("class","selectcycs");
+  loadimages();
+})
+ 
+</script>
+
+</div>
+</div>
+
+</body>
+</html>

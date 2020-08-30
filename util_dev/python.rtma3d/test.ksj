@@ -1,0 +1,9 @@
+#!/bin/sh
+
+set -x
+
+   cyclist="2100"                              #MPondeca /30Jul2017
+
+DATA_RHIST=/gpfs/dell1/ptmp/Edward.Colon/rtma3dda/grib2_wrkdir_202007132200
+ls -1 $DATA_RHIST | grep -E "${cyclist}" | grep -v bufr_d.listing | awk '
+            /netcdf/ { print "./"$0 > "perm" ; next }'

@@ -1,0 +1,22 @@
+#!/bin/ksh
+set -x
+
+#USER=Benjamin.Blake
+#CDATE=2018111400
+#cyc=00
+#fhr=54
+
+echo 'into launchALL'
+. /usrx/local/prod/lmod/lmod/init/sh
+source /u/${USER}/.bashrc
+
+mkdir -p /gpfs/dell2/stmp/${USER}
+mkdir -p /gpfs/dell2/stmp/${USER}/fv3da
+mkdir -p /gpfs/dell2/stmp/${USER}/fv3da/$cyc
+cd /gpfs/dell2/stmp/${USER}/fv3da/$cyc
+
+python /gpfs/dell2/emc/modeling/noscrub/${USER}/python.fv3/compare_da/plot_alldomains1.py $CDATE $fhr $fmin
+
+exit
+
+

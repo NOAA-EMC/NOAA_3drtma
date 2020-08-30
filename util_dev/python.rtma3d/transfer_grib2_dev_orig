@@ -1,0 +1,25 @@
+#!/bin/ksh --login
+
+set -x 
+
+NDATE=/gpfs/dell1/nco/ops/nwprod/prod_util.v1.1.0/exec/ips/ndate
+YMDm1=`$NDATE -24 ${YMD}${cyc} | cut -c 1-6`
+
+if [ ${cyc}${subcyc} = "0000" ] ; then
+ssh ecolon@emcrzdm.ncep.noaa.gov "mkdir -p /home/ftp/emc/mmb/rtma/rtma3d/${YMD}"
+fi
+
+if [ ${cyc}${subcyc} = "0100" ] ; then
+ssh ecolon@emcrzdm.ncep.noaa.gov "rm -f -r /home/ftp/emc/mmb/rtma/rtma3d/${YMDm1}"
+fi
+
+if [ -d ${COMFV3}/rtma3d.${YMD}/postprd.t${cyc}${subcyc}z ] ; then
+
+cd ${COMFV3}/rtma3d.${YMD}/postprd.t${cyc}${subcyc}z
+
+rsync -t  rtma3d.t${cyc}${subcyc}z.wrfsubhprs.grib2 ecolon@emcrzdm.ncep.noaa.gov:/home/ftp/emc/mmb/rtma/rtma3d/${YMD}/rtma3d.t${cyc}${subcyc}z.wrfsubhprs.grib2
+rsync -t  rtma3d.t${cyc}${subcyc}z.wrfsubhnat.grib2 ecolon@emcrzdm.ncep.noaa.gov:/home/ftp/emc/mmb/rtma/rtma3d/${YMD}/rtma3d.t${cyc}${subcyc}z.wrfsubhnat.grib2
+
+fi
+
+exit

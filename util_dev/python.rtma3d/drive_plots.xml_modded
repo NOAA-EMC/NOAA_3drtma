@@ -1,0 +1,97 @@
+<?xml version="1.0"?>
+<!DOCTYPE workflow
+[
+
+<!ENTITY STARTYEAR "2019">
+<!ENTITY STARTMONTH "09">
+<!ENTITY STARTDAY "09">
+<!ENTITY STARTHOUR "00">
+<!ENTITY STARTMINUTE "00">
+<!ENTITY ENDYEAR "2019">
+<!ENTITY ENDMONTH "09">
+<!ENTITY ENDDAY "09">
+<!ENTITY ENDHOUR "00">
+<!ENTITY ENDMINUTE "00">
+
+<!ENTITY USER "Edward.Colon">
+<!ENTITY ACCOUNT "RTMA-T2O">
+
+<!ENTITY LOGDIR "/gpfs/dell2/emc/modeling/noscrub/&USER;/python.fv3">
+<!-- <!ENTITY OUTDIR "/gpfs/dell1/ptmp/emc.campara"> -->
+<!ENTITY OUTDIR "/gpfs/dell2/stmp/Edward.Colon/rtma3d_wrkdir_retro">
+<!ENTITY COMFV3 "&OUTDIR;/com2/rtma3d/lsf">
+<!ENTITY COMFV3DA "&OUTDIR;/com2/rtma3d/lsf">
+<!ENTITY COMNAM "/gpfs/dell2/stmp/Manuel.Pondeca/upgrade/com/&SYSTEM;/test">
+<!ENTITY PYTHONDIR "/gpfs/dell2/emc/modeling/noscrub/&USER;/python.fv3">
+<!ENTITY STMPDIR1 "/gpfs/dell1/stmp/&USER;/fv3">
+<!ENTITY STMPDIR2 "/gpfs/dell2/stmp/&USER;/fv3">
+
+<!ENTITY RETRIEVE_RESERVATION '<queue>dev</queue><account>&ACCOUNT;</account>'>
+<!ENTITY PLOT_RESERVATION '<queue>dev</queue><account>&ACCOUNT;</account>'>
+<!ENTITY TRANS_RESERVATION '<queue>dev_transfer</queue><account>&ACCOUNT;</account>'>
+
+<!ENTITY RETRIEVE_RESOURCES '<walltime>00:30:00</walltime>'>
+<!ENTITY PLOT_RESOURCES '<walltime>00:45:00</walltime>'>
+<!ENTITY TRANS_RESOURCES '<walltime>01:15:00</walltime><memory>2048M</memory><cores>1</cores><native>-R affinity[core]</native>'>
+
+]>
+
+
+<!--  ************************************************************* -->
+<!--  ******************* STARTING THE WORKFLOW ******************* -->
+
+<workflow realtime="F" scheduler="lsf" taskthrottle="60" cyclethrottle="1" cyclelifespan="00:24:00:00">
+
+  <cycledef group="conus">&STARTYEAR;&STARTMONTH;&STARTDAY;&STARTHOUR;&STARTMINUTE; &ENDYEAR;&ENDMONTH;&ENDDAY;&ENDHOUR;&ENDMINUTE; 00:15:00</cycledef>
+
+  <log>
+    <cyclestr>&LOGDIR;/logfiles2/workflow_@Y@m@d@H@M.log</cyclestr>
+  </log> 
+
+
+
+
+
+<!-- Everything else! -->
+
+  <metatask>
+    <var name="fhr">00</var>
+    <var name="fmin">00</var>
+    <task name="makeplots_compareDA_f#fhr##fmin#" cycledefs="conus" maxtries="3">
+    &PLOT_RESERVATION;
+    &PLOT_RESOURCES;
+    <nodes>1:ppn=16</nodes>
+      <command>&PYTHONDIR;/compare_da/launchALL</command>
+      <jobname><cyclestr>makeplots_compareDA_f#fhr##fmin#</cyclestr></jobname>
+      <join><cyclestr>&LOGDIR;/logfiles2/log.makeplotsf#fhr##fmin#.compareDA.@Y@m@d@H@M.out</cyclestr></join>
+
+      <envar>
+        <name>USER</name><value>&USER;</value>
+      </envar>
+      <envar>
+        <name>CDATE</name><value><cyclestr>@Y@m@d@H@M</cyclestr></value>
+      </envar>
+      <envar>
+        <name>cyc</name><value><cyclestr>@H</cyclestr></value>
+      </envar>
+      <envar>
+        <name>subcyc</name><value><cyclestr>@M</cyclestr></value>
+      </envar>
+      <envar>
+        <name>fhr</name><value>#fhr#</value>
+      </envar>
+      <envar>
+        <name>fmin</name><value>#fmin#</value>
+      </envar>
+      <dependency>
+        <and>
+          <datadep age="05:00"><cyclestr>&COMFV3;/rtma3d.@Y@m@d/postprd.t@H@Mz/rtma3d.t@H@Mz.wrfprs_hrconus_00.grib2</cyclestr></datadep>
+          <datadep age="05:00"><cyclestr>&COMFV3DA;/rtma3d.@Y@m@d/postprd.t@H@Mz/rtma3d.t@H@Mz.fgs.wrfprs_hrconus_00.grib2</cyclestr></datadep>
+        </and>
+      </dependency>
+
+    </task>
+  </metatask> 
+
+
+</workflow>

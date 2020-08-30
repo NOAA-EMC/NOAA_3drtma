@@ -1,0 +1,23 @@
+#!/bin/ksh
+set -x
+
+USER=Benjamin.Blake
+CDATE=2019041200
+cyc=00
+#fhr=24
+dom='conus'
+
+echo 'into launchALL'
+. /usrx/local/prod/lmod/lmod/init/sh
+source /u/${USER}/.bashrc
+
+#mkdir -p /gpfs/dell2/stmp/${USER}
+#mkdir -p /gpfs/dell2/stmp/${USER}/fv3nest
+#mkdir -p /gpfs/dell2/stmp/${USER}/fv3nest/$cyc
+#cd /gpfs/dell2/stmp/${USER}/fv3nest/$cyc
+
+python /gpfs/dell2/emc/modeling/noscrub/${USER}/python.rtma3d/compare_da/plot_fv3_ptype_dif.py $CDATE $dom
+
+exit
+
+

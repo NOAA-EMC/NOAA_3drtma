@@ -107,9 +107,9 @@ fi
 
 echo " make a local clone of the ProdGSI repository under ${TOP_SORC}/${DIRNAME_GSI} ... "
 echo " ====> git clone gerrit:ProdGSI  ./${DIRNAME_GSI} "
-git clone gerrit:ProdGSI  ./${DIRNAME_GSI}
+git clone https://github.com/comgsi/GSI ./${DIRNAME_GSI}
 cd ./${DIRNAME_GSI}
-scp -p gerrit:hooks/commit-msg  .git/hooks
+scp -p .git/hooks/commit-msg  .git/hooks
 
 echo " check out the source branch (GSD RAP/HRRR-based) --> ${branch_gsi_source}"
 echo " ====> git checkout ${branch_gsi_source} "
@@ -122,13 +122,22 @@ if [ $? -ne 0 ] ; then
   exit 1
 fi
 
-echo " check out the submodule libsrc (specific GSD-dev version)"
-echo " ====> git submodule update --init libsrc "
-git submodule update --init libsrc
-
 echo
 
-#
+cd ${TOP_SORC}
+echo "checking out GSILIBS needed for GSI compile."
+
+git clone https://github.com/comgsi/GSILIBS
+
+
+
+echo "checking out  needed for GSI compile."
+
+
+git clone -b ufs-v1.0.0 --recursive https://github.com/NOAA-EMC/NCEPLIBS
+
+
+
 #--- If no modulefile specified for 3DRTMA on this machine to build GSI,
 #--- then adopting the modulefile used in GSI.
 #

@@ -1,0 +1,768 @@
+<?xml version="1.0"?>
+<!DOCTYPE workflow
+[
+
+<!ENTITY STARTYEAR "2019">
+<!ENTITY STARTMONTH "07">
+<!ENTITY STARTDAY "30">
+<!ENTITY STARTHOUR "00">
+
+<!ENTITY ENDYEAR "2019">
+<!ENTITY ENDMONTH "12">
+<!ENTITY ENDDAY "31">
+<!ENTITY ENDHOUR "12">
+
+<!ENTITY USER "Benjamin.Blake">
+<!ENTITY ACCOUNT "FV3GFS-T2O">
+
+<!ENTITY LOGDIR "/gpfs/dell1/ptmp/&USER;">
+<!-- <!ENTITY OUTDIR "/gpfs/dell1/ptmp/emc.campara"> -->
+<!ENTITY OUTDIR "/gpfs/tp2/ptmp/Benjamin.Blake">
+<!ENTITY COMFV3 "&OUTDIR;/com/fv3cam/para">
+<!ENTITY COMFV3NEST "&OUTDIR;/com/fv3cam/para">
+<!ENTITY COMFV3DA "/gpfs/tp2/ptmp/Eric.Rogers/com/fv3cam/para">
+<!ENTITY COMNAM "/gpfs/tp2/nco/ops/com/nam/prod">
+<!ENTITY PYTHONDIR "/gpfs/dell2/emc/modeling/noscrub/&USER;/python.fv3">
+<!ENTITY STMPDIR1 "/gpfs/dell1/stmp/&USER;/fv3">
+<!ENTITY STMPDIR2 "/gpfs/dell2/stmp/&USER;/fv3">
+
+<!ENTITY RETRIEVE_RESERVATION '<queue>dev</queue><account>&ACCOUNT;</account>'>
+<!ENTITY PLOT_RESERVATION '<queue>dev</queue><account>&ACCOUNT;</account>'>
+<!ENTITY TRANS_RESERVATION '<queue>dev_transfer</queue><account>&ACCOUNT;</account>'>
+
+<!ENTITY RETRIEVE_RESOURCES '<walltime>00:30:00</walltime>'>
+<!ENTITY PLOT_RESOURCES '<walltime>00:45:00</walltime>'>
+<!ENTITY TRANS_RESOURCES '<walltime>01:15:00</walltime><memory>2048M</memory><cores>1</cores><native>-R affinity[core]</native>'>
+
+]>
+
+
+<!--  ************************************************************* -->
+<!--  ******************* STARTING THE WORKFLOW ******************* -->
+
+<!-- <workflow realtime="F" scheduler="lsf" taskthrottle="25"> -->
+<workflow realtime="T" scheduler="lsf" taskthrottle="60" cyclethrottle="1" cyclelifespan="00:24:00:00">
+
+  <cycledef group="conus">&STARTYEAR;&STARTMONTH;&STARTDAY;&STARTHOUR;00 &ENDYEAR;&ENDMONTH;&ENDDAY;&ENDHOUR;00 24:00:00</cycledef>
+
+  <log>
+    <cyclestr>&LOGDIR;/logfiles2/workflow_@Y@m@d@H.log</cyclestr>
+  </log>
+
+
+<!--  ******************************************************************  -->
+<!--  *************************Python plotting**************************  -->
+
+<!-- Low mid high cloud -->
+
+<!--  <metatask>
+    <var name="dom">conus BN CE CO LA MA NC NE NW OV SC SE SF SP SW UM</var>
+    <task name="makeplots_comparenest_CLOUD_#dom#" cycledefs="conus" maxtries="2">
+
+    &PLOT_RESERVATION;
+    &PLOT_RESOURCES;
+    <cores>1</cores>
+      <command>&PYTHONDIR;/compare_nestsar/launchCLOUD</command>
+      <jobname><cyclestr>makeplots_comparenest_CLOUD_#dom#</cyclestr></jobname>
+      <join><cyclestr>&LOGDIR;/logfiles2/log.makeplotsCLOUD_#dom#.comparenest.@Y@m@d@H.out</cyclestr></join>
+
+      <envar>
+        <name>USER</name>
+        <value>&USER;</value>
+      </envar>
+      <envar>
+        <name>CDATE</name>
+        <value><cyclestr>@Y@m@d@H</cyclestr></value>
+      </envar>
+      <envar>
+        <name>cyc</name>
+        <value><cyclestr>@H</cyclestr></value>
+      </envar>
+      <envar>
+        <name>domain</name>
+        <value>#dom#</value>
+      </envar>
+
+      <dependency>
+        <and>
+          <datadep age="05:00"><cyclestr>&COMFV3;/fv3sar.@Y@m@d/@H/fv3sar.t@Hz.conus.f60.grib2</cyclestr></datadep>
+          <datadep age="05:00"><cyclestr>&COMFV3NEST;/fv3nest.@Y@m@d/@H/fv3nest.t@Hz.conus.f60.grib2</cyclestr></datadep>
+        </and>
+      </dependency>
+
+    </task>
+  </metatask> -->
+
+  <metatask>
+    <var name="dom">conus BN CE CO LA MA NC NE NW OV SC SE SF SP SW UM</var>
+    <task name="makeplots_compareDA_CLOUD_#dom#" cycledefs="conus" maxtries="2">
+
+    &PLOT_RESERVATION;
+    &PLOT_RESOURCES;
+    <cores>1</cores>
+      <command>&PYTHONDIR;/compare_da/launchCLOUD</command>
+      <jobname><cyclestr>makeplots_compareDA_CLOUD_#dom#</cyclestr></jobname>
+      <join><cyclestr>&LOGDIR;/logfiles2/log.makeplotsCLOUD_#dom#.compareDA.@Y@m@d@H.out</cyclestr></join>
+
+      <envar>
+        <name>USER</name>
+        <value>&USER;</value>
+      </envar>
+      <envar>
+        <name>CDATE</name>
+        <value><cyclestr>@Y@m@d@H</cyclestr></value>
+      </envar>
+      <envar>
+        <name>cyc</name>
+        <value><cyclestr>@H</cyclestr></value>
+      </envar>
+      <envar>
+        <name>domain</name>
+        <value>#dom#</value>
+      </envar>
+
+      <dependency>
+        <and>
+          <datadep age="05:00"><cyclestr>&COMFV3;/fv3sar.@Y@m@d/@H/fv3sar.t@Hz.conus.f60.grib2</cyclestr></datadep>
+          <datadep age="05:00"><cyclestr>&COMFV3DA;/fv3sar.@Y@m@d/@H/fv3sar.t@Hz.conus.f60.grib2</cyclestr></datadep>
+        </and>
+      </dependency>
+
+    </task>
+  </metatask>
+
+  <metatask>
+    <var name="dom">conus BN CE CO LA MA NC NE NW OV SC SE SF SP SW UM</var>
+    <task name="makeplots_comparenam_CLOUD_#dom#" cycledefs="conus" maxtries="2">
+
+    &PLOT_RESERVATION;
+    &PLOT_RESOURCES;
+    <cores>1</cores>
+      <command>&PYTHONDIR;/compare_nam/launchCLOUD</command>
+      <jobname><cyclestr>makeplots_comparenam_CLOUD_#dom#</cyclestr></jobname>
+      <join><cyclestr>&LOGDIR;/logfiles2/log.makeplotsCLOUD_#dom#.comparenam.@Y@m@d@H.out</cyclestr></join>
+
+      <envar>
+        <name>USER</name>
+        <value>&USER;</value>
+      </envar>
+      <envar>
+        <name>CDATE</name>
+        <value><cyclestr>@Y@m@d@H</cyclestr></value>
+      </envar>
+      <envar>
+        <name>cyc</name>
+        <value><cyclestr>@H</cyclestr></value>
+      </envar>
+      <envar>
+        <name>domain</name>
+        <value>#dom#</value>
+      </envar>
+
+      <dependency>
+        <and>
+          <datadep age="05:00"><cyclestr>&COMFV3;/fv3sar.@Y@m@d/@H/fv3sar.t@Hz.conus.f60.grib2</cyclestr></datadep>
+          <datadep age="05:00"><cyclestr>&COMNAM;/nam.@Y@m@d/nam.t@Hz.conusnest.hiresf60.tm00.grib2</cyclestr></datadep>
+        </and>
+      </dependency>
+
+    </task>
+  </metatask>
+
+
+<!-- Precipitation Type -->
+
+<!--  <metatask>
+    <var name="dom">conus BN CE CO LA MA NC NE NW OV SC SE SF SP SW UM</var>
+    <task name="makeplots_comparenest_PTYPE_#dom#" cycledefs="conus" maxtries="2">
+
+    &PLOT_RESERVATION;
+    &PLOT_RESOURCES;
+    <cores>1</cores>
+      <command>&PYTHONDIR;/compare_nestsar/launchPTYPE</command>
+      <jobname><cyclestr>makeplots_comparenest_PTYPE_#dom#</cyclestr></jobname>
+      <join><cyclestr>&LOGDIR;/logfiles2/log.makeplotsPTYPE_#dom#.comparenest.@Y@m@d@H.out</cyclestr></join>
+
+      <envar>
+        <name>USER</name>
+        <value>&USER;</value>
+      </envar>
+      <envar>
+        <name>CDATE</name>
+        <value><cyclestr>@Y@m@d@H</cyclestr></value>
+      </envar>
+      <envar>
+        <name>cyc</name>
+        <value><cyclestr>@H</cyclestr></value>
+      </envar>
+      <envar>
+        <name>domain</name>
+        <value>#dom#</value>
+      </envar>
+
+      <dependency>
+        <and>
+          <datadep age="05:00"><cyclestr>&COMFV3;/fv3sar.@Y@m@d/@H/fv3sar.t@Hz.conus.f60.grib2</cyclestr></datadep>
+          <datadep age="05:00"><cyclestr>&COMFV3NEST;/fv3nest.@Y@m@d/@H/fv3nest.t@Hz.conus.f60.grib2</cyclestr></datadep>
+        </and>
+      </dependency>
+
+    </task>
+  </metatask> -->
+
+  <metatask>
+    <var name="dom">conus BN CE CO LA MA NC NE NW OV SC SE SF SP SW UM</var>
+    <task name="makeplots_compareDA_PTYPE_#dom#" cycledefs="conus" maxtries="2">
+
+    &PLOT_RESERVATION;
+    &PLOT_RESOURCES;
+    <cores>1</cores>
+      <command>&PYTHONDIR;/compare_da/launchPTYPE</command>
+      <jobname><cyclestr>makeplots_compareDA_PTYPE_#dom#</cyclestr></jobname>
+      <join><cyclestr>&LOGDIR;/logfiles2/log.makeplotsPTYPE_#dom#.compareDA.@Y@m@d@H.out</cyclestr></join>
+
+      <envar>
+        <name>USER</name>
+        <value>&USER;</value>
+      </envar>
+      <envar>
+        <name>CDATE</name>
+        <value><cyclestr>@Y@m@d@H</cyclestr></value>
+      </envar>
+      <envar>
+        <name>cyc</name>
+        <value><cyclestr>@H</cyclestr></value>
+      </envar>
+      <envar>
+        <name>domain</name>
+        <value>#dom#</value>
+      </envar>
+
+      <dependency>
+        <and>
+          <datadep age="05:00"><cyclestr>&COMFV3;/fv3sar.@Y@m@d/@H/fv3sar.t@Hz.conus.f60.grib2</cyclestr></datadep>
+          <datadep age="05:00"><cyclestr>&COMFV3DA;/fv3sar.@Y@m@d/@H/fv3sar.t@Hz.conus.f60.grib2</cyclestr></datadep>
+        </and>
+      </dependency>
+
+    </task>
+  </metatask>
+
+  <metatask>
+    <var name="dom">conus BN CE CO LA MA NC NE NW OV SC SE SF SP SW UM</var>
+    <task name="makeplots_comparenam_PTYPE_#dom#" cycledefs="conus" maxtries="2">
+
+    &PLOT_RESERVATION;
+    &PLOT_RESOURCES;
+    <cores>1</cores>
+      <command>&PYTHONDIR;/compare_nam/launchPTYPE</command>
+      <jobname><cyclestr>makeplots_comparenam_PTYPE_#dom#</cyclestr></jobname>
+      <join><cyclestr>&LOGDIR;/logfiles2/log.makeplotsPTYPE_#dom#.comparenam.@Y@m@d@H.out</cyclestr></join>
+
+      <envar>
+        <name>USER</name>
+        <value>&USER;</value>
+      </envar>
+      <envar>
+        <name>CDATE</name>
+        <value><cyclestr>@Y@m@d@H</cyclestr></value>
+      </envar>
+      <envar>
+        <name>cyc</name>
+        <value><cyclestr>@H</cyclestr></value>
+      </envar>
+      <envar>
+        <name>domain</name>
+        <value>#dom#</value>
+      </envar>
+
+      <dependency>
+        <and>
+          <datadep age="05:00"><cyclestr>&COMFV3;/fv3sar.@Y@m@d/@H/fv3sar.t@Hz.conus.f60.grib2</cyclestr></datadep>
+          <datadep age="05:00"><cyclestr>&COMNAM;/nam.@Y@m@d/nam.t@Hz.conusnest.hiresf60.tm00.grib2</cyclestr></datadep>
+        </and>
+      </dependency>
+
+    </task>
+  </metatask>
+
+<!-- Total QPF for NAM Nest vs FV3SAR -->
+
+  <metatask>
+    <var name="dom">conus BN CE CO LA MA NC NE NW OV SC SE SF SP SW UM</var>
+    <task name="makeplots_comparenam_QPF_#dom#" cycledefs="conus" maxtries="2">
+
+    &PLOT_RESERVATION;
+    &PLOT_RESOURCES;
+    <cores>1</cores>
+      <command>&PYTHONDIR;/compare_nam/launchQPF</command>
+      <jobname><cyclestr>makeplots_comparenam_QPF_#dom#</cyclestr></jobname>
+      <join><cyclestr>&LOGDIR;/logfiles2/log.makeplotsQPF_#dom#.comparenam.@Y@m@d@H.out</cyclestr></join>
+
+      <envar>
+        <name>USER</name>
+        <value>&USER;</value>
+      </envar>
+      <envar>
+        <name>CDATE</name>
+        <value><cyclestr>@Y@m@d@H</cyclestr></value>
+      </envar>
+      <envar>
+        <name>cyc</name>
+        <value><cyclestr>@H</cyclestr></value>
+      </envar>
+      <envar>
+        <name>domain</name>
+        <value>#dom#</value>
+      </envar>
+
+      <dependency>
+        <and>
+          <datadep age="05:00"><cyclestr>&COMFV3;/fv3sar.@Y@m@d/@H/fv3sar.t@Hz.conus.f60.grib2</cyclestr></datadep>
+          <datadep age="05:00"><cyclestr>&COMNAM;/nam.@Y@m@d/nam.t@Hz.conusnest.hiresf60.tm00.grib2</cyclestr></datadep>
+        </and>
+      </dependency>
+
+    </task>
+  </metatask>
+
+
+<!-- Everything else! -->
+
+<!--  <metatask>
+    <var name="fhr">00 01 02 03 04 05 06 07 08 09 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35 36 37 38 39 40 41 42 43 44 45 46 47 48 49 50 51 52 53 54 55 56 57 58 59 60</var>
+    <task name="makeplots_comparenest_f#fhr#" cycledefs="conus" maxtries="3">
+    &PLOT_RESERVATION;
+    &PLOT_RESOURCES;
+    <nodes>1:ppn=16</nodes>
+      <command>&PYTHONDIR;/compare_nestsar/launchALL</command>
+      <jobname><cyclestr>makeplots_comparenest_f#fhr#</cyclestr></jobname>
+      <join><cyclestr>&LOGDIR;/logfiles2/log.makeplotsf#fhr#.comparenest.@Y@m@d@H.out</cyclestr></join>
+
+      <envar>
+        <name>USER</name>
+        <value>&USER;</value>
+      </envar>
+      <envar>
+        <name>CDATE</name>
+        <value><cyclestr>@Y@m@d@H</cyclestr></value>
+      </envar>
+      <envar>
+        <name>cyc</name>
+        <value><cyclestr>@H</cyclestr></value>
+      </envar>
+      <envar>
+        <name>fhr</name>
+        <value>#fhr#</value>
+      </envar>
+
+      <dependency>
+        <and>
+          <datadep age="05:00"><cyclestr>&COMFV3;/fv3sar.@Y@m@d/@H/fv3sar.t@Hz.conus.f#fhr#.grib2</cyclestr></datadep>
+          <datadep age="05:00"><cyclestr>&COMFV3NEST;/fv3nest.@Y@m@d/@H/fv3nest.t@Hz.conus.f#fhr#.grib2</cyclestr></datadep>
+        </and>
+      </dependency>
+
+    </task>
+  </metatask>
+
+  <metatask>
+    <var name="fhr">00 01 02 03 04 05 06 07 08 09 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35 36 37 38 39 40 41 42 43 44 45 46 47 48 49 50 51 52 53 54 55 56 57 58 59 60</var>
+    <task name="makeplots_comparenest2_f#fhr#" cycledefs="conus" maxtries="2">
+    &PLOT_RESERVATION;
+    &PLOT_RESOURCES;
+    <nodes>1:ppn=16</nodes>
+      <command>&PYTHONDIR;/compare_nestsar/launchALL2</command>
+      <jobname><cyclestr>makeplots_comparenest2_f#fhr#</cyclestr></jobname>
+      <join><cyclestr>&LOGDIR;/logfiles2/log.makeplotsf#fhr#.comparenest2.@Y@m@d@H.out</cyclestr></join>
+
+      <envar>
+        <name>USER</name>
+        <value>&USER;</value>
+      </envar>
+      <envar>
+        <name>CDATE</name>
+        <value><cyclestr>@Y@m@d@H</cyclestr></value>
+      </envar>
+      <envar>
+        <name>cyc</name>
+        <value><cyclestr>@H</cyclestr></value>
+      </envar>
+      <envar>
+        <name>fhr</name>
+        <value>#fhr#</value>
+      </envar>
+
+      <dependency>
+        <and>
+          <datadep age="05:00"><cyclestr>&COMFV3;/fv3sar.@Y@m@d/@H/fv3sar.t@Hz.conus.f#fhr#.grib2</cyclestr></datadep>
+          <datadep age="05:00"><cyclestr>&COMFV3NEST;/fv3nest.@Y@m@d/@H/fv3nest.t@Hz.conus.f#fhr#.grib2</cyclestr></datadep>
+        </and>
+      </dependency>
+
+    </task>
+  </metatask>
+
+  <metatask>
+    <var name="fhr">00 01 02 03 04 05 06 07 08 09 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35 36 37 38 39 40 41 42 43 44 45 46 47 48 49 50 51 52 53 54 55 56 57 58 59 60</var>
+    <task name="makeplots_comparenest3_f#fhr#" cycledefs="conus" maxtries="2">
+    &PLOT_RESERVATION;
+    &PLOT_RESOURCES;
+    <nodes>1:ppn=16</nodes>
+      <command>&PYTHONDIR;/compare_nestsar/launchALL3</command>
+      <jobname><cyclestr>makeplots_comparenest3_f#fhr#</cyclestr></jobname>
+      <join><cyclestr>&LOGDIR;/logfiles2/log.makeplotsf#fhr#.comparenest3.@Y@m@d@H.out</cyclestr></join>
+
+      <envar>
+        <name>USER</name>
+        <value>&USER;</value>
+      </envar>
+      <envar>
+        <name>CDATE</name>
+        <value><cyclestr>@Y@m@d@H</cyclestr></value>
+      </envar>
+      <envar>
+        <name>cyc</name>
+        <value><cyclestr>@H</cyclestr></value>
+      </envar>
+      <envar>
+        <name>fhr</name>
+        <value>#fhr#</value>
+      </envar>
+
+      <dependency>
+        <and>
+          <datadep age="05:00"><cyclestr>&COMFV3;/fv3sar.@Y@m@d/@H/fv3sar.t@Hz.conus.f#fhr#.grib2</cyclestr></datadep>
+          <datadep age="05:00"><cyclestr>&COMFV3NEST;/fv3nest.@Y@m@d/@H/fv3nest.t@Hz.conus.f#fhr#.grib2</cyclestr></datadep>
+        </and>
+      </dependency>
+
+    </task>
+  </metatask> -->
+
+
+  <metatask>
+    <var name="fhr">00 01 02 03 04 05 06 07 08 09 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35 36 37 38 39 40 41 42 43 44 45 46 47 48 49 50 51 52 53 54 55 56 57 58 59 60</var>
+    <task name="makeplots_compareDA_f#fhr#" cycledefs="conus" maxtries="3">
+    &PLOT_RESERVATION;
+    &PLOT_RESOURCES;
+    <nodes>1:ppn=16</nodes>
+      <command>&PYTHONDIR;/compare_da/launchALL</command>
+      <jobname><cyclestr>makeplots_compareDA_f#fhr#</cyclestr></jobname>
+      <join><cyclestr>&LOGDIR;/logfiles2/log.makeplotsf#fhr#.compareDA.@Y@m@d@H.out</cyclestr></join>
+
+      <envar>
+        <name>USER</name>
+        <value>&USER;</value>
+      </envar>
+      <envar>
+        <name>CDATE</name>
+        <value><cyclestr>@Y@m@d@H</cyclestr></value>
+      </envar>
+      <envar>
+        <name>cyc</name>
+        <value><cyclestr>@H</cyclestr></value>
+      </envar>
+      <envar>
+        <name>fhr</name>
+        <value>#fhr#</value>
+      </envar>
+
+      <dependency>
+        <and>
+          <datadep age="05:00"><cyclestr>&COMFV3;/fv3sar.@Y@m@d/@H/fv3sar.t@Hz.conus.f#fhr#.grib2</cyclestr></datadep>
+          <datadep age="05:00"><cyclestr>&COMFV3DA;/fv3sar.@Y@m@d/@H/fv3sar.t@Hz.conus.f#fhr#.grib2</cyclestr></datadep>
+        </and>
+      </dependency>
+
+    </task>
+  </metatask>
+
+
+  <metatask>
+    <var name="fhr">00 01 02 03 04 05 06 07 08 09 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35 36 37 38 39 40 41 42 43 44 45 46 47 48 49 50 51 52 53 54 55 56 57 58 59 60</var>
+    <task name="makeplots_compareDA2_f#fhr#" cycledefs="conus" maxtries="2">
+    &PLOT_RESERVATION;
+    &PLOT_RESOURCES;
+    <nodes>1:ppn=16</nodes>
+      <command>&PYTHONDIR;/compare_da/launchALL2</command>
+      <jobname><cyclestr>makeplots_compareDA2_f#fhr#</cyclestr></jobname>
+      <join><cyclestr>&LOGDIR;/logfiles2/log.makeplotsf#fhr#.compareDA2.@Y@m@d@H.out</cyclestr></join>
+
+      <envar>
+        <name>USER</name>
+        <value>&USER;</value>
+      </envar>
+      <envar>
+        <name>CDATE</name>
+        <value><cyclestr>@Y@m@d@H</cyclestr></value>
+      </envar>
+      <envar>
+        <name>cyc</name>
+        <value><cyclestr>@H</cyclestr></value>
+      </envar>
+      <envar>
+        <name>fhr</name>
+        <value>#fhr#</value>
+      </envar>
+
+      <dependency>
+        <and>
+          <datadep age="05:00"><cyclestr>&COMFV3;/fv3sar.@Y@m@d/@H/fv3sar.t@Hz.conus.f#fhr#.grib2</cyclestr></datadep>
+          <datadep age="05:00"><cyclestr>&COMFV3DA;/fv3sar.@Y@m@d/@H/fv3sar.t@Hz.conus.f#fhr#.grib2</cyclestr></datadep>
+        </and>
+      </dependency>
+
+    </task>
+  </metatask>
+
+  <metatask>
+    <var name="fhr">00 01 02 03 04 05 06 07 08 09 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35 36 37 38 39 40 41 42 43 44 45 46 47 48 49 50 51 52 53 54 55 56 57 58 59 60</var>
+    <task name="makeplots_compareDA3_f#fhr#" cycledefs="conus" maxtries="2">
+    &PLOT_RESERVATION;
+    &PLOT_RESOURCES;
+    <nodes>1:ppn=16</nodes>
+      <command>&PYTHONDIR;/compare_da/launchALL3</command>
+      <jobname><cyclestr>makeplots_compareDA3_f#fhr#</cyclestr></jobname>
+      <join><cyclestr>&LOGDIR;/logfiles2/log.makeplotsf#fhr#.compareDA3.@Y@m@d@H.out</cyclestr></join>
+
+      <envar>
+        <name>USER</name>
+        <value>&USER;</value>
+      </envar>
+      <envar>
+        <name>CDATE</name>
+        <value><cyclestr>@Y@m@d@H</cyclestr></value>
+      </envar>
+      <envar>
+        <name>cyc</name>
+        <value><cyclestr>@H</cyclestr></value>
+      </envar>
+      <envar>
+        <name>fhr</name>
+        <value>#fhr#</value>
+      </envar>
+
+      <dependency>
+        <and>
+          <datadep age="05:00"><cyclestr>&COMFV3;/fv3sar.@Y@m@d/@H/fv3sar.t@Hz.conus.f#fhr#.grib2</cyclestr></datadep>
+          <datadep age="05:00"><cyclestr>&COMFV3DA;/fv3sar.@Y@m@d/@H/fv3sar.t@Hz.conus.f#fhr#.grib2</cyclestr></datadep>
+        </and>
+      </dependency>
+
+    </task>
+  </metatask>
+
+  <metatask>
+    <var name="fhr">00 01 02 03 04 05 06 07 08 09 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35 36 37 38 39 40 41 42 43 44 45 46 47 48 49 50 51 52 53 54 55 56 57 58 59 60</var>
+    <task name="makeplots_comparenam_f#fhr#" cycledefs="conus" maxtries="2">
+    &PLOT_RESERVATION;
+    &PLOT_RESOURCES;
+    <nodes>1:ppn=16</nodes>
+      <command>&PYTHONDIR;/compare_nam/launchALL</command>
+      <jobname><cyclestr>makeplots_comparenam_f#fhr#</cyclestr></jobname>
+      <join><cyclestr>&LOGDIR;/logfiles2/log.makeplotsf#fhr#.comparenam.@Y@m@d@H.out</cyclestr></join>
+
+      <envar>
+        <name>USER</name>
+        <value>&USER;</value>
+      </envar>
+      <envar>
+        <name>CDATE</name>
+        <value><cyclestr>@Y@m@d@H</cyclestr></value>
+      </envar>
+      <envar>
+        <name>cyc</name>
+        <value><cyclestr>@H</cyclestr></value>
+      </envar>
+      <envar>
+        <name>fhr</name>
+        <value>#fhr#</value>
+      </envar>
+
+      <dependency>
+        <and>
+          <datadep age="05:00"><cyclestr>&COMFV3;/fv3sar.@Y@m@d/@H/fv3sar.t@Hz.conus.f#fhr#.grib2</cyclestr></datadep>
+          <datadep age="05:00"><cyclestr>&COMNAM;/nam.@Y@m@d/nam.t@Hz.conusnest.hiresf#fhr#.tm00.grib2</cyclestr></datadep>
+        </and>
+      </dependency>
+
+    </task>
+  </metatask>
+
+  <metatask>
+    <var name="fhr">00 01 02 03 04 05 06 07 08 09 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35 36 37 38 39 40 41 42 43 44 45 46 47 48 49 50 51 52 53 54 55 56 57 58 59 60</var>
+    <task name="makeplots_comparenam2_f#fhr#" cycledefs="conus" maxtries="2">
+    &PLOT_RESERVATION;
+    &PLOT_RESOURCES;
+    <nodes>1:ppn=16</nodes>
+      <command>&PYTHONDIR;/compare_nam/launchALL2</command>
+      <jobname><cyclestr>makeplots_comparenam2_f#fhr#</cyclestr></jobname>
+      <join><cyclestr>&LOGDIR;/logfiles2/log.makeplotsf#fhr#.comparenam2.@Y@m@d@H.out</cyclestr></join>
+
+      <envar>
+        <name>USER</name>
+        <value>&USER;</value>
+      </envar>
+      <envar>
+        <name>CDATE</name>
+        <value><cyclestr>@Y@m@d@H</cyclestr></value>
+      </envar>
+      <envar>
+        <name>cyc</name>
+        <value><cyclestr>@H</cyclestr></value>
+      </envar>
+      <envar>
+        <name>fhr</name>
+        <value>#fhr#</value>
+      </envar>
+
+      <dependency>
+        <and>
+          <datadep age="05:00"><cyclestr>&COMFV3;/fv3sar.@Y@m@d/@H/fv3sar.t@Hz.conus.f#fhr#.grib2</cyclestr></datadep>
+          <datadep age="05:00"><cyclestr>&COMNAM;/nam.@Y@m@d/nam.t@Hz.conusnest.hiresf#fhr#.tm00.grib2</cyclestr></datadep>
+        </and>
+      </dependency>
+
+    </task>
+  </metatask>
+
+  <metatask>
+    <var name="fhr">00 01 02 03 04 05 06 07 08 09 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35 36 37 38 39 40 41 42 43 44 45 46 47 48 49 50 51 52 53 54 55 56 57 58 59 60</var>
+    <task name="makeplots_comparenam3_f#fhr#" cycledefs="conus" maxtries="2">
+    &PLOT_RESERVATION;
+    &PLOT_RESOURCES;
+    <nodes>1:ppn=16</nodes>
+      <command>&PYTHONDIR;/compare_nam/launchALL3</command>
+      <jobname><cyclestr>makeplots_comparenam3_f#fhr#</cyclestr></jobname>
+      <join><cyclestr>&LOGDIR;/logfiles2/log.makeplotsf#fhr#.comparenam3.@Y@m@d@H.out</cyclestr></join>
+
+      <envar>
+        <name>USER</name>
+        <value>&USER;</value>
+      </envar>
+      <envar>
+        <name>CDATE</name>
+        <value><cyclestr>@Y@m@d@H</cyclestr></value>
+      </envar>
+      <envar>
+        <name>cyc</name>
+        <value><cyclestr>@H</cyclestr></value>
+      </envar>
+      <envar>
+        <name>fhr</name>
+        <value>#fhr#</value>
+      </envar>
+
+      <dependency>
+        <and>
+          <datadep age="05:00"><cyclestr>&COMFV3;/fv3sar.@Y@m@d/@H/fv3sar.t@Hz.conus.f#fhr#.grib2</cyclestr></datadep>
+          <datadep age="05:00"><cyclestr>&COMNAM;/nam.@Y@m@d/nam.t@Hz.conusnest.hiresf#fhr#.tm00.grib2</cyclestr></datadep>
+        </and>
+      </dependency>
+
+    </task>
+  </metatask>
+
+
+<!--  ****************************************************************  -->
+<!--  ************************** Transfer Jobs ***********************  -->
+ 
+<!--  <task name="transfer_nest" cycledefs="conus" maxtries="3">
+  &TRANS_RESERVATION;
+  &TRANS_RESOURCES;
+    <command>bash &PYTHONDIR;/transfer_nest.ksh</command>
+    <jobname><cyclestr>transfer_nest</cyclestr></jobname>
+    <join><cyclestr>&LOGDIR;/logfiles2/log.transfer.nest.@Y@m@d@H.out</cyclestr></join>
+
+    <envar>
+      <name>USER</name>
+      <value>&USER;</value>
+    </envar>
+    <envar>
+      <name>CDATE</name>
+      <value><cyclestr>@Y@m@d@H</cyclestr></value>
+    </envar>
+    <envar>
+      <name>cyc</name>
+      <value><cyclestr>@H</cyclestr></value>
+    </envar>
+
+    <dependency>
+      <and>
+        <taskdep task="makeplots_comparenest_PTYPE_conus"/>
+        <taskdep task="makeplots_comparenest_CLOUD_conus"/>
+        <taskdep task="makeplots_comparenest_f60"/>
+        <taskdep task="makeplots_comparenest2_f60"/>
+        <taskdep task="makeplots_comparenest3_f60"/>
+      </and>
+    </dependency>
+  </task> -->
+
+
+  <task name="transfer_compareDA" cycledefs="conus" maxtries="3">
+  &TRANS_RESERVATION;
+  &TRANS_RESOURCES;
+    <command>bash &PYTHONDIR;/transfer_compareDA.ksh</command>
+    <jobname><cyclestr>transfer_compareDA</cyclestr></jobname>
+    <join><cyclestr>&LOGDIR;/logfiles2/log.transfer.compareDA.@Y@m@d@H.out</cyclestr></join>
+
+    <envar>
+      <name>USER</name>
+      <value>&USER;</value>
+    </envar>
+    <envar>
+      <name>CDATE</name>
+      <value><cyclestr>@Y@m@d@H</cyclestr></value>
+    </envar>
+    <envar>
+      <name>cyc</name>
+      <value><cyclestr>@H</cyclestr></value>
+    </envar>
+
+    <dependency>
+      <and>
+        <taskdep task="makeplots_compareDA_PTYPE_conus"/>
+        <taskdep task="makeplots_compareDA_CLOUD_conus"/>
+        <taskdep task="makeplots_compareDA_f60"/>
+        <taskdep task="makeplots_compareDA2_f60"/>
+        <taskdep task="makeplots_compareDA3_f60"/>
+      </and>
+    </dependency>
+  </task>
+
+  <task name="transfer_nam" cycledefs="conus" maxtries="3">
+  &TRANS_RESERVATION;
+  &TRANS_RESOURCES;
+    <command>bash &PYTHONDIR;/transfer_nam.ksh</command>
+    <jobname><cyclestr>transfer_nam</cyclestr></jobname>
+    <join><cyclestr>&LOGDIR;/logfiles2/log.transfer.nam.@Y@m@d@H.out</cyclestr></join>
+
+    <envar>
+      <name>USER</name>
+      <value>&USER;</value>
+    </envar>
+    <envar>
+      <name>CDATE</name>
+      <value><cyclestr>@Y@m@d@H</cyclestr></value>
+    </envar>
+    <envar>
+      <name>cyc</name>
+      <value><cyclestr>@H</cyclestr></value>
+    </envar>
+
+    <dependency>
+      <and>
+        <taskdep task="makeplots_comparenam_PTYPE_conus"/>
+        <taskdep task="makeplots_comparenam_QPF_conus"/>
+        <taskdep task="makeplots_comparenam_CLOUD_conus"/>
+        <taskdep task="makeplots_comparenam_f60"/>
+        <taskdep task="makeplots_comparenam2_f60"/>
+        <taskdep task="makeplots_comparenam3_f60"/>
+      </and>
+    </dependency>
+  </task>
+
+
+
+</workflow>

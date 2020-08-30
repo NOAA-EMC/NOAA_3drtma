@@ -1,0 +1,70 @@
+#!/bin/ksh
+set -x
+
+echo 'into launchSNDS'
+. /usrx/local/prod/lmod/lmod/init/sh
+source /u/${USER}/.bashrc 
+
+export HISTM=15
+export LENGTH=0
+
+export CYCLE=${YMD}${cyc}${subcyc}
+
+export DATA_DIR=/gpfs/dell1/ptmp/${USER}/rtma3dda/${YMD}/snds.${cyc}${subcyc}
+export PARM_DIR=${PYTHONDIR}/parm
+export snddir=${DATA_DIR}/snds
+
+if [ ! -d ${DATA_DIR} ] ; then
+mkdir -p ${DATA_DIR}
+fi
+
+if [ ! -d ${snddir} ] ; then
+mkdir -p $snddir
+fi
+
+#-- Copy parameter files and executables needed for bufr processing
+
+cp ${PARM_DIR}/nam_staids.parm $snddir
+cp ${PARM_DIR}/nam_bufr.tbl $snddir
+cp ${PARM_DIR}/sndp.parm $snddir
+cp ${PARM_DIR}/sneta.prm $snddir
+cp ${PARM_DIR}/sfeta.prm $snddir
+
+let etop=PTOP/100
+cat ${PARM_DIR}/modtop.parm | sed s:PTOP:$etop: > ${snddir}/modtop.parm
+
+staids_exe=${PYTHONDIR}/exec/staids_nems.x
+if [ ! -x $staids_exe ]; then
+   echo Cannot find $staids_exe ... exit
+   exit
+fi
+cp $staids_exe $snddir
+
+bufr_exe=${PYTHONDIR}/exec/nam_post0
+if [ ! -x $bufr_exe ]; then
+   echo Cannot find $bufr_exe ... exit
+   exit
+fi
+cp $bufr_exe ${snddir}/wrfbufr_allinone.x
+
+
+cat ${PYTHONDIR}/templates/bufr_hr | sed s:EEE:$CYCLE: | sed s:FFF:$HISTM: | sed s:GGG:${cyc}${subcyc}: | sed s:HHH:0: > $snddir/bufr_hr
+
+#-- Make sure the proper sounding post executable is available, which
+#   depends on the number of vertical levels used in the model run.
+
+sndp_exe=${PYTHONDIR}/exec/nam_sndp
+
+if [ ! -x $sndp_exe ]; then
+   echo Cannot find $sndp_exe for running sounding post with $nz levels ... exit
+   exit
+fi
+
+cp $sndp_exe ${snddir}/sndp.exe
+
+
+${PYTHONDIR}/compare_da/run_bufr.ksh $DATA_DIR $LENGTH $HISTM 
+
+exit
+
+

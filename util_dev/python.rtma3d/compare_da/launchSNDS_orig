@@ -1,0 +1,31 @@
+#!/bin/ksh
+set -x
+
+echo 'into launchSNDS'
+. /usrx/local/prod/lmod/lmod/init/sh
+source /u/${USER}/.bashrc 
+
+export DATA=/gpfs/dell1/ptmp/${USER}/rtma3dda/${YMD}/snds.${cyc}${subcyc}
+export COMOUT=/gpfs/dell1/ptmp/${USER}/rtma3dda/${YMD}/comout.${cyc}${subcyc}
+export COMAWP=/gpfs/dell1/ptmp/${USER}/rtma3dda/${YMD}/comawp.${cyc}${subcyc}
+
+if [ ! -d ${DATA} ] ; then
+mkdir -p ${DATA}
+fi
+
+if [ ! -d ${COMOUT} ] ; then
+mkdir -p ${COMOUT}
+fi
+
+if [ ! -d ${COMAWP} ] ; then
+mkdir -p ${COMAWP}
+fi
+
+
+cd ${DATA}
+
+${PYTHONDIR}/compare_da/exrtma3d_postsnd.sh
+
+exit
+
+
