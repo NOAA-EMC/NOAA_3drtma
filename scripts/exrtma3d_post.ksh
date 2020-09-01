@@ -110,7 +110,7 @@ cd ${workdir}
 export XLFRTEOPTS="unit_vars=yes"
 
 if [ "${MODEL}" == "RAP" ]; then
-  export CORE=RAPR
+  export CORE=RAPRRTMA
 elif [ "${MODEL}" == "WRF-RR NMM" ]; then
   export CORE=NMM
 fi
