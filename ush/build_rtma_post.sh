@@ -97,6 +97,8 @@ fi
 
 USH_DIR=${TOP_RTMA}/ush
 MODULEFILES_DIR=${TOP_RTMA}/modulefiles
+PARM_DIR=${TOP_RTMA}/parm/upp
+
 
 cd $TOP_RTMA
 EXEC=${TOP_RTMA}/exec
@@ -115,7 +117,6 @@ fi
 if [ ! -d ${TOPSORC_POST}/exec ]; then
   mkdir -p ${TOPSORC_POST}/exec
 fi
-
 #
 #--- detecting the existence of the directory of POST source package
 #
@@ -152,6 +153,18 @@ fi
 
 modules_dir=${MODULEFILES_DIR}/${target}/build
 modules_fname=modulefile.build.post.${target}
+
+###################
+#Adding minmax function
+###################
+
+cp $PARM_DIR/pkind.f ${TOPSORC_POST}/sorc/ncep_post.fd
+cp $PARM_DIR/pmazmin.f ${TOPSORC_POST}/sorc/ncep_post.fd
+cp $PARM_DIR/makefile_module ${TOPSORC_POST}/sorc/ncep_post.fd
+
+chmod 755 ${TOPSORC_POST}/sorc/ncep_post.fd/makefile_module
+chmod 755 ${TOPSORC_POST}/sorc/ncep_post.fd/pmazmin.f
+chmod 755 ${TOPSORC_POST}/sorc/ncep_post.fd/pkind.f
 
 #==================#
 # compiling post
