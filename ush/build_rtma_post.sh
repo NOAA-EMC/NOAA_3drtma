@@ -153,6 +153,18 @@ fi
 modules_dir=${MODULEFILES_DIR}/${target}/build
 modules_fname=modulefile.build.post.${target}
 
+###################
+#Adding minmax function
+###################
+
+cp $PARM_DIR/pkind.f ${TOPSORC_POST}/sorc/ncep_post.fd
+cp $PARM_DIR/pmazmin.f ${TOPSORC_POST}/sorc/ncep_post.fd
+cp $PARM_DIR/makefile_module ${TOPSORC_POST}/sorc/ncep_post.fd
+
+chmod 755 ${TOPSORC_POST}/sorc/ncep_post.fd/makefile_module
+chmod 755 ${TOPSORC_POST}/sorc/ncep_post.fd/pmazmin.f
+chmod 755 ${TOPSORC_POST}/sorc/ncep_post.fd/pkind.f
+
 #==================#
 # compiling post
 echo " ====>  compiling POST under building directory: ${BUILD_POST} "
