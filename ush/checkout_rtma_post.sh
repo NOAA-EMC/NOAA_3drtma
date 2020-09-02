@@ -111,9 +111,9 @@ if [ -d ${DIRNAME_POST} ] ; then
 fi
 
 echo " ====> git clone gerrit:EMC_post  ./${DIRNAME_POST} "
-git clone gerrit:GSD_UPP  ./${DIRNAME_POST}
+git clone https://github.com/NOAA-EMC/EMC_post  ./${DIRNAME_POST}
 cd ./${DIRNAME_POST}
-scp -p gerrit:hooks/commit-msg  .git/hooks
+#scp -p .git/hooks/commit-msg  .git/hooks
 
 echo " check out the source branch --> ${branch_post_source}"
 if [ ${branch_post_source} = "master" ] ; then

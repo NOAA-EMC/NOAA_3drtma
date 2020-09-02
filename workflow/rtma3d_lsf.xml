@@ -1,0 +1,977 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE workflow [
+
+<!-- Key variables -->
+<!-- date/time of cases or cycles -->
+<!ENTITY startCDATE     "201907121400">
+<!ENTITY endCDATE       "201907121400">
+<!ENTITY realtime       "T">
+<!ENTITY NET		"rtma3d">
+<!ENTITY RUN		"rtma3d">
+<!ENTITY envir		"lsf">
+<!---<!ENTITY RUN_ENVIR	"dev_shared"> -->
+<!ENTITY CAP_NET	"RTMA3D">
+<!ENTITY CAP_RUN	"RTMA3D">
+<!ENTITY CAP_ENVIR	"LSF">
+<!--<!ENTITY CAP_RUN_ENVIR	""> -->
+<!ENTITY model		"&RUN;">
+<!ENTITY HRRRDAS_BEC     "0">
+
+<!ENTITY MACHINE	"dell">
+<!ENTITY machine	"&MACHINE;">
+
+<!ENTITY SCHEDULER      "LSF">
+
+<!-- Variables Defined by absolute paths -->
+
+<!ENTITY ptmp_base	"/gpfs/dell3/stmp/Edward.Colon/rtma3d_wrkdir_realtime">
+<!ENTITY COMINRAP       "/gpfs/dell2/emc/obsproc/noscrub/Jeff.Whiting/save/dev/rtma/3drtma/com3d/rtma/prod">
+<!ENTITY COMINHRRR      "/gpfs/hps/nco/ops/com/hrrr/prod">
+<!ENTITY COMINRADAR      "/gpfs/dell1/nco/ops/dcom/prod/ldmdata/obs/upperair/mrms/conus">
+<!ENTITY GESINHRRR      "/gpfs/dell1/ptmp/Annette.Gibbs/com/hrrr/prod">
+<!ENTITY COMINHRRRDAS   "/gpfs/hps/nco/ops/nwges/para/hrrr/hrrrdasges">
+<!ENTITY COMINGDAS      "/gpfs/dell1/nco/ops/com/gfs/prod">
+<!ENTITY NWROOT		"/gpfs/dell3/ptmp/Edward.Colon/NOAA_3drtma">
+
+<!ENTITY OBS_DIR	"/scratch4/NCEPDEV/fv3-cam/save/Gang.Zhao/Data/GSD_GSI_Case/obs">
+<!ENTITY HRRR_DIR	"/scratch4/NCEPDEV/fv3-cam/save/Gang.Zhao/Data/GSD_GSI_Case/fgs">
+
+<!--  -->
+
+<!ENTITY DATAROOT	"&ptmp_base;/data">
+<!ENTITY COMROOT	"&ptmp_base;/com2">
+<!ENTITY DCOMROOT	"&ptmp_base;/dcom">
+<!ENTITY GESROOT	"&ptmp_base;/nwges2/&NET;">
+
+<!ENTITY HOMErtma3d	"&NWROOT;">
+<!ENTITY LOG_DIR	"/gpfs/dell3/stmp/Edward.Colon/logs">
+<!ENTITY JJOB_DIR	"&HOMErtma3d;/jobs">
+<!ENTITY SCRIPT_DIR	"&HOMErtma3d;/scripts">
+<!ENTITY USHrtma3d	"&HOMErtma3d;/ush">
+<!ENTITY UTILrtma3d	"&HOMErtma3d;/util">
+<!ENTITY UTILrtma3d_dev	"&HOMErtma3d;/util_dev">
+<!ENTITY MODULEFILES	"&HOMErtma3d;/modulefiles">
+<!ENTITY EXECrtma3d	"/gpfs/dell3/ptmp/Edward.Colon/NOAA_3drtma/exec">
+<!ENTITY PARMrtma3d	"/gpfs/dell3/ptmp/Edward.Colon/NOAA_3drtma/parm">
+<!ENTITY FIXrtma3d	"/gpfs/dell3/ptmp/Edward.Colon/NOAA_3drtma/fix">
+
+<!-- Specific Definition for static data -->
+<!ENTITY FIXcrtm        "/gpfs/dell3/ptmp/Edward.Colon/NOAA_3drtma/fix/crtm">
+<!ENTITY FIXgsi         "/gpfs/dell3/ptmp/Edward.Colon/NOAA_3drtma/fix/gsi">
+<!ENTITY FIXwps         "/gpfs/dell3/ptmp/Edward.Colon/NOAA_3drtma/fix/wps">
+<!ENTITY FIXwrf         "/gpfs/dell3/ptmp/Edward.Colon/NOAA_3drtma/fix/wrf">
+<!ENTITY OBS_USELIST    "/gpfs/dell3/ptmp/Edward.Colon/NOAA_3drtma/fix/obsuselist">
+<!ENTITY AIRCRAFT_REJECT        "/gpfs/dell3/ptmp/Edward.Colon/NOAA_3drtma/fix/obsuselist/amdar_reject_lists">
+<!ENTITY SFCOBS_USELIST         "/gpfs/dell3/ptmp/Edward.Colon/NOAA_3drtma/fix/obsuselist/mesonet_uselists">
+<!ENTITY SFCOBS_PROVIDER        "/gpfs/dell3/ptmp/Edward.Colon/NOAA_3drtma/fix/obsuselist/sfcobs_provider">
+<!ENTITY PARMwrf        "/gpfs/dell3/ptmp/Edward.Colon/NOAA_3drtma/parm/wrf">
+<!ENTITY PARMupp        "/gpfs/dell3/ptmp/Edward.Colon/NOAA_3drtma/parm/upp">
+<!ENTITY PARMgsi        "/gpfs/dell3/ptmp/Edward.Colon/NOAA_3drtma/parm/gsi">
+<!ENTITY PARMverf       "/gpfs/dell3/ptmp/Edward.Colon/NOAA_3drtma/parm/verif">
+
+<!ENTITY LOG_WRKFLW	"&LOG_DIR;">
+<!ENTITY LOG_JJOB	"&LOG_DIR;/jlogfiles">
+<!ENTITY LOG_SCHDLR	"&LOG_DIR;">
+<!ENTITY LOG_PGMOUT     "&LOG_DIR;/pgmout">
+<!ENTITY jlogfile       "&LOG_JJOB;/jlogfile_lsf.@Y@m@d@H">
+
+<!-- definition of name of the top running directory for all tasks -->
+<!ENTITY DATA_RUNDIR    "&DATAROOT;/&envir;/&RUN;.@Y@m@d@H@M">
+<!--               names of the running directory for each task -->
+<!-- Note: -->
+<!--      these directories are just links pointing to real running directories -->
+<!ENTITY DATA_GSIANL    "&DATA_RUNDIR;/gsiprd">
+<!ENTITY DATA_OBSPRD    "&DATA_RUNDIR;/obsprd">
+<!ENTITY DATA_FGSPRD    "&DATA_RUNDIR;/fgsprd">
+<!ENTITY DATA_POST      "&DATA_RUNDIR;/postprd">
+<!ENTITY DATA_POST4FGS  "&DATA_RUNDIR;/postprd4fgs">
+<!ENTITY DATA_OBSPREP_LGHTN    "&DATA_RUNDIR;/obsprep_lghtn">
+<!ENTITY DATA_OBSPREP_RADAR    "&DATA_RUNDIR;/obsprep_radar">
+<!ENTITY DATA_OBSPREP_CLOUD    "&DATA_RUNDIR;/obsprep_cloud">
+<!ENTITY hpsspath0      "/NCEPDEV/emc-meso/5year/Edward.Colon/lsf_rtma3d">
+<!ENTITY hpsspath1      "/NCEPPROD/hpssprod/runhistory">
+<!ENTITY hpsspath1_1yr  "/NCEPPROD/1year/hpssprod/runhistory">
+<!ENTITY hpsspath1_gsd  "/BMC/fdr/Permanent">
+<!ENTITY hpsspath1_AGibbs  "/NCEPDEV/emc-meso/1year/Annette.Gibbs">
+
+<!ENTITY FGS_OPT        "1">
+
+<!-- for obs pre-processing -->
+<!ENTITY obsprep_radar  "1">
+<!ENTITY obsprep_lghtn  "1">
+<!ENTITY obsprep_cloud  "1">
+
+<!-- Variables used in GSD scripts -->
+<!ENTITY HOMEBASE_DIR	"&NWROOT;">
+<!ENTITY DATABASE_DIR	"&ptmp_base;">
+
+
+<!-- for workflow -->
+
+<!ENTITY maxtries	"7">
+<!ENTITY KEEPDATA	"YES">
+<!ENTITY SENDCOM	"YES">
+
+<!-- for various observations used in RTMA3D -->
+
+<!-- ex-shell and J-job script name -->
+<!ENTITY JJOB_OBSPREP_RADAR    "&JJOB_DIR;/J&CAP_RUN;_OBSPREP_RADAR">
+<!ENTITY exSCR_OBSPREP_RADAR   "&SCRIPT_DIR;/ex&RUN;_obsprep_radar.ksh">
+<!ENTITY exefile_name_mosaic   "">
+<!ENTITY JJOB_OBSPREP_LGHTN    "&JJOB_DIR;/J&CAP_RUN;_OBSPREP_LGHTN">
+<!ENTITY exSCR_OBSPREP_LGHTN   "&SCRIPT_DIR;/ex&RUN;_obsprep_lghtn.ksh">
+<!ENTITY exefile_name_lightning "rtma3d_process_lightning">
+<!ENTITY JJOB_OBSPREP_CLOUD    "&JJOB_DIR;/J&CAP_RUN;_OBSPREP_CLOUD">
+<!ENTITY exSCR_OBSPREP_CLOUD   "&SCRIPT_DIR;/ex&RUN;_obsprep_cloud.ksh">
+<!ENTITY exefile_name_cloud    "rtma3d_process_cloud">
+<!ENTITY JJOB_PREPOBS    "&JJOB_DIR;/J&CAP_RUN;_PREPOBS">
+<!ENTITY exSCR_PREPOBS   "&SCRIPT_DIR;/ex&RUN;_prepobs.ksh">
+<!ENTITY JJOB_PREPFGS    "&JJOB_DIR;/J&CAP_RUN;_PREPFGS">
+<!ENTITY exSCR_PREPFGS   "&SCRIPT_DIR;/ex&RUN;_prepfgs.ksh">
+<!ENTITY JJOB_GSIANL	 "&JJOB_DIR;/J&CAP_RUN;_GSIANL">
+<!ENTITY exSCR_GSIANL	 "&SCRIPT_DIR;/ex&RUN;_gsianl.ksh">
+<!ENTITY exefile_name_gsi      "rtma3d_gsi">
+<!ENTITY JJOB_UPDATEVARS     "&JJOB_DIR;/J&CAP_RUN;_UPDATEVARS">
+<!ENTITY exSCR_UPDATEVARS    "&SCRIPT_DIR;/ex&RUN;_updatevars.ksh">
+<!ENTITY exefile_name_updatevars_wrf  "rtma3d_updatevars_wrf">
+<!ENTITY exefile_name_updatevars_ncfields  "rtma3d_updatevars_ncfields">
+<!ENTITY exefile_name_updatevars_ndown  "rtma3d_updatevars_ndown">
+
+<!ENTITY JJOB_POST  	 "&JJOB_DIR;/J&CAP_RUN;_POST">
+<!ENTITY exSCR_POST      "&SCRIPT_DIR;/ex&RUN;_post.ksh">
+<!ENTITY exefile_name_post     "rtma3d_wrfpost">
+<!ENTITY JJOB_POST4FGS   "&JJOB_DIR;/J&CAP_RUN;_POST4FGS">
+<!ENTITY exSCR_POST4FGS  "&SCRIPT_DIR;/ex&RUN;_post4fgs.ksh">
+
+
+<!-- Resources -->
+
+<!ENTITY ACCOUNT         "RTMA-T2O">
+<!ENTITY QUEUE           "dev">
+<!ENTITY QUEUE_DBG       "debug">
+<!ENTITY QUEUE_SVC       "dev_transfer">
+<!ENTITY QUEUE_SHARED    "dev_shared">
+
+<!ENTITY PARTITION       "">
+<!ENTITY PARTITION_DA    "">
+<!ENTITY PARTITION_SVC   "">
+
+<!ENTITY time_sig  "@Y@m@d@H">
+<!ENTITY time_int  "1hr">
+<!ENTITY time_int_ex "01:00:00">
+
+<!ENTITY OBSPREP_RADAR_PROC "17">
+<!ENTITY RADAR_THREADS "1">
+<!ENTITY RADAR_OMP_STACKSIZE "512M">
+<!ENTITY OBSPREP_RADAR_RESOURCES '<nodes>2:ppn=&OBSPREP_RADAR_PROC;</nodes><walltime>00:05:00</walltime>'>
+<!ENTITY OBSPREP_RADAR_RESERVATION '<native>-R rusage[mem=3300] -R affinity[core]</native><queue>&QUEUE;</queue><account>&ACCOUNT;</account>'>
+
+<!ENTITY OBSPREP_LGHTN_PROC "1">
+<!ENTITY OBSPREP_LGHTN_RESOURCES '<cores>&OBSPREP_LGHTN_PROC;</cores><walltime>00:05:00</walltime>'>
+<!ENTITY OBSPREP_LGHTN_RESERVATION '<native>-R rusage[mem=2000] -R affinity[core]</native><queue>&QUEUE_SHARED;</queue><account>&ACCOUNT;</account>'>
+
+<!ENTITY OBSPREP_CLOUD_PROC "1">
+<!ENTITY OBSPREP_CLOUD_RESOURCES '<cores>&OBSPREP_CLOUD_PROC;</cores><walltime>00:05:00</walltime>'>
+<!ENTITY OBSPREP_CLOUD_RESERVATION '<native>-R rusage[mem=2000] -R affinity[core]</native><queue>&QUEUE_SHARED;</queue><account>&ACCOUNT;</account>'>
+
+<!ENTITY PREPOBS_PROC "1">
+<!ENTITY PREPOBS_RESOURCES '<cores>&PREPOBS_PROC;</cores><walltime>00:05:00</walltime>'>
+<!ENTITY PREPOBS_RESERVATION '<native>-R rusage[mem=2000] -R affinity[core]</native><queue>&QUEUE_SHARED;</queue><account>&ACCOUNT;</account>'>
+
+<!ENTITY PREPFGS_PROC "1">
+<!ENTITY PREPFGS_RESOURCES '<cores>&PREPFGS_PROC;</cores><walltime>00:05:00</walltime>'>
+<!ENTITY PREPFGS_RESERVATION '<native>-R rusage[mem=2000] -R affinity[core]</native><queue>&QUEUE_SHARED;</queue><account>&ACCOUNT;</account>'>
+
+<!ENTITY GSI_PROC "14">
+<!ENTITY GSI_THREADS "1">
+<!ENTITY GSI_OMP_STACKSIZE "512M">
+<!ENTITY GSI_RESOURCES '<nodes>21:ppn=&GSI_PROC;</nodes><walltime>00:30:00</walltime>'> 
+<!ENTITY GSI_RESERVATION '<native>-R rusage[mem=3300] -R affinity[core]</native><queue>&QUEUE;</queue><account>&ACCOUNT;</account>'>
+
+<!ENTITY GSI_START_TIME "00:40:00">
+<!ENTITY GSI_DEADLINE   "01:30:00">
+<!ENTITY START_TIME_RADAR "00:10:00">
+<!ENTITY GSI_WALL_LIMIT 
+   '<deadline><cyclestr offset="&GSI_DEADLINE;">@Y@m@d@H@M</cyclestr></deadline>'>
+
+<!ENTITY UPDATEVARS_PROC "14">
+<!ENTITY UPDATEVARS_THREADS "1">
+<!ENTITY UPDATEVARS_OMP_STACKSIZE "512M">
+<!ENTITY UPDATEVARS_RESOURCES '<nodes>10:ppn=&UPDATEVARS_PROC;</nodes><walltime>00:05:00</walltime>'> 
+<!ENTITY UPDATEVARS_RESERVATION '<native>-R rusage[mem=3300] -R affinity[core]</native><queue>&QUEUE;</queue><account>&ACCOUNT;</account>'>
+<!ENTITY FCST_LENGTH "20"> <!--20 secconds -->
+
+<!ENTITY POST_PROC "14">
+<!ENTITY POST_THREADS "1">
+<!ENTITY POST_OMP_STACKSIZE "512MB">
+<!ENTITY POST_RESOURCES '<nodes>2:ppn=&POST_PROC;</nodes><walltime>00:05:00</walltime>'> 
+<!ENTITY POST_RESERVATION '<native>-R rusage[mem=3300] -R affinity[core]</native><queue>&QUEUE;</queue><account>&ACCOUNT;</account>'>
+
+<!-- Variables in Namelist -->
+<!ENTITY GSI_grid_ratio_in_var       "1">
+<!ENTITY GSI_grid_ratio_in_cldanl    "1">
+
+<!ENTITY NCKS '/gpfs/dell1/usrx/local/prod/packages/ips/18.0.1/nco/4.7.0/bin/ncks'>
+<!-- Block of Variables passed to workflow and tasks -->
+
+<!ENTITY ENVARS
+   '<envar>
+        <name>envir</name>
+        <value>&envir;</value>
+   </envar>
+   <envar>
+        <name>realtime</name>
+        <value>&realtime;</value>
+   </envar>
+<!--   <envar>
+        <name>RUN_ENVIR</name>
+        <value>&RUN_ENVIR;</value>
+   </envar> -->
+   <envar>
+        <name>machine</name>
+        <value>&machine;</value>
+   </envar>
+   <envar>
+        <name>MACHINE</name>
+        <value>&MACHINE;</value>
+   </envar>
+   <envar>
+        <name>SCHEDULER</name>
+        <value>&SCHEDULER;</value>
+   </envar>
+   <envar>
+        <name>NET</name>
+        <value>&NET;</value>
+   </envar>
+   <envar>
+        <name>RUN</name>
+        <value>&RUN;</value>
+   </envar>
+   <envar>
+        <name>model</name>
+        <value>&model;</value>
+   </envar>
+   <envar>
+        <name>OBS_DIR</name>
+        <value>&OBS_DIR;</value>
+   </envar>
+   <envar>
+        <name>HRRR_DIR</name>
+        <value>&HRRR_DIR;</value>
+   </envar>
+   <envar>
+        <name>ptmp_base</name>
+        <value>&ptmp_base;</value>
+   </envar>
+   <envar>
+        <name>COMINRAP</name>
+        <value>&COMINRAP;</value>
+   </envar>
+   <envar>
+        <name>COMINHRRR</name>
+        <value>&COMINHRRR;</value>
+   </envar>
+   <envar>
+        <name>COMINRADAR</name>
+        <value>&COMINRADAR;</value>
+   </envar>
+   <envar>
+        <name>COMINGDAS</name>
+        <value>&COMINGDAS;</value>
+   </envar>
+   <envar>
+        <name>COMINHRRRDAS</name>
+        <value>&COMINHRRRDAS;</value>
+   </envar>
+   <envar>
+        <name>GESINHRRR</name>
+        <value>&GESINHRRR;</value>
+   </envar>
+   <envar>
+        <name>NWROOT</name>
+        <value>&NWROOT;</value>
+   </envar>
+   <envar>
+        <name>DATAROOT</name>
+        <value>&DATAROOT;</value>
+   </envar>
+   <envar>
+        <name>COMROOT</name>
+        <value>&COMROOT;</value>
+   </envar>
+   <envar>
+        <name>DCOMROOT</name>
+        <value>&DCOMROOT;</value>
+   </envar>
+   <envar>
+        <name>HOMErtma3d</name>
+        <value>&HOMErtma3d;</value>
+   </envar>
+   <envar>
+        <name>EXECrtma3d</name>
+        <value>&EXECrtma3d;</value>
+   </envar>
+   <envar>
+        <name>FIXrtma3d</name>
+        <value>&FIXrtma3d;</value>
+   </envar>
+   <envar>
+        <name>USHrtma3d</name>
+        <value>&USHrtma3d;</value>
+   </envar>
+   <envar>
+        <name>UTILrtma3d</name>
+        <value>&UTILrtma3d;</value>
+   </envar>
+   <envar>
+        <name>UTILrtma3d_dev</name>
+        <value>&UTILrtma3d_dev;</value>
+   </envar>
+   <envar>
+        <name>PARMrtma3d</name>
+        <value>&PARMrtma3d;</value>
+   </envar>
+   <envar>
+        <name>FIXcrtm</name>
+        <value>&FIXcrtm;</value>
+   </envar>
+   <envar>
+        <name>FIXgsi</name>
+        <value>&FIXgsi;</value>
+   </envar>
+   <envar>
+        <name>FIXwps</name>
+        <value>&FIXwps;</value>
+   </envar>
+   <envar>
+        <name>FIXwrf</name>
+        <value>&FIXwrf;</value>
+   </envar>
+   <envar>
+        <name>PARMwrf</name>
+        <value>&PARMwrf;</value>
+   </envar>
+   <envar>
+        <name>PARMupp</name>
+        <value>&PARMupp;</value>
+   </envar>
+   <envar>
+        <name>PARMgsi</name>
+        <value>&PARMgsi;</value>
+   </envar>
+   <envar>
+        <name>PARMverf</name>
+        <value>&PARMverf;</value>
+   </envar>
+   <envar>
+        <name>OBS_USELIST</name>
+        <value>&OBS_USELIST;</value>
+   </envar>
+   <envar>
+        <name>LOG_DIR</name>
+        <value>&LOG_DIR;</value>
+   </envar>
+   <envar>
+        <name>JJOB_DIR</name>
+        <value>&JJOB_DIR;</value>
+   </envar>
+   <envar>
+        <name>jlogfile</name>
+        <value><cyclestr>&jlogfile;</cyclestr></value>
+   </envar>
+   <envar>
+        <name>SCRIPT_DIR</name>
+        <value>&SCRIPT_DIR;</value>
+   </envar>
+   <envar>
+        <name>LOG_WRKFLW</name>
+        <value>&LOG_WRKFLW;</value>
+   </envar>
+   <envar>
+        <name>LOG_JJOB</name>
+        <value>&LOG_JJOB;</value>
+   </envar>
+   <envar>
+        <name>LOG_PGMOUT</name>
+        <value>&LOG_PGMOUT;</value>
+   </envar>
+   <envar>
+        <name>CAP_NET</name>
+        <value>&CAP_NET;</value>
+   </envar>
+   <envar>
+        <name>CAP_RUN</name>
+        <value>&CAP_RUN;</value>
+   </envar>
+   <envar>
+        <name>CAP_ENVIR</name>
+        <value>&CAP_ENVIR;</value>
+   </envar>
+   <envar>
+        <name>FGS_OPT</name>
+        <value>&FGS_OPT;</value>
+   </envar>
+   <envar>
+        <name>obsprep_radar</name>
+        <value>&obsprep_radar;</value>
+   </envar>
+   <envar>
+        <name>obsprep_lghtn</name>
+        <value>&obsprep_lghtn;</value>
+   </envar>
+   <envar>
+        <name>obsprep_cloud</name>
+        <value>&obsprep_cloud;</value>
+   </envar>
+   <envar>
+        <name>PDY</name>
+        <value><cyclestr>@Y@m@d</cyclestr></value>
+   </envar>
+   <envar>
+        <name>cyc</name>
+        <value><cyclestr>@H</cyclestr></value>
+   </envar>
+   <envar>
+	<name>fgsoffset</name>
+	<value><cyclestr offset="-1:00:00">@H</cyclestr></value>
+   </envar>
+   <envar>
+        <name>subcyc</name>
+        <value><cyclestr>@M</cyclestr></value>
+   </envar>
+   <envar>
+        <name>PROD_HEAD</name>
+        <value>&RUN;.t<cyclestr>@H@M</cyclestr>z</value>
+   </envar>
+   <envar>
+        <name>GESROOT</name>
+        <value>&GESROOT;</value>
+   </envar>
+   <envar>
+        <name>MODULEFILES</name>
+        <value>&MODULEFILES;</value>
+   </envar>
+   <envar>
+      <name>DATA_RUNDIR</name>
+      <value><cyclestr>&DATA_RUNDIR;</cyclestr></value>
+   </envar>
+   <envar>
+      <name>DATA_GSIANL</name>
+      <value><cyclestr>&DATA_GSIANL;</cyclestr></value>
+   </envar>
+   <envar>
+      <name>DATA_POST</name>
+      <value><cyclestr>&DATA_POST;</cyclestr></value>
+   </envar>
+   <envar>
+      <name>DATA_POST4FGS</name>
+      <value><cyclestr>&DATA_POST4FGS;</cyclestr></value>
+   </envar>
+   <envar>
+      <name>DATA_OBSPRD</name>
+      <value><cyclestr>&DATA_OBSPRD;</cyclestr></value>
+   </envar>
+   <envar>
+      <name>DATA_OBSPREP_LGHTN</name>
+      <value><cyclestr>&DATA_OBSPREP_LGHTN;</cyclestr></value>
+   </envar>
+   <envar>
+      <name>DATA_OBSPREP_RADAR</name>
+      <value><cyclestr>&DATA_OBSPREP_RADAR;</cyclestr></value>
+   </envar>
+   <envar>
+      <name>DATA_OBSPREP_CLOUD</name>
+      <value><cyclestr>&DATA_OBSPREP_CLOUD;</cyclestr></value>
+   </envar>
+   <envar>
+      <name>DATA_FGSPRD</name>
+      <value><cyclestr>&DATA_FGSPRD;</cyclestr></value>
+   </envar>
+   <envar>
+      <name>exefile_name_gsi</name>
+      <value><cyclestr>&exefile_name_gsi;</cyclestr></value>
+   </envar>
+   <envar>
+      <name>exefile_name_post</name>
+      <value><cyclestr>&exefile_name_post;</cyclestr></value>
+   </envar>
+   <envar>
+      <name>exefile_name_mosaic</name>
+      <value><cyclestr>&exefile_name_mosaic;</cyclestr></value>
+   </envar>
+   <envar>
+      <name>exefile_name_lightning</name>
+      <value><cyclestr>&exefile_name_lightning;</cyclestr></value>
+   </envar>
+   <envar>
+      <name>exefile_name_cloud</name>
+      <value><cyclestr>&exefile_name_cloud;</cyclestr></value>
+   </envar>
+   <envar>
+      <name>exefile_name_updatevars_wrf</name>
+      <value><cyclestr>&exefile_name_updatevars_wrf;</cyclestr></value>
+   </envar>
+   <envar>
+      <name>exefile_name_updatevars_ncfields</name>
+      <value><cyclestr>&exefile_name_updatevars_ncfields;</cyclestr></value>
+   </envar>
+   <envar>
+      <name>exefile_name_updatevars_ndown</name>
+      <value><cyclestr>&exefile_name_updatevars_ndown;</cyclestr></value>
+   </envar>
+   <envar>
+        <name>SENDCOM</name>
+        <value>&SENDCOM;</value>
+   </envar>
+   <envar>
+        <name>KEEPDATA</name>
+        <value>&KEEPDATA;</value>
+   </envar>
+   <envar>
+     <name>outid</name>
+     <value><cyclestr>&RUN;_@Y@m@d@H@M</cyclestr></value>
+   </envar>
+   <envar>
+        <name>remove_wrkdirs</name>
+        <value>no</value>
+   </envar>'>
+
+<!ENTITY ENVARS_GSI
+    '<envar>
+      <name>GSIPROC</name>
+      <value>&GSI_PROC;</value>
+    </envar>
+    <envar>
+      <name>START_TIME</name>
+      <value><cyclestr>@Y@m@d@H</cyclestr></value>
+    </envar>
+    <envar>
+      <name>FULLCYC</name>
+      <value>1</value>
+    </envar>
+    <envar>
+      <name>HRRRDAS_BEC</name>
+      <value>&HRRRDAS_BEC;</value>
+    </envar>
+    <envar>
+      <name>GSIANL_RES</name>
+      <value>3km</value>
+    </envar>
+    <envar>
+      <name>DATABASE_DIR</name>
+      <value>&DATABASE_DIR;</value>
+    </envar>
+    <envar>
+      <name>DATA_GES</name>
+      <value>&HRRR_DIR;/<cyclestr offset="-1:00:00">@Y@m@d@H</cyclestr>/wrfprd</value>
+    </envar>
+    <envar>
+      <name>GSI_grid_ratio_in_var</name>
+      <value>&GSI_grid_ratio_in_var;</value>
+    </envar>
+    <envar>
+      <name>GSI_grid_ratio_in_cldanl</name>
+      <value>&GSI_grid_ratio_in_cldanl;</value>
+    </envar>
+    <envar>
+      <name>exSCR_GSIANL</name>
+      <value>&exSCR_GSIANL;</value>
+    </envar>
+    <envar>
+      <name>JJOB_GSIANL</name>
+      <value>&JJOB_GSIANL;</value>
+    </envar>
+    <envar>
+      <name>AIRCRAFT_REJECT</name>
+      <value>&AIRCRAFT_REJECT;</value>
+    </envar>
+    <envar>
+      <name>SFCOBS_USELIST</name>
+      <value>&SFCOBS_USELIST;</value>
+    </envar>
+    <envar>
+      <name>SFCOBS_PROVIDER</name>
+      <value>&SFCOBS_PROVIDER;</value>
+    </envar>'>
+
+<!-- BLOCKS for OPTIMIZATIONS FOR GSIANL DA step-->
+<!-- Including Set endian conversion options for use with Intel compilers -->
+
+<!ENTITY OPTIMIZATIONS_GSI
+   '<envar>
+        <name>LANG</name>
+        <value>en_US</value>
+   </envar>
+   <envar>
+        <name>OMP_NUM_THREADS</name>
+        <value>&GSI_THREADS;</value>
+   </envar>
+   <envar>
+        <name>OMP_STACKSIZE</name>
+        <value>&GSI_OMP_STACKSIZE;</value>
+   </envar>'>
+
+<!ENTITY ENVARS_PREPJOB
+    '<envar>
+      <name>START_TIME</name>
+      <value><cyclestr>@Y@m@d@H</cyclestr></value>
+    </envar>
+    <envar>
+      <name>SUBH_TIME</name>
+       <value><cyclestr>@M</cyclestr></value>
+    </envar>
+    <envar>
+      <name>DATABASE_DIR</name>
+      <value>&DATABASE_DIR;</value>
+    </envar>
+    <envar>
+      <name>exSCR_OBSPREP_RADAR</name>
+      <value>&exSCR_OBSPREP_RADAR;</value>
+    </envar>
+    <envar>
+      <name>JJOB_OBSPREP_RADAR</name>
+      <value>&JJOB_OBSPREP_RADAR;</value>
+    </envar>
+    <envar>
+      <name>exSCR_OBSPREP_LGHTN</name>
+      <value>&exSCR_OBSPREP_LGHTN;</value>
+    </envar>
+    <envar>
+      <name>JJOB_OBSPREP_LGHTN</name>
+      <value>&JJOB_OBSPREP_LGHTN;</value>
+    </envar>
+    <envar>
+      <name>exSCR_OBSPREP_CLOUD</name>
+      <value>&exSCR_OBSPREP_CLOUD;</value>
+    </envar>
+    <envar>
+      <name>JJOB_OBSPREP_CLOUD</name>
+      <value>&JJOB_OBSPREP_CLOUD;</value>
+    </envar>
+    <envar>
+      <name>exSCR_PREPOBS</name>
+      <value>&exSCR_PREPOBS;</value>
+    </envar>
+    <envar>
+      <name>JJOB_PREPOBS</name>
+      <value>&JJOB_PREPOBS;</value>
+    </envar>
+    <envar>
+      <name>exSCR_PREPFGS</name>
+      <value>&exSCR_PREPFGS;</value>
+    </envar>
+    <envar>
+      <name>JJOB_PREPFGS</name>
+      <value>&JJOB_PREPFGS;</value>
+    </envar>'>
+
+<!ENTITY ENVARS_POST
+    '<envar>
+      <name>START_TIME</name>
+      <value><cyclestr>@Y@m@d@H</cyclestr></value>
+    </envar>
+    <envar>
+      <name>DATABASE_DIR</name>
+      <value>&DATABASE_DIR;</value>
+    </envar>
+    <envar>
+      <name>exSCR_POST4FGS</name>
+      <value>&exSCR_POST4FGS;</value>
+    </envar>
+    <envar>
+      <name>JJOB_POST4FGS</name>
+      <value>&JJOB_POST4FGS;</value>
+    </envar>
+    <envar>
+      <name>exSCR_POST</name>
+      <value>&exSCR_POST;</value>
+    </envar>
+    <envar>
+      <name>JJOB_POST</name>
+      <value>&JJOB_POST;</value>
+    </envar>'>
+
+<!ENTITY ENVARS_UPDATEVARS
+    '<envar>
+      <name>START_TIME</name>
+      <value><cyclestr>@Y@m@d@H</cyclestr></value>
+    </envar>
+    <envar>
+      <name>DATABASE_DIR</name>
+      <value>&DATABASE_DIR;</value>
+    </envar>
+    <envar>
+      <name>exSCR_UPDATEVARS</name>
+      <value>&exSCR_UPDATEVARS;</value>
+    </envar>
+    <envar>
+      <name>JJOB_UPDATEVARS</name>
+      <value>&JJOB_UPDATEVARS;</value>
+    </envar>
+    <envar>
+      <name>NCKS</name>
+      <value>&NCKS;</value>
+    </envar>
+    <envar>
+      <name>FCST_LENGTH</name>
+      <value>&FCST_LENGTH;</value>
+    </envar>'>
+
+
+]>
+
+<workflow realtime="T" scheduler="lsf" cyclethrottle="96" taskthrottle="960" cyclelifespan="00:48:00:00">
+
+  <log>
+    <cyclestr>&LOG_DIR;/&NET;_workflow_&envir;_@Y@m@d@H@M.log</cyclestr>
+  </log>
+
+  <cycledef group="00hr">*/15 00,12 * 01-12 2019-2025 *</cycledef>
+
+  <cycledef group="01hr">*/15 01,13 * 01-12 2019-2025 *</cycledef>
+
+  <cycledef group="02-11hr">*/15 02-11,14-23 * 01-12 2019-2025 *</cycledef>
+  
+
+
+  <task name="&NET;_obsprep_lghtn_task_@Y@m@d@H@M" cycledefs="02-11hr,00hr,01hr" maxtries="&maxtries;">
+
+    &ENVARS;
+    <envar>
+       <name>rundir_task</name>
+       <value><cyclestr>&DATA_OBSPREP_LGHTN;</cyclestr></value>
+    </envar>
+
+    <command>&JJOB_DIR;/launch.ksh &JJOB_OBSPREP_LGHTN;</command>
+    <jobname><cyclestr>&NET;_obsprep_lghtn_job_@Y@m@d@H@M</cyclestr></jobname>
+    <join><cyclestr>&LOG_SCHDLR;/&NET;_&envir;_obsprep_lghtn_@Y@m@d@H@M.log</cyclestr></join>
+
+    &OBSPREP_LGHTN_RESOURCES;
+    &OBSPREP_LGHTN_RESERVATION;
+
+    &ENVARS_PREPJOB;
+
+   <dependency>
+       <datadep age="15"><cyclestr>&COMINRAP;/rtma_ru.@Y@m@d/rtma_ru.t@H@Mz.lghtng.tm00.bufr_d</cyclestr></datadep>
+   </dependency>
+  </task>
+
+  <task name="&NET;_obsprep_cloud_task_@Y@m@d@H@M" cycledefs="02-11hr,00hr,01hr" maxtries="&maxtries;">
+
+    &ENVARS;
+    <envar>
+       <name>rundir_task</name>
+       <value><cyclestr>&DATA_OBSPREP_CLOUD;</cyclestr></value>
+    </envar>
+
+    <command>&JJOB_DIR;/launch.ksh &JJOB_OBSPREP_CLOUD;</command>
+    <jobname><cyclestr>&NET;_obsprep_cloud_job_@Y@m@d@H@M</cyclestr></jobname>
+    <join><cyclestr>&LOG_SCHDLR;/&NET;_&envir;_obsprep_cloud_@Y@m@d@H@M.log</cyclestr></join>
+
+    &OBSPREP_CLOUD_RESOURCES;
+    &OBSPREP_CLOUD_RESERVATION;
+
+    &ENVARS_PREPJOB; 
+
+   <dependency>
+       <datadep age="15"><cyclestr>&COMINRAP;/rtma_ru.@Y@m@d/rtma_ru.t@H@Mz.lgycld.tm00.bufr_d</cyclestr></datadep>
+   </dependency>
+  </task>
+
+  <task name="&NET;_obsprep_radar_task_@Y@m@d@H@M" cycledefs="02-11hr,00hr,01hr" maxtries="&maxtries;">
+
+    &ENVARS;
+   <envar>
+        <name>OMP_NUM_THREADS</name>
+        <value>&RADAR_THREADS;</value>
+    </envar>
+    <envar>
+        <name>OMP_STACKSIZE</name>
+        <value>&RADAR_OMP_STACKSIZE;</value>
+    </envar>
+    <envar>
+       <name>rundir_task</name>
+       <value><cyclestr>&DATA_OBSPREP_RADAR;</cyclestr></value>
+    </envar>
+
+    <command>&JJOB_DIR;/launch.ksh &JJOB_OBSPREP_RADAR;</command>
+    <jobname><cyclestr>&NET;_obsprep_radar_job_@Y@m@d@H@M</cyclestr></jobname>
+    <join><cyclestr>&LOG_SCHDLR;/&NET;_&envir;_obsprep_radar_@Y@m@d@H@M.log</cyclestr></join>
+
+    &OBSPREP_RADAR_RESOURCES;
+    &OBSPREP_RADAR_RESERVATION;
+    &ENVARS_PREPJOB;
+
+
+    <dependency>
+      <or>
+        <timedep><cyclestr offset="&START_TIME_RADAR;">@Y@m@d@H@M00</cyclestr></timedep>
+        <rb><cyclestr offset="-0:01:00">!Dir.glob('&COMINRADAR;/MergedReflectivityQC/MergedReflectivityQC_00.50_@Y@m@d-@H@M*.grib2.gz').empty?</cyclestr></rb>
+        <rb><cyclestr>!Dir.glob('&COMINRADAR;/MergedReflectivityQC/MergedReflectivityQC_00.50_@Y@m@d-@H@M*.grib2.gz').empty?</cyclestr></rb>
+        <rb><cyclestr offset="0:01:00">!Dir.glob('&COMINRADAR;/MergedReflectivityQC/MergedReflectivityQC_00.50_@Y@m@d-@H@M*.grib2.gz').empty?</cyclestr></rb>
+        <rb><cyclestr offset="0:02:00">!Dir.glob('&COMINRADAR;/MergedReflectivityQC/MergedReflectivityQC_00.50_@Y@m@d-@H@M*.grib2.gz').empty?</cyclestr></rb>
+      </or>
+   </dependency>
+  </task>
+
+    <task name="&NET;_prepobs_task_@Y@m@d@H@M" cycledefs="02-11hr,00hr,01hr" maxtries="&maxtries;">
+
+    &ENVARS;
+    <envar>
+       <name>rundir_task</name>
+       <value><cyclestr>&DATA_OBSPRD;</cyclestr></value>
+    </envar>
+
+    <command>&JJOB_DIR;/launch.ksh &JJOB_PREPOBS;</command>
+    <jobname><cyclestr>&NET;_prepobs_job_@Y@m@d@H@M</cyclestr></jobname>
+    <join><cyclestr>&LOG_SCHDLR;/&NET;_&envir;_prepobs_@Y@m@d@H@M.log</cyclestr></join>
+
+    &PREPOBS_RESOURCES;
+    &PREPOBS_RESERVATION;
+
+    &ENVARS_PREPJOB;
+
+   <dependency>
+       <and>
+       <datadep age="15"><cyclestr>&COMINRAP;/rtma_ru.@Y@m@d/rtma_ru.t@H@Mz.prepbufr.tm00</cyclestr></datadep>    
+       <or>
+       <taskdep state="succeeded" task="&NET;_obsprep_lghtn_task_@Y@m@d@H@M"/>
+       <taskdep state="Dead" task="&NET;_obsprep_lghtn_task_@Y@m@d@H@M"/>
+       <taskdep state="succeeded" task="&NET;_obsprep_cloud_task_@Y@m@d@H@M"/>
+       <taskdep state="Dead" task="&NET;_obsprep_cloud_task_@Y@m@d@H@M"/>
+       <taskdep state="succeeded" task="&NET;_obsprep_radar_task_@Y@m@d@H@M"/>
+       <taskdep state="Dead" task="&NET;_obsprep_radar_task_@Y@m@d@H@M"/>
+       </or>
+       </and>   
+   </dependency>
+
+  </task>
+
+  <task name="&NET;_prepfgs_task_@Y@m@d@H@M" cycledefs="02-11hr,00hr,01hr" maxtries="&maxtries;">
+
+    &ENVARS;
+    <envar>
+       <name>rundir_task</name>
+       <value><cyclestr>&DATA_FGSPRD;</cyclestr></value>
+    </envar>
+
+    <command>&JJOB_DIR;/launch.ksh &JJOB_PREPFGS;</command>
+    <jobname><cyclestr>&NET;_prepfgs_job_@Y@m@d@H@M</cyclestr></jobname>
+    <join><cyclestr>&LOG_SCHDLR;/&NET;_&envir;_prepfgs_@Y@m@d@H@M.log</cyclestr></join>
+
+    &PREPFGS_RESOURCES;
+    &PREPFGS_RESERVATION;
+
+    &ENVARS_PREPJOB;
+   <dependency>
+       <datadep age="15" minsize="15000M"><cyclestr offset="-3600">&GESINHRRR;/hrrr.@Y@m@d/conus/hrrr.t@H00z.f01@M.netcdf</cyclestr></datadep>
+   </dependency>
+   </task>
+  <task name="&NET;_gsianl_task_@Y@m@d@H@M" cycledefs="02-11hr,00hr,01hr" maxtries="&maxtries;">
+
+    &ENVARS;
+    &GSI_RESOURCES;
+    &GSI_RESERVATION;
+    &OPTIMIZATIONS_GSI;
+    <envar>
+       <name>rundir_task</name>
+       <value><cyclestr>&DATA_GSIANL;</cyclestr></value>
+    </envar>
+
+
+    <command>&JJOB_DIR;/launch.ksh &JJOB_GSIANL;</command>
+    <jobname><cyclestr>&NET;_gsianl_job_@Y@m@d@H@M</cyclestr></jobname>
+    <join><cyclestr>&LOG_SCHDLR;/&NET;_&envir;_gsianl_@Y@m@d@H@M.log</cyclestr></join>
+
+    &ENVARS_GSI;
+
+    <dependency>
+      <and>
+          <taskdep task="&NET;_prepobs_task_@Y@m@d@H@M"/>
+          <taskdep task="&NET;_prepfgs_task_@Y@m@d@H@M"/>
+      </and>
+    </dependency>
+  </task>
+
+ <task name="&NET;_updatevars_task_@Y@m@d@H@M" cycledefs="02-11hr,00hr,01hr" maxtries="&maxtries;">
+
+    &ENVARS;
+    &UPDATEVARS_RESOURCES;
+    &UPDATEVARS_RESERVATION;
+
+    <command>&JJOB_DIR;/launch.ksh &JJOB_UPDATEVARS;</command>
+    <jobname><cyclestr>&NET;_updatevars_job_@Y@m@d@H@M</cyclestr></jobname>
+    <join><cyclestr>&LOG_SCHDLR;/&NET;_&envir;_updatevars_@Y@m@d@H@M.log</cyclestr></join>
+
+    &ENVARS_UPDATEVARS;
+
+    <dependency>
+          <taskdep task="&NET;_gsianl_task_@Y@m@d@H@M"/>
+    </dependency>
+
+  </task>
+
+  <task name="&NET;_post_task_@Y@m@d@H@M" cycledefs="02-11hr,00hr,01hr" maxtries="&maxtries;">
+
+    &ENVARS;
+    &POST_RESOURCES;
+    &POST_RESERVATION;
+
+    <envar>
+        <name>OMP_NUM_THREADS</name>
+        <value>&POST_THREADS;</value>
+    </envar>
+    <envar>
+        <name>OMP_STACKSIZE</name>
+        <value>&POST_OMP_STACKSIZE;</value>
+    </envar>
+    <envar>
+       <name>rundir_task</name>
+       <value><cyclestr>&DATA_POST;</cyclestr></value>
+    </envar>
+
+    <command>&JJOB_DIR;/launch.ksh &JJOB_POST;</command>
+    <jobname><cyclestr>&NET;_post_job_@Y@m@d@H@M</cyclestr></jobname>
+    <join><cyclestr>&LOG_SCHDLR;/&NET;_&envir;_post_@Y@m@d@H@M.log</cyclestr></join>
+
+    &ENVARS_POST;
+
+    <dependency> 
+       <or>
+          <taskdep state="succeeded" task="&NET;_updatevars_task_@Y@m@d@H@M"/>
+          <taskdep state="Dead" task="&NET;_updatevars_task_@Y@m@d@H@M"/>
+       </or>
+    </dependency>
+
+  </task>
+
+  <task name="&NET;_post4fgs_task_@Y@m@d@H@M" cycledefs="02-11hr,00hr,01hr" maxtries="&maxtries;">
+
+    &ENVARS;
+    &POST_RESOURCES;
+    &POST_RESERVATION;
+    <envar>
+       <name>rundir_task</name>
+       <value><cyclestr>&DATA_POST4FGS;</cyclestr></value>
+    </envar>
+
+    <command>&JJOB_DIR;/launch.ksh &JJOB_POST4FGS;</command>
+    <jobname><cyclestr>&NET;_post4fgs_job_@Y@m@d@H@M</cyclestr></jobname>
+    <join><cyclestr>&LOG_SCHDLR;/&NET;_&envir;_post4fgs_@Y@m@d@H@M.log</cyclestr></join>
+
+    &ENVARS_POST;
+
+    <dependency> 
+       <or>
+          <taskdep state="succeeded" task="&NET;_updatevars_task_@Y@m@d@H@M"/>
+          <taskdep state="Dead" task="&NET;_updatevars_task_@Y@m@d@H@M"/>
+       </or>
+    </dependency>
+
+
+  </task>
+
+
+</workflow>
+
