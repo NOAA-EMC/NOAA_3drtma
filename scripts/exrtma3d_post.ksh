@@ -110,7 +110,7 @@ cd ${workdir}
 export XLFRTEOPTS="unit_vars=yes"
 
 if [ "${MODEL}" == "RAP" ]; then
-  export CORE=RAPR
+  export CORE=RAPRRTMA
 elif [ "${MODEL}" == "WRF-RR NMM" ]; then
   export CORE=NMM
 fi
@@ -120,7 +120,7 @@ fi
 # export tmmark=GrbF${FCST_TIME}
 export RSTFNL=${workdir}/
 
-export CORE=RAPR
+export CORE=RAPRRTMA
 export SPLNUM=47
 export SPL=2.,5.,7.,10.,20.,30.\
 ,50.,70.,75.,100.,125.,150.,175.,200.,225.\
