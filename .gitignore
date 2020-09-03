@@ -1,87 +1,86 @@
 # ignore vim temporary file (*.swp)
 #
- *.swp
+*.swp
 #
 # # ignore building directory ('build/'), directory of executable files ('exec/','bin/')
 #
 #
 **/exec/
- **/bin/
+**/bin/
 #
- **/build_*/
+**/build_*/
 #
- sorc/**/log.*
+sorc/**/log.*
 #
- sorc/**/log_*
+sorc/**/log_*
 #
 #
 # # ignore directory of log files ('log/', 'logs/')
 #
- **/log/
+**/log/
 #
- **/logs/
+**/logs/
 #
- **/log.*
+**/log.*
+log
+logs
+loghistory
+run/
+save4later
 #
 #  
 #
 #  # ignore rocoto database files ('*.db')
 #
-  *.db
+*.db
 #
 #  # ignore object/executable/lib/module file ('*.o, *.x, *.exei, *.a, *.mod')
 #
-  *.o
-#
-  *.x
-#
-  *.exe
-#
-  *.a
-#
-  sorc/**/*.mod
+*.o
+*.x
+*.exe
+*.a
+sorc/**/*.mod
 #
 #  # ignore directory of gsi and post(upp) source code ('sorc/rtma_gsi.fd, sorc/rtma_post.fd')
 #
-  **/rtma_gsi.fd/
+**/rtma_gsi.fd/
 #
-  **/rtma_post.fd/
+**/rtma_post.fd/
 #
-  **/build_gsi/
+**/build_gsi/
 #
-#  # ignore directory of static data ('fix/', 'parm/')
+**/rtma_post.fd/
 #
-  parm
+**/build_gsi/
 #
-  fix
-#
-  !parm/gsi
+fix
 #
 #  # ignore the link files under directory modulefiles
 #
-  modulefiles/*/build/build_ncep_post.*
+modulefiles/*/build/build_ncep_post.*
 #
 #  # ignore directory of development ('dev')
 #
-  **/dev/
+**/dev/
 #
-  **/untrack/
+**/untrack/
 #
-  **/tags
+**/tags
 #
 #  # special ignoring rules for workflow/
 #
-  xml/*.sh
+workflow/*.sh
 #
-  xml/*.ksh
+workflow/*.ksh
 #
-  xml/*.xml
+workflow/*.xml
 #
-  xml/*.db
+workflow/*.db
 #
-  !xml/prep_*.sh
+!workflow/prep_*.sh
 #
-  !xml/prep_*.ksh
+!workflow/prep_*.ksh
 #
 #  # exceptional pattern is led by sign "!"
 #
