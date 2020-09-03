@@ -50,10 +50,6 @@ sorc/**/*.mod
 #
 **/build_gsi/
 #
-**/rtma_post.fd/
-#
-**/build_gsi/
-#
 fix
 #
 #  # ignore the link files under directory modulefiles
