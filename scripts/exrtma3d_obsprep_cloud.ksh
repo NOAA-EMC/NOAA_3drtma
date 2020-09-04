@@ -55,9 +55,9 @@ ${ECHO} "YYYYMMDDHH: "${YYYYMMDDHH}
 
 # Link to the NASA LaRC cloud data
 if [ "${HH}" = 12 ] || [ "${HH}" = "00" ] ; then
-  ${LN} -sf ${NASALARC_DATA}/${YYYYJJJHH}00.rap_e.t${HH}z.lgycld.tm00.bufr_d ./NASA_LaRC_cloud.bufr
+  ${LN} -sf ${NASALARC_DATA}/${YYYYMMDDHH}.rap_e.t${HH}z.lgycld.tm00.bufr_d ./NASA_LaRC_cloud.bufr
 else
-  ${LN} -sf ${NASALARC_DATA}/${YYYYJJJHH}00.rap.t${HH}z.lgycld.tm00.bufr_d ./NASA_LaRC_cloud.bufr
+  ${LN} -sf ${NASALARC_DATA}/${YYYYMMDDHH}.rap.t${HH}z.lgycld.tm00.bufr_d ./NASA_LaRC_cloud.bufr
 fi
 if [ ! -s "NASA_LaRC_cloud.bufr" ]; then
   ${ECHO} "./NASA_LaRC_cloud.bufr does not exist or not readable"

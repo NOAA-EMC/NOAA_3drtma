@@ -204,7 +204,7 @@ if [ ${HRRRDAS_BEC} -eq 1 ]; then
    else
      hrrre_file=${HRRRDAS_DIR}/${time_1hour_ago}/wrfprd_mem00${cc}/wrfout_d02_${time_str2}
    fi
-   {LN} -sf ${hrrre_file} wrf_en0${cc}
+   ${LN} -sf ${hrrre_file} wrf_en0${cc}
    ((c = c + 1))
   done
 else
@@ -396,7 +396,8 @@ fi
 ${CP_LN} ${EXECrtma3d}/${exefile_name_gsi} ${pgm}
 if [ "${envir}" == "esrl" ];  then ##GSI on Jet needs special treatment
   [[ "$-" == *"x"* ]] && set +x && prev_x="YES"
-  module load contrib wrap-mpi >/dev/null
+  module use -a /contrib/wrap-mpi/modulefiles > /dev/null
+  module load wrap-mpi >/dev/null
   [[ "${prev_x}" == "YES"  ]] && set -x
   mpirun ${DATA}/${pgm} < gsiparm.anl > ${pgmout} 2>errfile
 else
@@ -475,7 +476,8 @@ EOF
   ${ECHO} -e "\n\n@@@@@@@@@ second GSI run standard output\n" >> ${pgmout}
   if [ "${envir}" == "esrl" ];  then ##GSI on Jet needs special treatment
     [[ "$-" == *"x"* ]] && set +x && prev_x="YES"
-    module load contrib wrap-mpi >/dev/null
+    module use -a /contrib/wrap-mpi/modulefiles > /dev/null
+    module load wrap-mpi >/dev/null
     [[ "${prev_x}" == "YES"  ]] && set -x
     mpirun ${DATA}/${pgm} < gsiparm.anl >> ${pgmout} 2>errfile
   else

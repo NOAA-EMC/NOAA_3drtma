@@ -75,8 +75,8 @@ if [ "${envir}" == "esrl"  ]; then #For Jet expr runs
 
 # # Radial velocity data
 # DFILE="nexrad"
-# RUNS[2]="rap";    FILES[2]="${RADVELLEV2_DIR}/${YYYYJJJHH00}.${RUNS[2]}.t${HH}z.${DFILE}.tm00.bufr_d"
-# RUNS[3]="rap_e";  FILES[3]="${RADVELLEV2_DIR}/${YYYYJJJHH00}.${RUNS[3]}.t${HH}z.${DFILE}.tm00.bufr_d"
+# RUNS[2]="rap";    FILES[2]="${RADVELLEV2_DIR}/${date_str}.${RUNS[2]}.t${HH}z.${DFILE}.tm00.bufr_d"
+# RUNS[3]="rap_e";  FILES[3]="${RADVELLEV2_DIR}/${date_str}.${RUNS[3]}.t${HH}z.${DFILE}.tm00.bufr_d"
 # casecade="2 3" #5 4 for prepbufr_test
 # for i in $casecade; do
 #   ${ECHO} "checking ${FILES[$i]}"
@@ -93,8 +93,8 @@ if [ "${envir}" == "esrl"  ]; then #For Jet expr runs
 
 # #  AMV wind
 # DFILE="satwnd"
-# RUNS[2]="rap";    FILES[2]="${SATWND_DIR}/${YYYYJJJHH00}.${RUNS[2]}.t${HH}z.${DFILE}.tm00.bufr_d"
-# RUNS[3]="rap_e";  FILES[3]="${SATWND_DIR}/${YYYYJJJHH00}.${RUNS[3]}.t${HH}z.${DFILE}.tm00.bufr_d"
+# RUNS[2]="rap";    FILES[2]="${SATWND_DIR}/${date_str}.${RUNS[2]}.t${HH}z.${DFILE}.tm00.bufr_d"
+# RUNS[3]="rap_e";  FILES[3]="${SATWND_DIR}/${date_str}.${RUNS[3]}.t${HH}z.${DFILE}.tm00.bufr_d"
 # casecade="2 3" #5 4 for prepbufr_test
 # for i in $casecade; do
 #   ${ECHO} "checking ${FILES[$i]}"
