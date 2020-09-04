@@ -204,7 +204,7 @@ if [ ${HRRRDAS_BEC} -eq 1 ]; then
    else
      hrrre_file=${HRRRDAS_DIR}/${time_1hour_ago}/wrfprd_mem00${cc}/wrfout_d02_${time_str2}
    fi
-   {LN} -sf ${hrrre_file} wrf_en0${cc}
+   ${LN} -sf ${hrrre_file} wrf_en0${cc}
    ((c = c + 1))
   done
 else
