@@ -40,7 +40,7 @@ fi
 ${ECHO} "   START_TIME = ${START_TIME}"
 ${ECHO} "    FCST_TIME = ${FCST_TIME}"
 
-set -A domains full t1 t2 t3 t4 t5 t6 t7 t8 z0 z1 z2 z3 z4 z5 z6 z7
+set -A domains full a1 a2 a3 
 
 zip_error=0
 
