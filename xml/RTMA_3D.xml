@@ -47,7 +47,7 @@
 
 <!ENTITY GFS_DIR "&OBS_DIR;/grids/gfs/0p5deg/grib2">
 <!ENTITY ENKFFCST_DIR "&OBS_DIR;/grids/enkf/atm_v15">
-<!ENTITY HRRRDAS_DIR "/lfs4/BMC/wrfruc/HRRRE/cycle">
+<!ENTITY HRRRDAS_DIR "/home/rtrr/hrrrdas">
 
 <!ENTITY AIRCRAFT_REJECT "/home/amb-verif/acars_RR/amdar_reject_lists">
 <!ENTITY SFCOBS_USELIST "/home/amb-verif/ruc_madis_surface/mesonet_uselists">
@@ -375,6 +375,10 @@
     <envar>
       <name>GSIANL_RES</name>
       <value>3km</value>
+    </envar>
+    <envar>
+      <name>EnsWgt</name>
+      <value>0.5</value>
     </envar>
 
     <dependency>

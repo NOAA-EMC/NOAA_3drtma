@@ -71,30 +71,34 @@ ${SPL}
 ${VALIDTIMEUNITS}
 EOF
 
-#link fix files
-ln -sf ${PARMupp}/post_avblflds.xml post_avblflds.xml
-ln -sf ${PARMupp}/params_grib2_tbl_new params_grib2_tbl_new
-ln -sf ${PARMupp}/postcntrl.xml postcntrl.xml
-ln -sf ${PARMupp}/postxconfig-NT.txt postxconfig-NT.txt  ##postcntrl_subh.xml postxconfig_subh-NT.txt??
-ln -sf ${PARMupp}/gtg.config.raphrrr gtg.config
+if [ "${envir}" == "esrl" ]; then #Jet
+  CP_LN="${LN} -sf"
+else
+  CP_LN=${CP}
+fi
+#link/copy parameter files
+${CP_LN} ${PARMupp}/post_avblflds.xml post_avblflds.xml
+${CP_LN} ${PARMupp}/params_grib2_tbl_new params_grib2_tbl_new
+${CP_LN} ${PARMupp}/postcntrl.xml postcntrl.xml
+${CP_LN} ${PARMupp}/postxconfig-NT.txt postxconfig-NT.txt  ##postcntrl_subh.xml postxconfig_subh-NT.txt??
+${CP_LN} ${PARMupp}/gtg.config.raphrrr gtg.config
 
-ln -sf ${FIXupp}/ETAMPNEW_DATA eta_micro_lookup.dat
+${CP_LN} ${FIXupp}/ETAMPNEW_DATA eta_micro_lookup.dat
 
 #link CRTM coefficients
-for dsis in "imgr_g11" "imgr_g12" "imgr_g13" "imgr_g15" "imgr_mt1r" "imgr_mt2" \
+for what in "imgr_g11" "imgr_g12" "imgr_g13" "imgr_g15" "imgr_mt1r" "imgr_mt2" \
      "amsre_aqua" "tmi_trmm" "ssmi_f13" "ssmi_f14" "ssmi_f15" "ssmis_f16"  \
      "ssmis_f17" "ssmis_f18" "ssmis_f19" "ssmis_f20" "seviri_m10" "ssmi_f10"   \
      "v.seviri_m10" "imgr_insat3d" "ssmi_f11"; do
-    ln -sf "${FIXcrtm}/${dsis}.SpcCoeff.bin" .
-    ln -sf "${FIXcrtm}/${dsis}.TauCoeff.bin" .
+    ln -s "${FIXcrtm}/${what}.TauCoeff.bin" .
+    ln -s "${FIXcrtm}/${what}.SpcCoeff.bin" .
 done
+
 ln -s ${FIXcrtm}/CloudCoeff.bin .
 ln -s ${FIXcrtm}/AerosolCoeff.bin .
-ln -s ${FIXcrtm}/FASTEM6.MWwater.EmisCoeff.bin .
-ln -s ${FIXcrtm}/Nalli.IRwater.EmisCoeff.bin .
-ln -s ${FIXcrtm}/NPOESS.IRice.EmisCoeff.bin .
-ln -s ${FIXcrtm}/NPOESS.IRland.EmisCoeff.bin .
-ln -s ${FIXcrtm}/NPOESS.IRsnow.EmisCoeff.bin .
+for what in  ${FIXcrtm}/*Emis* ; do
+    ln -s ${what} .
+done
 
 #---- Run unipost
 export pgm="rtma3d_post"
@@ -107,37 +111,43 @@ postmsg "$jlogfile" "$msg"
 msg="***********************************************************"
 postmsg "$jlogfile" "$msg"
 
-if [ "${envir}" == "esrl" ]; then #Jet
-  CP_LN="${LN} -sf"
-else
-  CP_LN=${CP}
-fi
 ${CP_LN} ${EXECrtma3d}/${exefile_name_post} ${pgm}
 ${MPIRUN} ${pgm} <itag > ${pgmout} 2>errfile
 export err=$?; err_chk
 
+if [ "${envir}" == "esrl" ]; then #Jet
+  wrfprsfile="wrfprs_${POST_NAME}_${FCST_TIME}.grib2"
+  wrfnatfile="wrfnat_${POST_NAME}_${FCST_TIME}.grib2
+  wrftwofile="wrftwo_${POST_NAME}_${FCST_TIME}.grib2"
+  wrfmslfile="wrfmsl_${POST_NAME}_${FCST_TIME}.grib2"
+else
+  wrfprsfile="wrfsubhprs.grib2"
+  wrfnatfile="wrfsubhnat.grib2"
+  wrftwofile="wrfsubhspl.grib2"
+  wrfmslfile="wrfsubhmsl.grib2"
+fi
 # Append entire wrftwo to wrfprs
 ${CAT} ${workdir}/WRFPRS.GrbF${FCST_TIME}  ${workdir}/WRFTWO.GrbF${FCST_TIME} > ${workdir}/WRFPRS.GrbF${FCST_TIME}.new
-${MV}  ${workdir}/WRFPRS.GrbF${FCST_TIME}.new  ${workdir}/wrfprs_${POST_NAME}_${FCST_TIME}.grib2
+${MV}  ${workdir}/WRFPRS.GrbF${FCST_TIME}.new ${workdir}/${wrfprsfile}
 
 # Append entire wrftwo to wrfnat
 ${CAT} ${workdir}/WRFNAT.GrbF${FCST_TIME}  ${workdir}/WRFTWO.GrbF${FCST_TIME} > ${workdir}/WRFNAT.GrbF${FCST_TIME}.new
-${MV}  ${workdir}/WRFNAT.GrbF${FCST_TIME}.new  ${workdir}/wrfnat_${POST_NAME}_${FCST_TIME}.grib2
+${MV}  ${workdir}/WRFNAT.GrbF${FCST_TIME}.new ${workdir}/${wrfnatfile}
 
-${MV}  ${workdir}/WRFTWO.GrbF${FCST_TIME}  ${workdir}/wrftwo_${POST_NAME}_${FCST_TIME}.grib2
-${MV} ${workdir}/WRFMSL.GrbF${FCST_TIME}  ${workdir}/wrfmsl_${POST_NAME}_${FCST_TIME}.grib2
+${MV}  ${workdir}/WRFTWO.GrbF${FCST_TIME}     ${workdir}/${wrftwofile}
+${MV}  ${workdir}/WRFMSL.GrbF${FCST_TIME}     ${workdir}/${wrfmslfile}
 
 # Check to make sure all Post  output files were produced
-if [ ! -s "${workdir}/wrfprs_${POST_NAME}_${FCST_TIME}.grib2" ]; then
-  ${ECHO} "unipost crashed! wrfprs_${POST_NAME}_${FCST_TIME}.grib2 is missing"
+if [ ! -s "${workdir}/${wrfprsfile}" ]; then
+  ${ECHO} "unipost crashed! ${wrfprsfile} is missing"
   exit 1
 fi
-if [ ! -s "${workdir}/wrftwo_${POST_NAME}_${FCST_TIME}.grib2" ]; then
-  ${ECHO} "unipost crashed! wrftwo_${POST_NAME}_${FCST_TIME}.grib2 is missing"
+if [ ! -s "${workdir}/${wrftwofile}" ]; then
+  ${ECHO} "unipost crashed! ${wrftwofile} is missing"
   exit 1
 fi
-if [ ! -s "${workdir}/wrfnat_${POST_NAME}_${FCST_TIME}.grib2" ]; then
-  ${ECHO} "unipost crashed! wrfnat_${POST_NAME}_${FCST_TIME}.grib2 is missing"
+if [ ! -s "${workdir}/${wrfnatfile}" ]; then
+  ${ECHO} "unipost crashed! ${wrfnatfile} is missing"
   exit 1
 fi
 
@@ -159,13 +169,13 @@ if [ "${envir}" == "esrl" ]; then #Jet expr runs
 
 else #wcoss
   # transfer the output grib2 files to $COMOUTpost_rtma3d
-  ${CP} ${workdir}/wrfprs_hrconus_${FCST_TIME}.grib2 ${COMOUTpost_rtma3d}/${PROD_HEAD}.wrfprs_hrconus_${FCST_TIME}.grib2
-  ${CP} ${workdir}/wrftwo_hrconus_${FCST_TIME}.grib2 ${COMOUTpost_rtma3d}/${PROD_HEAD}.wrftwo_hrconus_${FCST_TIME}.grib2
-  ${CP} ${workdir}/wrfnat_hrconus_${FCST_TIME}.grib2 ${COMOUTpost_rtma3d}/${PROD_HEAD}.wrfnat_hrconus_${FCST_TIME}.grib2
+  ${WGRIB2} ${workdir}/wrfsubhprs.grib2 -set center 7 -grib ${COMOUTpost_rtma3d}/${PROD_HEAD}.wrfsubhprs.grib2
+  ${WGRIB2} ${workdir}/wrfsubhspl.grib2 -set center 7 -grib ${COMOUTpost_rtma3d}/${PROD_HEAD}.wrfsubhspl.grib2
+  ${WGRIB2} ${workdir}/wrfsubhnat.grib2 -set center 7 -grib ${COMOUTpost_rtma3d}/${PROD_HEAD}.wrfsubhnat.grib2
 
-  ${LN} -sf ${COMOUTpost_rtma3d}/${PROD_HEAD}.wrfprs_hrconus_${FCST_TIME}.grib2 ${COMIN}/${PROD_HEAD}.wrfprs_hrconus_${FCST_TIME}.grib2
-  ${LN} -sf ${COMOUTpost_rtma3d}/${PROD_HEAD}.wrfnat_hrconus_${FCST_TIME}.grib2 ${COMIN}/${PROD_HEAD}.wrfnat_hrconus_${FCST_TIME}.grib2
-  ${LN} -sf ${COMOUTpost_rtma3d}/${PROD_HEAD}.wrftwo_hrconus_${FCST_TIME}.grib2 ${COMIN}/${PROD_HEAD}.wrftwo_hrconus_${FCST_TIME}.grib2
+  #${RM} -rf ${workdir}
+  ${RM} -f  ${workdir}/wrfsubh???.grib2
+  ${RM} -f  ${workdir}/WRF???.GrbF??
 fi
 
 msg="JOB $job FOR $RUN HAS COMPLETED NORMALLY"

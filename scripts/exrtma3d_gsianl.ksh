@@ -24,8 +24,8 @@ if [ ! -f ${EXECrtma3d}/${exefile_name_gsi} ]; then
 fi
 
 # Check to make sure required directory defined and existed
-check_if_defined "ENKF_FCST" "HRRRDAS_DIR" "HRRR_DIR" "OBS_DIR" "AIRCRAFT_REJECT" "SFCOBS_USELIST"
-check_dirs_exist "ENKF_FCST" "HRRRDAS_DIR" "HRRR_DIR" "OBS_DIR" "AIRCRAFT_REJECT" "SFCOBS_USELIST"
+check_if_defined "ENKF_FCST" "HRRRDAS_DIR" "HRRR_DIR" "OBS_DIR" "AIRCRAFT_REJECT" "SFCOBS_USELIST" "SFCOBS_PROVIDER" "COMINhrrrdas" "EnsWgt"
+check_dirs_exist "ENKF_FCST" "HRRRDAS_DIR" "HRRR_DIR" "OBS_DIR" "AIRCRAFT_REJECT" "SFCOBS_USELIST" "SFCOBS_PROVIDER" "COMINhrrrdas"
 
 if [ "${subcyc}" == "-1" ]; then #hourly run
   SUBH_TIME='00'
@@ -91,9 +91,6 @@ else
   exit 1
 fi
 
-# Update SST currently set to run in the 01z cycle
-update_SST='00'
-
 # Link to the prepbufr data
 if [ -r ${OBS_DIR}/prepbufr ] ; then
   ${LN} -sf ${OBS_DIR}/prepbufr ./prepbufr
@@ -115,8 +112,8 @@ if [ -r "${OBS_DIR}/LightningInGSI.bufr" ]; then
   ${LN} -sf ${OBS_DIR}/LightningInGSI.bufr ./lghtInGSI
 elif [ -r "${OBS_DIR}/hrrr.{tz_str}.LightningInGSI.bufr" ]; then
   ${LN} -sf ${OBS_DIR}/hrrr.{tz_str}.LightningInGSI.bufr ./lghtInGSI
-elif [ -r "${OBS_DIR}/${RUN}.{tz_str}.LightningInGSI.bufr" ]; then
-  ${LN} -sf ${OBS_DIR}/${RUN}.{tz_str}.LightningInGSI.bufr ./lghtInGSI
+elif [ -r "${OBS_DIR}/${RUN}.{tz_str}.lghtng.tm00.bufr_d" ]; then
+  ${LN} -sf ${OBS_DIR}/${RUN}.{tz_str}.lghtng.tm00.bufr_d ./lghtInGSI
 elif [ -r "${OBS_DIR}/${RUN}.{tz_str}.LightningInGSI_bufr.bufr" ]; then
   ${LN} -sf ${OBS_DIR}/${RUN}.{tz_str}.LightningInGSI_bufr.bufr ./lghtInGSI
 else
@@ -135,6 +132,41 @@ else
   ${ECHO} "Warning: ${OBS_DIR}: NASALaRCCloudInGSI.bufr does not exist!"
 fi
 
+if [ "${envir}" != "esrl" ]; then #WCOSS
+  # Set runtime and save directories
+  export endianness=Big_Endian
+
+  # Set variables used in script
+  #   ncp is cp replacement, currently keep as /bin/cp
+  ncp=/bin/cp
+
+  export HYB_ENS=".true."
+
+  # Get Fv3GDAS Enkf files
+  # We expect 80 total files to be present (80 enkf)
+  export nens=80
+
+  # Not using FGAT or 4DEnVar, so hardwire nhr_assimilation to 3
+  export nhr_assimilation=03
+  ##typeset -Z2 nhr_assimilation
+
+
+  python ${UTILrtma3d_dev}/getbest_EnKF_FV3GDAS.py -v $YYYYMMDDHH --exact=no --minsize=${nens} -d ${COMINGDAS}/enkfgdas -m no -o filelist${nhr_assimilation} --o3fname=gfs_sigf${nhr_assimilation} --gfs_nemsio=yes
+   
+
+  #Check to see if ensembles were found 
+  numfiles=`cat filelist03 | wc -l`
+
+  if [ $numfiles -ne 80 ]; then
+    echo "Ensembles not found - turning off ifhyb!"
+    export ifhyb=".false."
+  else
+  #   we have 80 files, figure out if they are all the right size
+  #   if not, set ifhyb=false
+      cp ${UTILrtma3d_dev}/convert.sh .
+      ${UTILrtma3d_dev}/check_enkf_size.sh
+  fi
+else #ESRL expr. runs
 ## 
 ## Find closest GFS EnKF forecast to analysis time
 # Make a list of the latest GFS EnKF ensemble
@@ -182,12 +214,16 @@ ${LS} ${ENKF_FCST}/${enkfcstname}.mem???.nemsio > filelist03
 # done
 # ${LS} enspreproc_arw_mem??? > filelist
 
+fi
+
 if [ ${HRRRDAS_BEC} -eq 1 ]; then
   ${ECHO} "\$HRRRDAS_BEC=${HRRRDAS_BEC}, so HRRRDAS will be used if available"
   #----------------------------------------------------
   # generate list of HRRRDAS members for ensemble covariances
   # Use 1-hr forecasts from the HRRRDAS cycling
-  if [ ${HRRRDAS_SMALL} -eq 1 ]; then
+  if [ "${envir}" != "esrl" ]; then #WCOSS
+    ${LS} ${COMINhrrrdas}/hrrrdas_small_d02_${YYYYMMDD}${cyc}00f01_mem000${c} > filelist.hrrrdas
+  elif [ ${HRRRDAS_SMALL} -eq 1 ]; then
     ${LS} ${HRRRDAS_DIR}/${time_1hour_ago}/wrfprd_mem????/wrfout_small_d02_${time_str2} > filelist.hrrrdas
   else
     ${LS} ${HRRRDAS_DIR}/${time_1hour_ago}/wrfprd_mem????/wrfout_d02_${time_str2} > filelist.hrrrdas
@@ -199,7 +235,9 @@ if [ ${HRRRDAS_BEC} -eq 1 ]; then
    else
     cc=$c
    fi
-   if [ ${HRRRDAS_SMALL} -eq 1 ]; then
+   if [ "${envir}" != "esrl" ]; then #WCOSS
+     hrrre_file=${COMINhrrrdas}/hrrrdas_small_d02_${YYYYMMDD}${cyc}00f01_mem00${cc}
+   elif [ ${HRRRDAS_SMALL} -eq 1 ]; then
      hrrre_file=${HRRRDAS_DIR}/${time_1hour_ago}/wrfprd_mem00${cc}/wrfout_small_d02_${time_str2}
    else
      hrrre_file=${HRRRDAS_DIR}/${time_1hour_ago}/wrfprd_mem00${cc}/wrfout_d02_${time_str2}
@@ -224,13 +262,13 @@ if [[ ${hrrrmem} -gt 30 ]] && [[ ${HRRRDAS_BEC} -eq 1  ]]; then #if HRRRDAS BEC 
   nummem=${hrrrmem}
   cp filelist.hrrrdas filelist03
 
-  beta1_inv=0.50 #0.15
+  beta1_inv=$(( 1 - $EnsWgt  ))
   ifhyb=.true.
   regional_ensemble_option=3
   grid_ratio_ens=1
   i_en_perts_io=0
   ens_fast_read=.true. 
-  ${ECHO} " Cycle ${YYYYMMDDHH}: GSI hybrid uses HRRRDAS BEC with n_ens=${nummem}" >> ${logfile}
+  ${ECHO} " Cycle ${YYYYMMDDHH}: GSI hybrid uses HRRRDAS BEC with n_ens=${nummem}" >> ${pgmout}
 elif [[ ${nummem} -eq 80 ]]; then
   echo "Do hybrid with GDAS directly"
   beta1_inv=0.50 ##0.15
@@ -239,7 +277,7 @@ elif [[ ${nummem} -eq 80 ]]; then
   grid_ratio_ens=12 #ensemble resolution=3 * grid_ratio * grid_ratio_ens
   i_en_perts_io=0
   ens_fast_read=.false. 
-  ${ECHO} " Cycle ${YYYYMMDDHH}: GSI hybrid uses GDAS directly with n_ens=${nummem}" >> ${logfile}
+  ${ECHO} " Cycle ${YYYYMMDDHH}: GSI hybrid uses GDAS directly with n_ens=${nummem}" >> ${pgmout}
 fi
 
 # Set fixed files
@@ -312,9 +350,8 @@ done
 # Get aircraft reject list, mesonet_uselist, sfcobs_provider
 ${CP} ${AIRCRAFT_REJECT}/current_bad_aircraft.txt current_bad_aircraft
 ${CP} ${SFCOBS_USELIST}/current_mesonet_uselist.txt gsd_sfcobs_uselist.txt
-${CP} ${FIXgsi}/gsd_sfcobs_provider.txt gsd_sfcobs_provider.txt
+${CP} ${SFCOBS_PROVIDER}/gsd_sfcobs_provider.txt gsd_sfcobs_provider.txt
 
-# Only need this file for single obs test
 bufrtable=${FIXgsi}/prepobs_prep.bufrtable
 ${CP} $bufrtable ./prepobs_prep.bufrtable
 
