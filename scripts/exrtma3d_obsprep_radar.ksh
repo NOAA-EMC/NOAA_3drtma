@@ -73,7 +73,7 @@ cd ${DATA}
 ${ECHO} "enter working directory:${DATA}"
 
 # BUFR Table including the description for HREF
-${LN} -sf ${FIXgsi}/prepobs_prep_RAP.bufrtable ./prepobs_prep.bufrtable
+${CP_LN} -sf ${FIXgsi}/prepobs_prep_RAP.bufrtable ./prepobs_prep.bufrtable
 if [ ! -s "./prepobs_prep.bufrtable" ]; then
   ${ECHO} "prepobs_prep.bufrtable does not exist or not readable"
   exit 1
@@ -96,30 +96,60 @@ ${ECHO} "MINUTES: "${MM1}"/"${MM2}"/"${MM3}
 ${ECHO} "YYYYMMDDHH: "${YYYYMMDDHH}
 
 # create mrms file list
-for min in ${MM1} ${MM2} ${MM3}
-do
-  ${ECHO} "Looking for data valid:"${YYYY}"-"${MM}"-"${DD}" "${HH}":"${min}
-  s=0
-  while [[ $s -le 59 ]]; do
-    if [ $s -lt 10 ]; then
-      ss=0${s}
-    else
-      ss=$s
-    fi
-    nsslfile=${NSSL}/${YYYY}${MM}${DD}-${HH}${min}${ss}.MRMS_MergedReflectivityQC_00.50_${YYYY}${MM}${DD}-${HH}${min}${ss}.grib2
-    if [ -s $nsslfile ]; then
-      echo 'Found '${nsslfile}
-      numgrib2=`ls ${NSSL}/${YYYY}${MM}${DD}-${HH}${min}*.MRMS_MergedReflectivityQC_*_${YYYY}${MM}${DD}-${HH}${min}*.grib2 | wc -l`
-      echo 'Number of GRIB-2 files: '${numgrib2}
-      if [ ${numgrib2} -ge 10 ] && [ ! -e filelist_mrms ]; then
-        ln -sf ${NSSL}/${YYYY}${MM}${DD}-${HH}${min}*.MRMS_MergedReflectivityQC_*_${YYYY}${MM}${DD}-${HH}${min}*.grib2 . 
-        ls ${YYYY}${MM}${DD}-${HH}${min}*.MRMS_MergedReflectivityQC_*_${YYYY}${MM}${DD}-${HH}${min}*.grib2 > filelist_mrms
-        echo 'Creating links for SUBH: '${SUBH_TIME}
+if [ "${envir}" == "esrl" ]; then #jet
+  for min in ${MM1} ${MM2} ${MM3}
+  do
+    ${ECHO} "Looking for data valid:"${YYYY}"-"${MM}"-"${DD}" "${HH}":"${min}
+    s=0
+    while [[ $s -le 59 ]]; do
+      if [ $s -lt 10 ]; then
+        ss=0${s}
+      else
+        ss=$s
       fi
-    fi
-    ((s+=1))
-  done 
-done
+      nsslfile=${NSSL}/${YYYY}${MM}${DD}-${HH}${min}${ss}.MRMS_MergedReflectivityQC_00.50_${YYYY}${MM}${DD}-${HH}${min}${ss}.grib2
+      if [ -s $nsslfile ]; then
+        echo 'Found '${nsslfile}
+        numgrib2=`ls ${NSSL}/${YYYY}${MM}${DD}-${HH}${min}*.MRMS_MergedReflectivityQC_*_${YYYY}${MM}${DD}-${HH}${min}*.grib2 | wc -l`
+        echo 'Number of GRIB-2 files: '${numgrib2}
+        if [ ${numgrib2} -ge 10 ] && [ ! -e filelist_mrms ]; then
+          ln -sf ${NSSL}/${YYYY}${MM}${DD}-${HH}${min}*.MRMS_MergedReflectivityQC_*_${YYYY}${MM}${DD}-${HH}${min}*.grib2 . 
+          ls ${YYYY}${MM}${DD}-${HH}${min}*.MRMS_MergedReflectivityQC_*_${YYYY}${MM}${DD}-${HH}${min}*.grib2 > filelist_mrms
+          echo 'Creating links for SUBH: '${SUBH_TIME}
+        fi
+      fi
+      ((s+=1))
+    done 
+  done
+else #wcoss
+  obsname="MergedReflectivityQC"
+  for min in ${MM1} ${MM2} ${MM3}
+  do
+    ${ECHO} "Looking for data valid:"${YYYY}"-"${MM}"-"${DD}" "${HH}":"${min}
+    s=0
+    while [[ $s -le 59 ]]; do
+      if [ $s -lt 10 ]; then
+        ss=0${s}
+      else
+        ss=$s
+      fi
+      radarfilez=${COMINradar}/${obsname}/${obsname}_00.50_${YYYY}${MM}${DD}-${HH}${min}${ss}.grib2.gz
+      if [ -s $radarfilez ]; then
+        echo 'Found '${radarfilez}
+        numgrib2=`ls ${COMINradar}/${obsname}/${obsname}_*_${YYYY}${MM}${DD}-${HH}${min}*.grib2.gz | wc -l`
+        echo 'Number of GRIB-2 files: '${numgrib2}
+        if [ ${numgrib2} -ge 10 ] && [ ! -e filelist_mrms ]; then
+  #        ln -sf ${COMINradar}/${obsname}/${obsname}_*_${YYYY}${MM}${DD}-${HH}${min}*.grib2.gz . 
+          cp ${COMINradar}/${obsname}/${obsname}_*_${YYYY}${MM}${DD}-${HH}${min}*.grib2.gz .
+          gzip -d ${obsname}_*_${YYYY}${MM}${DD}-${HH}${min}*.grib2.gz
+          ls ${obsname}_*_${YYYY}${MM}${DD}-${HH}${min}*.grib2 > filelist_mrms
+          echo 'Creating links for SUBH: '${SUBH_TIME}
+        fi
+      fi
+      ((s+=1))
+    done 
+  done
+fi
 
 # remove filelist_mrms if zero bytes
 if [ ! -s filelist_mrms ]; then
