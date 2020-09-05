@@ -1,4 +1,4 @@
-#!/bin/ksh --login 
+#!/bin/ksh --login
 set -x
 
 # make sure executable exists
@@ -61,17 +61,30 @@ if [ ${SUBH_TIME} -eq 60 ]; then
   YYYYMMDDHH=`${DATE} +"%Y%m%d%H" -d "${time_01hago}"`
 fi
 
+if [ "${envir}" == "esrl" ]; then #jet
+  CP_LN="${LN} -sf"
+  sleep 60 #sleep 1 minute
+else
+  CP_LN=${CP}
+fi
+
 #----- enter working directory -------
 cd ${DATA}
 ${ECHO} "enter working directory:${DATA}"
 
 # BUFR Table including the description for HREF
-# BUFR Table includingthe description for HREF
-${CP} -p ${FIXgsi}/prepobs_prep_RAP.bufrtable   ./prepobs_prep.bufrtable
+${CP_LN} -sf ${FIXgsi}/prepobs_prep_RAP.bufrtable ./prepobs_prep.bufrtable
+if [ ! -s "./prepobs_prep.bufrtable" ]; then
+  ${ECHO} "prepobs_prep.bufrtable does not exist or not readable"
+  exit 1
+fi
+
 # WPS GEO_GRID Data
-${LN} -s ${FIXwps}/hrrr_geo_em.d01.nc           ./geo_em.d01.nc
-
-
+${LN} -sf ${FIXwps}/hrrr_geo_em.d01.nc ./geo_em.d01.nc 
+if [ ! -s "./geo_em.d01.nc" ]; then
+  ${ECHO} "geo_em.d01.nc does not exist or not readable"
+  exit 1 
+fi
 
 # print parameters for linking/processing
 ${ECHO} "START_TIME: "${START_TIME}
@@ -81,34 +94,62 @@ fi
 ${ECHO} "SUBH_TIME: "${SUBH_TIME}
 ${ECHO} "MINUTES: "${MM1}"/"${MM2}"/"${MM3}
 ${ECHO} "YYYYMMDDHH: "${YYYYMMDDHH}
-obsname="MergedReflectivityQC"
+
 # create mrms file list
-for min in ${MM1} ${MM2} ${MM3}
-do
-  ${ECHO} "Looking for data valid:"${YYYY}"-"${MM}"-"${DD}" "${HH}":"${min}
-  s=0
-  while [[ $s -le 59 ]]; do
-    if [ $s -lt 10 ]; then
-      ss=0${s}
-    else
-      ss=$s
-    fi
-    radarfilez=${COMINradar}/${obsname}/${obsname}_00.50_${YYYY}${MM}${DD}-${HH}${min}${ss}.grib2.gz
-    if [ -s $radarfilez ]; then
-      echo 'Found '${radarfilez}
-      numgrib2=`ls ${COMINradar}/${obsname}/${obsname}_*_${YYYY}${MM}${DD}-${HH}${min}*.grib2.gz | wc -l`
-      echo 'Number of GRIB-2 files: '${numgrib2}
-      if [ ${numgrib2} -ge 10 ] && [ ! -e filelist_mrms ]; then
-#        ln -sf ${COMINradar}/${obsname}/${obsname}_*_${YYYY}${MM}${DD}-${HH}${min}*.grib2.gz . 
-        cp ${COMINradar}/${obsname}/${obsname}_*_${YYYY}${MM}${DD}-${HH}${min}*.grib2.gz .
-        gzip -d ${obsname}_*_${YYYY}${MM}${DD}-${HH}${min}*.grib2.gz
-        ls ${obsname}_*_${YYYY}${MM}${DD}-${HH}${min}*.grib2 > filelist_mrms
-        echo 'Creating links for SUBH: '${SUBH_TIME}
+if [ "${envir}" == "esrl" ]; then #jet
+  for min in ${MM1} ${MM2} ${MM3}
+  do
+    ${ECHO} "Looking for data valid:"${YYYY}"-"${MM}"-"${DD}" "${HH}":"${min}
+    s=0
+    while [[ $s -le 59 ]]; do
+      if [ $s -lt 10 ]; then
+        ss=0${s}
+      else
+        ss=$s
       fi
-    fi
-    ((s+=1))
-  done 
-done
+      nsslfile=${COMINradar}/${YYYY}${MM}${DD}-${HH}${min}${ss}.MRMS_MergedReflectivityQC_00.50_${YYYY}${MM}${DD}-${HH}${min}${ss}.grib2
+      if [ -s $nsslfile ]; then
+        echo 'Found '${nsslfile}
+        numgrib2=`ls ${COMINradar}/${YYYY}${MM}${DD}-${HH}${min}*.MRMS_MergedReflectivityQC_*_${YYYY}${MM}${DD}-${HH}${min}*.grib2 | wc -l`
+        echo 'Number of GRIB-2 files: '${numgrib2}
+        if [ ${numgrib2} -ge 10 ] && [ ! -e filelist_mrms ]; then
+          ln -sf ${COMINradar}/${YYYY}${MM}${DD}-${HH}${min}*.MRMS_MergedReflectivityQC_*_${YYYY}${MM}${DD}-${HH}${min}*.grib2 . 
+          ls ${YYYY}${MM}${DD}-${HH}${min}*.MRMS_MergedReflectivityQC_*_${YYYY}${MM}${DD}-${HH}${min}*.grib2 > filelist_mrms
+          echo 'Creating links for SUBH: '${SUBH_TIME}
+        fi
+      fi
+      ((s+=1))
+    done 
+  done
+else #wcoss
+  obsname="MergedReflectivityQC"
+  for min in ${MM1} ${MM2} ${MM3}
+  do
+    ${ECHO} "Looking for data valid:"${YYYY}"-"${MM}"-"${DD}" "${HH}":"${min}
+    s=0
+    while [[ $s -le 59 ]]; do
+      if [ $s -lt 10 ]; then
+        ss=0${s}
+      else
+        ss=$s
+      fi
+      radarfilez=${COMINradar}/${obsname}/${obsname}_00.50_${YYYY}${MM}${DD}-${HH}${min}${ss}.grib2.gz
+      if [ -s $radarfilez ]; then
+        echo 'Found '${radarfilez}
+        numgrib2=`ls ${COMINradar}/${obsname}/${obsname}_*_${YYYY}${MM}${DD}-${HH}${min}*.grib2.gz | wc -l`
+        echo 'Number of GRIB-2 files: '${numgrib2}
+        if [ ${numgrib2} -ge 10 ] && [ ! -e filelist_mrms ]; then
+  #        ln -sf ${COMINradar}/${obsname}/${obsname}_*_${YYYY}${MM}${DD}-${HH}${min}*.grib2.gz . 
+          cp ${COMINradar}/${obsname}/${obsname}_*_${YYYY}${MM}${DD}-${HH}${min}*.grib2.gz .
+          gzip -d ${obsname}_*_${YYYY}${MM}${DD}-${HH}${min}*.grib2.gz
+          ls ${obsname}_*_${YYYY}${MM}${DD}-${HH}${min}*.grib2 > filelist_mrms
+          echo 'Creating links for SUBH: '${SUBH_TIME}
+        fi
+      fi
+      ((s+=1))
+    done 
+  done
+fi
 
 # remove filelist_mrms if zero bytes
 if [ ! -s filelist_mrms ]; then
@@ -130,6 +171,7 @@ cat << EOF > mosaic.namelist
   analysis_time = ${YYYYMMDDHH},
   dataPath = './',
  /
+
 EOF
 
 # Run obs processor
@@ -143,7 +185,7 @@ postmsg "$jlogfile" "$msg"
 msg="***********************************************************"
 postmsg "$jlogfile" "$msg"
 
-${CP} ${EXECrtma3d}/${exefile_name_radar} ${pgm}
+${CP_LN} ${EXECrtma3d}/${exefile_name_radar} ${pgm}
 ${MPIRUN} ${pgm} > ${pgmout} 2>errfile
 export err=$?; err_chk
 
@@ -152,7 +194,12 @@ postmsg "$jlogfile" "$msg"
 
 targetfile="NSSLRefInGSI.bufr"
 if [ -f ${DATA}/${targetfile} ] ; then
+  if [ "${envir}" == "esrl" ]; then #Jet
+    mv ${DATA}/${targetfile} ${COMINobsproc_rtma3d}/${tz_str}.${targetfile} #to save disk space
+    ${LN} -snf ${COMINobsproc_rtma3d}/${tz_str}.${targetfile} ${DATA}/${targetfile}
+  else
     cpreq ${DATA}/${targetfile} ${COMINobsproc_rtma3d}/${RUN}.${tz_str}.${targetfile}
+  fi
 else
   msg="WARNING $pgm terminated normally but ${DATA}/${targetfile} does NOT exist."
   ${ECHO} "$msg"
@@ -161,4 +208,3 @@ else
 fi
 
 exit 0
-

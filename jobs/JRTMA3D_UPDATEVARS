@@ -33,19 +33,19 @@ export CNVGRIB=${CNVGRIB:-cnvgrib}
 ##########################################################
 # make temp/running directories
 ##########################################################
-#export DATA=${DATA:-$DATAROOT/${jobid:?}} #jobid ($job.$LSB_JOBID MUST BE DEFINED IN TERMS OF $RUN IN UPPER LEVEL SCRIPT /MPondeca, 26Jul2015
-#if [ -d $DATA ] ; then
-#   ${ECHO} "$DATA exists, remove its content"
-#   if [ "${envir}" == "esrl" ]; then #Jet
-#     ${RM} -rf $DATA/namelist.output #logic keeper
-#   else
-#     ${RM} -rf $DATA/*
-#   fi
-#else
-#   ${ECHO} "$DATA does not exist, create it"
-#   ${MKDIR} -p $DATA
-#fi
-#cd $DATA
+export DATA=${DATA:-$DATAROOT/${jobid:?}} #jobid ($job.$LSB_JOBID MUST BE DEFINED IN TERMS OF $RUN IN UPPER LEVEL SCRIPT /MPondeca, 26Jul2015
+if [ -d $DATA ] ; then
+   ${ECHO} "$DATA exists, remove its content"
+   if [ "${envir}" == "esrl" ]; then #Jet
+     ${RM} -rf $DATA/namelist.output #logic keeper
+   else
+     ${RM} -rf $DATA/*
+   fi
+else
+   ${ECHO} "$DATA does not exist, create it"
+   ${MKDIR} -p $DATA
+fi
+cd $DATA
 
 #####################################################
 # Run setpdy and initialize PDY variables
@@ -135,9 +135,8 @@ fi
 #
 ###########################################################
 #   Set the name to the executable
-    export exefile_name_updatevars=${exefile_name_updatevars_wrf:-"rtma3d_updatevars_wrf"}
+    export exefile_name_updatevars=${exefile_name_updatevars:-"rtma3d_updatevars"}
     export exefile_name_update_ncfields=${exefile_name_updatevars_ncfields:-"rtma3d_updatevars_ncfields"}
-    export exefile_name_updatevars_ndown=${exefile_name_updatevars_ndown:-"rtma3d_updatevars_ndown"}
 
 if [ "${envir}" != "esrl" ]; then #WCOSS
 #   set the file name of the final analysis file for archive
@@ -160,15 +159,15 @@ if [ "${envir}" != "esrl" ]; then #WCOSS
         mkdir -p ${DATA_RUNDIR}
     fi
     export DATAHOME=${DATA_RUNDIR}/gsiprd
-#    ${RM} -rf ${DATAHOME}
+    ${RM} -rf ${DATAHOME}
     ${LN} -s  ${DATA}  ${DATAHOME}
 
     export DATAOBSHOME=${DATA_RUNDIR}/obsprd
-#    ${RM} -rf ${DATAOBSHOME}
+    ${RM} -rf ${DATAOBSHOME}
     ${LN} -s  ${COMINobsproc_rtma3d}  ${DATAOBSHOME}
 
     export DATAHOME_BK=${DATA_RUNDIR}/fgsprd
-#    ${RM} -rf ${DATAHOME_BK}
+    ${RM} -rf ${DATAHOME_BK}
     ${LN} -s  ${GESINhrrr_rtma3d}  ${DATAHOME_BK}
 fi
 
