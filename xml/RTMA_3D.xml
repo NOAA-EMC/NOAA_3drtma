@@ -234,7 +234,7 @@
       <value><cyclestr>&DATAROOT;/@Y@m@d@H@M/obsprd</cyclestr></value>
     </envar>
     <envar>
-      <name>NSSL</name>
+      <name>COMINradar</name>
       <value>&RADAR_DIR;</value>
     </envar>
 
