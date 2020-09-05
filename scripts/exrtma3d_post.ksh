@@ -117,7 +117,7 @@ export err=$?; err_chk
 
 if [ "${envir}" == "esrl" ]; then #Jet
   wrfprsfile="wrfprs_${POST_NAME}_${FCST_TIME}.grib2"
-  wrfnatfile="wrfnat_${POST_NAME}_${FCST_TIME}.grib2
+  wrfnatfile="wrfnat_${POST_NAME}_${FCST_TIME}.grib2"
   wrftwofile="wrftwo_${POST_NAME}_${FCST_TIME}.grib2"
   wrfmslfile="wrfmsl_${POST_NAME}_${FCST_TIME}.grib2"
 else

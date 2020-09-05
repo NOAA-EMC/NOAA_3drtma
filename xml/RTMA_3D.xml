@@ -361,7 +361,7 @@
       <value>&ENKFFCST_DIR;</value>
     </envar>
     <envar>
-      <name>HRRRDAS_DIR</name>
+      <name>COMINhrrrdas</name>
       <value>&HRRRDAS_DIR;</value>
     </envar>
     <envar>

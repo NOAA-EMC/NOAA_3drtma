@@ -135,9 +135,8 @@ $varEOF
 EOF
 chmod 755 smart.ksh
 ./smart.ksh
-
-echo $?
+export err=$?; err_chk
 
 mv HRRRCS${fhr}.tm00 $COMOUT/hrrr.t${cyc}z.smarthrrrconusf${fhr}_nb.grib2
 rm -fr ${workdir}
-exit
+exit 0

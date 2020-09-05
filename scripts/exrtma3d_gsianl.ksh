@@ -24,8 +24,8 @@ if [ ! -f ${EXECrtma3d}/${exefile_name_gsi} ]; then
 fi
 
 # Check to make sure required directory defined and existed
-check_if_defined "ENKF_FCST" "HRRRDAS_DIR" "HRRR_DIR" "OBS_DIR" "AIRCRAFT_REJECT" "SFCOBS_USELIST" "SFCOBS_PROVIDER" "COMINhrrrdas" "EnsWgt"
-check_dirs_exist "ENKF_FCST" "HRRRDAS_DIR" "HRRR_DIR" "OBS_DIR" "AIRCRAFT_REJECT" "SFCOBS_USELIST" "SFCOBS_PROVIDER" "COMINhrrrdas"
+check_if_defined "ENKF_FCST" "COMINhrrrdas" "HRRR_DIR" "OBS_DIR" "AIRCRAFT_REJECT" "SFCOBS_USELIST" "SFCOBS_PROVIDER" "EnsWgt"
+check_dirs_exist "ENKF_FCST" "COMINhrrrdas" "HRRR_DIR" "OBS_DIR" "AIRCRAFT_REJECT" "SFCOBS_USELIST" "SFCOBS_PROVIDER"
 
 if [ "${subcyc}" == "-1" ]; then #hourly run
   SUBH_TIME='00'
@@ -224,9 +224,9 @@ if [ ${HRRRDAS_BEC} -eq 1 ]; then
   if [ "${envir}" != "esrl" ]; then #WCOSS
     ${LS} ${COMINhrrrdas}/hrrrdas_small_d02_${YYYYMMDD}${cyc}00f01_mem000${c} > filelist.hrrrdas
   elif [ ${HRRRDAS_SMALL} -eq 1 ]; then
-    ${LS} ${HRRRDAS_DIR}/${time_1hour_ago}/wrfprd_mem????/wrfout_small_d02_${time_str2} > filelist.hrrrdas
+    ${LS} ${COMINhrrrdas}/${time_1hour_ago}/wrfprd_mem????/wrfout_small_d02_${time_str2} > filelist.hrrrdas
   else
-    ${LS} ${HRRRDAS_DIR}/${time_1hour_ago}/wrfprd_mem????/wrfout_d02_${time_str2} > filelist.hrrrdas
+    ${LS} ${COMINhrrrdas}/${time_1hour_ago}/wrfprd_mem????/wrfout_d02_${time_str2} > filelist.hrrrdas
   fi
   c=1
   while [[ $c -le 36 ]]; do
@@ -238,9 +238,9 @@ if [ ${HRRRDAS_BEC} -eq 1 ]; then
    if [ "${envir}" != "esrl" ]; then #WCOSS
      hrrre_file=${COMINhrrrdas}/hrrrdas_small_d02_${YYYYMMDD}${cyc}00f01_mem00${cc}
    elif [ ${HRRRDAS_SMALL} -eq 1 ]; then
-     hrrre_file=${HRRRDAS_DIR}/${time_1hour_ago}/wrfprd_mem00${cc}/wrfout_small_d02_${time_str2}
+     hrrre_file=${COMINhrrrdas}/${time_1hour_ago}/wrfprd_mem00${cc}/wrfout_small_d02_${time_str2}
    else
-     hrrre_file=${HRRRDAS_DIR}/${time_1hour_ago}/wrfprd_mem00${cc}/wrfout_d02_${time_str2}
+     hrrre_file=${COMINhrrrdas}/${time_1hour_ago}/wrfprd_mem00${cc}/wrfout_d02_${time_str2}
    fi
    ${LN} -sf ${hrrre_file} wrf_en0${cc}
    ((c = c + 1))
