@@ -370,7 +370,7 @@
     </envar>
     <envar>
       <name>HRRRDAS_BEC</name>
-      <value>0</value>
+      <value>1</value>
     </envar>
     <envar>
       <name>GSIANL_RES</name>
@@ -378,7 +378,7 @@
     </envar>
     <envar>
       <name>EnsWgt</name>
-      <value>0.5</value>
+      <value>0.9</value>
     </envar>
 
     <dependency>
