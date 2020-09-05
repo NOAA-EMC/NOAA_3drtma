@@ -26,7 +26,7 @@ YYYYJJJHHMM=`${DATE} +"%Y%j%H%M" -d "${START_TIME}"`
 YYYYMMDD=`${DATE} +"%Y%m%d" -d "${START_TIME}"`
 YYYYMMDDHH=`${DATE} +"%Y%m%d%H" -d "${START_TIME}"`
 HH=`${DATE} +"%H" -d "${START_TIME}"`
-date_str=${YYYYJJJHHMM}
+date_str=${YYYYMMDDHH}
 
 #----- enter working directory -------
 cd ${DATA}
@@ -52,8 +52,8 @@ if [ "${envir}" == "esrl"  ]; then #For Jet expr runs
   RUNS[3]="rap_e";  FILES[3]="${PREPBUFR}/${date_str}.${RUNS[3]}.${tz_str}.${DFILE}.tm00.${YYYYMMDD}"
   RUNS[4]="rap";    FILES[4]="${PREPBUFR}_test/${date_str}.${RUNS[4]}.${tz_str}.${DFILE}.tm00.${YYYYMMDD}.test"
   RUNS[5]="rap_e";  FILES[5]="${PREPBUFR}_test/${date_str}.${RUNS[5]}.${tz_str}.${DFILE}.tm00.${YYYYMMDD}.test"
-  RUNS[6]="rtma_ru";FILES[6]="${PREPBUFR}/${date_str}.${RUNS[6]}.${tz_str}.${DFILE}.tm00"
-  RUNS[7]="rtma_ru";FILES[7]="${PREPBUFR}/${date_str}.${RUNS[7]}.${tz_str}.${DFILE}.tm00.${YYYYMMDD}"
+  RUNS[6]="rtma_ru";FILES[6]="${PREPBUFR}/${YYYYJJJHHMM}.${RUNS[6]}.${tz_str}.${DFILE}.tm00"
+  RUNS[7]="rtma_ru";FILES[7]="${PREPBUFR}/${YYYYJJJHHMM}.${RUNS[7]}.${tz_str}.${DFILE}.tm00.${YYYYMMDD}"
   RUNS[8]="rtma_ru";FILES[8]="${PREPBUFR}/${YYYYMMDDHH}.${RUNS[8]}.${tz_str}.${DFILE}.tm00"
   if [ "${subcyc}" == "-1" ]; then #hourly run
     casecade="2 3" #5 4 for prepbufr_test

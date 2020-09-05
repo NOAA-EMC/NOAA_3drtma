@@ -62,7 +62,11 @@ modulefiles/*/build/build_ncep_post.*
 #
 xml/*.db
 test.xml
-*ksh.2019-11*
-*xml.2019-11*
+*ksh.2019*
+*xml.2019*
+*ksh.2020*
+*xml.2020*
+xml/archive
+xml/retro
 #
 #  # exceptional pattern is led by sign "!"
