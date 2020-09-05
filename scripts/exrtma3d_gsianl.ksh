@@ -440,13 +440,14 @@ if [ "${envir}" == "esrl" ];  then ##GSI on Jet needs special treatment
 else
   ${MPIRUN} ${pgm} < gsiparm.anl > ${pgmout} 2>errfile
 fi
+export err=$?;
 ##save some information for possible debugging before err_chk
 ${CAT} fort.* >   fits_${cycle_str}.txt
 #${LS} -l > GSI_workdir_list
 ${CAT} errfile >> ${pgmout}
 #${MV} ${pgmout} ${pgmout}.var
 ${CP} -p fits_${cycle_str}.txt ${COMOUTgsi_rtma3d}
-export err=$?; err_chk
+err_chk
 
 # Loop over first and last outer loops to generate innovation
 # diagnostic files for indicated observation types (groups)
@@ -520,11 +521,12 @@ EOF
   else
     ${MPIRUN} ${pgm} < gsiparm.anl >> ${pgmout} 2>errfile
   fi
+  export err=$?;
   #${LS} -l > GSI_workdir_list
   ${CAT} errfile >> ${pgmout}
   ${ECHO} -e "\n\n -- End of second GSI --\n" >> ${pgmout}
   #${CP} -p ${pgmout} ${COMOUTgsi_rtma3d}/${pgmout}.cloudana #this output should be in $LLOG_PGMOUT
-  export err=$?; err_chk
+  err_chk
 
 fi ###### second GSI run
 
