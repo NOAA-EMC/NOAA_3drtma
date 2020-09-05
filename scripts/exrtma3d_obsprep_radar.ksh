@@ -7,12 +7,12 @@ if [ ! -f ${EXECrtma3d}/${exefile_name_radar} ] ; then
   exit 1
 fi
 
-if [ ! "${NSSL}" ]; then
-  ${ECHO} "ERROR: \$NSSL is not defined!"
+if [ ! "${COMINradar}" ]; then
+  ${ECHO} "ERROR: \$COMINradar is not defined!"
   exit 1
 fi
-if [ ! -d "${NSSL}" ]; then
-  ${ECHO} "ERROR: directory '${NSSL}' does not exist!"
+if [ ! -d "${COMINradar}" ]; then
+  ${ECHO} "ERROR: directory '${COMINradar}' does not exist!"
   exit 1
 fi
 
@@ -107,13 +107,13 @@ if [ "${envir}" == "esrl" ]; then #jet
       else
         ss=$s
       fi
-      nsslfile=${NSSL}/${YYYY}${MM}${DD}-${HH}${min}${ss}.MRMS_MergedReflectivityQC_00.50_${YYYY}${MM}${DD}-${HH}${min}${ss}.grib2
+      nsslfile=${COMINradar}/${YYYY}${MM}${DD}-${HH}${min}${ss}.MRMS_MergedReflectivityQC_00.50_${YYYY}${MM}${DD}-${HH}${min}${ss}.grib2
       if [ -s $nsslfile ]; then
         echo 'Found '${nsslfile}
-        numgrib2=`ls ${NSSL}/${YYYY}${MM}${DD}-${HH}${min}*.MRMS_MergedReflectivityQC_*_${YYYY}${MM}${DD}-${HH}${min}*.grib2 | wc -l`
+        numgrib2=`ls ${COMINradar}/${YYYY}${MM}${DD}-${HH}${min}*.MRMS_MergedReflectivityQC_*_${YYYY}${MM}${DD}-${HH}${min}*.grib2 | wc -l`
         echo 'Number of GRIB-2 files: '${numgrib2}
         if [ ${numgrib2} -ge 10 ] && [ ! -e filelist_mrms ]; then
-          ln -sf ${NSSL}/${YYYY}${MM}${DD}-${HH}${min}*.MRMS_MergedReflectivityQC_*_${YYYY}${MM}${DD}-${HH}${min}*.grib2 . 
+          ln -sf ${COMINradar}/${YYYY}${MM}${DD}-${HH}${min}*.MRMS_MergedReflectivityQC_*_${YYYY}${MM}${DD}-${HH}${min}*.grib2 . 
           ls ${YYYY}${MM}${DD}-${HH}${min}*.MRMS_MergedReflectivityQC_*_${YYYY}${MM}${DD}-${HH}${min}*.grib2 > filelist_mrms
           echo 'Creating links for SUBH: '${SUBH_TIME}
         fi
