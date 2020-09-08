@@ -97,6 +97,11 @@ fi
 #--- Building of GSILIBS
 #
 # working branch
+
+export FC=ifort
+export CXX=icpc
+export CC=icc
+
 cd ${TOP_SORC}/GSILIBS
 mkdir build
 cd build

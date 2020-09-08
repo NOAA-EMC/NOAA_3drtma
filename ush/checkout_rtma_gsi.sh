@@ -106,7 +106,7 @@ if [ -d ${DIRNAME_GSI} ] ; then
 fi
 
 echo " make a local clone of the ProdGSI repository under ${TOP_SORC}/${DIRNAME_GSI} ... "
-echo " ====> git clone gerrit:ProdGSI  ./${DIRNAME_GSI} "
+echo " ====> git clone https://github.com/comgsi/GSI  ./${DIRNAME_GSI} "
 git clone https://github.com/comgsi/GSI ./${DIRNAME_GSI}
 cd ./${DIRNAME_GSI}
 scp -p .git/hooks/commit-msg  .git/hooks

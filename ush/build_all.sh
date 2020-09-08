@@ -71,7 +71,6 @@ then
   echo ' directory sorc/ could not be found. Abort the task of compilation.'
   exit 1
 fi
-
 export USH_DIR=${TOP_RTMA}/ush 
 export EXEC_DIR=${TOP_RTMA}/exec
 

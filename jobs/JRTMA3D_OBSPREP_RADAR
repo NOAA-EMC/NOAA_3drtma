@@ -92,7 +92,7 @@ export COMOUT=${COMOUT:-${COMROOT}/${NET}/${envir}/${RUN}.${PDY}}
 
 ### Observations Products/Input from RAP
 export COMINrap=${COMINrap:-"${COMIN}/rap.${PDY}"}
-export COMINhrrr=${COMINhrrr:-"${COMIN}/hrrr.${PDY}/conus"}
+export COMINhrrr=${COMINhrrr:-"${COMIN}/hrrr.${PDY}/${DOMAIN}"}
 export COMINlightning=${COMINlightning:-"${COMIN}/lightning.${PDY}"}
 export COMINmosaic=${COMINmosaic:-"${COMIN}/radar.${PDY}"}
 export COMINradar=${COMINradar:-"${COMINRADAR}"}

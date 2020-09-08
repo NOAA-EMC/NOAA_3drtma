@@ -3,31 +3,31 @@
 set -x 
 #-- Testing the status of some important variables. --#
 # Make sure these variables for key directories are defined and exists
-if [ ! "${COMINhrrr}" ]; then
-  ${ECHO} "ERROR: \$COMINhrrr is not defined!"
-  exit 1
-fi
-if [ ! -d "${COMINhrrr}" ]; then
-  ${ECHO} "ERROR: $COMINhrrr does not exist!"
-  exit 1
-fi
-if [ ! "${COMINhrrr_cycp1}" ]; then
-  ${ECHO} "ERROR: \$COMINhrrr_cycp1 is not defined!"
-  exit 1
-fi
-if [ ! -d "${COMINhrrr_cycp1}" ]; then
-  ${ECHO} "ERROR: $COMINhrrr_cycp1 does not exist!"
-  exit 1
-fi
+#if [ ! "${COMINhrrr}" ]; then
+#  ${ECHO} "ERROR: \$COMINhrrr is not defined!"
+#  exit 1
+#fi
+#if [ ! -d "${COMINhrrr}" ]; then
+#  ${ECHO} "ERROR: $COMINhrrr does not exist!"
+#  exit 1
+#fi
+#if [ ! "${COMINhrrr_cycp1}" ]; then
+#  ${ECHO} "ERROR: \$COMINhrrr_cycp1 is not defined!"
+#  exit 1
+#fi
+#if [ ! -d "${COMINhrrr_cycp1}" ]; then
+#  ${ECHO} "ERROR: $COMINhrrr_cycp1 does not exist!"
+#  exit 1
+#fi
 
-if [ ! "${GESINhrrr_rtma3d}" ]; then
-  ${ECHO} "ERROR: \$GESINhrrr_rtma3d is not defined!"
-  exit 1
-fi
-if [ ! -d "${GESINhrrr_rtma3d}" ]; then
-  ${ECHO} "ERROR: $GESINhrrr_rtma3d does not exist!"
-  exit 1
-fi
+#if [ ! "${GESINhrrr_rtma3d}" ]; then
+#  ${ECHO} "ERROR: \$GESINhrrr_rtma3d is not defined!"
+#  exit 1
+#fi
+#if [ ! -d "${GESINhrrr_rtma3d}" ]; then
+#  ${ECHO} "ERROR: $GESINhrrr_rtma3d does not exist!"
+#  exit 1
+#fi
 
 if [ ! "${DATA}" ]; then
   ${ECHO} "ERROR: \$DATA is not defined!"
@@ -98,8 +98,118 @@ postmsg "$jlogfile" "$msg"
 msg="***********************************************************"
 postmsg "$jlogfile" "$msg"
 
-# Look for bqckground from pre-forecast background
+if [ ${DOMAIN} == "alaska" ]; then
+
+          case  $HH  in
+               00)       
+     		    HHf=21 
+                    HRCNT=03
+                    ;;
+               01)
+     		    HHf=00
+                    HRCNT=01
+                    ;;
+               02)       
+     		    HHf=00
+                    HRCNT=02
+                    ;;
+               03)  
+	       	    HHf=00
+                    HRCNT=03
+		    ;;
+               04)  
+		    HHf=03
+                    HRCNT=01
+                    ;;
+               05)  
+		    HHf=03
+                    HRCNT=02
+                    ;;
+               06)
+	            HHf=03
+                    HRCNT=03
+                    ;;
+               07)
+                    HHf=06
+                    HRCNT=01
+                    ;;
+               08)
+                    HHf=06
+                    HRCNT=02
+                    ;;
+               09)
+                    HHf=06
+                    HRCNT=03
+                    ;;
+               10)
+	            HHf=09
+		    HRCNT=01
+	            ;;
+               11)
+                    HHf=09
+                    HRCNT=02
+                    ;;
+
+               12)
+                    HHf=09
+                    HRCNT=03
+                    ;;
+               13)
+                    HHf=12
+                    HRCNT=01
+                    ;;
+               14)
+                    HHf=12
+                    HRCNT=02
+                    ;;
+               15)  
+                    HHf=12
+                    HRCNT=03
+                    ;;
+               16)  
+                    HHf=15
+                    HRCNT=01
+                    ;;
+               17)  
+                    HHf=15
+                    HRCNT=02
+                    ;;
+               18)
+                    HHf=15
+                    HRCNT=03
+                    ;;
+               19)
+                    HHf=18
+                    HRCNT=01
+                    ;;
+               20)
+                    HHf=18
+                    HRCNT=02
+                    ;;
+               21)
+                    HHf=18
+                    HRCNT=03
+                    ;;
+               22)
+                    HHf=21
+                    HRCNT=01
+                    ;;
+               23)
+                    HHf=21
+                    HRCNT=02
+                    ;;
+
+          esac 
+
+
+
+FGShrrr_FNAME2="hrrr.t${HHf}00z.f${HRCNT}${subcyc}.netcdf"
+
+elif [ ${DOMAIN} == "conus" ]; then
+
 FGShrrr_FNAME2="hrrr.t${HH_cycm1}00z.f01${subcyc}.netcdf"
+
+fi
 
 if  [ ${HH_cycm1} -eq 23 ]; then
 

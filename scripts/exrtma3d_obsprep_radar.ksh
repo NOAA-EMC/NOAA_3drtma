@@ -81,7 +81,14 @@ fi
 ${ECHO} "SUBH_TIME: "${SUBH_TIME}
 ${ECHO} "MINUTES: "${MM1}"/"${MM2}"/"${MM3}
 ${ECHO} "YYYYMMDDHH: "${YYYYMMDDHH}
+if [ ${DOMAIN} == "conus" ] ; then
 obsname="MergedReflectivityQC"
+numlim=10
+elif [ ${DOMAIN} == "alaska" ] ; then
+obsname="MergedReflectivityQComposite"
+numlim=1
+fi
+
 # create mrms file list
 for min in ${MM1} ${MM2} ${MM3}
 do
@@ -98,7 +105,7 @@ do
       echo 'Found '${radarfilez}
       numgrib2=`ls ${COMINradar}/${obsname}/${obsname}_*_${YYYY}${MM}${DD}-${HH}${min}*.grib2.gz | wc -l`
       echo 'Number of GRIB-2 files: '${numgrib2}
-      if [ ${numgrib2} -ge 10 ] && [ ! -e filelist_mrms ]; then
+      if [ ${numgrib2} -ge ${numlim} ] && [ ! -e filelist_mrms ]; then
 #        ln -sf ${COMINradar}/${obsname}/${obsname}_*_${YYYY}${MM}${DD}-${HH}${min}*.grib2.gz . 
         cp ${COMINradar}/${obsname}/${obsname}_*_${YYYY}${MM}${DD}-${HH}${min}*.grib2.gz .
         gzip -d ${obsname}_*_${YYYY}${MM}${DD}-${HH}${min}*.grib2.gz
