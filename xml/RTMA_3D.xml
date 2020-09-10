@@ -483,6 +483,7 @@
 
   </task>
 
+<!--
   <task name="smartinit_bl" cycledefs="all" maxtries="3">
 
     &SMARTINIT_RESOURCES;
@@ -592,6 +593,7 @@
     </dependency>
 
   </task>
+-->
 
   <task name="ncl_00" cycledefs="all" maxtries="3">
 
