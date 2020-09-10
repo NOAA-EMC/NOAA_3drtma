@@ -52,10 +52,13 @@ if [ "${envir}" == "esrl"  ]; then #For Jet expr runs
   RUNS[3]="rap_e";  FILES[3]="${PREPBUFR}/${date_str}.${RUNS[3]}.${tz_str}.${DFILE}.tm00"
   RUNS[4]="rap";    FILES[4]="${PREPBUFR}_test/${date_str}.${RUNS[4]}.${tz_str}.${DFILE}.tm00"
   RUNS[5]="rap_e";  FILES[5]="${PREPBUFR}_test/${date_str}.${RUNS[5]}.${tz_str}.${DFILE}.tm00"
+  RUNS[6]="rtma_ru";FILES[6]="${PREPBUFR}/${YYYYJJJHHMM}.${RUNS[6]}.${tz_str}.${DFILE}.tm00"
+  RUNS[7]="rtma_ru";FILES[7]="${PREPBUFR}/${YYYYJJJHHMM}.${RUNS[7]}.${tz_str}.${DFILE}.tm00.${YYYYMMDD}"
+  RUNS[8]="rtma_ru";FILES[8]="${PREPBUFR}/${YYYYMMDDHH}.${RUNS[8]}.${tz_str}.${DFILE}.tm00"
   if [ "${subcyc}" == "-1" ]; then #hourly run
     casecade="2 3" #5 4 for prepbufr_test
   else
-    casecade="1"
+    casecade="6 7 8" #"1"
   fi
   for i in $casecade; do
     ${ECHO} "checking ${FILES[$i]}"
