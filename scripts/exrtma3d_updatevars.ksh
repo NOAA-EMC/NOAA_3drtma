@@ -105,7 +105,11 @@ cd ${DATA}
 ${ECHO} "enter working directory:${DATA}"
 
 export WRF_NAMELIST=${DATA}/namelist.input
-${CP} ${PARMwrf}/wrf.nl ${WRF_NAMELIST}
+if [ ${DOMAIN} == "alaska" ] ; then 
+  ${CP} ${PARMwrf}/wrf.nl_AK ${WRF_NAMELIST}
+else
+  ${CP} ${PARMwrf}/wrf.nl ${WRF_NAMELIST} 
+fi
 
 # Check to make sure the wrfinput_d01 file exists
 if [ -r ${GSIRUN_DIR}/wrf_inout ]; then
@@ -135,10 +139,12 @@ end_day=`${DATE} +%d -d "${END_TIME}"`
 end_hour=`${DATE} +%H -d "${END_TIME}"`
 end_minute=`${DATE} +%M -d "${END_TIME}"`
 end_second=`${DATE} +%S -d "${END_TIME}"`
-mod3=$(( $start_hour % 3  ))
-if [ $mod3 -eq 0 ]; then #don't run wrf since it will crash
-   echo "hour=$start_hour, skip wrf run"
-   exit 0
+if [ ${DOMAIN} == "alaska" ] ; then 
+  mod3=$(( $start_hour % 3  ))
+  if [ $mod3 -eq 0 ]; then #don't run wrf since it will crash
+     echo "hour=$start_hour, skip wrf run"
+     exit 0
+  fi
 fi
 
 # Compute number of days and hours for the run
@@ -223,23 +229,38 @@ if [ ! -e "wrfout_d01_${time_str}" ]; then
 fi 
 
 # Output successful so write status to log
-#${ECHO} "Assemble  REFL_10CM,U10,V10 back into wrf_inout"
 ${ECHO} "Assemble Reflectivity fields back into wrf_inout"
-#${NCKS} -A -H -v REFL_10CM,COMPOSITE_REFL_10CM,REFL_10CM_1KM,REFL_10CM_4KM,U10,V10 wrfout_d01_${time_str} ${GSIRUN_DIR}/wrf_inout
-${NCKS} -A -H -v REFL_10CM,COMPOSITE_REFL_10CM,REFL_10CM_1KM,REFL_10CM_4KM wrfout_d01_${time_str} ${GSIRUN_DIR}/wrf_inout
+if [ "${envir}" == "esrl" ]; then #Jet
+  #${NCKS} -A -H -v REFL_10CM,COMPOSITE_REFL_10CM,REFL_10CM_1KM,REFL_10CM_4KM,U10,V10 wrfout_d01_${time_str} ${GSIRUN_DIR}/wrf_inout
+  ${NCKS} -A -H -v REFL_10CM,COMPOSITE_REFL_10CM,REFL_10CM_1KM,REFL_10CM_4KM wrfout_d01_${time_str} ${GSIRUN_DIR}/wrf_inout
+else
+  if [ ! -f ${EXECrtma3d}/${exefile_name_updatevars_ncfields} ]; then
+    ${ECHO} "ERROR: executable '${EXECrtma3d}/${exefile_name_updatevars_ncfields}' does not exist!"
+    exit 1
+  fi
+  ${CP_LN} ${EXECrtma3d}/${exefile_name_update_ncfields} .
+  ${LN} -s wrfout_d01_${time_str} wrfout_d01
+  ${exefile_name_update_ncfields} wrfout_d01 wrf_inout 
+  export err=$?; err_chk
+
+  if [ -f ${COMOUTgsi_rtma3d}/${ANLrtma3d_FNAME} ]; then
+    ${ECHO} "Erasing the GSI generated analysis file to be replaced by modified analysis."
+    ${RM} ${COMOUTgsi_rtma3d}/${ANLrtma3d_FNAME}
+  fi
+
+  ${CP_LN} -p wrf_inout ${COMOUTgsi_rtma3d}/${ANLrtma3d_FNAME}
+fi
 
 ${ECHO} "update_vars.ksh completed successfully at `${DATE}`"
 
 # Saving some files
 ${CP} -p namelist.input  ${COMOUTwrf_rtma3d}/namelist.input_${cycle_str}
 
-if [ "${envir}" != "esrl" ]; then #wcoss
-  echo "Doing some extra things..."
+if [ "${envir}" == "esrl" ]; then #Jet
+  ${RM} -f ${DATA}/sig*
+  ${RM} -f ${DATA}/obs*
+  ${RM} -f ${DATA}/pe*
 fi
-
-${RM} -f ${DATA}/sig*
-${RM} -f ${DATA}/obs*
-${RM} -f ${DATA}/pe*
 
 msg="JOB $job FOR $RUN HAS COMPLETED NORMALLY"
 postmsg "$jlogfile" "$msg"

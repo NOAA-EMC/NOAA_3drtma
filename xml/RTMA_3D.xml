@@ -18,6 +18,8 @@
 <!ENTITY JOBNAME_PRE "RTMA3D_AK">
 <!ENTITY envir "esrl"> 
 <!ENTITY KEEPDATA "YES">
+<!ENTITY DOMAIN "alaska">
+<!ENTITY FG_FALLBACK "YES">
 
 <!ENTITY NCL_VER "6.5.0">
 <!ENTITY SCRIPTS "&HOMEBASE_DIR;/scripts">
@@ -41,13 +43,13 @@
 <!ENTITY WRKFLW_DIR "&HOMEBASE_DIR;/xml">
 
 <!ENTITY MACHINE    "jet">
-<!ENTITY OBS_DIR "/lfs4/BMC/public/data">
+<!ENTITY OBS_DIR "/public/data">
 <!ENTITY HRRR_DIR "/home/rtrr/hrrr_ak">
 <!ENTITY SST_DIR "&OBS_DIR;/grids/ncep/sst/0p083deg/grib2">
 
 <!ENTITY GFS_DIR "&OBS_DIR;/grids/gfs/0p5deg/grib2">
 <!ENTITY ENKFFCST_DIR "&OBS_DIR;/grids/enkf/atm_v15">
-<!ENTITY HRRRDAS_DIR "/lfs4/BMC/wrfruc/HRRRE/cycle">
+<!ENTITY HRRRDAS_DIR "/home/rtrr/hrrrdas">
 
 <!ENTITY AIRCRAFT_REJECT "/home/amb-verif/acars_RR/amdar_reject_lists">
 <!ENTITY SFCOBS_USELIST "/home/amb-verif/ruc_madis_surface/mesonet_uselists">
@@ -132,50 +134,19 @@
 <!ENTITY RESERVATION_SMARTINIT '<native>--mail-type=NONE</native><queue>&QUEUE;</queue><account>&ACCOUNT;</account><partition>&PARTITION;</partition>'>
 
 <!ENTITY COMMONVARS
-   '<envar>
-      <name>HOMErtma3d</name>
-      <value>&HOMEBASE_DIR;</value>
-    </envar>
-    <envar>
-      <name>envir</name>
-      <value>&envir;</value>
-    </envar>
-    <envar>
-      <name>SCHEDULER</name>
-      <value>&SCHEDULER;</value>
-    </envar>
-    <envar>
-      <name>modulefile_jet</name>
-      <value>&MODULE_NCO;</value>
-    </envar>
-    <envar>
-      <name>machine</name>
-      <value>&MACHINE;</value>
-    </envar>
-    <envar>
-      <name>COMROOT</name>
-      <value>&DATABASE_DIR;</value>
-    </envar>
-    <envar>
-      <name>jlogfile</name>
-      <value><cyclestr>&LOG_DIR;/@Y@m@d/jlogfile_@Y@m@d@H@M</cyclestr></value>
-    </envar>
-    <envar>
-       <name>PDY</name>
-       <value><cyclestr>@Y@m@d</cyclestr></value>
-    </envar>
-    <envar>
-       <name>cyc</name>
-       <value><cyclestr>@H</cyclestr></value>
-    </envar>
-    <envar>
-       <name>subcyc</name>
-       <value><cyclestr>-1</cyclestr></value>
-    </envar>
-    <envar>
-      <name>KEEPDATA</name>
-      <value>&KEEPDATA;</value>
-    </envar>
+   '<envar><name>HOMErtma3d</name><value>&HOMEBASE_DIR;</value></envar>
+    <envar><name>envir</name><value>&envir;</value></envar>
+    <envar><name>SCHEDULER</name><value>&SCHEDULER;</value></envar>
+    <envar><name>modulefile_jet</name><value>&MODULE_NCO;</value></envar>
+    <envar><name>machine</name><value>&MACHINE;</value></envar>
+    <envar><name>COMROOT</name><value>&DATABASE_DIR;</value></envar>
+    <envar><name>jlogfile</name><value><cyclestr>&LOG_DIR;/@Y@m@d/jlogfile_@Y@m@d@H@M</cyclestr></value></envar>
+    <envar><name>PDY</name><value><cyclestr>@Y@m@d</cyclestr></value></envar>
+    <envar><name>cyc</name><value><cyclestr>@H</cyclestr></value></envar>
+    <envar><name>subcyc</name><value><cyclestr>-1</cyclestr></value></envar>
+    <envar><name>KEEPDATA</name><value>&KEEPDATA;</value></envar>
+    <envar><name>DOMAIN</name><value>&DOMAIN;</value></envar>
+    <envar><name>FG_FALLBACK</name><value>&FG_FALLBACK;</value></envar>
 '>
 
 ]>
@@ -234,7 +205,7 @@
       <value><cyclestr>&DATAROOT;/@Y@m@d@H/obsprd</cyclestr></value>
     </envar>
     <envar>
-      <name>NSSL</name>
+      <name>COMINradar</name>
       <value>&RADAR_DIR;</value>
     </envar>
 
@@ -361,7 +332,7 @@
       <value>&ENKFFCST_DIR;</value>
     </envar>
     <envar>
-      <name>HRRRDAS_DIR</name>
+      <name>COMINhrrrdas</name>
       <value>&HRRRDAS_DIR;</value>
     </envar>
     <envar>
@@ -375,6 +346,10 @@
     <envar>
       <name>GSIANL_RES</name>
       <value>3km</value>
+    </envar>
+    <envar>
+      <name>EnsWgt</name>
+      <value>0.5</value>
     </envar>
 
     <dependency>
