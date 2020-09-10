@@ -35,9 +35,15 @@ export CNVGRIB=${CNVGRIB:-cnvgrib}
 ##########################################################
 export DATA=${DATA:-$DATAROOT/${jobid:?}} #jobid ($job.$LSB_JOBID MUST BE DEFINED IN TERMS OF $RUN IN UPPER LEVEL SCRIPT /MPondeca, 26Jul2015
 if [ -d $DATA ] ; then
-   rm  -rf $DATA/*
+   ${ECHO} "$DATA exists, remove its content"
+   if [ "${envir}" == "esrl" ]; then #Jet
+     ${RM} -rf $DATA/output_${PDY}*
+   else
+     ${RM} -rf $DATA/*
+   fi
 else
-   mkdir -p $DATA
+   ${ECHO} "$DATA does not exist, create it"
+   ${MKDIR} -p $DATA
 fi
 cd $DATA
 
@@ -48,19 +54,24 @@ cd $DATA
 #####################################################
 #setpdy.sh
 #. ${DATA}/PDY
+if [[ "${subcyc}" == "-1" ]]; then #it's hourly run
+  export cycle=${cycle:-t${cyc}z}
+  export pgmout=${pgmout:-"OUTPUT.${PDY}${cyc}.${jobid}"}
+  export COMINmosaic=${COMINmosaic:-"${COMIN}/radar.${PDY}"}
+else
+  export cycle=${cycle:-t${cyc}${subcyc}z}
+  export pgmout=${pgmout:-"OUTPUT.${PDY}${cyc}${subcyc}.${jobid}"}
+  export COMINmosaic=${COMINmosaic:-"${COMIN}/radar.${PDY}"}
+fi
 
 export subcyc=${subcyc} #Note: Must define subcyc in upper level script. Can be 00, 15, 30, or 45 /MPondeca, 30Jun2017
                          #only used for rurtma2p5
 
-export cycle=${cycle:-t${cyc}${subcyc}z}
-export PDYHH="${PDY}${cyc}"
 ####################################
 # Determine Job Output Name on System
 ####################################
 export LOG_JJOB=${LOG_JJOB:-$COMROOT/logs/jlogfiles}
 export jlogfile=${jlogfile:-$LOG_JJOB/jlogfile.${jobid}}
-# export pgmout=${pgmout:-"OUTPUT.$$"}
-export pgmout=${pgmout:-"OUTPUT.${PDY}${cyc}${subcyc}.${jobid}"}
 if [ ! -d ${LOG_JJOB} ] ; then
    mkdir -p ${LOG_JJOB}
 fi
@@ -80,9 +91,9 @@ export USHrtma3d=${USHrtma3d:-$HOMErtma3d/ush/${RUN}}
 export UTILrtma3d=${UTILrtma3d:-$HOMErtma3d/util/${RUN}}
 
 # date and time for previous and next cycle
+export PDYHH="${PDY}${cyc}"
 export PDYHH_cycm1=$($NDATE -01  "${PDYHH}")
 export PDYHH_cycp1=$($NDATE +01  "${PDYHH}")
-
 export FGS_OPT=${FGS_OPT:-1}
 
 #################################################
@@ -91,7 +102,7 @@ export FGS_OPT=${FGS_OPT:-1}
 export COMIN=${COMIN:-${COMROOT}/${NET}/${envir}/${RUN}.${PDY}}
 export COMOUT=${COMOUT:-${COMROOT}/${NET}/${envir}/${RUN}.${PDY}}
 
-### Observations Products/Input for the RTMA3D (prepbufr files) 
+### Processed Observations ready to be used by RTMA3D_gsi
 export COMINobsproc_rtma3d=${COMINobsproc_rtma3d:-"${COMIN}/obsprd.${cycle}"}
 if [ ! -d "${COMINobsproc_rtma3d}" ] ; then
   echo " Directory of obs data does NOT exist. Job abort!"
@@ -104,20 +115,18 @@ if [ ! -d "${GESINhrrr_rtma3d}" ] ; then
   echo " Directory of HRRRs fgs data does NOT exist. Job abort!"
   err_exit
 fi
-export COMINHRRRDAS=/gpfs/hps/nco/ops/nwges/para/hrrr/hrrrdasges
+
 ### 3DRTMA GSIANL Products (netcdf)
-#export COMINHRRRDAS=/gpfs/dell2/ptmp/Gang.Zhao/Data/grids/enkf/hrrre_nco_para/2020042117
 export COMOUTgsi_rtma3d=${COMOUTgsi_rtma3d:-"${COMOUT}/gsiprd.${cycle}"}
-export COMINhrrrdas=${COMINhrrrdas:-"${COMINHRRRDAS}"}
+
 if [ ! -d "${COMIN}" ] ; then
    mkdir -p $COMIN
 fi
 if [ ! -d "${COMOUT}" ] ; then
    mkdir -p $COMOUT
 fi
-
 if [ ! -d "${COMOUTgsi_rtma3d}" ] ; then
-   mkdir -p ${COMOUTgsi_rtma3d}
+  ${MKDIR} -p ${COMOUTgsi_rtma3d}
 fi
 
 ###########################################################
@@ -125,10 +134,19 @@ fi
 # The following variables are used in exrtma3d_gsianl.ksh
 #
 ###########################################################
+#   Set the name to the executable
+    export exefile_name_gsi=${exefile_name_gsi:-"rtma3d_gsi"}
+
+if [ "${envir}" != "esrl" ]; then #WCOSS
 #   set the file name of the final analysis file for archive
     if [ ! "${PROD_HEAD}" ] ; then
-      export ANLrtma3d_FNAME="${RUN}.t${cyc}${subcyc}z.wrf_inout.nc"
-      export FGSrtma3d_FNAME="${RUN}.t${cyc}${subcyc}z.firstguess.nc"
+      if [ "${subcyc}" == "-1" ]; then #hourly run
+        tz_str=t${cyc}z
+      else
+        tz_str=t${cyc}${subcyc}z
+      fi
+      export ANLrtma3d_FNAME="${RUN}.${tz_str}.wrf_inout.nc"
+      export FGSrtma3d_FNAME="${RUN}.${tz_str}.firstguess.nc"
     else
       export ANLrtma3d_FNAME="${PROD_HEAD}.wrf_inout.nc"
       export FGSrtma3d_FNAME="${PROD_HEAD}.firstguess.nc"
@@ -140,20 +158,17 @@ fi
         mkdir -p ${DATA_RUNDIR}
     fi
     export DATAHOME=${DATA_RUNDIR}/gsiprd
-#    ${RM} -rf ${DATAHOME}
+    ${RM} -rf ${DATAHOME}
     ${LN} -s  ${DATA}  ${DATAHOME}
 
     export DATAOBSHOME=${DATA_RUNDIR}/obsprd
-#    ${RM} -rf ${DATAOBSHOME}
+    ${RM} -rf ${DATAOBSHOME}
     ${LN} -s  ${COMINobsproc_rtma3d}  ${DATAOBSHOME}
 
     export DATAHOME_BK=${DATA_RUNDIR}/fgsprd
-#    ${RM} -rf ${DATAHOME_BK}
+    ${RM} -rf ${DATAHOME_BK}
     ${LN} -s  ${GESINhrrr_rtma3d}  ${DATAHOME_BK}
-
-
-#   Set the path to the gsi executable
-    export exefile_name_gsi=${exefile_name_gsi:-"rtma3d_gsi"}
+fi
 
 #   Set the path to the GSI static files
     export FIXgsi=${FIXgsi:-"${FIXrtma3d}/gsi"}
@@ -174,7 +189,7 @@ fi
 ######################
 # Execute the script.
 ######################
-${exSCR_GSIANL:-$HOMErtma3d/scripts/ex${RUN}_gsianl_subhr.ksh}
+${exSCR_GSIANL:-$HOMErtma3d/scripts/ex${RUN}_gsianl.ksh}
 export err=$?; err_chk
 
 msg="$0 of $job completed normally"
@@ -182,7 +197,7 @@ postmsg $jlogfile "$msg"
 
 if [ -e "${pgmout}" ] ; then
    cat $pgmout
-   cp -p $pgmout   ${LOG_PGMOUT}
+   cp -p $pgmout ${LOG_PGMOUT}
 fi
 
 ##############################

@@ -35,9 +35,15 @@ export CNVGRIB=${CNVGRIB:-cnvgrib}
 ##########################################################
 export DATA=${DATA:-$DATAROOT/${jobid:?}} #jobid ($job.$LSB_JOBID MUST BE DEFINED IN TERMS OF $RUN IN UPPER LEVEL SCRIPT /MPondeca, 26Jul2015
 if [ -d $DATA ] ; then
-   rm  -rf $DATA/*
+  if [ "${envir}" == "esrl" ]; then #Jet
+    ${RM} -f $DATA/NSSLRefInGSI.bufr
+  else
+    ${ECHO} "$DATA exists, remove its content"
+    ${RM} -rf $DATA/*
+  fi
 else
-   mkdir -p $DATA
+   ${ECHO} "$DATA does not exist, create it"
+   ${MKDIR} -p $DATA
 fi
 cd $DATA
 
@@ -46,20 +52,26 @@ cd $DATA
 #    setpdy.sh needs the variables 
 #    $PDY and $cyc already defined in advance
 #####################################################
-export cycle=${cycle:-t${cyc}${subcyc}z}
 #setpdy.sh
 #. ${DATA}/PDY
+if [[ "${subcyc}" == "-1" ]]; then #it's hourly run
+  export cycle=${cycle:-t${cyc}z}
+  export pgmout=${pgmout:-"OUTPUT.${PDY}${cyc}.${jobid}"}
+  export COMINradar=${COMINradar:-"${COMINRADAR}/radar.${PDY}"}
+else
+  export cycle=${cycle:-t${cyc}${subcyc}z}
+  export pgmout=${pgmout:-"OUTPUT.${PDY}${cyc}${subcyc}.${jobid}"}
+  export COMINradar=${COMINradar:-"${COMINRADAR}/radar.${PDY}${cyc}"}
+fi
 
 export subcyc=${subcyc} #Note: Must define subcyc in upper level script. Can be 00, 15, 30, or 45 /MPondeca, 30Jun2017
                          #only used for rurtma2p5
-export PDYHH="${PDY}${cyc}"
+
 ####################################
 # Determine Job Output Name on System
 ####################################
 export LOG_JJOB=${LOG_JJOB:-$COMROOT/logs/jlogfiles}
 export jlogfile=${jlogfile:-$LOG_JJOB/jlogfile.${jobid}}
-# export pgmout=${pgmout:-"OUTPUT.$$"}
-export pgmout=${pgmout:-"OUTPUT.${PDY}${cyc}${subcyc}.${jobid}"}
 if [ ! -d ${LOG_JJOB} ] ; then
    mkdir -p ${LOG_JJOB}
 fi
@@ -78,30 +90,14 @@ export PARMrtma3d=${PARMrtma3d:-$HOMErtma3d/parm/${RUN}}
 export USHrtma3d=${USHrtma3d:-$HOMErtma3d/ush/${RUN}}
 export UTILrtma3d=${UTILrtma3d:-$HOMErtma3d/util/${RUN}}
 
-# date and time for previous and next cycle
-export PDYHH_cycm1=$($NDATE -01  "${PDYHH}")
-export PDYHH_cycp1=$($NDATE +01  "${PDYHH}")
-
-export FGS_OPT=${FGS_OPT:-1}
-
 #################################################
 # Set up the INPUT and OUTPUT directories
 #################################################
 export COMIN=${COMIN:-${COMROOT}/${NET}/${envir}/${RUN}.${PDY}}
 export COMOUT=${COMOUT:-${COMROOT}/${NET}/${envir}/${RUN}.${PDY}}
 
-### Observations Products/Input from RAP
-export COMINrap=${COMINrap:-"${COMIN}/rap.${PDY}"}
-export COMINhrrr=${COMINhrrr:-"${COMIN}/hrrr.${PDY}/conus"}
-export COMINlightning=${COMINlightning:-"${COMIN}/lightning.${PDY}"}
-export COMINmosaic=${COMINmosaic:-"${COMIN}/radar.${PDY}"}
-export COMINradar=${COMINradar:-"${COMINRADAR}"}
-
-### Observations Products/Input for the RTMA3D (prepbufr files) 
+### Processed Observations ready to be used by RTMA3D_gsi
 export COMINobsproc_rtma3d=${COMINobsproc_rtma3d:-"${COMIN}/obsprd.${cycle}"}
-
-### Firstguess Products/Input for the RTMA3D (prepbufr files) 
-export GESINhrrr_rtma3d=${GESINhrrr_rtma3d:-"${COMIN}/fgsprd.${cycle}"}
 
 if [ ! -d "${COMIN}" ] ; then
    mkdir -p $COMIN
@@ -110,9 +106,7 @@ if [ ! -d "${COMOUT}" ] ; then
    mkdir -p $COMOUT
 fi
 if [ ! -d "${COMINobsproc_rtma3d}" ] ; then
-# echo " Directory of obs data does NOT exist. Job abort!"
-# err_exit
-  mkdir -p $COMINobsproc_rtma3d
+  ${MKDIR} -p $COMINobsproc_rtma3d
 fi
 
 ###########################################################
@@ -120,7 +114,6 @@ fi
 # The following variables are used in exrtma3d_obsprep_radar.ksh
 #
 ###########################################################
-
 #   Set the name to the executable
     export exefile_name_radar=${exefile_name_radar:-"rtma3d_process_mosaic"}
 
@@ -142,7 +135,7 @@ fi
 ######################
 # Execute the script.
 ######################
-${exSCR_OBSPREP_RADAR:-$HOMErtma3d/scripts/ex${RUN}_obsprep_radar.ksh}
+${exSCR_OBSPREP_RADAR:-$HOMErtma3d/scripts/ex${NET}_obsprep_radar.ksh}
 export err=$?; err_chk
 
 msg="$0 of $job completed normally"
@@ -150,7 +143,7 @@ postmsg $jlogfile "$msg"
 
 if [ -e "${pgmout}" ] ; then
    cat $pgmout
-   cp -p $pgmout   ${LOG_PGMOUT}
+   cp -p $pgmout ${LOG_PGMOUT}
 fi
 
 ##############################
