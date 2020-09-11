@@ -42,7 +42,11 @@ if [ ! -s "./prepobs_prep.bufrtable" ]; then
 fi
 
 # WPS GEO_GRID Data
-${LN} -sf ${FIXwps}/hrrr_geo_em.d01.nc ./geo_em.d01.nc 
+if [ "${DOMAIN}" == "alaska" ]; then
+  ${LN} -sf ${FIXwps}/hrrr_geo_em.d01.nc_AK ./geo_em.d01.nc
+else
+  ${LN} -sf ${FIXwps}/hrrr_geo_em.d01.nc ./geo_em.d01.nc
+fi
 if [ ! -s "./geo_em.d01.nc" ]; then
   ${ECHO} "geo_em.d01.nc does not exist or not readable"
   exit 1 
@@ -65,14 +69,28 @@ if [ ! -s "NASA_LaRC_cloud.bufr" ]; then
 fi
 
 # Build the namelist on-the-fly
+if [ "${DOMAIN}" == "alaska" ]; then
 ${CAT} << EOF > namelist_nasalarc
 &SETUP
-  analysis_time = ${YYYYMMDDHH},
-  bufrfile='NASALaRCCloudInGSI.bufr',
-  npts_rad=3,
-  ioption = 2,
+analysis_time = ${YYYYMMDDHH},
+bufrfile='NASALaRCCloudInGSI.bufr',
+npts_rad=3,
+ioption = 2,
+boxlat0=60,61,63,66,68
+boxhalfy=4, 6, 8, 10, 12
+boxhalfx=4, 6, 8, 10, 12
 /
 EOF
+else
+${CAT} << EOF > namelist_nasalarc
+&SETUP
+analysis_time = ${YYYYMMDDHH},
+bufrfile='NASALaRCCloudInGSI.bufr',
+npts_rad=3,
+ioption = 2,
+/
+EOF
+fi
 
 # Run obs processor
 export pgm="rtma3d_process_cloud"
