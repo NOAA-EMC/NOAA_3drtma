@@ -40,6 +40,11 @@ START_TIME=`${DATE} -d "${PDY} ${cyc} ${SUBH_TIME} minutes"`
 YYYYMMDDHH=`${DATE} +"%Y%m%d%H" -d "${START_TIME}"`
 YYYYMMDDHHMM=`${DATE} +"%Y%m%d%H%M" -d "${START_TIME}"`
 time_1hour_ago=`${DATE} -d "${START_TIME} 1 hour ago" +%Y%m%d%H`
+time_2hour_ago=`${DATE} -d "${START_TIME} 2 hour ago" +%Y%m%d%H`
+time_3hour_ago=`${DATE} -d "${START_TIME} 3 hour ago" +%Y%m%d%H`
+time_4hour_ago=`${DATE} -d "${START_TIME} 4 hour ago" +%Y%m%d%H`
+time_5hour_ago=`${DATE} -d "${START_TIME} 5 hour ago" +%Y%m%d%H`
+time_6hour_ago=`${DATE} -d "${START_TIME} 6 hour ago" +%Y%m%d%H`
 time_str=`${DATE} "+%Y-%m-%d_%H_%M_%S" -d "${START_TIME}"`
 time_str2=`${DATE} "+%Y-%m-%d_%H_00_00" -d "${START_TIME}"`
 
@@ -71,7 +76,28 @@ fi
 
 # Look for background field for GSI analysis
 if [ "${envir}" == "esrl" ]; then #Jet expr runs
-  GSIbackground=${HRRR_DIR}/${time_1hour_ago}/wrfprd/wrfout_d01_${time_str}
+  GSIbackground1=${HRRR_DIR}/${time_1hour_ago}/wrfprd/wrfout_d01_${time_str}
+  GSIbackground2=${HRRR_DIR}/${time_2hour_ago}/wrfprd/wrfout_d01_${time_str}
+  GSIbackground3=${HRRR_DIR}/${time_3hour_ago}/wrfprd/wrfout_d01_${time_str}
+  GSIbackground4=${HRRR_DIR}/${time_4hour_ago}/wrfprd/wrfout_d01_${time_str}
+  GSIbackground5=${HRRR_DIR}/${time_5hour_ago}/wrfprd/wrfout_d01_${time_str}
+  GSIbackground6=${HRRR_DIR}/${time_6hour_ago}/wrfprd/wrfout_d01_${time_str}
+  GSIbackground=${GSIbackground1}
+  if [ "${FG_FALLBACK}" == "YES" ]; then #fallback to old cycles if current first guess is not ready 
+    if [ -r ${GSIbackground1} ]; then
+      GSIbackground=${GSIbackground1}
+    elif [ -r ${GSIbackground2} ]; then
+      GSIbackground=${GSIbackground2}
+    elif [ -r ${GSIbackground3} ]; then
+      GSIbackground=${GSIbackground3}
+    elif [ -r ${GSIbackground4} ]; then
+      GSIbackground=${GSIbackground4}
+    elif [ -r ${GSIbackground5} ]; then
+      GSIbackground=${GSIbackground5}
+    elif [ -r ${GSIbackground6} ]; then
+      GSIbackground=${GSIbackground6}
+    fi
+  fi
 else
   GSIbackground=${BKG_DIR}/${FGSrtma3d_FNAME}
 fi

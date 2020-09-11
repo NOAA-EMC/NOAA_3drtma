@@ -105,7 +105,11 @@ cd ${DATA}
 ${ECHO} "enter working directory:${DATA}"
 
 export WRF_NAMELIST=${DATA}/namelist.input
-${CP} ${PARMwrf}/wrf.nl ${WRF_NAMELIST}
+if [ ${DOMAIN} == "alaska" ] ; then 
+  ${CP} ${PARMwrf}/wrf.nl_AK ${WRF_NAMELIST}
+else
+  ${CP} ${PARMwrf}/wrf.nl ${WRF_NAMELIST} 
+fi
 
 # Check to make sure the wrfinput_d01 file exists
 if [ -r ${GSIRUN_DIR}/wrf_inout ]; then
@@ -135,6 +139,13 @@ end_day=`${DATE} +%d -d "${END_TIME}"`
 end_hour=`${DATE} +%H -d "${END_TIME}"`
 end_minute=`${DATE} +%M -d "${END_TIME}"`
 end_second=`${DATE} +%S -d "${END_TIME}"`
+if [ ${DOMAIN} == "alaska" ] ; then 
+  mod3=$(( $start_hour % 3  ))
+  if [ $mod3 -eq 0 ]; then #don't run wrf since it will crash
+     echo "hour=$start_hour, skip wrf run"
+     exit 0
+  fi
+fi
 
 # Compute number of days and hours for the run
 (( run_days = 0 ))
