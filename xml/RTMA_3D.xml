@@ -146,7 +146,6 @@
     <envar><name>subcyc</name><value><cyclestr>-1</cyclestr></value></envar>
     <envar><name>KEEPDATA</name><value>&KEEPDATA;</value></envar>
     <envar><name>DOMAIN</name><value>&DOMAIN;</value></envar>
-    <envar><name>FG_FALLBACK</name><value>&FG_FALLBACK;</value></envar>
 '>
 
 ]>
@@ -351,6 +350,7 @@
       <name>EnsWgt</name>
       <value>0.5</value>
     </envar>
+    <envar><name>FG_FALLBACK</name><value>&FG_FALLBACK;</value></envar>
 
     <dependency>
       <and>
