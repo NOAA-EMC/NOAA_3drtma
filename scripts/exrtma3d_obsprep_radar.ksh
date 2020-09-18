@@ -28,23 +28,23 @@ START_TIME=`${DATE} -d "${PDY} ${cyc} ${SUBH_TIME} minutes"`
 if [ "${SUBH_TIME}" == "00" ]; then
   MM1=00
   MM2=01
-  MM2=02
+  MM3=02
 elif [ "${SUBH_TIME}" == "15" ]; then
   MM1=15
   MM2=14
-  MM2=16
+  MM3=16
 elif [ "${SUBH_TIME}" == "30" ]; then
   MM1=30
   MM2=29
-  MM2=31
+  MM3=31
 elif [ "${SUBH_TIME}" == "45" ]; then
   MM1=45
   MM2=44
-  MM2=46
+  MM3=46
 elif [ "${SUBH_TIME}" == "60" ]; then
   MM1=59
   MM2=58
-  MM2=57
+  MM3=57
 fi
 # Compute date & time components for the analysis time
 YYYYMMDDHH=`${DATE} +"%Y%m%d%H" -d "${START_TIME}"`

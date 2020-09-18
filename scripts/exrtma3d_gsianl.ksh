@@ -288,6 +288,7 @@ if [[ ${hrrrmem} -gt 30 ]] && [[ ${HRRRDAS_BEC} -eq 1  ]]; then #if HRRRDAS BEC 
   nummem=${hrrrmem}
   cp filelist.hrrrdas filelist03
 
+  ${CP} ${PARMgsi}/hybens_info_hrrrdas ./hybens_info
   beta1_inv=$(( 1 - $EnsWgt  ))
   ifhyb=.true.
   regional_ensemble_option=3
@@ -297,7 +298,8 @@ if [[ ${hrrrmem} -gt 30 ]] && [[ ${HRRRDAS_BEC} -eq 1  ]]; then #if HRRRDAS BEC 
   ${ECHO} " Cycle ${YYYYMMDDHH}: GSI hybrid uses HRRRDAS BEC with n_ens=${nummem}" >> ${pgmout}
 elif [[ ${nummem} -eq 80 ]]; then
   echo "Do hybrid with GDAS directly"
-  beta1_inv=0.50 ##0.15
+  ${CP} ${PARMgsi}/hybens_info ./hybens_info
+  beta1_inv=$(( 1 - $EnsWgt  ))
   ifhyb=.true.
   regional_ensemble_option=1
   grid_ratio_ens=12 #ensemble resolution=3 * grid_ratio * grid_ratio_ens
@@ -424,7 +426,6 @@ if [ "${envir}" != "esrl" ]; then #WCOSS
   echo "HVC option is $hybridcord"
 fi
 
-${CP} ${PARMgsi}/hybens_info ./
 # Build the GSI namelist on-the-fly
 ${CP} ${PARMgsi}/gsiparm.anl.sh ./
 source ./gsiparm.anl.sh
@@ -466,6 +467,7 @@ if [ "${envir}" == "esrl" ];  then ##GSI on Jet needs special treatment
 else
   ${MPIRUN} ${pgm} < gsiparm.anl > ${pgmout} 2>errfile
 fi
+grep 'PROGRAM GSI_ANL HAS ENDED' ${pgmout}
 export err=$?;
 ##save some information for possible debugging before err_chk
 ${CAT} fort.* >   fits_${cycle_str}.txt
@@ -547,6 +549,7 @@ EOF
   else
     ${MPIRUN} ${pgm} < gsiparm.anl >> ${pgmout} 2>errfile
   fi
+  grep 'PROGRAM GSI_ANL HAS ENDED' ${pgmout}
   export err=$?;
   #${LS} -l > GSI_workdir_list
   ${CAT} errfile >> ${pgmout}
