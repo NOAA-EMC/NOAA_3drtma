@@ -41,11 +41,14 @@ ${SED} -n '/^OBS_PARA/,/m_berror_stats_reg/p' stdout.gsianl > obs_para.txt #for 
 if [ "${subcyc}" == "-1" ]; then #hourly run
   SUBH_TIME='00'
   tz_str=t${cyc}z
+  START_TIME=`${DATE} -d "${PDY} ${cyc} ${SUBH_TIME} minutes"`
+  CDATE=`${DATE} +"%Y%m%d%H" -d "${START_TIME}"`
 else
   SUBH_TIME=${subcyc}
   tz_str=t${cyc}${subcyc}z
+  START_TIME=`${DATE} -d "${PDY} ${cyc} ${SUBH_TIME} minutes"`
+  CDATE=`${DATE} +"%Y%m%d%H%M" -d "${START_TIME}"`
 fi
-START_TIME=`${DATE} -d "${PDY} ${cyc} ${SUBH_TIME} minutes"`
 YYYYMMDDHHMM=`${DATE} +"%Y%m%d%H%M" -d "${START_TIME}"`
 if [ "${envir}" == "esrl" ]; then #Jet
   CP_LN="${LN} -sf"
@@ -62,7 +65,7 @@ ${CAT} << EOF > namelist.conv
  &iosetup
   dirname='${DATA}',
   outfilename='./textdiag',
-  cdate='${YYYYMMDDHHMM}',
+  cdate='${CDATE}',
   nloop=1,0,1,0,0,
  /     
 EOF
@@ -87,7 +90,7 @@ export err=$?; err_chk
 #    &iosetup
 #     dirname='${DATA}',
 #     outfilename='./textdiag',
-#     cdate='${YYYYMMDDHHMM}',
+#     cdate='${CDATE}',
 #     nloop=1,0,1,0,0,
 #     instrument='amsub_n16','amsub_n17','hirs3_n17',
 #    /

@@ -43,7 +43,7 @@ elif [ "${SUBH_TIME}" == "45" ]; then
   MM3=46
 elif [ "${SUBH_TIME}" == "60" ]; then
   MM1=59
-  MM3=58
+  MM2=58
   MM3=57
 fi
 # Compute date & time components for the analysis time
