@@ -156,7 +156,7 @@ modules_fname=modulefile.build.post.${target}
 ###################
 #Adding minmax function
 ###################
-
+PARM_DIR=${TOP_RTMA}/parm/upp
 cp $PARM_DIR/pkind.f ${TOPSORC_POST}/sorc/ncep_post.fd
 cp $PARM_DIR/pmazmin.f ${TOPSORC_POST}/sorc/ncep_post.fd
 cp $PARM_DIR/makefile_module ${TOPSORC_POST}/sorc/ncep_post.fd

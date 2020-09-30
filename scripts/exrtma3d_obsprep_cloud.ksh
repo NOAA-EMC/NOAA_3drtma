@@ -6,7 +6,7 @@ if [ ! -f ${EXECrtma3d}/${exefile_name_cloud} ] ; then
   ${ECHO} "ERROR: NASA cloud obs prcoessing executable '${EXECrtma3d}/${exefile_name_cloud}' does not exist!"
   exit 1
 fi
-
+if [ "${envir}" == "esrl" ]; then #Jet
 if [ ! "${NASALARC_DATA}" ]; then
   ${ECHO} "ERROR: \$NASALARC_DATA is not defined!"
   exit 1
@@ -15,7 +15,7 @@ if [ ! -d "${NASALARC_DATA}" ]; then
   ${ECHO} "ERROR: NASALARC_DATA directory '${NASALARC_DATA}' does not exist!"
   exit 1
 fi
-
+fi
 if [ "${subcyc}" == "-1" ]; then #hourly run
   SUBH_TIME='00'
   tz_str=t${cyc}z
@@ -58,6 +58,7 @@ ${ECHO} "SUBH_TIME: "${SUBH_TIME}
 ${ECHO} "YYYYMMDDHH: "${YYYYMMDDHH}
 
 # Link to the NASA LaRC cloud data
+if [ "${envir}" == "esrl" ]; then #Jet
 if [ "${HH}" = 12 ] || [ "${HH}" = "00" ] ; then
   ${LN} -sf ${NASALARC_DATA}/${YYYYMMDDHH}.rap_e.t${HH}z.lgycld.tm00.bufr_d ./NASA_LaRC_cloud.bufr
 else
@@ -67,6 +68,16 @@ if [ ! -s "NASA_LaRC_cloud.bufr" ]; then
   ${ECHO} "./NASA_LaRC_cloud.bufr does not exist or not readable"
   exit 1
 fi
+elif [  "${envir}" == "lsf" ]; then #WCOSS
+  if [ -s $COMINrap/rtma_ru.t${cyc}${subcyc}z.lgycld.tm00.bufr_d ] ; then
+    ${CP} -p $COMINrap/rtma_ru.t${cyc}${subcyc}z.lgycld.tm00.bufr_d ./rtma_ru.t${cyc}${subcyc}z.lgycld.tm00.bufr_d
+    ${LN} -sf ./rtma_ru.t${cyc}${subcyc}z.lgycld.tm00.bufr_d ./NASA_LaRC_cloud.bufr
+  else
+    echo 'No bufr file found for nasa LaRC cloud data processing'
+  fi
+fi
+
+
 
 # Build the namelist on-the-fly
 if [ "${DOMAIN}" == "alaska" ]; then

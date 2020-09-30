@@ -121,7 +121,7 @@ if [ "${envir}" == "esrl" ]; then #jet
         echo 'Found '${nsslfile}
         numgrib2=`ls ${COMINradar}/${YYYY}${MM}${DD}-${HH}${min}*.${middlename}_*_${YYYY}${MM}${DD}-${HH}${min}*.grib2 | wc -l`
         echo 'Number of GRIB-2 files: '${numgrib2}
-        if [ ${numgrib2} -ge 10 ] && [ ! -e filelist_mrms ]; then
+        if [ ${numgrib2} -ge ${numlim} ] && [ ! -e filelist_mrms ]; then
           ln -sf ${COMINradar}/${YYYY}${MM}${DD}-${HH}${min}*.${middlename}_*_${YYYY}${MM}${DD}-${HH}${min}*.grib2 . 
           ls ${YYYY}${MM}${DD}-${HH}${min}*.${middlename}_*_${YYYY}${MM}${DD}-${HH}${min}*.grib2 > filelist_mrms
           echo 'Creating links for SUBH: '${SUBH_TIME}

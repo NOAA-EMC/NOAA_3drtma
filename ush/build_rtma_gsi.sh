@@ -96,7 +96,7 @@ fi
 #
 #--- Building of GSILIBS
 #
-# working branch
+ working branch
 cd ${TOP_SORC}/GSILIBS
 mkdir build
 cd build
@@ -130,8 +130,8 @@ ${TOP_SORC}/GSILIBS/linklibs
 # working branch
 
 
-wrking_branch=${branch_gsi_source}
-cd ${SORCDIR_GSI}
+#wrking_branch=${branch_gsi_source}
+#cd ${SORCDIR_GSI}
 #echo " ----> check out working branch "
 #echo " ----> git checkout ${wrking_branch} "
 #git checkout ${wrking_branch}
@@ -141,17 +141,17 @@ cd ${SORCDIR_GSI}
 #  exit 1
 #fi
 
-sROOT=ROOT
+#sROOT=ROOT
 
-rm ${SORCDIR_GSI}/ush/build.comgsi
+#rm ${SORCDIR_GSI}/ush/build.comgsi
 
 #cat ${PARM_DIR}/build.comgsi_tmp | sed "s/${sROOT//\\/\\\\}/${TOP_SORC//\\/\\\\}/g" > ${SORCDIR_GSI}/ush/build.comgsi
 
 #sed "s!ROOT!${TOP_SORC}!ig" ${PARM_DIR}/build.comgsi_tmp > ${SORCDIR_GSI}/ush/build.comgsi
 
-sed -e "s/${sROOT//\//\\/}/${TOP_RTMA//\//\\/}/g" ${PARM_DIR}/build.comgsi_tmp > ${SORCDIR_GSI}/ush/build.comgsi
+#sed -e "s/${sROOT//\//\\/}/${TOP_RTMA//\//\\/}/g" ${PARM_DIR}/build.comgsi_tmp > ${SORCDIR_GSI}/ush/build.comgsi
 
-chmod 755 ${SORCDIR_GSI}/ush/build.comgsi
+#chmod 755 ${SORCDIR_GSI}/ush/build.comgsi
 #if [[ -d /scratch3 ]] ; then ### theia
 #source /etc/profile.d/modules.sh
 #    modulefile="${PARM_DIR}/modulefile.theia.GSI_UPP_WRF"
@@ -163,7 +163,7 @@ chmod 755 ${SORCDIR_GSI}/ush/build.comgsi
 #    modulefile="${PARM_DIR}/modulefile.cheyenne.GSI_UPP_WRF"
 #elif [[ -d /ioddev_dell ]] ; then ### dell
 #source /usrx/local/prod/lmod/lmod/init/sh
-#    modulefile="${PARM_DIR}/modulefile.dell.GSI_UPP_WRF"
+#    modulefile="${PARM_DIR}/modulefile.me.GSI_UPP_WRF"
 #else
 #    echo "unknown machine"
 #    exit 9
@@ -177,10 +177,10 @@ chmod 755 ${SORCDIR_GSI}/ush/build.comgsi
 #fi
 #source $modulefile
 
-cd ${SORCDIR_GSI}
+#cd ${SORCDIR_GSI}
 
-echo "compiled at the node:" >> ${USH_DIR}/log.build_rtma_gsi
-hostname  >> ${USH_DIR}/log.build_rtma_gsi
+#echo "compiled at the node:" >> ${USH_DIR}/log.build_rtma_gsi
+#hostname  >> ${USH_DIR}/log.build_rtma_gsi
 #module list >> ${USH_DIR}/log.build_rtma_gsi
 #echo -e "\nThe branch name:" >> ${USH_DIR}/log.build_rtma_gsi
 #git branch | grep "*"  >> ${USH_DIR}/log.build_rtma_gsi
@@ -189,35 +189,35 @@ hostname  >> ${USH_DIR}/log.build_rtma_gsi
 #echo -e "\ngit status:" >> ${USH_DIR}/log.build_rtma_gsi
 #git status >> ${USH_DIR}/log.build_rtma_gsi
 #echo -e "\nCompiling commands:" >> ${USH_DIR}/log.build_rtma_gsi
-echo "${SORCDIR_GSI}/ush/build.comgsi"  >> ${USH_DIR}/log.build_rtma_gsi
+#echo "${SORCDIR_GSI}/ush/build.comgsi"  >> ${USH_DIR}/log.build_rtma_gsi
 #cat ${USH_DIR}/log.build_rtma_gsi
 
-./ush/build.comgsi >&  ${BUILD_LOG}/log.make.${DIRNAME_GSI}.txt
+#./ush/build.comgsi >&  ${BUILD_LOG}/log.make.${DIRNAME_GSI}.txt
 
-if [ $? -eq 0 ] ; then
-  echo " GSI code and utility codes were built successfully."
+#if [ $? -eq 0 ] ; then
+#  echo " GSI code and utility codes were built successfully."
+#
+#  echo " cp -p ${BUILD_GSI}/bin/gsi.x   ${EXEC}/GSI/${exefile_name_gsi} "
+#  cp -p ${BUILD_GSI}/bin/gsi.x   ${EXEC}/GSI/${exefile_name_gsi}
+#  cp -p ${BUILD_GSI}/bin/ndate.x ${EXEC}/ndate.x
+#  ls -l ${EXEC}/GSI/${exefile_name_gsi}
 
-  echo " cp -p ${BUILD_GSI}/bin/gsi.x   ${EXEC}/GSI/${exefile_name_gsi} "
-  cp -p ${BUILD_GSI}/bin/gsi.x   ${EXEC}/GSI/${exefile_name_gsi}
-  cp -p ${BUILD_GSI}/bin/ndate.x ${EXEC}/ndate.x
-  ls -l ${EXEC}/GSI/${exefile_name_gsi}
+#  cd ${BUILD_GSI}/bin
+#  exe_fnames=`ls *`
+#  cd ${BUILD_GSI}
+#  for fn in $exe_fnames
+#  do
+#    echo " cp -p  ${BUILD_GSI}/bin/$fn  ${EXEC}/GSI/$fn "
+#    cp -p  ${BUILD_GSI}/bin/$fn  ${EXEC}/GSI/$fn
+#  done
 
-  cd ${BUILD_GSI}/bin
-  exe_fnames=`ls *`
-  cd ${BUILD_GSI}
-  for fn in $exe_fnames
-  do
-    echo " cp -p  ${BUILD_GSI}/bin/$fn  ${EXEC}/GSI/$fn "
-    cp -p  ${BUILD_GSI}/bin/$fn  ${EXEC}/GSI/$fn
-  done
-
-else
-  echo " ================ WARNING =============== " 
-  echo " Compilation of GSI code was failed."
-  echo " Check up with the log file under "
-  echo "   ----> log.make.${DIRNAME_GSI}.txt  : "
-  echo " ================ WARNING =============== " 
-fi
+#else
+#  echo " ================ WARNING =============== " 
+#  echo " Compilation of GSI code was failed."
+#  echo " Check up with the log file under "
+#  echo "   ----> log.make.${DIRNAME_GSI}.txt  : "
+#  echo " ================ WARNING =============== " 
+#fi
 
 #===================================================================#
 

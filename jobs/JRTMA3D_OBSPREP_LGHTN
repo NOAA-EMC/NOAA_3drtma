@@ -58,10 +58,12 @@ if [[ "${subcyc}" == "-1" ]]; then #it's hourly run
   export cycle=${cycle:-t${cyc}z}
   export pgmout=${pgmout:-"OUTPUT.${PDY}${cyc}.${jobid}"}
   export COMINlightning=${COMINlightning:-"${COMIN}/lightning.${PDY}"}
+  export COMINrap=${COMINRAP}/rtma_ru.${PDY}
 else
   export cycle=${cycle:-t${cyc}${subcyc}z}
   export pgmout=${pgmout:-"OUTPUT.${PDY}${cyc}${subcyc}.${jobid}"}
   export COMINlightning=${COMINlightning:-"${COMIN}/lightning.${PDY}"}
+  export COMINrap=${COMINRAP}/rtma_ru.${PDY}
 fi
 
 export subcyc=${subcyc} #Note: Must define subcyc in upper level script. Can be 00, 15, 30, or 45 /MPondeca, 30Jun2017
@@ -81,7 +83,8 @@ fi
 
 # specify the file head for the file names of the archived data files
 export PROD_HEAD=${PROD_HEAD:-"${RUN}.t${cyc}z"}
-
+export PDYHH="${PDY}${cyc}"
+export PDYHH_cycm1=$($NDATE -01  "${PDYHH}")
 # Specify Execution Areas
 export HOMErtma3d=${HOMErtma3d:-$NWROOT/rtma.${rtma_ver}}
 export EXECrtma3d=${EXECrtma3d:-$HOMErtma3d/exec}

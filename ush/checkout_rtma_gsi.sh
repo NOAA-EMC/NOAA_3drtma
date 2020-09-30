@@ -106,10 +106,10 @@ if [ -d ${DIRNAME_GSI} ] ; then
 fi
 
 echo " make a local clone of the ProdGSI repository under ${TOP_SORC}/${DIRNAME_GSI} ... "
-echo " ====> git clone gerrit:ProdGSI  ./${DIRNAME_GSI} "
+#echo " ====> git clone gerrit:ProdGSI  ./${DIRNAME_GSI} "
 git clone https://github.com/comgsi/GSI ./${DIRNAME_GSI}
 cd ./${DIRNAME_GSI}
-scp -p .git/hooks/commit-msg  .git/hooks
+#scp -p .git/hooks/commit-msg  .git/hooks
 
 echo " check out the source branch (GSD RAP/HRRR-based) --> ${branch_gsi_source}"
 echo " ====> git checkout ${branch_gsi_source} "
