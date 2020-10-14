@@ -86,7 +86,7 @@ export DOMAIN="conus"
   QUEUE_SVC="dev_transfer"                  #user-specified transfer queue
   QUEUE_SHARED="dev_shared" 
 # Path to top running and archiving directory
-  ptmp_base="/gpfs/dell2/stmp/${USER}/${NET}_wrkdir_realtime_${DOMAIN}_bectune1"
+  ptmp_base="/gpfs/dell3/stmp/${USER}/${NET}_wrkdir_realtime_${DOMAIN}"
   DATABASE_DIR=${ptmp_base}            # (equivalent to ptmp_base)
   HOMEBASE_DIR=${NWROOT}               # path to system home directory
   COMINRAP="/gpfs/dell2/emc/obsproc/noscrub/Jeff.Whiting/save/dev/rtma/3drtma/com3d/rtma/prod"
@@ -350,7 +350,8 @@ export exefile_name_updatevars_ndown="rtma3d_updatevars_ndown"
                           # 2: wrfguess_rap (directly downscaled from RAP to HRRR grid  at 1 hr before analysis time)
                           # 2: Not recommended (missing some hydrometer information and leading to failure of UPP on CEIL)
 
-
+  export updatevars=0     # 0: WRFV3.9 is not invoked to add radar reflectivity fields prior to post-processing
+		          # 1: WRFV3.9 is employed to provide radar reflectivity fields prior to post_processing.
 
   export gsi2=""
   export gsi_grid_ratio_in_var=1
@@ -427,7 +428,7 @@ cat > ${NWROOT}/workflow/${RUN}_${expname}_${DOMAIN}.xml <<EOF
 <!ENTITY GESROOT	"&ptmp_base;/nwges2/&NET;">
 
 <!ENTITY HOMErtma3d	"&NWROOT;">
-<!ENTITY LOG_DIR	"/gpfs/dell2/stmp/${USER}/bectune1/${DOMAIN}_logs">
+<!ENTITY LOG_DIR	"/gpfs/dell3/stmp/${USER}/${DOMAIN}_logs_${NET}">
 <!ENTITY JJOB_DIR	"&HOMErtma3d;/jobs">
 <!ENTITY SCRIPT_DIR	"&HOMErtma3d;/scripts">
 <!ENTITY USHrtma3d	"&HOMErtma3d;/ush">
@@ -1602,6 +1603,8 @@ cat >> ${NWROOT}/workflow/${RUN}_${expname}_${DOMAIN}.xml <<EOF
 EOF
 fi
 
+if [ ${updatevars} -eq 1 ] ; then
+
 cat >> ${NWROOT}/workflow/${RUN}_${expname}_${DOMAIN}.xml <<EOF 
 
  <task name="&NET;_updatevars_task_@Y@m@d@H@M" cycledefs="02-11hr,00hr,01hr" maxtries="&maxtries;">
@@ -1621,6 +1624,11 @@ cat >> ${NWROOT}/workflow/${RUN}_${expname}_${DOMAIN}.xml <<EOF
     </dependency>
 
   </task>
+
+EOF
+fi
+
+cat >> ${NWROOT}/workflow/${RUN}_${expname}_${DOMAIN}.xml <<EOF 
 
   <task name="&NET;_post_task_@Y@m@d@H@M" cycledefs="02-11hr,00hr,01hr" maxtries="&maxtries;">
 
@@ -1647,15 +1655,29 @@ cat >> ${NWROOT}/workflow/${RUN}_${expname}_${DOMAIN}.xml <<EOF
 
     &ENVARS_POST;
 
+EOF
+
+if [ ${updatevars} -eq 1 ] ; then
+cat >> ${NWROOT}/workflow/${RUN}_${expname}_${DOMAIN}.xml <<EOF  
+
     <dependency> 
        <or>
           <taskdep state="succeeded" task="&NET;_updatevars_task_@Y@m@d@H@M"/>
           <taskdep state="Dead" task="&NET;_updatevars_task_@Y@m@d@H@M"/>
        </or>
     </dependency>
-
   </task>
+EOF
+else
+cat >> ${NWROOT}/workflow/${RUN}_${expname}_${DOMAIN}.xml <<EOF 
+    <dependency> 
+	<taskdep task="&NET;_gsianl_task_@Y@m@d@H@M"/>
+     </dependency>
+  </task>
+EOF
+fi
 
+cat >> ${NWROOT}/workflow/${RUN}_${expname}_${DOMAIN}.xml <<EOF 
   <task name="&NET;_post4fgs_task_@Y@m@d@H@M" cycledefs="02-11hr,00hr,01hr" maxtries="&maxtries;">
 
     &ENVARS;
@@ -1670,7 +1692,10 @@ cat >> ${NWROOT}/workflow/${RUN}_${expname}_${DOMAIN}.xml <<EOF
     <jobname><cyclestr>&NET;_post4fgs_job_@Y@m@d@H@M</cyclestr></jobname>
     <join><cyclestr>&LOG_SCHDLR;/&NET;_&envir;_post4fgs_@Y@m@d@H@M.log</cyclestr></join>
 
-    &ENVARS_POST;
+    &ENVARS_POST; 
+EOF
+if [ ${updatevars} -eq 1 ] ; then
+cat >> ${NWROOT}/workflow/${RUN}_${expname}_${DOMAIN}.xml <<EOF  
 
     <dependency> 
        <or>
@@ -1678,9 +1703,17 @@ cat >> ${NWROOT}/workflow/${RUN}_${expname}_${DOMAIN}.xml <<EOF
           <taskdep state="Dead" task="&NET;_updatevars_task_@Y@m@d@H@M"/>
        </or>
     </dependency>
-
-
   </task>
+EOF
+else
+cat >> ${NWROOT}/workflow/${RUN}_${expname}_${DOMAIN}.xml <<EOF 
+    <dependency> 
+        <taskdep task="&NET;_gsianl_task_@Y@m@d@H@M"/>
+     </dependency>
+  </task>
+EOF
+fi
+cat >> ${NWROOT}/workflow/${RUN}_${expname}_${DOMAIN}.xml <<EOF  
 
 </workflow>
 

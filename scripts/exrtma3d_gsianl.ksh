@@ -260,7 +260,7 @@ if [ ${HRRRDAS_BEC} -eq 1 ]; then
    fi
    if [ "${envir}" == "lsf" ]; then #WCOSS
      hrrre_file=${COMINhrrrdas}/hrrrdas_small_d02_${time_1hour_ago}00f01_mem00${cc}
-     ${LS} ${COMINhrrrdas}/hrrrdas_small_d02_${time_1hour_ago}00f01_mem00${cc} > filelist.hrrrdas
+     ${LS} ${COMINhrrrdas}/hrrrdas_small_d02_${time_1hour_ago}00f01_mem00${cc} >> filelist.hrrrdas
    elif [ ${HRRRDAS_SMALL} -eq 1 ]; then
      hrrre_file=${COMINhrrrdas}/${time_1hour_ago}/wrfprd_mem00${cc}/wrfout_small_d02_${time_str2}
    else
@@ -285,7 +285,7 @@ if [[ ${hrrrmem} -gt 30 ]] && [[ ${HRRRDAS_BEC} -eq 1  ]]; then #if HRRRDAS BEC 
   echo "Do hybrid with HRRRDAS BEC"
   nummem=${hrrrmem}
   cp filelist.hrrrdas filelist03
-  ${CP} ${PARMgsi}/hybens_info_hrrrdas ./hybens_info
+#  ${CP} ${PARMgsi}/hybens_info_hrrrdas ./hybens_info
   beta1_inv=$(( 1 - $EnsWgt  ))
   ifhyb=.true.
   regional_ensemble_option=3
@@ -321,15 +321,15 @@ fi
 #   bftab_sst= bufr table for sst ONLY needed for sst retrieval (retrieval=.true.)
 
 anavinfo=${FIXgsi}/anavinfo_arw_netcdf
-BERROR=${FIXgsi}/3drtma_berror_stats_hz01
-#BERROR=${FIXgsi}/rap_berror_stats_global_RAP_tune
+#BERROR=${FIXgsi}/3drtma_berror_stats_hz01
+BERROR=${FIXgsi}/rap_berror_stats_global_RAP_tune
 SATANGL=${FIXgsi}/global_satangbias.txt
 SATINFO=${FIXgsi}/global_satinfo.txt
 CONVINFO=${FIXgsi}/nam_regional_convinfo_RAP.txt
 OZINFO=${FIXgsi}/global_ozinfo.txt    
 PCPINFO=${FIXgsi}/global_pcpinfo.txt
-OBERROR=${FIXgsi}/3drtma_errtable_smallSFCerr
-#OBERROR=${FIXgsi}/nam_errtable.r3dv
+#OBERROR=${FIXgsi}/3drtma_errtable_smallSFCerr
+OBERROR=${FIXgsi}/nam_errtable.r3dv
 # Fixed fields
 cp $anavinfo anavinfo
 cp $BERROR   berror_stats
@@ -422,7 +422,7 @@ if [ "${envir}" == "lsf" ]; then #WCOSS
   echo "HVC option is $hybridcord"
 fi
 # Build the GSI namelist on-the-fly
-${CP} ${PARMgsi}/gsiparm.anl.sh_bectune ./gsiparm.anl.sh
+${CP} ${PARMgsi}/gsiparm.anl.sh .
 source ./gsiparm.anl.sh
 cat << EOF > gsiparm.anl
 $gsi_namelist
