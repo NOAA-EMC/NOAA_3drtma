@@ -81,7 +81,7 @@ elif [ "${machine}" = "jet" ] ; then
 elif [ "${machine}" = "dell" ] ; then
   . /etc/profile
   . /usrx/local/prod/lmod/lmod/init/sh >/dev/null # Module Support 
-  module purge
+#  module purge
 # loading modules used when building the code
   case "$COMMAND" in
     *POST*)

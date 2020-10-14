@@ -179,7 +179,7 @@ fi
 # ln -s ${FIXcrtm}/EmisCoeff/Big_Endian/Nalli.EK-PDF.W_W-RefInd.EmisCoeff.bin EmisCoeff.bin
 ################################################################################
 
-for what in "amsre_aqua" "imgr_g11" "imgr_g12" "imgr_g13" \
+for what in "ahi_himawari8" "abi_gr" "amsre_aqua" "imgr_g11" "imgr_g12" "imgr_g13" \
     "imgr_g15" "imgr_mt1r" "imgr_mt2" "seviri_m10" \
     "ssmi_f13" "ssmi_f14" "ssmi_f15" "ssmis_f16" \
     "ssmis_f17" "ssmis_f18" "ssmis_f19" "ssmis_f20" \

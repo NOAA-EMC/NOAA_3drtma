@@ -106,6 +106,11 @@ MM=`${DATE} +"%m" -d "${START_TIME}"`
 DD=`${DATE} +"%d" -d "${START_TIME}"`
 HH=`${DATE} +"%H" -d "${START_TIME}"`
 
+YYYYMMDDHHMM=`${DATE} +"%Y%m%d%H%M" -d "${START_TIME}"`
+time_1hour_ago=`${DATE} -d "${START_TIME} 1 hour ago" +%Y%m%d%H`
+
+
+
 
 if (((${HH} >= 00) && (${HH} <=  05))) ; then
 HHR=00
@@ -194,7 +199,7 @@ elif [ -r "${DATAOBSHOME}/${RUN}.t${HH}${subcyc}z.NASALaRCCloudInGSI.bufr" ]; th
 else
   ${ECHO} "Warning: ${DATAOBSHOME}: NASALaRCCloudInGSI.bufr does not exist!"
 fi
-
+if [ ${HRRRDAS_BEC} -eq 0 ]; then 
 # Set runtime and save directories
 export endianness=Big_Endian
 
@@ -229,14 +234,14 @@ else
     ${UTILrtma3d_dev}/check_enkf_size.sh
 fi
 
-if [ ${HRRRDAS_BEC} -gt 0 ]; then
+elif [ ${HRRRDAS_BEC} -gt 0 ]; then
   ${ECHO} "\$HRRRDAS_BEC=${HRRRDAS_BEC}, so HRRRDAS will be used if available"
   #----------------------------------------------------
   # generate list of HRRRDAS members for ensemble covariances
   # Use 1-hr forecasts from the HRRRDAS cyclin
   c=1
-  hrrre_file=${COMINhrrrdas}/hrrrdas_small_d02_${YYYYMMDD}${cyc}00f01_mem0001
-  ${LS} ${COMINhrrrdas}/hrrrdas_small_d02_${YYYYMMDD}${cyc}00f01_mem000${c} > filelist.hrrrdas
+  hrrre_file=${COMINhrrrdas}/hrrrdas_small_d02_${time_1hour_ago}00f01_mem0001
+  ${LS} ${COMINhrrrdas}/hrrrdas_small_d02_${time_1hour_ago}00f01_mem000${c} > filelist.hrrrdas
   ${LN} -sf ${hrrre_file} wrf_en001
   c=2
   while [[ $c -le 36 ]]; do
@@ -245,8 +250,8 @@ if [ ${HRRRDAS_BEC} -gt 0 ]; then
    else
     cc=$c
    fi
-   hrrre_file=${COMINhrrrdas}/hrrrdas_small_d02_${YYYYMMDD}${cyc}00f01_mem00${cc}
-   ${LS} ${COMINhrrrdas}/hrrrdas_small_d02_${YYYYMMDD}${cyc}00f01_mem00${cc} >> filelist.hrrrdas
+   hrrre_file=${COMINhrrrdas}/hrrrdas_small_d02_${time_1hour_ago}00f01_mem00${cc}
+   ${LS} ${COMINhrrrdas}/hrrrdas_small_d02_${time_1hour_ago}00f01_mem00${cc} >> filelist.hrrrdas
    ${LN} -sf ${hrrre_file} wrf_en0${cc}
    ((c = c + 1))
   done
@@ -266,7 +271,6 @@ if [[ ${hrrrmem} -gt 30 ]] && [[ ${HRRRDAS_BEC} -eq 1  ]]; then #if HRRRDAS BEC 
   echo "Do hybrid with HRRRDAS BEC"
   nummem=${hrrrmem}
   cp filelist.hrrrdas filelist03
-
   beta1_inv=0.10 #0.15
   ifhyb=.true.
   regional_ensemble_option=3
