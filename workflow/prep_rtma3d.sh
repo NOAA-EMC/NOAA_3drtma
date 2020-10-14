@@ -99,7 +99,7 @@ export DOMAIN="conus"
 # Computational resources
   ACCOUNT="RTMA-T2O"                    #account for CPU resources
   RESERVATION="<native>-R rusage[mem=2000] -R affinity[core]</native><queue>&QUEUE_SHARED;</queue><account>&ACCOUNT;</account>"
-  RESERVATION_GSI="<native>-R rusage[mem=3300] -R affinity[core]</native><queue>&QUEUE;</queue><account>&ACCOUNT;</account>"
+  RESERVATION_GSI="<native>-R rusage[mem=3600] -R affinity[core]</native><queue>&QUEUE;</queue><account>&ACCOUNT;</account>"
   RESERVATION_UPDATEVARS="<native>-R rusage[mem=3300] -R affinity[core]</native><queue>&QUEUE;</queue><account>&ACCOUNT;</account>"
   RESERVATION_UPP="<native>-R rusage[mem=3300] -R affinity[core]</native><queue>&QUEUE;</queue><account>&ACCOUNT;</account>"
   RESERVATION_SVC="<native>-R rusage[mem=1000] -R affinity[core]</native><queue>&QUEUE_SVC;</queue><account>&ACCOUNT;</account>"
@@ -138,7 +138,7 @@ export DOMAIN="conus"
   GSI_PROC=14
   GSI_THREADS=1
   GSI_OMP_STACKSIZE="512M"
-  GSI_RESOURCES="<nodes>21:ppn=&GSI_PROC;</nodes><walltime>00:30:00</walltime>"
+  GSI_RESOURCES="<nodes>24:ppn=&GSI_PROC;</nodes><walltime>00:40:00</walltime>"
   GSI_RESERVATION=${RESERVATION_GSI}
 
 #UPDATE_VARS
@@ -350,7 +350,8 @@ export exefile_name_updatevars_ndown="rtma3d_updatevars_ndown"
                           # 2: wrfguess_rap (directly downscaled from RAP to HRRR grid  at 1 hr before analysis time)
                           # 2: Not recommended (missing some hydrometer information and leading to failure of UPP on CEIL)
 
-
+  export updatevars=0     # 0: WRFV3.9 is not invoked to add radar reflectivity fields prior to post-processing
+		          # 1: WRFV3.9 is employed to provide radar reflectivity fields prior to post_processing.
 
   export gsi2=""
   export gsi_grid_ratio_in_var=1
@@ -427,7 +428,7 @@ cat > ${NWROOT}/workflow/${RUN}_${expname}_${DOMAIN}.xml <<EOF
 <!ENTITY GESROOT	"&ptmp_base;/nwges2/&NET;">
 
 <!ENTITY HOMErtma3d	"&NWROOT;">
-<!ENTITY LOG_DIR	"/gpfs/dell2/stmp/${USER}/bectune/${DOMAIN}_logs">
+<!ENTITY LOG_DIR	"/gpfs/dell2/stmp/${USER}/${DOMAIN}_logs_bectune">
 <!ENTITY JJOB_DIR	"&HOMErtma3d;/jobs">
 <!ENTITY SCRIPT_DIR	"&HOMErtma3d;/scripts">
 <!ENTITY USHrtma3d	"&HOMErtma3d;/ush">
@@ -1602,6 +1603,8 @@ cat >> ${NWROOT}/workflow/${RUN}_${expname}_${DOMAIN}.xml <<EOF
 EOF
 fi
 
+if [ ${updatevars} -eq 1 ] ; then
+
 cat >> ${NWROOT}/workflow/${RUN}_${expname}_${DOMAIN}.xml <<EOF 
 
  <task name="&NET;_updatevars_task_@Y@m@d@H@M" cycledefs="02-11hr,00hr,01hr" maxtries="&maxtries;">
@@ -1621,6 +1624,11 @@ cat >> ${NWROOT}/workflow/${RUN}_${expname}_${DOMAIN}.xml <<EOF
     </dependency>
 
   </task>
+
+EOF
+fi
+
+cat >> ${NWROOT}/workflow/${RUN}_${expname}_${DOMAIN}.xml <<EOF 
 
   <task name="&NET;_post_task_@Y@m@d@H@M" cycledefs="02-11hr,00hr,01hr" maxtries="&maxtries;">
 
@@ -1647,15 +1655,29 @@ cat >> ${NWROOT}/workflow/${RUN}_${expname}_${DOMAIN}.xml <<EOF
 
     &ENVARS_POST;
 
+EOF
+
+if [ ${updatevars} -eq 1 ] ; then
+cat >> ${NWROOT}/workflow/${RUN}_${expname}_${DOMAIN}.xml <<EOF  
+
     <dependency> 
        <or>
           <taskdep state="succeeded" task="&NET;_updatevars_task_@Y@m@d@H@M"/>
           <taskdep state="Dead" task="&NET;_updatevars_task_@Y@m@d@H@M"/>
        </or>
     </dependency>
-
   </task>
+EOF
+else
+cat >> ${NWROOT}/workflow/${RUN}_${expname}_${DOMAIN}.xml <<EOF 
+    <dependency> 
+	<taskdep task="&NET;_gsianl_task_@Y@m@d@H@M"/>
+     </dependency>
+  </task>
+EOF
+fi
 
+cat >> ${NWROOT}/workflow/${RUN}_${expname}_${DOMAIN}.xml <<EOF 
   <task name="&NET;_post4fgs_task_@Y@m@d@H@M" cycledefs="02-11hr,00hr,01hr" maxtries="&maxtries;">
 
     &ENVARS;
@@ -1670,7 +1692,10 @@ cat >> ${NWROOT}/workflow/${RUN}_${expname}_${DOMAIN}.xml <<EOF
     <jobname><cyclestr>&NET;_post4fgs_job_@Y@m@d@H@M</cyclestr></jobname>
     <join><cyclestr>&LOG_SCHDLR;/&NET;_&envir;_post4fgs_@Y@m@d@H@M.log</cyclestr></join>
 
-    &ENVARS_POST;
+    &ENVARS_POST; 
+EOF
+if [ ${updatevars} -eq 1 ] ; then
+cat >> ${NWROOT}/workflow/${RUN}_${expname}_${DOMAIN}.xml <<EOF  
 
     <dependency> 
        <or>
@@ -1678,9 +1703,17 @@ cat >> ${NWROOT}/workflow/${RUN}_${expname}_${DOMAIN}.xml <<EOF
           <taskdep state="Dead" task="&NET;_updatevars_task_@Y@m@d@H@M"/>
        </or>
     </dependency>
-
-
   </task>
+EOF
+else
+cat >> ${NWROOT}/workflow/${RUN}_${expname}_${DOMAIN}.xml <<EOF 
+    <dependency> 
+        <taskdep task="&NET;_gsianl_task_@Y@m@d@H@M"/>
+     </dependency>
+  </task>
+EOF
+fi
+cat >> ${NWROOT}/workflow/${RUN}_${expname}_${DOMAIN}.xml <<EOF  
 
 </workflow>
 

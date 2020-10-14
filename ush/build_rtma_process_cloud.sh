@@ -175,9 +175,9 @@ fi
 
 if [ $? -eq 0 ] ; then
   echo " code was built successfully."
-  echo " cp -p ${BUILD_DIR}/rap_process_cloud.exe   ${EXEC}/GSI/${exefile_name_cloud} "
-  cp -p ${BUILD_DIR}/rap_process_cloud.exe   ${EXEC}/GSI/${exefile_name_cloud}
-  ls -l ${EXEC}/GSI/${exefile_name_cloud}
+#  echo " cp -p ${BUILD_DIR}/rap_process_cloud.exe   ${EXEC}/GSI/${exefile_name_cloud} "
+#  cp -p ${BUILD_DIR}/rap_process_cloud.exe   ${EXEC}/GSI/${exefile_name_cloud}
+#  ls -l ${EXEC}/GSI/${exefile_name_cloud}
 else
   echo " ================ WARNING =============== " 
   echo " Compilation of process_NASA_cloud code was failed."

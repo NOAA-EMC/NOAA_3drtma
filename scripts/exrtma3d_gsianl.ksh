@@ -260,7 +260,7 @@ if [ ${HRRRDAS_BEC} -eq 1 ]; then
    fi
    if [ "${envir}" == "lsf" ]; then #WCOSS
      hrrre_file=${COMINhrrrdas}/hrrrdas_small_d02_${time_1hour_ago}00f01_mem00${cc}
-     ${LS} ${COMINhrrrdas}/hrrrdas_small_d02_${time_1hour_ago}00f01_mem00${cc} > filelist.hrrrdas
+     ${LS} ${COMINhrrrdas}/hrrrdas_small_d02_${time_1hour_ago}00f01_mem00${cc} >> filelist.hrrrdas
    elif [ ${HRRRDAS_SMALL} -eq 1 ]; then
      hrrre_file=${COMINhrrrdas}/${time_1hour_ago}/wrfprd_mem00${cc}/wrfout_small_d02_${time_str2}
    else
