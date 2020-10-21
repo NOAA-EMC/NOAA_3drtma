@@ -18,8 +18,8 @@ elif [[ -d /cm ]] ; then
     conf_target=nco
     target=cray
 elif [[ -d /ioddev_dell ]]; then
-#   MODULESHOME="/usrx/local/Modules/3.2.10"
-#   . $MODULESHOME/init/sh
+   MODULESHOME="/usrx/local/Modules/3.2.10"
+   . $MODULESHOME/init/sh
     conf_target=nco
     target=dell
 elif [[ -d /scratch3 ]] ; then
@@ -132,16 +132,16 @@ fi
 #--- compilation of POST
 #
 # working branch
-wrking_branch=${branch_post_source}
-cd ${TOPSORC_POST}
-echo " ----> check out working branch "
-echo " ----> git checkout ${wrking_branch} "
-git checkout ${wrking_branch}
+#wrking_branch=${branch_post_source}
+#cd ${TOPSORC_POST}
+#echo " ----> check out working branch "
+#echo " ----> git checkout ${wrking_branch} "
+#git checkout ${wrking_branch}
 
-if [ $? -ne 0 ] ; then
-  echo " failed to check out the branch ${wrking_branch} and abort "
-  exit 1
-fi
+#if [ $? -ne 0 ] ; then
+#  echo " failed to check out the branch ${wrking_branch} and abort "
+#  exit 1
+#fi
 
 #==================#
 # NOTE:
@@ -150,8 +150,8 @@ fi
 # load modules (using module file under modulefiles/${target}/build)
 #
 
-modules_dir=${MODULEFILES_DIR}/${target}/build
-modules_fname=modulefile.build.post.${target}
+#modules_dir=${MODULEFILES_DIR}/${target}/build
+#modules_fname=modulefile.build.post.${target}
 
 ###################
 #Adding minmax function
@@ -170,7 +170,8 @@ chmod 755 ${TOPSORC_POST}/sorc/ncep_post.fd/pkind.f
 echo " ====>  compiling POST under building directory: ${BUILD_POST} "
 
 cd ${BUILD_POST}
-/bin/sh build_ncep_post.sh >& ${BUILD_LOG}/log.build_ncep_post_native.txt  2>&1
+#/bin/sh build_ncep_post.sh >& ${BUILD_LOG}/log.build_ncep_post_native.txt  2>&1
+./build_ncep_post.sh >& ${BUILD_LOG}/log.build_ncep_post_native.txt  2>&1
 
 if [ $? -eq 0 ] ; then
   echo " NCEP-POST code was built successfully."
