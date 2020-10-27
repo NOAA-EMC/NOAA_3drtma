@@ -110,7 +110,7 @@ if [ -d ${DIRNAME_POST} ] ; then
     rm -rf ${DIRNAME_POST}
 fi
 
-echo " ====> git clone gerrit:EMC_post  ./${DIRNAME_POST} "
+echo " ====> git clone https://github.com/NOAA-EMC/EMC_post  ./${DIRNAME_POST} "
 git clone https://github.com/NOAA-EMC/EMC_post  ./${DIRNAME_POST}
 cd ./${DIRNAME_POST}
 #scp -p .git/hooks/commit-msg  .git/hooks

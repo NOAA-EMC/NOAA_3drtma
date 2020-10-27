@@ -18,8 +18,8 @@ elif [[ -d /cm ]] ; then
     conf_target=nco
     target=cray
 elif [[ -d /ioddev_dell ]]; then
-   MODULESHOME="/usrx/local/Modules/3.2.10"
-   . $MODULESHOME/init/sh
+#   MODULESHOME="/usrx/local/Modules/3.2.10"
+#   . $MODULESHOME/init/sh
     conf_target=nco
     target=dell
 elif [[ -d /scratch3 ]] ; then
@@ -95,12 +95,7 @@ then
   exit 1
 fi
 
-USH_DIR=${TOP_RTMA}/ush
-MODULEFILES_DIR=${TOP_RTMA}/modulefiles
-
-cd $TOP_RTMA
 EXEC=${TOP_RTMA}/exec
-if [ ! -d ${EXEC} ]; then mkdir -p ${EXEC}; fi
 
 cd ${TOP_SORC}
 # all the building POST jobs is to be done under sub-direvtory build_post
@@ -120,28 +115,10 @@ fi
 #--- detecting the existence of the directory of POST source package
 #
 cd ${TOP_SORC}
-if [ ! -d ${TOPSORC_POST} ]
-then
-  echo " ====> WARNING: POST source code directory: ${TOPSORC_POST}  does NOT exist."
-  echo " ====> WARNING: please check out a local copy of POST to ${TOPSORC_POST}"
-  echo " ====> Warning: abort compilation of POST for RTMA3D."
-  exit 2
-fi
-
 #
 #--- compilation of POST
 #
 # working branch
-#wrking_branch=${branch_post_source}
-#cd ${TOPSORC_POST}
-#echo " ----> check out working branch "
-#echo " ----> git checkout ${wrking_branch} "
-#git checkout ${wrking_branch}
-
-#if [ $? -ne 0 ] ; then
-#  echo " failed to check out the branch ${wrking_branch} and abort "
-#  exit 1
-#fi
 
 #==================#
 # NOTE:
@@ -150,28 +127,11 @@ fi
 # load modules (using module file under modulefiles/${target}/build)
 #
 
-#modules_dir=${MODULEFILES_DIR}/${target}/build
-#modules_fname=modulefile.build.post.${target}
-
-###################
-#Adding minmax function
-###################
-PARM_DIR=${TOP_RTMA}/parm/upp
-cp $PARM_DIR/pkind.f ${TOPSORC_POST}/sorc/ncep_post.fd
-cp $PARM_DIR/pmazmin.f ${TOPSORC_POST}/sorc/ncep_post.fd
-cp $PARM_DIR/makefile_module ${TOPSORC_POST}/sorc/ncep_post.fd
-
-chmod 755 ${TOPSORC_POST}/sorc/ncep_post.fd/makefile_module
-chmod 755 ${TOPSORC_POST}/sorc/ncep_post.fd/pmazmin.f
-chmod 755 ${TOPSORC_POST}/sorc/ncep_post.fd/pkind.f
-
-#==================#
 # compiling post
 echo " ====>  compiling POST under building directory: ${BUILD_POST} "
 
 cd ${BUILD_POST}
-#/bin/sh build_ncep_post.sh >& ${BUILD_LOG}/log.build_ncep_post_native.txt  2>&1
-./build_ncep_post.sh >& ${BUILD_LOG}/log.build_ncep_post_native.txt  2>&1
+build_ncep_post.sh >& ${BUILD_LOG}/log.build_ncep_post_native.txt  2>&1
 
 if [ $? -eq 0 ] ; then
   echo " NCEP-POST code was built successfully."

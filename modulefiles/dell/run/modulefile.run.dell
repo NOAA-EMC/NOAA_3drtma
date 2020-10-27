@@ -42,7 +42,7 @@
 #   module load contrib     # not use this line if use the command just above
 
 #    module load prod_envir/1.0.3
-    module load HPSS/5.0.2.5
+#    module load HPSS/5.0.2.5
 #   module load gsd
 
 #    module load cnvgrib
@@ -56,10 +56,10 @@
 #   module load met/7.0        # MET (loaded in launch.ksh)
 
 #   module load anaconda       # Python
-    module load GrADS/2.2.0          # GrADS
-    module load NCARG/6.4.0 
-    module load HDF5-serial/1.10.1
-    module load NCO/4.7.0
+#    module load GrADS/2.2.0          # GrADS
+#    module load NCARG/6.4.0 
+#    module load HDF5-serial/1.10.1
+#    module load NCO/4.7.0
 #    module load cairo          # NCL
 #    module load ncl            # NCL
 #    module load ncview         # ncview tools
