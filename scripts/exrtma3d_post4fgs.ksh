@@ -54,7 +54,7 @@ HH_fcstinit=`${ECHO} ${FCST_INI_TIME} | cut -c9-10 `
 #------------------------------------------------------------------#
 
 export DATAHOME=$DATA
-export MODEL="RAP"
+export CORE="RAPRRTMA"
 
 export DATAWRFHOME=${GESINhrrr_rtma3d:-"$COMIN"}
 export DATAWRFFILE=${FGSrtma3d_FNAME:-"${RUN}.t${cyc}${subcyc}z.firstguess.nc"}
@@ -108,20 +108,9 @@ cd ${workdir}
 #
 # Set up some constants for UPP namlist itag
 #
+
 export XLFRTEOPTS="unit_vars=yes"
-
-if [ "${MODEL}" == "RAP" ]; then
-  export CORE=RAPR
-elif [ "${MODEL}" == "WRF-RR NMM" ]; then
-  export CORE=NMM
-fi
-
-# export tmmark=tm00
-# export tmmark=GrbF00
-# export tmmark=GrbF${FCST_TIME}
-export RSTFNL=${workdir}/
-
-export CORE=RAPR
+export MP_SHARED_MEMORY=yes
 export SPLNUM=47
 export SPL=2.,5.,7.,10.,20.,30.\
 ,50.,70.,75.,100.,125.,150.,175.,200.,225.\
@@ -130,10 +119,8 @@ export SPL=2.,5.,7.,10.,20.,30.\
 ,675.,700.,725.,750.,775.,800.,825.,850.\
 ,875.,900.,925.,950.,975.,1000.,1013.2
 
-# export VALIDTIMEUNITS=00
-
-timestr=`${DATE} +%Y-%m-%d_%H_%M_%S -d "${START_TIME}  ${FCST_TIME} hours"`
-timestr2=`${DATE} +%Y-%m-%d_%H:%M:%S -d "${START_TIME}  ${FCST_TIME} hours"`
+timestr=`${DATE} +%Y-%m-%d_%H_%M_%S -d "${START_TIME}"`
+timestr2=`${DATE} +%Y-%m-%d_%H:%M:%S -d "${START_TIME}"`
 
 ${CAT} > itag <<EOF
 ${DATAWRFHOME}/${DATAWRFFILE}
@@ -150,51 +137,32 @@ ${RM} -f fort.*
 ${RM} -f post_avblflds.xml params_grib2_tbl_new postcntrl.xml postxconfig-NT.txt eta_micro_lookup.dat
 ${RM} -f WRF???.GrbF??
 
-# set up the namelist/control/config input files
-# hrrr"x": means experimental testing.
-# cp -p ${PARMupp}/hrrr_post_avblflds.xml          post_avblflds.xml
-  cp -p ${PARMupp}/post_avblflds_raphrrr.xml       post_avblflds.xml
-# cp -p ${PARMupp}/hrrr_params_grib2_tbl_new       params_grib2_tbl_new
-  cp -p ${PARMupp}/params_grib2_tbl_new_raphrrr    params_grib2_tbl_new
-# cp -p ${PARMupp}/hrrr_postcntrl.xml              postcntrl.xml
-# cp -p ${PARMupp}/postcntrl_hrrr.xml              postcntrl.xml
-  cp -p ${PARMupp}/postcntrl_hrrrx.xml             postcntrl.xml
 
-# if [ -f ${PARMupp}/hrrr_postxconfig-NT.txt ] ; then
-#   cp -p ${PARMupp}/hrrr_postxconfig-NT.txt       postxconfig-NT.txt
-if [ -f ${PARMupp}/postxconfig-NT-hrrrx.txt ] ; then
-  cp -p ${PARMupp}/postxconfig-NT-hrrrx.txt        postxconfig-NT.txt
-else
-  echo " Warning: No postxconfig-NT.txt file. UPP Abort!"
-  exit 1
-fi
+  CP_LN="${LN} -sf"
+#link/copy parameter files
+${CP_LN} ${PARMupp}/post_avblflds.xml post_avblflds.xml
+${CP_LN} ${PARMupp}/params_grib2_tbl_new params_grib2_tbl_new
+${CP_LN} ${PARMupp}/postcntrl.xml postcntrl.xml
+${CP_LN} ${PARMupp}/postxconfig-NT.txt postxconfig-NT.txt  ##postcntrl_subh.xml postxconfig_subh-NT.txt??
+${CP_LN} ${PARMupp}/gtg.config.raphrrr gtg.config
 
-if [ "${MODEL}" == "RAP" ]; then
-  cp -p ${PARMupp}/rap_micro_lookup.dat      eta_micro_lookup.dat
-elif [ "${MODEL}" == "WRF-RR NMM" ]; then
-  cp -p ${PARMupp}/nam_micro_lookup.dat      eta_micro_lookup.dat
-fi
+${CP_LN} ${PARMupp}/ETAMPNEW_DATA eta_micro_lookup.dat
 
-################################################################################
-# ln -s ${FIXcrtm}/EmisCoeff/Big_Endian/Nalli.EK-PDF.W_W-RefInd.EmisCoeff.bin EmisCoeff.bin
-################################################################################
-
-for what in "ahi_himawari8" "abi_gr" "amsre_aqua" "imgr_g11" "imgr_g12" "imgr_g13" \
-    "imgr_g15" "imgr_mt1r" "imgr_mt2" "seviri_m10" \
-    "ssmi_f13" "ssmi_f14" "ssmi_f15" "ssmis_f16" \
-    "ssmis_f17" "ssmis_f18" "ssmis_f19" "ssmis_f20" \
-    "tmi_trmm" "v.seviri_m10" "imgr_insat3d" ; do
-    ln -s "$FIXcrtm/$what.TauCoeff.bin" .
-    ln -s "$FIXcrtm/$what.SpcCoeff.bin" .
+#link CRTM coefficients
+for what in "ahi_himawari8" "abi_gr" "imgr_g11" "imgr_g12" "imgr_g13" "imgr_g15" "imgr_mt1r" "imgr_mt2" \
+     "amsre_aqua" "tmi_trmm" "ssmi_f13" "ssmi_f14" "ssmi_f15" "ssmis_f16"  \
+     "ssmis_f17" "ssmis_f18" "ssmis_f19" "ssmis_f20" "seviri_m10" "ssmi_f10"   \
+     "v.seviri_m10" "imgr_insat3d" "ssmi_f11"; do
+    ln -s "${FIXcrtm}/${what}.TauCoeff.bin" .
+    ln -s "${FIXcrtm}/${what}.SpcCoeff.bin" .
 done
 
-for what in 'Aerosol' 'Cloud' ; do
-    ln -s "$FIXcrtm/${what}Coeff.bin" .
+ln -s ${FIXcrtm}/CloudCoeff.bin .
+ln -s ${FIXcrtm}/AerosolCoeff.bin .
+for what in  ${FIXcrtm}/*Emis* ; do
+    ln -s ${what} .
 done
 
-for what in  $FIXcrtm/*Emis* ; do
-    ln -s $what .
-done
 
 #=============================================================================#
 #
@@ -247,17 +215,17 @@ ${MV}  ${workdir}/WRFPRS.GrbF${FCST_TIME}.new ${workdir}/wrfsubhprs_fgs.grib2
 ${CAT} ${workdir}/WRFNAT.GrbF${FCST_TIME}     ${workdir}/WRFTWO.GrbF${FCST_TIME} > ${workdir}/WRFNAT.GrbF${FCST_TIME}.new
 ${MV}  ${workdir}/WRFNAT.GrbF${FCST_TIME}.new ${workdir}/wrfsubhnat_fgs.grib2
 
-${CP}  ${workdir}/WRFTWO.GrbF${FCST_TIME}     ${workdir}/wrfsubhspl_fgs.grib2
+#${CP}  ${workdir}/WRFTWO.GrbF${FCST_TIME}     ${workdir}/wrfsubhspl_fgs.grib2
 
 # Check to make sure all Post  output files were produced
 if [ ! -s "${workdir}/wrfsubhprs_fgs.grib2" ]; then
   ${ECHO} "unipost crashed! wrfsubhprs.grib2 is missing"
   exit 1
 fi
-if [ ! -s "${workdir}/wrfsubhspl_fgs.grib2" ]; then
-  ${ECHO} "unipost crashed! wrfsubhspl.grib2 s missing"
-  exit 1
-fi
+#if [ ! -s "${workdir}/wrfsubhspl_fgs.grib2" ]; then
+#  ${ECHO} "unipost crashed! wrfsubhspl.grib2 s missing"
+#  exit 1
+#fi
 if [ ! -s "${workdir}/wrfsubhnat_fgs.grib2" ]; then
   ${ECHO} "unipost crashed! wrfsubhnat.grib2 is missing"
   exit 1
@@ -266,7 +234,7 @@ fi
 # transfer the output grib2 files to $COMOUTpost_rtma3d
 
 ${WGRIB2} ${workdir}/wrfsubhprs_fgs.grib2 -set center 7 -grib ${COMOUTpost_rtma3d}/${PROD_HEAD2}.wrfsubhprs_fgs.grib2
-${WGRIB2} ${workdir}/wrfsubhspl_fgs.grib2 -set center 7 -grib ${COMOUTpost_rtma3d}/${PROD_HEAD2}.wrfsubhspl_fgs.grib2
+#${WGRIB2} ${workdir}/wrfsubhspl_fgs.grib2 -set center 7 -grib ${COMOUTpost_rtma3d}/${PROD_HEAD2}.wrfsubhspl_fgs.grib2
 ${WGRIB2} ${workdir}/wrfsubhnat_fgs.grib2 -set center 7 -grib ${COMOUTpost_rtma3d}/${PROD_HEAD2}.wrfsubhnat_fgs.grib2
 
 # softlinks with Julian date

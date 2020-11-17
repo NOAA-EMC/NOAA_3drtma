@@ -557,7 +557,7 @@ ${CP} -p gsiparm.anl  ${COMOUTgsi_rtma3d}/gsiparm.anl_${cycle_str}
 ${TAR} -zcvf ${COMOUTgsi_rtma3d}/diag_${cycle_str}.tgz diag_*
 
 if [ "${envir}" == "lsf" ]; then #wcoss
-  mv ${DATA}/wrf_inout                  ${COMOUTgsi_rtma3d}/${ANLrtma3d_FNAME}
+  ${CP} ${DATA}/wrf_inout                  ${COMOUTgsi_rtma3d}/${ANLrtma3d_FNAME}
   ${CP} -p minimization_fort220.${cycle_str} ${COMOUTgsi_rtma3d}
   ${CP} -p diag_*                             ${COMOUTgsi_rtma3d}
   tar -zcvf obsfit_fort220.tgz  ./fort.* ./fit_*
@@ -580,7 +580,7 @@ fi
 
 ${RM} -f ${DATA}/sig*
 ${RM} -f ${DATA}/obs*
-${RM} -f ${DATA}/pe*
+#${RM} -f ${DATA}/pe*
 
 msg="JOB $job FOR $RUN HAS COMPLETED NORMALLY"
 postmsg "$jlogfile" "$msg"

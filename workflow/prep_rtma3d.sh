@@ -94,13 +94,13 @@ export DOMAIN="conus"
   COMINRADAR="/gpfs/dell1/nco/ops/dcom/prod/ldmdata/obs/upperair/mrms/${DOMAIN}"
   GESINHRRR="/gpfs/dell1/ptmp/Annette.Gibbs/com/hrrr/prod"
   COMINGDAS="/gpfs/dell1/nco/ops/com/gfs/prod"
-  COMINHRRRDAS="/gpfs/hps/ptmp/Benjamin.Blake/nwges/prod/hrrr/hrrrdasges"
+  COMINHRRRDAS="/gpfs/hps/nco/ops/nwges/para/hrrr/hrrrdasges"
   NCKS="/gpfs/dell1/usrx/local/prod/packages/ips/18.0.1/nco/4.7.0/bin/ncks"
 # Computational resources
   ACCOUNT="RTMA-T2O"                    #account for CPU resources
   RESERVATION="<native>-R rusage[mem=2000] -R affinity[core]</native><queue>&QUEUE_SHARED;</queue><account>&ACCOUNT;</account>"
   RESERVATION_GSI="<native>-R rusage[mem=3600] -R affinity[core]</native><queue>&QUEUE;</queue><account>&ACCOUNT;</account>"
-  RESERVATION_UPDATEVARS="<native>-R rusage[mem=3300] -R affinity[core]</native><queue>&QUEUE;</queue><account>&ACCOUNT;</account>"
+  RESERVATION_UPDATEVARS="<native>-R rusage[mem=4000] -R affinity[core]</native><queue>&QUEUE;</queue><account>&ACCOUNT;</account>"
   RESERVATION_UPP="<native>-R rusage[mem=3300] -R affinity[core]</native><queue>&QUEUE;</queue><account>&ACCOUNT;</account>"
   RESERVATION_SVC="<native>-R rusage[mem=1000] -R affinity[core]</native><queue>&QUEUE_SVC;</queue><account>&ACCOUNT;</account>"
   RESERVATION_RADAR="<native>-R rusage[mem=3300] -R affinity[core]</native><queue>&QUEUE;</queue><account>&ACCOUNT;</account>"
@@ -145,7 +145,7 @@ export DOMAIN="conus"
   UPDATEVARS_PROC=14
   UPDATEVARS_THREADS=1
   UPDATEVARS_OMP_STACKSIZE="512M"
-  UPDATEVARS_RESOURCES="<nodes>20:ppn=&UPDATEVARS_PROC;</nodes><walltime>00:05:00</walltime>"
+  UPDATEVARS_RESOURCES="<nodes>24:ppn=&UPDATEVARS_PROC;</nodes><walltime>00:10:00</walltime>"
   UPDATEVARS_RESERVATION=${RESERVATION_UPDATEVARS}
 
 #  POST_PROC="112"
@@ -350,7 +350,7 @@ export exefile_name_updatevars_ndown="rtma3d_updatevars_ndown"
                           # 2: wrfguess_rap (directly downscaled from RAP to HRRR grid  at 1 hr before analysis time)
                           # 2: Not recommended (missing some hydrometer information and leading to failure of UPP on CEIL)
 
-  export updatevars=0     # 0: WRFV3.9 is not invoked to add radar reflectivity fields prior to post-processing
+  export updatevars=1     # 0: WRFV3.9 is not invoked to add radar reflectivity fields prior to post-processing
 		          # 1: WRFV3.9 is employed to provide radar reflectivity fields prior to post_processing.
 
   export gsi2=""
