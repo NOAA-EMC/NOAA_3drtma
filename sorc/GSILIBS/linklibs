@@ -1,0 +1,16 @@
+#!/bin/bash
+# This is to remove version numbers for NCEPLIBS Libraries
+# by Guoqing Ge, 2020/06/05
+
+#to make link with versin # removed
+for file in ./*
+do
+  #src=`readlink $file | sed -e "s#/lfs1/BMC/nrtrr#/home/rtrr#g"`
+  src=$file
+  dst=${src//_v*_/_}
+  dst=${dst//_v*./.}
+  if [ ! -z $src ]; then
+    ln -snf $src $dst
+    #echo "ln -snf $src $dst"
+  fi
+done

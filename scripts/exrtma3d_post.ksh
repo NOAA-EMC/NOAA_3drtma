@@ -298,38 +298,43 @@ ${timestr2}
 ${CORE}
 ${SPLNUM}
 ${SPL}
-${VALIDTIMEUNITS}
+
 EOF
 
 ${RM} -f fort.*
-${RM} -f post_avblflds.xml params_grib2_tbl_new postcntrl.xml postxconfig-NT.txt eta_micro_lookup.dat
+${RM} -f params_grib2_tbl_new postxconfig-NT.txt eta_micro_lookup.dat
 ${RM} -f WRF???.GrbF??
 
 
   CP_LN="${LN} -sf"
 #link/copy parameter files
-${CP_LN} ${PARMupp}/post_avblflds.xml post_avblflds.xml
+#${CP_LN} ${PARMupp}/post_avblflds.xml post_avblflds.xml
 ${CP_LN} ${PARMupp}/params_grib2_tbl_new params_grib2_tbl_new
-${CP_LN} ${PARMupp}/postcntrl.xml postcntrl.xml
-${CP_LN} ${PARMupp}/postxconfig-NT.txt postxconfig-NT.txt  ##postcntrl_subh.xml postxconfig_subh-NT.txt??
-${CP_LN} ${PARMupp}/gtg.config.raphrrr gtg.config
+#${CP_LN} ${PARMupp}/postcntrl.xml postcntrl.xml
+${CP_LN} ${PARMupp}/postxconfig-NT-3drtma.txt postxconfig-NT.txt
+#${CP_LN} ${PARMupp}/postxconfig-NT.txt postxconfig-NT.txt  ##postcntrl_subh.xml postxconfig_subh-NT.txt??
+#${CP_LN} ${PARMupp}/gtg.config.raphrrr gtg.config
 
-${CP_LN} ${PARMupp}/ETAMPNEW_DATA eta_micro_lookup.dat
+#${CP_LN} ${PARMupp}/ETAMPNEW_DATA eta_micro_lookup.dat
+${CP_LN} ${PARMupp}/rap_micro_lookup.dat ./eta_micro_lookup.dat
+
+
+${CP_LN} ${FIXupp}/*bin .
 
 #link CRTM coefficients
-for what in "ahi_himawari8" "abi_gr" "imgr_g11" "imgr_g12" "imgr_g13" "imgr_g15" "imgr_mt1r" "imgr_mt2" \
-     "amsre_aqua" "tmi_trmm" "ssmi_f13" "ssmi_f14" "ssmi_f15" "ssmis_f16"  \
-     "ssmis_f17" "ssmis_f18" "ssmis_f19" "ssmis_f20" "seviri_m10" "ssmi_f10"   \
-     "v.seviri_m10" "imgr_insat3d" "ssmi_f11"; do
-    ln -s "${FIXcrtm}/${what}.TauCoeff.bin" .
-    ln -s "${FIXcrtm}/${what}.SpcCoeff.bin" .
-done
+#for what in "ahi_himawari8" "abi_gr" "imgr_g11" "imgr_g12" "imgr_g13" "imgr_g15" "imgr_mt1r" "imgr_mt2" \
+#     "amsre_aqua" "tmi_trmm" "ssmi_f13" "ssmi_f14" "ssmi_f15" "ssmis_f16"  \
+#     "ssmis_f17" "ssmis_f18" "ssmis_f19" "ssmis_f20" "seviri_m10" "ssmi_f10"   \
+#     "v.seviri_m10" "imgr_insat3d" "ssmi_f11"; do
+#    ln -s "${FIXcrtm}/${what}.TauCoeff.bin" .
+#    ln -s "${FIXcrtm}/${what}.SpcCoeff.bin" .
+#done
 
-ln -s ${FIXcrtm}/CloudCoeff.bin .
-ln -s ${FIXcrtm}/AerosolCoeff.bin .
-for what in  ${FIXcrtm}/*Emis* ; do
-    ln -s ${what} .
-done
+#ln -s ${FIXcrtm}/CloudCoeff.bin .
+#ln -s ${FIXcrtm}/AerosolCoeff.bin .
+#for what in  ${FIXcrtm}/*Emis* ; do
+#    ln -s ${what} .
+#done
 
 
 #=============================================================================#
@@ -399,7 +404,6 @@ fi
 # transfer the output grib2 files to $COMOUTpost_rtma3d
 
 ${WGRIB2} ${workdir}/wrfsubhprs.grib2 -set center 7 -grib ${COMOUTpost_rtma3d}/${PROD_HEAD}.wrfsubhprs.grib2
-#${WGRIB2} ${workdir}/wrfsubhspl.grib2 -set center 7 -grib ${COMOUTpost_rtma3d}/${PROD_HEAD}.wrfsubhspl.grib2
 ${WGRIB2} ${workdir}/wrfsubhnat.grib2 -set center 7 -grib ${COMOUTpost_rtma3d}/${PROD_HEAD}.wrfsubhnat.grib2
 
 

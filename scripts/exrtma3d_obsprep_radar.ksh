@@ -131,7 +131,13 @@ if [ "${envir}" == "esrl" ]; then #jet
     done 
   done
 else #wcoss
-  obsname="MergedReflectivityQC"
+  if  [ "${DOMAIN}" == "alaska" ]; then
+    obsname="MergedReflectivityQComposite"
+    numlim=1
+  else
+    obsname="MergedReflectivityQC" 
+    numlim=10
+  fi
   for min in ${MM1} ${MM2} ${MM3}
   do
     ${ECHO} "Looking for data valid:"${YYYY}"-"${MM}"-"${DD}" "${HH}":"${min}
@@ -147,7 +153,7 @@ else #wcoss
         echo 'Found '${radarfilez}
         numgrib2=`ls ${COMINradar}/${obsname}/${obsname}_*_${YYYY}${MM}${DD}-${HH}${min}*.grib2.gz | wc -l`
         echo 'Number of GRIB-2 files: '${numgrib2}
-        if [ ${numgrib2} -ge 10 ] && [ ! -e filelist_mrms ]; then
+        if [ ${numgrib2} -ge $numlim ] && [ ! -e filelist_mrms ]; then
   #        ln -sf ${COMINradar}/${obsname}/${obsname}_*_${YYYY}${MM}${DD}-${HH}${min}*.grib2.gz . 
           cp ${COMINradar}/${obsname}/${obsname}_*_${YYYY}${MM}${DD}-${HH}${min}*.grib2.gz .
           gzip -d ${obsname}_*_${YYYY}${MM}${DD}-${HH}${min}*.grib2.gz

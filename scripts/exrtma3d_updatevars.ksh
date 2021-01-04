@@ -119,7 +119,7 @@ export WRF_NAMELIST=${DATAHOME}/namelist.input
 if [ ${DOMAIN} == "conus" ] ; then
 ${CP} ${PARMwrf}/wrf.nl ${WRF_NAMELIST} 
 elif [ ${DOMAIN} == "alaska" ] ; then 
-${CP} ${PARMwrf}/jet.nl ${WRF_NAMELIST}
+${CP} ${PARMwrf}/wrf.nl_ak ${WRF_NAMELIST}
 fi
 
 # Check to make sure the wrfinput_d01 file exists
