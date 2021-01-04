@@ -422,7 +422,7 @@ if [ "${envir}" == "lsf" ]; then #WCOSS
   echo "HVC option is $hybridcord"
 fi
 # Build the GSI namelist on-the-fly
-${CP} ${PARMgsi}/gsiparm.anl.sh_bectune ./gsiparm.anl.sh
+${CP} ${PARMgsi}/gsiparm.anl.sh_bectune gsiparm.anl.sh
 source ./gsiparm.anl.sh
 cat << EOF > gsiparm.anl
 $gsi_namelist
@@ -580,7 +580,7 @@ fi
 
 ${RM} -f ${DATA}/sig*
 ${RM} -f ${DATA}/obs*
-#${RM} -f ${DATA}/pe*
+${RM} -f ${DATA}/pe*
 
 msg="JOB $job FOR $RUN HAS COMPLETED NORMALLY"
 postmsg "$jlogfile" "$msg"

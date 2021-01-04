@@ -94,7 +94,7 @@ export DOMAIN="conus"
   COMINRADAR="/gpfs/dell1/nco/ops/dcom/prod/ldmdata/obs/upperair/mrms/${DOMAIN}"
   GESINHRRR="/gpfs/dell1/ptmp/Annette.Gibbs/com/hrrr/prod"
   COMINGDAS="/gpfs/dell1/nco/ops/com/gfs/prod"
-  COMINHRRRDAS="/gpfs/hps/nco/ops/nwges/para/hrrr/hrrrdasges"
+  COMINHRRRDAS="/gpfs/hps/nco/ops/nwges/prod/hrrr/hrrrdasges"
   NCKS="/gpfs/dell1/usrx/local/prod/packages/ips/18.0.1/nco/4.7.0/bin/ncks"
 # Computational resources
   ACCOUNT="RTMA-T2O"                    #account for CPU resources
@@ -153,7 +153,7 @@ export DOMAIN="conus"
   POST_THREADS=1
   POST_OMP_STACKSIZE="512MB"
 #  POST_RESOURCES="<cores>&POST_PROC;</cores><walltime>00:30:00</walltime>"
-  POST_RESOURCES="<nodes>2:ppn=&POST_PROC;</nodes><walltime>00:05:00</walltime>"
+  POST_RESOURCES="<nodes>2:ppn=&POST_PROC;</nodes><walltime>00:10:00</walltime>"
   POST_RESERVATION=${RESERVATION_UPP}
 
 
@@ -211,6 +211,7 @@ export exefile_name_updatevars_ndown="rtma3d_updatevars_ndown"
 
    export FIXgsi_udef="/gpfs/dell2/emc/modeling/noscrub/Edward.Colon/FixData/GSI-fix"
    export FIXcrtm_udef="/gpfs/dell2/emc/modeling/noscrub/Edward.Colon/FixData/CRTM-fix"
+   export FIXupp_udef="/gpfs/dell2/emc/modeling/noscrub/Edward.Colon/FixData/UPP-fix"
    export FIXwps_udef="/gpfs/dell2/emc/modeling/noscrub/Edward.Colon/FixData/wps"
    export FIXwrf_udef="/gpfs/dell2/emc/modeling/noscrub/Edward.Colon/FixData/wrf"
 
@@ -220,7 +221,7 @@ export exefile_name_updatevars_ndown="rtma3d_updatevars_ndown"
    export SFCOBS_PROVIDER_udef="/gpfs/dell2/emc/modeling/noscrub/Edward.Colon/FixData/obsuselist/sfcobs_provider"
    
    export PARMgsi_udef="/gpfs/dell2/emc/modeling/noscrub/Edward.Colon/FixData/parm/gsi"
-   export PARMupp_udef="/gpfs/dell2/emc/modeling/noscrub/Edward.Colon/FixData/parm/upp"
+   export PARMupp_udef="/gpfs/dell2/emc/modeling/noscrub/Edward.Colon/FixData/parm/upp_new"
    export PARMwrf_udef="/gpfs/dell2/emc/modeling/noscrub/Edward.Colon/FixData/parm/wrf"
    export PARMverf_udef="/gpfs/dell2/emc/modeling/noscrub/Edward.Colon/FixData/parm/verif" 
 
@@ -229,6 +230,7 @@ export exefile_name_updatevars_ndown="rtma3d_updatevars_ndown"
 
   export EXECrtma3d="${NWROOT}/exec"
   export FIXrtma3d="${NWROOT}/fix"
+  export FIXupp="${FIXrtma3d}/upp"
   export FIXgsi="${FIXrtma3d}/gsi"
   export FIXcrtm="${FIXrtma3d}/crtm"
   export FIXwps="${FIXrtma3d}/wps"
@@ -274,7 +276,10 @@ export exefile_name_updatevars_ndown="rtma3d_updatevars_ndown"
     ln -sf ${FIXgsi_udef}        ${FIXgsi}
     rm -rf $FIXcrtm
     echo " ln -sf ${FIXcrtm_udef}       ${FIXcrtm}"
-    ln -sf ${FIXcrtm_udef}       ${FIXcrtm}
+    ln -sf ${FIXupp_udef}       ${FIXupp}
+    rm -rf $FIXupp
+    echo " ln -sf ${FIXupp_udef}       ${FIXupp}"
+    ln -sf ${FIXupp_udef}       ${FIXupp}
     rm -rf $FIXwps
     echo " ln -sf ${FIXwps_udef}        ${FIXwps}"
     ln -sf ${FIXwps_udef}        ${FIXwps}
@@ -441,6 +446,7 @@ cat > ${NWROOT}/workflow/${RUN}_${expname}_${DOMAIN}.xml <<EOF
 
 <!-- Specific Definition for static data -->
 <!ENTITY FIXcrtm        "${FIXcrtm}">
+<!ENTITY FIXupp         "${FIXupp}">
 <!ENTITY FIXgsi         "${FIXgsi}">
 <!ENTITY FIXwps         "${FIXwps}">
 <!ENTITY FIXwrf         "${FIXwrf}">
@@ -497,7 +503,7 @@ cat > ${NWROOT}/workflow/${RUN}_${expname}_${DOMAIN}.xml <<EOF
 
 <!-- for workflow -->
 
-<!ENTITY maxtries	"7">
+<!ENTITY maxtries	"10">
 <!ENTITY KEEPDATA	"YES">
 <!ENTITY SENDCOM	"YES">
 
@@ -727,6 +733,10 @@ cat > ${NWROOT}/workflow/${RUN}_${expname}_${DOMAIN}.xml <<EOF
    <envar>
         <name>FIXcrtm</name>
         <value>&FIXcrtm;</value>
+   </envar>
+   <envar>
+        <name>FIXupp</name>
+        <value>&FIXupp;</value>
    </envar>
    <envar>
         <name>FIXgsi</name>
