@@ -87,8 +87,9 @@
 <!ENTITY LIGHTNING_PROC "1">
 <!ENTITY RADAR_PROC "33">
 <!ENTITY SATELLITE_PROC "1">
-<!-- ENTITY GSI_HYB_PROC "9:ppn=20" -->
-<!ENTITY GSI_HYB_PROC "280">
+<!-- ENTITY GSI_HYB_PROC "9:ppn=20"-->
+<!-- ENTITY GSIRUN_CORES "180"-->
+<!ENTITY GSI_HYB_PROC "7:ppn=40">
 <!ENTITY GSIRUN_CORES "280">
 <!ENTITY WRF_PROC "280">
 <!ENTITY DIAG_STATS_PROC "1">
@@ -301,7 +302,7 @@
     &RESERVATION_DA;
 
     <command>&JJOB_DIR;/launch.ksh &JJOB_DIR;/JRTMA3D_GSIANL</command>
-    <cores>&GSI_HYB_PROC;</cores>
+    <nodes>&GSI_HYB_PROC;</nodes>
     <jobname><cyclestr>&JOBNAME_PRE;_gsianl_@H@M</cyclestr></jobname>
     <join><cyclestr>&LOG_DIR;/@Y@m@d/gsianl_@Y@m@d@H@M.log</cyclestr></join>
 
