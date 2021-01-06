@@ -66,6 +66,31 @@ for onetime in ${XX[*]};do
   fi
 done
 
+# Delete postprd/wrf*grib2 obsprd/*.dat files
+if [ "${subcyc}" == "-1" ]; then #hourly run
+  deletetime=`date +%Y%m%d%H -d "${currentime}  50 hours ago"`  # keeping latest 12 cycles is enough
+else
+  deletetime=`date +%Y%m%d%H%M -d "${currentime} 50 hours ago"`  #4 cycles per hour, so keeping latest 12 cycles is enough
+fi
+set -A workdir "${mainroot}/run"
+echo "Delete postprd/wrf*grib2 obsprd/*.dat before ${deletetime}"
+cd ${workdir}
+echo "Working on directory ${workdir}"
+set -A XX `ls -d 20??????* | sort -r`
+maxnum=${#XX[*]}
+for onetime in ${XX[*]};do
+  if [[ ${onetime} -le ${deletetime} ]]; then
+    echo "${onetime}: Delete wrf*grib2 obsprd/*.dat in postprd/"
+    rm -f ${onetime}/postprd/wrf*grib2
+    rm -f ${onetime}/postprd/*/output*
+    rm -f ${onetime}/smtiprd/hrrr*grib2
+    rm -f ${onetime}/obsprd/*.dat
+    rm -f ${onetime}/obsprd/NASALaRC_cloud.bin
+    rm -f ${onetime}/gsiprd/diag_conv*
+    rm -rf ${onetime}/nclprd
+  fi
+done
+
 #=====================the following is to delete YYYYMMDD subdirectories under ptmp,stdout,log
 # Delete ptmp directories
 deletetime=`date +%Y%m%d -d "${currentime}  10 days ago"`
