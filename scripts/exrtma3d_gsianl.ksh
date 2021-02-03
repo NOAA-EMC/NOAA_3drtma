@@ -328,10 +328,11 @@ anavinfo=${FIXgsi}/anavinfo_arw_netcdf
 BERROR=${FIXgsi}/rap_berror_stats_global_RAP_tune
 SATANGL=${FIXgsi}/global_satangbias.txt
 SATINFO=${FIXgsi}/global_satinfo.txt
-CONVINFO=${FIXgsi}/nam_regional_convinfo_RAP.txt
 OZINFO=${FIXgsi}/global_ozinfo.txt    
 PCPINFO=${FIXgsi}/global_pcpinfo.txt
 OBERROR=${FIXgsi}/nam_errtable.r3dv
+VQCTP001=${FIXgsi}/vqctp001.dat
+CONVINFO=${PARMgsi}/nam_regional_convinfo_RAP.txt
 
 
 # Fixed fields
@@ -340,6 +341,7 @@ cp $BERROR   berror_stats
 cp $SATANGL  satbias_angle
 cp $SATINFO  satinfo
 cp $CONVINFO convinfo
+cp $VQCTP001  vqctp001.dat
 cp $OZINFO   ozinfo
 cp $PCPINFO  pcpinfo
 cp $OBERROR  errtable
