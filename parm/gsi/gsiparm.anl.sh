@@ -195,7 +195,7 @@ OBS_INPUT::
    i_T_Q_adjust= 2,
    l_rtma3d            = .true.,
    i_precip_vertical_check = 3,
-   !i_cloud_q_innovation=2,
+   !i_cloud_q_innovation=22,
  /
  &CHEM
  /
