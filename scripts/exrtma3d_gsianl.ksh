@@ -371,10 +371,48 @@ for file in `awk '{if($1!~"!"){print $1}}' ./satinfo | sort | uniq` ;do
    ln -s ${FIXcrtm}/${file}.TauCoeff.bin ./
 done
 
+# MTM - Begin Changes
+
+max_cycs=168 # Number of cycles to look back
+probe_MM=`echo ${START_TIME} | cut -c 11-12`
+if [ ${probe_MM} == '00' ]; then
+  i=1
+else
+  i=0
+fi
+export PDYprev_dir=${COMOUTautoqc_rtma3d}
+while [ ${i} -lt ${max_cycs} ]; do
+  export probe_cyc=`/gpfs/dell1/nco/ops/nwprod/prod_util.v1.1.4/exec/ips/ndate -${i} ${YYYYMMDDHH}`
+  probe_YYYYMMDD=`echo $probe_cyc | cut -c 1-8`
+  probe_HH=`echo $probe_cyc | cut -c 9-10`
+#  probe_MM=`echo $YYYYMMDDHHMM | cut -c 11-12`
+  probe_dir=${COMOUTautoqc_base}/${RUN}.${probe_YYYYMMDD}/autoqcprd.t${probe_HH}00z
+  if [ -s ${probe_dir}/${RUN}_${DOMAIN}_t.db ]; then
+    export PDYprev_dir=${probe_dir}
+    break
+  else
+    let "i=i+1"
+  fi
+done
+
+#cp ${PDYprev_dir}/reject_conus_t_${probe_cyc}${probe_MM}.txt    t_rejectlist
+#cp ${PDYprev_dir}/reject_conus_q_${probe_cyc}${probe_MM}.txt    q_rejectlist
+#cp ${PDYprev_dir}/reject_conus_ps_${probe_cyc}${probe_MM}.txt   p_rejectlist 
+#cp ${PDYprev_dir}/reject_conus_wst_${probe_cyc}${probe_MM}.txt  w_rejectlist 
+#cp ${PDYprev_dir}/accept_conus_wst_${probe_cyc}${probe_MM}.txt  mesonet_stnuselist
+
+cp ${PDYprev_dir}/reject_conus_t_${probe_cyc}00.txt    t_rejectlist
+cp ${PDYprev_dir}/reject_conus_q_${probe_cyc}00.txt    q_rejectlist
+cp ${PDYprev_dir}/reject_conus_ps_${probe_cyc}00.txt   p_rejectlist
+cp ${PDYprev_dir}/reject_conus_wst_${probe_cyc}00.txt  w_rejectlist
+cp ${PDYprev_dir}/accept_conus_wst_${probe_cyc}00.txt  mesonet_stnuselist
+
+# MTM - End Changes
+
 # Get aircraft reject list, mesonet_uselist, sfcobs_provider
 ${CP} ${AIRCRAFT_REJECT}/current_bad_aircraft.txt current_bad_aircraft
-${CP} ${SFCOBS_USELIST}/current_mesonet_uselist.txt gsd_sfcobs_uselist.txt
-${CP} ${SFCOBS_PROVIDER}/gsd_sfcobs_provider.txt gsd_sfcobs_provider.txt
+#${CP} ${SFCOBS_USELIST}/current_mesonet_uselist.txt gsd_sfcobs_uselist.txt # MTM
+#${CP} ${SFCOBS_PROVIDER}/gsd_sfcobs_provider.txt gsd_sfcobs_provider.txt # MTM
 
 bufrtable=${FIXgsi}/prepobs_prep.bufrtable
 ${CP} $bufrtable ./prepobs_prep.bufrtable

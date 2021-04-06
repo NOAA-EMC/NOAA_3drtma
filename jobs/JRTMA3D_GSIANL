@@ -119,6 +119,12 @@ fi
 ### 3DRTMA GSIANL Products (netcdf)
 export COMOUTgsi_rtma3d=${COMOUTgsi_rtma3d:-"${COMOUT}/gsiprd.${cycle}"}
 
+# MTM - Begin Changes
+### 3DRTMA AUTOQC Products
+export COMOUTautoqc_rtma3d=${COMOUTautoqc_rtma3d:-"${COMOUT}/autoqcprd.${cycle}"}
+export COMOUTautoqc_base=${COMOUTautoqc_base:-${COMROOT}/${NET}/${envir}}
+# MTM - End Changes
+
 if [ ! -d "${COMIN}" ] ; then
    mkdir -p $COMIN
 fi
@@ -203,8 +209,8 @@ fi
 ##############################
 # Remove the Temporary working directory
 ##############################
-if [ "${KEEPDATA}" != YES ]; then
-   rm -rf $DATA
-fi
+#if [ "${KEEPDATA}" != YES ]; then
+#   rm -rf $DATA
+#fi
 
 date
