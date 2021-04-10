@@ -2,17 +2,16 @@
 
 <!DOCTYPE workflow [
 
-<!ENTITY ACCOUNT "rtrr">
-<!ENTITY ACCOUNT_DA "rtrr">
-<!ENTITY ACCOUNT_PYTHON "rtrr">
+<!ENTITY ACCOUNT_RES "rtrr">
+<!ENTITY ACCOUNT "nrtrr">
+<!ENTITY ACCOUNT_PYTHON "nrtrr">
 <!ENTITY SCHEDULER "slurm">
 
 <!ENTITY PARTITION "kjet">
 <!ENTITY PARTITION_DA "kjet">
 <!ENTITY PARTITION_PYTHON "xjet:vjet:kjet:sjet:ujet">
 <!ENTITY QUEUE "batch">
-<!ENTITY RES_DA "rtma-kjet">
-<!ENTITY RES_POST "rtma-kjet">
+<!ENTITY RES_DA "3drtma">
 
 <!ENTITY SYSTEM_ID "RTMA3D_dev1">
 <!ENTITY HOMEBASE_DIR "/home/rtrr/RTMA_3D_dev1">
@@ -139,11 +138,11 @@
 <!ENTITY WALL_LIMIT_PYTHON '<deadline><cyclestr offset="&DEADLINE_PYTHON;">@Y@m@d@H@M</cyclestr></deadline>'>
 
 <!ENTITY RESERVATION '<native>--mail-type=NONE</native><queue>&QUEUE;</queue><account>&ACCOUNT;</account><partition>&PARTITION;</partition>'>
-<!ENTITY RESERVATION_PRE '<native>--mail-type=NONE </native><queue>&QUEUE;</queue><account>&ACCOUNT;</account><partition>&PARTITION;</partition>'>
-<!ENTITY RESERVATION_DA '<native>--mail-type=NONE </native><queue>&QUEUE;</queue><account>&ACCOUNT_DA;</account><partition>&PARTITION_DA;</partition>'>
-<!ENTITY RESERVATION_POST '<native>--mail-type=NONE </native><queue>&QUEUE;</queue><account>&ACCOUNT;</account><partition>&PARTITION;</partition>'>
-<!ENTITY RESERVATION_SMARTINIT '<native>--mail-type=NONE</native><queue>&QUEUE;</queue><account>&ACCOUNT;</account><partition>&PARTITION;</partition>'>
-<!ENTITY RESERVATION_PYTHON '<native>--mail-type=NONE --exclusive</native><queue>&QUEUE;</queue><account>&ACCOUNT;</account><partition>&PARTITION_PYTHON;</partition>'>
+<!ENTITY RESERVATION_PRE '<native>--mail-type=NONE --reservation=&RES_DA;</native><queue>&QUEUE;</queue><account>&ACCOUNT_RES;</account><partition>&PARTITION_DA;</partition>'>
+<!ENTITY RESERVATION_DA '<native>--mail-type=NONE --reservation=&RES_DA;</native><queue>&QUEUE;</queue><account>&ACCOUNT_RES;</account><partition>&PARTITION_DA;</partition>'>
+<!ENTITY RESERVATION_POST '<native>--mail-type=NONE --reservation=&RES_DA;</native><queue>&QUEUE;</queue><account>&ACCOUNT_RES;</account><partition>&PARTITION_DA;</partition>'>
+<!ENTITY RESERVATION_SMARTINIT '<native>--mail-type=NONE --reservation=&RES_DA;</native><queue>&QUEUE;</queue><account>&ACCOUNT_RES;</account><partition>&PARTITION_DA;</partition>'>
+<!ENTITY RESERVATION_PYTHON '<native>--mail-type=NONE --exclusive --reservation=&RES_DA;</native><queue>&QUEUE;</queue><account>&ACCOUNT_RES;</account><partition>&PARTITION_DA;</partition>'>
 
 <!ENTITY COMMONVARS
    '<envar><name>HOMErtma3d</name><value>&HOMEBASE_DIR;</value></envar>
@@ -659,9 +658,9 @@
           maps \
           -d &DATAROOT;/@Y@m@d@H/postprd \
           -f 0 \
-          --file_tmpl wrfprs_hrconus_{FCST_TIME:02d}.grib2 \
+          --file_tmpl wrfprs_hrconus_00.grib2 \
           --file_type prs \
-          --images &PYTHON_SCRIPTS;/image_lists/rtma.yml hourly\
+          --images &PYTHON_SCRIPTS;/image_lists/hrrr.yml hourly\
           -n ${SLURM_CPUS_ON_NODE:-12} \
           -o &DATAROOT;/@Y@m@d@H/pyprd/maps \
           -s @Y@m@d@H \
