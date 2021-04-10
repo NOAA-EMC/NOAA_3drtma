@@ -2,15 +2,15 @@
 
 <!DOCTYPE workflow [
 
-<!ENTITY ACCOUNT "rtrr">
-<!ENTITY ACCOUNT_DA "rtrr">
+<!ENTITY ACCOUNT "nrtrr">
+<!ENTITY ACCOUNT_RES "rtrr">
 <!ENTITY SCHEDULER "slurm">
 
 <!ENTITY PARTITION "kjet">
 <!ENTITY PARTITION_DA "kjet">
 <!ENTITY QUEUE "batch">
-<!ENTITY RES_DA "rtma-kjet">
-<!ENTITY RES_POST "rtma-kjet">
+<!ENTITY RES_DA "3drtma">
+<!--<!ENTITY RES_POST "rtma-kjet">-->
 
 <!ENTITY SYSTEM_ID "RTMA3D"> 
 <!ENTITY HOMEBASE_DIR "/home/rtrr/RTMA_3D">
@@ -45,6 +45,7 @@
 <!ENTITY MACHINE    "jet">
 <!ENTITY OBS_DIR "/public/data">
 <!ENTITY HRRR_DIR "/home/rtrr/hrrr">
+<!ENTITY HRRRfcst_DIR "/home/rtrr/hrrrv4_ncepfcst">
 <!ENTITY SST_DIR "&OBS_DIR;/grids/ncep/sst/0p083deg/grib2">
 
 <!ENTITY GFS_DIR "&OBS_DIR;/grids/gfs/0p5deg/grib2">
@@ -129,10 +130,10 @@
 <!ENTITY WALL_LIMIT_UV '<deadline><cyclestr offset="&DEADLINE_UV;">@Y@m@d@H@M</cyclestr></deadline>'>
 
 <!ENTITY RESERVATION '<native>--mail-type=NONE</native><queue>&QUEUE;</queue><account>&ACCOUNT;</account><partition>&PARTITION;</partition>'>
-<!ENTITY RESERVATION_PRE '<native>--mail-type=NONE --reservation=&RES_DA;</native><queue>&QUEUE;</queue><account>&ACCOUNT;</account><partition>&PARTITION;</partition>'>
-<!ENTITY RESERVATION_DA '<native>--mail-type=NONE --reservation=&RES_DA;</native><queue>&QUEUE;</queue><account>&ACCOUNT_DA;</account><partition>&PARTITION_DA;</partition>'>
-<!ENTITY RESERVATION_POST '<native>--mail-type=NONE --reservation=&RES_DA;</native><queue>&QUEUE;</queue><account>&ACCOUNT;</account><partition>&PARTITION;</partition>'>
-<!ENTITY RESERVATION_SMARTINIT '<native>--mail-type=NONE</native><queue>&QUEUE;</queue><account>&ACCOUNT;</account><partition>&PARTITION;</partition>'>
+<!ENTITY RESERVATION_PRE '<native>--mail-type=NONE --reservation=&RES_DA;</native><queue>&QUEUE;</queue><account>&ACCOUNT_RES;</account><partition>&PARTITION;</partition>'>
+<!ENTITY RESERVATION_DA '<native>--mail-type=NONE --reservation=&RES_DA;</native><queue>&QUEUE;</queue><account>&ACCOUNT_RES;</account><partition>&PARTITION_DA;</partition>'>
+<!ENTITY RESERVATION_POST '<native>--mail-type=NONE --reservation=&RES_DA;</native><queue>&QUEUE;</queue><account>&ACCOUNT_RES;</account><partition>&PARTITION;</partition>'>
+<!ENTITY RESERVATION_SMARTINIT '<native>--mail-type=NONE --reservation=&RES_DA;</native><queue>&QUEUE;</queue><account>&ACCOUNT_RES;</account><partition>&PARTITION;</partition>'>
 
 <!ENTITY COMMONVARS
    '<envar><name>HOMErtma3d</name><value>&HOMEBASE_DIR;</value></envar>
@@ -321,7 +322,7 @@
     </envar>
     <envar>
       <name>HRRR_DIR</name>
-      <value>&HRRR_DIR;</value>
+      <value>&HRRRfcst_DIR;</value>
     </envar>
     <envar>
       <name>OBS_DIR</name>
@@ -355,7 +356,7 @@
 
     <dependency>
       <and>
-        <datadep age="00:06:00">&HRRR_DIR;/<cyclestr offset="-1:00:00">@Y@m@d@H</cyclestr>/wrfprd/<cyclestr>wrfout_d01_@Y-@m-@d_@H_00_00</cyclestr></datadep>
+        <datadep age="00:06:00">&HRRRfcst_DIR;/<cyclestr offset="-1:00:00">@Y@m@d@H</cyclestr>/wrfprd/<cyclestr>wrfout_d01_@Y-@m-@d_@H_00_00</cyclestr></datadep>
         <or> 
           <and>
             <taskdep task="obsprep_radar"/>
@@ -835,6 +836,11 @@
     
   </task>
 
+<!--
+  <task name="bufrsnd_rtma" cycledefs="all" maxtries="3">
+
+  </task>
+-->
   <task name="clean" cycledefs="clean" maxtries="3">
 
     &CLEAN_RESOURCES;
