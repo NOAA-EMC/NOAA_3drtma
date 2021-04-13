@@ -661,6 +661,7 @@
           --file_tmpl wrfprs_hrconus_00.grib2 \
           --file_type prs \
           --images &PYTHON_SCRIPTS;/image_lists/hrrr.yml hourly\
+          -m RTMA_3D_dev1 \
           -n ${SLURM_CPUS_ON_NODE:-12} \
           -o &DATAROOT;/@Y@m@d@H/pyprd/maps \
           -s @Y@m@d@H \
@@ -695,6 +696,7 @@
           --file_tmpl wrfnat_hrconus_00.grib2 \
           --file_type nat \
           --max_plev 100 \
+          -m RTMA_3D_dev1 \
           -n ${SLURM_CPUS_ON_NODE:-12} \
           -o &DATAROOT;/@Y@m@d@H/pyprd/skewt \
           -s @Y@m@d@H \
