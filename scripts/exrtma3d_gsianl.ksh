@@ -168,6 +168,13 @@ else
   ${ECHO} "Warning: ${OBS_DIR}: NASALaRCCloudInGSI.bufr does not exist!"
 fi
 
+if [ -r "${OBS_DIR}/rtma_ru.${tz_str}.satwnd.tm00.bufr_d" ]; then
+  ${LN} -sf ${OBS_DIR}/rtma_ru.${tz_str}.satwnd.tm00.bufr_d ./satwndbufr
+else
+  ${ECHO} "Warning: ${OBS_DIR}:  does not exist!"
+fi
+
+
 if [ "${envir}" = "lsf" ] && [ ${HRRRDAS_BEC} -eq 0 ] ; then #WCOSS
   # Set runtime and save directories
   export endianness=Big_Endian

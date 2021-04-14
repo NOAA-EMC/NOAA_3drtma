@@ -100,10 +100,10 @@ if [ ! -d "${COMINobsproc_rtma3d}" ] ; then
 fi
 
 # obs data from HPSS
-if [ ! -d "${COMINrap}" ] ; then
-  ${ECHO} "ERROR: ${COMINrap} does not exist!"
-  exit 1
-fi
+#if [ ! -d "${COMINrap}" ] ; then
+#  ${ECHO} "ERROR: ${COMINrap} does not exist!"
+#  exit 1
+#fi
 #if [ ! -d "${COMINhrrr}" ] ; then
 #  ${ECHO} "ERROR: ${COMINhrrr} does not exist!"
 #  exit 1
