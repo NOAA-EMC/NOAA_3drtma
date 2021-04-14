@@ -186,8 +186,8 @@ if [ "${envir}" = "lsf" ] && [ ${HRRRDAS_BEC} -eq 0 ] ; then #WCOSS
   export nhr_assimilation=03
   ##typeset -Z2 nhr_assimilation
 
-python ${UTILrtma3d_dev}/getbest_EnKF_FV3GDAS.py -v $YYYYMMDDHH --exact=no --minsize=${nens} -d ${COMINGDAS}/enkfgdas -m no -o filelist${nhr_assimilation} --o3fname=gfs_sigf${nhr_assimilation} --gfs_nemsio=yes
-   
+# /usr/bin/python2.7 ${UTILrtma3d_dev}/getbest_EnKF_FV3GDAS.py -v $YYYYMMDDHH --exact=no --minsize=${nens} -d ${COMINGDAS}/enkfgdas -m no -o filelist${nhr_assimilation} --o3fname=gfs_sigf${nhr_assimilation} --gfs_nemsio=yes
+  /gpfs/dell1/usrx/local/prod/packages/python/3.6.3/bin/python ${UTILrtma3d_dev}/getbest_EnKF_FV3GDAS.py -v $YYYYMMDDHH --exact=no --minsize=${nens} -d ${COMINGDAS}/enkfgdas -m no -o filelist${nhr_assimilation} --o3fname=gfs_sigf${nhr_assimilation} --gfs_netcdf=yes   
   #Check to see if ensembles were found 
   numfiles=`cat filelist03 | wc -l`
 
@@ -198,7 +198,7 @@ python ${UTILrtma3d_dev}/getbest_EnKF_FV3GDAS.py -v $YYYYMMDDHH --exact=no --min
   #   we have 80 files, figure out if they are all the right size
   #   if not, set ifhyb=false
       cp ${UTILrtma3d_dev}/convert.sh .
-      ${UTILrtma3d_dev}/check_enkf_size.sh
+#      ${UTILrtma3d_dev}/check_enkf_size.sh
   fi
 elif [ "${envir}" == "esrl" ] ; then #ESRL expr. runs
 ## 
@@ -208,7 +208,7 @@ stampcycle=`date -d "${START_TIME}" +%s`
 minHourDiff=100
 loops="009"
 for loop in $loops; do
-  for timelist in `ls ${ENKF_FCST}/*.gdas.t*z.atmf${loop}s.mem080.nemsio`; do
+  for timelist in `ls ${ENKF_FCST}/gdas.t*z.atmf${loop}.nc`; do
     availtimeyy=`basename ${timelist} | cut -c 1-2`
     availtimeyyyy=20${availtimeyy}
     availtimejjj=`basename ${timelist} | cut -c 3-5`
@@ -234,7 +234,7 @@ for loop in $loops; do
 done
 EYYYYMMDD=$(echo ${availtime} | cut -c1-8)
 EHH=$(echo ${availtime} | cut -c9-10)
-${LS} ${ENKF_FCST}/${enkfcstname}.mem???.nemsio > filelist03
+${LS} ${ENKF_FCST}/${enkfcstname}.nc > filelist03
 
 fi
 
@@ -422,7 +422,7 @@ if [ "${envir}" == "lsf" ]; then #WCOSS
   echo "HVC option is $hybridcord"
 fi
 # Build the GSI namelist on-the-fly
-${CP} ${PARMgsi}/gsiparm.anl.sh_bectune gsiparm.anl.sh
+${CP} ${PARMgsi}/gsiparm.anl.sh_bectune_gsd gsiparm.anl.sh
 source ./gsiparm.anl.sh
 cat << EOF > gsiparm.anl
 $gsi_namelist

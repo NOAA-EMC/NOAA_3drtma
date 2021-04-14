@@ -74,7 +74,7 @@ export SCHD_ATTRB="lsf"
 export envir="${SCHD_ATTRB}"                      #environment (test, prod, dev, etc.)
 export expname="${envir}"                   # experiment name
 export realtime="T"
-export HRRRDAS_BEC=1                        #Use HRRRDAS 1-hr forecast during hybrid analysis (0=no,1=yes)
+export HRRRDAS_BEC=0                        #Use HRRRDAS 1-hr forecast during hybrid analysis (0=no,1=yes)
 export DOMAIN="conus"
 #====================================================================#
 # Note: Definition for the following variables 
@@ -86,10 +86,10 @@ export DOMAIN="conus"
   QUEUE_SVC="dev_transfer"                  #user-specified transfer queue
   QUEUE_SHARED="dev_shared" 
 # Path to top running and archiving directory
-  ptmp_base="/gpfs/dell2/stmp/${USER}/${NET}_wrkdir_realtime_${DOMAIN}_bectune"
+  ptmp_base="/gpfs/dell3/stmp/${USER}/${NET}_wrkdir_realtime_${DOMAIN}_bectune_hourly_gsd"
   DATABASE_DIR=${ptmp_base}            # (equivalent to ptmp_base)
   HOMEBASE_DIR=${NWROOT}               # path to system home directory
-  COMINRAP="/gpfs/dell2/emc/obsproc/noscrub/Jeff.Whiting/save/dev/rtma/3drtma/com3d/rtma/prod"
+  COMINRAP="/gpfs/dell2/ptmp/Shelley.Melchior/rtma_3d/com/rtma/prod"
   COMINHRRR="/gpfs/hps/nco/ops/com/hrrr/prod"
   COMINRADAR="/gpfs/dell1/nco/ops/dcom/prod/ldmdata/obs/upperair/mrms/${DOMAIN}"
   GESINHRRR="/gpfs/dell1/ptmp/Annette.Gibbs/com/hrrr/prod"
@@ -433,7 +433,7 @@ cat > ${NWROOT}/workflow/${RUN}_${expname}_${DOMAIN}.xml <<EOF
 <!ENTITY GESROOT	"&ptmp_base;/nwges2/&NET;">
 
 <!ENTITY HOMErtma3d	"&NWROOT;">
-<!ENTITY LOG_DIR	"/gpfs/dell2/stmp/${USER}/${DOMAIN}_logs_bectune">
+<!ENTITY LOG_DIR	"/gpfs/dell3/stmp/${USER}/${DOMAIN}_logs_bectune_hourly_gsd">
 <!ENTITY JJOB_DIR	"&HOMErtma3d;/jobs">
 <!ENTITY SCRIPT_DIR	"&HOMErtma3d;/scripts">
 <!ENTITY USHrtma3d	"&HOMErtma3d;/ush">
@@ -1135,11 +1135,11 @@ cat >> ${NWROOT}/workflow/${RUN}_${expname}_${DOMAIN}.xml <<EOF
     <cyclestr>&LOG_DIR;/&NET;_workflow_&envir;_@Y@m@d@H@M.log</cyclestr>
   </log>
 
-  <cycledef group="00hr">*/15 00,12 ${ExpDateWindows}</cycledef>
+  <cycledef group="00hr">0 00,12 ${ExpDateWindows}</cycledef>
 
-  <cycledef group="01hr">*/15 01,13 ${ExpDateWindows}</cycledef>
+  <cycledef group="01hr">0 01,13 ${ExpDateWindows}</cycledef>
 
-  <cycledef group="02-11hr">*/15 02-11,14-23 ${ExpDateWindows}</cycledef>
+  <cycledef group="02-11hr">0 02-11,14-23 ${ExpDateWindows}</cycledef>
   
   <cycledef group="ind1">*/15 01,04,07,10,13,16,19,22 ${ExpDateWindows}</cycledef>
  
@@ -1319,6 +1319,8 @@ cat >> ${NWROOT}/workflow/${RUN}_${expname}_${DOMAIN}.xml <<EOF
        </or>
        </and>   
    </dependency>
+
+
 
   </task>
 
