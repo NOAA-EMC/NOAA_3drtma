@@ -58,10 +58,12 @@ if [[ "${subcyc}" == "-1" ]]; then #it's hourly run
   export cycle=${cycle:-t${cyc}z}
   export pgmout=${pgmout:-"OUTPUT.${PDY}${cyc}.${jobid}"}
   export COMINmosaic=${COMINmosaic:-"${COMIN}/radar.${PDY}"}
+  export COMINrap=${COMINRAP}/rtma_ru.${PDY}
 else
   export cycle=${cycle:-t${cyc}${subcyc}z}
   export pgmout=${pgmout:-"OUTPUT.${PDY}${cyc}${subcyc}.${jobid}"}
   export COMINmosaic=${COMINmosaic:-"${COMIN}/radar.${PDY}"}
+  export COMINrap=${COMINRAP}/rtma_ru.${PDY}
 fi
 
 export subcyc=${subcyc} #Note: Must define subcyc in upper level script. Can be 00, 15, 30, or 45 /MPondeca, 30Jun2017

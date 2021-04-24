@@ -4,14 +4,14 @@ set -x
 
 #-- Testing the status of some important variables. --#
 # Make sure these variables for key directories are defined and exists
-#if [ ! "${COMINrap}" ]; then
-#  ${ECHO} "ERROR: \${COMINrap} is not defined!"
-#  exit 1
-#fi
-#if [ ! -d "${COMINrap}" ]; then
-#  ${ECHO} "ERROR: $COMINrap does not exist!"
-#  exit 1
-#fi
+if [ ! "${COMINrap}" ]; then
+  ${ECHO} "ERROR: \${COMINrap} is not defined!"
+  exit 1
+fi
+if [ ! -d "${COMINrap}" ]; then
+  ${ECHO} "ERROR: $COMINrap does not exist!"
+  exit 1
+fi
 
 #if [ ! "${COMINhrrr}" ]; then
 #  ${ECHO} "ERROR: \${COMINhrrr} is not defined!"
@@ -22,23 +22,23 @@ set -x
 #  exit 1
 #fi
 
-#if [ ! "${COMINobsproc_rtma3d}" ]; then
-#  ${ECHO} "ERROR: \$COMINobsproc_rtma3d is not defined!"
-#  exit 1
-#fi
-#if [ ! -d "${COMINobsproc_rtma3d}" ]; then
-#  ${ECHO} "ERROR: $COMINobsproc_rtma3d does not exist!"
-#  exit 1
-#fi
+if [ ! "${COMINobsproc_rtma3d}" ]; then
+  ${ECHO} "ERROR: \$COMINobsproc_rtma3d is not defined!"
+  exit 1
+fi
+if [ ! -d "${COMINobsproc_rtma3d}" ]; then
+  ${ECHO} "ERROR: $COMINobsproc_rtma3d does not exist!"
+  exit 1
+fi
 
-#if [ ! "${DATA}" ]; then
-#  ${ECHO} "ERROR: \$DATA is not defined!"
-#  exit 1
-#fi
-#if [ ! -d "${DATA}" ]; then
-#  ${ECHO} "ERROR: $DATA does not exist!"
-#  exit 1
-#fi
+if [ ! "${DATA}" ]; then
+  ${ECHO} "ERROR: \$DATA is not defined!"
+  exit 1
+fi
+if [ ! -d "${DATA}" ]; then
+  ${ECHO} "ERROR: $DATA does not exist!"
+  exit 1
+fi
 
 if [  "${DATA_OBSPRD}" ]; then
   ${RM} -f  ${DATA_OBSPRD}
@@ -157,13 +157,13 @@ else
   fi
 fi
 
-# satellite wind data 
+# satellite wind data
 if [ $obsprep_satwnd -eq 0 ] ; then
-  if [ -r ${COMINrap}/rtma_ru.t${HH}${subcyc}z.satwnd.tm00.bufr_d ]; then
-    cpreq  ${COMINrap}/rtma_ru.t${HH}${subcyc}z.satwnd.tm00.bufr_d  ${COMINobsproc_rtma3d}
-    ${LN} -sf ${COMINobsproc_rtma3d}/rtma_ru.t${HH}${subcyc}z.satwnd.tm00.bufr_d ${DATA}/rtma_ru.t${HH}${subcyc}z.satwnd.tm00.bufr_d
+  if [ -r ${COMINrap}/rtma_ru.t${HH}z.satwndInGSI.bufr ]; then
+    cpreq  ${COMINrap}/rtma_ru.t${HH}z.satwndInGSI.bufr ${COMINobsproc_rtma3d}
+    ${LN} -sf ${COMINobsproc_rtma3d}/rtma_ru.t${HH}z.satwndInGSI.bufr ${DATA}/rtma_ru.t${HH}z.satwndInGSI.bufr
   else
-    ${ECHO} "Warning: ${COMINrap}/rtma_ru.t${HH}z.satwndInGSI.bufr does not exist!"
+    ${ECHO} "Warning: ${COMINhrap}/rtma_ru.t${HH}z.satwndInGSI.bufr does not exist!"
   fi
 else
   if [ -r ${COMINrap}/rtma_ru.t${HH}${subcyc}z.satwnd.tm00.bufr_d  ]; then
@@ -174,14 +174,6 @@ else
   fi
 fi
 
-
-
-
-
-
-
-
-
 # the radial velocity data
 
 # Snow cover building and trimming currently set to run in the 00z cycle
@@ -191,6 +183,3 @@ fi
 
 export err=$? ; err_chk
 
-ls -l ${COMINobsproc_rtma3d} > ${COMINobsproc_rtma3d}/obs_data_${PDY}_${cyc}_${subcyc}.list
-
-exit 0

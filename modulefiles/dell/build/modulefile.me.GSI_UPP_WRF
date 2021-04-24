@@ -1,5 +1,5 @@
 module purge
 module load ips/18.0.5.274
 module load impi/18.0.1
-module load NetCDF/4.5.0
+module load NetCDF-parallel/4.7.4
 module load cmake/3.16.2 

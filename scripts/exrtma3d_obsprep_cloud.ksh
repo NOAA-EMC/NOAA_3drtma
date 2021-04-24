@@ -120,7 +120,7 @@ else
   CP_LN=${CP}
 fi
 ${CP_LN} ${EXECrtma3d}/${exefile_name_cloud} ${pgm}
-${MPIRUN} ${pgm} > ${pgmout} 2>errfile
+${MPIRUN} ./${pgm} > ${pgmout} 2>errfile
 export err=$?; err_chk
 
 msg="JOB $job FOR $RUN HAS COMPLETED NORMALLY"

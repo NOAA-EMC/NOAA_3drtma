@@ -119,6 +119,10 @@ fi
 ### 3DRTMA GSIANL Products (netcdf)
 export COMOUTgsi_rtma3d=${COMOUTgsi_rtma3d:-"${COMOUT}/gsiprd.${cycle}"}
 
+### 3DRTMA AUTOQC Products
+export COMOUTautoqc_rtma3d=${COMOUTautoqc_rtma3d:-"${COMOUT}/autoqcprd.${cycle}"}
+export COMOUTautoqc_base=${COMOUTautoqc_base:-${COMROOT}/${NET}/${envir}}
+
 if [ ! -d "${COMIN}" ] ; then
    mkdir -p $COMIN
 fi

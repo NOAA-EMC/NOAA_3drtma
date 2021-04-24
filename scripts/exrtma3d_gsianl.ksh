@@ -174,7 +174,6 @@ else
   ${ECHO} "Warning: ${OBS_DIR}:  does not exist!"
 fi
 
-
 if [ "${envir}" = "lsf" ] && [ ${HRRRDAS_BEC} -eq 0 ] ; then #WCOSS
   # Set runtime and save directories
   export endianness=Big_Endian
@@ -328,15 +327,13 @@ fi
 #   bftab_sst= bufr table for sst ONLY needed for sst retrieval (retrieval=.true.)
 
 anavinfo=${FIXgsi}/anavinfo_arw_netcdf
-BERROR=${FIXgsi}/3drtma_berror_stats_hz01
-#BERROR=${FIXgsi}/rap_berror_stats_global_RAP_tune
+BERROR=${FIXgsi}/rap_berror_stats_global_RAP_tune
 SATANGL=${FIXgsi}/global_satangbias.txt
 SATINFO=${FIXgsi}/global_satinfo.txt
-CONVINFO=${FIXgsi}/nam_regional_convinfo_RAP.txt
+CONVINFO=${FIXgsi}/nam_regional_convinfo_RAP_ascat_thinning.txt
 OZINFO=${FIXgsi}/global_ozinfo.txt    
 PCPINFO=${FIXgsi}/global_pcpinfo.txt
-OBERROR=${FIXgsi}/3drtma_errtable_smallSFCerr
-#OBERROR=${FIXgsi}/nam_errtable.r3dv
+OBERROR=${FIXgsi}/3drtma_errtable_smallSFCerr_ascat
 # Fixed fields
 cp $anavinfo anavinfo
 cp $BERROR   berror_stats
@@ -378,10 +375,42 @@ for file in `awk '{if($1!~"!"){print $1}}' ./satinfo | sort | uniq` ;do
    ln -s ${FIXcrtm}/${file}.TauCoeff.bin ./
 done
 
+found_rjlist=False
+max_cycs=168 # Number of cycles to look back
+probe_MM=`echo ${START_TIME} | cut -c 11-12`
+if [ ${probe_MM} == '00' ]; then
+  i=1
+else
+  i=0
+fi
+export PDYprev_dir=${COMOUTautoqc_rtma3d}
+while [ ${i} -lt ${max_cycs} ]; do
+  export probe_cyc=`/gpfs/dell1/nco/ops/nwprod/prod_util.v1.1.4/exec/ips/ndate -${i} ${YYYYMMDDHH}`
+  probe_YYYYMMDD=`echo $probe_cyc | cut -c 1-8`
+  probe_HH=`echo $probe_cyc | cut -c 9-10`
+#  probe_MM=`echo $YYYYMMDDHHMM | cut -c 11-12`
+  probe_dir=${COMOUTautoqc_base}/${RUN}.${probe_YYYYMMDD}/autoqcprd.t${probe_HH}00z
+  if [ -s ${probe_dir}/done.${probe_YYYYMMDD}${probe_HH}00 ]; then
+    export PDYprev_dir=${probe_dir}
+    found_rjlist=True
+    break
+  else
+    let "i=i+1"
+  fi
+done 
+
+if [ $found_rjlist == True ]; then
+  cp ${PDYprev_dir}/reject_conus_t_${probe_cyc}00.txt    t_rejectlist
+  cp ${PDYprev_dir}/reject_conus_q_${probe_cyc}00.txt    q_rejectlist
+  cp ${PDYprev_dir}/reject_conus_ps_${probe_cyc}00.txt   p_rejectlist
+  cp ${PDYprev_dir}/reject_conus_wst_${probe_cyc}00.txt  w_rejectlist
+  cp ${PDYprev_dir}/accept_conus_wst_${probe_cyc}00.txt  mesonet_stnuselist
+fi
+
 # Get aircraft reject list, mesonet_uselist, sfcobs_provider
 ${CP} ${AIRCRAFT_REJECT}/current_bad_aircraft.txt current_bad_aircraft
-${CP} ${SFCOBS_USELIST}/current_mesonet_uselist.txt gsd_sfcobs_uselist.txt
-${CP} ${SFCOBS_PROVIDER}/gsd_sfcobs_provider.txt gsd_sfcobs_provider.txt
+#${CP} ${SFCOBS_USELIST}/current_mesonet_uselist.txt gsd_sfcobs_uselist.txt
+#${CP} ${SFCOBS_PROVIDER}/gsd_sfcobs_provider.txt gsd_sfcobs_provider.txt
 
 bufrtable=${FIXgsi}/prepobs_prep.bufrtable
 ${CP} $bufrtable ./prepobs_prep.bufrtable
@@ -428,8 +457,7 @@ if [ "${envir}" == "lsf" ]; then #WCOSS
   fi
   echo "HVC option is $hybridcord"
 fi
-# Build the GSI namelist on-the-fly
-${CP} ${PARMgsi}/gsiparm.anl.sh_bectune gsiparm.anl.sh
+${CP} ${PARMgsi}/gsiparm.anl.sh_test gsiparm.anl.sh
 source ./gsiparm.anl.sh
 cat << EOF > gsiparm.anl
 $gsi_namelist
@@ -564,7 +592,7 @@ ${CP} -p gsiparm.anl  ${COMOUTgsi_rtma3d}/gsiparm.anl_${cycle_str}
 ${TAR} -zcvf ${COMOUTgsi_rtma3d}/diag_${cycle_str}.tgz diag_*
 
 if [ "${envir}" == "lsf" ]; then #wcoss
-  ${CP} ${DATA}/wrf_inout                  ${COMOUTgsi_rtma3d}/${ANLrtma3d_FNAME}
+  ${CP} -p ${DATA}/wrf_inout                  ${COMOUTgsi_rtma3d}/${ANLrtma3d_FNAME}
   ${CP} -p minimization_fort220.${cycle_str} ${COMOUTgsi_rtma3d}
   ${CP} -p diag_*                             ${COMOUTgsi_rtma3d}
   tar -zcvf obsfit_fort220.tgz  ./fort.* ./fit_*

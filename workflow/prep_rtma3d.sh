@@ -138,8 +138,12 @@ export DOMAIN="conus"
   GSI_PROC=14
   GSI_THREADS=1
   GSI_OMP_STACKSIZE="512M"
-  GSI_RESOURCES="<nodes>24:ppn=&GSI_PROC;</nodes><walltime>00:40:00</walltime>"
+  GSI_RESOURCES="<nodes>30:ppn=&GSI_PROC;</nodes><walltime>00:40:00</walltime>"
   GSI_RESERVATION=${RESERVATION_GSI}
+
+  AUTOQC_PROC="1"
+  AUTOQC_RESOURCES="<cores>&PREPFGS_PROC;</cores><walltime>00:10:00</walltime>"
+  AUTOQC_RESERVATION=${RESERVATION}
 
 #UPDATE_VARS
   UPDATEVARS_PROC=14
@@ -276,7 +280,7 @@ export exefile_name_updatevars_ndown="rtma3d_updatevars_ndown"
     ln -sf ${FIXgsi_udef}        ${FIXgsi}
     rm -rf $FIXcrtm
     echo " ln -sf ${FIXcrtm_udef}       ${FIXcrtm}"
-    ln -sf ${FIXupp_udef}       ${FIXupp}
+    ln -sf ${FIXcrtm_udef}       ${FIXcrtm}
     rm -rf $FIXupp
     echo " ln -sf ${FIXupp_udef}       ${FIXupp}"
     ln -sf ${FIXupp_udef}       ${FIXupp}
@@ -360,6 +364,9 @@ export exefile_name_updatevars_ndown="rtma3d_updatevars_ndown"
 
   export updatevars=1     # 0: WRFV3.9 is not invoked to add radar reflectivity fields prior to post-processing
 		          # 1: WRFV3.9 is employed to provide radar reflectivity fields prior to post_processing.
+
+  export autoqc=1         # 0: Disable automated QC package
+                          # 1: Enable automated QC package
 
   export gsi2=""
   export gsi_grid_ratio_in_var=1
@@ -493,6 +500,7 @@ cat > ${NWROOT}/workflow/${RUN}_${expname}_${DOMAIN}.xml <<EOF
 <!ENTITY hpsspath1_AGibbs  "/NCEPDEV/emc-meso/1year/Annette.Gibbs">
 
 <!ENTITY FGS_OPT        "${fgs_opt}">
+<!ENTITY READDIAG "/gpfs/dell2/emc/modeling/save/Matthew.T.Morris/NOAA_3drtma/sorc/rtma_gsi.fd/build/bin/read_diag_conv.x">
 
 <!-- for obs pre-processing -->
 <!ENTITY obsprep_radar  "${obsprep_radar}">
@@ -530,6 +538,8 @@ cat > ${NWROOT}/workflow/${RUN}_${expname}_${DOMAIN}.xml <<EOF
 <!ENTITY JJOB_GSIANL	 "&JJOB_DIR;/J&CAP_RUN;_GSIANL">
 <!ENTITY exSCR_GSIANL	 "&SCRIPT_DIR;/ex&RUN;_gsianl.ksh">
 <!ENTITY exefile_name_gsi      "${exefile_name_gsi}">
+<!ENTITY JJOB_AUTOQC     "&JJOB_DIR;/J&CAP_RUN;_AUTOQC">
+<!ENTITY exSCR_AUTOQC    "&SCRIPT_DIR;/ex&RUN;_autoqc.ksh">
 <!ENTITY JJOB_UPDATEVARS     "&JJOB_DIR;/J&CAP_RUN;_UPDATEVARS">
 <!ENTITY exSCR_UPDATEVARS    "&SCRIPT_DIR;/ex&RUN;_updatevars.ksh">
 <!ENTITY exefile_name_updatevars_wrf  "${exefile_name_updatevars_wrf}">
@@ -592,6 +602,10 @@ cat > ${NWROOT}/workflow/${RUN}_${expname}_${DOMAIN}.xml <<EOF
 <!ENTITY START_TIME_RADAR "00:10:00">
 <!ENTITY GSI_WALL_LIMIT 
    '<deadline><cyclestr offset="&GSI_DEADLINE;">@Y@m@d@H@M</cyclestr></deadline>'>
+
+<!ENTITY AUTOQC_PROC "${AUTOQC_PROC}">
+<!ENTITY AUTOQC_RESOURCES '${AUTOQC_RESOURCES}'>
+<!ENTITY AUTOQC_RESERVATION '${AUTOQC_RESERVATION}'>
 
 <!ENTITY UPDATEVARS_PROC "${UPDATEVARS_PROC}">
 <!ENTITY UPDATEVARS_THREADS "${UPDATEVARS_THREADS}">
@@ -1102,6 +1116,26 @@ cat > ${NWROOT}/workflow/${RUN}_${expname}_${DOMAIN}.xml <<EOF
       <value>&JJOB_POST;</value>
     </envar>'>
 
+
+<!ENTITY ENVARS_AUTOQC
+    '<envar>
+      <name>START_TIME</name>
+      <value><cyclestr>@Y@m@d@H</cyclestr></value>
+    </envar>
+    <envar>
+      <name>READDIAG</name>
+      <value>&READDIAG;</value>
+    </envar>
+    <envar>
+      <name>exSCR_AUTOQC</name>
+      <value>&exSCR_AUTOQC;</value>
+    </envar>
+    <envar>
+      <name>JJOB_AUTOQC</name>
+      <value>&JJOB_AUTOQC;</value>
+    </envar>'>
+
+
 <!ENTITY ENVARS_UPDATEVARS
     '<envar>
       <name>START_TIME</name>
@@ -1155,6 +1189,7 @@ cat >> ${NWROOT}/workflow/${RUN}_${expname}_${DOMAIN}.xml <<EOF
 
   <cycledef group="ind3">*/15 03,06,09,12,15,18,21,00 ${ExpDateWindows}</cycledef>
 
+  <cycledef group="hourly">0 * ${ExpDateWindows}</cycledef>
   
 
 EOF
@@ -1180,7 +1215,7 @@ cat >> ${NWROOT}/workflow/${RUN}_${expname}_${DOMAIN}.xml <<EOF
     &ENVARS_PREPJOB;
 
    <dependency>
-       <datadep age="15"><cyclestr>&COMINRAP;/rtma_ru.@Y@m@d/rtma_ru.t@H@Mz.lghtng.tm00.bufr_d</cyclestr></datadep>
+       <datadep age="2"><cyclestr>&COMINRAP;/rtma_ru.@Y@m@d/rtma_ru.t@H@Mz.lghtng.tm00.bufr_d</cyclestr></datadep>
    </dependency>
   </task>
 EOF
@@ -1207,7 +1242,7 @@ cat >> ${NWROOT}/workflow/${RUN}_${expname}_${DOMAIN}.xml <<EOF
     &ENVARS_PREPJOB; 
 
    <dependency>
-       <datadep age="15"><cyclestr>&COMINRAP;/rtma_ru.@Y@m@d/rtma_ru.t@H@Mz.lgycld.tm00.bufr_d</cyclestr></datadep>
+       <datadep age="2"><cyclestr>&COMINRAP;/rtma_ru.@Y@m@d/rtma_ru.t@H@Mz.lgycld.tm00.bufr_d</cyclestr></datadep>
    </dependency>
   </task>
 EOF
@@ -1316,7 +1351,7 @@ cat >> ${NWROOT}/workflow/${RUN}_${expname}_${DOMAIN}.xml <<EOF
 
    <dependency>
        <and>
-       <datadep age="15"><cyclestr>&COMINRAP;/rtma_ru.@Y@m@d/rtma_ru.t@H@Mz.prepbufr.tm00</cyclestr></datadep>    
+       <datadep age="2"><cyclestr>&COMINRAP;/rtma_ru.@Y@m@d/rtma_ru.t@H@Mz.prepbufr.tm00</cyclestr></datadep>    
        <or>
        <taskdep state="succeeded" task="&NET;_obsprep_lghtn_task_@Y@m@d@H@M"/>
        <taskdep state="Dead" task="&NET;_obsprep_lghtn_task_@Y@m@d@H@M"/>
@@ -1351,7 +1386,7 @@ cat >> ${NWROOT}/workflow/${RUN}_${expname}_${DOMAIN}.xml <<EOF
 
     &ENVARS_PREPJOB;
    <dependency>
-       <datadep age="15" minsize="15000M"><cyclestr offset="-3600">&GESINHRRR;/hrrr.@Y@m@d/&DOMAIN;/hrrr.t@H00z.f01@M.netcdf</cyclestr></datadep>
+       <datadep age="10" minsize="15000M"><cyclestr offset="-3600">&GESINHRRR;/hrrr.@Y@m@d/&DOMAIN;/hrrr.t@H00z.f01@M.netcdf</cyclestr></datadep>
    </dependency>
    </task>
 EOF
@@ -1375,7 +1410,7 @@ cat >> ${NWROOT}/workflow/${RUN}_${expname}_${DOMAIN}.xml <<EOF
 
     &ENVARS_PREPJOB;
    <dependency>
-       <datadep age="15" minsize="9400M"><cyclestr offset="-3600">&GESINHRRR;/hrrr.@Y@m@d/alaska/hrrr.t@H00z.f01@M.netcdf</cyclestr></datadep>
+       <datadep age="10" minsize="9400M"><cyclestr offset="-3600">&GESINHRRR;/hrrr.@Y@m@d/alaska/hrrr.t@H00z.f01@M.netcdf</cyclestr></datadep>
    </dependency>
    </task>
 
@@ -1396,7 +1431,7 @@ cat >> ${NWROOT}/workflow/${RUN}_${expname}_${DOMAIN}.xml <<EOF
 
     &ENVARS_PREPJOB;
    <dependency>
-       <datadep age="15" minsize="9400M"><cyclestr offset="-7200">&GESINHRRR;/hrrr.@Y@m@d/alaska/hrrr.t@H00z.f02@M.netcdf</cyclestr></datadep>
+       <datadep age="10" minsize="9400M"><cyclestr offset="-7200">&GESINHRRR;/hrrr.@Y@m@d/alaska/hrrr.t@H00z.f02@M.netcdf</cyclestr></datadep>
    </dependency>
    </task>
 
@@ -1417,7 +1452,7 @@ cat >> ${NWROOT}/workflow/${RUN}_${expname}_${DOMAIN}.xml <<EOF
 
     &ENVARS_PREPJOB;
    <dependency>
-       <datadep age="15" minsize="9400M"><cyclestr offset="-10800">&GESINHRRR;/hrrr.@Y@m@d/alaska/hrrr.t@H00z.f03@M.netcdf</cyclestr></datadep>
+       <datadep age="10" minsize="9400M"><cyclestr offset="-10800">&GESINHRRR;/hrrr.@Y@m@d/alaska/hrrr.t@H00z.f03@M.netcdf</cyclestr></datadep>
    </dependency>
    </task>
 EOF
@@ -1452,42 +1487,42 @@ cat >> ${NWROOT}/workflow/${RUN}_${expname}_${DOMAIN}.xml <<EOF
               <taskdep task="&NET;_prepfgs_ind3_task_@Y@m@d@H@M"/>
           </or>
           <taskdep task="&NET;_prepobs_task_@Y@m@d@H@M"/>
-          <datadep age="15"><cyclestr offset="-3600">&COMINHRRRDAS;/hrrrdas_small_d02_@Y@m@d@H00f01_mem0001</cyclestr></datadep> 
-          <datadep age="15"><cyclestr offset="-3600">&COMINHRRRDAS;/hrrrdas_small_d02_@Y@m@d@H00f01_mem0002</cyclestr></datadep>
-          <datadep age="15"><cyclestr offset="-3600">&COMINHRRRDAS;/hrrrdas_small_d02_@Y@m@d@H00f01_mem0003</cyclestr></datadep> 
-          <datadep age="15"><cyclestr offset="-3600">&COMINHRRRDAS;/hrrrdas_small_d02_@Y@m@d@H00f01_mem0004</cyclestr></datadep>
-          <datadep age="15"><cyclestr offset="-3600">&COMINHRRRDAS;/hrrrdas_small_d02_@Y@m@d@H00f01_mem0005</cyclestr></datadep> 
-          <datadep age="15"><cyclestr offset="-3600">&COMINHRRRDAS;/hrrrdas_small_d02_@Y@m@d@H00f01_mem0006</cyclestr></datadep>
-          <datadep age="15"><cyclestr offset="-3600">&COMINHRRRDAS;/hrrrdas_small_d02_@Y@m@d@H00f01_mem0007</cyclestr></datadep> 
-          <datadep age="15"><cyclestr offset="-3600">&COMINHRRRDAS;/hrrrdas_small_d02_@Y@m@d@H00f01_mem0008</cyclestr></datadep>
-          <datadep age="15"><cyclestr offset="-3600">&COMINHRRRDAS;/hrrrdas_small_d02_@Y@m@d@H00f01_mem0009</cyclestr></datadep> 
-          <datadep age="15"><cyclestr offset="-3600">&COMINHRRRDAS;/hrrrdas_small_d02_@Y@m@d@H00f01_mem0010</cyclestr></datadep>
-          <datadep age="15"><cyclestr offset="-3600">&COMINHRRRDAS;/hrrrdas_small_d02_@Y@m@d@H00f01_mem0011</cyclestr></datadep> 
-          <datadep age="15"><cyclestr offset="-3600">&COMINHRRRDAS;/hrrrdas_small_d02_@Y@m@d@H00f01_mem0012</cyclestr></datadep>
-          <datadep age="15"><cyclestr offset="-3600">&COMINHRRRDAS;/hrrrdas_small_d02_@Y@m@d@H00f01_mem0013</cyclestr></datadep> 
-          <datadep age="15"><cyclestr offset="-3600">&COMINHRRRDAS;/hrrrdas_small_d02_@Y@m@d@H00f01_mem0014</cyclestr></datadep>
-          <datadep age="15"><cyclestr offset="-3600">&COMINHRRRDAS;/hrrrdas_small_d02_@Y@m@d@H00f01_mem0015</cyclestr></datadep> 
-          <datadep age="15"><cyclestr offset="-3600">&COMINHRRRDAS;/hrrrdas_small_d02_@Y@m@d@H00f01_mem0016</cyclestr></datadep>
-          <datadep age="15"><cyclestr offset="-3600">&COMINHRRRDAS;/hrrrdas_small_d02_@Y@m@d@H00f01_mem0017</cyclestr></datadep> 
-          <datadep age="15"><cyclestr offset="-3600">&COMINHRRRDAS;/hrrrdas_small_d02_@Y@m@d@H00f01_mem0018</cyclestr></datadep>
-          <datadep age="15"><cyclestr offset="-3600">&COMINHRRRDAS;/hrrrdas_small_d02_@Y@m@d@H00f01_mem0019</cyclestr></datadep> 
-          <datadep age="15"><cyclestr offset="-3600">&COMINHRRRDAS;/hrrrdas_small_d02_@Y@m@d@H00f01_mem0020</cyclestr></datadep>
-          <datadep age="15"><cyclestr offset="-3600">&COMINHRRRDAS;/hrrrdas_small_d02_@Y@m@d@H00f01_mem0021</cyclestr></datadep> 
-          <datadep age="15"><cyclestr offset="-3600">&COMINHRRRDAS;/hrrrdas_small_d02_@Y@m@d@H00f01_mem0022</cyclestr></datadep>
-          <datadep age="15"><cyclestr offset="-3600">&COMINHRRRDAS;/hrrrdas_small_d02_@Y@m@d@H00f01_mem0023</cyclestr></datadep> 
-          <datadep age="15"><cyclestr offset="-3600">&COMINHRRRDAS;/hrrrdas_small_d02_@Y@m@d@H00f01_mem0024</cyclestr></datadep>
-          <datadep age="15"><cyclestr offset="-3600">&COMINHRRRDAS;/hrrrdas_small_d02_@Y@m@d@H00f01_mem0025</cyclestr></datadep> 
-          <datadep age="15"><cyclestr offset="-3600">&COMINHRRRDAS;/hrrrdas_small_d02_@Y@m@d@H00f01_mem0026</cyclestr></datadep>
-          <datadep age="15"><cyclestr offset="-3600">&COMINHRRRDAS;/hrrrdas_small_d02_@Y@m@d@H00f01_mem0027</cyclestr></datadep> 
-          <datadep age="15"><cyclestr offset="-3600">&COMINHRRRDAS;/hrrrdas_small_d02_@Y@m@d@H00f01_mem0028</cyclestr></datadep>
-          <datadep age="15"><cyclestr offset="-3600">&COMINHRRRDAS;/hrrrdas_small_d02_@Y@m@d@H00f01_mem0029</cyclestr></datadep> 
-          <datadep age="15"><cyclestr offset="-3600">&COMINHRRRDAS;/hrrrdas_small_d02_@Y@m@d@H00f01_mem0030</cyclestr></datadep>
-          <datadep age="15"><cyclestr offset="-3600">&COMINHRRRDAS;/hrrrdas_small_d02_@Y@m@d@H00f01_mem0031</cyclestr></datadep> 
-          <datadep age="15"><cyclestr offset="-3600">&COMINHRRRDAS;/hrrrdas_small_d02_@Y@m@d@H00f01_mem0032</cyclestr></datadep>
-          <datadep age="15"><cyclestr offset="-3600">&COMINHRRRDAS;/hrrrdas_small_d02_@Y@m@d@H00f01_mem0033</cyclestr></datadep> 
-          <datadep age="15"><cyclestr offset="-3600">&COMINHRRRDAS;/hrrrdas_small_d02_@Y@m@d@H00f01_mem0034</cyclestr></datadep>
-          <datadep age="15"><cyclestr offset="-3600">&COMINHRRRDAS;/hrrrdas_small_d02_@Y@m@d@H00f01_mem0035</cyclestr></datadep> 
-          <datadep age="15"><cyclestr offset="-3600">&COMINHRRRDAS;/hrrrdas_small_d02_@Y@m@d@H00f01_mem0036</cyclestr></datadep>
+          <datadep age="2"><cyclestr offset="-3600">&COMINHRRRDAS;/hrrrdas_small_d02_@Y@m@d@H00f01_mem0001</cyclestr></datadep> 
+          <datadep age="2"><cyclestr offset="-3600">&COMINHRRRDAS;/hrrrdas_small_d02_@Y@m@d@H00f01_mem0002</cyclestr></datadep>
+          <datadep age="2"><cyclestr offset="-3600">&COMINHRRRDAS;/hrrrdas_small_d02_@Y@m@d@H00f01_mem0003</cyclestr></datadep> 
+          <datadep age="2"><cyclestr offset="-3600">&COMINHRRRDAS;/hrrrdas_small_d02_@Y@m@d@H00f01_mem0004</cyclestr></datadep>
+          <datadep age="2"><cyclestr offset="-3600">&COMINHRRRDAS;/hrrrdas_small_d02_@Y@m@d@H00f01_mem0005</cyclestr></datadep> 
+          <datadep age="2"><cyclestr offset="-3600">&COMINHRRRDAS;/hrrrdas_small_d02_@Y@m@d@H00f01_mem0006</cyclestr></datadep>
+          <datadep age="2"><cyclestr offset="-3600">&COMINHRRRDAS;/hrrrdas_small_d02_@Y@m@d@H00f01_mem0007</cyclestr></datadep> 
+          <datadep age="2"><cyclestr offset="-3600">&COMINHRRRDAS;/hrrrdas_small_d02_@Y@m@d@H00f01_mem0008</cyclestr></datadep>
+          <datadep age="2"><cyclestr offset="-3600">&COMINHRRRDAS;/hrrrdas_small_d02_@Y@m@d@H00f01_mem0009</cyclestr></datadep> 
+          <datadep age="2"><cyclestr offset="-3600">&COMINHRRRDAS;/hrrrdas_small_d02_@Y@m@d@H00f01_mem0010</cyclestr></datadep>
+          <datadep age="2"><cyclestr offset="-3600">&COMINHRRRDAS;/hrrrdas_small_d02_@Y@m@d@H00f01_mem0011</cyclestr></datadep> 
+          <datadep age="2"><cyclestr offset="-3600">&COMINHRRRDAS;/hrrrdas_small_d02_@Y@m@d@H00f01_mem0012</cyclestr></datadep>
+          <datadep age="2"><cyclestr offset="-3600">&COMINHRRRDAS;/hrrrdas_small_d02_@Y@m@d@H00f01_mem0013</cyclestr></datadep> 
+          <datadep age="2"><cyclestr offset="-3600">&COMINHRRRDAS;/hrrrdas_small_d02_@Y@m@d@H00f01_mem0014</cyclestr></datadep>
+          <datadep age="2"><cyclestr offset="-3600">&COMINHRRRDAS;/hrrrdas_small_d02_@Y@m@d@H00f01_mem0015</cyclestr></datadep> 
+          <datadep age="2"><cyclestr offset="-3600">&COMINHRRRDAS;/hrrrdas_small_d02_@Y@m@d@H00f01_mem0016</cyclestr></datadep>
+          <datadep age="2"><cyclestr offset="-3600">&COMINHRRRDAS;/hrrrdas_small_d02_@Y@m@d@H00f01_mem0017</cyclestr></datadep> 
+          <datadep age="2"><cyclestr offset="-3600">&COMINHRRRDAS;/hrrrdas_small_d02_@Y@m@d@H00f01_mem0018</cyclestr></datadep>
+          <datadep age="2"><cyclestr offset="-3600">&COMINHRRRDAS;/hrrrdas_small_d02_@Y@m@d@H00f01_mem0019</cyclestr></datadep> 
+          <datadep age="2"><cyclestr offset="-3600">&COMINHRRRDAS;/hrrrdas_small_d02_@Y@m@d@H00f01_mem0020</cyclestr></datadep>
+          <datadep age="2"><cyclestr offset="-3600">&COMINHRRRDAS;/hrrrdas_small_d02_@Y@m@d@H00f01_mem0021</cyclestr></datadep> 
+          <datadep age="2"><cyclestr offset="-3600">&COMINHRRRDAS;/hrrrdas_small_d02_@Y@m@d@H00f01_mem0022</cyclestr></datadep>
+          <datadep age="2"><cyclestr offset="-3600">&COMINHRRRDAS;/hrrrdas_small_d02_@Y@m@d@H00f01_mem0023</cyclestr></datadep> 
+          <datadep age="2"><cyclestr offset="-3600">&COMINHRRRDAS;/hrrrdas_small_d02_@Y@m@d@H00f01_mem0024</cyclestr></datadep>
+          <datadep age="2"><cyclestr offset="-3600">&COMINHRRRDAS;/hrrrdas_small_d02_@Y@m@d@H00f01_mem0025</cyclestr></datadep> 
+          <datadep age="2"><cyclestr offset="-3600">&COMINHRRRDAS;/hrrrdas_small_d02_@Y@m@d@H00f01_mem0026</cyclestr></datadep>
+          <datadep age="2"><cyclestr offset="-3600">&COMINHRRRDAS;/hrrrdas_small_d02_@Y@m@d@H00f01_mem0027</cyclestr></datadep> 
+          <datadep age="2"><cyclestr offset="-3600">&COMINHRRRDAS;/hrrrdas_small_d02_@Y@m@d@H00f01_mem0028</cyclestr></datadep>
+          <datadep age="2"><cyclestr offset="-3600">&COMINHRRRDAS;/hrrrdas_small_d02_@Y@m@d@H00f01_mem0029</cyclestr></datadep> 
+          <datadep age="2"><cyclestr offset="-3600">&COMINHRRRDAS;/hrrrdas_small_d02_@Y@m@d@H00f01_mem0030</cyclestr></datadep>
+          <datadep age="2"><cyclestr offset="-3600">&COMINHRRRDAS;/hrrrdas_small_d02_@Y@m@d@H00f01_mem0031</cyclestr></datadep> 
+          <datadep age="2"><cyclestr offset="-3600">&COMINHRRRDAS;/hrrrdas_small_d02_@Y@m@d@H00f01_mem0032</cyclestr></datadep>
+          <datadep age="2"><cyclestr offset="-3600">&COMINHRRRDAS;/hrrrdas_small_d02_@Y@m@d@H00f01_mem0033</cyclestr></datadep> 
+          <datadep age="2"><cyclestr offset="-3600">&COMINHRRRDAS;/hrrrdas_small_d02_@Y@m@d@H00f01_mem0034</cyclestr></datadep>
+          <datadep age="2"><cyclestr offset="-3600">&COMINHRRRDAS;/hrrrdas_small_d02_@Y@m@d@H00f01_mem0035</cyclestr></datadep> 
+          <datadep age="2"><cyclestr offset="-3600">&COMINHRRRDAS;/hrrrdas_small_d02_@Y@m@d@H00f01_mem0036</cyclestr></datadep>
       </and>
     </dependency>
   </task>
@@ -1517,42 +1552,42 @@ cat >> ${NWROOT}/workflow/${RUN}_${expname}_${DOMAIN}.xml <<EOF
       <and>
           <taskdep task="&NET;_prepfgs_task_@Y@m@d@H@M"/> 
           <taskdep task="&NET;_prepobs_task_@Y@m@d@H@M"/>
-          <datadep age="15"><cyclestr offset="-3600">&COMINHRRRDAS;/hrrrdas_small_d02_@Y@m@d@H00f01_mem0001</cyclestr></datadep> 
-          <datadep age="15"><cyclestr offset="-3600">&COMINHRRRDAS;/hrrrdas_small_d02_@Y@m@d@H00f01_mem0002</cyclestr></datadep>
-          <datadep age="15"><cyclestr offset="-3600">&COMINHRRRDAS;/hrrrdas_small_d02_@Y@m@d@H00f01_mem0003</cyclestr></datadep> 
-          <datadep age="15"><cyclestr offset="-3600">&COMINHRRRDAS;/hrrrdas_small_d02_@Y@m@d@H00f01_mem0004</cyclestr></datadep>
-          <datadep age="15"><cyclestr offset="-3600">&COMINHRRRDAS;/hrrrdas_small_d02_@Y@m@d@H00f01_mem0005</cyclestr></datadep> 
-          <datadep age="15"><cyclestr offset="-3600">&COMINHRRRDAS;/hrrrdas_small_d02_@Y@m@d@H00f01_mem0006</cyclestr></datadep>
-          <datadep age="15"><cyclestr offset="-3600">&COMINHRRRDAS;/hrrrdas_small_d02_@Y@m@d@H00f01_mem0007</cyclestr></datadep> 
-          <datadep age="15"><cyclestr offset="-3600">&COMINHRRRDAS;/hrrrdas_small_d02_@Y@m@d@H00f01_mem0008</cyclestr></datadep>
-          <datadep age="15"><cyclestr offset="-3600">&COMINHRRRDAS;/hrrrdas_small_d02_@Y@m@d@H00f01_mem0009</cyclestr></datadep> 
-          <datadep age="15"><cyclestr offset="-3600">&COMINHRRRDAS;/hrrrdas_small_d02_@Y@m@d@H00f01_mem0010</cyclestr></datadep>
-          <datadep age="15"><cyclestr offset="-3600">&COMINHRRRDAS;/hrrrdas_small_d02_@Y@m@d@H00f01_mem0011</cyclestr></datadep> 
-          <datadep age="15"><cyclestr offset="-3600">&COMINHRRRDAS;/hrrrdas_small_d02_@Y@m@d@H00f01_mem0012</cyclestr></datadep>
-          <datadep age="15"><cyclestr offset="-3600">&COMINHRRRDAS;/hrrrdas_small_d02_@Y@m@d@H00f01_mem0013</cyclestr></datadep> 
-          <datadep age="15"><cyclestr offset="-3600">&COMINHRRRDAS;/hrrrdas_small_d02_@Y@m@d@H00f01_mem0014</cyclestr></datadep>
-          <datadep age="15"><cyclestr offset="-3600">&COMINHRRRDAS;/hrrrdas_small_d02_@Y@m@d@H00f01_mem0015</cyclestr></datadep> 
-          <datadep age="15"><cyclestr offset="-3600">&COMINHRRRDAS;/hrrrdas_small_d02_@Y@m@d@H00f01_mem0016</cyclestr></datadep>
-          <datadep age="15"><cyclestr offset="-3600">&COMINHRRRDAS;/hrrrdas_small_d02_@Y@m@d@H00f01_mem0017</cyclestr></datadep> 
-          <datadep age="15"><cyclestr offset="-3600">&COMINHRRRDAS;/hrrrdas_small_d02_@Y@m@d@H00f01_mem0018</cyclestr></datadep>
-          <datadep age="15"><cyclestr offset="-3600">&COMINHRRRDAS;/hrrrdas_small_d02_@Y@m@d@H00f01_mem0019</cyclestr></datadep> 
-          <datadep age="15"><cyclestr offset="-3600">&COMINHRRRDAS;/hrrrdas_small_d02_@Y@m@d@H00f01_mem0020</cyclestr></datadep>
-          <datadep age="15"><cyclestr offset="-3600">&COMINHRRRDAS;/hrrrdas_small_d02_@Y@m@d@H00f01_mem0021</cyclestr></datadep> 
-          <datadep age="15"><cyclestr offset="-3600">&COMINHRRRDAS;/hrrrdas_small_d02_@Y@m@d@H00f01_mem0022</cyclestr></datadep>
-          <datadep age="15"><cyclestr offset="-3600">&COMINHRRRDAS;/hrrrdas_small_d02_@Y@m@d@H00f01_mem0023</cyclestr></datadep> 
-          <datadep age="15"><cyclestr offset="-3600">&COMINHRRRDAS;/hrrrdas_small_d02_@Y@m@d@H00f01_mem0024</cyclestr></datadep>
-          <datadep age="15"><cyclestr offset="-3600">&COMINHRRRDAS;/hrrrdas_small_d02_@Y@m@d@H00f01_mem0025</cyclestr></datadep> 
-          <datadep age="15"><cyclestr offset="-3600">&COMINHRRRDAS;/hrrrdas_small_d02_@Y@m@d@H00f01_mem0026</cyclestr></datadep>
-          <datadep age="15"><cyclestr offset="-3600">&COMINHRRRDAS;/hrrrdas_small_d02_@Y@m@d@H00f01_mem0027</cyclestr></datadep> 
-          <datadep age="15"><cyclestr offset="-3600">&COMINHRRRDAS;/hrrrdas_small_d02_@Y@m@d@H00f01_mem0028</cyclestr></datadep>
-          <datadep age="15"><cyclestr offset="-3600">&COMINHRRRDAS;/hrrrdas_small_d02_@Y@m@d@H00f01_mem0029</cyclestr></datadep> 
-          <datadep age="15"><cyclestr offset="-3600">&COMINHRRRDAS;/hrrrdas_small_d02_@Y@m@d@H00f01_mem0030</cyclestr></datadep>
-          <datadep age="15"><cyclestr offset="-3600">&COMINHRRRDAS;/hrrrdas_small_d02_@Y@m@d@H00f01_mem0031</cyclestr></datadep> 
-          <datadep age="15"><cyclestr offset="-3600">&COMINHRRRDAS;/hrrrdas_small_d02_@Y@m@d@H00f01_mem0032</cyclestr></datadep>
-          <datadep age="15"><cyclestr offset="-3600">&COMINHRRRDAS;/hrrrdas_small_d02_@Y@m@d@H00f01_mem0033</cyclestr></datadep> 
-          <datadep age="15"><cyclestr offset="-3600">&COMINHRRRDAS;/hrrrdas_small_d02_@Y@m@d@H00f01_mem0034</cyclestr></datadep>
-          <datadep age="15"><cyclestr offset="-3600">&COMINHRRRDAS;/hrrrdas_small_d02_@Y@m@d@H00f01_mem0035</cyclestr></datadep> 
-          <datadep age="15"><cyclestr offset="-3600">&COMINHRRRDAS;/hrrrdas_small_d02_@Y@m@d@H00f01_mem0036</cyclestr></datadep>
+          <datadep age="2"><cyclestr offset="-3600">&COMINHRRRDAS;/hrrrdas_small_d02_@Y@m@d@H00f01_mem0001</cyclestr></datadep> 
+          <datadep age="2"><cyclestr offset="-3600">&COMINHRRRDAS;/hrrrdas_small_d02_@Y@m@d@H00f01_mem0002</cyclestr></datadep>
+          <datadep age="2"><cyclestr offset="-3600">&COMINHRRRDAS;/hrrrdas_small_d02_@Y@m@d@H00f01_mem0003</cyclestr></datadep> 
+          <datadep age="2"><cyclestr offset="-3600">&COMINHRRRDAS;/hrrrdas_small_d02_@Y@m@d@H00f01_mem0004</cyclestr></datadep>
+          <datadep age="2"><cyclestr offset="-3600">&COMINHRRRDAS;/hrrrdas_small_d02_@Y@m@d@H00f01_mem0005</cyclestr></datadep> 
+          <datadep age="2"><cyclestr offset="-3600">&COMINHRRRDAS;/hrrrdas_small_d02_@Y@m@d@H00f01_mem0006</cyclestr></datadep>
+          <datadep age="2"><cyclestr offset="-3600">&COMINHRRRDAS;/hrrrdas_small_d02_@Y@m@d@H00f01_mem0007</cyclestr></datadep> 
+          <datadep age="2"><cyclestr offset="-3600">&COMINHRRRDAS;/hrrrdas_small_d02_@Y@m@d@H00f01_mem0008</cyclestr></datadep>
+          <datadep age="2"><cyclestr offset="-3600">&COMINHRRRDAS;/hrrrdas_small_d02_@Y@m@d@H00f01_mem0009</cyclestr></datadep> 
+          <datadep age="2"><cyclestr offset="-3600">&COMINHRRRDAS;/hrrrdas_small_d02_@Y@m@d@H00f01_mem0010</cyclestr></datadep>
+          <datadep age="2"><cyclestr offset="-3600">&COMINHRRRDAS;/hrrrdas_small_d02_@Y@m@d@H00f01_mem0011</cyclestr></datadep> 
+          <datadep age="2"><cyclestr offset="-3600">&COMINHRRRDAS;/hrrrdas_small_d02_@Y@m@d@H00f01_mem0012</cyclestr></datadep>
+          <datadep age="2"><cyclestr offset="-3600">&COMINHRRRDAS;/hrrrdas_small_d02_@Y@m@d@H00f01_mem0013</cyclestr></datadep> 
+          <datadep age="2"><cyclestr offset="-3600">&COMINHRRRDAS;/hrrrdas_small_d02_@Y@m@d@H00f01_mem0014</cyclestr></datadep>
+          <datadep age="2"><cyclestr offset="-3600">&COMINHRRRDAS;/hrrrdas_small_d02_@Y@m@d@H00f01_mem0015</cyclestr></datadep> 
+          <datadep age="2"><cyclestr offset="-3600">&COMINHRRRDAS;/hrrrdas_small_d02_@Y@m@d@H00f01_mem0016</cyclestr></datadep>
+          <datadep age="2"><cyclestr offset="-3600">&COMINHRRRDAS;/hrrrdas_small_d02_@Y@m@d@H00f01_mem0017</cyclestr></datadep> 
+          <datadep age="2"><cyclestr offset="-3600">&COMINHRRRDAS;/hrrrdas_small_d02_@Y@m@d@H00f01_mem0018</cyclestr></datadep>
+          <datadep age="2"><cyclestr offset="-3600">&COMINHRRRDAS;/hrrrdas_small_d02_@Y@m@d@H00f01_mem0019</cyclestr></datadep> 
+          <datadep age="2"><cyclestr offset="-3600">&COMINHRRRDAS;/hrrrdas_small_d02_@Y@m@d@H00f01_mem0020</cyclestr></datadep>
+          <datadep age="2"><cyclestr offset="-3600">&COMINHRRRDAS;/hrrrdas_small_d02_@Y@m@d@H00f01_mem0021</cyclestr></datadep> 
+          <datadep age="2"><cyclestr offset="-3600">&COMINHRRRDAS;/hrrrdas_small_d02_@Y@m@d@H00f01_mem0022</cyclestr></datadep>
+          <datadep age="2"><cyclestr offset="-3600">&COMINHRRRDAS;/hrrrdas_small_d02_@Y@m@d@H00f01_mem0023</cyclestr></datadep> 
+          <datadep age="2"><cyclestr offset="-3600">&COMINHRRRDAS;/hrrrdas_small_d02_@Y@m@d@H00f01_mem0024</cyclestr></datadep>
+          <datadep age="2"><cyclestr offset="-3600">&COMINHRRRDAS;/hrrrdas_small_d02_@Y@m@d@H00f01_mem0025</cyclestr></datadep> 
+          <datadep age="2"><cyclestr offset="-3600">&COMINHRRRDAS;/hrrrdas_small_d02_@Y@m@d@H00f01_mem0026</cyclestr></datadep>
+          <datadep age="2"><cyclestr offset="-3600">&COMINHRRRDAS;/hrrrdas_small_d02_@Y@m@d@H00f01_mem0027</cyclestr></datadep> 
+          <datadep age="2"><cyclestr offset="-3600">&COMINHRRRDAS;/hrrrdas_small_d02_@Y@m@d@H00f01_mem0028</cyclestr></datadep>
+          <datadep age="2"><cyclestr offset="-3600">&COMINHRRRDAS;/hrrrdas_small_d02_@Y@m@d@H00f01_mem0029</cyclestr></datadep> 
+          <datadep age="2"><cyclestr offset="-3600">&COMINHRRRDAS;/hrrrdas_small_d02_@Y@m@d@H00f01_mem0030</cyclestr></datadep>
+          <datadep age="2"><cyclestr offset="-3600">&COMINHRRRDAS;/hrrrdas_small_d02_@Y@m@d@H00f01_mem0031</cyclestr></datadep> 
+          <datadep age="2"><cyclestr offset="-3600">&COMINHRRRDAS;/hrrrdas_small_d02_@Y@m@d@H00f01_mem0032</cyclestr></datadep>
+          <datadep age="2"><cyclestr offset="-3600">&COMINHRRRDAS;/hrrrdas_small_d02_@Y@m@d@H00f01_mem0033</cyclestr></datadep> 
+          <datadep age="2"><cyclestr offset="-3600">&COMINHRRRDAS;/hrrrdas_small_d02_@Y@m@d@H00f01_mem0034</cyclestr></datadep>
+          <datadep age="2"><cyclestr offset="-3600">&COMINHRRRDAS;/hrrrdas_small_d02_@Y@m@d@H00f01_mem0035</cyclestr></datadep> 
+          <datadep age="2"><cyclestr offset="-3600">&COMINHRRRDAS;/hrrrdas_small_d02_@Y@m@d@H00f01_mem0036</cyclestr></datadep>
       </and>
     </dependency>
   </task>
@@ -1620,6 +1655,31 @@ cat >> ${NWROOT}/workflow/${RUN}_${expname}_${DOMAIN}.xml <<EOF
   </task>
 EOF
 fi
+
+if [ ${autoqc} -eq 1 ] ; then
+
+cat >> ${NWROOT}/workflow/${RUN}_${expname}_${DOMAIN}.xml <<EOF 
+
+ <task name="&NET;_autoqc_task_@Y@m@d@H@M" cycledefs="hourly" maxtries="&maxtries;">
+
+    &ENVARS;
+    &AUTOQC_RESOURCES;
+    &AUTOQC_RESERVATION;
+
+    <command>&JJOB_DIR;/launch.ksh &JJOB_AUTOQC;</command>
+    <jobname><cyclestr>&NET;_autoqc_job_@Y@m@d@H@M</cyclestr></jobname>
+    <join><cyclestr>&LOG_SCHDLR;/&NET;_&envir;_autoqc_@Y@m@d@H@M.log</cyclestr></join>
+
+    &ENVARS_AUTOQC;
+
+    <dependency>
+          <taskdep task="&NET;_gsianl_task_@Y@m@d@H@M"/>
+    </dependency>
+
+  </task>
+EOF
+fi
+
 
 if [ ${updatevars} -eq 1 ] ; then
 

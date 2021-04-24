@@ -243,7 +243,7 @@ else
 fi
 ${CP_LN} ${EXECrtma3d}/${exefile_name_updatevars} ${pgm}
 now=`${DATE} +%Y%m%d%H%M%S`
-${MPIRUN} ${pgm}
+${MPIRUN} ./${pgm}
 export err=$?; err_chk
 
 # Save a copy of the RSL files
@@ -267,7 +267,7 @@ ${ECHO} "Assemble Reflectivity fields back into wrf_inout"
 #${NCKS} -A -H -v REFL_10CM,COMPOSITE_REFL_10CM,REFL_10CM_1KM,REFL_10CM_4KM,U10,V10 wrfout_d01_${time_str} ${COMOUTgsi_rtma3d}/${ANLrtma3d_FNAME} 
 #${NCKS} -A -H -v REFL_10CM,COMPOSITE_REFL_10CM,REFL_10CM_1KM,REFL_10CM_4KM wrfout_d01_${time_str} ${COMOUTgsi_rtma3d}/${ANLrtma3d_FNAME} 
 
-${exefile_name_update_ncfields} wrfout_d01 wrf_inout 
+./${exefile_name_update_ncfields} wrfout_d01 wrf_inout 
 export err=$?; err_chk
 
 if [ -f ${COMOUTgsi_rtma3d}/${ANLrtma3d_FNAME} ]; then

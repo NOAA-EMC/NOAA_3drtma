@@ -111,7 +111,7 @@ msg="***********************************************************"
 postmsg "$jlogfile" "$msg"
 
 ${CP_LN} ${EXECrtma3d}/${exefile_name_post} ${pgm}
-${MPIRUN} ${pgm} <itag > ${pgmout} 2>errfile
+${MPIRUN} ./${pgm} <itag > ${pgmout} 2>errfile
 export err=$?; err_chk
 
   wrfprsfile="wrfprs_${POST_NAME}_${FCST_TIME}.grib2"
@@ -366,7 +366,7 @@ if [ ${err} -ne 0 ]; then
 fi
 
 # Linking GrbF{HH} to GrbF00 (esp. for firstguess which is from WRF forecast)
-GrbFiles=`ls WRF???.GrbF?????`
+GrbFiles=`ls WRF???.GrbF??`
 for i in ${GrbFiles}
 do
   i_fname=`echo "$i" | cut -d '.' -f 1`
@@ -426,7 +426,7 @@ ${WGRIB2} ${workdir}/wrfsubhnat.grib2 -set center 7 -grib ${COMOUTpost_rtma3d}/$
 
 # ${RM} -rf ${workdir}
   ${RM} -f  ${workdir}/wrfsubh???.grib2
-  ${RM} -f  ${workdir}/WRF???.GrbF?????
+  ${RM} -f  ${workdir}/WRF???.GrbF??
 
 # Create softlinks for transfer
 # basetime=`${DATE} +%y%j%H%M -d "${START_TIME}"`
