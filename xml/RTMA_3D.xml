@@ -6,8 +6,9 @@
 <!ENTITY ACCOUNT_RES "rtrr">
 <!ENTITY SCHEDULER "slurm">
 
-<!ENTITY PARTITION "kjet">
-<!ENTITY PARTITION_DA "kjet">
+<!ENTITY PARTITION "kjet:xjet:vjet:sjet:ujet">
+<!ENTITY PARTITION_DA "kjet:vjet:xjet">
+<!ENTITY PARTITION_PYTHON "xjet:vjet:kjet:sjet:ujet">
 <!ENTITY QUEUE "batch">
 <!ENTITY RES_DA "3drtma">
 <!--<!ENTITY RES_POST "rtma-kjet">-->
@@ -23,6 +24,7 @@
 
 <!ENTITY NCL_VER "6.5.0">
 <!ENTITY SCRIPTS "&HOMEBASE_DIR;/scripts">
+<!ENTITY PYTHON_SCRIPTS "&HOMEBASE_DIR;/scripts/python/pygraf">
 <!ENTITY STATIC_DIR "&HOMEBASE_DIR;/fix">
 
 <!ENTITY WPS_ROOT "&HOMEBASE_DIR;/exec/WPS">
@@ -99,6 +101,8 @@
 <!ENTITY NCL_PROC "1">
 <!ENTITY NCL_MAIN_PROC "8">
 <!ENTITY CLEAN_PROC "1">
+<!ENTITY PYTHON_MAPS_NODES "1:ppn=12">
+<!ENTITY PYTHON_SKEWT_NODES "1:ppn=12">
 
 <!ENTITY SMARTINIT_RESOURCES "<walltime>00:10:00</walltime><memory>10G</memory>">
 <!ENTITY CLEAN_RESOURCES "<walltime>00:45:00</walltime><memory>500M</memory>">
@@ -113,6 +117,8 @@
 <!ENTITY NCL_SKEWT_RESOURCES "<walltime>00:25:00</walltime><memory>9G</memory>">
 <!ENTITY NCL_HTXS_RESOURCES "<walltime>00:25:00</walltime><memory>9G</memory>">
 <!ENTITY UPDATE_VARS_RESOURCES "<walltime>00:08:00</walltime>">
+<!ENTITY PYTHON_MAPS_RESOURCES "<walltime>02:35:00</walltime>">
+<!ENTITY PYTHON_SKEWT_RESOURCES "<walltime>02:35:00</walltime>">
 
 <!-- End gsi_hyb by 3 hr -->
 <!-- End all post-processing by 6 hrs -->
@@ -124,16 +130,19 @@
 <!ENTITY DEADLINE_DA "03:00:00">
 <!ENTITY DEADLINE_UV "03:00:00">
 <!ENTITY DEADLINE_PP "06:00:00">
+<!ENTITY DEADLINE_PYTHON "06:00:00">
 
 <!ENTITY WALL_LIMIT_DA '<deadline><cyclestr offset="&DEADLINE_DA;">@Y@m@d@H@M</cyclestr></deadline>'>
 <!ENTITY WALL_LIMIT_PP '<deadline><cyclestr offset="&DEADLINE_PP;">@Y@m@d@H@M</cyclestr></deadline>'>
 <!ENTITY WALL_LIMIT_UV '<deadline><cyclestr offset="&DEADLINE_UV;">@Y@m@d@H@M</cyclestr></deadline>'>
+<!ENTITY WALL_LIMIT_PYTHON '<deadline><cyclestr offset="&DEADLINE_PYTHON;">@Y@m@d@H@M</cyclestr></deadline>'>
 
 <!ENTITY RESERVATION '<native>--mail-type=NONE</native><queue>&QUEUE;</queue><account>&ACCOUNT;</account><partition>&PARTITION;</partition>'>
-<!ENTITY RESERVATION_PRE '<native>--mail-type=NONE --reservation=&RES_DA;</native><queue>&QUEUE;</queue><account>&ACCOUNT_RES;</account><partition>&PARTITION;</partition>'>
-<!ENTITY RESERVATION_DA '<native>--mail-type=NONE --reservation=&RES_DA;</native><queue>&QUEUE;</queue><account>&ACCOUNT_RES;</account><partition>&PARTITION_DA;</partition>'>
-<!ENTITY RESERVATION_POST '<native>--mail-type=NONE --reservation=&RES_DA;</native><queue>&QUEUE;</queue><account>&ACCOUNT_RES;</account><partition>&PARTITION;</partition>'>
-<!ENTITY RESERVATION_SMARTINIT '<native>--mail-type=NONE --reservation=&RES_DA;</native><queue>&QUEUE;</queue><account>&ACCOUNT_RES;</account><partition>&PARTITION;</partition>'>
+<!ENTITY RESERVATION_PRE '<native>--mail-type=NONE</native><queue>&QUEUE;</queue><account>&ACCOUNT;</account><partition>&PARTITION;</partition>'>
+<!ENTITY RESERVATION_DA '<native>--mail-type=NONE</native><queue>&QUEUE;</queue><account>&ACCOUNT;</account><partition>&PARTITION_DA;</partition>'>
+<!ENTITY RESERVATION_POST '<native>--mail-type=NONE</native><queue>&QUEUE;</queue><account>&ACCOUNT;</account><partition>&PARTITION;</partition>'>
+<!ENTITY RESERVATION_SMARTINIT '<native>--mail-type=NONE</native><queue>&QUEUE;</queue><account>&ACCOUNT;</account><partition>&PARTITION;</partition>'>
+<!ENTITY RESERVATION_PYTHON '<native>--mail-type=NONE</native><queue>&QUEUE;</queue><account>&ACCOUNT;</account><partition>&PARTITION_DA;</partition>'>
 
 <!ENTITY COMMONVARS
    '<envar><name>HOMErtma3d</name><value>&HOMEBASE_DIR;</value></envar>
@@ -583,6 +592,78 @@
 
   </task>
 
+  <task name="python_maps" cycledefs="all" maxtries="1">
+
+    &PYTHON_MAPS_RESOURCES;
+    &WALL_LIMIT_PYTHON;
+    &RESERVATION_PYTHON;
+
+    <nodes>&PYTHON_MAPS_NODES;</nodes>
+    <jobname><cyclestr>&JOBNAME_PRE;_python_@H_@M_map</cyclestr></jobname>
+    <join><cyclestr>&LOG_DIR;/@Y@m@d/python_@Y@m@d@H@M_map.log</cyclestr></join>
+
+    <command>
+      <cyclestr>
+        source &PYTHON_SCRIPTS;/pre.sh;
+        cd &PYTHON_SCRIPTS; ;
+        python &PYTHON_SCRIPTS;/create_graphics.py \
+          maps \
+          -d &DATAROOT;/@Y@m@d@H/postprd \
+          -f 0 \
+          --file_tmpl wrfprs_hrconus_00.grib2 \
+          --file_type prs \
+          --images &PYTHON_SCRIPTS;/image_lists/rtma.yml hourly\
+          -m RTMA_3D \
+          -n ${SLURM_CPUS_ON_NODE:-12} \
+          -o &DATAROOT;/@Y@m@d@H/pyprd/maps \
+          -s @Y@m@d@H \
+          --tiles full NE NC NW SE SC SW ATL CA-NV CentralCA CHI-DET DCArea EastCO GreatLakes NYC-BOS SEA-POR SouthCA SouthFL VortexSE \
+          -z &DATAROOT;/@Y@m@d@H/nclprd
+      </cyclestr>
+    </command>
+
+    <dependency>
+      <taskdep task="post"/>
+    </dependency>
+  </task>
+
+  <task name="python_skewt" cycledefs="all" maxtries="1">
+
+    &PYTHON_SKEWT_RESOURCES;
+    &WALL_LIMIT_PYTHON;
+    &RESERVATION_PYTHON;
+
+    <nodes>&PYTHON_SKEWT_NODES;</nodes>
+    <jobname><cyclestr>&JOBNAME_PRE;_python_@H_@M_skewt</cyclestr></jobname>
+    <join><cyclestr>&LOG_DIR;/@Y@m@d/python_@Y@m@d@H@M_skewt.log</cyclestr></join>
+
+    <command>
+      <cyclestr>
+        source &PYTHON_SCRIPTS;/pre.sh;
+        cd &PYTHON_SCRIPTS; ;
+        python &PYTHON_SCRIPTS;/create_graphics.py \
+          skewts \
+          -d &DATAROOT;/@Y@m@d@H/postprd \
+          -f 0 \
+          --file_tmpl wrfnat_hrconus_00.grib2 \
+          --file_type nat \
+          --max_plev 100 \
+          -m RTMA_3D \
+          -n ${SLURM_CPUS_ON_NODE:-12} \
+          -o &DATAROOT;/@Y@m@d@H/pyprd/skewt \
+          -s @Y@m@d@H \
+          -z &DATAROOT;/@Y@m@d@H/nclprd \
+          --sites &PYTHON_SCRIPTS;/static/conus_raobs.txt
+      </cyclestr>
+    </command>
+
+    <dependency>
+      <taskdep task="post"/>
+    </dependency>
+
+  </task>
+
+<!--
   <task name="ncl_00" cycledefs="all" maxtries="3">
 
     &NCL_RESOURCES;
@@ -679,6 +760,7 @@
     </task>
 
   </metatask>
+-->
 
   <metatask>
     <var name="htxs">htxs1</var>
@@ -731,6 +813,7 @@
 
   </metatask>
 
+<!--
   <task name="ncl_zip" cycledefs="all" maxtries="3">
 
     &NCL_RESOURCES;
@@ -800,6 +883,7 @@
     </dependency>
     
   </task>
+-->
 
   <task name="ncl_htxs_zip" cycledefs="all" maxtries="3">
 
