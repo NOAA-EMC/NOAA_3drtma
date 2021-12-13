@@ -220,14 +220,14 @@ for loop in $loops; do
 
     if [[ ${hourDiff} -lt ${minHourDiff} ]]; then
        minHourDiff=${hourDiff}
-       enkfcstname=${availtimeyy}${availtimejjj}${availtimehh}00.gdas.t${availtimehh}z.atmf${loop}s
+       enkfcstname=${availtimeyy}${availtimejjj}${availtimehh}00.gdas.t${availtimehh}z.atmf${loop}
     fi
   done
 done
 EYYYYMMDD=$(echo ${availtime} | cut -c1-8)
 EHH=$(echo ${availtime} | cut -c9-10)
-${LS} ${ENKF_FCST}/${enkfcstname}.mem???.nemsio > filelist03
-#${LS} ${ENKF_FCST}/${enkfcstname}.mem???.nemsio > filelist.tmp
+${LS} ${ENKF_FCST}/${enkfcstname}.mem???.nc > filelist03
+#${LS} ${ENKF_FCST}/${enkfcstname}.mem???.nc > filelist.tmp
 #head -n 36 filelist.tmp > filelist03
 
 ## 
