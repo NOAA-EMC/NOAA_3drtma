@@ -409,8 +409,8 @@ fi
 
 # Get aircraft reject list, mesonet_uselist, sfcobs_provider
 ${CP} ${AIRCRAFT_REJECT}/current_bad_aircraft.txt current_bad_aircraft
-#${CP} ${SFCOBS_USELIST}/current_mesonet_uselist.txt gsd_sfcobs_uselist.txt
-#${CP} ${SFCOBS_PROVIDER}/gsd_sfcobs_provider.txt gsd_sfcobs_provider.txt
+${CP} ${SFCOBS_USELIST}/current_mesonet_uselist.txt gsd_sfcobs_uselist.txt
+${CP} ${SFCOBS_PROVIDER}/gsd_sfcobs_provider.txt gsd_sfcobs_provider.txt
 
 bufrtable=${FIXgsi}/prepobs_prep.bufrtable
 ${CP} $bufrtable ./prepobs_prep.bufrtable
@@ -589,7 +589,7 @@ fi ###### second GSI run
 
 # Saving ANALYSIS, DIAG, Obs-Fitting files TO COM2 DIRECTORY AS PRODUCT for archive
 ${CP} -p gsiparm.anl  ${COMOUTgsi_rtma3d}/gsiparm.anl_${cycle_str}
-${TAR} -zcvf ${COMOUTgsi_rtma3d}/diag_${cycle_str}.tgz diag_*
+tar -zcvf ${COMOUTgsi_rtma3d}/diag_${cycle_str}.tgz diag_*
 
 if [ "${envir}" == "lsf" ]; then #wcoss
   ${CP} -p ${DATA}/wrf_inout                  ${COMOUTgsi_rtma3d}/${ANLrtma3d_FNAME}

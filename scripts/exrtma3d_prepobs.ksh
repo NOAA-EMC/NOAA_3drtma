@@ -168,6 +168,7 @@ if [ $obsprep_satwnd -eq 0 ] ; then
 else
   if [ -r ${COMINrap}/rtma_ru.t${HH}${subcyc}z.satwnd.tm00.bufr_d  ]; then
     ${ECHO} "using preocessed satwnd data"
+    cpreq  ${COMINrap}/rtma_ru.t${HH}${subcyc}z.satwnd.tm00.bufr_d ${COMINobsproc_rtma3d}
     ${LN} -sf ${COMINrap}/rtma_ru.t${HH}${subcyc}z.satwnd.tm00.bufr_d ${DATA}/rtma_ru.t${HH}${subcyc}z.satwnd.tm00.bufr_d
   else
     ${ECHO} "Warning: ${COMINrap}/rtma_ru.t${HH}${subcyc}z.satwnd.tm00.bufr_d does not exist!"

@@ -86,10 +86,10 @@ export DOMAIN="conus"
   QUEUE_SVC="dev_transfer"                  #user-specified transfer queue
   QUEUE_SHARED="dev_shared" 
 # Path to top running and archiving directory
-  ptmp_base="/gpfs/dell3/stmp/${USER}/${NET}_wrkdir_realtime_${DOMAIN}_bectune"
+  ptmp_base="/gpfs/dell3/ptmp/${USER}/${NET}_wrkdir_realtime_${DOMAIN}_bectune"
   DATABASE_DIR=${ptmp_base}            # (equivalent to ptmp_base)
   HOMEBASE_DIR=${NWROOT}               # path to system home directory
-  COMINRAP="/gpfs/dell2/ptmp/Shelley.Melchior/rtma_3d/com/rtma/prod"
+  COMINRAP="/gpfs/dell2/ptmp/Ashley.Stanfield/rtma_3d/com/rtma/prod"
   COMINHRRR="/gpfs/hps/nco/ops/com/hrrr/prod"
   COMINRADAR="/gpfs/dell1/nco/ops/dcom/prod/ldmdata/obs/upperair/mrms/${DOMAIN}"
   GESINHRRR="/gpfs/dell1/ptmp/Annette.Gibbs/com/hrrr/prod"
@@ -99,11 +99,13 @@ export DOMAIN="conus"
 # Computational resources
   ACCOUNT="RTMA-T2O"                    #account for CPU resources
   RESERVATION="<native>-R rusage[mem=2000] -R affinity[core]</native><queue>&QUEUE_SHARED;</queue><account>&ACCOUNT;</account>"
+  RESERVATION_MINMAX="<native>-R rusage[mem=4000] -R affinity[core]</native><queue>&QUEUE_SHARED;</queue><account>&ACCOUNT;</account>"
   RESERVATION_GSI="<native>-R rusage[mem=3600] -R affinity[core]</native><queue>&QUEUE;</queue><account>&ACCOUNT;</account>"
   RESERVATION_UPDATEVARS="<native>-R rusage[mem=4000] -R affinity[core]</native><queue>&QUEUE;</queue><account>&ACCOUNT;</account>"
   RESERVATION_UPP="<native>-R rusage[mem=3300] -R affinity[core]</native><queue>&QUEUE;</queue><account>&ACCOUNT;</account>"
   RESERVATION_SVC="<native>-R rusage[mem=1000] -R affinity[core]</native><queue>&QUEUE_SVC;</queue><account>&ACCOUNT;</account>"
   RESERVATION_RADAR="<native>-R rusage[mem=3300] -R affinity[core]</native><queue>&QUEUE;</queue><account>&ACCOUNT;</account>"
+  RESERVATION_AUTOQC="<native>-R rusage[mem=4000] -R affinity[core]</native><queue>&QUEUE_SHARED;</queue><account>&ACCOUNT;</account>"
 #  RESERVATION="<native>-R rusage[mem=2000] -R affinity[core]</native><queue>&QUEUE;</queue><account>&ACCOUNT;</account>"
 #  RESERVATION_GSI="<native>-R rusage[mem=3300] -R span[ptile=14] -R affinity[core]</native><queue>&QUEUE;</queue><account>&ACCOUNT;</account>"
 #  RESERVATION_UPP="<native>-R rusage[mem=3300] -R span[ptile=8] -R affinity[core]</native><queue>&QUEUE;</queue><account>&ACCOUNT;</account>"
@@ -138,12 +140,17 @@ export DOMAIN="conus"
   GSI_PROC=14
   GSI_THREADS=1
   GSI_OMP_STACKSIZE="512M"
-  GSI_RESOURCES="<nodes>30:ppn=&GSI_PROC;</nodes><walltime>00:40:00</walltime>"
+  GSI_RESOURCES="<nodes>24:ppn=&GSI_PROC;</nodes><walltime>00:40:00</walltime>"
   GSI_RESERVATION=${RESERVATION_GSI}
 
   AUTOQC_PROC="1"
-  AUTOQC_RESOURCES="<cores>&PREPFGS_PROC;</cores><walltime>00:10:00</walltime>"
-  AUTOQC_RESERVATION=${RESERVATION}
+  AUTOQC_RESOURCES="<cores>&AUTOQC_PROC;</cores><walltime>00:10:00</walltime>"
+  AUTOQC_RESERVATION=${RESERVATION_AUTOQC}
+
+  MINMAX_PROC="1"
+  MINMAX_RESOURCES="<cores>&MINMAX_PROC;</cores><walltime>00:10:00</walltime>"
+  MINMAX_RESERVATION=${RESERVATION_MINMAX}
+
 
 #UPDATE_VARS
   UPDATEVARS_PROC=14
@@ -159,7 +166,6 @@ export DOMAIN="conus"
 #  POST_RESOURCES="<cores>&POST_PROC;</cores><walltime>00:30:00</walltime>"
   POST_RESOURCES="<nodes>2:ppn=&POST_PROC;</nodes><walltime>00:10:00</walltime>"
   POST_RESERVATION=${RESERVATION_UPP}
-
 
 # if [[ ! -d ${ptmp_base} ]] ; then
 #     echo " ${ptmp_base} does NOT exist !"
@@ -187,6 +193,13 @@ export exefile_name_cloud="rtma3d_process_cloud"
 export exefile_name_updatevars_wrf="rtma3d_updatevars_wrf"
 export exefile_name_updatevars_ncfields="rtma3d_updatevars_ncfields"
 export exefile_name_updatevars_ndown="rtma3d_updatevars_ndown"
+export exefile_name_maxrh="rtma3d_maxrh"
+export exefile_name_maxtbg="rtma3d_maxtbg"
+export exefile_name_maxtobs="rtma3d_maxtobs"
+export exefile_name_minrh="rtma3d_minrh"
+export exefile_name_mintbg="rtma3d_mintbg"
+export exefile_name_mintobs="rtma3d_mintobs"
+
 #########################################################
 #--- define the path to the static data
 #    fix/
@@ -218,7 +231,7 @@ export exefile_name_updatevars_ndown="rtma3d_updatevars_ndown"
    export FIXupp_udef="/gpfs/dell2/emc/modeling/noscrub/Edward.Colon/FixData/UPP-fix"
    export FIXwps_udef="/gpfs/dell2/emc/modeling/noscrub/Edward.Colon/FixData/wps"
    export FIXwrf_udef="/gpfs/dell2/emc/modeling/noscrub/Edward.Colon/FixData/wrf"
-
+   export FIXminmax_udef="/gpfs/dell2/emc/modeling/noscrub/Edward.Colon/FixData/minmaxt"
    export OBS_USELIST_udef="/gpfs/dell2/emc/modeling/noscrub/Edward.Colon/FixData/obsuselist"
    export SFCOBS_USELIST_udef="/gpfs/dell2/emc/modeling/noscrub/Edward.Colon/FixData/obsuselist/mesonet_uselists"
    export AIRCRAFT_REJECT_udef="/gpfs/dell2/emc/modeling/noscrub/Edward.Colon/FixData/obsuselist/amdar_reject_lists"
@@ -239,7 +252,7 @@ export exefile_name_updatevars_ndown="rtma3d_updatevars_ndown"
   export FIXcrtm="${FIXrtma3d}/crtm"
   export FIXwps="${FIXrtma3d}/wps"
   export FIXwrf="${FIXrtma3d}/wrf"
-
+  export FIXminmax="${FIXrtma3d}/minmax"
   export OBS_USELIST="${FIXrtma3d}/obsuselist"
   export SFCOBS_USELIST="${OBS_USELIST}/mesonet_uselists"
   export AIRCRAFT_REJECT="${OBS_USELIST}/amdar_reject_lists"
@@ -290,6 +303,10 @@ export exefile_name_updatevars_ndown="rtma3d_updatevars_ndown"
     rm -rf $FIXwrf
     echo " ln -sf ${FIXwrf_udef}        ${FIXwrf}"
     ln -sf ${FIXwrf_udef}        ${FIXwrf}
+    rm -rf $FIXminmax
+    echo " ln -sf ${FIXminmax_udef}        ${FIXminmax}"
+    ln -sf ${FIXminmax_udef}        ${FIXminmax}
+
 
     cd ${OBS_USELIST}
     rm -rf $SFCOBS_USELIST
@@ -368,6 +385,8 @@ export exefile_name_updatevars_ndown="rtma3d_updatevars_ndown"
   export autoqc=1         # 0: Disable automated QC package
                           # 1: Enable automated QC package
 
+  export minmaxtrh=1      # 0: Disable minmax package
+                          # 1: Enable minmax package
   export gsi2=""
   export gsi_grid_ratio_in_var=1
   export gsi_grid_rario_in_cldanl=1
@@ -443,7 +462,7 @@ cat > ${NWROOT}/workflow/${RUN}_${expname}_${DOMAIN}.xml <<EOF
 <!ENTITY GESROOT	"&ptmp_base;/nwges2/&NET;">
 
 <!ENTITY HOMErtma3d	"&NWROOT;">
-<!ENTITY LOG_DIR	"/gpfs/dell3/stmp/${USER}/${DOMAIN}_logs_bectune">
+<!ENTITY LOG_DIR	"/gpfs/dell3/ptmp/${USER}/${DOMAIN}_logs_bectune">
 <!ENTITY JJOB_DIR	"&HOMErtma3d;/jobs">
 <!ENTITY SCRIPT_DIR	"&HOMErtma3d;/scripts">
 <!ENTITY USHrtma3d	"&HOMErtma3d;/ush">
@@ -460,6 +479,7 @@ cat > ${NWROOT}/workflow/${RUN}_${expname}_${DOMAIN}.xml <<EOF
 <!ENTITY FIXgsi         "${FIXgsi}">
 <!ENTITY FIXwps         "${FIXwps}">
 <!ENTITY FIXwrf         "${FIXwrf}">
+<!ENTITY FIXminmax         "${FIXminmax}">
 <!ENTITY OBS_USELIST    "${OBS_USELIST}">
 <!ENTITY AIRCRAFT_REJECT        "${AIRCRAFT_REJECT}">
 <!ENTITY SFCOBS_USELIST         "${SFCOBS_USELIST}">
@@ -490,6 +510,9 @@ cat > ${NWROOT}/workflow/${RUN}_${expname}_${DOMAIN}.xml <<EOF
 <!ENTITY DATA_FGSPRD    "&DATA_RUNDIR;/fgsprd">
 <!ENTITY DATA_POST      "&DATA_RUNDIR;/postprd">
 <!ENTITY DATA_POST4FGS  "&DATA_RUNDIR;/postprd4fgs">
+<!ENTITY DATA_AUTOQC    "&DATA_RUNDIR;/autoqc">
+<!ENTITY DATA_MINTMAXRH "&DATA_RUNDIR;/mintmaxrh">
+<!ENTITY DATA_MAXTMINRH "&DATA_RUNDIR;/maxtminrh">
 <!ENTITY DATA_OBSPREP_LGHTN    "&DATA_RUNDIR;/obsprep_lghtn">
 <!ENTITY DATA_OBSPREP_RADAR    "&DATA_RUNDIR;/obsprep_radar">
 <!ENTITY DATA_OBSPREP_CLOUD    "&DATA_RUNDIR;/obsprep_cloud">
@@ -515,7 +538,7 @@ cat > ${NWROOT}/workflow/${RUN}_${expname}_${DOMAIN}.xml <<EOF
 
 <!-- for workflow -->
 
-<!ENTITY maxtries	"10">
+<!ENTITY maxtries	"12">
 <!ENTITY KEEPDATA	"YES">
 <!ENTITY SENDCOM	"YES">
 
@@ -540,6 +563,20 @@ cat > ${NWROOT}/workflow/${RUN}_${expname}_${DOMAIN}.xml <<EOF
 <!ENTITY exefile_name_gsi      "${exefile_name_gsi}">
 <!ENTITY JJOB_AUTOQC     "&JJOB_DIR;/J&CAP_RUN;_AUTOQC">
 <!ENTITY exSCR_AUTOQC    "&SCRIPT_DIR;/ex&RUN;_autoqc.ksh">
+<!ENTITY JJOB_MINT       "&JJOB_DIR;/J&CAP_RUN;_MINT_PREP">
+<!ENTITY JJOB_MAXT       "&JJOB_DIR;/J&CAP_RUN;_MAXT_PREP">
+<!ENTITY exSCR_MAXTBG    "&SCRIPT_DIR;/ex&RUN;_maxtbg.ksh">
+<!ENTITY exefile_name_maxtbg      "${exefile_name_maxtbg}">
+<!ENTITY exSCR_MAXTOBS   "&SCRIPT_DIR;/ex&RUN;_maxtobs.ksh">
+<!ENTITY exefile_name_maxtobs      "${exefile_name_maxtobs}">
+<!ENTITY exSCR_MINTOBS   "&SCRIPT_DIR;/ex&RUN;_mintobs.ksh">
+<!ENTITY exefile_name_mintobs      "${exefile_name_mintobs}">
+<!ENTITY exSCR_MINTBG   "&SCRIPT_DIR;/ex&RUN;_mintbg.ksh">
+<!ENTITY exefile_name_mintbg      "${exefile_name_mintbg}">
+<!ENTITY exSCR_MINRH   "&SCRIPT_DIR;/ex&RUN;_minrh.ksh"> 
+<!ENTITY exefile_name_minrh      "${exefile_name_minrh}">
+<!ENTITY exSCR_MAXRH   "&SCRIPT_DIR;/ex&RUN;_maxrh.ksh"> 
+<!ENTITY exefile_name_maxrh      "${exefile_name_maxrh}">
 <!ENTITY JJOB_UPDATEVARS     "&JJOB_DIR;/J&CAP_RUN;_UPDATEVARS">
 <!ENTITY exSCR_UPDATEVARS    "&SCRIPT_DIR;/ex&RUN;_updatevars.ksh">
 <!ENTITY exefile_name_updatevars_wrf  "${exefile_name_updatevars_wrf}">
@@ -606,6 +643,10 @@ cat > ${NWROOT}/workflow/${RUN}_${expname}_${DOMAIN}.xml <<EOF
 <!ENTITY AUTOQC_PROC "${AUTOQC_PROC}">
 <!ENTITY AUTOQC_RESOURCES '${AUTOQC_RESOURCES}'>
 <!ENTITY AUTOQC_RESERVATION '${AUTOQC_RESERVATION}'>
+
+<!ENTITY MINMAX_PROC "${MINMAX_PROC}">
+<!ENTITY MINMAX_RESOURCES '${MINMAX_RESOURCES}'>
+<!ENTITY MINMAX_RESERVATION '${MINMAX_RESERVATION}'>
 
 <!ENTITY UPDATEVARS_PROC "${UPDATEVARS_PROC}">
 <!ENTITY UPDATEVARS_THREADS "${UPDATEVARS_THREADS}">
@@ -769,6 +810,10 @@ cat > ${NWROOT}/workflow/${RUN}_${expname}_${DOMAIN}.xml <<EOF
         <value>&FIXwrf;</value>
    </envar>
    <envar>
+        <name>FIXminmax</name>
+        <value>&FIXminmax;</value>
+   </envar>
+   <envar>
         <name>PARMwrf</name>
         <value>&PARMwrf;</value>
    </envar>
@@ -893,6 +938,10 @@ cat > ${NWROOT}/workflow/${RUN}_${expname}_${DOMAIN}.xml <<EOF
       <value><cyclestr>&DATA_POST4FGS;</cyclestr></value>
    </envar>
    <envar>
+      <name>DATA_AUTOQC</name>
+      <value><cyclestr>&DATA_AUTOQC;</cyclestr></value>
+   </envar>
+   <envar>
       <name>DATA_OBSPRD</name>
       <value><cyclestr>&DATA_OBSPRD;</cyclestr></value>
    </envar>
@@ -944,6 +993,31 @@ cat > ${NWROOT}/workflow/${RUN}_${expname}_${DOMAIN}.xml <<EOF
       <name>exefile_name_updatevars_ndown</name>
       <value><cyclestr>&exefile_name_updatevars_ndown;</cyclestr></value>
    </envar>
+   <envar>
+      <name>exefile_name_maxrh</name>
+      <value><cyclestr>&exefile_name_maxrh;</cyclestr></value>
+   </envar>
+   <envar>
+      <name>exefile_name_maxtbg</name>
+      <value><cyclestr>&exefile_name_maxtbg;</cyclestr></value>
+   </envar>
+   <envar>
+      <name>exefile_name_maxtobs</name>
+      <value><cyclestr>&exefile_name_maxtobs;</cyclestr></value>
+   </envar>
+   <envar>
+      <name>exefile_name_minrh</name>
+      <value><cyclestr>&exefile_name_minrh;</cyclestr></value>
+   </envar>
+   <envar>
+      <name>exefile_name_mintbg</name>
+      <value><cyclestr>&exefile_name_mintbg;</cyclestr></value>
+   </envar>
+   <envar>
+      <name>exefile_name_mintobs</name>
+      <value><cyclestr>&exefile_name_mintobs;</cyclestr></value>
+   </envar>
+
    <envar>
         <name>SENDCOM</name>
         <value>&SENDCOM;</value>
@@ -1136,6 +1210,46 @@ cat > ${NWROOT}/workflow/${RUN}_${expname}_${DOMAIN}.xml <<EOF
     </envar>'>
 
 
+<!ENTITY ENVARS_MINMAX
+    '<envar>
+      <name>START_TIME</name>
+      <value><cyclestr>@Y@m@d@H</cyclestr></value>
+    </envar>
+    <envar>
+       <name>JJOB_MINT</name>
+       <value>&JJOB_MINT;</value>
+    </envar>
+    <envar>
+       <name>JJOB_MAXT</name>
+       <value>&JJOB_MAXT;</value>
+    </envar>
+    <envar>
+       <name>exSCR_MAXTBG</name>
+       <value>&exSCR_MAXTBG;</value>
+    </envar>
+    <envar>
+       <name>exSCR_MAXTOBS</name>
+       <value>&exSCR_MAXTOBS;</value>
+    </envar>
+    <envar>
+       <name>exSCR_MINTOBS</name>
+       <value>&exSCR_MINTOBS;</value>
+    </envar>
+    <envar>
+       <name>exSCR_MINTBG</name>
+       <value>&exSCR_MINTBG;</value>
+    </envar>
+    <envar>
+       <name>exSCR_MINRH</name>
+       <value>&exSCR_MINRH;</value>
+    </envar>
+    <envar>
+       <name>exSCR_MAXRH</name>
+       <value>&exSCR_MAXRH;</value>
+    </envar>'>
+
+
+
 <!ENTITY ENVARS_UPDATEVARS
     '<envar>
       <name>START_TIME</name>
@@ -1283,7 +1397,7 @@ elif [ $DOMAIN == "alaska" ] ; then
 cat >> ${NWROOT}/workflow/${RUN}_${expname}_${DOMAIN}.xml <<EOF 
     <envar>
         <name>obsname</name>
-        <value>&obsname_alask;</value>
+        <value>&obsname_alaska;</value>
     </envar>
     <envar>
         <name>numlim</name>
@@ -1352,14 +1466,20 @@ cat >> ${NWROOT}/workflow/${RUN}_${expname}_${DOMAIN}.xml <<EOF
    <dependency>
        <and>
        <datadep age="2"><cyclestr>&COMINRAP;/rtma_ru.@Y@m@d/rtma_ru.t@H@Mz.prepbufr.tm00</cyclestr></datadep>    
+       <and>
        <or>
        <taskdep state="succeeded" task="&NET;_obsprep_lghtn_task_@Y@m@d@H@M"/>
        <taskdep state="Dead" task="&NET;_obsprep_lghtn_task_@Y@m@d@H@M"/>
+       </or>
+       <or>
        <taskdep state="succeeded" task="&NET;_obsprep_cloud_task_@Y@m@d@H@M"/>
        <taskdep state="Dead" task="&NET;_obsprep_cloud_task_@Y@m@d@H@M"/>
+       </or>
+       <or>
        <taskdep state="succeeded" task="&NET;_obsprep_radar_task_@Y@m@d@H@M"/>
        <taskdep state="Dead" task="&NET;_obsprep_radar_task_@Y@m@d@H@M"/>
        </or>
+       </and>
        </and>   
    </dependency>
 
@@ -1665,6 +1785,10 @@ cat >> ${NWROOT}/workflow/${RUN}_${expname}_${DOMAIN}.xml <<EOF
     &ENVARS;
     &AUTOQC_RESOURCES;
     &AUTOQC_RESERVATION;
+    <envar>
+       <name>rundir_task</name>
+       <value><cyclestr>&DATA_AUTOQC;</cyclestr></value>
+    </envar>
 
     <command>&JJOB_DIR;/launch.ksh &JJOB_AUTOQC;</command>
     <jobname><cyclestr>&NET;_autoqc_job_@Y@m@d@H@M</cyclestr></jobname>
@@ -1754,6 +1878,57 @@ cat >> ${NWROOT}/workflow/${RUN}_${expname}_${DOMAIN}.xml <<EOF
   </task>
 EOF
 fi
+
+if [ ${minmaxtrh} -eq 1 ]; then
+
+
+cat>> ${NWROOT}/workflow/${RUN}_${expname}_${DOMAIN}.xml <<EOF 
+
+  <task name="&RUN;_mint_prep_@Y@m@d@H@M" cycledefs="02-11hr,00hr,01hr" maxtries="&maxtries;">
+    &ENVARS;
+    <envar>
+       <name>rundir_task</name>
+       <value><cyclestr>&DATA_MINTMAXRH;</cyclestr></value>
+    </envar>
+
+    &MINMAX_RESOURCES;
+    &MINMAX_RESERVATION;
+    &ENVARS_MINMAX;
+    <command>&JJOB_DIR;/launch.ksh &JJOB_MINT;</command>
+    <jobname>&NET;_mint_prep</jobname>
+    <join><cyclestr>&LOG_DIR;/&RUN;_mint_prep_@Y@m@d@H@M.log</cyclestr></join>
+
+
+    <dependency>
+      <taskdep task="&RUN;_post_task_@Y@m@d@H@M"/>
+    </dependency>
+
+  </task>
+    <task name="&RUN;_maxt_prep_@Y@m@d@H@M" cycledefs="02-11hr,00hr,01hr" maxtries="&maxtries;">
+    &ENVARS;
+    <envar>
+       <name>rundir_task</name>
+       <value><cyclestr>&DATA_MAXTMINRH;</cyclestr></value>
+    </envar>
+    &MINMAX_RESOURCES;
+    &MINMAX_RESERVATION;
+    &ENVARS_MINMAX;
+
+    <command>&JJOB_DIR;/launch.ksh &JJOB_MAXT;</command>
+    <jobname>&NET;_maxt_prep</jobname>
+    <join><cyclestr>&LOG_DIR;/&RUN;_maxt_prep_@Y@m@d@H@M.log</cyclestr></join>
+
+
+    <dependency>
+      <taskdep task="&RUN;_post_task_@Y@m@d@H@M"/>
+    </dependency>
+
+  </task>
+
+EOF
+fi
+
+
 
 cat >> ${NWROOT}/workflow/${RUN}_${expname}_${DOMAIN}.xml <<EOF 
   <task name="&NET;_post4fgs_task_@Y@m@d@H@M" cycledefs="02-11hr,00hr,01hr" maxtries="&maxtries;">
