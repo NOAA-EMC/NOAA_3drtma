@@ -31,6 +31,8 @@ if [ ! -d $BASE/../exec ]; then
 mkdir $BASE/../exec 
 fi
 
+if [ $BUILD_rtma_links = yes ] ; then
+
 mkdir $BASE/../parm
 ln -sf /lfs/h2/emc/da/noscrub/edward.colon/FixData/parm/wrf wrf
 ln -sf /lfs/h2/emc/da/noscrub/edward.colon/FixData/parm/upp upp
@@ -45,6 +47,7 @@ ln -sf /lfs/h2/emc/da/noscrub/edward.colon/FixData/minmaxtrh minmax
 ln -sf /lfs/h2/emc/da/noscrub/edward.colon/FixData/wps wps
 ln -sf /lfs/h2/emc/da/noscrub/edward.colon/FixData/wrf wrf
 
+fi
 
 ##############################
 
