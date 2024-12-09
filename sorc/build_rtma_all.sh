@@ -36,7 +36,7 @@ if [ $BUILD_rtma_links = yes ] ; then
 mkdir $BASE/../parm
 cd $BASE/../parm
 ln -sf /lfs/h2/emc/da/noscrub/edward.colon/FixData/parm/wrf wrf
-ln -sf /lfs/h2/emc/da/noscrub/edward.colon/FixData/parm/upp upp
+ln -sf /lfs/h2/emc/da/noscrub/edward.colon/FixData/parm/upp_new upp
 ln -sf /lfs/h2/emc/da/noscrub/edward.colon/FixData/parm/gsi gsi
 
 mkdir $BASE/../fix
