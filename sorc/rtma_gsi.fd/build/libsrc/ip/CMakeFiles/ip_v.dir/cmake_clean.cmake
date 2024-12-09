@@ -1,0 +1,42 @@
+file(REMOVE_RECURSE
+  "../../lib/libip_v.a"
+  "../../lib/libip_v.pdb"
+  "CMakeFiles/ip_v.dir/gausslat.f90.o"
+  "CMakeFiles/ip_v.dir/gdswzd00_mod.f90.o"
+  "CMakeFiles/ip_v.dir/gdswzd01_mod.f90.o"
+  "CMakeFiles/ip_v.dir/gdswzd03_mod.f90.o"
+  "CMakeFiles/ip_v.dir/gdswzd04_mod.f90.o"
+  "CMakeFiles/ip_v.dir/gdswzd05_mod.f90.o"
+  "CMakeFiles/ip_v.dir/gdswzd_c.F90.o"
+  "CMakeFiles/ip_v.dir/gdswzd_mod.f90.o"
+  "CMakeFiles/ip_v.dir/gdswzdcb_mod.f90.o"
+  "CMakeFiles/ip_v.dir/gdswzdcd_mod.f90.o"
+  "CMakeFiles/ip_v.dir/ijkgds0.f90.o"
+  "CMakeFiles/ip_v.dir/ijkgds1.f90.o"
+  "CMakeFiles/ip_v.dir/ipolates.f90.o"
+  "CMakeFiles/ip_v.dir/ipolatev.f90.o"
+  "CMakeFiles/ip_v.dir/ipxwafs.f90.o"
+  "CMakeFiles/ip_v.dir/ipxwafs2.f90.o"
+  "CMakeFiles/ip_v.dir/ipxwafs3.f90.o"
+  "CMakeFiles/ip_v.dir/makgds.f90.o"
+  "CMakeFiles/ip_v.dir/movect.f90.o"
+  "CMakeFiles/ip_v.dir/polates0.f90.o"
+  "CMakeFiles/ip_v.dir/polates1.f90.o"
+  "CMakeFiles/ip_v.dir/polates2.f90.o"
+  "CMakeFiles/ip_v.dir/polates3.f90.o"
+  "CMakeFiles/ip_v.dir/polates4.f90.o"
+  "CMakeFiles/ip_v.dir/polates6.f90.o"
+  "CMakeFiles/ip_v.dir/polatev0.f90.o"
+  "CMakeFiles/ip_v.dir/polatev1.f90.o"
+  "CMakeFiles/ip_v.dir/polatev2.f90.o"
+  "CMakeFiles/ip_v.dir/polatev3.f90.o"
+  "CMakeFiles/ip_v.dir/polatev4.f90.o"
+  "CMakeFiles/ip_v.dir/polatev6.f90.o"
+  "CMakeFiles/ip_v.dir/polfixs.f90.o"
+  "CMakeFiles/ip_v.dir/polfixv.f90.o"
+)
+
+# Per-language clean rules from dependency scanning.
+foreach(lang Fortran)
+  include(CMakeFiles/ip_v.dir/cmake_clean_${lang}.cmake OPTIONAL)
+endforeach()

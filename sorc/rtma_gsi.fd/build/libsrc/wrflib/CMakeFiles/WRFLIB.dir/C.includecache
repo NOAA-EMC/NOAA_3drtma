@@ -1,0 +1,24 @@
+#IncludeRegexLine: ^[ 	]*[#%][ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
+
+#IncludeRegexScan: ^.*$
+
+#IncludeRegexComplain: ^$
+
+#IncludeRegexTransform: 
+
+/lfs/h2/emc/da/noscrub/edward.colon/3drtma_hrrr/sorc/rtma_gsi.fd/libsrc/wrflib/pack_utils.c
+stdio.h
+-
+stdlib.h
+-
+string.h
+-
+streams.h
+/lfs/h2/emc/da/noscrub/edward.colon/3drtma_hrrr/sorc/rtma_gsi.fd/libsrc/wrflib/streams.h
+stdlib.h
+-
+sys/time.h
+-
+
+/lfs/h2/emc/da/noscrub/edward.colon/3drtma_hrrr/sorc/rtma_gsi.fd/libsrc/wrflib/streams.h
+

@@ -1,0 +1,23 @@
+# The fortran modules provided by this target.
+provides
+ controlvec.mod
+ covlocal.mod
+ enkf_obsmod.mod
+ gridinfo.mod
+ gridio.mod
+ kdtree2_module.mod
+ kdtree2_precision_module.mod
+ kdtree2_priority_queue_module.mod
+ mpi_readobs.mod
+ mpisetup.mod
+ netcdf_io.mod
+ observer_enkf.mod
+ params.mod
+ random_normal.mod
+ readconvobs.mod
+ readozobs.mod
+ readsatobs.mod
+ reducedgrid_mod.mod
+ sorting.mod
+ specmod.mod
+ statevec.mod

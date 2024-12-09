@@ -1,0 +1,7 @@
+# The fortran modules provided by this target.
+provides
+ nemsio_module.mod
+ nemsio_module_mpi.mod
+ nemsio_openclose.mod
+ nemsio_read.mod
+ nemsio_write.mod

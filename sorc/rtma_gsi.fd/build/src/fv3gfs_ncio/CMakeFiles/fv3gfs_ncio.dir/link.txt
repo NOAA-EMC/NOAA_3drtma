@@ -1,0 +1,2 @@
+/usr/bin/ar qc ../../lib/libfv3gfs_ncio.a CMakeFiles/fv3gfs_ncio.dir/module_fv3gfs_ncio.f90.o
+/usr/bin/ranlib ../../lib/libfv3gfs_ncio.a

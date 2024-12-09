@@ -1,0 +1,24 @@
+# The fortran modules provided by this target.
+provides
+ bicglanczos.mod
+ convert_netcdf_mod.mod
+ crtm_interface.mod
+ get_gfs_ensmod_mod.mod
+ get_pseudo_ensperts_mod.mod
+ get_wrf_binary_interface_mod.mod
+ get_wrf_mass_ensperts_mod.mod
+ get_wrf_nmm_ensperts_mod.mod
+ gsi_nemsio_mod.mod
+ gsimod.mod
+ hybrid_ensemble_isotropic.mod
+ lanczos.mod
+ module_wrf_error.mod
+ pcgsoimod.mod
+ read_wrf_mass_files_mod.mod
+ read_wrf_mass_guess_mod.mod
+ read_wrf_nmm_files_mod.mod
+ read_wrf_nmm_guess_mod.mod
+ regional_io_mod.mod
+ set_crtm_cloudmod.mod
+ wrwrfmassa_mod.mod
+ wrwrfnmma_mod.mod

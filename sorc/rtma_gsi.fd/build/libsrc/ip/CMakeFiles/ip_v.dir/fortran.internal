@@ -1,0 +1,10 @@
+# The fortran modules provided by this target.
+provides
+ gdswzd00_mod.mod
+ gdswzd01_mod.mod
+ gdswzd03_mod.mod
+ gdswzd04_mod.mod
+ gdswzd05_mod.mod
+ gdswzd_mod.mod
+ gdswzdcb_mod.mod
+ gdswzdcd_mod.mod

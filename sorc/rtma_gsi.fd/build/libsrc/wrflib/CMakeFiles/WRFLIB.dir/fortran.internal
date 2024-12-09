@@ -1,0 +1,6 @@
+# The fortran modules provided by this target.
+provides
+ ext_ncd_support_routines.mod
+ module_driver_constants.mod
+ module_machine.mod
+ wrf_data.mod

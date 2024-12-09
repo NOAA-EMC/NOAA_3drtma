@@ -1,0 +1,14 @@
+#IncludeRegexLine: ^[ 	]*[#%][ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
+
+#IncludeRegexScan: ^.*$
+
+#IncludeRegexComplain: ^$
+
+#IncludeRegexTransform: 
+
+/lfs/h2/emc/da/noscrub/edward.colon/3drtma_hrrr/sorc/rtma_gsi.fd/src/gsi/blockIO.c
+stdlib.h
+-
+stdio.h
+-
+

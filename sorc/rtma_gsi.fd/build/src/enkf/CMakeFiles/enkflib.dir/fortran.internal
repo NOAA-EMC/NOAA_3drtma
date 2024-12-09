@@ -1,0 +1,12 @@
+# The fortran modules provided by this target.
+provides
+ enkf.mod
+ enkf_obs_sensitivity.mod
+ gridinfo.mod
+ gridio.mod
+ inflation.mod
+ innovstats.mod
+ letkf.mod
+ loadbal.mod
+ radbias.mod
+ smooth_mod.mod
