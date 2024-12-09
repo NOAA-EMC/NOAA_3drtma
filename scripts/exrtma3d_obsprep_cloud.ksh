@@ -6,16 +6,6 @@ if [ ! -f ${EXECrtma3d}/${exefile_name_cloud} ] ; then
   ${ECHO} "ERROR: NASA cloud obs prcoessing executable '${EXECrtma3d}/${exefile_name_cloud}' does not exist!"
   exit 1
 fi
-if [ "${envir}" == "esrl" ]; then #Jet
-if [ ! "${NASALARC_DATA}" ]; then
-  ${ECHO} "ERROR: \$NASALARC_DATA is not defined!"
-  exit 1
-fi
-if [ ! -d "${NASALARC_DATA}" ]; then
-  ${ECHO} "ERROR: NASALARC_DATA directory '${NASALARC_DATA}' does not exist!"
-  exit 1
-fi
-fi
 if [ "${subcyc}" == "-1" ]; then #hourly run
   SUBH_TIME='00'
   tz_str=t${cyc}z
@@ -96,11 +86,7 @@ postmsg "$jlogfile" "$msg"
 msg="***********************************************************"
 postmsg "$jlogfile" "$msg"
 
-if [ "${envir}" == "esrl" ]; then #Jet
-  CP_LN="${LN} -sf"
-else
-  CP_LN=${CP}
-fi
+CP_LN=${CP}
 ${CP_LN} ${EXECrtma3d}/${exefile_name_cloud} ${pgm}
 ${MPIRUN} ./${pgm} > ${pgmout} 2>errfile
 export err=$?; err_chk
@@ -110,12 +96,7 @@ postmsg "$jlogfile" "$msg"
 
 targetfile="NASALaRCCloudInGSI.bufr"
 if [ -f ${DATA}/${targetfile} ] ; then
-  if [ "${envir}" == "esrl" ]; then #Jet
-    mv ${DATA}/${targetfile} ${COMINobsproc_rtma3d}/${tz_str}.${targetfile} #to save disk space
-    ${LN} -snf ${COMINobsproc_rtma3d}/${tz_str}.${targetfile} ${DATA}/${targetfile}
-  else
-    cpreq ${DATA}/${targetfile} ${COMINobsproc_rtma3d}/rap.${tz_str}.${targetfile}
-  fi
+  cpreq ${DATA}/${targetfile} ${COMINobsproc_rtma3d}/rap.${tz_str}.${targetfile}
 else
   msg="WARNING $pgm terminated normally but ${DATA}/${targetfile} does NOT exist."
   ${ECHO} "$msg"

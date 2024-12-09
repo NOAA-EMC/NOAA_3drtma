@@ -35,12 +35,8 @@ export CNVGRIB=${CNVGRIB:-cnvgrib}
 ##########################################################
 export DATA=${DATA:-$DATAROOT/${jobid:?}} #jobid ($job.$LSB_JOBID MUST BE DEFINED IN TERMS OF $RUN IN UPPER LEVEL SCRIPT /MPondeca, 26Jul2015
 if [ -d $DATA ] ; then
-  if [ "${envir}" == "esrl" ]; then #Jet
-    ${RM} -f $DATA/NSSLRefInGSI.bufr
-  else
     ${ECHO} "$DATA exists, remove its content"
     ${RM} -rf $DATA/*
-  fi
 else
    ${ECHO} "$DATA does not exist, create it"
    ${MKDIR} -p $DATA
@@ -57,9 +53,7 @@ cd $DATA
 if [[ "${subcyc}" == "-1" ]]; then #it's hourly run
   export cycle=${cycle:-t${cyc}z}
   export pgmout=${pgmout:-"OUTPUT.${PDY}${cyc}.${jobid}"}
-  if [ "${envir}" == "esrl" ]; then #Jet
-  export COMINradar=${COMINradar:-"${COMINRADAR}/radar.${PDY}"}
-  elif [ "${envir}" == "lsf" ]; then #wcoss
+  if [ "${envir}" == "lsf" ]; then #wcoss
   export COMINradar=${COMINradar:-"${COMINRADAR}"}
   elif [ "${envir}" == "pbspro" ]; then #wcoss2
   export COMINradar=${COMINradar:-"${COMINRADAR}"}
@@ -67,9 +61,7 @@ if [[ "${subcyc}" == "-1" ]]; then #it's hourly run
 else
   export cycle=${cycle:-t${cyc}${subcyc}z}
   export pgmout=${pgmout:-"OUTPUT.${PDY}${cyc}${subcyc}.${jobid}"}
-  if [ "${envir}" == "esrl" ]; then #Jet
-  export COMINradar=${COMINradar:-"${COMINRADAR}/radar.${PDY}${cyc}"}
-  elif [ "${envir}" == "lsf" ]; then #wcoss
+  if [ "${envir}" == "lsf" ]; then #wcoss
   export COMINradar=${COMINradar:-"${COMINRADAR}"}
   elif [ "${envir}" == "pbspro" ]; then #wcoss2
   export COMINradar=${COMINradar:-"${COMINRADAR}"}

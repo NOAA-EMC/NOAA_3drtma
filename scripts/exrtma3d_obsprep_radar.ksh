@@ -61,12 +61,7 @@ if [ ${SUBH_TIME} -eq 60 ]; then
   YYYYMMDDHH=`${DATE} +"%Y%m%d%H" -d "${time_01hago}"`
 fi
 
-if [ "${envir}" == "esrl" ]; then #jet
-  CP_LN="${LN} -sf"
-  sleep 60 #sleep 1 minute
-else
-  CP_LN=${CP}
-fi
+CP_LN=${CP}
 
 #----- enter working directory -------
 cd ${DATA}
@@ -100,37 +95,7 @@ ${ECHO} "MINUTES: "${MM1}"/"${MM2}"/"${MM3}
 ${ECHO} "YYYYMMDDHH: "${YYYYMMDDHH}
 
 # create mrms file list
-if [ "${envir}" == "esrl" ]; then #jet
-  if [ "${DOMAIN}" == "alaska" ]; then
-    middlename="MRMS_EXP_MergedReflectivityQC"
-  else
-    middlename="MRMS_MergedReflectivityQC"
-  fi
-  for min in ${MM1} ${MM2} ${MM3}
-  do
-    ${ECHO} "Looking for data valid:"${YYYY}"-"${MM}"-"${DD}" "${HH}":"${min}
-    s=0
-    while [[ $s -le 59 ]]; do
-      if [ $s -lt 10 ]; then
-        ss=0${s}
-      else
-        ss=$s
-      fi
-      nsslfile=${COMINradar}/${YYYY}${MM}${DD}-${HH}${min}${ss}.${middlename}_00.50_${YYYY}${MM}${DD}-${HH}${min}${ss}.grib2
-      if [ -s $nsslfile ]; then
-        echo 'Found '${nsslfile}
-        numgrib2=`ls ${COMINradar}/${YYYY}${MM}${DD}-${HH}${min}*.${middlename}_*_${YYYY}${MM}${DD}-${HH}${min}*.grib2 | wc -l`
-        echo 'Number of GRIB-2 files: '${numgrib2}
-        if [ ${numgrib2} -ge ${numlim} ] && [ ! -e filelist_mrms ]; then
-          ln -sf ${COMINradar}/${YYYY}${MM}${DD}-${HH}${min}*.${middlename}_*_${YYYY}${MM}${DD}-${HH}${min}*.grib2 . 
-          ls ${YYYY}${MM}${DD}-${HH}${min}*.${middlename}_*_${YYYY}${MM}${DD}-${HH}${min}*.grib2 > filelist_mrms
-          echo 'Creating links for SUBH: '${SUBH_TIME}
-        fi
-      fi
-      ((s+=1))
-    done 
-  done
-else #wcoss
+#wcoss
 #  obsname="MergedReflectivityQC"
   for min in ${MM1} ${MM2} ${MM3}
   do
@@ -157,7 +122,7 @@ else #wcoss
       ((s+=1))
     done 
   done
-fi
+
 
 # remove filelist_mrms if zero bytes
 if [ ! -s filelist_mrms ]; then
@@ -206,12 +171,7 @@ postmsg "$jlogfile" "$msg"
 
 targetfile="NSSLRefInGSI.bufr"
 if [ -f ${DATA}/${targetfile} ] ; then
-  if [ "${envir}" == "esrl" ]; then #Jet
-    mv ${DATA}/${targetfile} ${COMINobsproc_rtma3d}/${tz_str}.${targetfile} #to save disk space
-    ${LN} -snf ${COMINobsproc_rtma3d}/${tz_str}.${targetfile} ${DATA}/${targetfile}
-  else
-    cpreq ${DATA}/${targetfile} ${COMINobsproc_rtma3d}/${RUN}.${tz_str}.${targetfile}
-  fi
+  cpreq ${DATA}/${targetfile} ${COMINobsproc_rtma3d}/${RUN}.${tz_str}.${targetfile}
 else
   msg="WARNING $pgm terminated normally but ${DATA}/${targetfile} does NOT exist."
   ${ECHO} "$msg"

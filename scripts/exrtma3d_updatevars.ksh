@@ -232,11 +232,7 @@ postmsg "$jlogfile" "$msg"
 msg="***********************************************************"
 postmsg "$jlogfile" "$msg"
 
-if [ "${envir}" == "esrl" ]; then #Jet
-  CP_LN="${LN} -sf"
-else
-  CP_LN=${CP}
-fi
+CP_LN=${CP}
 ${CP_LN} ${EXECrtma3d}/${exefile_name_updatevars} ${pgm}
 now=`${DATE} +%Y%m%d%H%M%S`
 export APRUN="mpiexec -n 384 -ppn 64 --cpu-bind core "

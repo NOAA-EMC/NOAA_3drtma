@@ -22,15 +22,6 @@ if [ ! -f ${EXECrtma3d}/${exefile_name_gsi} ]; then
   ${ECHO} "ERROR: GSI Analysis executable '${EXECrtma3d}/${exefile_name_gsi}' does not exist!"
   exit 1
 fi
-if [ "${envir}" == "esrl" ]; then #Jet
-# Check to make sure required directory defined and existed
-check_if_defined "ENKF_FCST" "COMINhrrrdas" "HRRR_DIR" "OBS_DIR" "AIRCRAFT_REJECT" "SFCOBS_USELIST" "SFCOBS_PROVIDER" "EnsWgt"
-check_dirs_exist "ENKF_FCST" "COMINhrrrdas" "HRRR_DIR" "OBS_DIR" "AIRCRAFT_REJECT" "SFCOBS_USELIST" "SFCOBS_PROVIDER"
-elif [ "${envir}" == "lsf" ] || [ "${envir}" == "pbspro" ]; then
-OBS_DIR=${DATAOBSHOME}
-BKG_DIR=${DATAHOME_BK}
-COMINhrrrdas=${COMINHRRRDAS}
-fi
 if [ "${subcyc}" == "-1" ]; then #hourly run
   SUBH_TIME='00'
   tz_str=t${cyc}z
@@ -62,18 +53,6 @@ nc_diag_cat=/lfs/h2/emc/da/noscrub/edward.colon/save/RTMA/bin/ncdiag_cat_serial.
 # Define the loghistory file depending on if this is the full or partial cycle
 #ifsoilnudge=.true.
 ifsoilnudge=.true.
-if [ "${envir}" == "esrl" ]; then #Jet
-  if [ "${FULLCYC}" == "0" ]; then
-    loghistoryfile=${COMROOT}/loghistory/HRRR_GSI_HYB_PCYC.log
-    ifsoilnudge=.true.
-  elif [ "${FULLCYC}" == "2" ]; then
-    loghistoryfile=${COMROOT}/loghistory/HRRR_GSI_HYB_early.log
-    ifsoilnudge=.true.
-  else
-    loghistoryfile=${COMROOT}/loghistory/HRRR_GSI_HYB.log
-    ifsoilnudge=.true.
-  fi
-fi
 
 # Bring over background field (it's modified by GSI so we can't link to it)
 if [ "${subcyc}" == "-1" ]; then #hourly run
@@ -83,46 +62,17 @@ else
 fi
 
 # Look for background field for GSI analysis
-if [ "${envir}" == "esrl" ]; then #Jet expr runs
-  GSIbackground1=${HRRR_DIR}/${time_1hour_ago}/wrfprd/wrfout_d01_${time_str}
-  GSIbackground2=${HRRR_DIR}/${time_2hour_ago}/wrfprd/wrfout_d01_${time_str}
-  GSIbackground3=${HRRR_DIR}/${time_3hour_ago}/wrfprd/wrfout_d01_${time_str}
-  GSIbackground4=${HRRR_DIR}/${time_4hour_ago}/wrfprd/wrfout_d01_${time_str}
-  GSIbackground5=${HRRR_DIR}/${time_5hour_ago}/wrfprd/wrfout_d01_${time_str}
-  GSIbackground6=${HRRR_DIR}/${time_6hour_ago}/wrfprd/wrfout_d01_${time_str}
-  GSIbackground=${GSIbackground1}
-  if [ "${FG_FALLBACK}" == "YES" ]; then #fallback to old cycles if current first guess is not ready 
-    if [ -r ${GSIbackground1} ]; then
-      GSIbackground=${GSIbackground1}
-    elif [ -r ${GSIbackground2} ]; then
-      GSIbackground=${GSIbackground2}
-    elif [ -r ${GSIbackground3} ]; then
-      GSIbackground=${GSIbackground3}
-    elif [ -r ${GSIbackground4} ]; then
-      GSIbackground=${GSIbackground4}
-    elif [ -r ${GSIbackground5} ]; then
-      GSIbackground=${GSIbackground5}
-    elif [ -r ${GSIbackground6} ]; then
-      GSIbackground=${GSIbackground6}
-    fi
-  fi
-elif [ "${envir}" == "lsf" ] || [ "${envir}" == "pbspro" ]; then #wcoss expr runs
+if [ "${envir}" == "lsf" ] || [ "${envir}" == "pbspro" ]; then #wcoss expr runs
   GSIbackground=${BKG_DIR}/${FGSrtma3d_FNAME}
 fi
 
 if [ -r ${GSIbackground} ]; then
   cpfs ${GSIbackground} ./wrf_inout
   ${ECHO} " Cycle ${cycle_str}: GSI background=${GSIbackground}"
-  if [ "${envir}" == "esrl" ]; then #Jet expr runs
-    ${ECHO} " Cycle ${cycle_str}: GSI background=${GSIbackground}" >> ${loghistoryfile}
-  fi
 else
   # No background available so abort
   ${ECHO} "${GSIbackground} does not exist!!"
   ${ECHO} "FATAL ERROR: No background file for analysis at ${time_str}!!!!"
-  if [ "${envir}" == "esrl" ]; then #Jet expr runs
-    ${ECHO} " Cycle ${cycle_str}: GSI failed because of no background" >> ${loghistoryfile}
-  fi
   exit 1
 fi
 
@@ -214,42 +164,6 @@ if [ "${envir}" = "lsf" ] || [ "${envir}" = "pbspro" ] && [ ${HRRRDAS_BEC} -eq 0
       cp ${UTILrtma3d_dev}/convert.sh .
 #      ${UTILrtma3d_dev}/check_enkf_size.sh
   fi
-elif [ "${envir}" == "esrl" ] ; then #ESRL expr. runs
-## 
-## Find closest GFS EnKF forecast to analysis time
-# Make a list of the latest GFS EnKF ensemble
-stampcycle=`date -d "${START_TIME}" +%s`
-minHourDiff=100
-loops="009"
-for loop in $loops; do
-  for timelist in `ls ${ENKF_FCST}/gdas.t*z.atmf${loop}.nc`; do
-    availtimeyy=`basename ${timelist} | cut -c 1-2`
-    availtimeyyyy=20${availtimeyy}
-    availtimejjj=`basename ${timelist} | cut -c 3-5`
-    availtimemm=`date -d "${availtimeyyyy}0101 +$(( 10#${availtimejjj} - 1 )) days" +%m`
-    availtimedd=`date -d "${availtimeyyyy}0101 +$(( 10#${availtimejjj} - 1 )) days" +%d`
-    availtimehh=`basename ${timelist} | cut -c 6-7`
-    availtime=${availtimeyyyy}${availtimemm}${availtimedd}${availtimehh}
-    AVAIL_TIME=`${ECHO} "${availtime}" | ${SED} 's/\([[:digit:]]\{2\}\)$/ \1/'`
-    AVAIL_TIME=`${DATE} -d "${AVAIL_TIME}"`
-
-    stamp_avail=`date -d "${AVAIL_TIME} ${loop} hours" +%s`
-
-    hourDiff=`echo "($stampcycle - $stamp_avail) / (60 * 60 )" | bc`;
-    if [[ ${stampcycle} -lt ${stamp_avail} ]]; then
-       hourDiff=`echo "($stamp_avail - $stampcycle) / (60 * 60 )" | bc`;
-    fi
-
-    if [[ ${hourDiff} -lt ${minHourDiff} ]]; then
-       minHourDiff=${hourDiff}
-       enkfcstname=${availtimeyy}${availtimejjj}${availtimehh}00.gdas.t${availtimehh}z.atmf${loop}s
-    fi
-  done
-done
-EYYYYMMDD=$(echo ${availtime} | cut -c1-8)
-EHH=$(echo ${availtime} | cut -c9-10)
-${LS} ${ENKF_FCST}/${enkfcstname}.nc > filelist03
-
 fi
 
 
@@ -258,13 +172,6 @@ if [ ${HRRRDAS_BEC} -eq 1 ]; then
   #----------------------------------------------------
   # generate list of HRRRDAS members for ensemble covariances
   # Use 1-hr forecasts from the HRRRDAS cycling
-  if [ "${envir}" == "esrl" ]; then #WCOSS
-  if [ ${HRRRDAS_SMALL} -eq 1 ]; then
-    ${LS} ${COMINhrrrdas}/${time_1hour_ago}/wrfprd_mem????/wrfout_small_d02_${time_str2} > filelist.hrrrdas
-  else
-    ${LS} ${COMINhrrrdas}/${time_1hour_ago}/wrfprd_mem????/wrfout_d02_${time_str2} > filelist.hrrrdas
-  fi
-  fi
   c=1
   while [[ $c -le 36 ]]; do
    if [ $c -lt 10 ]; then
@@ -501,19 +408,9 @@ postmsg "$jlogfile" "$msg"
 msg="***********************************************************"
 postmsg "$jlogfile" "$msg"
 
-if [ "${envir}" == "esrl" ]; then #Jet
-  CP_LN="${LN} -sf"
-else
-  CP_LN=${CP}
-fi
+CP_LN=${CP}
 ${CP_LN} ${EXECrtma3d}/${exefile_name_gsi} ${pgm}
-if [ "${envir}" == "esrl" ];  then ##GSI on Jet needs special treatment
-  [[ "$-" == *"x"* ]] && set +x && prev_x="YES"
-  module use -a /contrib/wrap-mpi/modulefiles > /dev/null
-  module load wrap-mpi >/dev/null
-  [[ "${prev_x}" == "YES"  ]] && set -x
-  mpirun ${DATA}/${pgm} < gsiparm.anl > ${pgmout} 2>errfile
-elif [ "${envir}" == "lsf" ] || [ "${envir}" == "pbspro" ];  then
+if [ "${envir}" == "lsf" ] || [ "${envir}" == "pbspro" ];  then
 #module purge
 #module use /lfs/h2/emc/lam/noscrub/Ming.Hu/rrfs/testD/ufs-srweather-app/env
 #source /lfs/h2/emc/lam/noscrub/Ming.Hu/rrfs/testD/ufs-srweather-app/env/build_wcoss2_intel.env
@@ -609,13 +506,7 @@ EOF
   msg="***********************************************************"
   postmsg "$jlogfile" "$msg"
   ${ECHO} -e "\n\n@@@@@@@@@ second GSI run standard output\n" >> ${pgmout}
-  if [ "${envir}" == "esrl" ];  then ##GSI on Jet needs special treatment
-    [[ "$-" == *"x"* ]] && set +x && prev_x="YES"
-    module use -a /contrib/wrap-mpi/modulefiles > /dev/null
-    module load wrap-mpi >/dev/null
-    [[ "${prev_x}" == "YES"  ]] && set -x
-    mpirun ${DATA}/${pgm} < gsiparm.anl >> ${pgmout} 2>errfile
-  elif [ "${envir}" == "lsf" ] || [ "${envir}" == "pbspro" ];  then
+  if [ "${envir}" == "lsf" ] || [ "${envir}" == "pbspro" ];  then
     ${MPIRUN} ${pgm} < gsiparm.anl >> ${pgmout} 2>errfile
   fi
   export err=$?
@@ -646,12 +537,6 @@ if [ "${envir}" == "lsf" ] || [ "${envir}" == "pbspro" ]; then #wcoss
   #${LN} -sf ${COMOUTgsi_rtma3d}/${ANLrtma3d_FNAME} ${COMOUT}/${ANLrtma3d_FNAME}
   #${CP} -p ${pgmout_stdout}        ${COMOUT}/${pgmout_stdout}_gsianl.${cycle_str}
   #${CP} -p fits_${cycle_str}.txt  ${COMOUT}/fits_${cycle_str}.txt
-elif [ "${envir}" == "esrl" ]; then
-  tar cvfz fixparm_gsi.${cycle_str}.tgz *info gsd*txt filelist03 satbias* berror_stats  \
-      current_bad_aircraft errtable gsiparm.anl
-  ${CP} -p fixparm_gsi.${cycle_str}.tgz ${LOG_PGMOUT}
-  ${CP} -p fixparm_gsi.${cycle_str}.tgz ${COMOUTgsi_rtma3d}
-fi
 
 #${RM} -f ${DATA}/sig*
 #${RM} -f ${DATA}/obs*
