@@ -44,6 +44,8 @@ sorc/**/*.mod
 #
 #  # ignore directory of gsi and post(upp) source code ('sorc/rtma_gsi.fd, sorc/rtma_post.fd')
 #
+parm
+fix
 #
 #  # ignore the link files under directory modulefiles
 #

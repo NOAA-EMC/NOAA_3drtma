@@ -11,5 +11,5 @@
   module use /apps/ops/test/nco/modulefiles/core
   module load rocoto
 
-rocotorun -v 10 -w /lfs/h2/emc/da/noscrub/edward.colon/3drtma_hrrr/workflow/rtma3d_pbspro_conus.xml -d /lfs/h2/emc/da/noscrub/edward.colon/3drtma_hrrr/workflow/rtma3d_pbspro_conus.db 
+rocotorun -v 10 -w /lfs/h2/emc/da/noscrub/$USER/NOAA_3drtma/workflow/rtma3d_pbspro_conus.xml -d /lfs/h2/emc/da/noscrub/$USER/NOAA_3drtma/workflow/rtma3d_pbspro_conus.db 
 

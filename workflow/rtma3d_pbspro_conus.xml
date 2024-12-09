@@ -4,7 +4,7 @@
 
 <!-- Key variables -->
 <!-- date/time of cases or cycles -->
-<!ENTITY USER     "">
+<!ENTITY USER           "edward.colon">
 <!ENTITY startCDATE     "201907121400">
 <!ENTITY endCDATE       "201907121400">
 <!ENTITY realtime       "T">

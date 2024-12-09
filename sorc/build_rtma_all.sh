@@ -34,11 +34,13 @@ fi
 if [ $BUILD_rtma_links = yes ] ; then
 
 mkdir $BASE/../parm
+cd $BASE/../parm
 ln -sf /lfs/h2/emc/da/noscrub/edward.colon/FixData/parm/wrf wrf
 ln -sf /lfs/h2/emc/da/noscrub/edward.colon/FixData/parm/upp upp
 ln -sf /lfs/h2/emc/da/noscrub/edward.colon/FixData/parm/gsi gsi
 
 mkdir $BASE/../fix
+cd $BASE/../fix
 ln -sf /lfs/h2/emc/da/noscrub/edward.colon/FixData/obsuselist obsuselist
 ln -sf /lfs/h2/emc/da/noscrub/edward.colon/FixData/UPP-fix upp
 ln -sf /lfs/h2/emc/da/noscrub/edward.colon/FixData/CRTM-fix crtm
@@ -48,6 +50,8 @@ ln -sf /lfs/h2/emc/da/noscrub/edward.colon/FixData/wps wps
 ln -sf /lfs/h2/emc/da/noscrub/edward.colon/FixData/wrf wrf
 
 fi
+
+cd $BASE
 
 ##############################
 
