@@ -1,4 +1,4 @@
-#!/bin/ksh --login
+#!/bin/ksh 
 set -x
 
 # make sure executable exists
@@ -165,6 +165,9 @@ if [ ! -s filelist_mrms ]; then
 fi
 
 if [ -s filelist_mrms ]; then
+#   gzip -d *.gz
+   mv filelist_mrms filelist_mrms_org
+   ls MergedReflectivityQC_*_${YYYY}${MM}${DD}-${HH}????.grib2 > filelist_mrms
    numgrib2=`more filelist_mrms | wc -l`
    echo "Using radar data from: `head -1 filelist_mrms | cut -c10-15`"
    echo "NSSL grib2 file levels = $numgrib2"
@@ -183,7 +186,7 @@ cat << EOF > mosaic.namelist
 EOF
 
 # Run obs processor
-export pgm="rtma3d_process_mosaic"
+export pgm="rtma_process_mosaic"
 . prep_step
 startmsg
 msg="***********************************************************"
@@ -192,9 +195,10 @@ msg="  begin processing MRMS MOSAIC RADAR Reflectivity Obs DATA"
 postmsg "$jlogfile" "$msg"
 msg="***********************************************************"
 postmsg "$jlogfile" "$msg"
-
 ${CP_LN} ${EXECrtma3d}/${exefile_name_radar} ${pgm}
-${MPIRUN} ./${pgm} > ${pgmout} 2>errfile
+APRUN="mpiexec -n 128 -ppn 128 --cpu-bind core --depth 1"
+${APRUN} ./${pgm} > ${pgmout} 2>errfile
+#${MPIRUN} ./${pgm} > ${pgmout} 2>errfile
 export err=$?; err_chk
 
 msg="JOB $job FOR $RUN HAS COMPLETED NORMALLY"

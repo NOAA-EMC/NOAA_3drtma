@@ -1,5 +1,6 @@
-#!/bin/ksh --login
+#!/bin/ksh 
 set -x
+CUT=/usr/bin/cut
 check_if_defined() { #usage: check_if_defined "var1_name" "var2_name" ...
   for str in "$@"; do
     eval "path=\${$str}"
@@ -17,26 +18,21 @@ check_dirs_exist() { #usage: check_dirs_exist "var1_name" "var2_name" ...
   done
 }
 
-if [ "${envir}" == "esrl" ]; then
-  # Set IMPI I/O performance variables
-  export I_MPI_EXTRA_FILESYSTEM=on
-  export I_MPI_EXTRA_FILESYSTEM_LIST=lustre:panfs
-fi
-
 # make sure executable exists
-if [ ! -f ${EXECrtma3d}/${exefile_name_updatevars_wrf} ]; then
-  ${ECHO} "ERROR: executable '${EXECrtma3d}/${exefile_name_updatevars_wrf}' does not exist!"
-  exit 1
-fi
-if [ ! -f ${EXECrtma3d}/${exefile_name_updatevars_ncfields} ]; then
-  ${ECHO} "ERROR: executable '${EXECrtma3d}/${exefile_name_updatevars_ncfields}' does not exist!"
-  exit 1
-fi
-if [ ! -f ${EXECrtma3d}/${exefile_name_updatevars_ndown} ]; then
-  ${ECHO} "ERROR: executable '${EXECrtma3d}/${exefile_name_updatevars_ndown}' does not exist!"
-  exit 1
-fi
+#if [ ! -f ${EXECrtma3d}/${exefile_name_updatevars_wrf} ]; then
+#  ${ECHO} "ERROR: executable '${EXECrtma3d}/${exefile_name_updatevars_wrf}' does not exist!"
+#  exit 1
+#fi
+#if [ ! -f ${EXECrtma3d}/${exefile_name_updatevars_ncfields} ]; then
+#  ${ECHO} "ERROR: executable '${EXECrtma3d}/${exefile_name_updatevars_ncfields}' does not exist!"
+#  exit 1
+#fi
+#if [ ! -f ${EXECrtma3d}/${exefile_name_updatevars_ndown} ]; then
+#  ${ECHO} "ERROR: executable '${EXECrtma3d}/${exefile_name_updatevars_ndown}' does not exist!"
+#  exit 1
+#fi
 
+export OMP_NUM_THREADS=1
 
 
 
@@ -161,20 +157,6 @@ end_hour=`${DATE} +%H -d "${END_TIME}"`
 end_minute=`${DATE} +%M -d "${END_TIME}"`
 end_second=`${DATE} +%S -d "${END_TIME}"`
 
-#start_year=2020
-#start_month=01
-#start_day=22
-#start_hour=16
-#start_minute=00
-#start_second=00
-#end_year=2020
-#end_month=01
-#end_day=22
-#end_hour=16
-#end_minute=00
-#end_second=20
-
-
 # Compute number of days and hours for the run
 (( run_days = 0 ))
 (( run_hours = 0 ))
@@ -225,6 +207,20 @@ else
   ${ECHO} "No pre-existing rsl files were found"
 fi
 
+# MPI Settings for pre-forecast
+#grid_order -C -c 2,12 -g 20,60 > MPICH_RANK_ORDER
+#export MPICH_RANK_REORDER_METHOD=3
+#export MALLOC_MMAP_MAX=0
+#export MALLOC_TRIM_THRESHOLD=134217728
+#export MPICH_MPIIO_HINTS="wrfinput*:cb_nodes=24,wrfrst*:cb_nodes=24,wrfout*:cb_nodes=24"
+#export MPICH_MPIIO_AGGREGATOR_PLACEMENT_DISPLAY=1
+#export MPICH_MPIIO_HINTS_DISPLAY=1
+#export MPICH_ENV_DISPLAY=1
+#export MPICH_VERSION_DISPLAY=1
+#export MPICH_ABORT_ON_ERROR=1
+#export MPICH_MPIIO_STATS=1
+
+
 # Run WRF to update reflectivity fields
 export pgm="rtma3d_updatevars"
 . prep_step
@@ -243,9 +239,9 @@ else
 fi
 ${CP_LN} ${EXECrtma3d}/${exefile_name_updatevars} ${pgm}
 now=`${DATE} +%Y%m%d%H%M%S`
-${MPIRUN} ./${pgm}
+export APRUN="mpiexec -n 384 -ppn 64 --cpu-bind core "
+$APRUN ./${pgm}
 export err=$?; err_chk
-
 # Save a copy of the RSL files
 rsldir=rsl.wrf.${now}
 ${MKDIR} ${rsldir}
@@ -259,20 +255,15 @@ if [ ! -e "wrfout_d01_${time_str}" ]; then
 fi 
 
 ${LN} -s wrfout_d01_${time_str} wrfout_d01
-${CP_LN} ${EXECrtma3d}/${exefile_name_update_ncfields} .
 
 # Output successful so write status to log
 ${ECHO} "Assemble Reflectivity fields back into wrf_inout"
 
-#${NCKS} -A -H -v REFL_10CM,COMPOSITE_REFL_10CM,REFL_10CM_1KM,REFL_10CM_4KM,U10,V10 wrfout_d01_${time_str} ${COMOUTgsi_rtma3d}/${ANLrtma3d_FNAME} 
-#${NCKS} -A -H -v REFL_10CM,COMPOSITE_REFL_10CM,REFL_10CM_1KM,REFL_10CM_4KM wrfout_d01_${time_str} ${COMOUTgsi_rtma3d}/${ANLrtma3d_FNAME} 
-
-./${exefile_name_update_ncfields} wrfout_d01 wrf_inout 
-export err=$?; err_chk
+${NCKS} -A -v REFL_10CM,COMPOSITE_REFL_10CM,REFL_10CM_1KM,REFL_10CM_4KM wrfout_d01 wrf_inout
 
 if [ -f ${COMOUTgsi_rtma3d}/${ANLrtma3d_FNAME} ]; then
   ${ECHO} "Erasing the GSI generated analysis file to be replaced by modified analysis."
-  ${RM} ${COMOUTgsi_rtma3d}/${ANLrtma3d_FNAME}
+  ${MV} ${COMOUTgsi_rtma3d}/${ANLrtma3d_FNAME} ${COMOUTgsi_rtma3d}/old_analysis
 fi
 
 ${CP_LN} -p wrf_inout ${COMOUTgsi_rtma3d}/${ANLrtma3d_FNAME}
@@ -287,3 +278,4 @@ msg="JOB $job FOR $RUN HAS COMPLETED NORMALLY"
 postmsg "$jlogfile" "$msg"
 
 exit 0
+

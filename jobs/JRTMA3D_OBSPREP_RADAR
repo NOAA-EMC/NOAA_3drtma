@@ -61,6 +61,8 @@ if [[ "${subcyc}" == "-1" ]]; then #it's hourly run
   export COMINradar=${COMINradar:-"${COMINRADAR}/radar.${PDY}"}
   elif [ "${envir}" == "lsf" ]; then #wcoss
   export COMINradar=${COMINradar:-"${COMINRADAR}"}
+  elif [ "${envir}" == "pbspro" ]; then #wcoss2
+  export COMINradar=${COMINradar:-"${COMINRADAR}"}
   fi
 else
   export cycle=${cycle:-t${cyc}${subcyc}z}
@@ -68,6 +70,8 @@ else
   if [ "${envir}" == "esrl" ]; then #Jet
   export COMINradar=${COMINradar:-"${COMINRADAR}/radar.${PDY}${cyc}"}
   elif [ "${envir}" == "lsf" ]; then #wcoss
+  export COMINradar=${COMINradar:-"${COMINRADAR}"}
+  elif [ "${envir}" == "pbspro" ]; then #wcoss2
   export COMINradar=${COMINradar:-"${COMINRADAR}"}
   fi
 fi
@@ -123,7 +127,7 @@ fi
 #
 ###########################################################
 #   Set the name to the executable
-    export exefile_name_radar=${exefile_name_radar:-"rtma3d_process_mosaic"}
+    export exefile_name_radar=${exefile_name_radar:-"rtma_process_mosaic"}
 
 #   Set the path to the GSI static files
     export FIXgsi=${FIXgsi:-"${FIXrtma3d}/gsi"}

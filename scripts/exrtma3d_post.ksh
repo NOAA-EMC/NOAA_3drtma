@@ -85,22 +85,24 @@ ${CP_LN} ${PARMupp}/gtg.config.raphrrr gtg.config
 ${CP_LN} ${FIXupp}/ETAMPNEW_DATA eta_micro_lookup.dat
 
 #link CRTM coefficients
-for what in "ahi_himawari8" "abi_gr" "imgr_g11" "imgr_g12" "imgr_g13" "imgr_g15" "imgr_mt1r" "imgr_mt2" \
-     "amsre_aqua" "tmi_trmm" "ssmi_f13" "ssmi_f14" "ssmi_f15" "ssmis_f16"  \
-     "ssmis_f17" "ssmis_f18" "ssmis_f19" "ssmis_f20" "seviri_m10" "ssmi_f10"   \
-     "v.seviri_m10" "imgr_insat3d" "ssmi_f11"; do
-    ln -s "${FIXcrtm}/${what}.TauCoeff.bin" .
-    ln -s "${FIXcrtm}/${what}.SpcCoeff.bin" .
-done
+#for what in "ahi_himawari8" "abi_gr" "imgr_g11" "imgr_g12" "imgr_g13" "imgr_g15" "imgr_mt1r" "imgr_mt2" \
+#     "amsre_aqua" "tmi_trmm" "ssmi_f13" "ssmi_f14" "ssmi_f15" "ssmis_f16"  \
+#     "ssmis_f17" "ssmis_f18" "ssmis_f19" "ssmis_f20" "seviri_m10" "ssmi_f10"   \
+#     "v.seviri_m10" "imgr_insat3d" "ssmi_f11"; do
+#    ln -s "${FIXcrtm}/${what}.TauCoeff.bin" .
+#    ln -s "${FIXcrtm}/${what}.SpcCoeff.bin" .
+#done
 
-ln -s ${FIXcrtm}/CloudCoeff.bin .
-ln -s ${FIXcrtm}/AerosolCoeff.bin .
-for what in  ${FIXcrtm}/*Emis* ; do
-    ln -s ${what} .
-done
+#ln -s ${FIXcrtm}/CloudCoeff.bin .
+#ln -s ${FIXcrtm}/AerosolCoeff.bin .
+#for what in  ${FIXcrtm}/*Emis* ; do
+#    ln -s ${what} .
+#done 
+
+cp /lfs/h2/emc/da/noscrub/edward.colon/3D-RTMA/rtma.v0.9.1/RTMA_NA/fix_upp_crtm/* .
 
 #---- Run unipost
-export pgm="rtma3d_post"
+export pgm="upp.x"
 . prep_step
 startmsg
 msg="***********************************************************"
@@ -168,7 +170,7 @@ postmsg "$jlogfile" "$msg"
 
 fi
 
-if [ "${envir}" == "lsf" ] ; then
+if [ "${envir}" == "lsf" ] || [ "${envir}" == "pbspro" ]; then
 
 export OMP_NUM_THREADS=1
 
@@ -204,7 +206,7 @@ fi
 
 ANLS_CYC_TIME=`${DATE} --date="${START_TIME}  0 hour " +"%Y%m%d%H%M"`
 FCST_INI_TIME=`${DATE} --date="${START_TIME} -${FCST_TIME} hour " +"%Y%m%d%H%M"`
-export WGRIB2=/gpfs/dell1/nco/ops/nwprod/grib_util.v1.1.0/exec/wgrib2
+export WGRIB2=/apps/ops/prod/libs/intel/19.1.3.304/wgrib2/2.0.8_wmo/bin/wgrib2
 # Compute date & time components for the analysis time
 YYYYMMDDHHMU=`${DATE} +"%Y%m%d%H%M" -d "${START_TIME}"`
 YYYYMMDDHH=`${DATE} +"%Y%m%d%H" -d "${START_TIME}"`
@@ -224,7 +226,10 @@ HH_fcstinit=`${ECHO} ${FCST_INI_TIME} | cut -c9-10 `
 
 export DATAHOME=$DATA
 export CORE="RAPRRTMA"
-
+export MODELNAME="RAPR"
+export SUBMODELNAME="RTMA"
+export fileNameFlux="DUMMY"
+export fileNameFlat="DUMMY"
 export DATAWRFHOME=${COMOUTgsi_rtma3d:-"$COMIN"}
 export DATAWRFFILE=${ANLrtma3d_FNAME:-"${RUN}.t${cyc}${subcyc}z.anl.wrf_inout.nc"}
 
@@ -277,28 +282,21 @@ cd ${workdir}
 # Set up some constants for UPP namlist itag
 #
 
-export XLFRTEOPTS="unit_vars=yes"
-export MP_SHARED_MEMORY=yes
-export SPLNUM=47
-export SPL=2.,5.,7.,10.,20.,30.\
-,50.,70.,75.,100.,125.,150.,175.,200.,225.\
-,250.,275.,300.,325.,350.,375.,400.,425.,450.\
-,475.,500.,525.,550.,575.,600.,625.,650.\
-,675.,700.,725.,750.,775.,800.,825.,850.\
-,875.,900.,925.,950.,975.,1000.,1013.2
-
 timestr=`${DATE} +%Y-%m-%d_%H_%M_%S -d "${START_TIME}"`
 timestr2=`${DATE} +%Y-%m-%d_%H:%M:%S -d "${START_TIME}"`
 
-${CAT} > itag <<EOF
-${DATAWRFHOME}/${DATAWRFFILE}
-netcdf
-grib2
-${timestr2}
-${CORE}
-${SPLNUM}
-${SPL}
-
+cat > itag <<EOF
+&model_inputs
+fileName='${DATAWRFHOME}/${DATAWRFFILE}'
+IOFORM='netcdf'
+grib='grib2'
+DateStr='${timestr2}'
+MODELNAME='RAPR'
+SUBMODELNAME='RTMA'
+/
+&NAMPGB
+KPO=47,PO=2.,5.,7.,10.,20.,30.,50.,70.,75.,100.,125.,150.,175.,200.,225.,250.,275.,300.,325.,350.,375.,400.,425.,450.,475.,500.,525.,550.,575.,600.,625.,650.,675.,700.,725.,750.,775.,800.,825.,850.,875.,900.,925.,950.,975.,1000.,1013.2
+/
 EOF
 
 ${RM} -f fort.*
@@ -319,8 +317,8 @@ ${CP_LN} ${PARMupp}/postxconfig-NT-3drtma.txt postxconfig-NT.txt
 ${CP_LN} ${PARMupp}/rap_micro_lookup.dat ./eta_micro_lookup.dat
 
 
-${CP_LN} ${FIXupp}/*bin .
-
+#${CP_LN} ${FIXupp}/*bin .
+cp /lfs/h2/emc/da/noscrub/edward.colon/3D-RTMA/rtma.v0.9.1/RTMA_NA/fix_upp_crtm/* .
 #link CRTM coefficients
 #for what in "ahi_himawari8" "abi_gr" "imgr_g11" "imgr_g12" "imgr_g13" "imgr_g15" "imgr_mt1r" "imgr_mt2" \
 #     "amsre_aqua" "tmi_trmm" "ssmi_f13" "ssmi_f14" "ssmi_f15" "ssmis_f16"  \
@@ -355,8 +353,8 @@ postmsg "$jlogfile" "$msg"
 
 #copy executable to running directory
 ${CP} ${EXECrtma3d}/${exefile_name_post} ./rtma3d_wrfpost
-
- runline="${MPIRUN}         ./rtma3d_wrfpost"
+export APRUN="mpiexec -l -n 64 -ppn 64"
+runline="${APRUN} ./rtma3d_wrfpost"
 $runline < itag > ${pgmout} 2>errfile
 export err=$? ; err_chk
 

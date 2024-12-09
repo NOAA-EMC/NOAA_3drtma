@@ -113,6 +113,40 @@ elif [ "${machine}" = "dell" ] ; then
   esac
   module list
 
+elif [ "${machine}" = "cray" ] ; then
+  . /etc/profile
+  . /usr/share/lmod/lmod/init/sh >/dev/null # Module Support 
+#  module purge
+# loading modules used when building the code
+  case "$COMMAND" in
+    *POST*)
+      modulefile_build=${modulefile_build:-"${MODULEFILES}/${machine}/build/modulefile.build.post.${machine}"}
+      source $modulefile_build
+      ;;
+    *GSIANL*)
+      modulefile_build=${modulefile_build:-"${MODULEFILES}/${machine}/build/modulefile.build.gsi.${machine}"}
+      source $modulefile_build
+      ;;
+    *)
+      modulefile_build=${modulefile_build:-"${MODULEFILES}/${machine}/build/modulefile.build.gsi.${machine}"}
+      source $modulefile_build
+      ;;
+  esac
+# loading modules for running
+  modulefile_run=${modulefile_run:-"${MODULEFILES}/${machine}/run/modulefile.run.${machine}"}
+  source ${modulefile_run}
+# loading modules for specific task
+  case "$COMMAND" in
+    *VERIF*)
+      module use /gpfs/dell2/emc/verification/noscrub/Julie.Prestopnik/modulefiles/
+      module load met/8.0
+      ;;
+    *)
+      ;;
+  esac
+  module list
+
+
 else
   echo "modulefile has not set up for this unknow machine. Job abort!"
   exit 1
@@ -232,6 +266,24 @@ elif [ "${machine}" = "dell" ] ; then  ### LSB scheduler
   esac
   export job=${job:-"${LSB_JOBNAME}"}    # job is defined as job name
   export jid=`echo ${LSB_JOBID} | cut -f1 -d.`  # removal of tailing sub-server string
+  export jobid=${jobid:-"${job}.${jid}"}
+  echo " number of cores : $np for job $job with id as $jobid "
+
+elif [ "${machine}" = "cray" ] ; then  ### LSB scheduler
+
+  case ${SCHEDULER} in
+    PBSPRO|pbspro)
+      module use /apps/ops/test/nco/modulefiles/core
+      module load rocoto
+      export MPIRUN="mpirun"
+      ;;
+    *)
+      echo "unknown scheduler: ${SCHEDULER}. $0 abort! "
+      exit 1
+      ;;
+  esac
+  export job=${job:-"${PBS_JOBNAME}"}    # job is defined as job name
+  export jid=`echo ${PBS_JOBID} | cut -f1 -d.`  # removal of tailing sub-server string
   export jobid=${jobid:-"${job}.${jid}"}
   echo " number of cores : $np for job $job with id as $jobid "
 

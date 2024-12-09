@@ -1,4 +1,4 @@
-#!/bin/ksh --login
+#!/bin/ksh 
 set -x
 check_if_defined() { #usage: check_if_defined "var1_name" "var2_name" ...
   for str in "$@"; do
@@ -26,7 +26,7 @@ if [ "${envir}" == "esrl" ]; then #Jet
 # Check to make sure required directory defined and existed
 check_if_defined "ENKF_FCST" "COMINhrrrdas" "HRRR_DIR" "OBS_DIR" "AIRCRAFT_REJECT" "SFCOBS_USELIST" "SFCOBS_PROVIDER" "EnsWgt"
 check_dirs_exist "ENKF_FCST" "COMINhrrrdas" "HRRR_DIR" "OBS_DIR" "AIRCRAFT_REJECT" "SFCOBS_USELIST" "SFCOBS_PROVIDER"
-elif [ "${envir}" == "lsf" ]; then
+elif [ "${envir}" == "lsf" ] || [ "${envir}" == "pbspro" ]; then
 OBS_DIR=${DATAOBSHOME}
 BKG_DIR=${DATAHOME_BK}
 COMINhrrrdas=${COMINHRRRDAS}
@@ -58,8 +58,9 @@ time_str2=`${DATE} "+%Y-%m-%d_%H_00_00" -d "${START_TIME}"`
 #----- enter working directory -------
 cd ${DATA}
 ${ECHO} "enter working directory:${DATA}"
-
+nc_diag_cat=/lfs/h2/emc/da/noscrub/edward.colon/save/RTMA/bin/ncdiag_cat_serial.x
 # Define the loghistory file depending on if this is the full or partial cycle
+#ifsoilnudge=.true.
 ifsoilnudge=.true.
 if [ "${envir}" == "esrl" ]; then #Jet
   if [ "${FULLCYC}" == "0" ]; then
@@ -105,7 +106,7 @@ if [ "${envir}" == "esrl" ]; then #Jet expr runs
       GSIbackground=${GSIbackground6}
     fi
   fi
-elif [ "${envir}" == "lsf" ]; then #wcoss expr runs
+elif [ "${envir}" == "lsf" ] || [ "${envir}" == "pbspro" ]; then #wcoss expr runs
   GSIbackground=${BKG_DIR}/${FGSrtma3d_FNAME}
 fi
 
@@ -128,53 +129,60 @@ fi
 # Link to the prepbufr data
 if [ -r ${OBS_DIR}/prepbufr ] ; then
   ${LN} -sf ${OBS_DIR}/prepbufr ./prepbufr
-elif [ -r "${OBS_DIR}/rtma_ru.${tz_str}.prepbufr.tm00" ]; then
-  ${LN} -sf ${OBS_DIR}/rtma_ru.${tz_str}.prepbufr.tm00 ./prepbufr
+elif [ -r "${OBS_DIR}/rap.${tz_str}.prepbufr.tm00" ]; then
+  ${LN} -sf ${OBS_DIR}/rap.${tz_str}.prepbufr.tm00 ./prepbufr
+elif  [ -r "${OBS_DIR}/rap_e.${tz_str}.prepbufr.tm00" ]; then
+  ${LN} -sf ${OBS_DIR}/rap_e.${tz_str}.prepbufr.tm00 ./prepbufr
 else
   ${ECHO} "Warning: ${OBS_DIR}/prepbufr does not exist"
 fi
 
 if [ -r "${OBS_DIR}/NSSLRefInGSI.bufr" ]; then
   ${LN} -sf ${OBS_DIR}/NSSLRefInGSI.bufr ./refInGSI
-elif [ -r "${OBS_DIR}/hrrr.${tz_str}.NSSLRefInGSI.bufr" ]; then
-  ${LN} -sf ${OBS_DIR}/hrrr.${tz_str}.NSSLRefInGSI.bufr ./refInGSI
-elif [ -r "${OBS_DIR}/${RUN}.${tz_str}.NSSLRefInGSI.bufr" ]; then
-  ${LN} -sf ${OBS_DIR}/${RUN}.${tz_str}.NSSLRefInGSI.bufr ./refInGSI
+elif [ -r "${OBS_DIR}/rtma3d.${tz_str}.NSSLRefInGSI.bufr" ]; then
+  ${LN} -sf ${OBS_DIR}/rtma3d.${tz_str}.NSSLRefInGSI.bufr ./refInGSI
 else
   ${ECHO} "Warning: ${OBS_DIR}: NSSLRefInGSI.bufr does not exist!"
 fi
 
 if [ -r "${OBS_DIR}/LightningInGSI.bufr" ]; then
   ${LN} -sf ${OBS_DIR}/LightningInGSI.bufr ./lghtInGSI
-elif [ -r "${OBS_DIR}/hrrr.${tz_str}.LightningInGSI.bufr" ]; then
-  ${LN} -sf ${OBS_DIR}/hrrr.${tz_str}.LightningInGSI.bufr ./lghtInGSI
-elif [ -r "${OBS_DIR}/${RUN}.${tz_str}.lghtng.tm00.bufr_d" ]; then
-  ${LN} -sf ${OBS_DIR}/${RUN}.${tz_str}.lghtng.tm00.bufr_d ./lghtInGSI
-elif [ -r "${OBS_DIR}/${RUN}.${tz_str}.LightningInGSI_bufr.bufr" ]; then
-  ${LN} -sf ${OBS_DIR}/${RUN}.${tz_str}.LightningInGSI_bufr.bufr ./lghtInGSI
+elif [ -r "${OBS_DIR}/rap.${tz_str}.LightningInGSI_bufr.bufr" ]; then
+  ${LN} -sf ${OBS_DIR}/rap.${tz_str}.LightningInGSI_bufr.bufr ./lghtInGSI
+elif [ -r "${OBS_DIR}/rap_e.${tz_str}.LightningInGSI_bufr.bufr" ]; then
+  ${LN} -sf ${OBS_DIR}/rap_e.${tz_str}.LightningInGSI_bufr.bufr ./lghtInGSI
 else
   ${ECHO} "Warning: ${OBS_DIR}: LightningInGSI.bufr does not exist!"
 fi
 
 if [ -r "${OBS_DIR}/NASALaRCCloudInGSI.bufr" ]; then
   ${LN} -sf ${OBS_DIR}/NASALaRCCloudInGSI.bufr ./larcInGSI
-elif [ -r "${OBS_DIR}/hrrr.${tz_str}.NASALaRCCloudInGSI.bufr" ]; then
-  ${LN} -sf ${OBS_DIR}/hrrr.${tz_str}.NASALaRCCloudInGSI.bufr ./larcInGSI
-elif [ -r "${OBS_DIR}/${RUN}.${tz_str}.NASALaRCCloudInGSI.bufr" ]; then
-  ${LN} -sf ${OBS_DIR}/${RUN}.${tz_str}.NASALaRCCloudInGSI.bufr ./larcInGSI
-elif [ -r "${OBS_DIR}/rtma_ru.${tz_str}.lgycld.tm00.bufr_d" ]; then
-  ${LN} -sf ${OBS_DIR}/rtma_ru.${tz_str}.lgycld.tm00.bufr_d ./larcInGSI
+elif [ -r "${OBS_DIR}/rap.${tz_str}.NASALaRCCloudInGSI.bufr" ]; then
+  ${LN} -sf ${OBS_DIR}/rap.${tz_str}.NASALaRCCloudInGSI.bufr ./larcInGSI
+elif [ -r "${OBS_DIR}/rap_e.${tz_str}.NASALaRCCloudInGSI.bufr" ]; then
+  ${LN} -sf ${OBS_DIR}/rap_e.${tz_str}.NASALaRCCloudInGSI.bufr ./larcInGSI
 else
   ${ECHO} "Warning: ${OBS_DIR}: NASALaRCCloudInGSI.bufr does not exist!"
 fi
 
-if [ -r "${OBS_DIR}/rtma_ru.${tz_str}.satwnd.tm00.bufr_d" ]; then
-  ${LN} -sf ${OBS_DIR}/rtma_ru.${tz_str}.satwnd.tm00.bufr_d ./satwndbufr
+if [ -r "${OBS_DIR}/rap.${tz_str}.satwnd.tm00.bufr_d" ]; then
+  ${LN} -sf ${OBS_DIR}/rap.${tz_str}.satwnd.tm00.bufr_d ./satwndbufr
+elif [ -r "${OBS_DIR}/rap_e.${tz_str}.satwnd.tm00.bufr_d" ]; then
+  ${LN} -sf ${OBS_DIR}/rap_e.${tz_str}.satwnd.tm00.bufr_d ./satwndbufr
 else
   ${ECHO} "Warning: ${OBS_DIR}:  does not exist!"
 fi
 
-if [ "${envir}" = "lsf" ] && [ ${HRRRDAS_BEC} -eq 0 ] ; then #WCOSS
+if [ -r "${OBS_DIR}/rap.${tz_str}.nexrad.tm00.bufr_d" ]; then
+  ${LN} -sf ${OBS_DIR}/rap.${tz_str}.nexrad.tm00.bufr_d ./nexradbufr
+elif [ -r "${OBS_DIR}/rap_e.${tz_str}.nexrad.tm00.bufr_d" ]; then
+  ${LN} -sf ${OBS_DIR}/rap_e.${tz_str}.nexrad.tm00.bufr_d ./nexradbufr
+else
+  ${ECHO} "Warning: ${OBS_DIR}:  does not exist!"
+fi
+
+
+if [ "${envir}" = "lsf" ] || [ "${envir}" = "pbspro" ] && [ ${HRRRDAS_BEC} -eq 0 ] ; then #WCOSS
   # Set runtime and save directories
   export endianness=Big_Endian
 
@@ -192,8 +200,8 @@ if [ "${envir}" = "lsf" ] && [ ${HRRRDAS_BEC} -eq 0 ] ; then #WCOSS
   export nhr_assimilation=03
   ##typeset -Z2 nhr_assimilation
 
-python ${UTILrtma3d_dev}/getbest_EnKF_FV3GDAS.py -v $YYYYMMDDHH --exact=no --minsize=${nens} -d ${COMINGDAS}/enkfgdas -m no -o filelist${nhr_assimilation} --o3fname=gfs_sigf${nhr_assimilation} --gfs_nemsio=yes
-   
+# /usr/bin/python2.7 ${UTILrtma3d_dev}/getbest_EnKF_FV3GDAS.py -v $YYYYMMDDHH --exact=no --minsize=${nens} -d ${COMINGDAS}/enkfgdas -m no -o filelist${nhr_assimilation} --o3fname=gfs_sigf${nhr_assimilation} --gfs_nemsio=yes
+  /usr/bin/python ${UTILrtma3d_dev}/getbest_EnKF_FV3GDAS.py -v $YYYYMMDDHH --exact=no --minsize=${nens} -d ${COMINGDAS}/enkfgdas -m no -o filelist${nhr_assimilation} --o3fname=gfs_sigf${nhr_assimilation} --gfs_netcdf=yes   
   #Check to see if ensembles were found 
   numfiles=`cat filelist03 | wc -l`
 
@@ -204,7 +212,7 @@ python ${UTILrtma3d_dev}/getbest_EnKF_FV3GDAS.py -v $YYYYMMDDHH --exact=no --min
   #   we have 80 files, figure out if they are all the right size
   #   if not, set ifhyb=false
       cp ${UTILrtma3d_dev}/convert.sh .
-      ${UTILrtma3d_dev}/check_enkf_size.sh
+#      ${UTILrtma3d_dev}/check_enkf_size.sh
   fi
 elif [ "${envir}" == "esrl" ] ; then #ESRL expr. runs
 ## 
@@ -214,7 +222,7 @@ stampcycle=`date -d "${START_TIME}" +%s`
 minHourDiff=100
 loops="009"
 for loop in $loops; do
-  for timelist in `ls ${ENKF_FCST}/*.gdas.t*z.atmf${loop}s.mem080.nemsio`; do
+  for timelist in `ls ${ENKF_FCST}/gdas.t*z.atmf${loop}.nc`; do
     availtimeyy=`basename ${timelist} | cut -c 1-2`
     availtimeyyyy=20${availtimeyy}
     availtimejjj=`basename ${timelist} | cut -c 3-5`
@@ -240,7 +248,7 @@ for loop in $loops; do
 done
 EYYYYMMDD=$(echo ${availtime} | cut -c1-8)
 EHH=$(echo ${availtime} | cut -c9-10)
-${LS} ${ENKF_FCST}/${enkfcstname}.mem???.nemsio > filelist03
+${LS} ${ENKF_FCST}/${enkfcstname}.nc > filelist03
 
 fi
 
@@ -264,7 +272,7 @@ if [ ${HRRRDAS_BEC} -eq 1 ]; then
    else
     cc=$c
    fi
-   if [ "${envir}" == "lsf" ]; then #WCOSS
+   if [ "${envir}" == "lsf" ] || [ "${envir}" = "pbspro" ]; then #WCOSS
      hrrre_file=${COMINhrrrdas}/hrrrdas_small_d02_${time_1hour_ago}00f01_mem00${cc}
      ${LS} ${COMINhrrrdas}/hrrrdas_small_d02_${time_1hour_ago}00f01_mem00${cc} >> filelist.hrrrdas
    elif [ ${HRRRDAS_SMALL} -eq 1 ]; then
@@ -291,7 +299,7 @@ if [[ ${hrrrmem} -gt 30 ]] && [[ ${HRRRDAS_BEC} -eq 1  ]]; then #if HRRRDAS BEC 
   echo "Do hybrid with HRRRDAS BEC"
   nummem=${hrrrmem}
   cp filelist.hrrrdas filelist03
-  ${CP} ${PARMgsi}/hybens_info_hrrrdas ./hybens_info
+  ${CP} ${PARMgsi}/hybens_info_hrrrdas hybens_info
   beta1_inv=$(( 1 - $EnsWgt  ))
   ifhyb=.true.
   regional_ensemble_option=3
@@ -301,10 +309,11 @@ if [[ ${hrrrmem} -gt 30 ]] && [[ ${HRRRDAS_BEC} -eq 1  ]]; then #if HRRRDAS BEC 
   ${ECHO} " Cycle ${YYYYMMDDHH}: GSI hybrid uses HRRRDAS BEC with n_ens=${nummem}" >> ${pgmout}
 elif [[ ${nummem} -eq 80 ]]; then
   echo "Do hybrid with GDAS directly"
+  ${CP} ${PARMgsi}/hybens_info_hrrrdas hybens_info
   beta1_inv=$(( 1 - $EnsWgt  ))
   ifhyb=.true.
   regional_ensemble_option=1
-  grid_ratio_ens=12 #ensemble resolution=3 * grid_ratio * grid_ratio_ens
+  grid_ratio_ens=3 #ensemble resolution=3 * grid_ratio * grid_ratio_ens
   i_en_perts_io=0
   ens_fast_read=.false. 
   ${ECHO} " Cycle ${YYYYMMDDHH}: GSI hybrid uses GDAS directly with n_ens=${nummem}" >> ${pgmout}
@@ -327,13 +336,15 @@ fi
 #   bftab_sst= bufr table for sst ONLY needed for sst retrieval (retrieval=.true.)
 
 anavinfo=${FIXgsi}/anavinfo_arw_netcdf
-BERROR=${FIXgsi}/rap_berror_stats_global_RAP_tune
+BERROR=${FIXgsi}/3drtma_berror_stats_hz01
+#BERROR=${FIXgsi}/rap_berror_stats_global_RAP_tune
 SATANGL=${FIXgsi}/global_satangbias.txt
 SATINFO=${FIXgsi}/global_satinfo.txt
-CONVINFO=${FIXgsi}/nam_regional_convinfo_RAP_ascat_thinning.txt
-OZINFO=${FIXgsi}/global_ozinfo.txt    
+CONVINFO=${FIXgsi}/convinfo.rtma
+OZINFO=${FIXgsi}/global_ozinfo.txt
 PCPINFO=${FIXgsi}/global_pcpinfo.txt
 OBERROR=${FIXgsi}/3drtma_errtable_smallSFCerr_ascat
+#OBERROR=${FIXgsi}/nam_errtable.r3dv
 # Fixed fields
 cp $anavinfo anavinfo
 cp $BERROR   berror_stats
@@ -374,40 +385,47 @@ for file in `awk '{if($1!~"!"){print $1}}' ./satinfo | sort | uniq` ;do
    ln -s ${FIXcrtm}/${file}.SpcCoeff.bin ./
    ln -s ${FIXcrtm}/${file}.TauCoeff.bin ./
 done
+#found_rjlist=False
+#max_cycs=168 # Number of cycles to look back
+#probe_MM=`echo ${START_TIME} | cut -c 11-12`
+#if [ ${probe_MM} == '00' ]; then
+#  i=1
+#else
+#  i=0
+#fi
+#export PDYprev_dir=${COMOUTautoqc_rtma3d}
+#while [ ${i} -lt ${max_cycs} ]; do
+#  export probe_cyc=`/gpfs/dell1/nco/ops/nwprod/prod_util.v1.1.4/exec/ips/ndate -${i} ${YYYYMMDDHH}`
+#  probe_YYYYMMDD=`echo $probe_cyc | cut -c 1-8`
+#  probe_HH=`echo $probe_cyc | cut -c 9-10`
+##  probe_MM=`echo $YYYYMMDDHHMM | cut -c 11-12`
+#  probe_dir=${COMOUTautoqc_base}/${RUN}.${probe_YYYYMMDD}/autoqcprd.t${probe_HH}00z
+#  if [ -s ${probe_dir}/done.${probe_YYYYMMDD}${probe_HH}00 ]; then
+#    export PDYprev_dir=${probe_dir}
+#    found_rjlist=True
+#    break
+#  else
+#    let "i=i+1"
+#  fi
+#done
 
-found_rjlist=False
-max_cycs=168 # Number of cycles to look back
-probe_MM=`echo ${START_TIME} | cut -c 11-12`
-if [ ${probe_MM} == '00' ]; then
-  i=1
-else
-  i=0
-fi
-export PDYprev_dir=${COMOUTautoqc_rtma3d}
-while [ ${i} -lt ${max_cycs} ]; do
-  export probe_cyc=`/gpfs/dell1/nco/ops/nwprod/prod_util.v1.1.4/exec/ips/ndate -${i} ${YYYYMMDDHH}`
-  probe_YYYYMMDD=`echo $probe_cyc | cut -c 1-8`
-  probe_HH=`echo $probe_cyc | cut -c 9-10`
-#  probe_MM=`echo $YYYYMMDDHHMM | cut -c 11-12`
-  probe_dir=${COMOUTautoqc_base}/${RUN}.${probe_YYYYMMDD}/autoqcprd.t${probe_HH}00z
-  if [ -s ${probe_dir}/done.${probe_YYYYMMDD}${probe_HH}00 ]; then
-    export PDYprev_dir=${probe_dir}
-    found_rjlist=True
-    break
-  else
-    let "i=i+1"
-  fi
-done 
-
-if [ $found_rjlist == True ]; then
-  cp ${PDYprev_dir}/reject_conus_t_${probe_cyc}00.txt    t_rejectlist
-  cp ${PDYprev_dir}/reject_conus_q_${probe_cyc}00.txt    q_rejectlist
-  cp ${PDYprev_dir}/reject_conus_ps_${probe_cyc}00.txt   p_rejectlist
-  cp ${PDYprev_dir}/reject_conus_wst_${probe_cyc}00.txt  w_rejectlist
-  cp ${PDYprev_dir}/accept_conus_wst_${probe_cyc}00.txt  mesonet_stnuselist
-fi
+#if [ $found_rjlist == True ]; then
+#  cp ${PDYprev_dir}/reject_conus_t_${probe_cyc}00.txt    t_rejectlist
+#  cp ${PDYprev_dir}/reject_conus_q_${probe_cyc}00.txt    q_rejectlist
+#  cp ${PDYprev_dir}/reject_conus_ps_${probe_cyc}00.txt   p_rejectlist
+#  cp ${PDYprev_dir}/reject_conus_wst_${probe_cyc}00.txt  w_rejectlist
+#  cp ${PDYprev_dir}/accept_conus_wst_${probe_cyc}00.txt  mesonet_stnuselist
+#fi
 
 # Get aircraft reject list, mesonet_uselist, sfcobs_provider
+#if [ $cyc = "08" ]; then
+#${MV} ${AIRCRAFT_REJECT}/current_bad_aircraft.txt  ${AIRCRAFT_REJECT}/${PDYm1}_bad_aircraft.txt
+#scp Edward.Colon@dtn-jet.boulder.rdhpcs.noaa.gov:/mnt/lfs4/HFIP/hfv3gfs/Edward.Colon/reject_use_lists/current_bad_aircraft.txt ${AIRCRAFT_REJECT}/
+#fi
+#if [ $cyc = "12" ]; then
+#${MV} ${SFCOBS_USELIST}/current_mesonet_uselist.txt ${SFCOBS_USELIST}/${PDYm1}_mesonet_uselist.txt
+#scp Edward.Colon@dtn-jet.boulder.rdhpcs.noaa.gov:/mnt/lfs4/HFIP/hfv3gfs/Edward.Colon/reject_use_lists/current_mesonet_uselist.txt ${SFCOBS_USELIST}/
+#fi
 ${CP} ${AIRCRAFT_REJECT}/current_bad_aircraft.txt current_bad_aircraft
 ${CP} ${SFCOBS_USELIST}/current_mesonet_uselist.txt gsd_sfcobs_uselist.txt
 ${CP} ${SFCOBS_PROVIDER}/gsd_sfcobs_provider.txt gsd_sfcobs_provider.txt
@@ -437,7 +455,7 @@ else
 fi
 
 # option for hybrid vertical coordinate (HVC) in WRF-ARW
-if [ "${envir}" == "lsf" ]; then #WCOSS
+if [ "${envir}" == "lsf" ] || [ "${envir}" == "pbspro" ]; then #WCOSS
   if [ "$NCDUMP" ] ; then
     n_c3f=`$NCDUMP -h ./wrf_inout | grep -i "C3F:" | wc -l`
     n_c4f=`$NCDUMP -h ./wrf_inout | grep -i "C4F:" | wc -l`
@@ -457,7 +475,8 @@ if [ "${envir}" == "lsf" ]; then #WCOSS
   fi
   echo "HVC option is $hybridcord"
 fi
-${CP} ${PARMgsi}/gsiparm.anl.sh_test gsiparm.anl.sh
+# Build the GSI namelist on-the-fly
+${CP} ${PARMgsi}/hrrr_gsiparm.anl.sh gsiparm.anl.sh
 source ./gsiparm.anl.sh
 cat << EOF > gsiparm.anl
 $gsi_namelist
@@ -494,17 +513,27 @@ if [ "${envir}" == "esrl" ];  then ##GSI on Jet needs special treatment
   module load wrap-mpi >/dev/null
   [[ "${prev_x}" == "YES"  ]] && set -x
   mpirun ${DATA}/${pgm} < gsiparm.anl > ${pgmout} 2>errfile
-elif [ "${envir}" == "lsf" ];  then
-  ${MPIRUN} ${pgm} < gsiparm.anl > ${pgmout} 2>errfile
+elif [ "${envir}" == "lsf" ] || [ "${envir}" == "pbspro" ];  then
+#module purge
+#module use /lfs/h2/emc/lam/noscrub/Ming.Hu/rrfs/testD/ufs-srweather-app/env
+#source /lfs/h2/emc/lam/noscrub/Ming.Hu/rrfs/testD/ufs-srweather-app/env/build_wcoss2_intel.env
+#module list
+  APRUN="mpiexec -n 256 -ppn 64 --cpu-bind core --depth 1"
+  export FI_OFI_RXM_SAR_LIMIT=3145728
+  export OMP_STACKSIZE=500M
+  export OMP_NUM_THREADS=1
+  rm ${DATA}/rtma_gsi
+  cp ${EXECrtma3d}/rtma_gsi ${DATA}
+  $APRUN ${DATA}/rtma_gsi < ${DATA}/gsiparm.anl > stdout 2>&1
+  export err=$?
 fi
-export err=$?;
 ##save some information for possible debugging before err_chk
 ${CAT} fort.* >   fits_${cycle_str}.txt
 #${LS} -l > GSI_workdir_list
-${CAT} errfile >> ${pgmout}
+${CAT} stdout >> ${pgmout}
 #${MV} ${pgmout} ${pgmout}.var
 ${CP} -p fits_${cycle_str}.txt ${COMOUTgsi_rtma3d}
-err_chk
+#err_chk
 
 # Loop over first and last outer loops to generate innovation
 # diagnostic files for indicated observation types (groups)
@@ -517,7 +546,7 @@ err_chk
 #        innovation files.
 #
 
-loops="01 03"
+loops="01 02 03"
 for loop in $loops; do
 
 case $loop in
@@ -528,6 +557,8 @@ esac
 
 #  Collect diagnostic files for obs types (groups) below
 #  listall="hirs2_n14 msu_n14 sndr_g08 sndr_g11 sndr_g11 sndr_g12 sndr_g13 sndr_g08_prep sndr_g11_prep sndr_g12_prep sndr_g13_prep sndrd1_g11 sndrd2_g11 sndrd3_g11 sndrd4_g11 sndrd1_g12 sndrd2_g12 sndrd3_g12 sndrd4_g12 sndrd1_g13 sndrd2_g13 sndrd3_g13 sndrd4_g13 hirs3_n15 hirs3_n16 hirs3_n17 amsua_n15 amsua_n16 amsua_n17 amsub_n15 amsub_n16 amsub_n17 hsb_aqua airs_aqua amsua_aqua imgr_g08 imgr_g11 imgr_g12 pcp_ssmi_dmsp pcp_tmi_trmm conv sbuv2_n16 sbuv2_n17 sbuv2_n18 omi_aura ssmi_f13 ssmi_f14 ssmi_f15 hirs4_n18 hirs4_metop-a amsua_n18 amsua_metop-a mhs_n18 mhs_metop-a amsre_low_aqua amsre_mid_aqua amsre_hig_aqua ssmis_las_f16 ssmis_uas_f16 ssmis_img_f16 ssmis_env_f16 iasi_metop-a"
+
+
    listall="conv"
    for type in $listall; do
       count=`ls pe*.${type}_${loop}* | wc -l`
@@ -535,10 +566,19 @@ esac
          `${CAT} pe*.${type}_${loop}* > diag_${type}_${string}.${cycle_str}`
       fi
    done
+   listall="uv t q ps"
+   for type in $listall; do
+     count=`ls pe*.conv_${type}_${loop}.nc4 | wc -l`
+     if [[ $count -gt 0 ]]; then
+#	$(cat pe*.${type}_${loop} > diag_${type}_${string}.${YYYYMMDDHH})
+        find ${DATA} -type f -name "pe*.conv_${type}_${loop}.nc4" -size 1k -delete
+        $nc_diag_cat -o diag_${type}_${string}.${cycle_str}.HRRR.nc4 pe*.conv_${type}_${loop}.nc4 
+     fi
+   done
 done
 
 ## link fort files with user-friendly file name
-if [ "${envir}" == "lsf" ]; then #wcoss
+if [ "${envir}" == "lsf" ] || [ "${envir}" == "pbspro" ]; then #wcoss
   ${LN} -sf fort.201    fit_p1.${cycle_str}
   ${LN} -sf fort.202    fit_w1.${cycle_str}
   ${LN} -sf fort.203    fit_t1.${cycle_str}
@@ -575,10 +615,10 @@ EOF
     module load wrap-mpi >/dev/null
     [[ "${prev_x}" == "YES"  ]] && set -x
     mpirun ${DATA}/${pgm} < gsiparm.anl >> ${pgmout} 2>errfile
-  elif [ "${envir}" == "lsf" ];  then
+  elif [ "${envir}" == "lsf" ] || [ "${envir}" == "pbspro" ];  then
     ${MPIRUN} ${pgm} < gsiparm.anl >> ${pgmout} 2>errfile
   fi
-  export err=$?;
+  export err=$?
   #${LS} -l > GSI_workdir_list
   ${CAT} errfile >> ${pgmout}
   ${ECHO} -e "\n\n -- End of second GSI --\n" >> ${pgmout}
@@ -589,16 +629,16 @@ fi ###### second GSI run
 
 # Saving ANALYSIS, DIAG, Obs-Fitting files TO COM2 DIRECTORY AS PRODUCT for archive
 ${CP} -p gsiparm.anl  ${COMOUTgsi_rtma3d}/gsiparm.anl_${cycle_str}
-tar -zcvf ${COMOUTgsi_rtma3d}/diag_${cycle_str}.tgz diag_*
+tar -cvf ${COMOUTgsi_rtma3d}/diag_${cycle_str}.tgz diag_*
 
-if [ "${envir}" == "lsf" ]; then #wcoss
+if [ "${envir}" == "lsf" ] || [ "${envir}" == "pbspro" ]; then #wcoss
   ${CP} -p ${DATA}/wrf_inout                  ${COMOUTgsi_rtma3d}/${ANLrtma3d_FNAME}
   ${CP} -p minimization_fort220.${cycle_str} ${COMOUTgsi_rtma3d}
   ${CP} -p diag_*                             ${COMOUTgsi_rtma3d}
-  tar -zcvf obsfit_fort220.tgz  ./fort.* ./fit_*
+  tar -cvf obsfit_fort220.tgz  ./fort.* ./fit_*
   ${CP} -p  obsfit_fort220.tgz                ${COMOUTgsi_rtma3d}
-  tar -zcvf misc_info.tgz  ./*info ./errtable ./prepobs_prep.bufrtable  ./*bias*  \
-    ./current_bad_aircraft ./gsd_sfcobs_uselist.txt ./gsd_sfcobs_provider.txt ./GSI_workdir_list
+  tar -cvf misc_info.tgz  ./*info ./errtable ./prepobs_prep.bufrtable  ./*bias*  \
+    ./current_bad_aircraft ./gsd_sfcobs_uselist.txt ./gsd_sfcobs_provider.txt 
   ${CP} -p  misc_info.tgz                      ${COMOUTgsi_rtma3d}
   gzip ${COMOUTgsi_rtma3d}/diag_*
 
@@ -613,9 +653,9 @@ elif [ "${envir}" == "esrl" ]; then
   ${CP} -p fixparm_gsi.${cycle_str}.tgz ${COMOUTgsi_rtma3d}
 fi
 
-${RM} -f ${DATA}/sig*
-${RM} -f ${DATA}/obs*
-${RM} -f ${DATA}/pe*
+#${RM} -f ${DATA}/sig*
+#${RM} -f ${DATA}/obs*
+#${RM} -f ${DATA}/pe*
 
 msg="JOB $job FOR $RUN HAS COMPLETED NORMALLY"
 postmsg "$jlogfile" "$msg"

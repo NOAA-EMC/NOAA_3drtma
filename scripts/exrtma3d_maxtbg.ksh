@@ -2,10 +2,10 @@
 
 #   DOCBLOCK
 #
-# Script Name: urma_maxtbg.sh
+# Script Name: rtma_maxtbg.sh
 # Author: Steven Levine
-# Abstract: Read in previous 25 URMA background/analysis files, use those
-# to compute maxT background for 08Z URMA
+# Abstract: Read in previous 25 RTMA3D background/analysis files, use those
+# to compute maxT background for 08Z RTMA3D
 # History Log:
 #    9/2015: Initial write for WCOSS
 #    11/2016: Generalized to some extent to account for westward expanded
@@ -16,15 +16,15 @@
 # Usage:
 #  Parameters: None
 #  Input files:
-#    Analysis (2dvaranl) and guess (2dvarges) files from each of the last 25 URMA 
+#    Analysis (2dvaranl) and guess (2dvarges) files from each of the last 25 RTMA3D 
 #    cycles.  Exact file names depend on the grids specified by the user.  They are 
 #    specified in variables opsfile and gesfile
 #
 #  Output files:
-#    urma2p5.${PDY}.maxT.bin, urma2p5.${PDY}.maxT.grb2
-#    akurma.${PDY}.maxT.bin, akurma.${PDY}.maxT.grb2
-#    hiurma.${PDY}.maxT.bin, hiurma.${PDY}.maxT.grb2
-#    prurma.${PDY}.maxT.bin, prurma.${PDY}.maxT.grb2
+#    rtma3d.${PDY}.maxT.bin, rtma3d.${PDY}.maxT.grb2
+#    akrtma.${PDY}.maxT.bin, akrtma.${PDY}.maxT.grb2
+#    hirtma.${PDY}.maxT.bin, hirtma.${PDY}.maxT.grb2
+#    prrtma.${PDY}.maxT.bin, prrtma.${PDY}.maxT.grb2
 #
 #  User controllable options:
 #     $1 is an array of grid names.  Grid names are specified in sorc file domain_dims.f
@@ -78,11 +78,11 @@ while [[ $nn -lt $num ]] ; do
     let nnp1="nn+1"
     dname=${gridsarray[$nn]}
     echo "     gridnames($nnp1)=${dname}," >> gridsinfo_input
-    if [[ $dname = "cohreswexp" || $dname = "cohresext" || $dname = "cohres" || $dname = "urma2p5" || $dname = "hrrr" ]] ; then
+    if [[ $dname = "cohreswexp" || $dname = "cohresext" || $dname = "cohres" || $dname = "rtma3d" || $dname = "hrrr" ]] ; then
 	if [[ $Tur = yes ]] ; then
-	    err_exit echo "MULTIPLE GRIDS FROM URMA2P5 DOMAIN!"
+	    err_exit echo "MULTIPLE GRIDS FROM RTMA3D3D DOMAIN!"
 	else
-	    run="urma2p5"
+	    run="rtma3d"
 	    Tur=yes
 	fi
     else
@@ -99,7 +99,7 @@ while [[ $nn -lt $num ]] ; do
 	HH=`echo $CYCLE | cut -c 9-10`
 
 	#find proper name of ges and analysis files to run wgrib2 on based on run and domain name
-	if [[ $run = "urma2p5" ]] ; then
+	if [[ $run = "rtma3d" ]] ; then
 	    if [[ $dname == "hrrr" ]] ; then
 		opsfile=${COM_IN}/${RUN}.${YYYYMMDD}/postprd.t${HH}00z/${RUN}.t${HH}00z.wrfsubhnat.grib2
 		gesfile=${COM_IN}/${RUN}.${YYYYMMDD}/postprd.t${HH}00z/${RUN}.t${HH}00z.wrfsubhnat_fgs.grib2
@@ -123,7 +123,7 @@ while [[ $nn -lt $num ]] ; do
 	#get template grid for 20Z
 
 	if [ ${HH} -eq 20 ] ; then
-	    if [[ $run == "urma2p5" ]] ; then
+	    if [[ $run == "rtma3d" ]] ; then
 		cpfs $gesfile gesfileus.grb2
 	    fi
 	fi
@@ -143,28 +143,28 @@ EOF
 
 . prep_step
 
-export FORT71=urma2p5.${PDYm1}.maxt_diag_bg.dat
-export FORT72=urma2p5.${PDYm1}.maxt_diag_anl.dat
+export FORT71=rtma3d.${PDYm1}.maxt_diag_bg.dat
+export FORT72=rtma3d.${PDYm1}.maxt_diag_anl.dat
 
 cpfs $FIXminmax/aktz.bin .
-cpfs $FIXminmax/conus2p5exttz.bin .
-cpfs $FIXminmax/conus2p5tz.bin .
-cpfs $FIXminmax/conus2p5tz_ndfdonly.bin .
+cpfs $FIXminmax/conusexttz.bin .
+cpfs $FIXminmax/conustz.bin .
+cpfs $FIXminmax/conustz_ndfdonly.bin .
 
-export pgm=rtma3d_maxtgb
+export pgm=rtma_maxtgb
 startmsg
-$EXECrtma3d/rtma3d_maxtbg >> $pgmout 2> errfile
+$EXECrtma3d/$pgm >> $pgmout 2> errfile
 export err=$?; err_chk
 cat $pgmout
 
 if [[ $Tur = yes ]]; then
-if [ -s $DATA/maxt_urma2p5_bg.bin ] ; then
+if [ -s $DATA/maxt_rtma3d_bg.bin ] ; then
     $WGRIB2 $DATA/gesfileus.grb2 -match ":TMP:" -grib_out $DATA/tempgribus.grb2
-    $WGRIB2 $DATA/tempgribus.grb2 -import_ieee maxt_urma2p5_bg.bin -set_date "${PDY}08" -set_var TMAX -set_ftime "12 hour fcst" -undefine_val 0 -grib_out $DATA/urma2p5.${PDYm1}.maxT.grb2
-    cpfs $DATA/maxt_urma2p5_bg.bin $DATA/rtma3d.${PDYm1}.maxT.bin
-    cpfs $DATA/urma2p5.${PDYm1}.maxT.grb2 $COMOUTpost_rtma3d/rtma3d.maxT.grib2
+    $WGRIB2 $DATA/tempgribus.grb2 -import_ieee maxt_rtma3d_bg.bin -set_date "${PDY}08" -set_var TMAX -set_ftime "12 hour fcst" -undefine_val 0 -grib_out $DATA/rtma3d.${PDYm1}.maxT.grb2
+    cpfs $DATA/maxt_rtma3d_bg.bin $DATA/rtma3d.${PDYm1}.maxT.bin
+    cpfs $DATA/rtma3d.${PDYm1}.maxT.grb2 $COMOUTpost_rtma3d/rtma3d.maxT.grib2
 else
-    err_exit "URMA2P5 background was not generated or copied properly!"
+    err_exit "RTMA3D background was not generated or copied properly!"
 fi
 fi
 

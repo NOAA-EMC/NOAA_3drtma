@@ -149,14 +149,14 @@ fi
 
 
 export COM_IN=${COM_IN:-$COMROOT/${NET}/${envir}}
-#export COMOUT=${COM_OUT:-$COMROOT/${NET}/${envir}}/urma.${PDY}
-#export COMOUT2p5=${COM_OUT:-$COMROOT/${NET}/${envir}}/urma2p5.${PDY}
-#export COMOUTak=${COM_OUT:-$COMROOT/${NET}/${envir}}/akurma.${PDY}
-#export COMOUThi=${COM_OUT:-$COMROOT/${NET}/${envir}}/hiurma.${PDY}
-#export COMOUTpr=${COM_OUT:-$COMROOT/${NET}/${envir}}/prurma.${PDY}
+#export COMOUT=${COM_OUT:-$COMROOT/${NET}/${envir}}/rtma.${PDY}
+#export COMOUT2p5=${COM_OUT:-$COMROOT/${NET}/${envir}}/rtma2p5.${PDY}
+#export COMOUTak=${COM_OUT:-$COMROOT/${NET}/${envir}}/akrtma.${PDY}
+#export COMOUThi=${COM_OUT:-$COMROOT/${NET}/${envir}}/hirtma.${PDY}
+#export COMOUTpr=${COM_OUT:-$COMROOT/${NET}/${envir}}/prrtma.${PDY}
 #export DATA_MAXT_PREP=${DATA_MAXT_PREP:-$DATAROOT/wrkdir_maxt_prep.${PDY}${cyc}}
 ### Input from the URMA for the prepbufr and previous guess files:
-#export COMINobsproc_urma=${COMINobsproc_urma:-$(compath.py urma/${envir}/urma.${PDY})}
+#export COMINobsproc_rtma=${COMINobsproc_rtma:-$(compath.py rtma/${envir}/rtma.${PDY})}
 
 #mkdir -p $COMOUT $DATA_MAXT_PREP
 

@@ -29,7 +29,7 @@ export jobid=${jobid:-"${outid}.o$$"}
 export MPIRUN=${MPIRUN:-"mpirun"}
 
 export CNVGRIB=${CNVGRIB:-cnvgrib}
-
+export PDYm1=`$NDATE -24 ${PDY}${cyc} | cut -c 1-8`
 ##########################################################
 # make temp/running directories
 ##########################################################

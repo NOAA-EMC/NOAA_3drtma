@@ -1,4 +1,4 @@
-#!/bin/ksh --login
+#!/bin/ksh 
 set -x
 
 # make sure executable exists
@@ -27,6 +27,7 @@ START_TIME=`${DATE} -d "${PDY} ${cyc} ${SUBH_TIME} minutes"`
 
 # Compute date & time components for the analysis time
 YYYYMMDDHH=`${DATE} +"%Y%m%d%H" -d "${START_TIME}"`
+YYYYMMDD=`${DATE} +"%Y%m%d" -d "${START_TIME}"`
 YYYYJJJHH=`${DATE} +"%Y%j%H" -d "${START_TIME}"`
 HH=`${DATE} +"%H" -d "${START_TIME}"`
 
@@ -58,41 +59,23 @@ ${ECHO} "SUBH_TIME: "${SUBH_TIME}
 ${ECHO} "YYYYMMDDHH: "${YYYYMMDDHH}
 
 # Link to the NASA LaRC cloud data
-if [ "${envir}" == "esrl" ]; then #Jet
 if [ "${HH}" = 12 ] || [ "${HH}" = "00" ] ; then
-  ${LN} -sf ${NASALARC_DATA}/${YYYYMMDDHH}.rap_e.t${HH}z.lgycld.tm00.bufr_d ./NASA_LaRC_cloud.bufr
+  ${LN} -sf ${COMINPREP}/rap_e.${YYYYMMDD}/rap_e.t${HH}z.lgycld.tm00.bufr_d ./rap_e.t${cyc}${subcyc}z.lgycld.tm00.bufr_d
+  ${LN} -sf ./rap_e.t${cyc}${subcyc}z.lgycld.tm00.bufr_d ./NASA_LaRC_cloud.bufr
 else
-  ${LN} -sf ${NASALARC_DATA}/${YYYYMMDDHH}.rap.t${HH}z.lgycld.tm00.bufr_d ./NASA_LaRC_cloud.bufr
+  ${LN} -sf ${COMINPREP}/rap.${YYYYMMDD}/rap.t${HH}z.lgycld.tm00.bufr_d ./rap.t${cyc}${subcyc}z.lgycld.tm00.bufr_d
+  ${LN} -sf ./rap.t${cyc}${subcyc}z.lgycld.tm00.bufr_d ./NASA_LaRC_cloud.bufr
 fi
-if [ ! -s "NASA_LaRC_cloud.bufr" ]; then
-  ${ECHO} "./NASA_LaRC_cloud.bufr does not exist or not readable"
-  exit 1
-fi
-elif [  "${envir}" == "lsf" ]; then #WCOSS
-  if [ -s $COMINrap/rtma_ru.t${cyc}${subcyc}z.lgycld.tm00.bufr_d ] ; then
-    ${CP} -p $COMINrap/rtma_ru.t${cyc}${subcyc}z.lgycld.tm00.bufr_d ./rtma_ru.t${cyc}${subcyc}z.lgycld.tm00.bufr_d
-    ${LN} -sf ./rtma_ru.t${cyc}${subcyc}z.lgycld.tm00.bufr_d ./NASA_LaRC_cloud.bufr
-  else
-    echo 'No bufr file found for nasa LaRC cloud data processing'
-  fi
-fi
+
+#if [ ! -s "rap.t${cyc}${subcyc}z.lgycld.tm00.bufr_d" ]; then
+#  ${ECHO} "./NASA_LaRC_cloud.bufr does not exist or not readable"
+#  exit 1
+#fi
+
 
 
 
 # Build the namelist on-the-fly
-if [ "${DOMAIN}" == "alaska" ]; then
-${CAT} << EOF > namelist_nasalarc
-&SETUP
-analysis_time = ${YYYYMMDDHH},
-bufrfile='NASALaRCCloudInGSI.bufr',
-npts_rad=3,
-ioption = 2,
-boxlat0=60,61,63,66,68
-boxhalfy=4, 6, 8, 10, 12
-boxhalfx=4, 6, 8, 10, 12
-/
-EOF
-else
 ${CAT} << EOF > namelist_nasalarc
 &SETUP
 analysis_time = ${YYYYMMDDHH},
@@ -101,10 +84,9 @@ npts_rad=3,
 ioption = 2,
 /
 EOF
-fi
 
 # Run obs processor
-export pgm="rtma3d_process_cloud"
+export pgm="rtma_process_cloud"
 . prep_step
 startmsg
 msg="***********************************************************"
@@ -132,7 +114,7 @@ if [ -f ${DATA}/${targetfile} ] ; then
     mv ${DATA}/${targetfile} ${COMINobsproc_rtma3d}/${tz_str}.${targetfile} #to save disk space
     ${LN} -snf ${COMINobsproc_rtma3d}/${tz_str}.${targetfile} ${DATA}/${targetfile}
   else
-    cpreq ${DATA}/${targetfile} ${COMINobsproc_rtma3d}/${RUN}.${tz_str}.${targetfile}
+    cpreq ${DATA}/${targetfile} ${COMINobsproc_rtma3d}/rap.${tz_str}.${targetfile}
   fi
 else
   msg="WARNING $pgm terminated normally but ${DATA}/${targetfile} does NOT exist."

@@ -2,29 +2,29 @@
 
 #   DOCBLOCK
 #
-# Script Name: urma_minrh.sh
+# Script Name: rtma_minrh.sh
 # Author: Steven Levine
-# Abstract: Read in previous 25 URMA background/analysis files, use those
-# to compute minRH for 20Z URMA
+# Abstract: Read in previous 25 RTMA3D background/analysis files, use those
+# to compute minRH for 20Z RTMA3D
 # History Log:
-#    04/2017: Initial write to WCOSS - originated with exurma_gett.sh
+#    04/2017: Initial write to WCOSS - originated with exrtma_gett.sh
 #    08/2017: Bug fix to make sure dates in minRH file are correct - use dummy file to start
 ##
 # Usage:
 #  Parameters: None
 #  Input files:
-#    Analysis (2dvaranl) and guess (2dvarges) files from each of the last 25 URMA
+#    Analysis (2dvaranl) and guess (2dvarges) files from each of the last 25 RTMA3D
 #    cycles.  Exact file names depend on the grids specified by the user.  They are
 #    specified in variables opsfile and gesfile
-#    Also dummy grib2 files for each grid name used.  Dummy files are in ${HOMEurma}/fix/mint
+#    Also dummy grib2 files for each grid name used.  Dummy files are in ${HOMErtma}/fix/mint
 #    and are called ${gridname}.temprh.grb2_0.  Grid names are specified in sorc file domain_dims.f.
 #
 #
 #  Output files:
-#    urma2p5.${PDY}.minRH.bin, urma2p5.${PDY}.minRH.grb2
-#    akurma.${PDY}.minRH.bin, akurma.${PDY}.minRH.grb2
-#    hiurma.${PDY}.minRH.bin, hiurma.${PDY}.minRH.grb2
-#    prurma.${PDY}.minRH.bin, prurma.${PDY}.minRH.grb2
+#    rtma3d.${PDY}.minRH.bin, rtma3d.${PDY}.minRH.grb2
+#    akrtma.${PDY}.minRH.bin, akrtma.${PDY}.minRH.grb2
+#    hirtma.${PDY}.minRH.bin, hirtma.${PDY}.minRH.grb2
+#    prrtma.${PDY}.minRH.bin, prrtma.${PDY}.minRH.grb2
 #
 #  User controllable options:
 #     $1 is an array of grid names.  Grid names are specified in sorc file domain_dims.f
@@ -79,7 +79,7 @@ while [[ $nn -lt $num ]] ; do
     dname=${gridsarray[$nn]}
     echo "     gridnames($nnp1)=${dname}," >> gridsinfo_input
     Tur=yes
-    run=urma2p5
+    run=rtma3d
 	Tur=yes
 
 	CYCLE=${PDYm1}1800
@@ -123,7 +123,7 @@ while [[ $nn -lt $num ]] ; do
 	fi	
 	CYCLE=`$MDATE +60 $CYCLE`
         if [ ${HH} -eq 06 ] ; then
-            if [[ $run == "urma2p5" ]] ; then
+            if [[ $run == "rtma3d" ]] ; then
                 cpfs $gesfile gesfileus.grb2
             fi
         fi
@@ -148,9 +148,9 @@ EOF
 ln -sf $run.${PDYm1}.minrh_anl.dat fort.61
 ln -sf $run.${PDYm1}.minrh_bg.dat fort.62
 
-export pgm=urma_minrh
+export pgm=rtma_minrh
 startmsg
-$EXECrtma3d/rtma3d_minrh >> $pgmout 2> errfile
+$EXECrtma3d/rtma_minrh >> $pgmout 2> errfile
 export err=$?; err_chk
 cat $pgmout
 
@@ -163,7 +163,7 @@ if [[ $Tur = yes ]] ; then
     if [[ $bnum -eq "2" || $bnum -eq "3" ]] ; then
         if [ -s $DATA/$run.${PDYm1}.minrh_anl.dat ] ; then
             $WGRIB2 $DATA/gesfileus.grb2 -match ":RH:" -grib_out $DATA/tempgribus.grb2
-            $WGRIB2 $DATA/tempgribus.grb2 -import_ieee urma2p5.${PDYm1}.minrh_anl.dat -set_date ${PDYm1}18 -set_var MINRH -set_ftime '12 hour fcst' -undefine_val 0 -grib_out $DATA/$run.${PDYm1}.minRH.grb2
+            $WGRIB2 $DATA/tempgribus.grb2 -import_ieee rtma3d.${PDYm1}.minrh_anl.dat -set_date ${PDYm1}18 -set_var MINRH -set_ftime '12 hour fcst' -undefine_val 0 -grib_out $DATA/$run.${PDYm1}.minRH.grb2
             cpfs $DATA/$run.${PDYm1}.minrh_anl.dat $DATA/$run.${PDYm1}.minrh_anl.dat
             cpfs $DATA/$run.${PDYm1}.minRH.grb2 $COMOUTpost_rtma3d/rtma3d.minRH.grib2
         else
@@ -173,7 +173,7 @@ if [[ $Tur = yes ]] ; then
     if [[ $bnum -eq "1" || $bnum -eq "3" ]] ; then
         if [ -s $DATA/$run..${PDYm1}.minrh_bg.dat ] ; then
             $WGRIB2 $DATA/gesfileus.grb2 -match ":RH:" -grib_out $DATA/tempgribus.grb2
-            $WGRIB2 $DATA/tempgribus.grb2 -import_ieee urma2p5.${PDYm1}.minrh_bg.dat -set_date ${PDYm1}18 -set_var MINRH -set_ftime '12 hour fcst' -undefine_val 0 -grib_out $DATA/$run.${PDYm1}.minRH.grb2
+            $WGRIB2 $DATA/tempgribus.grb2 -import_ieee rtma3d.${PDYm1}.minrh_bg.dat -set_date ${PDYm1}18 -set_var MINRH -set_ftime '12 hour fcst' -undefine_val 0 -grib_out $DATA/$run.${PDYm1}.minRH.grb2
             cpfs $DATA/$run.${PDYm1}.minrh_bg.dat $DATA/$run.${PDYm1}.minrh_bg.dat
             cpfs $DATA/$run.${PDYm1}.minRH.grb2 $COMOUTpost_rtma3d/rtma3d.minRH.grib2
         else

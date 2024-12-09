@@ -35,6 +35,7 @@ echo $START_TIME
 # Compute date & time components for the analysis time
 YYYYJJJHH00=`${DATE} +"%Y%j%H00" -d "${START_TIME}"`
 YYYYMMDDHH=`${DATE} +"%Y%m%d%H" -d "${START_TIME}"`
+YYYYMMDD=`${DATE} +"%Y%m%d" -d "${START_TIME}"`
 YYYY=`${DATE} +"%Y" -d "${START_TIME}"`
 MM=`${DATE} +"%m" -d "${START_TIME}"`
 DD=`${DATE} +"%d" -d "${START_TIME}"`
@@ -85,13 +86,15 @@ if [ ${obsprep_lghtn} -eq 1 ] ; then
   ${ECHO} " processing NCEP BUFR Lightning Data"
 
 # find lightning bufr file
-  if [ -s $COMINrap/rtma_ru.t${cyc}${subcyc}z.lghtng.tm00.bufr_d ] ; then
-    cp $COMINrap/rtma_ru.t${cyc}${subcyc}z.lghtng.tm00.bufr_d ./rtma_ru.t${cyc}${subcyc}z.lghtng.tm00.bufr_d
-  else
-    echo 'No bufr file found for lightning processing'
-  fi
 
-  ln -s rtma_ru.t${cyc}${subcyc}z.lghtng.tm00.bufr_d lghtngbufr
+# Link to the NASA LaRC cloud data
+if [ "${HH}" = 12 ] || [ "${HH}" = "00" ] ; then
+  ${LN} -sf ${COMINPREP}/rap_e.${YYYYMMDD}/rap_e.t${HH}z.lghtng.tm00.bufr_d ./rap.t${cyc}${subcyc}z.lghtng.tm00.bufr_d
+else 
+  ${LN} -sf ${COMINPREP}/rap.${YYYYMMDD}/rap.t${HH}z.lghtng.tm00.bufr_d ./rap.t${cyc}${subcyc}z.lghtng.tm00.bufr_d
+fi
+
+${LN} -sf rap.t${cyc}${subcyc}z.lghtng.tm00.bufr_d  lghtngbufr
 
   echo ${PDY}${cyc} > ./lightning_cycle_date
 
@@ -99,14 +102,14 @@ if [ ${obsprep_lghtn} -eq 1 ] ; then
   minutetime=$subcyc
 
 # Build the namelist on-the-fly
-  rm -f ./lightning_bufr.namelist
-  cat << EOF > lightning_bufr.namelist
- &SETUP
-  analysis_time = ${YYYYMMDDHH},
-  minute=${minutetime},
-  trange_start=-15.0,
-  trange_end=0.0,
- /
+rm -f ./lightning_bufr.namelist
+cat << EOF > lightning_bufr.namelist
+&SETUP
+analysis_time = ${YYYYMMDDHH},
+minute=${minutetime},
+trange_start=-15.0,
+trange_end=0.0,
+/
 EOF
 
 fi
@@ -139,14 +142,10 @@ export err=$?; err_chk
 
 msg="JOB $job FOR $RUN HAS COMPLETED NORMALLY"
 postmsg "$jlogfile" "$msg"
-
-if [ $obsprep_lghtn -eq 1 ] ; then
-  lghtng_bufr="LightningInGSI_bufr.bufr"
-else
-  lghtng_bufr="LightningInGSI.bufr"
-fi
+cpreq  ${DATA}/LightningInGSI.bufr ${DATA}/LightningInGSI_bufr.bufr
+lghtng_bufr="LightningInGSI_bufr.bufr"
 if [ -f ${DATA}/${lghtng_bufr} ] ; then
-  cpreq ${DATA}/${lghtng_bufr} ${COMINobsproc_rtma3d}/${RUN}.t${cyc}${subcyc}z.${lghtng_bufr}
+  cpreq ${DATA}/${lghtng_bufr} ${COMINobsproc_rtma3d}/rap.t${cyc}${subcyc}z.${lghtng_bufr}
 else
   msg="WARNING $pgm terminated normally but ${DATA}/${lghtng_bufr} does NOT exist."
   ${ECHO} "$msg"

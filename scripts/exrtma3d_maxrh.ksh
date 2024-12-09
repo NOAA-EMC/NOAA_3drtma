@@ -2,29 +2,29 @@
 
 #   DOCBLOCK
 #
-# Script Name: urma_maxrh.sh
+# Script Name: rtma_maxrh.sh
 # Author: Steven Levine
-# Abstract: Read in previous 25 URMA background/analysis files, use those
-# to compute maxRH for 20Z URMA
+# Abstract: Read in previous 25 RTMA3D background/analysis files, use those
+# to compute maxRH for 20Z RTMA3D
 # History Log:
-#    04/2017: Initial write to WCOSS - originated with exurma_getmaxt.sh
+#    04/2017: Initial write to WCOSS - originated with exrtma_getmaxt.sh
 #    08/2017: Bug fix to make sure dates in maxRH file are correct - use dummy file to start
 ##
 # Usage:
 #  Parameters: None
 #  Input files:
-#    Analysis (2dvaranl) and guess (2dvarges) files from each of the last 25 URMA
+#    Analysis (2dvaranl) and guess (2dvarges) files from each of the last 25 RTMA3D
 #    cycles.  Exact file names depend on the grids specified by the user.  They are
 #    specified in variables opsfile and gesfile
-#    Also dummy grib2 files for each grid name used.  Dummy files are in ${HOMEurma}/fix/maxmint
+#    Also dummy grib2 files for each grid name used.  Dummy files are in ${HOMErtma}/fix/maxmint
 #    and are called ${gridname}.temprh.grb2_0.  Grid names are specified in sorc file domain_dims.f.
 #
 #
 #  Output files:
-#    urma2p5.${PDY}.maxRH.bin, urma2p5.${PDY}.minRH.grb2
-#    akurma.${PDY}.maxRH.bin, akurma.${PDY}.minRH.grb2
-#    hiurma.${PDY}.maxRH.bin, hiurma.${PDY}.minRH.grb2
-#    prurma.${PDY}.maxRH.bin, prurma.${PDY}.minRH.grb2
+#    rtma3d.${PDY}.maxRH.bin, rtma3d.${PDY}.minRH.grb2
+#    akrtma.${PDY}.maxRH.bin, akrtma.${PDY}.minRH.grb2
+#    hirtma.${PDY}.maxRH.bin, hirtma.${PDY}.minRH.grb2
+#    prrtma.${PDY}.maxRH.bin, prrtma.${PDY}.minRH.grb2
 #
 #  User controllable options:
 #     $1 is an array of grid names.  Grid names are specified in sorc file domain_dims.f
@@ -79,10 +79,10 @@ while [[ $nn -lt $num ]] ; do
     dname=${gridsarray[$nn]}
     echo "     gridnames($nnp1)=${dname}," >> gridsinfo_input
     Tur=yes
-    run=urma2p5
-#    cpfs $FIXminmax/urma2p5.temprh.grb2_0 tempgrib_urma2p5.grb2
+    run=rtma3d
+#    cpfs $FIXminmax/rtma3d.temprh.grb2_0 tempgrib_rtma3d.grb2
 	Tur=yes
-#	cpfs $FIXminmax/urma2p5.temprh.grb2_0 tempgrib_urma2p5.grb2
+#	cpfs $FIXminmax/rtma3d.temprh.grb2_0 tempgrib_rtma3d.grb2
 
 	CYCLE=${PDY}1800
         CYCLE_STOP=${PDY}0600
@@ -103,7 +103,7 @@ while [[ $nn -lt $num ]] ; do
 	
 	#find proper name of ges and analysis files to run wgrib2 on based on run and domain name
        #find proper name of ges and analysis files to run wgrib2 on based on run and domain name
-        if [[ $run = "urma2p5" ]] ; then
+        if [[ $run = "rtma3d" ]] ; then
             if [[ $dname == "hrrr" ]] ; then
                 opsfile=${COM_IN}/${RUN}.${YYYYMMDD}/postprd.t${HH}00z/${RUN}.t${HH}00z.wrfsubhnat.grib2
                 gesfile=${COM_IN}/${RUN}.${YYYYMMDD}/postprd.t${HH}00z/${RUN}.t${HH}00z.wrfsubhnat_fgs.grib2
@@ -126,7 +126,7 @@ while [[ $nn -lt $num ]] ; do
 	CYCLE=`$MDATE -60 $CYCLE`
 
         if [ ${HH} -eq 06 ] ; then
-            if [[ $run == "urma2p5" ]] ; then
+            if [[ $run == "rtma3d" ]] ; then
                 cpfs $gesfile gesfileus.grb2
             fi
         fi
@@ -153,9 +153,9 @@ EOF
 ln -sf $run.${PDYm1}.maxrh_anl.dat fort.61
 ln -sf $run.${PDYm1}.maxrh_bg.dat fort.62
 
-export pgm=urma_maxrh
+export pgm=rtma_maxrh
 startmsg
-$EXECrtma3d/rtma3d_maxrh >> $pgmout 2> errfile
+$EXECrtma3d/rtma_maxrh >> $pgmout 2> errfile
 export err=$?; err_chk
 cat $pgmout
 
@@ -167,7 +167,7 @@ if [[ $Tur = yes ]] ; then
     if [[ $bnum -eq "2" || $bnum -eq "3" ]] ; then
 	if [ -s $DATA/$run.${PDYm1}.maxrh_anl.dat ] ; then
             $WGRIB2 $DATA/gesfileus.grb2 -match ":RH:" -grib_out $DATA/tempgribus.grb2
-            $WGRIB2 $DATA/tempgribus.grb2 -import_ieee urma2p5.${PDYm1}.maxrh_anl.dat -set_date ${PDYm1}18 -set_var MAXRH -set_ftime '12 hour fcst' -undefine_val 0 -grib_out $DATA/$run.${PDYm1}.maxRH.grb2 
+            $WGRIB2 $DATA/tempgribus.grb2 -import_ieee rtma3d.${PDYm1}.maxrh_anl.dat -set_date ${PDYm1}18 -set_var MAXRH -set_ftime '12 hour fcst' -undefine_val 0 -grib_out $DATA/$run.${PDYm1}.maxRH.grb2 
             cpfs $DATA/$run.${PDYm1}.maxrh_anl.dat $DATA/$run.${PDYm1}.maxrh_anl.dat
             cpfs $DATA/$run.${PDYm1}.maxRH.grb2 $COMOUTpost_rtma3d/rtma3d.maxRH.grib2
 	else
@@ -177,7 +177,7 @@ if [[ $Tur = yes ]] ; then
     if [[ $bnum -eq "1" || $bnum -eq "3" ]] ; then
 	if [ -s $DATA/$run..${PDYm1}.maxrh_bg.dat ] ; then 
             $WGRIB2 $DATA/gesfileus.grb2 -match ":RH:" -grib_out $DATA/tempgribus.grb2
-            $WGRIB2 $DATA/tempgribus.grb2 -import_ieee urma2p5.${PDYm1}.maxrh_bg.dat -set_date ${PDYm1}18 -set_var MAXRH -set_ftime '12 hour fcst' -undefine_val 0 -grib_out $DATA/$run.${PDYm1}.maxRH.grb2
+            $WGRIB2 $DATA/tempgribus.grb2 -import_ieee rtma3d.${PDYm1}.maxrh_bg.dat -set_date ${PDYm1}18 -set_var MAXRH -set_ftime '12 hour fcst' -undefine_val 0 -grib_out $DATA/$run.${PDYm1}.maxRH.grb2
             cpfs $DATA/$run.${PDYm1}.maxrh_bg.dat $DATA/$run.${PDYm1}.maxrh_bg.dat
 	    cpfs $DATA/$run.${PDYm1}.maxRH.grb2 $COMOUTpost_rtma3d/rtma3d.maxRH.grib2
 	else
