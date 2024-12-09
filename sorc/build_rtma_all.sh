@@ -5,26 +5,31 @@ cd $BASE
 
 #build switches
 
+export BUILD_rtma_links=yes
 export BUILD_rtma_wrfpost=yes
-export BUILD_rtma_wrfarw=no
-export BUILD_rtma_gsi=no
-export BUILD_rtma_process_cloud=no
-export BUILD_rtma_process_mosaic=no
-export BUILD_rtma_process_lightning=no
-export BUILD_rtma_sndp=no
-export BUILD_rtma_wrfbufr_conus=no
-export BUILD_rtma_wrfbufr_alaska=no
-export BUILD_rtma_stnmlist=no
-export BUILD_rtma_smartinit=no
-export BUILD_rtma_minmax=no
+export BUILD_rtma_wrfarw=yes
+export BUILD_rtma_gsi=yes
+export BUILD_rtma_process_cloud=yes
+export BUILD_rtma_process_mosaic=yes
+export BUILD_rtma_process_lightning=yes
+export BUILD_rtma_sndp=yes
+export BUILD_rtma_wrfbufr_conus=yes
+export BUILD_rtma_wrfbufr_alaska=yes
+export BUILD_rtma_stnmlist=yes
+export BUILD_rtma_smartinit=yes
+export BUILD_rtma_minmax=yes
 module reset
 
-
+if [ ! -d $BASE/logs ]; then
 mkdir $BASE/logs
+fi
+
 export logs_dir=$BASE/logs
 sleep 1
 
-mkdir $BASE/../exec
+if [ ! -d $BASE/../exec ]; then 
+mkdir $BASE/../exec 
+fi
 
 mkdir $BASE/../parm
 ln -sf /lfs/h2/emc/da/noscrub/edward.colon/FixData/parm/wrf wrf

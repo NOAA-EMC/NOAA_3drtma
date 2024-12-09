@@ -32,7 +32,7 @@
 <!ENTITY GESINHRRR      "/lfs/h2/emc/ptmp/annette.gibbs/prod/com/hrrr/v4.1">
 <!ENTITY COMINHRRRDAS   "/lfs/h1/ops/canned/com/hrrr/v4.1/nwges/hrrrdasges">
 <!ENTITY COMINGDAS      "/lfs/h1/ops/prod/com/gfs/v16.3">
-<!ENTITY NWROOT		"/lfs/h2/emc/da/noscrub/&USER;/3DRTMA.v01">
+<!ENTITY NWROOT		"/lfs/h2/emc/da/noscrub/&USER;/NOAA_3drtma">
 <!ENTITY COMINPREP      "/lfs/h1/ops/prod/com/obsproc/v1.2">
 <!ENTITY OBS_DIR	"/scratch4/NCEPDEV/fv3-cam/save/Gang.Zhao/Data/GSD_GSI_Case/obs">
 <!ENTITY HRRR_DIR	"/scratch4/NCEPDEV/fv3-cam/save/Gang.Zhao/Data/GSD_GSI_Case/fgs">
@@ -52,25 +52,25 @@
 <!ENTITY UTILrtma3d	"&HOMErtma3d;/util">
 <!ENTITY UTILrtma3d_dev	"&HOMErtma3d;/util_dev">
 <!ENTITY MODULEFILES	"&HOMErtma3d;/modulefiles">
-<!ENTITY EXECrtma3d	"/lfs/h2/emc/da/noscrub/&USER;/3DRTMA.v01/exec">
-<!ENTITY PARMrtma3d	"/lfs/h2/emc/da/noscrub/&USER;/3DRTMA.v01/parm">
-<!ENTITY FIXrtma3d	"/lfs/h2/emc/da/noscrub/&USER;/3DRTMA.v01/fix">
+<!ENTITY EXECrtma3d	"/lfs/h2/emc/da/noscrub/&USER;/NOAA_3drtma/exec">
+<!ENTITY PARMrtma3d	"/lfs/h2/emc/da/noscrub/&USER;/NOAA_3drtma/parm">
+<!ENTITY FIXrtma3d	"/lfs/h2/emc/da/noscrub/&USER;/NOAA_3drtma/fix">
 
 <!-- Specific Definition for static data -->
-<!ENTITY FIXcrtm        "/lfs/h2/emc/da/noscrub/&USER;/3DRTMA.v01/fix/crtm">
-<!ENTITY FIXupp         "/lfs/h2/emc/da/noscrub/&USER;/3DRTMA.v01/fix/upp">
-<!ENTITY FIXgsi         "/lfs/h2/emc/da/noscrub/&USER;/3DRTMA.v01/fix/gsi">
-<!ENTITY FIXwps         "/lfs/h2/emc/da/noscrub/&USER;/3DRTMA.v01/fix/wps">
-<!ENTITY FIXwrf         "/lfs/h2/emc/da/noscrub/&USER;/3DRTMA.v01/fix/wrf">
-<!ENTITY FIXminmax         "/lfs/h2/emc/da/noscrub/&USER;/3DRTMA.v01/fix/minmax">
-<!ENTITY OBS_USELIST    "/lfs/h2/emc/da/noscrub/&USER;/3DRTMA.v01/fix/obsuselist">
-<!ENTITY AIRCRAFT_REJECT        "/lfs/h2/emc/da/noscrub/edward.colon//3DRTMA.v01/fix/obsuselist/amdar_reject_lists">
-<!ENTITY SFCOBS_USELIST         "/lfs/h2/emc/da/noscrub/edward.colon/3DRTMA.v01/fix/obsuselist/mesonet_uselists">
-<!ENTITY SFCOBS_PROVIDER        "/lfs/h2/emc/da/noscrub/edward.colon/3DRTMA.v01/fix/obsuselist/sfcobs_provider">
-<!ENTITY PARMwrf        "/lfs/h2/emc/da/noscrub/&USER;/3DRTMA.v01/parm/wrf">
-<!ENTITY PARMupp        "/lfs/h2/emc/da/noscrub/&USER;/3DRTMA.v01/parm/upp">
-<!ENTITY PARMgsi        "/lfs/h2/emc/da/noscrub/&USER;/3DRTMA.v01/parm/gsi">
-<!ENTITY PARMverf       "/lfs/h2/emc/da/noscrub/&USER;/3DRTMA.v01/parm/verif">
+<!ENTITY FIXcrtm        "/lfs/h2/emc/da/noscrub/&USER;/NOAA_3drtma/fix/crtm">
+<!ENTITY FIXupp         "/lfs/h2/emc/da/noscrub/&USER;/NOAA_3drtma/fix/upp">
+<!ENTITY FIXgsi         "/lfs/h2/emc/da/noscrub/&USER;/NOAA_3drtma/fix/gsi">
+<!ENTITY FIXwps         "/lfs/h2/emc/da/noscrub/&USER;/NOAA_3drtma/fix/wps">
+<!ENTITY FIXwrf         "/lfs/h2/emc/da/noscrub/&USER;/NOAA_3drtma/fix/wrf">
+<!ENTITY FIXminmax         "/lfs/h2/emc/da/noscrub/&USER;/NOAA_3drtma/fix/minmax">
+<!ENTITY OBS_USELIST    "/lfs/h2/emc/da/noscrub/&USER;/NOAA_3drtma/fix/obsuselist">
+<!ENTITY AIRCRAFT_REJECT        "/lfs/h2/emc/da/noscrub/edward.colon//NOAA_3drtma/fix/obsuselist/amdar_reject_lists">
+<!ENTITY SFCOBS_USELIST         "/lfs/h2/emc/da/noscrub/edward.colon/NOAA_3drtma/fix/obsuselist/mesonet_uselists">
+<!ENTITY SFCOBS_PROVIDER        "/lfs/h2/emc/da/noscrub/edward.colon/NOAA_3drtma/fix/obsuselist/sfcobs_provider">
+<!ENTITY PARMwrf        "/lfs/h2/emc/da/noscrub/&USER;/NOAA_3drtma/parm/wrf">
+<!ENTITY PARMupp        "/lfs/h2/emc/da/noscrub/&USER;/NOAA_3drtma/parm/upp">
+<!ENTITY PARMgsi        "/lfs/h2/emc/da/noscrub/&USER;/NOAA_3drtma/parm/gsi">
+<!ENTITY PARMverf       "/lfs/h2/emc/da/noscrub/&USER;/NOAA_3drtma/parm/verif">
 
 <!ENTITY LOG_WRKFLW	"&LOG_DIR;">
 <!ENTITY LOG_JJOB	"&LOG_DIR;/jlogfiles">
