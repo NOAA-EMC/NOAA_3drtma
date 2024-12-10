@@ -92,8 +92,8 @@ export COMOUT=${COMOUT:-${COMROOT}/${NET}/${envir}/${RUN}.${PDY}}
 
 export COMINrap=${COMINRAP}/rap.${PDY}
 export COMINhrrr=${COMINHRRR}/hrrr.${PDY}/${domain}
-export GESINhrrr=${GESINHRRR}/hrrr.${PDY}/conus
-export GESINhrrrm1=${GESINHRRR}/hrrr.${PDYm1}/conus
+export GESINhrrr=${GESINHRRR}
+export GESINhrrrm1=${GESINHRRR}
 
 export GESINhrrr_rtma3d=${GESINhrrr_rtma3d:-"${COMIN}/fgsprd.${cycle}"}
 export PDYHH_cycm1=$($NDATE -01  "${PDYHH}")

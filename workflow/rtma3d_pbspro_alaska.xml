@@ -29,7 +29,7 @@
 <!ENTITY COMINRAP       "/lfs/h1/ops/prod/com/obsproc/v1.2">
 <!ENTITY COMINHRRR      "/lfs/h1/ops/prod/com/hrrr/v4.1">
 <!ENTITY COMINRADAR      "/lfs/h1/ops/prod/dcom/ldmdata/obs/upperair/mrms/alaska">
-<!ENTITY GESINHRRR      "/lfs/h2/emc/ptmp/annette.gibbs/prod/com/hrrr/v4.1">
+<!ENTITY GESINHRRR      "/lfs/h1/ops/prod/com/hrrr/v4.1/nwges/hrrrges_sfc/alaska">
 <!ENTITY COMINHRRRDAS   "/lfs/h1/ops/canned/com/hrrr/v4.1/nwges/hrrrdasges">
 <!ENTITY COMINGDAS      "/lfs/h1/ops/prod/com/gfs/v16.3">
 <!ENTITY NWROOT		"/lfs/h2/emc/da/noscrub/&USER;/NOAA_3drtma">
@@ -1039,7 +1039,7 @@
 
     &ENVARS_PREPJOB;
    <dependency>
-       <datadep age="10" minsize="15000M"><cyclestr offset="-3600">&GESINHRRR;/hrrr.@Y@m@d/&DOMAIN;/hrrr.t@H00z.f01@M.netcdf</cyclestr></datadep>
+   <datadep age="10" minsize="15000M"><cyclestr offset="-3600">&GESINHRRR;/hrrrak_@Y@m@d@Hf001</cyclestr></datadep>
    </dependency>
    </task>
   <task name="&NET;_gsianl_task_@Y@m@d@H@M" cycledefs="hourly" maxtries="&maxtries;">

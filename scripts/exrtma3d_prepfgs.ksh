@@ -99,22 +99,11 @@ msg="***********************************************************"
 postmsg "$jlogfile" "$msg"
 
 # Look for bqckground from pre-forecast background
-FGShrrr_FNAME2="hrrr.t${HH_cycm1}00z.f01${subcyc}.netcdf"
-
-if  [ ${HH_cycm1} -eq 23 ]; then
-
-	if [ -r ${GESINhrrrm1}/${FGShrrr_FNAME2} ] ; then
-  		${LN} -sf ${GESINhrrrm1}/${FGShrrr_FNAME2}   ${GESINhrrr_rtma3d}/${FGSrtma3d_FNAME}
-  		${LN} -sf ${GESINhrrr_rtma3d}/${FGSrtma3d_FNAME}     ${DATA}/${FGSrtma3d_FNAME}
-  		${ECHO} " Cycle ${YYYYMMDDHH}: PREPFGS background --> ${DATA}/${FGShrrr_FNAME2} "
-	else
-  		${ECHO} "ERROR: No background file for analysis at ${time_run}!!!!"
-  		${ECHO} " Cycle ${YYYYMMDDHH}: PREPFGS failed because of no background" >> ${pgmout}
-  		exit 1
-	fi
-
+if [ "${DOMAIN}" == "alaska" ]; then
+FGShrrr_FNAME2="hrrrak_${PDYHH_cycm1}f001"
 else
-
+FGShrrr_FNAME2="hrrr_${PDYHH_cycm1}f001"
+fi
         if [ -r ${GESINhrrr}/${FGShrrr_FNAME2} ] ; then
                 ${LN} -sf ${GESINhrrr}/${FGShrrr_FNAME2}   ${GESINhrrr_rtma3d}/${FGSrtma3d_FNAME}
                 ${LN} -sf ${GESINhrrr_rtma3d}/${FGSrtma3d_FNAME}     ${DATA}/${FGSrtma3d_FNAME}
@@ -124,10 +113,6 @@ else
                 ${ECHO} " Cycle ${YYYYMMDDHH}: PREPFGS failed because of no background" >> ${pgmout}
                 exit 1
         fi
-
-fi
-
-
 
 
 
