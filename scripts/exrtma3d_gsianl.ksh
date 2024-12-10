@@ -22,6 +22,11 @@ if [ ! -f ${EXECrtma3d}/${exefile_name_gsi} ]; then
   ${ECHO} "ERROR: GSI Analysis executable '${EXECrtma3d}/${exefile_name_gsi}' does not exist!"
   exit 1
 fi
+if [ "${envir}" == "lsf" ] || [ "${envir}" == "pbspro" ]; then
+OBS_DIR=${DATAOBSHOME}
+BKG_DIR=${DATAHOME_BK}
+COMINhrrrdas=${COMINHRRRDAS}
+fi
 if [ "${subcyc}" == "-1" ]; then #hourly run
   SUBH_TIME='00'
   tz_str=t${cyc}z
@@ -538,6 +543,8 @@ if [ "${envir}" == "lsf" ] || [ "${envir}" == "pbspro" ]; then #wcoss
   #${CP} -p ${pgmout_stdout}        ${COMOUT}/${pgmout_stdout}_gsianl.${cycle_str}
   #${CP} -p fits_${cycle_str}.txt  ${COMOUT}/fits_${cycle_str}.txt
 
+
+fi  
 #${RM} -f ${DATA}/sig*
 #${RM} -f ${DATA}/obs*
 #${RM} -f ${DATA}/pe*
