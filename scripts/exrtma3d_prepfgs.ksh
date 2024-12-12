@@ -100,9 +100,86 @@ postmsg "$jlogfile" "$msg"
 
 # Look for bqckground from pre-forecast background
 if [ "${DOMAIN}" == "alaska" ]; then
-FGShrrr_FNAME2="hrrrak_${PDYHH_cycm1}f001"
+          case  $HH  in
+               00)       
+                    export PDYHH_AK=$($NDATE -03  "${PDYHH}")
+                    ;;
+               01)
+		    export PDYHH_AK=$($NDATE -01  "${PDYHH}")   
+                    ;;
+               02)       
+                    export PDYHH_AK=$($NDATE -02  "${PDYHH}")		    
+                    ;;
+               03)  
+                    export PDYHH_AK=$($NDATE -03  "${PDYHH}")
+		    ;;
+               04)  
+                    export PDYHH_AK=$($NDATE -01  "${PDYHH}")	
+                    HRCNT=01
+                    ;;
+               05) 
+		    export PDYHH_AK=$($NDATE -02  "${PDYHH}")    
+                    ;;
+               06)
+                    export PDYHH_AK=$($NDATE -03  "${PDYHH}") 
+                    ;;
+               07)
+                    export PDYHH_AK=$($NDATE -01  "${PDYHH}")
+                    ;;
+               08)
+                    export PDYHH_AK=$($NDATE -02  "${PDYHH}")
+                    ;;
+               09)
+                    export PDYHH_AK=$($NDATE -03  "${PDYHH}")
+                    ;;
+               10)
+                    export PDYHH_AK=$($NDATE -01  "${PDYHH}")
+	            ;;
+               11)
+                    export PDYHH_AK=$($NDATE -02  "${PDYHH}")
+                    ;;
+
+               12)
+                    export PDYHH_AK=$($NDATE -03  "${PDYHH}")
+                    ;;
+               13)
+                    export PDYHH_AK=$($NDATE -01  "${PDYHH}")
+                    ;;
+               14)
+                    export PDYHH_AK=$($NDATE -02  "${PDYHH}")
+                    ;;
+               15)  
+                    export PDYHH_AK=$($NDATE -03  "${PDYHH}")
+                    ;;
+               16)  
+                    export PDYHH_AK=$($NDATE -01  "${PDYHH}")
+                    ;;
+               17)  
+                    export PDYHH_AK=$($NDATE -02  "${PDYHH}")
+                    ;;
+               18)
+                    export PDYHH_AK=$($NDATE -03  "${PDYHH}")
+                    ;;
+               19)
+                    export PDYHH_AK=$($NDATE -01  "${PDYHH}")
+                    ;;
+               20)
+                    export PDYHH_AK=$($NDATE -02  "${PDYHH}")
+                    ;;
+               21)
+                    export PDYHH_AK=$($NDATE -03  "${PDYHH}")
+                    ;;
+               22)
+                    export PDYHH_AK=$($NDATE -01  "${PDYHH}")
+                    ;;
+               23)
+                    export PDYHH_AK=$($NDATE -02  "${PDYHH}")
+                    ;;
+
+          esac 
+FGShrrr_FNAME2="hrrrak_${PDYHH_AK}f00${ind}"
 else
-FGShrrr_FNAME2="hrrr_${PDYHH_cycm1}f001"
+FGShrrr_FNAME2="hrrr_${PDYHH_cycm1}f00${ind}"
 fi
         if [ -r ${GESINhrrr}/${FGShrrr_FNAME2} ] ; then
                 ${LN} -sf ${GESINhrrr}/${FGShrrr_FNAME2}   ${GESINhrrr_rtma3d}/${FGSrtma3d_FNAME}
