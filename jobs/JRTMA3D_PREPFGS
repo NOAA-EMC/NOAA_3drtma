@@ -21,7 +21,6 @@ export NET=${NET:-rtma3d}
 export RUN=${RUN:-rtma3d}
 export model=${model:-rtma3d}
 
-export domain=${domain:-conus}
 ##########################################################
 # obtain unique process id (pid)
 ##########################################################
@@ -91,7 +90,7 @@ export COMOUT=${COMOUT:-${COMROOT}/${NET}/${envir}/${RUN}.${PDY}}
 # Directory to store the firstguess as input for the RTMA3D (NETCDF?) 
 
 export COMINrap=${COMINRAP}/rap.${PDY}
-export COMINhrrr=${COMINHRRR}/hrrr.${PDY}/${domain}
+export COMINhrrr=${COMINHRRR}/hrrr.${PDY}/${RUN}
 export GESINhrrr=${GESINHRRR}
 export GESINhrrrm1=${GESINHRRR}
 
@@ -101,7 +100,7 @@ export PDYHH_cycp1=$($NDATE +01  "${PDYHH}")
 
 PDY_cycp1=`echo ${PDYHH_cycp1} | cut -c 1-8`
 
-export COMINhrrr_cycp1=${COMINHRRR}/hrrr.${PDY_cycp1}/${domain}
+export COMINhrrr_cycp1=${COMINHRRR}/hrrr.${PDY_cycp1}/${RUN}
 
 export FGS_OPT=${FGS_OPT:-1}
 
@@ -145,7 +144,7 @@ postmsg $jlogfile "$msg"
 
 if [ -e "${pgmout}" ] ; then
    cat $pgmout
-   cp -p $pgmout   ${LOG_PGMOUT}
+   cpreq -p $pgmout   ${LOG_PGMOUT}
 fi
 
 ##############################

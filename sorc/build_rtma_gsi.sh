@@ -32,9 +32,9 @@ cd ${BASE}/rtma_gsi.fd/build
 cmake -DENKF_MODE=WRF -DBUILD_ENKF_PREPROCESS_ARW=ON -DBUILD_GSDCLOUD_ARW=ON ../.
 make -j1
 
-cp bin/gsi.x        ${BASE}/../exec/rtma_gsi
-cp bin/enkf_wrf.x   ${BASE}/../exec/rtma_enkf
-cp bin/enspreproc.x ${BASE}/../exec/rtma_process_enkf
-cp bin/initialens.x ${BASE}/../exec/rtma_initialens
+cpreq bin/gsi.x        ${BASE}/../exec/rtma_gsi
+cpreq bin/enkf_wrf.x   ${BASE}/../exec/rtma_enkf
+cpreq bin/enspreproc.x ${BASE}/../exec/rtma_process_enkf
+cpreq bin/initialens.x ${BASE}/../exec/rtma_initialens
 
 ##############################

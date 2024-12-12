@@ -33,9 +33,9 @@ if [ ! -s "./prepobs_prep.bufrtable" ]; then
 fi
 
 # WPS GEO_GRID Data
-if [ "${DOMAIN}" == "alaska" ]; then
+if [ "${RUN}" == "alaska" ]; then
   ${LN} -sf ${FIXwps}/hrrr_geo_em.d01.nc_AK ./geo_em.d01.nc
-else
+elseif [ "${RUN}" == "conus" ]; then
   ${LN} -sf ${FIXwps}/hrrr_geo_em.d01.nc ./geo_em.d01.nc
 fi
 if [ ! -s "./geo_em.d01.nc" ]; then

@@ -142,7 +142,7 @@ if [ "${envir}" = "lsf" ] || [ "${envir}" = "pbspro" ] && [ ${HRRRDAS_BEC} -eq 0
   export endianness=Big_Endian
 
   # Set variables used in script
-  #   ncp is cp replacement, currently keep as /bin/cp
+  #   ncpreq is cpreq replacement, currently keep as /bin/cp
   ncp=/bin/cp
 
   export HYB_ENS=".true."
@@ -166,7 +166,7 @@ if [ "${envir}" = "lsf" ] || [ "${envir}" = "pbspro" ] && [ ${HRRRDAS_BEC} -eq 0
   else
   #   we have 80 files, figure out if they are all the right size
   #   if not, set ifhyb=false
-      cp ${UTILrtma3d_dev}/convert.sh .
+      cpreq ${UTILrtma3d_dev}/convert.sh .
 #      ${UTILrtma3d_dev}/check_enkf_size.sh
   fi
 fi
@@ -210,7 +210,7 @@ hrrrmem=$((hrrrmem - 3 ))
 if [[ ${hrrrmem} -gt 30 ]] && [[ ${HRRRDAS_BEC} -eq 1  ]]; then #if HRRRDAS BEC is available, use it as first choice
   echo "Do hybrid with HRRRDAS BEC"
   nummem=${hrrrmem}
-  cp filelist.hrrrdas filelist03
+  cpreq filelist.hrrrdas filelist03
   ${CP} ${PARMgsi}/hybens_info_hrrrdas hybens_info
   beta1_inv=$(( 1 - $EnsWgt  ))
   ifhyb=.true.
@@ -258,14 +258,14 @@ PCPINFO=${FIXgsi}/global_pcpinfo.txt
 OBERROR=${FIXgsi}/3drtma_errtable_smallSFCerr_ascat
 #OBERROR=${FIXgsi}/nam_errtable.r3dv
 # Fixed fields
-cp $anavinfo anavinfo
-cp $BERROR   berror_stats
-cp $SATANGL  satbias_angle
-cp $SATINFO  satinfo
-cp $CONVINFO convinfo
-cp $OZINFO   ozinfo
-cp $PCPINFO  pcpinfo
-cp $OBERROR  errtable
+cpreq $anavinfo anavinfo
+cpreq $BERROR   berror_stats
+cpreq $SATANGL  satbias_angle
+cpreq $SATINFO  satinfo
+cpreq $CONVINFO convinfo
+cpreq $OZINFO   ozinfo
+cpreq $PCPINFO  pcpinfo
+cpreq $OBERROR  errtable
 
 # CRTM Spectral and Transmittance coefficients
 emiscoef_IRwater=${FIXcrtm}/Nalli.IRwater.EmisCoeff.bin
@@ -322,21 +322,21 @@ done
 #done
 
 #if [ $found_rjlist == True ]; then
-#  cp ${PDYprev_dir}/reject_conus_t_${probe_cyc}00.txt    t_rejectlist
-#  cp ${PDYprev_dir}/reject_conus_q_${probe_cyc}00.txt    q_rejectlist
-#  cp ${PDYprev_dir}/reject_conus_ps_${probe_cyc}00.txt   p_rejectlist
-#  cp ${PDYprev_dir}/reject_conus_wst_${probe_cyc}00.txt  w_rejectlist
-#  cp ${PDYprev_dir}/accept_conus_wst_${probe_cyc}00.txt  mesonet_stnuselist
+#  cpreq ${PDYprev_dir}/reject_conus_t_${probe_cyc}00.txt    t_rejectlist
+#  cpreq ${PDYprev_dir}/reject_conus_q_${probe_cyc}00.txt    q_rejectlist
+#  cpreq ${PDYprev_dir}/reject_conus_ps_${probe_cyc}00.txt   p_rejectlist
+#  cpreq ${PDYprev_dir}/reject_conus_wst_${probe_cyc}00.txt  w_rejectlist
+#  cpreq ${PDYprev_dir}/accept_conus_wst_${probe_cyc}00.txt  mesonet_stnuselist
 #fi
 
 # Get aircraft reject list, mesonet_uselist, sfcobs_provider
 #if [ $cyc = "08" ]; then
 #${MV} ${AIRCRAFT_REJECT}/current_bad_aircraft.txt  ${AIRCRAFT_REJECT}/${PDYm1}_bad_aircraft.txt
-#scp Edward.Colon@dtn-jet.boulder.rdhpcs.noaa.gov:/mnt/lfs4/HFIP/hfv3gfs/Edward.Colon/reject_use_lists/current_bad_aircraft.txt ${AIRCRAFT_REJECT}/
+#scpreq Edward.Colon@dtn-jet.boulder.rdhpcs.noaa.gov:/mnt/lfs4/HFIP/hfv3gfs/Edward.Colon/reject_use_lists/current_bad_aircraft.txt ${AIRCRAFT_REJECT}/
 #fi
 #if [ $cyc = "12" ]; then
 #${MV} ${SFCOBS_USELIST}/current_mesonet_uselist.txt ${SFCOBS_USELIST}/${PDYm1}_mesonet_uselist.txt
-#scp Edward.Colon@dtn-jet.boulder.rdhpcs.noaa.gov:/mnt/lfs4/HFIP/hfv3gfs/Edward.Colon/reject_use_lists/current_mesonet_uselist.txt ${SFCOBS_USELIST}/
+#scpreq Edward.Colon@dtn-jet.boulder.rdhpcs.noaa.gov:/mnt/lfs4/HFIP/hfv3gfs/Edward.Colon/reject_use_lists/current_mesonet_uselist.txt ${SFCOBS_USELIST}/
 #fi
 ${CP} ${AIRCRAFT_REJECT}/current_bad_aircraft.txt current_bad_aircraft
 ${CP} ${SFCOBS_USELIST}/current_mesonet_uselist.txt gsd_sfcobs_uselist.txt
@@ -425,7 +425,7 @@ if [ "${envir}" == "lsf" ] || [ "${envir}" == "pbspro" ];  then
   export OMP_STACKSIZE=500M
   export OMP_NUM_THREADS=1
   rm ${DATA}/rtma_gsi
-  cp ${EXECrtma3d}/rtma_gsi ${DATA}
+  cpreq ${EXECrtma3d}/rtma_gsi ${DATA}
   $APRUN ${DATA}/rtma_gsi < ${DATA}/gsiparm.anl > stdout 2>&1
   export err=$?
 fi

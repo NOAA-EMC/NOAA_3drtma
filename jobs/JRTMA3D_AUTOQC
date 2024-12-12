@@ -20,7 +20,6 @@ export RUN_ENVIR=${RUN_ENVIR:-nco}
 export NET=${NET:-rtma3d}
 export RUN=${RUN:-rtma3d}
 export model=${model:-rtma3d}
-export domain=${domain:-conus}
 
 ##########################################################
 # obtain unique process id (pid)
@@ -145,7 +144,7 @@ postmsg $jlogfile "$msg"
 
 if [ -e "${pgmout}" ] ; then
    cat $pgmout
-   cp -p $pgmout ${LOG_PGMOUT}
+   cpreq -p $pgmout ${LOG_PGMOUT}
 fi
 
 ##############################

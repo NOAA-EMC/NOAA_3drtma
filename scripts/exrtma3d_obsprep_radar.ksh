@@ -75,9 +75,9 @@ if [ ! -s "./prepobs_prep.bufrtable" ]; then
 fi
 
 # WPS GEO_GRID Data
-if [ "${DOMAIN}" == "alaska" ]; then
+if [ "${RUN}" == "alaska" ]; then
   ${LN} -sf ${FIXwps}/hrrr_geo_em.d01.nc_AK ./geo_em.d01.nc
-else
+elseif [ "${RUN}" == "conus" ]; then
   ${LN} -sf ${FIXwps}/hrrr_geo_em.d01.nc ./geo_em.d01.nc
 fi
 if [ ! -s "./geo_em.d01.nc" ]; then
@@ -113,7 +113,7 @@ ${ECHO} "YYYYMMDDHH: "${YYYYMMDDHH}
         numgrib2=`ls ${COMINradar}/${obsname}/${obsname}_*_${YYYY}${MM}${DD}-${HH}${min}*.grib2.gz | wc -l`
         echo 'Number of GRIB-2 files: '${numgrib2}
         if [ ${numgrib2} -ge 1 ] && [ ! -e filelist_mrms ]; then
-          cp ${COMINradar}/${obsname}/${obsname}_*_${YYYY}${MM}${DD}-${HH}${min}*.grib2.gz .
+          cpreq ${COMINradar}/${obsname}/${obsname}_*_${YYYY}${MM}${DD}-${HH}${min}*.grib2.gz .
           gzip -d ${obsname}_*_${YYYY}${MM}${DD}-${HH}${min}*.grib2.gz
           ls ${obsname}_*_${YYYY}${MM}${DD}-${HH}${min}*.grib2 > filelist_mrms
           echo 'Creating links for SUBH: '${SUBH_TIME}

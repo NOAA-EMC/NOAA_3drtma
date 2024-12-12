@@ -186,7 +186,7 @@ postmsg $jlogfile "$msg"
 
 if [ -e "${pgmout}" ] ; then
    cat $pgmout
-   cp -p $pgmout ${LOG_PGMOUT}
+   cpreq -p $pgmout ${LOG_PGMOUT}
 fi
 
 postmsg $jlogfile "$0 of $job completed normally"

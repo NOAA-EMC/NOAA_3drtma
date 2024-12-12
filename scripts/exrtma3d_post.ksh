@@ -149,7 +149,7 @@ ${CP_LN} ${PARMupp}/rap_micro_lookup.dat ./eta_micro_lookup.dat
 
 
 #${CP_LN} ${FIXupp}/*bin .
-cp /lfs/h2/emc/da/noscrub/edward.colon/3D-RTMA/rtma.v0.9.1/RTMA_NA/fix_upp_crtm/* .
+cpreq /lfs/h2/emc/da/noscrub/edward.colon/3D-RTMA/rtma.v0.9.1/RTMA_NA/fix_upp_crtm/* .
 #link CRTM coefficients
 #for what in "ahi_himawari8" "abi_gr" "imgr_g11" "imgr_g12" "imgr_g13" "imgr_g15" "imgr_mt1r" "imgr_mt2" \
 #     "amsre_aqua" "tmi_trmm" "ssmi_f13" "ssmi_f14" "ssmi_f15" "ssmis_f16"  \

@@ -99,7 +99,7 @@ msg="***********************************************************"
 postmsg "$jlogfile" "$msg"
 
 # Look for bqckground from pre-forecast background
-if [ "${DOMAIN}" == "alaska" ]; then
+if [ "${RUN}" == "alaska" ]; then
           case  $HH  in
                00)       
                     export PDYHH_AK=$($NDATE -03  "${PDYHH}")
@@ -178,7 +178,7 @@ if [ "${DOMAIN}" == "alaska" ]; then
 
           esac 
 FGShrrr_FNAME2="hrrrak_${PDYHH_AK}f00${ind}"
-else
+elseif [ "${RUN}" == "conus" ]; then
 FGShrrr_FNAME2="hrrr_${PDYHH_cycm1}f00${ind}"
 fi
         if [ -r ${GESINhrrr}/${FGShrrr_FNAME2} ] ; then

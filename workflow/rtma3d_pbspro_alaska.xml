@@ -8,7 +8,7 @@
 <!ENTITY endCDATE       "201907121400">
 <!ENTITY realtime       "T">
 <!ENTITY NET		"rtma3d">
-<!ENTITY RUN		"rtma3d">
+<!ENTITY RUN		"alaska">
 <!ENTITY envir		"pbspro">
 <!---<!ENTITY RUN_ENVIR	"dev"> -->
 <!ENTITY CAP_NET	"RTMA3D">
@@ -21,7 +21,6 @@
 <!ENTITY machine	"&MACHINE;">
 
 <!ENTITY SCHEDULER      "pbspro">
-<!ENTITY DOMAIN         "alaska">
 <!-- Variables Defined by absolute paths -->
 
 <!ENTITY ptmp_base	"/lfs/h2/emc/ptmp/&USER;/3DRTMA_HRRR_ALASKA_WKDIR">
@@ -269,10 +268,6 @@
    <envar>
         <name>MACHINE</name>
         <value>&MACHINE;</value>
-   </envar>
-   <envar>
-        <name>DOMAIN</name>
-        <value>&DOMAIN;</value>
    </envar>
    <envar>
         <name>SCHEDULER</name>
