@@ -270,7 +270,7 @@ ${ECHO} "update_vars.ksh completed successfully at `${DATE}`"
 ${CP} -p namelist.input  ${COMOUTwrf_rtma3d}/namelist.input_${cycle_str}
 
 
-msg="JOB $job FOR $RUN HAS COMPLETED NORMALLY"
+msg="JOB $job FOR $NET HAS COMPLETED NORMALLY"
 postmsg "$jlogfile" "$msg"
 
 exit 0

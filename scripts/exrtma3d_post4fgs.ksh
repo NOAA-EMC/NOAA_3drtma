@@ -57,7 +57,7 @@ export DATAHOME=$DATA
 export CORE="RAPRRTMA"
 
 export DATAWRFHOME=${GESINhrrr_rtma3d:-"$COMIN"}
-export DATAWRFFILE=${FGSrtma3d_FNAME:-"${RUN}.t${cyc}${subcyc}z.firstguess.nc"}
+export DATAWRFFILE=${FGSrtma3d_FNAME:-"${NET}.t${cyc}${subcyc}z.firstguess.nc"}
 export PROD_HEAD2="${PROD_HEAD}"
 
 ##########################################################################
@@ -186,7 +186,7 @@ cpreq /lfs/h2/emc/da/noscrub/edward.colon/3D-RTMA/rtma.v0.9.1/RTMA_NA/fix_upp_cr
 #
 # Run unipost
 #
-pgm=${RUN}_post4fgs
+pgm=${NET}_post4fgs
 . prep_step
 
 startmsg

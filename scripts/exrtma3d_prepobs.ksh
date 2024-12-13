@@ -81,7 +81,7 @@ cd ${workdir}
 time_str=`${DATE} "+%Y-%m-%d_%H_%M_%S" -d "${START_TIME}"`
 ${ECHO} " time_str = ${time_str}"
 time_run=${time_str}
-pgm=${RUN}_prepobs
+pgm=${NET}_prepobs
 . prep_step
 
 startmsg
@@ -126,7 +126,7 @@ if [ ${obsprep_radar} -eq 0 ] ; then
     ${ECHO} "Warning: ${COMINhrrr}/hrrr.t${HH}z.NSSLRefInGSI.bufr dones not exist!"
   fi
 else
-  ${ECHO} "using processed MRMS mosaic data for $RUN"
+  ${ECHO} "using processed MRMS mosaic data for $NET"
   if [ -r ${COMINobsproc_rtma3d}/rtma3d.t${HH}${subcyc}z.NSSLRefInGSI.bufr ] ; then
     ${LN} -sf ${COMINobsproc_rtma3d}/rtma3d.t${HH}${subcyc}z.NSSLRefInGSI.bufr ${DATA}/rtma3d.t${HH}${subcyc}z.NSSLRefInGSI.bufr
   else
@@ -149,7 +149,7 @@ fi
     ${ECHO} "using preocessed satellite cloud data from NASA LaRC NETCDF satellite cloud obs"
     ${LN} -sf ${COMINobsproc_rtma3d}/rap.t${HH}${subcyc}z.NASALaRCCloudInGSI.bufr ${DATA}/rap.t${HH}${subcyc}z.NASALaRCCloudInGSI.bufr
   else
-    ${ECHO} "Warning: ${COMINobsproc_rtma3d}/${RUN}.t${HH}${subcyc}z.NASALaRCCloudInGSI(_bufr).bufr  does not exist!"
+    ${ECHO} "Warning: ${COMINobsproc_rtma3d}/${NET}.t${HH}${subcyc}z.NASALaRCCloudInGSI(_bufr).bufr  does not exist!"
   fi
 
 # satellite wind data

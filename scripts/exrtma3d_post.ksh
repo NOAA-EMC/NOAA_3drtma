@@ -62,7 +62,7 @@ export SUBMODELNAME="RTMA"
 export fileNameFlux="DUMMY"
 export fileNameFlat="DUMMY"
 export DATAWRFHOME=${COMOUTgsi_rtma3d:-"$COMIN"}
-export DATAWRFFILE=${ANLrtma3d_FNAME:-"${RUN}.t${cyc}${subcyc}z.anl.wrf_inout.nc"}
+export DATAWRFFILE=${ANLrtma3d_FNAME:-"${NET}.t${cyc}${subcyc}z.anl.wrf_inout.nc"}
 
 ##########################################################################
 
@@ -170,7 +170,7 @@ cpreq /lfs/h2/emc/da/noscrub/edward.colon/3D-RTMA/rtma.v0.9.1/RTMA_NA/fix_upp_cr
 #
 # Run unipost
 #
-pgm=${RUN}_post
+pgm=${NET}_post
 . prep_step
 
 startmsg

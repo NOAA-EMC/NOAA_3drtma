@@ -71,26 +71,26 @@ if [ ! -d ${LOG_PGMOUT} ] ; then
 fi
 
 # specify the file head for the file names of the archived data files
-export PROD_HEAD=${PROD_HEAD:-${RUN}.t${cyc}z}
+export PROD_HEAD=${PROD_HEAD:-${NET}.t${cyc}z}
 
 # Specify Execution Areas
 export HOMErtma3d=${HOMErtma3d:-$NWROOT/rtma.${rtma_ver}}
 export EXECrtma3d=${EXECrtma3d:-$HOMErtma3d/exec}
-export FIXrtma3d=${FIXrtma3d:-$HOMErtma3d/fix/${RUN}}
-export PARMrtma3d=${PARMrtma3d:-$HOMErtma3d/parm/${RUN}}
-export USHrtma3d=${USHrtma3d:-$HOMErtma3d/ush/${RUN}}
-export UTILrtma3d=${UTILrtma3d:-$HOMErtma3d/util/${RUN}}
+export FIXrtma3d=${FIXrtma3d:-$HOMErtma3d/fix/${NET}}
+export PARMrtma3d=${PARMrtma3d:-$HOMErtma3d/parm/${NET}}
+export USHrtma3d=${USHrtma3d:-$HOMErtma3d/ush/${NET}}
+export UTILrtma3d=${UTILrtma3d:-$HOMErtma3d/util/${NET}}
 
 #################################################
 # Set up the INPUT and OUTPUT directories
 #################################################
-export COMIN=${COMIN:-${COMROOT}/${NET}/${envir}/${RUN}.${PDY}}
-export COMOUT=${COMOUT:-${COMROOT}/${NET}/${envir}/${RUN}.${PDY}}
+export COMIN=${COMIN:-${COMROOT}/${NET}/${envir}/${NET}.${PDY}}
+export COMOUT=${COMOUT:-${COMROOT}/${NET}/${envir}/${NET}.${PDY}}
 
 # Directory to store the firstguess as input for the RTMA3D (NETCDF?) 
 
 export COMINrap=${COMINRAP}/rap.${PDY}
-export COMINhrrr=${COMINHRRR}/hrrr.${PDY}/${RUN}
+export COMINhrrr=${COMINHRRR}/hrrr.${PDY}/${NET}
 export GESINhrrr=${GESINHRRR}
 export GESINhrrrm1=${GESINHRRR}
 
@@ -100,14 +100,14 @@ export PDYHH_cycp1=$($NDATE +01  "${PDYHH}")
 
 PDY_cycp1=`echo ${PDYHH_cycp1} | cut -c 1-8`
 
-export COMINhrrr_cycp1=${COMINHRRR}/hrrr.${PDY_cycp1}/${RUN}
+export COMINhrrr_cycp1=${COMINHRRR}/hrrr.${PDY_cycp1}/${NET}
 
 export FGS_OPT=${FGS_OPT:-1}
 
 # set the file name of the firstguess for rtma3d
 if [ ! "${PROD_HEAD}" ] ; then
-  export ANLrtma3d_FNAME="${RUN}.${cycle}.wrf_inout.nc"
-  export FGSrtma3d_FNAME="${RUN}.${cycle}.firstguess.nc"
+  export ANLrtma3d_FNAME="${NET}.${cycle}.wrf_inout.nc"
+  export FGSrtma3d_FNAME="${NET}.${cycle}.firstguess.nc"
 else
   export ANLrtma3d_FNAME="${PROD_HEAD}.wrf_inout.nc"
   export FGSrtma3d_FNAME="${PROD_HEAD}.firstguess.nc"
@@ -136,7 +136,7 @@ fi
 ######################
 # Execute the script.
 ######################
-${exSCR_PREPFGS:-$HOMErtma3d/scripts/ex${RUN}_prepfgs.ksh}
+${exSCR_PREPFGS:-$HOMErtma3d/scripts/ex${NET}_prepfgs.ksh}
 export err=$?; err_chk
 
 msg="$0 of $job completed normally"

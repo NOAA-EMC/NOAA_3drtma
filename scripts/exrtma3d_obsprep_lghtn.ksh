@@ -115,7 +115,7 @@ EOF
 fi
 
 # Run process lightning
-pgm=${RUN}_lghtn
+pgm=${NET}_lghtn
 . prep_step
 
 startmsg
@@ -140,7 +140,7 @@ else
 fi
 export err=$?; err_chk
 
-msg="JOB $job FOR $RUN HAS COMPLETED NORMALLY"
+msg="JOB $job FOR $NET HAS COMPLETED NORMALLY"
 postmsg "$jlogfile" "$msg"
 cpreq  ${DATA}/LightningInGSI.bufr ${DATA}/LightningInGSI_bufr.bufr
 lghtng_bufr="LightningInGSI_bufr.bufr"

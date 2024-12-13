@@ -67,16 +67,16 @@ if [ ! -d ${LOG_PGMOUT} ] ; then
 fi
 
 # specify the file head for the file names of the archived data files
-export PROD_HEAD=${PROD_HEAD:-"${RUN}.${cycle}"}
+export PROD_HEAD=${PROD_HEAD:-"${NET}.${cycle}"}
 
 
 # Specify Execution Areas
 export HOMErtma3d=${HOMErtma3d:-$NWROOT/rtma.${rtma_ver}}
 export EXECrtma3d=${EXECrtma3d:-$HOMErtma3d/exec}
-export FIXrtma3d=${FIXrtma3d:-$HOMErtma3d/fix/${RUN}}
-export PARMrtma3d=${PARMrtma3d:-$HOMErtma3d/parm/${RUN}}
-export USHrtma3d=${USHrtma3d:-$HOMErtma3d/ush/${RUN}}
-export UTILrtma3d=${UTILrtma3d:-$HOMErtma3d/util/${RUN}}
+export FIXrtma3d=${FIXrtma3d:-$HOMErtma3d/fix/${NET}}
+export PARMrtma3d=${PARMrtma3d:-$HOMErtma3d/parm/${NET}}
+export USHrtma3d=${USHrtma3d:-$HOMErtma3d/ush/${NET}}
+export UTILrtma3d=${UTILrtma3d:-$HOMErtma3d/util/${NET}}
 
 # date and time for previous and next cycle
 export PDYHH="${PDY}${cyc}"
@@ -105,9 +105,9 @@ fi
 # Set up the INPUT and OUTPUT directories
 #################################################
 ### COM_IN used to retrieve ges and analysis files from 2p5, ak, gu, hi, and pr
-export COMIN=${COMIN:-${COMROOT}/${NET}/${envir}/${RUN}.${PDY}}
-export COMINm1=${COMINm1:-${COMROOT}/${NET}/${envir}/${RUN}.${PDYm1}}
-export COMOUT=${COMOUT:-${COMROOT}/${NET}/${envir}/${RUN}.${PDY}}
+export COMIN=${COMIN:-${COMROOT}/${NET}/${envir}/${NET}.${PDY}}
+export COMINm1=${COMINm1:-${COMROOT}/${NET}/${envir}/${NET}.${PDYm1}}
+export COMOUT=${COMOUT:-${COMROOT}/${NET}/${envir}/${NET}.${PDY}}
 
 ### Observations Products/Input for the RTMA3D (prepbufr files) 
 export COMINobsproc_rtma3d=${COMINobsproc_rtma3d:-"${COMIN}/obsprd.${cycle}"}
@@ -172,13 +172,13 @@ export COM_IN=${COM_IN:-$COMROOT/${NET}/${envir}}
 #msg="$0 of $job completed normally"
 #postmsg $jlogfile "$msg"
 
-${exSCR_POST:-$HOMErtma3d/scripts/ex${RUN}_mintbg.ksh} 
+${exSCR_POST:-$HOMErtma3d/scripts/ex${NET}_mintbg.ksh} 
 export err=$?; err_chk
 
 msg="$0 of $job completed normally"
 postmsg $jlogfile "$msg"
 
-${exSCR_POST:-$HOMErtma3d/scripts/ex${RUN}_maxrh.ksh} 
+${exSCR_POST:-$HOMErtma3d/scripts/ex${NET}_maxrh.ksh} 
 export err=$?; err_chk
 
 msg="$0 of $job completed normally"

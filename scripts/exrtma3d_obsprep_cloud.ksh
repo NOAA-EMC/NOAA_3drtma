@@ -35,7 +35,7 @@ fi
 # WPS GEO_GRID Data
 if [ "${RUN}" == "alaska" ]; then
   ${LN} -sf ${FIXwps}/hrrr_geo_em.d01.nc_AK ./geo_em.d01.nc
-elseif [ "${RUN}" == "conus" ]; then
+elif [ "${RUN}" == "conus" ]; then
   ${LN} -sf ${FIXwps}/hrrr_geo_em.d01.nc ./geo_em.d01.nc
 fi
 if [ ! -s "./geo_em.d01.nc" ]; then
@@ -91,7 +91,7 @@ ${CP_LN} ${EXECrtma3d}/${exefile_name_cloud} ${pgm}
 ${MPIRUN} ./${pgm} > ${pgmout} 2>errfile
 export err=$?; err_chk
 
-msg="JOB $job FOR $RUN HAS COMPLETED NORMALLY"
+msg="JOB $job FOR $NET HAS COMPLETED NORMALLY"
 postmsg "$jlogfile" "$msg"
 
 targetfile="NASALaRCCloudInGSI.bufr"

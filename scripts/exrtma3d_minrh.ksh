@@ -101,10 +101,10 @@ while [[ $nn -lt $num ]] ; do
 	
 	#find proper name of ges and analysis files to run wgrib2 on based on run and domain name
        #find proper name of ges and analysis files to run wgrib2 on based on run and domain name
-        if [[ $RUN = "rtma3d" ]] ; then
+        if [[ $NET = "rtma3d" ]] ; then
             if [[ $dname == "hrrr" ]] ; then
-                opsfile=${COM_IN}/${RUN}.${YYYYMMDD}/postprd.t${HH}00z/${RUN}.t${HH}00z.wrfsubhnat.grib2
-                gesfile=${COM_IN}/${RUN}.${YYYYMMDD}/postprd.t${HH}00z/${RUN}.t${HH}00z.wrfsubhnat_fgs.grib2
+                opsfile=${COM_IN}/${NET}.${YYYYMMDD}/postprd.t${HH}00z/${NET}.t${HH}00z.wrfsubhnat.grib2
+                gesfile=${COM_IN}/${NET}.${YYYYMMDD}/postprd.t${HH}00z/${NET}.t${HH}00z.wrfsubhnat_fgs.grib2
             fi
         fi
 	#now use wgrib2 to pull ges/analysis from the file
@@ -119,7 +119,7 @@ while [[ $nn -lt $num ]] ; do
             $WGRIB2 $opsfile -match ":DPT:2 m above ground:" -ieee $dptops
             $WGRIB2 $gesfile -match ":DPT:2 m above ground:" -ieee $dptges
 	else
-	    echo "WARNING: ${run} file unavailable for ${CYCLE}!";
+	    echo "WARNING: ${NET} file unavailable for ${CYCLE}!";
 	fi	
 	CYCLE=`$MDATE +60 $CYCLE`
         if [ ${HH} -eq 06 ] ; then

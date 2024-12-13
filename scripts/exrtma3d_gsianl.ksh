@@ -311,7 +311,7 @@ done
 #  probe_YYYYMMDD=`echo $probe_cyc | cut -c 1-8`
 #  probe_HH=`echo $probe_cyc | cut -c 9-10`
 ##  probe_MM=`echo $YYYYMMDDHHMM | cut -c 11-12`
-#  probe_dir=${COMOUTautoqc_base}/${RUN}.${probe_YYYYMMDD}/autoqcprd.t${probe_HH}00z
+#  probe_dir=${COMOUTautoqc_base}/${NET}.${probe_YYYYMMDD}/autoqcprd.t${probe_HH}00z
 #  if [ -s ${probe_dir}/done.${probe_YYYYMMDD}${probe_HH}00 ]; then
 #    export PDYprev_dir=${probe_dir}
 #    found_rjlist=True
@@ -549,7 +549,7 @@ fi
 #${RM} -f ${DATA}/obs*
 #${RM} -f ${DATA}/pe*
 
-msg="JOB $job FOR $RUN HAS COMPLETED NORMALLY"
+msg="JOB $job FOR $NET HAS COMPLETED NORMALLY"
 postmsg "$jlogfile" "$msg"
 
 exit 0

@@ -77,7 +77,7 @@ fi
 # WPS GEO_GRID Data
 if [ "${RUN}" == "alaska" ]; then
   ${LN} -sf ${FIXwps}/hrrr_geo_em.d01.nc_AK ./geo_em.d01.nc
-elseif [ "${RUN}" == "conus" ]; then
+elif [ "${RUN}" == "conus" ]; then
   ${LN} -sf ${FIXwps}/hrrr_geo_em.d01.nc ./geo_em.d01.nc
 fi
 if [ ! -s "./geo_em.d01.nc" ]; then
@@ -171,7 +171,7 @@ postmsg "$jlogfile" "$msg"
 
 targetfile="NSSLRefInGSI.bufr"
 if [ -f ${DATA}/${targetfile} ] ; then
-  cpreq ${DATA}/${targetfile} ${COMINobsproc_rtma3d}/${RUN}.${tz_str}.${targetfile}
+  cpreq ${DATA}/${targetfile} ${COMINobsproc_rtma3d}/${NET}.${tz_str}.${targetfile}
 else
   msg="WARNING $pgm terminated normally but ${DATA}/${targetfile} does NOT exist."
   ${ECHO} "$msg"

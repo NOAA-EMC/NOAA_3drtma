@@ -87,7 +87,7 @@ cd ${workdir}
 time_str=`${DATE} "+%Y-%m-%d_%H_%M_%S" -d "${START_TIME}"`
 ${ECHO} " time_str = ${time_str}"
 time_run=${time_str}
-pgm=${RUN}_prepfgs
+pgm=${NET}_prepfgs
 . prep_step
 
 startmsg
@@ -178,7 +178,7 @@ if [ "${RUN}" == "alaska" ]; then
 
           esac 
 FGShrrr_FNAME2="hrrrak_${PDYHH_AK}f00${ind}"
-elseif [ "${RUN}" == "conus" ]; then
+elif [ "${RUN}" == "conus" ]; then
 FGShrrr_FNAME2="hrrr_${PDYHH_cycm1}f00${ind}"
 fi
         if [ -r ${GESINhrrr}/${FGShrrr_FNAME2} ] ; then

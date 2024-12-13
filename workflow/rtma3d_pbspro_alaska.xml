@@ -119,7 +119,7 @@
 
 <!-- for workflow -->
 
-<!ENTITY maxtries	"9">
+<!ENTITY maxtries	"10">
 <!ENTITY KEEPDATA	"YES">
 <!ENTITY SENDCOM	"YES">
 
@@ -127,48 +127,48 @@
 
 <!-- ex-shell and J-job script name -->
 <!ENTITY JJOB_OBSPREP_RADAR    "&JJOB_DIR;/J&CAP_RUN;_OBSPREP_RADAR">
-<!ENTITY exSCR_OBSPREP_RADAR   "&SCRIPT_DIR;/ex&RUN;_obsprep_radar.ksh">
+<!ENTITY exSCR_OBSPREP_RADAR   "&SCRIPT_DIR;/ex&NET;_obsprep_radar.ksh">
 <!ENTITY exefile_name_mosaic   "">
 <!ENTITY JJOB_OBSPREP_LGHTN    "&JJOB_DIR;/J&CAP_RUN;_OBSPREP_LGHTN">
-<!ENTITY exSCR_OBSPREP_LGHTN   "&SCRIPT_DIR;/ex&RUN;_obsprep_lghtn.ksh">
+<!ENTITY exSCR_OBSPREP_LGHTN   "&SCRIPT_DIR;/ex&NET;_obsprep_lghtn.ksh">
 <!ENTITY exefile_name_lightning "rtma_process_lightning">
 <!ENTITY JJOB_OBSPREP_CLOUD    "&JJOB_DIR;/J&CAP_RUN;_OBSPREP_CLOUD">
-<!ENTITY exSCR_OBSPREP_CLOUD   "&SCRIPT_DIR;/ex&RUN;_obsprep_cloud.ksh">
+<!ENTITY exSCR_OBSPREP_CLOUD   "&SCRIPT_DIR;/ex&NET;_obsprep_cloud.ksh">
 <!ENTITY exefile_name_cloud    "rtma_process_cloud">
 <!ENTITY JJOB_PREPOBS    "&JJOB_DIR;/J&CAP_RUN;_PREPOBS">
-<!ENTITY exSCR_PREPOBS   "&SCRIPT_DIR;/ex&RUN;_prepobs.ksh">
+<!ENTITY exSCR_PREPOBS   "&SCRIPT_DIR;/ex&NET;_prepobs.ksh">
 <!ENTITY JJOB_PREPFGS    "&JJOB_DIR;/J&CAP_RUN;_PREPFGS">
-<!ENTITY exSCR_PREPFGS   "&SCRIPT_DIR;/ex&RUN;_prepfgs.ksh">
+<!ENTITY exSCR_PREPFGS   "&SCRIPT_DIR;/ex&NET;_prepfgs.ksh">
 <!ENTITY JJOB_GSIANL	 "&JJOB_DIR;/J&CAP_RUN;_GSIANL">
-<!ENTITY exSCR_GSIANL	 "&SCRIPT_DIR;/ex&RUN;_gsianl.ksh">
+<!ENTITY exSCR_GSIANL	 "&SCRIPT_DIR;/ex&NET;_gsianl.ksh">
 <!ENTITY exefile_name_gsi      "rtma_gsi">
 <!ENTITY JJOB_AUTOQC     "&JJOB_DIR;/J&CAP_RUN;_AUTOQC">
-<!ENTITY exSCR_AUTOQC    "&SCRIPT_DIR;/ex&RUN;_autoqc.ksh">
+<!ENTITY exSCR_AUTOQC    "&SCRIPT_DIR;/ex&NET;_autoqc.ksh">
 <!ENTITY JJOB_MINT       "&JJOB_DIR;/J&CAP_RUN;_MINT_PREP">
 <!ENTITY JJOB_MAXT       "&JJOB_DIR;/J&CAP_RUN;_MAXT_PREP">
-<!ENTITY exSCR_MAXTBG    "&SCRIPT_DIR;/ex&RUN;_maxtbg.ksh">
+<!ENTITY exSCR_MAXTBG    "&SCRIPT_DIR;/ex&NET;_maxtbg.ksh">
 <!ENTITY exefile_name_maxtbg      "rtma_maxtbg">
-<!ENTITY exSCR_MAXTOBS   "&SCRIPT_DIR;/ex&RUN;_maxtobs.ksh">
+<!ENTITY exSCR_MAXTOBS   "&SCRIPT_DIR;/ex&NET;_maxtobs.ksh">
 <!ENTITY exefile_name_maxtobs      "rtma_maxtobs">
-<!ENTITY exSCR_MINTOBS   "&SCRIPT_DIR;/ex&RUN;_mintobs.ksh">
+<!ENTITY exSCR_MINTOBS   "&SCRIPT_DIR;/ex&NET;_mintobs.ksh">
 <!ENTITY exefile_name_mintobs      "rtma_mintobs">
-<!ENTITY exSCR_MINTBG   "&SCRIPT_DIR;/ex&RUN;_mintbg.ksh">
+<!ENTITY exSCR_MINTBG   "&SCRIPT_DIR;/ex&NET;_mintbg.ksh">
 <!ENTITY exefile_name_mintbg      "rtma_mintbg">
-<!ENTITY exSCR_MINRH   "&SCRIPT_DIR;/ex&RUN;_minrh.ksh"> 
+<!ENTITY exSCR_MINRH   "&SCRIPT_DIR;/ex&NET;_minrh.ksh"> 
 <!ENTITY exefile_name_minrh      "rtma_minrh">
-<!ENTITY exSCR_MAXRH   "&SCRIPT_DIR;/ex&RUN;_maxrh.ksh"> 
+<!ENTITY exSCR_MAXRH   "&SCRIPT_DIR;/ex&NET;_maxrh.ksh"> 
 <!ENTITY exefile_name_maxrh      "rtma_maxrh">
-<!ENTITY JJOB_UPDATEVARS     "&JJOB_DIR;/J&CAP_RUN;_UPDATEVARS">
-<!ENTITY exSCR_UPDATEVARS    "&SCRIPT_DIR;/ex&RUN;_updatevars.ksh">
+<!ENTITY JJOB_UPDATEVARS     "&JJOB_DIR;/J&CAP_NET;_UPDATEVARS">
+<!ENTITY exSCR_UPDATEVARS    "&SCRIPT_DIR;/ex&NET;_updatevars.ksh">
 <!ENTITY exefile_name_updatevars_wrf  "rtma_wrfarw_fcst">
 <!ENTITY exefile_name_updatevars_ncfields  "rtma_updatevars_ncfields">
 <!ENTITY exefile_name_updatevars_ndown  "rtma_updatevars_ndown">
 
 <!ENTITY JJOB_POST  	 "&JJOB_DIR;/J&CAP_RUN;_POST">
-<!ENTITY exSCR_POST      "&SCRIPT_DIR;/ex&RUN;_post.ksh">
+<!ENTITY exSCR_POST      "&SCRIPT_DIR;/ex&NET;_post.ksh">
 <!ENTITY exefile_name_post     "upp.x">
 <!ENTITY JJOB_POST4FGS   "&JJOB_DIR;/J&CAP_RUN;_POST4FGS">
-<!ENTITY exSCR_POST4FGS  "&SCRIPT_DIR;/ex&RUN;_post4fgs.ksh">
+<!ENTITY exSCR_POST4FGS  "&SCRIPT_DIR;/ex&NET;_post4fgs.ksh">
 
 
 <!-- Resources -->
