@@ -23,7 +23,7 @@
 <!ENTITY SCHEDULER      "pbspro">
 <!-- Variables Defined by absolute paths -->
 
-<!ENTITY ptmp_base	"/lfs/h2/emc/ptmp/&USER;/3DRTMA_HRRR_ALASKA_WKDIR">
+<!ENTITY ptmp_base	"/lfs/h2/emc/ptmp/&USER;/3DRTMA_HRRR_ALASKA_WRKDIR">
 <!ENTITY COMINRAP       "/lfs/h1/ops/prod/com/obsproc/v1.2">
 <!ENTITY COMINHRRR      "/lfs/h1/ops/prod/com/hrrr/v4.1">
 <!ENTITY COMINRADAR      "/lfs/h1/ops/prod/dcom/ldmdata/obs/upperair/mrms/alaska">
@@ -82,7 +82,7 @@
 
 
 <!-- definition of name of the top running directory for all tasks -->
-<!ENTITY DATA_RUNDIR    "&DATAROOT;/&envir;/&RUN;.@Y@m@d@H@M">
+<!ENTITY DATA_RUNDIR    "&DATAROOT;/&envir;/&NET;.@Y@m@d@H@M">
 <!--               names of the running directory for each task -->
 <!-- Note: -->
 <!--      these directories are just links pointing to real running directories -->
@@ -487,7 +487,7 @@
    </envar>
    <envar>
         <name>PROD_HEAD</name>
-        <value>&RUN;.t<cyclestr>@H@M</cyclestr>z</value>
+        <value>&NET;.t<cyclestr>@H@M</cyclestr>z</value>
    </envar>
    <envar>
         <name>GESROOT</name>
