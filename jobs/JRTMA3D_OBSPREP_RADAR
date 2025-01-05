@@ -50,7 +50,6 @@ cd $DATA
 #####################################################
 #setpdy.sh
 #. ${DATA}/PDY
-if [[ "${subcyc}" == "-1" ]]; then #it's hourly run
   export cycle=${cycle:-t${cyc}z}
   export pgmout=${pgmout:-"OUTPUT.${PDY}${cyc}.${jobid}"}
   if [ "${envir}" == "lsf" ]; then #wcoss
@@ -58,18 +57,6 @@ if [[ "${subcyc}" == "-1" ]]; then #it's hourly run
   elif [ "${envir}" == "pbspro" ]; then #wcoss2
   export COMINradar=${COMINradar:-"${COMINRADAR}"}
   fi
-else
-  export cycle=${cycle:-t${cyc}${subcyc}z}
-  export pgmout=${pgmout:-"OUTPUT.${PDY}${cyc}${subcyc}.${jobid}"}
-  if [ "${envir}" == "lsf" ]; then #wcoss
-  export COMINradar=${COMINradar:-"${COMINRADAR}"}
-  elif [ "${envir}" == "pbspro" ]; then #wcoss2
-  export COMINradar=${COMINradar:-"${COMINRADAR}"}
-  fi
-fi
-
-export subcyc=${subcyc} #Note: Must define subcyc in upper level script. Can be 00, 15, 30, or 45 /MPondeca, 30Jun2017
-                         #only used for rurtma2p5
 
 ####################################
 # Determine Job Output Name on System
@@ -139,7 +126,7 @@ fi
 ######################
 # Execute the script.
 ######################
-${exSCR_OBSPREP_RADAR:-$HOMErtma3d/scripts/ex${NET}_obsprep_radar.ksh}
+${exSCR_OBSPREP_RADAR:-$HOMErtma3d/scripts/$RUN/ex${RUN}_obsprep_radar.ksh}
 export err=$?; err_chk
 
 msg="$0 of $job completed normally"

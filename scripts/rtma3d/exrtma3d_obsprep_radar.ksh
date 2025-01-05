@@ -16,13 +16,6 @@ if [ ! -d "${COMINradar}" ]; then
   exit 1
 fi
 
-if [ "${subcyc}" == "-1" ]; then #hourly run
-  SUBH_TIME='00'
-  tz_str=t${cyc}z
-else
-  SUBH_TIME=${subcyc}
-  tz_str=t${cyc}${subcyc}z
-fi
 START_TIME=`${DATE} -d "${PDY} ${cyc} ${SUBH_TIME} minutes"`
 #assgin MM1, MM2, MM3
 if [ "${SUBH_TIME}" == "00" ]; then
@@ -75,11 +68,7 @@ if [ ! -s "./prepobs_prep.bufrtable" ]; then
 fi
 
 # WPS GEO_GRID Data
-if [ "${RUN}" == "alaska" ]; then
-  ${LN} -sf ${FIXwps}/hrrr_geo_em.d01.nc_AK ./geo_em.d01.nc
-elif [ "${RUN}" == "conus" ]; then
   ${LN} -sf ${FIXwps}/hrrr_geo_em.d01.nc ./geo_em.d01.nc
-fi
 if [ ! -s "./geo_em.d01.nc" ]; then
   ${ECHO} "geo_em.d01.nc does not exist or not readable"
   exit 1 
@@ -171,7 +160,7 @@ postmsg "$jlogfile" "$msg"
 
 targetfile="NSSLRefInGSI.bufr"
 if [ -f ${DATA}/${targetfile} ] ; then
-  cpreq ${DATA}/${targetfile} ${COMINobsproc_rtma3d}/${NET}.${tz_str}.${targetfile}
+  cpreq ${DATA}/${targetfile} ${COMINobsproc_rtma3d}/${NET}.t${cyc}z.${targetfile}
 else
   msg="WARNING $pgm terminated normally but ${DATA}/${targetfile} does NOT exist."
   ${ECHO} "$msg"

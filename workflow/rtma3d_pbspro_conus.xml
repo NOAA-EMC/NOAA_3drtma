@@ -9,7 +9,7 @@
 <!ENTITY endCDATE       "201907121400">
 <!ENTITY realtime       "T">
 <!ENTITY NET		"rtma3d">
-<!ENTITY RUN		"conus">
+<!ENTITY RUN		"&NET;">
 <!ENTITY envir		"pbspro">
 <!---<!ENTITY RUN_ENVIR	"dev"> -->
 <!ENTITY CAP_NET	"RTMA3D">
@@ -25,15 +25,15 @@
 <!ENTITY SCHEDULER      "pbspro">
 <!-- Variables Defined by absolute paths -->
 
-<!ENTITY ptmp_base	"/lfs/h2/emc/ptmp/&USER;/3DRTMA_HRRR_CONUS_WRKDIR">
+<!ENTITY ptmp_base	"/lfs/h2/emc/ptmp/&USER;/3DRTMA_HRRR_CONUS_NEW_WRKDIR">
 <!ENTITY COMINRAP       "/lfs/h1/ops/prod/com/obsproc/v1.2">
 <!ENTITY COMINHRRR      "/lfs/h1/ops/prod/com/hrrr/v4.1">
 <!ENTITY COMINRADAR      "/lfs/h1/ops/prod/dcom/ldmdata/obs/upperair/mrms/conus">
 <!ENTITY GESINHRRR      "/lfs/h1/ops/prod/com/hrrr/v4.1/nwges/hrrrges_sfc/conus">
 <!ENTITY COMINHRRRDAS   "/lfs/h1/ops/canned/com/hrrr/v4.1/nwges/hrrrdasges">
 <!ENTITY COMINGDAS      "/lfs/h1/ops/prod/com/gfs/v16.3">
-<!ENTITY NWROOT		"/lfs/h2/emc/da/noscrub/&USER;/NOAA_3drtma">
-<!ENTITY COMINPREP      "/lfs/h1/ops/prod/com/obsproc/v1.2">
+<!ENTITY NWROOT		"/lfs/h2/emc/da/noscrub/&USER;/NOAA_3drtma_new">
+<!ENTITY COMINPREP      "/lfs/h2/emc/ptmp/ashley.stanfield/CRON/3drtma_v13/com/obsproc/v1.3">
 <!ENTITY OBS_DIR	"/scratch4/NCEPDEV/fv3-cam/save/Gang.Zhao/Data/GSD_GSI_Case/obs">
 <!ENTITY HRRR_DIR	"/scratch4/NCEPDEV/fv3-cam/save/Gang.Zhao/Data/GSD_GSI_Case/fgs">
 
@@ -45,7 +45,7 @@
 <!ENTITY GESROOT	"&ptmp_base;/nwges2/&NET;">
 
 <!ENTITY HOMErtma3d	"&NWROOT;">
-<!ENTITY LOG_DIR	"/lfs/h2/emc/ptmp/&USER;/3DRTMA_HRRR_CONUS_LOG">
+<!ENTITY LOG_DIR	"/lfs/h2/emc/ptmp/&USER;/3DRTMA_HRRR_CONUS_NEW_LOG">
 <!ENTITY JJOB_DIR	"&HOMErtma3d;/jobs">
 <!ENTITY SCRIPT_DIR	"&HOMErtma3d;/scripts">
 <!ENTITY USHrtma3d	"&HOMErtma3d;/ush">
@@ -63,7 +63,7 @@
 <!ENTITY FIXwps         "&NWROOT;/fix/wps">
 <!ENTITY FIXwrf         "&NWROOT;/fix/wrf">
 <!ENTITY OBS_USELIST    "&NWROOT;/fix/obsuselist">
-<!ENTITY AIRCRAFT_REJECT  "$NWROOT;/fix/obsuselist/amdar_reject_lists">
+<!ENTITY AIRCRAFT_REJECT  "&NWROOT;/fix/obsuselist/amdar_reject_lists">
 <!ENTITY SFCOBS_USELIST   "&NWROOT;/fix/obsuselist/mesonet_uselists">
 <!ENTITY SFCOBS_PROVIDER  "&NWROOT;/fix/obsuselist/sfcobs_provider">
 <!ENTITY PARMwrf        "&NWROOT;/parm/wrf">
@@ -105,7 +105,7 @@
 <!ENTITY hpsspath1_AGibbs  "/NCEPDEV/emc-meso/1year/Annette.Gibbs">
 
 <!ENTITY FGS_OPT        "1">
-<!ENTITY READDIAG "/lfs/h2/emc/da/save/Matthew.T.Morris/NOAA_3drtma/sorc/rtma_gsi.fd/build/bin/read_diag_conv.x">
+<!ENTITY READDIAG "/lfs/h2/emc/da/save/Matthew.T.Morris/NOAA_3drtma_new/sorc/rtma_gsi.fd/build/bin/read_diag_conv.x">
 
 <!-- for obs pre-processing -->
 <!ENTITY obsprep_radar  "1">
@@ -128,48 +128,48 @@
 
 <!-- ex-shell and J-job script name -->
 <!ENTITY JJOB_OBSPREP_RADAR    "&JJOB_DIR;/J&CAP_RUN;_OBSPREP_RADAR">
-<!ENTITY exSCR_OBSPREP_RADAR   "&SCRIPT_DIR;/ex&NET;_obsprep_radar.ksh">
+<!ENTITY exSCR_OBSPREP_RADAR   "&SCRIPT_DIR;/&RUN;/ex&RUN;_obsprep_radar.ksh">
 <!ENTITY exefile_name_mosaic   "">
 <!ENTITY JJOB_OBSPREP_LGHTN    "&JJOB_DIR;/J&CAP_RUN;_OBSPREP_LGHTN">
-<!ENTITY exSCR_OBSPREP_LGHTN   "&SCRIPT_DIR;/ex&NET;_obsprep_lghtn.ksh">
+<!ENTITY exSCR_OBSPREP_LGHTN   "&SCRIPT_DIR;/ex&RUN;_obsprep_lghtn.ksh">
 <!ENTITY exefile_name_lightning "rtma_process_lightning">
 <!ENTITY JJOB_OBSPREP_CLOUD    "&JJOB_DIR;/J&CAP_RUN;_OBSPREP_CLOUD">
-<!ENTITY exSCR_OBSPREP_CLOUD   "&SCRIPT_DIR;/ex&NET;_obsprep_cloud.ksh">
+<!ENTITY exSCR_OBSPREP_CLOUD   "&SCRIPT_DIR;/&RUN;/ex&RUN;_obsprep_cloud.ksh">
 <!ENTITY exefile_name_cloud    "rtma_process_cloud">
 <!ENTITY JJOB_PREPOBS    "&JJOB_DIR;/J&CAP_RUN;_PREPOBS">
-<!ENTITY exSCR_PREPOBS   "&SCRIPT_DIR;/ex&NET;_prepobs.ksh">
+<!ENTITY exSCR_PREPOBS   "&SCRIPT_DIR;/ex&RUN;_prepobs.ksh">
 <!ENTITY JJOB_PREPFGS    "&JJOB_DIR;/J&CAP_RUN;_PREPFGS">
-<!ENTITY exSCR_PREPFGS   "&SCRIPT_DIR;/ex&NET;_prepfgs.ksh">
+<!ENTITY exSCR_PREPFGS   "&SCRIPT_DIR;/&RUN;/ex&RUN;_prepfgs.ksh">
 <!ENTITY JJOB_GSIANL	 "&JJOB_DIR;/J&CAP_RUN;_GSIANL">
-<!ENTITY exSCR_GSIANL	 "&SCRIPT_DIR;/ex&NET;_gsianl.ksh">
+<!ENTITY exSCR_GSIANL	 "&SCRIPT_DIR;/ex&RUN;_gsianl.ksh">
 <!ENTITY exefile_name_gsi      "rtma_gsi">
 <!ENTITY JJOB_AUTOQC     "&JJOB_DIR;/J&CAP_RUN;_AUTOQC">
-<!ENTITY exSCR_AUTOQC    "&SCRIPT_DIR;/ex&NET;_autoqc.ksh">
+<!ENTITY exSCR_AUTOQC    "&SCRIPT_DIR;/ex&RUN;_autoqc.ksh">
 <!ENTITY JJOB_MINT       "&JJOB_DIR;/J&CAP_RUN;_MINT_PREP">
 <!ENTITY JJOB_MAXT       "&JJOB_DIR;/J&CAP_RUN;_MAXT_PREP">
-<!ENTITY exSCR_MAXTBG    "&SCRIPT_DIR;/ex&NET;_maxtbg.ksh">
+<!ENTITY exSCR_MAXTBG    "&SCRIPT_DIR;/ex&RUN;_maxtbg.ksh">
 <!ENTITY exefile_name_maxtbg      "rtma_maxtbg">
-<!ENTITY exSCR_MAXTOBS   "&SCRIPT_DIR;/ex&NET;_maxtobs.ksh">
+<!ENTITY exSCR_MAXTOBS   "&SCRIPT_DIR;/ex&RUN;_maxtobs.ksh">
 <!ENTITY exefile_name_maxtobs      "rtma_maxtobs">
-<!ENTITY exSCR_MINTOBS   "&SCRIPT_DIR;/ex&NET;_mintobs.ksh">
+<!ENTITY exSCR_MINTOBS   "&SCRIPT_DIR;/ex&RUN;_mintobs.ksh">
 <!ENTITY exefile_name_mintobs      "rtma_mintobs">
-<!ENTITY exSCR_MINTBG   "&SCRIPT_DIR;/ex&NET;_mintbg.ksh">
+<!ENTITY exSCR_MINTBG   "&SCRIPT_DIR;/ex&RUN;_mintbg.ksh">
 <!ENTITY exefile_name_mintbg      "rtma_mintbg">
-<!ENTITY exSCR_MINRH   "&SCRIPT_DIR;/ex&NET;_minrh.ksh"> 
+<!ENTITY exSCR_MINRH   "&SCRIPT_DIR;/ex&RUN;_minrh.ksh"> 
 <!ENTITY exefile_name_minrh      "rtma_minrh">
-<!ENTITY exSCR_MAXRH   "&SCRIPT_DIR;/ex&NET;_maxrh.ksh"> 
+<!ENTITY exSCR_MAXRH   "&SCRIPT_DIR;/ex&RUN;_maxrh.ksh"> 
 <!ENTITY exefile_name_maxrh      "rtma_maxrh">
 <!ENTITY JJOB_UPDATEVARS     "&JJOB_DIR;/J&CAP_RUN;_UPDATEVARS">
-<!ENTITY exSCR_UPDATEVARS    "&SCRIPT_DIR;/ex&NET;_updatevars.ksh">
+<!ENTITY exSCR_UPDATEVARS    "&SCRIPT_DIR;/&RUN;/ex&RUN;_updatevars.ksh">
 <!ENTITY exefile_name_updatevars_wrf  "rtma_wrfarw_fcst">
 <!ENTITY exefile_name_updatevars_ncfields  "rtma3d_updatevars_ncfields">
 <!ENTITY exefile_name_updatevars_ndown  "rtma3d_updatevars_ndown">
 
 <!ENTITY JJOB_POST  	 "&JJOB_DIR;/J&CAP_RUN;_POST">
-<!ENTITY exSCR_POST      "&SCRIPT_DIR;/ex&NET;_post.ksh">
+<!ENTITY exSCR_POST      "&SCRIPT_DIR;/ex&RUN;_post.ksh">
 <!ENTITY exefile_name_post     "upp.x">
 <!ENTITY JJOB_POST4FGS   "&JJOB_DIR;/J&CAP_RUN;_POST4FGS">
-<!ENTITY exSCR_POST4FGS  "&SCRIPT_DIR;/ex&NET;_post4fgs.ksh">
+<!ENTITY exSCR_POST4FGS  "&SCRIPT_DIR;/ex&RUN;_post4fgs.ksh">
 
 
 <!-- Resources -->
@@ -481,7 +481,7 @@
    </envar>
    <envar>
         <name>PROD_HEAD</name>
-        <value>&NET;.t<cyclestr>@H@M</cyclestr>z</value>
+        <value>&RUN;.t<cyclestr>@H</cyclestr>z</value>
    </envar>
    <envar>
         <name>GESROOT</name>
@@ -816,7 +816,7 @@
 <workflow realtime="T" scheduler="pbspro" cyclethrottle="96" taskthrottle="960" cyclelifespan="00:48:00:00">
 
   <log>
-    <cyclestr>&LOG_DIR;/&NET;_workflow_&envir;_@Y@m@d@H@M.log</cyclestr>
+    <cyclestr>&LOG_DIR;/&RUN;_workflow_&envir;_@Y@m@d@H@M.log</cyclestr>
   </log>
 
 
@@ -828,7 +828,7 @@
 
   <cycledef group="rap">0 0,12 * 01-12 2022-2025 *</cycledef>
 
-  <task name="&NET;_obsprep_lghtn_task_@Y@m@d@H@M" cycledefs="hourly" maxtries="&maxtries;">
+  <task name="&RUN;_obsprep_lghtn_task_@Y@m@d@H@M" cycledefs="hourly" maxtries="&maxtries;">
 
     &ENVARS;
     <envar>
@@ -837,8 +837,8 @@
     </envar>
 
     <command>&JJOB_DIR;/launch.ksh &JJOB_OBSPREP_LGHTN;</command>
-    <jobname><cyclestr>&NET;_obsprep_lghtn_job_@Y@m@d@H@M</cyclestr></jobname>
-    <join><cyclestr>&LOG_SCHDLR;/&NET;_&envir;_obsprep_lghtn_@Y@m@d@H@M.log</cyclestr></join>
+    <jobname><cyclestr>&RUN;_obsprep_lghtn_job_@Y@m@d@H@M</cyclestr></jobname>
+    <join><cyclestr>&LOG_SCHDLR;/&RUN;_&envir;_obsprep_lghtn_@Y@m@d@H@M.log</cyclestr></join>
 
     &OBSPREP_LGHTN_RESOURCES;
     &OBSPREP_LGHTN_RESERVATION;
@@ -846,13 +846,10 @@
     &ENVARS_PREPJOB;
 
    <dependency>
-       <or>
-       <datadep age="2"><cyclestr>&COMINPREP;/rap.@Y@m@d/rap.t@Hz.lghtng.tm00.bufr_d</cyclestr></datadep>
-       <datadep age="2"><cyclestr>&COMINPREP;/rap_e.@Y@m@d/rap_e.t@Hz.lghtng.tm00.bufr_d</cyclestr></datadep>
-       </or>
+       <datadep age="2"><cyclestr>&COMINPREP;/rtma.@Y@m@d/rtma.t@Hz.lghtng.tm00.bufr_d</cyclestr></datadep>
    </dependency>
   </task>
-  <task name="&NET;_obsprep_cloud_task_@Y@m@d@H@M" cycledefs="hourly" maxtries="&maxtries;">
+  <task name="&RUN;_obsprep_cloud_task_@Y@m@d@H@M" cycledefs="hourly" maxtries="&maxtries;">
 
     &ENVARS;
     <envar>
@@ -861,8 +858,8 @@
     </envar>
 
     <command>&JJOB_DIR;/launch.ksh &JJOB_OBSPREP_CLOUD;</command>
-    <jobname><cyclestr>&NET;_obsprep_cloud_job_@Y@m@d@H@M</cyclestr></jobname>
-    <join><cyclestr>&LOG_SCHDLR;/&NET;_&envir;_obsprep_cloud_@Y@m@d@H@M.log</cyclestr></join>
+    <jobname><cyclestr>&RUN;_obsprep_cloud_job_@Y@m@d@H@M</cyclestr></jobname>
+    <join><cyclestr>&LOG_SCHDLR;/&RUN;_&envir;_obsprep_cloud_@Y@m@d@H@M.log</cyclestr></join>
 
     &OBSPREP_CLOUD_RESOURCES;
     &OBSPREP_CLOUD_RESERVATION;
@@ -870,14 +867,11 @@
     &ENVARS_PREPJOB; 
 
     <dependency>
-       <or>
-       <datadep age="2"><cyclestr>&COMINPREP;/rap.@Y@m@d/rap.t@Hz.lgycld.tm00.bufr_d</cyclestr></datadep>
-       <datadep age="2"><cyclestr>&COMINPREP;/rap_e.@Y@m@d/rap_e.t@Hz.lgycld.tm00.bufr_d</cyclestr></datadep>
-       </or>
+       <datadep age="2"><cyclestr>&COMINPREP;/rtma.@Y@m@d/rtma.t@Hz.lgycld.tm00.bufr_d</cyclestr></datadep>
    </dependency>
   </task>
 
-  <task name="&NET;_obsprep_radar_task_@Y@m@d@H@M" cycledefs="hourly" maxtries="&maxtries;">
+  <task name="&RUN;_obsprep_radar_task_@Y@m@d@H@M" cycledefs="hourly" maxtries="&maxtries;">
 
     &ENVARS;
    <envar>
@@ -903,8 +897,8 @@
 
 
     <command>&JJOB_DIR;/launch.ksh &JJOB_OBSPREP_RADAR;</command>
-    <jobname><cyclestr>&NET;_obsprep_radar_job_@Y@m@d@H@M</cyclestr></jobname>
-    <join><cyclestr>&LOG_SCHDLR;/&NET;_&envir;_obsprep_radar_@Y@m@d@H@M.log</cyclestr></join>
+    <jobname><cyclestr>&RUN;_obsprep_radar_job_@Y@m@d@H@M</cyclestr></jobname>
+    <join><cyclestr>&LOG_SCHDLR;/&RUN;_&envir;_obsprep_radar_@Y@m@d@H@M.log</cyclestr></join>
 
     &OBSPREP_RADAR_RESOURCES;
     &OBSPREP_RADAR_RESERVATION;
@@ -922,7 +916,7 @@
    </dependency>
   </task>
 
-    <task name="&NET;_prepobs_task_@Y@m@d@H@M" cycledefs="hourly" maxtries="&maxtries;">
+    <task name="&RUN;_prepobs_task_@Y@m@d@H@M" cycledefs="hourly" maxtries="&maxtries;">
 
     &ENVARS;
     <envar>
@@ -931,8 +925,8 @@
     </envar>
 
     <command>&JJOB_DIR;/launch.ksh &JJOB_PREPOBS;</command>
-    <jobname><cyclestr>&NET;_prepobs_job_@Y@m@d@H@M</cyclestr></jobname>
-    <join><cyclestr>&LOG_SCHDLR;/&NET;_&envir;_prepobs_@Y@m@d@H@M.log</cyclestr></join>
+    <jobname><cyclestr>&RUN;_prepobs_job_@Y@m@d@H@M</cyclestr></jobname>
+    <join><cyclestr>&LOG_SCHDLR;/&RUN;_&envir;_prepobs_@Y@m@d@H@M.log</cyclestr></join>
 
     &PREPOBS_RESOURCES;
     &PREPOBS_RESERVATION;
@@ -940,27 +934,18 @@
 
    <dependency>
        <and>
-       <or>
-       <datadep age="2"><cyclestr>&COMINPREP;/rap.@Y@m@d/rap.t@Hz.prepbufr.tm00</cyclestr></datadep>    
-       <datadep age="2"><cyclestr>&COMINPREP;/rap_e.@Y@m@d/rap_e.t@Hz.prepbufr.tm00</cyclestr></datadep>
-       </or>
-       <or>
-       <datadep age="2"><cyclestr>&COMINPREP;/rap.@Y@m@d/rap.t@Hz.satwnd.tm00.bufr_d</cyclestr></datadep>
-       <datadep age="2"><cyclestr>&COMINPREP;/rap_e.@Y@m@d/rap_e.t@Hz.satwnd.tm00.bufr_d</cyclestr></datadep> 
-       </or>
-       <or>
-       <datadep age="2"><cyclestr>&COMINPREP;/rap.@Y@m@d/rap.t@Hz.nexrad.tm00.bufr_d</cyclestr></datadep>
-       <datadep age="2"><cyclestr>&COMINPREP;/rap_e.@Y@m@d/rap_e.t@Hz.nexrad.tm00.bufr_d</cyclestr></datadep>  
-       </or>
+       <datadep age="2"><cyclestr>&COMINPREP;/rtma.@Y@m@d/rtma.t@Hz.prepbufr.tm00</cyclestr></datadep>  
+       <datadep age="2"><cyclestr>&COMINPREP;/rtma.@Y@m@d/rtma.t@Hz.satwnd.tm00.bufr_d</cyclestr></datadep>
+       <datadep age="2"><cyclestr>&COMINPREP;/rtma.@Y@m@d/rtma.t@Hz.nexrad.tm00.bufr_d</cyclestr></datadep>
        <and>
        <or>
-       <taskdep task="&NET;_obsprep_lghtn_task_@Y@m@d@H@M"/>
+       <taskdep task="&RUN;_obsprep_lghtn_task_@Y@m@d@H@M"/>
        </or>
        <or>
-       <taskdep task="&NET;_obsprep_cloud_task_@Y@m@d@H@M"/>
+       <taskdep task="&RUN;_obsprep_cloud_task_@Y@m@d@H@M"/>
        </or>
        <or>
-       <taskdep task="&NET;_obsprep_radar_task_@Y@m@d@H@M"/>
+       <taskdep task="&RUN;_obsprep_radar_task_@Y@m@d@H@M"/>
        </or>
        </and>
        </and>   
@@ -969,22 +954,18 @@
   </task>
 
 
-  <task name="&NET;_prepfgs_task_@Y@m@d@H@M" cycledefs="hourly" maxtries="&maxtries;">
+  <task name="&RUN;_prepfgs_task_@Y@m@d@H@M" cycledefs="hourly" maxtries="&maxtries;">
 
     &ENVARS;
     <envar>
        <name>rundir_task</name>
        <value><cyclestr>&DATA_FGSPRD;</cyclestr></value>
     </envar>
-    <envar>
-       <name>ind</name>
-       <value><cyclestr>1</cyclestr></value>
-    </envar>
 
 
     <command>&JJOB_DIR;/launch.ksh &JJOB_PREPFGS;</command>
-    <jobname><cyclestr>&NET;_prepfgs_job_@Y@m@d@H@M</cyclestr></jobname>
-    <join><cyclestr>&LOG_SCHDLR;/&NET;_&envir;_prepfgs_@Y@m@d@H@M.log</cyclestr></join>
+    <jobname><cyclestr>&RUN;_prepfgs_job_@Y@m@d@H@M</cyclestr></jobname>
+    <join><cyclestr>&LOG_SCHDLR;/&RUN;_&envir;_prepfgs_@Y@m@d@H@M.log</cyclestr></join>
 
     &PREPFGS_RESOURCES;
     &PREPFGS_RESERVATION;
@@ -994,7 +975,7 @@
        <datadep age="10" minsize="15000M"><cyclestr offset="-3600">&GESINHRRR;/hrrr_@Y@m@d@Hf001</cyclestr></datadep>
    </dependency>
    </task>
-  <task name="&NET;_gsianl_task_@Y@m@d@H@M" cycledefs="hourly" maxtries="&maxtries;">
+  <task name="&RUN;_gsianl_task_@Y@m@d@H@M" cycledefs="hourly" maxtries="&maxtries;">
 
     &ENVARS;
     &GSI_RESOURCES;
@@ -1007,39 +988,39 @@
 
 
     <command>&JJOB_DIR;/launch.ksh &JJOB_GSIANL;</command>
-    <jobname><cyclestr>&NET;_gsianl_job_@Y@m@d@H@M</cyclestr></jobname>
-    <join><cyclestr>&LOG_SCHDLR;/&NET;_&envir;_gsianl_@Y@m@d@H@M.log</cyclestr></join>
+    <jobname><cyclestr>&RUN;_gsianl_job_@Y@m@d@H@M</cyclestr></jobname>
+    <join><cyclestr>&LOG_SCHDLR;/&RUN;_&envir;_gsianl_@Y@m@d@H@M.log</cyclestr></join>
 
     &ENVARS_GSI;
 
     <dependency>
       <and>
-           <taskdep task="&NET;_prepfgs_task_@Y@m@d@H@M"/> 
-           <taskdep task="&NET;_prepobs_task_@Y@m@d@H@M"/>
+           <taskdep task="&RUN;_prepfgs_task_@Y@m@d@H@M"/> 
+           <taskdep task="&RUN;_prepobs_task_@Y@m@d@H@M"/>
       </and>
      </dependency>
   </task>
 
- <task name="&NET;_updatevars_task_@Y@m@d@H@M" cycledefs="hourly" maxtries="1">
+ <task name="&RUN;_updatevars_task_@Y@m@d@H@M" cycledefs="hourly" maxtries="1">
 
     &ENVARS;
     &UPDATEVARS_RESOURCES;
     &UPDATEVARS_RESERVATION;
 
     <command>&JJOB_DIR;/launch.ksh &JJOB_UPDATEVARS;</command>
-    <jobname><cyclestr>&NET;_updatevars_job_@Y@m@d@H@M</cyclestr></jobname>
-    <join><cyclestr>&LOG_SCHDLR;/&NET;_&envir;_updatevars_@Y@m@d@H@M.log</cyclestr></join>
+    <jobname><cyclestr>&RUN;_updatevars_job_@Y@m@d@H@M</cyclestr></jobname>
+    <join><cyclestr>&LOG_SCHDLR;/&RUN;_&envir;_updatevars_@Y@m@d@H@M.log</cyclestr></join>
 
     &ENVARS_UPDATEVARS;
 
     <dependency>
-          <taskdep task="&NET;_gsianl_task_@Y@m@d@H@M"/>
+          <taskdep task="&RUN;_gsianl_task_@Y@m@d@H@M"/>
     </dependency>
 
   </task>
 
 
-  <task name="&NET;_post_task_@Y@m@d@H@M" cycledefs="hourly" maxtries="&maxtries;">
+  <task name="&RUN;_post_task_@Y@m@d@H@M" cycledefs="hourly" maxtries="&maxtries;">
 
     &ENVARS;
     &POST_RESOURCES;
@@ -1059,18 +1040,18 @@
     </envar>
 
     <command>&JJOB_DIR;/launch.ksh &JJOB_POST;</command>
-    <jobname><cyclestr>&NET;_post_job_@Y@m@d@H@M</cyclestr></jobname>
-    <join><cyclestr>&LOG_SCHDLR;/&NET;_&envir;_post_@Y@m@d@H@M.log</cyclestr></join>
+    <jobname><cyclestr>&RUN;_post_job_@Y@m@d@H@M</cyclestr></jobname>
+    <join><cyclestr>&LOG_SCHDLR;/&RUN;_&envir;_post_@Y@m@d@H@M.log</cyclestr></join>
 
     &ENVARS_POST;
 
 
     <dependency> 
-          <taskdep task="&NET;_updatevars_task_@Y@m@d@H@M"/>
+          <taskdep task="&RUN;_updatevars_task_@Y@m@d@H@M"/>
     </dependency>
   </task>
 
-  <task name="&NET;_post4fgs_task_@Y@m@d@H@M" cycledefs="hourly" maxtries="&maxtries;">
+  <task name="&RUN;_post4fgs_task_@Y@m@d@H@M" cycledefs="hourly" maxtries="&maxtries;">
 
     &ENVARS;
     &POST_RESOURCES;
@@ -1081,13 +1062,13 @@
     </envar>
 
     <command>&JJOB_DIR;/launch.ksh &JJOB_POST4FGS;</command>
-    <jobname><cyclestr>&NET;_post4fgs_job_@Y@m@d@H@M</cyclestr></jobname>
-    <join><cyclestr>&LOG_SCHDLR;/&NET;_&envir;_post4fgs_@Y@m@d@H@M.log</cyclestr></join>
+    <jobname><cyclestr>&RUN;_post4fgs_job_@Y@m@d@H@M</cyclestr></jobname>
+    <join><cyclestr>&LOG_SCHDLR;/&RUN;_&envir;_post4fgs_@Y@m@d@H@M.log</cyclestr></join>
 
     &ENVARS_POST; 
 
     <dependency> 
-          <taskdep task="&NET;_updatevars_task_@Y@m@d@H@M"/>
+          <taskdep task="&RUN;_updatevars_task_@Y@m@d@H@M"/>
     </dependency>
     </task> 
 

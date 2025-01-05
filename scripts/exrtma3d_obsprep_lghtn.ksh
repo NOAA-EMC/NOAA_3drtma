@@ -14,12 +14,11 @@ cd ${workdir}
 
 # export MV2_ON_DEMAND_THRESHOLD=256    # if load module mvapich2 ?
 
-mm=$subcyc
-subhtime=$subcyc
+mm="00"
+subhtime="00"
 ${ECHO} $PDY $cyc $mm
 # START_TIME="${PDY}${cyc}"      # YYYYMMDDHH
   START_TIME=${START_TIME:-"{PDY} ${cyc}"}      # YYYYMMDD HH
-# START_TIME="${PDY} ${cyc} ${subcyc} minutes"  # YYYYMMDD HH MN 
 
 ${ECHO} "${START_TIME}"
 echo `echo "${START_TIME}" | ${AWK} '/^[[:digit:]]{10}$/'`
@@ -87,19 +86,14 @@ if [ ${obsprep_lghtn} -eq 1 ] ; then
 
 # find lightning bufr file
 
-# Link to the NASA LaRC cloud data
-if [ "${HH}" = 12 ] || [ "${HH}" = "00" ] ; then
-  ${LN} -sf ${COMINPREP}/rap_e.${YYYYMMDD}/rap_e.t${HH}z.lghtng.tm00.bufr_d ./rap.t${cyc}${subcyc}z.lghtng.tm00.bufr_d
-else 
-  ${LN} -sf ${COMINPREP}/rap.${YYYYMMDD}/rap.t${HH}z.lghtng.tm00.bufr_d ./rap.t${cyc}${subcyc}z.lghtng.tm00.bufr_d
-fi
+${LN} -sf ${COMINPREP}/rtma.${YYYYMMDD}/rtma.t${HH}z.lghtng.tm00.bufr_d ./rtma.t${cyc}z.lghtng.tm00.bufr_d
 
-${LN} -sf rap.t${cyc}${subcyc}z.lghtng.tm00.bufr_d  lghtngbufr
+${LN} -sf rtma.t${cyc}z.lghtng.tm00.bufr_d  lghtngbufr
 
   echo ${PDY}${cyc} > ./lightning_cycle_date
 
   YYYYMMDDHH=${PDY}${cyc}
-  minutetime=$subcyc
+  minutetime=$mm
 
 # Build the namelist on-the-fly
 rm -f ./lightning_bufr.namelist
@@ -145,7 +139,7 @@ postmsg "$jlogfile" "$msg"
 cpreq  ${DATA}/LightningInGSI.bufr ${DATA}/LightningInGSI_bufr.bufr
 lghtng_bufr="LightningInGSI_bufr.bufr"
 if [ -f ${DATA}/${lghtng_bufr} ] ; then
-  cpreq ${DATA}/${lghtng_bufr} ${COMINobsproc_rtma3d}/rap.t${cyc}${subcyc}z.${lghtng_bufr}
+  cpreq ${DATA}/${lghtng_bufr} ${COMINobsproc_rtma3d}/rtma.t${cyc}z.${lghtng_bufr}
 else
   msg="WARNING $pgm terminated normally but ${DATA}/${lghtng_bufr} does NOT exist."
   ${ECHO} "$msg"

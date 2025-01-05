@@ -12,7 +12,7 @@ export TZ="GMT"
 #
 # ANLS_TIME=${PDY}' '${cyc}
 ANLS_TIME=${ANLS_TIME:-"${PDY} ${cyc}"}            # YYYYMMDD HH
-echo $PDY $cyc $subcyc
+echo $PDY $cyc 
 # cyc_intvl="60 minutes"       # <-- cycle interval (minute)
 FCST_TIME="00"                 # <-- forecast time (hour) to provide fgs for rtma
 
@@ -30,7 +30,7 @@ else
     ${ECHO} "ERROR: start time, '${START_TIME}', is not in 'yyyymmddhh' or 'yyyymmdd hh' format"
     exit 1
   fi
-  START_TIME=`${DATE} -d "${START_TIME} ${subcyc} minutes"`
+  START_TIME=`${DATE} -d "${START_TIME} ${FCST_TIME} minutes"`
 fi
 
 ANLS_CYC_TIME=`${DATE} --date="${START_TIME}  0 hour " +"%Y%m%d%H%M"`
@@ -57,7 +57,7 @@ export DATAHOME=$DATA
 export CORE="RAPRRTMA"
 
 export DATAWRFHOME=${GESINhrrr_rtma3d:-"$COMIN"}
-export DATAWRFFILE=${FGSrtma3d_FNAME:-"${NET}.t${cyc}${subcyc}z.firstguess.nc"}
+export DATAWRFFILE=${FGSrtma3d_FNAME:-"${NET}.t${cyc}z.firstguess.nc"}
 export PROD_HEAD2="${PROD_HEAD}"
 
 ##########################################################################
@@ -154,32 +154,10 @@ ${RM} -f WRF???.GrbF??
 
   CP_LN="${LN} -sf"
 #link/copy parameter files
-#${CP_LN} ${PARMupp}/post_avblflds.xml post_avblflds.xml
-#${CP_LN} ${PARMupp}/params_grib2_tbl_new params_grib2_tbl_new
-#${CP_LN} ${PARMupp}/postcntrl.xml postcntrl.xml
-#${CP_LN} ${PARMupp}/postxconfig-NT.txt postxconfig-NT.txt  ##postcntrl_subh.xml postxconfig_subh-NT.txt??
-#${CP_LN} ${PARMupp}/gtg.config.raphrrr gtg.config
 ${CP_LN} ${PARMupp}/params_grib2_tbl_new params_grib2_tbl_new
 ${CP_LN} ${PARMupp}/postxconfig-NT-3drtma.txt postxconfig-NT.txt
-#${CP_LN} ${PARMupp}/ETAMPNEW_DATA eta_micro_lookup.dat
 ${CP_LN} ${PARMupp}/rap_micro_lookup.dat ./eta_micro_lookup.dat
-
-#${CP_LN} ${FIXupp}/*bin .
-cpreq /lfs/h2/emc/da/noscrub/edward.colon/3D-RTMA/rtma.v0.9.1/RTMA_NA/fix_upp_crtm/* .
-#link CRTM coefficients
-#for what in "ahi_himawari8" "abi_gr" "imgr_g11" "imgr_g12" "imgr_g13" "imgr_g15" "imgr_mt1r" "imgr_mt2" \
-#     "amsre_aqua" "tmi_trmm" "ssmi_f13" "ssmi_f14" "ssmi_f15" "ssmis_f16"  \
-#     "ssmis_f17" "ssmis_f18" "ssmis_f19" "ssmis_f20" "seviri_m10" "ssmi_f10"   \
-#     "v.seviri_m10" "imgr_insat3d" "ssmi_f11"; do
-#    ln -s "${FIXcrtm}/${what}.TauCoeff.bin" .
-#    ln -s "${FIXcrtm}/${what}.SpcCoeff.bin" .
-#done
-
-#ln -s ${FIXcrtm}/CloudCoeff.bin .
-#ln -s ${FIXcrtm}/AerosolCoeff.bin .
-#for what in  ${FIXcrtm}/*Emis* ; do
-#    ln -s ${what} .
-#done
+${CP_LN} ${FIXcrtm}/* .
 
 
 #=============================================================================#
@@ -254,29 +232,10 @@ fi
 ${WGRIB2} ${workdir}/wrfsubhprs_fgs.grib2 -set center 7 -grib ${COMOUTpost_rtma3d}/${PROD_HEAD2}.wrfsubhprs_fgs.grib2
 ${WGRIB2} ${workdir}/wrfsubhnat_fgs.grib2 -set center 7 -grib ${COMOUTpost_rtma3d}/${PROD_HEAD2}.wrfsubhnat_fgs.grib2
 
-# softlinks with Julian date
-#basetime=`${DATE} +%y%j%H%M -d "${START_TIME}"`
-#${LN} -sf ${COMOUTpost_rtma3d}/${PROD_HEAD2}.wrfprs_subhrconus_${FCST_TIME}.grib2 ${COMOUTpost_rtma3d}/${PROD_HEAD2}.wrfprs_${basetime}${FCST_TIME}00
-#${LN} -sf ${COMOUTpost_rtma3d}/${PROD_HEAD2}.wrftwo_subhrconus_${FCST_TIME}.grib2 ${COMOUTpost_rtma3d}/${PROD_HEAD2}.wrftwo_${basetime}${FCST_TIME}00
-#${LN} -sf ${COMOUTpost_rtma3d}/${PROD_HEAD2}.wrfnat_subhrconus_${FCST_TIME}.grib2 ${COMOUTpost_rtma3d}/${PROD_HEAD2}.wrfnat_${basetime}${FCST_TIME}00
-
 #================================================================================#
-# The following data transferr is used in GSD old unipost script
-#  (Should be removed for NCO usage)
-# Move the output files to postprd under $COMOUTpost_rtma3d
-# ${MV} ${workdir}/wrfprs_subhrconus_${FCST_TIME}.grib2 ${DATAHOME}/wrfprs_subhrconus_${FCST_TIME}.grib2
-# ${MV} ${workdir}/wrftwo_subhrconus_${FCST_TIME}.grib2 ${DATAHOME}/wrftwo_subhrconus_${FCST_TIME}.grib2
-# ${MV} ${workdir}/wrfnat_subhrconus_${FCST_TIME}.grib2 ${DATAHOME}/wrfnat_subhrconus_${FCST_TIME}.grib2
-
-# ${RM} -rf ${workdir}
   ${RM} -f  ${workdir}/wrfsubh???_fgs.grib2
   ${RM} -f  ${workdir}/WRF???.GrbF??
 
-# Create softlinks for transfer
-# basetime=`${DATE} +%y%j%H%M -d "${START_TIME}"`
-# ln -s ${DATAHOME}/wrfprs_subhrconus_${FCST_TIME}.grib2 ${DATAHOME}/wrfprs_${basetime}${FCST_TIME}00
-# ln -s ${DATAHOME}/wrftwo_subhrconus_${FCST_TIME}.grib2 ${DATAHOME}/wrftwo_${basetime}${FCST_TIME}00
-# ln -s ${DATAHOME}/wrfnat_subhrconus_${FCST_TIME}.grib2 ${DATAHOME}/wrfnat_${basetime}${FCST_TIME}00
 #================================================================================#
 
 ${ECHO} "unipost completed at `${DATE}`"

@@ -50,20 +50,11 @@ cd $DATA
 #####################################################
 #setpdy.sh
 #. ${DATA}/PDY
-if [[ "${subcyc}" == "-1" ]]; then #it's hourly run
   export cycle=${cycle:-t${cyc}z}
   export pgmout=${pgmout:-"OUTPUT.${PDY}${cyc}.${jobid}"}
   export COMINlightning=${COMINlightning:-"${COMIN}/lightning.${PDY}"}
   export COMINrap=${COMINRAP}/rtma.${PDY}
-else
-  export cycle=${cycle:-t${cyc}${subcyc}z}
-  export pgmout=${pgmout:-"OUTPUT.${PDY}${cyc}${subcyc}.${jobid}"}
-  export COMINlightning=${COMINlightning:-"${COMIN}/lightning.${PDY}"}
-  export COMINrap=${COMINRAP}/rtma.${PDY}
-fi
 
-export subcyc=${subcyc} #Note: Must define subcyc in upper level script. Can be 00, 15, 30, or 45 /MPondeca, 30Jun2017
-                         #only used for rurtma2p5
 
 ####################################
 # Determine Job Output Name on System

@@ -49,10 +49,8 @@ cd $DATA
 #setpdy.sh
 #. ${DATA}/PDY
 
-export subcyc=${subcyc} #Note: Must define subcyc in upper level script. Can be 00, 15, 30, or 45 /MPondeca, 30Jun2017
-                         #only used for rurtma2p5
 
-export cycle=${cycle:-t${cyc}${subcyc}z}
+export cycle=${cycle:-t${cyc}z}
 export PDYHH="${PDY}${cyc}"
 PDYm1=`$NDATE -24 ${PDY}${cyc} | cut -c 1-8`
 
@@ -62,7 +60,7 @@ PDYm1=`$NDATE -24 ${PDY}${cyc} | cut -c 1-8`
 export LOG_JJOB=${LOG_JJOB:-$COMROOT/logs/jlogfiles}
 export jlogfile=${jlogfile:-$LOG_JJOB/jlogfile.${jobid}}
 # export pgmout=${pgmout:-"OUTPUT.$$"}
-export pgmout=${pgmout:-"OUTPUT.${PDY}${cyc}${subcyc}.${jobid}"}
+export pgmout=${pgmout:-"OUTPUT.${PDY}${cyc}.${jobid}"}
 if [ ! -d ${LOG_JJOB} ] ; then
    mkdir -p ${LOG_JJOB}
 fi
@@ -136,7 +134,7 @@ fi
 ######################
 # Execute the script.
 ######################
-${exSCR_PREPFGS:-$HOMErtma3d/scripts/ex${NET}_prepfgs.ksh}
+${exSCR_PREPFGS:-$HOMErtma3d/scripts/$RUN/ex${RUN}_prepfgs.ksh}
 export err=$?; err_chk
 
 msg="$0 of $job completed normally"

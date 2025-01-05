@@ -18,26 +18,13 @@ check_dirs_exist() { #usage: check_dirs_exist "var1_name" "var2_name" ...
   done
 }
 
-# make sure executable exists
-#if [ ! -f ${EXECrtma3d}/${exefile_name_updatevars_wrf} ]; then
-#  ${ECHO} "ERROR: executable '${EXECrtma3d}/${exefile_name_updatevars_wrf}' does not exist!"
-#  exit 1
-#fi
-#if [ ! -f ${EXECrtma3d}/${exefile_name_updatevars_ncfields} ]; then
-#  ${ECHO} "ERROR: executable '${EXECrtma3d}/${exefile_name_updatevars_ncfields}' does not exist!"
-#  exit 1
-#fi
-#if [ ! -f ${EXECrtma3d}/${exefile_name_updatevars_ndown} ]; then
-#  ${ECHO} "ERROR: executable '${EXECrtma3d}/${exefile_name_updatevars_ndown}' does not exist!"
-#  exit 1
-#fi
 
 export OMP_NUM_THREADS=1
 
 
 
 # Check to make sure required directory defined and existed
-check_if_defined "FCST_LENGTH" "DATA_GSIANL" "FIXwrf" "PDY" "cyc" "subcyc"
+check_if_defined "FCST_LENGTH" "DATA_GSIANL" "FIXwrf" "PDY" "cyc" 
 check_dirs_exist "DATA_GSIANL" "FIXwrf"
 
 # Initialize an array of WRF input dat files that need to be linked
@@ -90,13 +77,8 @@ for file in ${WRF_DAT_FILES[@]}; do
   fi
 done
 
-if [ "${subcyc}" == "-1" ]; then #hourly run
   SUBH_TIME='00'
   tz_str=t${cyc}z
-else
-  SUBH_TIME=${subcyc}
-  tz_str=t${cyc}${subcyc}z
-fi
 START_TIME=`${DATE} -d "${PDY} ${cyc} ${SUBH_TIME} minutes"`
 
 # Compute date & time components for the analysis time
@@ -112,11 +94,7 @@ cd ${DATAHOME}
 ${ECHO} "enter working directory:${DATAHOME}"
 
 export WRF_NAMELIST=${DATAHOME}/namelist.input
-if [ ${RUN} == "conus" ] ; then
 ${CP} ${PARMwrf}/hrrr_conus.nl ${WRF_NAMELIST} 
-elif [ ${RUN} == "alaska" ] ; then 
-${CP} ${PARMwrf}/hrrr_alaska.nl ${WRF_NAMELIST}
-fi
 
 # Check to make sure the wrfinput_d01 file exists
 #if [ -r ${COMOUTgsi_rtma3d}/${ANLrtma3d_FNAME} ]; then
@@ -206,19 +184,6 @@ if [ -f "rsl.out.0000" ]; then
 else
   ${ECHO} "No pre-existing rsl files were found"
 fi
-
-# MPI Settings for pre-forecast
-#grid_order -C -c 2,12 -g 20,60 > MPICH_RANK_ORDER
-#export MPICH_RANK_REORDER_METHOD=3
-#export MALLOC_MMAP_MAX=0
-#export MALLOC_TRIM_THRESHOLD=134217728
-#export MPICH_MPIIO_HINTS="wrfinput*:cb_nodes=24,wrfrst*:cb_nodes=24,wrfout*:cb_nodes=24"
-#export MPICH_MPIIO_AGGREGATOR_PLACEMENT_DISPLAY=1
-#export MPICH_MPIIO_HINTS_DISPLAY=1
-#export MPICH_ENV_DISPLAY=1
-#export MPICH_VERSION_DISPLAY=1
-#export MPICH_ABORT_ON_ERROR=1
-#export MPICH_MPIIO_STATS=1
 
 
 # Run WRF to update reflectivity fields

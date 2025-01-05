@@ -46,12 +46,10 @@ cd $DATA
 #    setpdy.sh needs the variables 
 #    $PDY and $cyc already defined in advance
 #####################################################
-export cycle=${cycle:-t${cyc}${subcyc}z} 
+export cycle=${cycle:-t${cyc}z} 
 #setpdy.sh
 #. ${DATA}/PDY
 
-export subcyc=${subcyc} #Note: Must define subcyc in upper level script. Can be 00, 15, 30, or 45 /MPondeca, 30Jun2017
-                         #only used for rurtma2p5
 export PDYHH="${PDY}${cyc}"
 ####################################
 # Determine Job Output Name on System
@@ -59,7 +57,7 @@ export PDYHH="${PDY}${cyc}"
 export LOG_JJOB=${LOG_JJOB:-$COMROOT/logs/jlogfiles}
 export jlogfile=${jlogfile:-$LOG_JJOB/jlogfile.${jobid}}
 # export pgmout=${pgmout:-"OUTPUT.$$"}
-export pgmout=${pgmout:-"OUTPUT.${PDY}${cyc}${subcyc}.${jobid}"}
+export pgmout=${pgmout:-"OUTPUT.${PDY}${cyc}.${jobid}"}
 if [ ! -d ${LOG_JJOB} ] ; then
    mkdir -p ${LOG_JJOB}
 fi
@@ -68,7 +66,7 @@ if [ ! -d ${LOG_PGMOUT} ] ; then
 fi
 
 # specify the file head for the file names of the archived data files
-export PROD_HEAD=${PROD_HEAD:-"${NET}.t${cyc}${subcyc}z"}
+export PROD_HEAD=${PROD_HEAD:-"${NET}.t${cyc}z"}
 
 # Specify Execution Areas
 export HOMErtma3d=${HOMErtma3d:-$NWROOT/rtma.${rtma_ver}}
@@ -122,8 +120,8 @@ fi
 ###########################################################
 #   set the file name of the firstguess for rtma3d
     if [ ! "${PROD_HEAD}" ] ; then
-      export ANLrtma3d_FNAME="${NET}.t${cyc}${subcyc}z.wrf_inout.nc"
-      export FGSrtma3d_FNAME="${NET}.t${cyc}${subcyc}z.firstguess.nc"
+      export ANLrtma3d_FNAME="${NET}.t${cyc}z.wrf_inout.nc"
+      export FGSrtma3d_FNAME="${NET}.t${cyc}z.firstguess.nc"
     else
       export ANLrtma3d_FNAME="${PROD_HEAD}.wrf_inout.nc"
       export FGSrtma3d_FNAME="${PROD_HEAD}.firstguess.nc"
@@ -148,7 +146,7 @@ fi
 ##########################################################
 
 #   Link the path to the working UPP directory
-    export DATA_RUNDIR=${DATA_RUNDIR:-"${DATAROOT}/${envir}/${NET}.${PDY}${cyc}${subcyc}"}
+    export DATA_RUNDIR=${DATA_RUNDIR:-"${DATAROOT}/${envir}/${NET}.${PDY}${cyc}"}
     if [ ! -d "${DATA_RUNDIR}" ] ; then
         mkdir -p ${DATA_RUNDIR}
     fi

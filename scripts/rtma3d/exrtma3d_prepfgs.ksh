@@ -1,24 +1,6 @@
 #!/bin/ksh
 
 set -x 
-#-- Testing the status of some important variables. --#
-# Make sure these variables for key directories are defined and exists
-#if [ ! "${COMINhrrr}" ]; then
-#  ${ECHO} "ERROR: \$COMINhrrr is not defined!"
-#  exit 1
-#fi
-#if [ ! -d "${COMINhrrr}" ]; then
-#  ${ECHO} "ERROR: $COMINhrrr does not exist!"
-#  exit 1
-#fi
-#if [ ! "${COMINhrrr_cycp1}" ]; then
-#  ${ECHO} "ERROR: \$COMINhrrr_cycp1 is not defined!"
-#  exit 1
-#fi
-#if [ ! -d "${COMINhrrr_cycp1}" ]; then
-#  ${ECHO} "ERROR: $COMINhrrr_cycp1 does not exist!"
-#  exit 1
-#fi
 
 if [ ! "${GESINhrrr_rtma3d}" ]; then
   ${ECHO} "ERROR: \$GESINhrrr_rtma3d is not defined!"
@@ -99,88 +81,8 @@ msg="***********************************************************"
 postmsg "$jlogfile" "$msg"
 
 # Look for bqckground from pre-forecast background
-if [ "${RUN}" == "alaska" ]; then
-          case  $HH  in
-               00)       
-                    export PDYHH_AK=$($NDATE -03  "${PDYHH}")
-                    ;;
-               01)
-		    export PDYHH_AK=$($NDATE -01  "${PDYHH}")   
-                    ;;
-               02)       
-                    export PDYHH_AK=$($NDATE -02  "${PDYHH}")		    
-                    ;;
-               03)  
-                    export PDYHH_AK=$($NDATE -03  "${PDYHH}")
-		    ;;
-               04)  
-                    export PDYHH_AK=$($NDATE -01  "${PDYHH}")	
-                    HRCNT=01
-                    ;;
-               05) 
-		    export PDYHH_AK=$($NDATE -02  "${PDYHH}")    
-                    ;;
-               06)
-                    export PDYHH_AK=$($NDATE -03  "${PDYHH}") 
-                    ;;
-               07)
-                    export PDYHH_AK=$($NDATE -01  "${PDYHH}")
-                    ;;
-               08)
-                    export PDYHH_AK=$($NDATE -02  "${PDYHH}")
-                    ;;
-               09)
-                    export PDYHH_AK=$($NDATE -03  "${PDYHH}")
-                    ;;
-               10)
-                    export PDYHH_AK=$($NDATE -01  "${PDYHH}")
-	            ;;
-               11)
-                    export PDYHH_AK=$($NDATE -02  "${PDYHH}")
-                    ;;
-
-               12)
-                    export PDYHH_AK=$($NDATE -03  "${PDYHH}")
-                    ;;
-               13)
-                    export PDYHH_AK=$($NDATE -01  "${PDYHH}")
-                    ;;
-               14)
-                    export PDYHH_AK=$($NDATE -02  "${PDYHH}")
-                    ;;
-               15)  
-                    export PDYHH_AK=$($NDATE -03  "${PDYHH}")
-                    ;;
-               16)  
-                    export PDYHH_AK=$($NDATE -01  "${PDYHH}")
-                    ;;
-               17)  
-                    export PDYHH_AK=$($NDATE -02  "${PDYHH}")
-                    ;;
-               18)
-                    export PDYHH_AK=$($NDATE -03  "${PDYHH}")
-                    ;;
-               19)
-                    export PDYHH_AK=$($NDATE -01  "${PDYHH}")
-                    ;;
-               20)
-                    export PDYHH_AK=$($NDATE -02  "${PDYHH}")
-                    ;;
-               21)
-                    export PDYHH_AK=$($NDATE -03  "${PDYHH}")
-                    ;;
-               22)
-                    export PDYHH_AK=$($NDATE -01  "${PDYHH}")
-                    ;;
-               23)
-                    export PDYHH_AK=$($NDATE -02  "${PDYHH}")
-                    ;;
-
-          esac 
-FGShrrr_FNAME2="hrrrak_${PDYHH_AK}f00${ind}"
-elif [ "${RUN}" == "conus" ]; then
+ind=1	
 FGShrrr_FNAME2="hrrr_${PDYHH_cycm1}f00${ind}"
-fi
         if [ -r ${GESINhrrr}/${FGShrrr_FNAME2} ] ; then
                 ${LN} -sf ${GESINhrrr}/${FGShrrr_FNAME2}   ${GESINhrrr_rtma3d}/${FGSrtma3d_FNAME}
                 ${LN} -sf ${GESINhrrr_rtma3d}/${FGSrtma3d_FNAME}     ${DATA}/${FGSrtma3d_FNAME}
@@ -199,6 +101,6 @@ fi
 
 export err=$? ; err_chk
 
-ls -l ${GESINhrrr_rtma3d} > ${GESINhrrr_rtma3d}/fgs_data_${PDY}_${cyc}_${subcyc}.list
+ls -l ${GESINhrrr_rtma3d} > ${GESINhrrr_rtma3d}/fgs_data_${PDY}_${cyc}.list
 
 exit 0

@@ -4,7 +4,7 @@ set -x
 
 #############################################################################
 # Make sure START_TIME is defined and in the correct format
-START_TIME=`${DATE} -d "${PDY} ${cyc} ${subcyc} minutes"`
+START_TIME=`${DATE} -d "${PDY} ${cyc} minutes"`
 echo $START_TIME
 echo $cyc
 
@@ -108,7 +108,7 @@ postmsg "$jlogfile" "$msg"
 
 #export err=$? ; err_chk
 
-#ls -l ${GESINhrrr_rtma3d} > ${GESINhrrr_rtma3d}/fgs_data_${PDY}_${cyc}_${subcyc}.list
+#ls -l ${GESINhrrr_rtma3d} > ${GESINhrrr_rtma3d}/fgs_data_${PDY}_${cyc}.list
 
 exit 0
 

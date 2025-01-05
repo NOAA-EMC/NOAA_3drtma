@@ -27,13 +27,6 @@ OBS_DIR=${DATAOBSHOME}
 BKG_DIR=${DATAHOME_BK}
 COMINhrrrdas=${COMINHRRRDAS}
 fi
-if [ "${subcyc}" == "-1" ]; then #hourly run
-  SUBH_TIME='00'
-  tz_str=t${cyc}z
-else
-  SUBH_TIME=${subcyc}
-  tz_str=t${cyc}${subcyc}z
-fi
 START_TIME=`${DATE} -d "${PDY} ${cyc} ${SUBH_TIME} minutes"`
 if [ ${HRRRDAS_BEC} -eq 0 ]; then
 EnsWgt=0.5
@@ -59,12 +52,6 @@ nc_diag_cat=/lfs/h2/emc/da/noscrub/edward.colon/save/RTMA/bin/ncdiag_cat_serial.
 #ifsoilnudge=.true.
 ifsoilnudge=.true.
 
-# Bring over background field (it's modified by GSI so we can't link to it)
-if [ "${subcyc}" == "-1" ]; then #hourly run
-   cycle_str=${YYYYMMDDHH}
-else
-   cycle_str=${YYYYMMDDHHMM}
-fi
 
 # Look for background field for GSI analysis
 if [ "${envir}" == "lsf" ] || [ "${envir}" == "pbspro" ]; then #wcoss expr runs
@@ -82,56 +69,36 @@ else
 fi
 
 # Link to the prepbufr data
-if [ -r ${OBS_DIR}/prepbufr ] ; then
-  ${LN} -sf ${OBS_DIR}/prepbufr ./prepbufr
-elif [ -r "${OBS_DIR}/rap.${tz_str}.prepbufr.tm00" ]; then
-  ${LN} -sf ${OBS_DIR}/rap.${tz_str}.prepbufr.tm00 ./prepbufr
-elif  [ -r "${OBS_DIR}/rap_e.${tz_str}.prepbufr.tm00" ]; then
-  ${LN} -sf ${OBS_DIR}/rap_e.${tz_str}.prepbufr.tm00 ./prepbufr
-else
-  ${ECHO} "Warning: ${OBS_DIR}/prepbufr does not exist"
+if [ -r ${OBS_DIR}/rtma.t${cyc}z.prepbufr.tm00 ]; then
+  ${LN} -sf ${OBS_DIR}/rtma.t${cyc}z.prepbufr.tm00 ./prepbufr
 fi
 
-if [ -r "${OBS_DIR}/NSSLRefInGSI.bufr" ]; then
-  ${LN} -sf ${OBS_DIR}/NSSLRefInGSI.bufr ./refInGSI
-elif [ -r "${OBS_DIR}/rtma3d.${tz_str}.NSSLRefInGSI.bufr" ]; then
-  ${LN} -sf ${OBS_DIR}/rtma3d.${tz_str}.NSSLRefInGSI.bufr ./refInGSI
+if [ -r "${OBS_DIR}/rtma3d.t${cyc}z.NSSLRefInGSI.bufr" ]; then
+  ${LN} -sf ${OBS_DIR}/rtma3d.t${cyc}z.NSSLRefInGSI.bufr ./refInGSI
 else
   ${ECHO} "Warning: ${OBS_DIR}: NSSLRefInGSI.bufr does not exist!"
 fi
 
-if [ -r "${OBS_DIR}/LightningInGSI.bufr" ]; then
-  ${LN} -sf ${OBS_DIR}/LightningInGSI.bufr ./lghtInGSI
-elif [ -r "${OBS_DIR}/rap.${tz_str}.LightningInGSI_bufr.bufr" ]; then
-  ${LN} -sf ${OBS_DIR}/rap.${tz_str}.LightningInGSI_bufr.bufr ./lghtInGSI
-elif [ -r "${OBS_DIR}/rap_e.${tz_str}.LightningInGSI_bufr.bufr" ]; then
-  ${LN} -sf ${OBS_DIR}/rap_e.${tz_str}.LightningInGSI_bufr.bufr ./lghtInGSI
+if [ -r "${OBS_DIR}/rtma.t${cyc}z.LightningInGSI_bufr.bufr" ]; then
+  ${LN} -sf ${OBS_DIR}/rtma.t${cyc}z.LightningInGSI_bufr.bufr ./lghtInGSI
 else
   ${ECHO} "Warning: ${OBS_DIR}: LightningInGSI.bufr does not exist!"
 fi
 
-if [ -r "${OBS_DIR}/NASALaRCCloudInGSI.bufr" ]; then
-  ${LN} -sf ${OBS_DIR}/NASALaRCCloudInGSI.bufr ./larcInGSI
-elif [ -r "${OBS_DIR}/rap.${tz_str}.NASALaRCCloudInGSI.bufr" ]; then
-  ${LN} -sf ${OBS_DIR}/rap.${tz_str}.NASALaRCCloudInGSI.bufr ./larcInGSI
-elif [ -r "${OBS_DIR}/rap_e.${tz_str}.NASALaRCCloudInGSI.bufr" ]; then
-  ${LN} -sf ${OBS_DIR}/rap_e.${tz_str}.NASALaRCCloudInGSI.bufr ./larcInGSI
+if [ -r "${OBS_DIR}/rtma.t${cyc}z.NASALaRCCloudInGSI.bufr" ]; then
+  ${LN} -sf ${OBS_DIR}/rtma.t${cyc}z.NASALaRCCloudInGSI.bufr ./larcInGSI
 else
   ${ECHO} "Warning: ${OBS_DIR}: NASALaRCCloudInGSI.bufr does not exist!"
 fi
 
-if [ -r "${OBS_DIR}/rap.${tz_str}.satwnd.tm00.bufr_d" ]; then
-  ${LN} -sf ${OBS_DIR}/rap.${tz_str}.satwnd.tm00.bufr_d ./satwndbufr
-elif [ -r "${OBS_DIR}/rap_e.${tz_str}.satwnd.tm00.bufr_d" ]; then
-  ${LN} -sf ${OBS_DIR}/rap_e.${tz_str}.satwnd.tm00.bufr_d ./satwndbufr
+if [ -r "${OBS_DIR}/rtma.t${cyc}z.satwnd.tm00.bufr_d" ]; then
+  ${LN} -sf ${OBS_DIR}/rtma.t${cyc}z.satwnd.tm00.bufr_d ./satwndbufr
 else
   ${ECHO} "Warning: ${OBS_DIR}:  does not exist!"
 fi
 
-if [ -r "${OBS_DIR}/rap.${tz_str}.nexrad.tm00.bufr_d" ]; then
-  ${LN} -sf ${OBS_DIR}/rap.${tz_str}.nexrad.tm00.bufr_d ./nexradbufr
-elif [ -r "${OBS_DIR}/rap_e.${tz_str}.nexrad.tm00.bufr_d" ]; then
-  ${LN} -sf ${OBS_DIR}/rap_e.${tz_str}.nexrad.tm00.bufr_d ./nexradbufr
+if [ -r "${OBS_DIR}/rtma.t${cyc}z.nexrad.tm00.bufr_d" ]; then
+  ${LN} -sf ${OBS_DIR}/rtma.t${cyc}z.nexrad.tm00.bufr_d ./nexradbufr
 else
   ${ECHO} "Warning: ${OBS_DIR}:  does not exist!"
 fi
@@ -155,7 +122,6 @@ if [ "${envir}" = "lsf" ] || [ "${envir}" = "pbspro" ] && [ ${HRRRDAS_BEC} -eq 0
   export nhr_assimilation=03
   ##typeset -Z2 nhr_assimilation
 
-# /usr/bin/python2.7 ${UTILrtma3d_dev}/getbest_EnKF_FV3GDAS.py -v $YYYYMMDDHH --exact=no --minsize=${nens} -d ${COMINGDAS}/enkfgdas -m no -o filelist${nhr_assimilation} --o3fname=gfs_sigf${nhr_assimilation} --gfs_nemsio=yes
   /usr/bin/python ${UTILrtma3d_dev}/getbest_EnKF_FV3GDAS.py -v $YYYYMMDDHH --exact=no --minsize=${nens} -d ${COMINGDAS}/enkfgdas -m no -o filelist${nhr_assimilation} --o3fname=gfs_sigf${nhr_assimilation} --gfs_netcdf=yes   
   #Check to see if ensembles were found 
   numfiles=`cat filelist03 | wc -l`
@@ -167,7 +133,6 @@ if [ "${envir}" = "lsf" ] || [ "${envir}" = "pbspro" ] && [ ${HRRRDAS_BEC} -eq 0
   #   we have 80 files, figure out if they are all the right size
   #   if not, set ifhyb=false
       cpreq ${UTILrtma3d_dev}/convert.sh .
-#      ${UTILrtma3d_dev}/check_enkf_size.sh
   fi
 fi
 

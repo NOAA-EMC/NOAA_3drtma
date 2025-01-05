@@ -6,13 +6,6 @@ if [ ! -f ${EXECrtma3d}/${exefile_name_cloud} ] ; then
   ${ECHO} "ERROR: NASA cloud obs prcoessing executable '${EXECrtma3d}/${exefile_name_cloud}' does not exist!"
   exit 1
 fi
-if [ "${subcyc}" == "-1" ]; then #hourly run
-  SUBH_TIME='00'
-  tz_str=t${cyc}z
-else
-  SUBH_TIME=${subcyc}
-  tz_str=t${cyc}${subcyc}z
-fi
 START_TIME=`${DATE} -d "${PDY} ${cyc} ${SUBH_TIME} minutes"`
 
 # Compute date & time components for the analysis time
@@ -33,11 +26,7 @@ if [ ! -s "./prepobs_prep.bufrtable" ]; then
 fi
 
 # WPS GEO_GRID Data
-if [ "${RUN}" == "alaska" ]; then
   ${LN} -sf ${FIXwps}/hrrr_geo_em.d01.nc_AK ./geo_em.d01.nc
-elif [ "${RUN}" == "conus" ]; then
-  ${LN} -sf ${FIXwps}/hrrr_geo_em.d01.nc ./geo_em.d01.nc
-fi
 if [ ! -s "./geo_em.d01.nc" ]; then
   ${ECHO} "geo_em.d01.nc does not exist or not readable"
   exit 1 
@@ -49,18 +38,9 @@ ${ECHO} "SUBH_TIME: "${SUBH_TIME}
 ${ECHO} "YYYYMMDDHH: "${YYYYMMDDHH}
 
 # Link to the NASA LaRC cloud data
-if [ "${HH}" = 12 ] || [ "${HH}" = "00" ] ; then
-  ${LN} -sf ${COMINPREP}/rap_e.${YYYYMMDD}/rap_e.t${HH}z.lgycld.tm00.bufr_d ./rap_e.t${cyc}${subcyc}z.lgycld.tm00.bufr_d
-  ${LN} -sf ./rap_e.t${cyc}${subcyc}z.lgycld.tm00.bufr_d ./NASA_LaRC_cloud.bufr
-else
-  ${LN} -sf ${COMINPREP}/rap.${YYYYMMDD}/rap.t${HH}z.lgycld.tm00.bufr_d ./rap.t${cyc}${subcyc}z.lgycld.tm00.bufr_d
-  ${LN} -sf ./rap.t${cyc}${subcyc}z.lgycld.tm00.bufr_d ./NASA_LaRC_cloud.bufr
-fi
+${LN} -sf ${COMINPREP}/rtma.${YYYYMMDD}/rtma.t${HH}z.lgycld.tm00.bufr_d ./rtma.t${cyc}z.lgycld.tm00.bufr_d
+${LN} -sf ./rtma.t${cyc}z.lgycld.tm00.bufr_d ./NASA_LaRC_cloud.bufr
 
-#if [ ! -s "rap.t${cyc}${subcyc}z.lgycld.tm00.bufr_d" ]; then
-#  ${ECHO} "./NASA_LaRC_cloud.bufr does not exist or not readable"
-#  exit 1
-#fi
 
 
 
@@ -96,7 +76,7 @@ postmsg "$jlogfile" "$msg"
 
 targetfile="NASALaRCCloudInGSI.bufr"
 if [ -f ${DATA}/${targetfile} ] ; then
-  cpreq ${DATA}/${targetfile} ${COMINobsproc_rtma3d}/rap.${tz_str}.${targetfile}
+  cpreq ${DATA}/${targetfile} ${COMINobsproc_rtma3d}/rtma.t${cyc}z.${targetfile}
 else
   msg="WARNING $pgm terminated normally but ${DATA}/${targetfile} does NOT exist."
   ${ECHO} "$msg"
