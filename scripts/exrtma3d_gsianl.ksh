@@ -52,7 +52,7 @@ nc_diag_cat=/lfs/h2/emc/da/noscrub/edward.colon/save/RTMA/bin/ncdiag_cat_serial.
 #ifsoilnudge=.true.
 ifsoilnudge=.true.
 
-
+cycle_str=${PDY}${cyc}
 # Look for background field for GSI analysis
 if [ "${envir}" == "lsf" ] || [ "${envir}" == "pbspro" ]; then #wcoss expr runs
   GSIbackground=${BKG_DIR}/${FGSrtma3d_FNAME}
