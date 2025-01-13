@@ -76,8 +76,8 @@
 <!ENTITY LOG_PGMOUT     "&LOG_DIR;/pgmout">
 <!ENTITY jlogfile       "&LOG_JJOB;/jlogfile_pbspro.@Y@m@d@H">
 <!ENTITY obsname_conus  "MergedReflectivityQC">
-<!ENTITY obsname_alaska  "MergedReflectivityQComposite">
-<!ENTITY numlim_conus  "MergedReflectivityQC">
+<!ENTITY obsname_alaska "MergedReflectivityQComposite">
+<!ENTITY numlim_conus   "MergedReflectivityQC">
 <!ENTITY numlim_alaska  "MergedReflectivityQComposite">
 
 
@@ -862,7 +862,7 @@
 <workflow realtime="T" scheduler="pbspro" cyclethrottle="96" taskthrottle="960" cyclelifespan="00:48:00:00">
 
   <log>
-    <cyclestr>&LOG_DIR;/&RUN;_workflow_&envir;_@Y@m@d@H@M.log</cyclestr>
+    <cyclestr>&LOG_DIR;/&RUN;_workflow_&envir;_@Y@m@d@H.log</cyclestr>
   </log>
   
   <cycledef group="hourly">0 * * 01-12 2022-2028 *</cycledef>
@@ -887,7 +887,7 @@
 
     <command>&JJOB_DIR;/launch.ksh &JJOB_OBSPREP_LGHTN;</command>
     <jobname><cyclestr>&RUN;_obsprep_lghtn_job_@Y@m@d@H@M</cyclestr></jobname>
-    <join><cyclestr>&LOG_SCHDLR;/&RUN;_&envir;_obsprep_lghtn_@Y@m@d@H@M.log</cyclestr></join>
+    <join><cyclestr>&LOG_SCHDLR;/&RUN;_&envir;_obsprep_lghtn_@Y@m@d@H.log</cyclestr></join>
 
     &OBSPREP_LGHTN_RESOURCES;
     &OBSPREP_LGHTN_RESERVATION;
@@ -909,7 +909,7 @@
 
     <command>&JJOB_DIR;/launch.ksh &JJOB_OBSPREP_CLOUD;</command>
     <jobname><cyclestr>&RUN;_obsprep_cloud_job_@Y@m@d@H@M</cyclestr></jobname>
-    <join><cyclestr>&LOG_SCHDLR;/&RUN;_&envir;_obsprep_cloud_@Y@m@d@H@M.log</cyclestr></join>
+    <join><cyclestr>&LOG_SCHDLR;/&RUN;_&envir;_obsprep_cloud_@Y@m@d@H.log</cyclestr></join>
 
     &OBSPREP_CLOUD_RESOURCES;
     &OBSPREP_CLOUD_RESERVATION;
@@ -948,7 +948,7 @@
 
     <command>&JJOB_DIR;/launch.ksh &JJOB_OBSPREP_RADAR;</command>
     <jobname><cyclestr>&RUN;_obsprep_radar_job_@Y@m@d@H@M</cyclestr></jobname>
-    <join><cyclestr>&LOG_SCHDLR;/&RUN;_&envir;_obsprep_radar_@Y@m@d@H@M.log</cyclestr></join>
+    <join><cyclestr>&LOG_SCHDLR;/&RUN;_&envir;_obsprep_radar_@Y@m@d@H.log</cyclestr></join>
 
     &OBSPREP_RADAR_RESOURCES;
     &OBSPREP_RADAR_RESERVATION;
@@ -976,7 +976,7 @@
 
     <command>&JJOB_DIR;/launch.ksh &JJOB_PREPOBS;</command>
     <jobname><cyclestr>&RUN;_prepobs_job_@Y@m@d@H@M</cyclestr></jobname>
-    <join><cyclestr>&LOG_SCHDLR;/&RUN;_&envir;_prepobs_@Y@m@d@H@M.log</cyclestr></join>
+    <join><cyclestr>&LOG_SCHDLR;/&RUN;_&envir;_prepobs_@Y@m@d@H.log</cyclestr></join>
 
     &PREPOBS_RESOURCES;
     &PREPOBS_RESERVATION;
@@ -1015,7 +1015,7 @@
 
     <command>&JJOB_DIR;/launch.ksh &JJOB_PREPFGS;</command>
     <jobname><cyclestr>&RUN;_prepfgs_ind1_job_@Y@m@d@H@M</cyclestr></jobname>
-    <join><cyclestr>&LOG_SCHDLR;/&RUN;_&envir;_prepfgs_ind1_@Y@m@d@H@M.log</cyclestr></join>
+    <join><cyclestr>&LOG_SCHDLR;/&RUN;_&envir;_prepfgs_ind1_@Y@m@d@H.log</cyclestr></join>
 
     &PREPFGS_RESOURCES;
     &PREPFGS_RESERVATION;
@@ -1038,7 +1038,7 @@
 
     <command>&JJOB_DIR;/launch.ksh &JJOB_PREPFGS;</command>
     <jobname><cyclestr>&RUN;_prepfgs_ind2_job_@Y@m@d@H@M</cyclestr></jobname>
-    <join><cyclestr>&LOG_SCHDLR;/&RUN;_&envir;_prepfgs_ind2_@Y@m@d@H@M.log</cyclestr></join>
+    <join><cyclestr>&LOG_SCHDLR;/&RUN;_&envir;_prepfgs_ind2_@Y@m@d@H.log</cyclestr></join>
 
     &PREPFGS_RESOURCES;
     &PREPFGS_RESERVATION;
@@ -1060,7 +1060,7 @@
 
     <command>&JJOB_DIR;/launch.ksh &JJOB_PREPFGS;</command>
     <jobname><cyclestr>&RUN;_prepfgs_ind3_job_@Y@m@d@H@M</cyclestr></jobname>
-    <join><cyclestr>&LOG_SCHDLR;/&RUN;_&envir;_prepfgs_ind3_@Y@m@d@H@M.log</cyclestr></join>
+    <join><cyclestr>&LOG_SCHDLR;/&RUN;_&envir;_prepfgs_ind3_@Y@m@d@H.log</cyclestr></join>
 
     &PREPFGS_RESOURCES;
     &PREPFGS_RESERVATION;
@@ -1089,7 +1089,7 @@
 
     <command>&JJOB_DIR;/launch.ksh &JJOB_GSIANL;</command>
     <jobname><cyclestr>&RUN;_gsianl_job_@Y@m@d@H@M</cyclestr></jobname>
-    <join><cyclestr>&LOG_SCHDLR;/&RUN;_&envir;_gsianl_@Y@m@d@H@M.log</cyclestr></join>
+    <join><cyclestr>&LOG_SCHDLR;/&RUN;_&envir;_gsianl_@Y@m@d@H.log</cyclestr></join>
 
     &ENVARS_GSI;
 
@@ -1113,7 +1113,7 @@
 
     <command>&JJOB_DIR;/launch.ksh &JJOB_UPDATEVARS;</command>
     <jobname><cyclestr>&RUN;_updatevars_job_@Y@m@d@H@M</cyclestr></jobname>
-    <join><cyclestr>&LOG_SCHDLR;/&RUN;_&envir;_updatevars_@Y@m@d@H@M.log</cyclestr></join>
+    <join><cyclestr>&LOG_SCHDLR;/&RUN;_&envir;_updatevars_@Y@m@d@H.log</cyclestr></join>
 
     &ENVARS_UPDATEVARS;
 
@@ -1145,7 +1145,7 @@
 
     <command>&JJOB_DIR;/launch.ksh &JJOB_POST;</command>
     <jobname><cyclestr>&RUN;_post_job_@Y@m@d@H@M</cyclestr></jobname>
-    <join><cyclestr>&LOG_SCHDLR;/&RUN;_&envir;_post_@Y@m@d@H@M.log</cyclestr></join>
+    <join><cyclestr>&LOG_SCHDLR;/&RUN;_&envir;_post_@Y@m@d@H.log</cyclestr></join>
 
     &ENVARS_POST;
 
@@ -1167,7 +1167,7 @@
 
     <command>&JJOB_DIR;/launch.ksh &JJOB_POST4FGS;</command>
     <jobname><cyclestr>&RUN;_post4fgs_job_@Y@m@d@H@M</cyclestr></jobname>
-    <join><cyclestr>&LOG_SCHDLR;/&RUN;_&envir;_post4fgs_@Y@m@d@H@M.log</cyclestr></join>
+    <join><cyclestr>&LOG_SCHDLR;/&RUN;_&envir;_post4fgs_@Y@m@d@H.log</cyclestr></join>
 
     &ENVARS_POST; 
 
