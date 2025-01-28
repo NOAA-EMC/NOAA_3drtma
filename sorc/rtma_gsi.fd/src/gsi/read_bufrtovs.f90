@@ -89,6 +89,10 @@ subroutine read_bufrtovs(mype,val_tovs,ithin,isfcalc,&
 !   2016-04-28  jung - added logic for RARS and direct broadcast from NESDIS/UW
 !   2016-10-20  collard - fix to allow monitoring and limited assimilation of spectra when key 
 !                         channels are missing.
+!   2018-04-19  eliu - allow data selection for precipitation-affected data 
+!   2018-05-21  j.jin   - added time-thinning. Moved the checking of thin4d into satthin.F90.
+!   2020-04021  s.sieron - change converting brightness temperatures to antenna temperautres to the
+!                          other way around. added support for multiple SpcCoeff files and ACCoeffs
 !
 !   input argument list:
 !     mype     - mpi task id
@@ -128,6 +132,8 @@ subroutine read_bufrtovs(mype,val_tovs,ithin,isfcalc,&
   use kinds, only: r_kind,r_double,i_kind
   use satthin, only: super_val,itxmax,makegrids,destroygrids,checkob, &
       finalcheck,map2tgrid,score_crit
+  use satthin, only: radthin_time_info,tdiff2crit
+  use obsmod, only: time_window_max, ta2tb
   use radinfo, only: iuse_rad,newchn,cbias,predx,nusis,jpch_rad,air_rad,ang_rad, &
       use_edges,radedge1, radedge2, radstart,radstep,newpc4pred
   use radinfo, only: crtm_coeffs_path,adp_anglebc
@@ -137,9 +143,10 @@ subroutine read_bufrtovs(mype,val_tovs,ithin,isfcalc,&
       crtm_kind => fp, &
       MAX_SENSOR_ZENITH_ANGLE
   use crtm_spccoeff, only: sc,crtm_spccoeff_load,crtm_spccoeff_destroy
+  use ACCoeff_Define, only: ACCoeff_type
   use calc_fov_crosstrk, only : instrument_init, fov_cleanup, fov_check
-  use gsi_4dvar, only: l4dvar,l4densvar,iwinbgn,winlen,thin4d
-  use antcorr_application, only: remove_antcorr
+  use gsi_4dvar, only: l4dvar,l4densvar,iwinbgn,winlen
+  use antcorr_application, only: remove_antcorr, apply_antcorr
   use mpeu_util, only: getindex
   use deter_sfc_mod, only: deter_sfc_fov,deter_sfc
   use gsi_nstcouplermod, only: nst_gsi,nstinfo
@@ -170,7 +177,8 @@ subroutine read_bufrtovs(mype,val_tovs,ithin,isfcalc,&
 ! Declare local parameters
 
   character(8),parameter:: fov_flag="crosstrk"
-  integer(i_kind),parameter:: n1bhdr=13
+  ! change from 13 to 14 for sacv
+  integer(i_kind),parameter:: n1bhdr=14
   integer(i_kind),parameter:: n2bhdr=4
   real(r_kind),parameter:: r360=360.0_r_kind
   real(r_kind),parameter:: tbmin=50.0_r_kind
@@ -186,6 +194,7 @@ subroutine read_bufrtovs(mype,val_tovs,ithin,isfcalc,&
 
   integer(i_kind) ireadsb,ireadmg,irec,next,nrec_startx
   integer(i_kind) i,j,k,ifov,ntest,llll
+  integer(i_kind) sacv
   integer(i_kind) iret,idate,nchanl,n,idomsfc(1)
   integer(i_kind) ich1,ich2,ich8,ich15,ich16,ich17
   integer(i_kind) kidsat,instrument,maxinfo
@@ -214,19 +223,26 @@ subroutine read_bufrtovs(mype,val_tovs,ithin,isfcalc,&
   real(r_kind) dlon_earth_deg,dlat_earth_deg,sat_aziang
   real(r_kind) dlon_earth,dlat_earth,r01
   real(r_kind) crit1,step,start,ch8flg,dist1
-  real(r_kind) terrain,timedif,lza,df2,tt,lzaest
+  real(r_kind) terrain,lza,df2,tt,lzaest
   real(r_kind),dimension(0:4):: rlndsea
   real(r_kind),allocatable,dimension(:,:):: data_all
 
   real(crtm_kind),allocatable,dimension(:):: data1b4
-  real(r_double),allocatable,dimension(:):: data1b8,data1b8x
+  real(r_double),allocatable,dimension(:):: data1b8
   real(r_double),dimension(n1bhdr):: bfr1bhdr
   real(r_double),dimension(n2bhdr):: bfr2bhdr
 
   real(r_kind) disterr,disterrmax,cdist,dlon00,dlat00
 
+  real(r_kind)    :: ptime,timeinflat,crit0
+  integer(i_kind) :: ithin_time,n_tbin,it_mesh
   logical :: critical_channels_missing,quiet
   logical :: print_verbose
+
+  logical :: spc_coeff_found
+  integer(i_kind) :: spc_coeff_versions
+  character(len=80) :: spc_filename
+  type(ACCoeff_type),dimension(3) :: accoeff_sets
 
 !**************************************************************************
 ! Initialize variables
@@ -248,8 +264,14 @@ subroutine read_bufrtovs(mype,val_tovs,ithin,isfcalc,&
      call gsi_nstcoupler_skindepth(obstype, zob)         ! get penetration depth (zob) for the obstype
   endif
 
+  call radthin_time_info(obstype, jsatid, sis, ptime, ithin_time)
+  if( ptime > 0.0_r_kind) then
+     n_tbin=nint(2*time_window_max/ptime)
+  else
+     n_tbin=1
+  endif
 ! Make thinning grids
-  call makegrids(rmesh,ithin)
+  call makegrids(rmesh,ithin,n_tbin=n_tbin)
 
 ! Set various variables depending on type of data to be read
 
@@ -464,11 +486,11 @@ subroutine read_bufrtovs(mype,val_tovs,ithin,isfcalc,&
   if(dval_use) maxinfo=maxinfo+2
   nreal = maxinfo + nstinfo
   nele  = nreal   + nchanl
-  hdr1b ='SAID FOVN YEAR MNTH DAYS HOUR MINU SECO CLAT CLON CLATH CLONH HOLS'
+  hdr1b ='SAID FOVN YEAR MNTH DAYS HOUR MINU SECO CLAT CLON CLATH CLONH HOLS SACV'
   hdr2b ='SAZA SOZA BEARAZ SOLAZI'
   allocate(data_all(nele,itxmax),data1b8(nchanl),data1b4(nchanl),nrec(itxmax))
 
-
+  nrec = 999999
   next=0
   irec=0
 ! Big loop over standard data feed and possible ears/db data
@@ -489,41 +511,76 @@ subroutine read_bufrtovs(mype,val_tovs,ithin,isfcalc,&
      end if
 
 !    Reopen unit to satellite bufr file
-     call closbf(lnbufr)
      open(lnbufr,file=trim(infile2),form='unformatted',status = 'old',iostat=ierr)
      if(ierr /= 0) cycle ears_db_loop
 
      call openbf(lnbufr,'IN',lnbufr)
 
-     if(llll >= 2 .and. (amsua .or. amsub .or. mhs))then
+     ! support multiple spc coefficient files for any given sensor
+     if(amsua .or. amsub .or. mhs)then
         quiet=.not.verbose
-        allocate(data1b8x(nchanl))
-        sensorlist(1)=sis
-        if( crtm_coeffs_path /= "" ) then
-           if(mype_sub==mype_root .and. print_verbose) write(6,*)'READ_BUFRTOVS: crtm_spccoeff_load() on path "'//trim(crtm_coeffs_path)//'"'
-           error_status = crtm_spccoeff_load(sensorlist,&
-              File_Path = crtm_coeffs_path, quiet=quiet )
+        spc_coeff_versions = 0
+        spc_coeff_found = .true.
+        do while (spc_coeff_found)
+           if (spc_coeff_versions == 0) then
+              sensorlist(1)=sis
            else
-              error_status = crtm_spccoeff_load(sensorlist,quiet=quiet)
-           endif
-           if (error_status /= success) then
-              write(6,*)'READ_BUFRTOVS:  ***ERROR*** crtm_spccoeff_load error_status=',error_status,&
-                 '   TERMINATE PROGRAM EXECUTION'
-           call stop2(71)
-        endif
-        ninstruments = size(sc)
-        instrument_loop: do n=1,ninstruments
-           if(sis == sc(n)%sensor_id)then
-              instrument=n
-              exit instrument_loop
+              i = spc_coeff_versions+1
+              write(sensorlist(1),'(a,a,i1)') trim(sis),'_v',i
            end if
-        end do instrument_loop
-        if(instrument == 0)then
-           write(6,*)' failure to find instrument in read_bufrtovs ',sis
-        end if
+
+           if( crtm_coeffs_path /= "" ) then
+              if(mype_sub==mype_root .and. print_verbose) write(6,*)'READ_BUFRTOVS: crtm_spccoeff_load() on path "'//trim(crtm_coeffs_path)//'"'
+           end if
+
+           spc_filename = trim(crtm_coeffs_path) // trim(sensorlist(1)) // '.SpcCoeff.bin'
+           INQUIRE(FILE=trim(spc_filename), EXIST=spc_coeff_found)
+
+           if (.NOT. spc_coeff_found) then
+              if (spc_coeff_versions == 0) then
+                 write(6,*)'READ_BUFRTOVS:  ***ERROR*** crtm_spccoeff_load error_status=',error_status,&
+                    '   TERMINATE PROGRAM EXECUTION'
+                 call stop2(71)
+              else
+                 write(6,*)'READ_BUFRTOVS:  ', spc_coeff_versions, ' versions of SpcCoeff found for ', trim(sis)
+              end if
+           else
+              spc_coeff_versions = spc_coeff_versions+1
+
+              if( crtm_coeffs_path /= "" ) then
+                 error_status = crtm_spccoeff_load(sensorlist,&
+                    File_Path = crtm_coeffs_path, quiet=quiet )
+              else
+                 error_status = crtm_spccoeff_load(sensorlist,quiet=quiet)
+              endif
+              if (error_status /= success) then
+                 write(6,*)'READ_BUFRTOVS:  ***ERROR*** crtm_spccoeff_load error_status=',error_status,&
+                    ' despite file ',trim(spc_filename),' existing,   TERMINATE PROGRAM EXECUTION'
+                 call stop2(71)
+              endif
+
+              ninstruments = size(sc)
+              instrument_loop: do n=1,ninstruments
+                 if(sis == sc(n)%sensor_id)then
+                    instrument=n
+                    exit instrument_loop
+                 end if
+              end do instrument_loop
+              if(instrument == 0)then
+                 write(6,*)' failure to find instrument in read_bufrtovs ',sis
+              end if
+
+              accoeff_sets(spc_coeff_versions) = sc(instrument)%ac
+
+              ! deallocate crtm info
+              error_status = crtm_spccoeff_destroy()
+              if (error_status /= success) &
+                 write(6,*)'OBSERVER:  ***ERROR*** crtm_spccoeff_destroy error_status=',error_status
+           end if
+        end do
+
      end if
 
-   
 !    Loop to read bufr file
      irecx=0
      read_subset: do while(ireadmg(lnbufr,subset,idate)>=0)
@@ -613,18 +670,25 @@ subroutine read_bufrtovs(mype,val_tovs,ithin,isfcalc,&
 
            nread=nread+nchanl
 
-           if (thin4d) then
-              timedif = zero
-           else
-              timedif = two*abs(tdiff)        ! range:  0 to 6
-           endif
-
            terrain = 50._r_kind
            if(llll == 1)terrain = 0.01_r_kind*abs(bfr1bhdr(13))                   
-           crit1 = 0.01_r_kind + terrain + timedif
-           if (llll >  1 ) crit1 = crit1 + r100 * float(llll)
-           call map2tgrid(dlat_earth,dlon_earth,dist1,crit1,itx,ithin,itt,iuse,sis)
+           crit0 = 0.01_r_kind + terrain
+           if (llll >  1 ) crit0 = crit0 + r100 * real(llll,r_kind)
+           timeinflat=two
+           call tdiff2crit(tdiff,ptime,ithin_time,timeinflat,crit0,crit1,it_mesh)
+           call map2tgrid(dlat_earth,dlon_earth,dist1,crit1,itx,ithin,itt,iuse,sis,it_mesh=it_mesh)
            if(.not. iuse)cycle read_loop
+
+!          Extract satellite antenna corrections version number
+           if (llll > 1) then
+              sacv = nint(bfr1bhdr(14))
+              if (sacv > spc_coeff_versions) then
+                 write(6,*) 'READ_BUFRTOVS WARNING sacv greater than spc_coeff_versions',' ',jsatid,' ',obstype
+              end if
+           else ! normal feed doesn't have antenna correction, so set sacv to 0
+              sacv = 0
+           end if
+
 
            call ufbint(lnbufr,bfr2bhdr,n2bhdr,1,iret,hdr2b)
 
@@ -635,7 +699,7 @@ subroutine read_bufrtovs(mype,val_tovs,ithin,isfcalc,&
            if(hirs .and. ((jsatid == 'n16') .or. (jsatid == 'n17'))) &
               ifovmod=ifovmod+1
 
-           panglr=(start+float(ifovmod-1)*step)*deg2rad
+           panglr=(start+real(ifovmod-1,r_kind)*step)*deg2rad
            lzaest = asin(rato*sin(panglr))
            if( msu .or. hirs2 .or. ssu)then
               lza = lzaest
@@ -667,22 +731,76 @@ subroutine read_bufrtovs(mype,val_tovs,ithin,isfcalc,&
            endif
 
 !          Read data record.  Increment data counter
-!          TMBR is actually the antenna temperature for most microwave 
-!          sounders.
-           if (llll == 1) then
-              call ufbrep(lnbufr,data1b8,1,nchanl,iret,'TMBR')
-           else     ! EARS / DB
-              call ufbrep(lnbufr,data1b8,1,nchanl,iret,'TMBRST')
-              if ( amsua .or. amsub .or. mhs )then
-                 data1b8x=data1b8
-                 data1b4=data1b8
-                 call remove_antcorr(sc(instrument)%ac,ifov,data1b4)
-                 data1b8=data1b4
-                 do j=1,nchanl
-                    if(data1b8x(j) > r1000)data1b8(j) = 1000000._r_kind
-                 end do
+!          TMBR is actually the antenna temperature for most microwave sounders.
+!          Changed from accepting TMBR and converting TMBRST to
+!          antenna temperature (remove_antcorr), to converting TMBR to
+!          brightness temperature (add_antcorr) and accepting TMBRST
+!
+
+           if (ta2tb) then
+
+              if (llll == 1) then
+                 call ufbrep(lnbufr,data1b8,1,nchanl,iret,'TMBR')
+                 if ( (amsua .or. amsub .or. mhs) .and. &
+                      .not.(jsatid == 'n15' .or. jsatid == 'n16') )then
+                    ! convert antenna temperature to brightness temperature,
+                    ! unless the satellite is n15 or n16, because tranamsua
+                    ! does this conversion because the coefficient files exist
+                    ! for it to use
+                    data1b4=data1b8
+                    !call apply_antcorr(accoeff_sets(spc_coeff_versions),ifov,data1b4)
+                    call apply_antcorr(accoeff_sets(1),ifov,data1b4)
+                    do j=1,nchanl
+                       if(data1b8(j) > r1000)then
+                         data1b8(j) = 1000000._r_kind
+                       else
+                         data1b8(j) = data1b4(j)
+                       end if
+                    end do
+                 end if
+              else     ! EARS / DB
+                 call ufbrep(lnbufr,data1b8,1,nchanl,iret,'TMBRST')
+                 !if ( amsua .or. amsub .or. mhs .AND. sacv .ne. spc_coeff_versions)then
+                 if ( amsua .or. amsub .or. mhs .AND. spc_coeff_versions /= 1 .AND. sacv /= 1)then
+                    ! convert brightness temperature to antenna temperature using
+                    ! the satellite antenna correction version (sacv) used by the
+                    ! data originator,
+                    ! then convert back to brightness temperature using the version
+                    ! of parameters used by the CRTM
+                    data1b4=data1b8
+                    call remove_antcorr(accoeff_sets(sacv),ifov,data1b4)
+                    !call apply_antcorr(accoeff_sets(spc_coeff_versions),ifov,data1b4)
+                    call apply_antcorr(accoeff_sets(1),ifov,data1b4)
+                    do j=1,nchanl
+                       if(data1b8(j) > r1000) then
+                         data1b8(j) = 1000000._r_kind
+                       else
+                         data1b8(j)=data1b4(j)
+                       end if
+                    end do
+                 end if
               end if
-           end if
+
+           else
+
+              if (llll == 1) then
+                 call ufbrep(lnbufr,data1b8,1,nchanl,iret,'TMBR')
+              else     ! EARS / DB
+                 call ufbrep(lnbufr,data1b8,1,nchanl,iret,'TMBRST')
+                 if ( amsua .or. amsub .or. mhs )then
+                    data1b4=data1b8
+                    call remove_antcorr(accoeff_sets(1),ifov,data1b4)
+                    do j=1,nchanl
+                       if(data1b8(j) > r1000)then
+                         data1b8(j) = 1000000._r_kind
+                       else
+                         data1b8(j) = data1b4(j)
+                       end if
+                    end do
+                 end if
+              end if
+
+           endif
 
 !          Transfer observed brightness temperature to work array.  If any
 !          temperature exceeds limits, reset observation to "bad" value
@@ -703,7 +821,7 @@ subroutine read_bufrtovs(mype,val_tovs,ithin,isfcalc,&
            end do
            if (iskip >= nchanl) cycle read_loop
 !          Map obs to thinning grid
-           crit1 = crit1 + 10._r_kind*float(iskip)
+           crit1 = crit1 + 10._r_kind*real(iskip,r_kind)
            call checkob(dist1,crit1,itx,iuse)
            if(.not. iuse)cycle read_loop
 
@@ -800,6 +918,7 @@ subroutine read_bufrtovs(mype,val_tovs,ithin,isfcalc,&
                        else
                           qval=zero
                        end if
+                       if (radmod%lprecip) qval=zero  
                        ! favor thinner clouds
                        ! cosza = cos(lza)
                        ! d0= 8.24_r_kind - 2.622_r_kind*cosza + 1.846_r_kind*cosza*cosza
@@ -937,15 +1056,7 @@ subroutine read_bufrtovs(mype,val_tovs,ithin,isfcalc,&
         enddo read_loop
      enddo read_subset
      call closbf(lnbufr)
-
-     if(llll > 1 .and. (amsua .or. amsub .or. mhs))then
-        deallocate(data1b8x)
-
-!       deallocate crtm info
-        error_status = crtm_spccoeff_destroy()
-        if (error_status /= success) &
-           write(6,*)'OBSERVER:  ***ERROR*** crtm_spccoeff_destroy error_status=',error_status
-     end if
+     close(lnbufr)
 
   end do ears_db_loop
   deallocate(data1b8,data1b4)

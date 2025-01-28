@@ -34,11 +34,11 @@ subroutine q_diag(it,mype)
 !$$$
   use kinds, only: r_kind,i_kind
   use guess_grids, only: ges_qsat,ges_prsi
-  use jfunc, only: iout_iter
+  use jfunc, only: iout_iter,jiter
   use mpimod, only: mpi_rtype,mpi_comm_world,mpi_sum,ierror
   use constants,only: zero,two,one,half
   use gridmod, only: lat2,lon2,nsig,nlat,nlon,lat1,lon1,iglobal,&
-       displs_g,ijn,wgtlats,itotsub,strip
+       displs_g,ijn,wgtlats,itotsub,strip,minmype
   use derivsmod, only: cwgues
   use general_commvars_mod, only: load_grid
   use gridmod, only: regional
@@ -67,7 +67,7 @@ subroutine q_diag(it,mype)
   real(r_kind),pointer,dimension(:,:,:):: ges_q =>NULL()
   real(r_kind),pointer,dimension(:,:,:):: ges_cwmr_it=>NULL()
 
-  mype_out=0
+  mype_out=minmype
   mm1=mype+1
 
   ier=0
@@ -85,7 +85,8 @@ subroutine q_diag(it,mype)
         if (regional) then 
            ges_cwmr_it => cwgues        ! temporarily
         else
-           call die('q_diag','cannot get pointer to cwmr, istatus =',istatus)
+        !  call die('q_diag','cannot get pointer to cwmr, istatus =',istatus) 
+           ges_cwmr_it => cwgues ! do not die
         end if
      end if
   else
@@ -132,18 +133,21 @@ subroutine q_diag(it,mype)
      if(qrms0(1,3)>zero) rhrms_neg=sqrt(qrms0(1,2)/qrms0(1,3))
      if(qrms0(2,2)>zero) qrms_sat =sqrt(qrms0(2,1)/qrms0(2,3))
      if(qrms0(2,3)>zero) rhrms_sat=sqrt(qrms0(2,2)/qrms0(2,3))
-     write(iout_iter,100) nint(qrms0(1,3)),qrms_neg,nint(qrms0(1,3)),rhrms_neg, &
-                          nint(qrms0(2,3)),qrms_sat,nint(qrms0(2,3)),rhrms_sat
-100  format(' Q_DIAG:  NEG Q  COUNT,RMS=',i9,1x,g13.6,/, &
-            '          NEG RH COUNT,RMS=',i9,1x,g13.6,/, &
-            '     SUPERSAT Q  COUNT,RMS=',i9,1x,g13.6,/, &
-            '     SUPERSAT RH COUNT,RMS=',i9,1x,g13.6)
+     write(iout_iter,100) &
+          jiter,nint(qrms0(1,3)),qrms_neg,&
+          jiter,nint(qrms0(1,3)),rhrms_neg, &
+          jiter,nint(qrms0(2,3)),qrms_sat, &
+          jiter,nint(qrms0(2,3)),rhrms_sat
+100  format(' Q_DIAG:  ',i2.2,' NEG Q  COUNT,RMS=',i9,1x,g19.12,/, &
+            '          ',i2.2,' NEG RH COUNT,RMS=',i9,1x,g19.12,/, &
+            '     ',i2.2,' SUPERSAT Q  COUNT,RMS=',i9,1x,g19.12,/, &
+            '     ',i2.2,' SUPERSAT RH COUNT,RMS=',i9,1x,g19.12)
 
      call load_grid(work_ps,grid_ps)
      call load_grid(work_pw,grid_pw)
      globps=zero
      globpw=zero
-     rlon=one/float(nlon)
+     rlon=one/real(nlon,r_kind)
      do jj=2,nlat-1
         j=jj-1
         fmeanps=zero
@@ -160,8 +164,8 @@ subroutine q_diag(it,mype)
      globps=globps
      globpw=globpw
      pdryini=globps-globpw
-     write(iout_iter,110) globps,globpw,pdryini
-110  format(' Q_DIAG:  mean_ps, mean_pw, pdryini=',3(g13.6,1x))
+     write(iout_iter,110) jiter,globps,globpw,pdryini
+110  format(' Q_DIAG:  ',i2.2,' mean_ps, mean_pw, pdryini=',3(g19.12,1x))
   end if
 
   return

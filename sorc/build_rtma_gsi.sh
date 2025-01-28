@@ -20,21 +20,22 @@ set COMPILER intel
 setenv FFLAGS_COM "-fp-model strict"
 setenv LDFLAGS_COM " "
 
-module use $BASE/../modulefiles
-source $BASE/../modulefiles/HRRR/v4.0.0
+#module use $BASE/../modulefiles
+#source $BASE/../modulefiles/HRRR/v4.0.0
 
 module list
 
 cd ${BASE}/rtma_gsi.fd
 rm -fr build
 mkdir build
-cd ${BASE}/rtma_gsi.fd/build
-cmake -DENKF_MODE=WRF -DBUILD_ENKF_PREPROCESS_ARW=ON -DBUILD_GSDCLOUD_ARW=ON ../.
-make -j1
+cd ush
+./build_mine.sh
+#cmake -DENKF_MODE=WRF -DBUILD_ENKF_PREPROCESS_ARW=ON -DBUILD_GSDCLOUD_ARW=ON ../.
+#make -j1
 
-cpreq bin/gsi.x        ${BASE}/../exec/rtma_gsi
-cpreq bin/enkf_wrf.x   ${BASE}/../exec/rtma_enkf
-cpreq bin/enspreproc.x ${BASE}/../exec/rtma_process_enkf
-cpreq bin/initialens.x ${BASE}/../exec/rtma_initialens
+cp ${BASE}/rtma_gsi.fd/build/src/gsi/gsi.x        ${BASE}/../exec/rtma_gsi
+#cpreq bin/enkf_wrf.x   ${BASE}/../exec/rtma_enkf
+#cpreq bin/enspreproc.x ${BASE}/../exec/rtma_process_enkf
+#cpreq bin/initialens.x ${BASE}/../exec/rtma_initialens
 
 ##############################

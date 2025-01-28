@@ -17,6 +17,9 @@ module intallmod
 !   2015-09-03  guo     - obsmod::yobs has been replaced with m_obsHeadBundle,
 !                         where yobs is created and destroyed when and where it
 !                         is needed.
+!   2018-08-10  guo     - removed obsHeadBundle references.
+!                       - replaced intjo() related implementations with a new
+!                         polymorphic implementation of intjomod::intjo().
 !
 ! subroutines included:
 !   sub intall
@@ -152,6 +155,7 @@ subroutine intall(sval,sbias,rval,rbias)
 !   2014-05-07  pondeca -  Add RHS calculation for howv constraint
 !   2014-06-17  carley/zhu  - Add RHS calculation for lcbas constraint
 !   2015-07-10  pondeca - Add RHS calculation for cldch constraint
+!   2019-03-13  eliu    - add precipitation component
 !
 !   input argument list:
 !     sval     - solution on grid
@@ -175,25 +179,21 @@ subroutine intall(sval,sbias,rval,rbias)
   use kinds, only: i_kind,r_quad
   use gsi_4dvar, only: nobs_bins,ltlint,ibin_anl
   use constants, only: zero,zero_quad
-  use jcmod, only: ljcpdry,ljc4tlevs,ljcdfi
+  use jcmod, only: ljcpdry,ljc4tlevs,ljcdfi,ljclimqc 
   use jfunc, only: nrclen,nsclen,npclen,ntclen
-  use intradmod, only: setrad
   use intjomod, only: intjo
   use bias_predictors, only : predictors,assignment(=)
   use state_vectors, only: allocate_state,deallocate_state
+  use state_vectors, only: qgpresent,qspresent,qrpresent,qipresent,qlpresent
+  use state_vectors, only: cldchpresent,lcbaspresent,howvpresent,wspd10mpresent,pblhpresent,vispresent,gustpresent
   use intjcmod, only: intlimq,intlimg,intlimv,intlimp,intlimw10m,intlimhowv,intlimcldch,&
-      intliml,intjcpdry1,intjcpdry2,intjcdfi
+      intliml,intjcpdry1,intjcpdry2,intjcdfi,intlimqc  
   use timermod, only: timer_ini,timer_fnl
   use gsi_bundlemod, only: gsi_bundle
   use gsi_bundlemod, only: assignment(=)
-  use state_vectors, only: svars2d
-  use mpeu_util, only: getindex
   use guess_grids, only: ntguessig,nfldsig
   use mpl_allreducemod, only: mpl_allreduce
 
-  use m_obsHeadBundle, only: obsHeadBundle
-  use m_obsHeadBundle, only: obsHeadBundle_create
-  use m_obsHeadBundle, only: obsHeadBundle_destroy
   implicit none
 
 ! Declare passed variables
@@ -201,14 +201,11 @@ subroutine intall(sval,sbias,rval,rbias)
   type(predictors), intent(in   ) :: sbias
   type(gsi_bundle), intent(inout) :: rval(nobs_bins)
   type(predictors), intent(inout) :: rbias
-  real(r_quad),dimension(max(1,nrclen),nobs_bins) :: qpred_bin
   real(r_quad),dimension(max(1,nrclen)) :: qpred
   real(r_quad),dimension(2*nobs_bins) :: mass
 
 ! Declare local variables
   integer(i_kind) :: ibin,ii,it,i
-
-  type(obsHeadBundle),pointer,dimension(:):: yobs
 
 !******************************************************************************
 ! Initialize timer
@@ -220,22 +217,10 @@ subroutine intall(sval,sbias,rval,rbias)
      rval(ii)=zero
   enddo
 
-! Compute RHS in physical space
-  call setrad(sval(1))
-  qpred_bin=zero_quad
-  call obsHeadBundle_create(yobs,nobs_bins)
-! RHS for Jo
-!$omp parallel do  schedule(dynamic,1) private(ibin)
-  do ibin=1,size(yobs)  ! == nobs_bins
-     call intjo(yobs(ibin),rval(ibin),qpred_bin(:,ibin),sval(ibin),sbias,ibin)
-  end do
   qpred=zero_quad
-  do ibin=1,size(yobs)  ! == nobs_bins
-     do i=1,nrclen
-        qpred(i)=qpred(i)+qpred_bin(i,ibin)
-     end do
-  end do
-  call obsHeadBundle_destroy(yobs)
+
+! Compute RHS in physical space (rval,qpred)
+  call intjo(rval,qpred,sval,sbias)
 
   if(.not.ltlint)then
 ! RHS for moisture constraint
@@ -251,27 +236,48 @@ subroutine intall(sval,sbias,rval,rbias)
            call intlimq(rval(ibin),sval(ibin),it)
         end do
      end if
-
+     if (ljclimqc) then
+        if (.not.ljc4tlevs) then
+           if (qlpresent) call intlimqc(rval(ibin_anl),sval(ibin_anl),ntguessig,'ql')
+           if (qipresent) call intlimqc(rval(ibin_anl),sval(ibin_anl),ntguessig,'qi')
+           if (qrpresent) call intlimqc(rval(ibin_anl),sval(ibin_anl),ntguessig,'qr')
+           if (qspresent) call intlimqc(rval(ibin_anl),sval(ibin_anl),ntguessig,'qs')
+           if (qgpresent) call intlimqc(rval(ibin_anl),sval(ibin_anl),ntguessig,'qg')
+        else
+           do ibin=1,nobs_bins
+              if (nobs_bins /= nfldsig) then
+                 it=ntguessig
+              else
+                 it=ibin
+              end if
+              if (qlpresent) call intlimqc(rval(ibin),sval(ibin),it,'ql')
+              if (qipresent) call intlimqc(rval(ibin),sval(ibin),it,'qi')
+              if (qrpresent) call intlimqc(rval(ibin),sval(ibin),it,'qr')
+              if (qspresent) call intlimqc(rval(ibin),sval(ibin),it,'qs')
+              if (qgpresent) call intlimqc(rval(ibin),sval(ibin),it,'qg')
+           end do
+        end if
+     end if  ! ljclimqc
 ! RHS for gust constraint
-     if (getindex(svars2d,'gust')>0)call intlimg(rval(1),sval(1))
+     if (gustpresent)call intlimg(rval(1),sval(1))
 
 ! RHS for vis constraint
-     if (getindex(svars2d,'vis')>0) call intlimv(rval(1),sval(1))
+     if (vispresent) call intlimv(rval(1),sval(1))
 
 ! RHS for pblh constraint
-     if (getindex(svars2d,'pblh')>0) call intlimp(rval(1),sval(1))
+     if (pblhpresent) call intlimp(rval(1),sval(1))
 
 ! RHS for wspd10m constraint
-     if (getindex(svars2d,'wspd10m')>0) call intlimw10m(rval(1),sval(1))
+     if (wspd10mpresent) call intlimw10m(rval(1),sval(1))
 
 ! RHS for howv constraint
-     if (getindex(svars2d,'howv')>0) call intlimhowv(rval(1),sval(1))
+     if (howvpresent) call intlimhowv(rval(1),sval(1))
 
 ! RHS for lcbas constraint
-     if (getindex(svars2d,'lcbas')>0) call intliml(rval(1),sval(1))
+     if (lcbaspresent) call intliml(rval(1),sval(1))
 
 ! RHS for cldch constraint
-     if (getindex(svars2d,'cldch')>0) call intlimcldch(rval(1),sval(1))
+     if (cldchpresent) call intlimcldch(rval(1),sval(1))
 
   end if
 
@@ -290,7 +296,7 @@ subroutine intall(sval,sbias,rval,rbias)
 
   end if
 
-! Take care of background error for bias correction terms
+! Sum over all processors for bias correction terms
 
   call mpl_allreduce(nrclen,qpvals=qpred)
 
@@ -307,13 +313,13 @@ subroutine intall(sval,sbias,rval,rbias)
 ! RHS for Jc DFI
   if (ljcdfi .and. nobs_bins>1) call intjcdfi(rval,sval)
 
+!  Put bias correction terms in correct location
   if(nsclen > 0)then
      do i=1,nsclen
         rbias%predr(i)=qpred(i)
      end do
   end if
   if(npclen > 0)then
-     
      do i=1,npclen
         rbias%predp(i)=qpred(nsclen+i)
      end do

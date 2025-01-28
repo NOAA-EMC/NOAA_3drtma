@@ -23,6 +23,7 @@ subroutine get_gefs_for_regional
 !                               when using ensembles from different time
 !   2016-12-12  tong    - add code to get nemsio meta data, if use_gfs_nemsio=True
 !   2020-07-01  Bi   - add code to get netCDF data, if use_gfs_ncio=.true.
+!   2020-05-04  wu   - no rotate_wind for fv3_regional
 !
 !   input argument list:
 !
@@ -36,13 +37,13 @@ subroutine get_gefs_for_regional
 
   use gridmod, only: idsl5,regional,use_gfs_nemsio,use_gfs_ncio,&
                      ncepgfs_head,ncepgfs_headv
-  use gridmod, only: nlon,nlat,lat2,lon2,nsig,rotate_wind_ll2xy
+  use gridmod, only: nlon,nlat,lat2,lon2,nsig,rotate_wind_ll2xy,&
+                     fv3_regional
   use hybrid_ensemble_parameters, only: region_lat_ens,region_lon_ens
   use hybrid_ensemble_parameters, only: en_perts,ps_bar,nelen
-  use hybrid_ensemble_parameters, only: n_ens,grd_ens,grd_a1,grd_e1,p_e2a,uv_hyb_ens,dual_res
+  use hybrid_ensemble_parameters, only: n_ens_gfs,weight_ens_gfs,grd_ens,grd_a1,grd_e1,p_e2a,uv_hyb_ens,dual_res
   use hybrid_ensemble_parameters, only: full_ensemble,q_hyb_ens,l_ens_in_diff_time,write_ens_sprd
   use hybrid_ensemble_parameters, only: ntlevs_ens,ensemble_path,jcap_ens
- !use hybrid_ensemble_parameters, only: add_bias_perturbation
   use control_vectors, only: cvars2d,cvars3d,nc2d,nc3d
   use gsi_bundlemod, only: gsi_bundlecreate
   use gsi_bundlemod, only: gsi_bundle
@@ -76,7 +77,7 @@ subroutine get_gefs_for_regional
   use nemsio_module, only: nemsio_init,nemsio_open,nemsio_close
   use ncepnems_io, only: error_msg
   use nemsio_module, only: nemsio_gfile,nemsio_getfilehead
-  use module_fv3gfs_ncio, only: Dimension, Dataset, open_dataset, get_dim, &
+  use module_ncio, only: Dimension, Dataset, open_dataset, get_dim, &
                                 read_vardata, get_idate_from_time_units,&
                                 read_attribute, close_dataset
   use get_wrf_mass_ensperts_mod, only: get_wrf_mass_ensperts_class
@@ -114,7 +115,6 @@ subroutine get_gefs_for_regional
   character(len=*),parameter::myname='get_gefs_for_regional'
   real(r_kind) bar_norm,sig_norm,kapr,kap1,trk
   integer(i_kind) iret,i,j,k,k2,n,mm1,iderivative
-  integer(i_kind) mype_out
   integer(i_kind) ic2,ic3,it
   integer(i_kind) ku,kv,kt,kq,koz,kcw,kz,kps
   character(255) filename,filelists(ntlevs_ens)
@@ -228,14 +228,20 @@ subroutine get_gefs_for_regional
   do n=1,200
      read(10,'(a)',err=20,end=40)filename 
   enddo
-40 n_ens=n-1
+40 n_ens_temp=n-1
+  if(n_ens_gfs/=n_ens_temp) then
+     n_ens_gfs=n_ens_temp
+     if(mype == 0) then
+         write(6,*)'the n_ens_gfs is adjusted to the actual number of ensemble members ',n_ens_temp
+     endif
+  endif
 
 !    set n_ens_temp depending on if we want to add bias perturbation to the ensemble
 
   if(add_bias_perturbation) then
-     n_ens_temp=n_ens+1
+     n_ens_temp=n_ens_gfs+1
   else
-     n_ens_temp=n_ens
+     n_ens_temp=n_ens_gfs
   end if
 
   rewind (10) 
@@ -298,8 +304,8 @@ subroutine get_gefs_for_regional
      if (nframe /= 0) call error_msg(trim(my_name),trim(filename),'nframe', &
                                      'getfilehead',istop,nframe)
 
-     fhour = float(nfhour) + float(nfminute)/r60 + &
-             float(nfsecondn)/float(nfsecondd)/r3600
+     fhour = real(nfhour,r_kind) + real(nfminute,r_kind)/r60 + &
+             real(nfsecondn,r_kind)/real(nfsecondd,r_kind)/r3600
 
      nlat_gfs=latb+2
      nlon_gfs=lonb
@@ -363,7 +369,7 @@ subroutine get_gefs_for_regional
      else ! use_gfs_ncio and get this information
         write(sfilename,'("sfcf",i2.2)')nhr_assimilation
         ! open the netCDF file
-        atmges = open_dataset(filename,paropen=.true.)
+        atmges = open_dataset(filename)
         ! get dimension sizes
         ncdim = get_dim(atmges, 'grid_xt'); gfshead%lonb = ncdim%len
         ncdim = get_dim(atmges, 'grid_yt'); gfshead%latb = ncdim%len
@@ -374,8 +380,6 @@ subroutine get_gefs_for_regional
         gfshead%idsl= 1
         gfshead%idvc = 2
 
-        ! FV3GFS write component does not include JCAP, infer from DIMY-2
-        njcap=latb-2
 
         nlat_gfs=gfshead%latb+2
         nlon_gfs=gfshead%lonb
@@ -383,7 +387,7 @@ subroutine get_gefs_for_regional
 
         jcap_gfs=gfshead%latb-2
 
-        if (mype==mype_out) write(6,*)'GESINFO:  Read NCEP FV3GFS netCDF ', &
+        if (mype==0) write(6,*)'GESINFO:  Read NCEP FV3GFS netCDF ', &
            'format file, ',trim(filename)
         ! hard code nvcoord to be 2
         gfshead%nvcoord=2 ! ak and bk
@@ -586,13 +590,13 @@ subroutine get_gefs_for_regional
                     grd_gfs%nlat,sp_gfs%rlats,grd_gfs%nlon,sp_gfs%rlons,nord_g2r,p_g2r)
 
 !  allocate mix ensemble space--horizontal on regional domain, vertical still gefs 
-  allocate(st_eg(grd_mix%lat2,grd_mix%lon2,grd_mix%nsig,n_ens))
-  allocate(vp_eg(grd_mix%lat2,grd_mix%lon2,grd_mix%nsig,n_ens))
-  allocate( t_eg(grd_mix%lat2,grd_mix%lon2,grd_mix%nsig,n_ens))
-  allocate(rh_eg(grd_mix%lat2,grd_mix%lon2,grd_mix%nsig,n_ens))
-  allocate(oz_eg(grd_mix%lat2,grd_mix%lon2,grd_mix%nsig,n_ens))
-  allocate(cw_eg(grd_mix%lat2,grd_mix%lon2,grd_mix%nsig,n_ens))
-  allocate( p_eg_nmmb(grd_mix%lat2,grd_mix%lon2,n_ens))
+  allocate(st_eg(grd_mix%lat2,grd_mix%lon2,grd_mix%nsig,n_ens_gfs))
+  allocate(vp_eg(grd_mix%lat2,grd_mix%lon2,grd_mix%nsig,n_ens_gfs))
+  allocate( t_eg(grd_mix%lat2,grd_mix%lon2,grd_mix%nsig,n_ens_gfs))
+  allocate(rh_eg(grd_mix%lat2,grd_mix%lon2,grd_mix%nsig,n_ens_gfs))
+  allocate(oz_eg(grd_mix%lat2,grd_mix%lon2,grd_mix%nsig,n_ens_gfs))
+  allocate(cw_eg(grd_mix%lat2,grd_mix%lon2,grd_mix%nsig,n_ens_gfs))
+  allocate( p_eg_nmmb(grd_mix%lat2,grd_mix%lon2,n_ens_gfs))
   st_eg=zero ; vp_eg=zero ; t_eg=zero ; rh_eg=zero ; oz_eg=zero ; cw_eg=zero 
   p_eg_nmmb=zero
 
@@ -612,11 +616,12 @@ subroutine get_gefs_for_regional
   else
      ges_z_ens(:,:)=ges_z(:,:)
   endif
+
 !                begin loop over ensemble members
 
   rewind(10)
   inithead=.true.
-  do n=1,n_ens
+  do n=1,n_ens_gfs
      read(10,'(a)',err=20,end=20)filename 
      filename=trim(ensemble_path) // trim(filename)
 !     write(filename,100) n
@@ -877,37 +882,52 @@ subroutine get_gefs_for_regional
      jjmin=grd_mix%nlon
      ratio_x=(nlon-one)/(grd_mix%nlon-one)
      ratio_y=(nlat-one)/(grd_mix%nlat-one)
-     do k=1,grd_mix%nsig
-        ku=k ; kv=ku+grd_mix%nsig ; kt=kv+grd_mix%nsig ; kq=kt+grd_mix%nsig ; koz=kq+grd_mix%nsig
-        kcw=koz+grd_mix%nsig
-        do j=1,grd_mix%lon2
-           do i=1,grd_mix%lat2
+     if(.not. fv3_regional)then
+        do k=1,grd_mix%nsig
+           ku=k ; kv=ku+grd_mix%nsig ; kt=kv+grd_mix%nsig ; kq=kt+grd_mix%nsig ; koz=kq+grd_mix%nsig
+           kcw=koz+grd_mix%nsig
+           do j=1,grd_mix%lon2
+              do i=1,grd_mix%lat2
 
-              ii=i+grd_mix%istart(mm1)-2
-              jj=j+grd_mix%jstart(mm1)-2
-              ii=min(grd_mix%nlat,max(1,ii))
-              jj=min(grd_mix%nlon,max(1,jj))
-              iimax=max(ii,iimax)
-              iimin=min(ii,iimin)
-              jjmax=max(jj,jjmax)
-              jjmin=min(jj,jjmin)
-              dlon_ens=float(jj)
-              dlat_ens=float(ii)
-              dlon=one+(dlon_ens-one)*ratio_x
-              dlat=one+(dlat_ens-one)*ratio_y
-              
-              call rotate_wind_ll2xy(work_sub(1,i,j,ku),work_sub(1,i,j,kv), &
-                                     uob,vob,region_lon_ens(ii,jj),dlon,dlat)
-              st_eg(i,j,k,n)=uob
-              vp_eg(i,j,k,n)=vob
-
-               t_eg(i,j,k,n)=work_sub(1,i,j,kt)     !  now pot virtual temp
-              rh_eg(i,j,k,n)=work_sub(1,i,j,kq)     !  now rh
-              oz_eg(i,j,k,n)=work_sub(1,i,j,koz)
-              cw_eg(i,j,k,n)=work_sub(1,i,j,kcw)
+                 ii=i+grd_mix%istart(mm1)-2
+                 jj=j+grd_mix%jstart(mm1)-2
+                 ii=min(grd_mix%nlat,max(1,ii))
+                 jj=min(grd_mix%nlon,max(1,jj))
+                 iimax=max(ii,iimax)
+                 iimin=min(ii,iimin)
+                 jjmax=max(jj,jjmax)
+                 jjmin=min(jj,jjmin)
+                 dlon_ens=real(jj,r_kind)
+                 dlat_ens=real(ii,r_kind)
+                 dlon=one+(dlon_ens-one)*ratio_x
+                 dlat=one+(dlat_ens-one)*ratio_y
+                 call rotate_wind_ll2xy(work_sub(1,i,j,ku),work_sub(1,i,j,kv), &
+                                        uob,vob,region_lon_ens(ii,jj),dlon,dlat)
+                 st_eg(i,j,k,n)=uob
+                 vp_eg(i,j,k,n)=vob
+                  t_eg(i,j,k,n)=work_sub(1,i,j,kt)     !  now pot virtual temp
+                 rh_eg(i,j,k,n)=work_sub(1,i,j,kq)     !  now rh
+                 oz_eg(i,j,k,n)=work_sub(1,i,j,koz)
+                 cw_eg(i,j,k,n)=work_sub(1,i,j,kcw)
+              end do
            end do
         end do
-     end do
+     else
+        do k=1,grd_mix%nsig
+           ku=k ; kv=ku+grd_mix%nsig ; kt=kv+grd_mix%nsig ; kq=kt+grd_mix%nsig ; koz=kq+grd_mix%nsig
+           kcw=koz+grd_mix%nsig
+           do j=1,grd_mix%lon2
+              do i=1,grd_mix%lat2
+                 st_eg(i,j,k,n)=work_sub(1,i,j,ku)
+                 vp_eg(i,j,k,n)=work_sub(1,i,j,kv)
+                  t_eg(i,j,k,n)=work_sub(1,i,j,kt)     !  now pot virtual temp
+                 rh_eg(i,j,k,n)=work_sub(1,i,j,kq)     !  now rh
+                 oz_eg(i,j,k,n)=work_sub(1,i,j,koz)
+                 cw_eg(i,j,k,n)=work_sub(1,i,j,kcw)
+              end do
+           end do
+        end do
+     endif
      kz=num_fields ; kps=kz-1
      do j=1,grd_mix%lon2
         do i=1,grd_mix%lat2
@@ -935,7 +955,7 @@ subroutine get_gefs_for_regional
 !                   if(mype==0) write(6,*)' with halo, n,min,max ges_ps - matt ps =',n,pdiffmin0,pdiffmax0
 
   end do   !  end loop over ensemble members.
-!
+
   deallocate(ges_z_ens)
 
 !   next, compute mean of ensembles.
@@ -951,7 +971,7 @@ subroutine get_gefs_for_regional
 !   compute mean state
   stbar=zero ; vpbar=zero ; tbar=zero ; rhbar=zero ; ozbar=zero ; cwbar=zero 
   pbar_nmmb=zero
-  do n=1,n_ens
+  do n=1,n_ens_gfs
      do k=1,grd_mix%nsig
         do j=1,grd_mix%lon2
            do i=1,grd_mix%lat2
@@ -972,7 +992,7 @@ subroutine get_gefs_for_regional
   end do
 
 ! Convert to mean
-  bar_norm = one/float(n_ens)
+  bar_norm = one/real(n_ens_gfs,r_kind)
   do k=1,grd_mix%nsig
      do j=1,grd_mix%lon2
         do i=1,grd_mix%lat2
@@ -1005,7 +1025,7 @@ subroutine get_gefs_for_regional
 !www  ensemble perturbation for all but the first member if full_ensemble
   if(full_ensemble)n1=2
 
-  do n=n1,n_ens
+  do n=n1,n_ens_gfs
      do k=1,grd_mix%nsig
         do j=1,grd_mix%lon2
            do i=1,grd_mix%lat2
@@ -1101,7 +1121,7 @@ subroutine get_gefs_for_regional
   allocate(rht(grd_ens%lat2,grd_ens%lon2,grd_ens%nsig))
   allocate(ozt(grd_ens%lat2,grd_ens%lon2,grd_ens%nsig))
   allocate(cwt(grd_ens%lat2,grd_ens%lon2,grd_ens%nsig))
-  do n=1,n_ens
+  do n=1,n_ens_gfs
      do j=1,grd_ens%lon2
         do i=1,grd_ens%lat2
            do k=1,grd_mix%nsig
@@ -1291,7 +1311,7 @@ subroutine get_gefs_for_regional
 ! 2*J_b = x^T * (beta1*B + beta2*P_ens)^(-1) * x
 ! where  P_ens is the ensemble covariance which is the sum of outer products of the
 ! ensemble perturbations (unnormalized) divided by n_ens-1  (or n_ens, depending on who you read).
-     sig_norm=sqrt(one/max(one,n_ens_temp-one))
+     sig_norm=sqrt(weight_ens_gfs/max(one,n_ens_temp-one))
 
 !     if(n_ens_temp==n_ens.and.n==n_ens+1) sig_norm=one
 !                                                  if(n==1 .or. n==2 .or. n==50) then
@@ -1313,9 +1333,9 @@ subroutine get_gefs_for_regional
      do ic3=1,nc3d
 
         if(ntlevs_ens > 1) then
-           call gsi_bundlegetpointer(en_perts(n,it),trim(cvars3d(ic3)),w3,istatus)
+           call gsi_bundlegetpointer(en_perts(n,1,it),trim(cvars3d(ic3)),w3,istatus)
         else
-           call gsi_bundlegetpointer(en_perts(n,1),trim(cvars3d(ic3)),w3,istatus)
+           call gsi_bundlegetpointer(en_perts(n,1,1),trim(cvars3d(ic3)),w3,istatus)
         endif
         if(istatus/=0) then
            write(6,*)' error retrieving pointer to ',trim(cvars3d(ic3)),' for ensemble member ',n
@@ -1402,9 +1422,9 @@ subroutine get_gefs_for_regional
      do ic2=1,nc2d
 
         if(ntlevs_ens > 1) then
-           call gsi_bundlegetpointer(en_perts(n,it),trim(cvars2d(ic2)),w2,istatus)
+           call gsi_bundlegetpointer(en_perts(n,1,it),trim(cvars2d(ic2)),w2,istatus)
         else
-           call gsi_bundlegetpointer(en_perts(n,1),trim(cvars2d(ic2)),w2,istatus)
+           call gsi_bundlegetpointer(en_perts(n,1,1),trim(cvars2d(ic2)),w2,istatus)
         endif
         if(istatus/=0) then
            write(6,*)' error retrieving pointer to ',trim(cvars2d(ic2)),' for ensemble member ',n

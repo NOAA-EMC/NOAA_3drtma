@@ -172,6 +172,13 @@ subroutine  read_NASA_LaRC_cloud(nread,ndata,nouse,infile,obstype,lunout,sis,nob
    write(lunout) ((cdata_all(k,i),k=1,maxdat),i=1,numobs)
    write(6,*)'NASA larcglb::',nreal,numobs
 
+   deallocate(cdata_all)
+   deallocate(lat_l)
+   deallocate(lon_l)
+   deallocate(ptop_l)
+   deallocate(teff_l)
+   deallocate(phase_l)
+   deallocate(lwp_l)
    return
 end subroutine read_NASA_LaRC_cloud
 
@@ -298,6 +305,7 @@ subroutine read_NASALaRC_cloud_bufr(satfile,atime,&
    enddo msg_report
    write(*,*) 'message/reports num=',nmsg,ntb
  call closbf(unit_in)
+ close(unit_in)
  numobs=ntb
  write(atime,'(I10)') idate
 
@@ -409,6 +417,7 @@ subroutine read_NASALaRC_cloud_bufr_survey(satfile,east_time, west_time)
    enddo msg_report
    write(*,*) 'message/reports num=',nmsg,ntb
  call closbf(unit_in)
+ close(unit_in)
 
  write(*,'(2x,a10,a10,a11)') 'time_level','subset_num'
  DO i=1,num_obstime

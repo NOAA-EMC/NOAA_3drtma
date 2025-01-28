@@ -102,10 +102,10 @@ module loadbal
 use mpimod, only: mpi_comm_world
 use mpisetup, only: mpi_real4,mpi_sum,mpi_comm_io,mpi_in_place,numproc,nproc,&
                 mpi_integer,mpi_wtime,mpi_status,mpi_real8,mpi_max
-
 use params, only: datapath, nanals, simple_partition, letkf_flag, nobsl_max,&
-                  neigv, corrlengthnh, corrlengthsh, corrlengthtr, lupd_obspace_serial
-use enkf_obsmod, only: nobstot, obloc, oblnp, ensmean_ob, obtime, anal_ob, anal_ob_modens, corrlengthsq
+                  neigv, corrlengthnh, corrlengthsh, corrlengthtr, lupd_obspace_serial,letkf_bruteforce_search
+use enkf_obsmod, only: nobstot, obloc, oblnp, ensmean_ob, obtime, &
+                       anal_ob, anal_ob_modens, corrlengthsq
 use kinds, only: r_kind, i_kind, r_double, r_single
 use kdtree2_module, only: kdtree2, kdtree2_create, kdtree2_destroy, &
                           kdtree2_result, kdtree2_r_nearest
@@ -130,7 +130,6 @@ integer(i_kind),public, allocatable, dimension(:) :: iprocob, indxob_chunk,&
                           numptsperproc, numobsperproc
 integer(i_kind),public, allocatable, dimension(:,:) :: indxproc, indxproc_obs
 integer(i_kind),public :: npts_min, npts_max, nobs_min, nobs_max
-integer(8) totsize
 ! kd-tree structures.
 type(kdtree2),public,pointer :: kdtree_obs, kdtree_grid, kdtree_obs2
 
@@ -153,7 +152,7 @@ logical test_loadbal
 if (letkf_flag) then
    ! used for finding nearest obs to grid point in LETKF.
    ! results are sorted by distance.
-   if (nobstot >= 3) then
+   if (nobstot >= 3 .and. .not. letkf_bruteforce_search) then
       kdtree_obs2  => kdtree2_create(obloc,sort=.true.,rearrange=.true.)
    endif
 endif
@@ -297,68 +296,19 @@ if (.not. letkf_flag .or. lupd_obspace_serial) then
        print *,'min/max number of obs per proc = ',nobs_min,nobs_max
        print *,'time to do ob space decomp = ',mpi_wtime()-t1
    end if
-   ! for serial enkf, send out observation priors to be updated on each processor.
+   ! for serial enkf, create observation priors to be updated on each processor.
    allocate(anal_obchunk_prior(nanals,nobs_max))
-   if(nproc == 0) then
-      print *,'sending out observation prior ensemble perts from root ...'
-      totsize = nobstot
-      totsize = totsize*nanals
-      print *,'nobstot*nanals',totsize
-      t1 = mpi_wtime()
-      ! send one big message to each task.
-      do np=1,numproc-1
-         do nob1=1,numobsperproc(np+1)
-            nob2 = indxproc_obs(np+1,nob1)
-            anal_obchunk_prior(1:nanals,nob1) = anal_ob(1:nanals,nob2)
-         end do
-         call mpi_send(anal_obchunk_prior,nobs_max*nanals,mpi_real4,np, &
-              1,mpi_comm_world,ierr)
-      end do
-      ! anal_obchunk_prior on root (no send necessary)
-      do nob1=1,numobsperproc(1)
-         nob2 = indxproc_obs(1,nob1)
-         anal_obchunk_prior(1:nanals,nob1) = anal_ob(1:nanals,nob2)
-      end do
-      ! now we don't need anal_ob anymore for serial EnKF.
-      if (.not. lupd_obspace_serial) deallocate(anal_ob)
-   else
-      ! recv one large message on each task.
-      call mpi_recv(anal_obchunk_prior,nobs_max*nanals,mpi_real4,0, &
-           1,mpi_comm_world,mpi_status,ierr)
-   end if
+   do nob1=1,numobsperproc(nproc+1)
+      nob2 = indxproc_obs(nproc+1,nob1)
+      anal_obchunk_prior(1:nanals,nob1) = anal_ob(1:nanals,nob2)
+   end do
    if (neigv > 0) then
-      ! if model space vertical localization is enabled, 
-      ! distribute ensemble perturbations in ob space for serial filter.
       allocate(anal_obchunk_modens_prior(nanals*neigv,nobs_max)) 
-      if(nproc == 0) then
-         print *,'sending out modens observation prior ensemble perts from root ...'
-         totsize = nobstot
-         totsize = totsize*nanals*neigv
-         print *,'nobstot*nanals*neigv',totsize
-         t1 = mpi_wtime()
-         ! send one big message to each task.
-         do np=1,numproc-1
-            do nob1=1,numobsperproc(np+1)
-               nob2 = indxproc_obs(np+1,nob1)
-               anal_obchunk_modens_prior(1:nanals*neigv,nob1) = anal_ob_modens(1:nanals*neigv,nob2)
-            end do
-            call mpi_send(anal_obchunk_modens_prior,nobs_max*nanals*neigv,mpi_real4,np, &
-                 1,mpi_comm_world,ierr)
-         end do
-         ! anal_obchunk_prior on root (no send necessary)
-         do nob1=1,numobsperproc(1)
-            nob2 = indxproc_obs(1,nob1)
-            anal_obchunk_modens_prior(1:nanals*neigv,nob1) = anal_ob_modens(1:nanals*neigv,nob2)
-         end do
-         ! now we don't need anal_ob_modens anymore for serial EnKF.
-         if (.not. lupd_obspace_serial) deallocate(anal_ob_modens)
-      else
-         ! recv one large message on each task.
-         call mpi_recv(anal_obchunk_modens_prior,nobs_max*nanals*neigv,mpi_real4,0, &
-              1,mpi_comm_world,mpi_status,ierr)
-      end if
+      do nob1=1,numobsperproc(nproc+1)
+         nob2 = indxproc_obs(nproc+1,nob1)
+         anal_obchunk_modens_prior(1:nanals*neigv,nob1) = anal_ob_modens(1:nanals*neigv,nob2)
+      end do
    endif
-   call mpi_barrier(mpi_comm_world, ierr)
    if(nproc == 0) print *,'... took ',mpi_wtime()-t1,' secs'
    ! these arrays only needed for serial filter
    ! nob1 is the index of the obs to be processed on this rank
@@ -405,72 +355,125 @@ integer(i_kind) :: np, nb, nn, n, nanal, i, ierr, ne
 allocate(scounts(0:numproc-1))
 allocate(displs(0:numproc-1))
 allocate(rcounts(0:numproc-1))
+! allocate array to hold pieces of state vector on each proc.
+allocate(anal_chunk(nanals,npts_max,ncdim,nbackgrounds))
+if (nproc == 0) print *,'anal_chunk size = ',size(anal_chunk,kind=8)
+
 ! only IO tasks send any data.
 ! scounts is number of data elements to send to processor np.
 ! rcounts is number of data elements to recv from processor np.
 ! displs is displacement into send array for data to go to proc np
-do np=0,numproc-1
-   displs(np) = np*nanals_per_iotask*npts_max*ncdim
-enddo
-if (nproc <= ntasks_io-1) then
-   scounts = nanals_per_iotask*npts_max*ncdim
+
+if (real(numproc)*real(nanals_per_iotask)*real(npts_max)*real(ncdim) < 2_r_kind**32/2_r_kind - 1_r_kind) then
+    do np=0,numproc-1
+       displs(np) = np*nanals_per_iotask*npts_max*ncdim
+    enddo
+    if (nproc <= ntasks_io-1) then
+       scounts = nanals_per_iotask*npts_max*ncdim
+    else
+       scounts = 0
+    endif
+    ! displs is also the displacement into recv array for data to go into anal_chunk
+    ! on task np.
+    do np=0,numproc-1
+       if (np <= ntasks_io-1) then
+          rcounts(np) = nanals_per_iotask*npts_max*ncdim
+       else
+          rcounts(np) = 0
+       end if
+    enddo
+    allocate(sendbuf(numproc*nanals_per_iotask*npts_max*ncdim))
+    allocate(recvbuf(numproc*nanals_per_iotask*npts_max*ncdim))
+
+    ! send and receive buffers.
+    do nb=1,nbackgrounds ! loop over time levels in background
+    
+      if (nproc <= ntasks_io-1) then
+         ! fill up send buffer.
+         do np=1,numproc
+          do ne=1,nanals_per_iotask
+            do nn=1,ncdim
+             do i=1,numptsperproc(np)
+              n = ((np-1)*ncdim*nanals_per_iotask + (ne-1)*ncdim + (nn-1))*npts_max + i
+              sendbuf(n) = grdin(indxproc(np,i),nn,nb,ne)
+            enddo
+           enddo
+          enddo
+         enddo
+      end if
+      call mpi_alltoallv(sendbuf, scounts, displs, mpi_real4, recvbuf, rcounts, displs,&
+                         mpi_real4, mpi_comm_world, ierr)
+      
+      !==> compute ensemble of first guesses on each task, remove mean from anal.
+      !$omp parallel do schedule(dynamic,1)  private(nn,i,nanal,n)
+      do nn=1,ncdim
+         do i=1,numptsperproc(nproc+1)
+            do nanal=1,nanals
+               n = ((nanal-1)*ncdim + (nn-1))*npts_max + i
+               anal_chunk(nanal,i,nn,nb) = recvbuf(n)
+            enddo
+         end do
+      end do
+      !$omp end parallel do
+    
+    enddo ! loop over nbackgrounds
 else
-   scounts = 0
-endif
-! displs is also the displacement into recv array for data to go into anal_chunk
-! on
-! task np.
-do np=0,numproc-1
-   if (np <= ntasks_io-1) then
-      rcounts(np) = nanals_per_iotask*npts_max*ncdim
+   do np=0,numproc-1
+      displs(np) = np*nanals_per_iotask*npts_max
+   enddo
+   if (nproc <= ntasks_io-1) then
+      scounts = nanals_per_iotask*npts_max
    else
-      rcounts(np) = 0
-   end if
-enddo
-allocate(sendbuf(numproc*nanals_per_iotask*npts_max*ncdim))
-allocate(recvbuf(numproc*nanals_per_iotask*npts_max*ncdim))
+      scounts = 0
+   endif
+   ! displs is also the displacement into recv array for data to go into anal_chunk
+   ! on task np.
+   do np=0,numproc-1
+      if (np <= ntasks_io-1) then
+         rcounts(np) = nanals_per_iotask*npts_max
+      else
+         rcounts(np) = 0
+      end if
+   enddo
+   allocate(sendbuf(numproc*nanals_per_iotask*npts_max))
+   allocate(recvbuf(numproc*nanals_per_iotask*npts_max))
+   
+   ! send and receive buffers.
+   do nb=1,nbackgrounds ! loop over time levels in background
+     do nn=1,ncdim ! loop over levels
+   
+       if (nproc <= ntasks_io-1) then
+          ! fill up send buffer.
+          do np=1,numproc
+           do ne=1,nanals_per_iotask
+             do i=1,numptsperproc(np)
+               n = ((ne-1)*nanals_per_iotask + (np-1))*npts_max + i
+               sendbuf(n) = grdin(indxproc(np,i),nn,nb,ne)
+             enddo
+           enddo
+          enddo
+       end if
+       call mpi_alltoallv(sendbuf, scounts, displs, mpi_real4, recvbuf, rcounts, displs,&
+                          mpi_real4, mpi_comm_world, ierr)
+       !==> compute ensemble of first guesses on each task, remove mean from anal.
+       !$omp parallel do schedule(dynamic,1)  private(i,nanal,n)
+       do i=1,numptsperproc(nproc+1)
+          do nanal=1,nanals
+             n = (nanal-1)*npts_max + i
+             anal_chunk(nanal,i,nn,nb) = recvbuf(n)
+          enddo
+       end do
+       !$omp end parallel do
+   
+     enddo ! end loop over levels
+   enddo ! loop over nbackgrounds
+endif
 
-! allocate array to hold pieces of state vector on each proc.
-allocate(anal_chunk(nanals,npts_max,ncdim,nbackgrounds))
-if (nproc == 0) print *,'anal_chunk size = ',size(anal_chunk)
-
+deallocate(sendbuf, recvbuf)
 allocate(anal_chunk_prior(nanals,npts_max,ncdim,nbackgrounds))
 allocate(ensmean_chunk(npts_max,ncdim,nbackgrounds))
 allocate(ensmean_chunk_prior(npts_max,ncdim,nbackgrounds))
 ensmean_chunk = 0_r_single
-
-! send and receive buffers.
-do nb=1,nbackgrounds ! loop over time levels in background
-
-  if (nproc <= ntasks_io-1) then
-     ! fill up send buffer.
-     do np=1,numproc
-      do ne=1,nanals_per_iotask
-        do nn=1,ncdim
-         do i=1,numptsperproc(np)
-          n = ((np-1)*ncdim*nanals_per_iotask + (ne-1)*ncdim + (nn-1))*npts_max + i
-          sendbuf(n) = grdin(indxproc(np,i),nn,nb,ne)
-        enddo
-       enddo
-      enddo
-     enddo
-  end if
-  call mpi_alltoallv(sendbuf, scounts, displs, mpi_real4, recvbuf, rcounts, displs,&
-                     mpi_real4, mpi_comm_world, ierr)
-  
-  !==> compute ensemble of first guesses on each task, remove mean from anal.
-  !$omp parallel do schedule(dynamic,1)  private(nn,i,nanal,n)
-  do nn=1,ncdim
-     do i=1,numptsperproc(nproc+1)
-        do nanal=1,nanals
-           n = ((nanal-1)*ncdim + (nn-1))*npts_max + i
-           anal_chunk(nanal,i,nn,nb) = recvbuf(n)
-        enddo
-     end do
-  end do
-  !$omp end parallel do
-
-enddo ! loop over nbackgrounds
 
 !==> compute mean, remove it from anal_chunk
 !$omp parallel do schedule(dynamic,1)  private(nn,i,n,nb)
@@ -489,11 +492,8 @@ do nb=1,nbackgrounds
 end do
 !$omp end parallel do
 
-deallocate(sendbuf, recvbuf)
 
 end subroutine scatter_chunks
-
-
 
 subroutine gather_chunks
 ! gather chunks into grdin to write out the ensemble members
@@ -511,52 +511,94 @@ allocate(rcounts(0:numproc-1))
 ! scounts is number of data elements to send to processor np.
 ! rcounts is number of data elements to recv from processor np.
 ! displs is displacement into send array for data to go to proc np
-if (nproc <= ntasks_io-1) then
-   rcounts = nanals_per_iotask*npts_max*ncdim
-else
-   rcounts = 0
-endif
-do np=0,numproc-1
-   displs(np) = np*nanals_per_iotask*npts_max*ncdim
-   if (np <= ntasks_io-1) then
-      scounts(np) = nanals_per_iotask*npts_max*ncdim
+
+if (real(numproc)*real(nanals_per_iotask)*real(npts_max)*real(ncdim) < 2_r_kind**32/2_r_kind - 1_i_kind) then
+   if (nproc <= ntasks_io-1) then
+      rcounts = nanals_per_iotask*npts_max*ncdim
    else
-      scounts(np) = 0
-   end if
-enddo
-allocate(recvbuf(numproc*nanals_per_iotask*npts_max*ncdim))
-allocate(sendbuf(numproc*nanals_per_iotask*npts_max*ncdim))
-
-
-do nb=1,nbackgrounds ! loop over time levels in background
-  do nn=1,ncdim
-    do i=1,numptsperproc(nproc+1)
-      do nanal=1,nanals
-         n = ((nanal-1)*ncdim + (nn-1))*npts_max + i
-         ! add ensemble mean back in.
-         sendbuf(n) = anal_chunk(nanal,i,nn,nb)+ensmean_chunk(i,nn,nb)
-         ! convert to increment (A-F).
-         sendbuf(n) = sendbuf(n)-(anal_chunk_prior(nanal,i,nn,nb)+ensmean_chunk_prior(i,nn,nb))
-      enddo
-    enddo
-  enddo
-  call mpi_alltoallv(sendbuf, scounts, displs, mpi_real4, recvbuf, rcounts, displs,&
-                     mpi_real4, mpi_comm_world, ierr)
-  if (nproc <= ntasks_io-1) then
-    do np=1,numproc
-     do ne=1,nanals_per_iotask
-      do nn=1,ncdim
-       do i=1,numptsperproc(np)
-         n = ((np-1)*ncdim*nanals_per_iotask + (ne-1)*ncdim + (nn-1))*npts_max + i
-         grdin(indxproc(np,i),nn,nb,ne) = recvbuf(n)
+      rcounts = 0
+   endif
+   do np=0,numproc-1
+      displs(np) = np*nanals_per_iotask*npts_max*ncdim
+      if (np <= ntasks_io-1) then
+         scounts(np) = nanals_per_iotask*npts_max*ncdim
+      else
+         scounts(np) = 0
+      end if
+   enddo
+   allocate(recvbuf(numproc*nanals_per_iotask*npts_max*ncdim))
+   allocate(sendbuf(numproc*nanals_per_iotask*npts_max*ncdim))
+   do nb=1,nbackgrounds ! loop over time levels in background
+     do nn=1,ncdim
+       do i=1,numptsperproc(nproc+1)
+         do nanal=1,nanals
+            n = ((nanal-1)*ncdim + (nn-1))*npts_max + i
+            ! add ensemble mean back in.
+            sendbuf(n) = anal_chunk(nanal,i,nn,nb)+ensmean_chunk(i,nn,nb)
+            ! convert to increment (A-F).
+            sendbuf(n) = sendbuf(n)-(anal_chunk_prior(nanal,i,nn,nb)+ensmean_chunk_prior(i,nn,nb))
+         enddo
        enddo
-      enddo
      enddo
-    enddo
-    !print *,nproc,'min/max ps',minval(grdin(:,ncdim)),maxval(grdin(:,ncdim))
-  end if
-enddo ! end loop over background time levels
-
+     call mpi_alltoallv(sendbuf, scounts, displs, mpi_real4, recvbuf, rcounts, displs,&
+                        mpi_real4, mpi_comm_world, ierr)
+     if (nproc <= ntasks_io-1) then
+       do np=1,numproc
+        do ne=1,nanals_per_iotask
+         do nn=1,ncdim
+          do i=1,numptsperproc(np)
+            n = ((np-1)*ncdim*nanals_per_iotask + (ne-1)*ncdim + (nn-1))*npts_max + i
+            grdin(indxproc(np,i),nn,nb,ne) = recvbuf(n)
+          enddo
+         enddo
+        enddo
+       enddo
+       !print *,nproc,'min/max ps',minval(grdin(:,ncdim)),maxval(grdin(:,ncdim))
+     end if
+   enddo ! end loop over background time levels
+else
+   if (nproc <= ntasks_io-1) then
+      rcounts = nanals_per_iotask*npts_max
+   else
+      rcounts = 0
+   endif
+   do np=0,numproc-1
+      displs(np) = np*nanals_per_iotask*npts_max
+      if (np <= ntasks_io-1) then
+         scounts(np) = nanals_per_iotask*npts_max
+      else
+         scounts(np) = 0
+      end if
+   enddo
+   allocate(recvbuf(numproc*nanals_per_iotask*npts_max))
+   allocate(sendbuf(numproc*nanals_per_iotask*npts_max))
+   do nb=1,nbackgrounds ! loop over time levels in background
+     do nn=1,ncdim ! loop over levels
+       do i=1,numptsperproc(nproc+1)
+         do nanal=1,nanals
+            n = (nanal-1)*npts_max + i
+            ! add ensemble mean back in.
+            sendbuf(n) = anal_chunk(nanal,i,nn,nb)+ensmean_chunk(i,nn,nb)
+            ! convert to increment (A-F).
+            sendbuf(n) = sendbuf(n)-(anal_chunk_prior(nanal,i,nn,nb)+ensmean_chunk_prior(i,nn,nb))
+         enddo
+       enddo
+       call mpi_alltoallv(sendbuf, scounts, displs, mpi_real4, recvbuf, rcounts, displs,&
+                        mpi_real4, mpi_comm_world, ierr)
+       if (nproc <= ntasks_io-1) then
+         do np=1,numproc
+          do ne=1,nanals_per_iotask
+            do i=1,numptsperproc(np)
+              n = ((ne-1)*nanals_per_iotask + (np-1))*npts_max + i
+              grdin(indxproc(np,i),nn,nb,ne) = recvbuf(n)
+            enddo
+          enddo
+         enddo
+         !print *,nproc,'min/max ps',minval(grdin(:,ncdim)),maxval(grdin(:,ncdim))
+       end if
+     enddo ! end loop over levels
+   enddo ! end loop over background time levels
+endif
 deallocate(sendbuf, recvbuf)
 
 end subroutine gather_chunks

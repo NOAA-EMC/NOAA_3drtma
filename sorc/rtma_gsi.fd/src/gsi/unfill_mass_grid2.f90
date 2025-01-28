@@ -310,7 +310,7 @@ end subroutine unfill_mass_grid2t_ldmk
 subroutine unfill_mass_grid2t_drycheck(gout,nx,ny,gin,qs)
 !$$$  subprogram documentation block
 !                .      .    .                                       .
-! subprogram:    unfill_mass_grid2t        opposite of fill_mass_grid2
+! subprogram:    unfill_mass_grid2t_drycheck   opposite of fill_mass_grid2
 !   prgmmr: parrish          org: np22                date: 2004-06-22
 !
 ! abstract: This is almost the reverse of subroutine fill_mass_grid2t. 
@@ -320,7 +320,8 @@ subroutine unfill_mass_grid2t_drycheck(gout,nx,ny,gin,qs)
 ! program history log:
 !   2004-07-16  parrish
 !   2013-10-25  todling - reposition ltosi and others to commvars
-!   2019-10-30  Hu       Code for check q2  
+!   2019-10-30  Hu       Code for check moisture and remove negative
+!                        mositure if the background is not too dry (>4%)
 !
 !   input argument list:
 !     gout     - input A-grid (reorganized for distibution to local domains)
@@ -368,12 +369,12 @@ subroutine unfill_mass_grid2t_drycheck(gout,nx,ny,gin,qs)
      do i=1,nx
         rh=gin(i,j)/max(1.0e-4_r_single,qs(i,j))*100.0_r_single
         if(rh < 4.0_r_single .and. b(i,j) < 0.0_r_single) then
-!           write(*,'(a,2I4,f6.2,3f8.4)') 'dry air becomes dryer=',i,j,rh,qs(i,j)*1000.0,b(i,j)*1000.0,gin(i,j)*1000.0
+! dry air (4%) becomes dryer (b<0.0)
         else
            gin(i,j)=b(i,j)+gin(i,j)
            if( gin(i,j) < 1.0e-12_r_single) then
               gin(i,j) = qs(i,j)*0.01_r_single
-!              write(*,'(a,2I4,3f8.4)') 'reset negative analysis moisture to 1%=',i,j,qs(i,j)*1000.0,gin(i,j)*1000.0
+! reset negative analysis moisture to 1%'
            endif
         endif
      end do

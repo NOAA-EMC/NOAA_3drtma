@@ -88,7 +88,7 @@ module read_diag
 ! Declare structures for radiance diagnostic file information
   type diag_header_fix_list
      character(len=20) :: isis           ! sat and sensor type
-     character(len=10) :: id             ! sat type
+     character(len=11) :: id             ! sat type
      character(len=10) :: obstype        ! observation type
      integer(i_kind) :: jiter            ! outer loop counter
      integer(i_kind) :: nchan            ! number of channels in the sensor
@@ -414,7 +414,8 @@ subroutine read_radiag_header_nc(ftin,header_fix,header_chan,iflag)
   real(r_kind),allocatable,dimension(:)               :: r_var_stor
   integer(i_kind),allocatable,dimension(:)            :: i_var_stor
   character(20)                          :: isis
-  character(10)                          :: id, obstype
+  character(11)                          :: id
+  character(10)                          :: obstype
 !  integer(i_kind),dimension(:),allocatable           :: jiter, nchan_diag, npred, idate, &
   integer(i_kind)                        :: jiter, nchan_diag, npred, idate, &
                                             ireal, ipchan, iextra, jextra,   &
@@ -515,7 +516,8 @@ subroutine read_radiag_header_bin(ftin,npred_radiag,retrieval,header_fix,header_
 
 !  Declare local variables
   character(len=2):: string
-  character(len=10):: satid,sentype
+  character(len=11):: satid
+  character(len=10):: sentype
   character(len=20):: sensat
   integer(i_kind) :: i,ich
   integer(i_kind):: jiter,nchanl,npred,ianldate,ireal,ipchan,iextra,jextra
@@ -860,7 +862,7 @@ subroutine read_radiag_data_nc_init(ftin, diag_status, header_fix, retrieval, if
                                               Snow_Fraction, Water_Temperature, Land_Temperature, Ice_Temperature,  &
                                               Snow_Temperature, Soil_Temperature, Soil_Moisture,  &
                                               tsavg5, sstcu, sstph, sstnv, dta, dqa, dtp_avh, Vegetation_Fraction,  &
-                                              Snow_Depth, tpwc_amsua, clw_guess_retrieval, Sfc_Wind_Speed,  &
+                                              Snow_Depth, clw_guess_retrieval, Sfc_Wind_Speed,  &
                                               Cloud_Frac, CTP, CLW, TPWC, clw_obs, clw_guess, Foundation_Temperature, SST_Warm_layer_dt,  &
                                               SST_Cool_layer_tdrop, SST_dTz_dTfound, Observation, Obs_Minus_Forecast_adjusted,  &
                                               Obs_Minus_Forecast_unadjusted, Inverse_Observation_Error, QC_Flag, Emissivity,  &
@@ -896,7 +898,7 @@ subroutine read_radiag_data_nc_init(ftin, diag_status, header_fix, retrieval, if
             Soil_Temperature(ndatum),         Soil_Moisture(ndatum),                    tsavg5(ndatum),                                &
             sstcu(ndatum),                    sstph(ndatum),                            sstnv(ndatum),                                 &
             dta(ndatum),                      dqa(ndatum),                              dtp_avh(ndatum),                               &
-            Vegetation_Fraction(ndatum),      Snow_Depth(ndatum),                       tpwc_amsua(ndatum),                            & 
+            Vegetation_Fraction(ndatum),      Snow_Depth(ndatum),                                                                      & 
             clw_guess_retrieval(ndatum),      Sfc_Wind_Speed(ndatum),                   Cloud_Frac(ndatum),                            &
             CTP(ndatum),                      CLW(ndatum),                              TPWC(ndatum),                                  &
             clw_obs(ndatum),                  clw_guess(ndatum),                        Foundation_Temperature(ndatum),                &
@@ -956,7 +958,6 @@ subroutine read_radiag_data_nc_init(ftin, diag_status, header_fix, retrieval, if
   call nc_diag_read_get_var(ftin, 'dtp_avh', dtp_avh)
   call nc_diag_read_get_var(ftin, 'Vegetation_Fraction', Vegetation_Fraction)
   call nc_diag_read_get_var(ftin, 'Snow_Depth', Snow_Depth)
-  call nc_diag_read_get_var(ftin, 'tpwc_amsua', tpwc_amsua)
   call nc_diag_read_get_var(ftin, 'clw_guess_retrieval', clw_guess_retrieval)
   call nc_diag_read_get_var(ftin, 'Sfc_Wind_Speed', Sfc_Wind_Speed)
   call nc_diag_read_get_var(ftin, 'Cloud_Frac', Cloud_Frac)
@@ -1103,7 +1104,7 @@ subroutine read_radiag_data_nc_init(ftin, diag_status, header_fix, retrieval, if
              Sun_Glint_Angle, Water_Fraction, Land_Fraction, Ice_Fraction,              &
              Snow_Fraction, Water_Temperature, Land_Temperature, Ice_Temperature,       &
              Snow_Temperature, Soil_Temperature, Soil_Moisture, tsavg5, sstcu, sstph,   &
-             sstnv, dta, dqa, dtp_avh, Vegetation_Fraction, Snow_Depth, tpwc_amsua,     &
+             sstnv, dta, dqa, dtp_avh, Vegetation_Fraction, Snow_Depth,                 &
              clw_guess_retrieval, Sfc_Wind_Speed, Cloud_Frac, CTP, CLW, TPWC, clw_obs,  &
              clw_guess, Foundation_Temperature, SST_Warm_layer_dt, SST_Cool_layer_tdrop, &
              SST_dTz_dTfound, Observation, Obs_Minus_Forecast_adjusted,                 &
@@ -1166,7 +1167,9 @@ subroutine read_radiag_data_nc(diag_status,header_fix,data_fix,data_chan,data_ex
 
   data_fix        = diag_status%all_data_fix(diag_status%cur_ob_idx)
   data_chan(:)    = diag_status%all_data_chan(diag_status%cur_ob_idx,:)
-  data_extra(:,:) = diag_status%all_data_extra(diag_status%cur_ob_idx,:,:) 
+  if (header_fix%iextra > 0) then
+     data_extra(:,:) = diag_status%all_data_extra(diag_status%cur_ob_idx,:,:)
+  endif
 
   diag_status%cur_ob_idx = diag_status%cur_ob_idx + 1
 

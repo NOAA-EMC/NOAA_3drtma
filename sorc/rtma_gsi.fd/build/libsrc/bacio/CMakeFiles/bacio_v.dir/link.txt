@@ -1,2 +1,0 @@
-/usr/bin/ar qc ../../lib/libbacio_v.a CMakeFiles/bacio_v.dir/baciof.f.o CMakeFiles/bacio_v.dir/bafrio.f.o CMakeFiles/bacio_v.dir/chk_endianc.f.o CMakeFiles/bacio_v.dir/bacio.c.o CMakeFiles/bacio_v.dir/byteswap.c.o
-/usr/bin/ranlib ../../lib/libbacio_v.a

@@ -1,8 +1,8 @@
 file(REMOVE_RECURSE
-  "../../bin/gsi.x"
-  "../../bin/gsi.x.pdb"
   "CMakeFiles/gsi.x.dir/gsimain.f90.o"
   "CMakeFiles/gsi.x.dir/gsimod.F90.o"
+  "gsi.x"
+  "gsi.x.pdb"
 )
 
 # Per-language clean rules from dependency scanning.

@@ -133,8 +133,36 @@ module obsmod
 !   2016-11-29 shlyaeva  - add lobsdiag_forenkf option for writing out linearized
 !                           H(x) for EnKF
 !   2018-01-01  apodaca  - add GOES/GLM lightning observations
+!   2019-05-28  guo     - moved all type-constants {i_xx_ob_type} as enumerators of
+!                         (1) obsNode types to module m_obsNodeTypeManager.F90 (iobNode_xx); and
+!                         (2) obOper Types to module gsi_obOperTypeManager.F90 (iobOper_xx).
+!                         Note that a single type specification i_xx_ob_type is now split into two,
+!                         one for obsNode types, and another for obOper types.
+!                       - moved nobs_type to module gsi_obOperTypeManager.F90 (obOper_count).
+!                       - moved cobstype(:) to module gsi_obOperTypeManager.F90.
+!                       - moved type obs_diag, obs_diags, aofp_obs_diag, and variable obsdiags(:,:)
+!                         with subroutine inquire_obsdiags() into m_obsdiagNode.F90.
+!                       - moved obscounts(:) into obs_sensitivity.f90.
 !   2019-06-25  Hu       - add diag_radardbz for controling radar reflectivity
 !                               diag file
+!   2019-07-29  pondeca - add logical variable neutral_stability_windfact_2dvar
+!                         to turn on computation of 10m wind factor for near surface
+!                         winds using a simple, similarity theory-based approach
+!   2019-08-23  pondeca - add logical variable use_similarity_2dvar
+!                         to turn on computation of 10m wind factor for near surface
+!                         winds the mm5-based sfc model's similarity theory
+!  01-27-2020 Winterbottom Moved regression coeffcients for regional
+!                          model (e.g., HWRF) aircraft recon dynamic
+!                          observation error (DOE) specification to
+!                          GSI namelist level.  
+!  2020-09-15  Wu        - add option tcp_posmatch to mitigate possibility of erroneous TC initialization
+!  2020-09-19  CAPS(J. Park) - add 'vad_near_analtime' flag to assimilate newvad obs around analysis time only
+!   2021-11-16 Zhao      - add option l_obsprvdiag (if true) to trigger the output of
+!                          observation provider and sub-provider information into
+!                          obsdiags files (used for AutoObsQC)
+!  2022-03-15  K. Apodaca - add GNSS-R L2 ocean wind speed observations (CYGNSS, Spire) 
+!   2023-07-10  Y. Wang, D. Dowell - add variables for flash extent density
+!   2023-10-10  H. Wang (GSL) - add variables for flash extent density EnVar DA
 ! 
 ! Subroutines Included:
 !   sub init_obsmod_dflts   - initialize obs related variables to default values
@@ -154,10 +182,20 @@ module obsmod
 ! Variable Definitions:
 !   def oberror_tune - namelist logical to tune (=true) oberror
 !   def perturb_obs  - namelist logical to perturb (=true) observations
+!   def tcp_posmatch - namelist integer =1 to move TC to guess position,
+!                                       =2 set pges to the minimum Psfc 
+!   def tcp_box      - namelist integer (=5) to define search box size in gridpoints
 !   def perturb_fact - namelist scaling factor for observation perturbations
 !   def write_diag   - namelist logical array to compute/write (=true) diag files
 !   def diag_radardbz- namelist logical to compute/write (=true) radar
 !                                          reflectiivty diag files
+!   def diag_fed     - namelist logical to compute/write (=true) flash extent density diag files
+!   def innov_use_model_fed - namelist logical. True: use (the FEB in background to calculate innovation
+!                                               False: calculate innvation use
+!                                               the obs operator in GSI  
+!   def if_model_fed - namelist logical. True: Read in FED from background
+!                                              including from ensemble.  
+!   def r_hgt_fed    - height of fed observations
 !   def reduce_diag  - namelist logical to produce reduced radiance diagnostic files
 !   def use_limit    - parameter set equal to -1 if diag files produced or 0 if not diag files or reduce_diag
 !   def obs_setup    - prefix for files passing pe relative obs data to setup routines
@@ -373,8 +411,14 @@ module obsmod
 !                        (nobs_type,npe)
 !   def binary_diag    - trigger binary diag-file output (being phased out)
 !   def netcdf_diag    - trigger netcdf diag-file output
+!   def l_obsprvdiag   - trigger obs provider info output into obsdiags files
 !   def l_wcp_cwm      - namelist logical whether to use operator that
 !                        includes cwm for both swcp and lwcp or not
+!   def neutral_stability_windfact_2dvar - logical, if .true., then use simple formula representing
+!                                          special case from similarity theory to compute the 10m-wind factor
+!   def use_similarity_2dvar - logical, if .true., then use similarity theory from mm5
+!                              sfc model to compute the 10m-wind factor
+!   def aircraft_recon - namelist logibal whether to use DOE for aircraft
 !
 ! attributes:
 !   langauge: f90
@@ -400,50 +444,34 @@ module obsmod
   public :: ran01dom,dval_use
   public :: iout_pcp,iout_rad,iadate,iadatemn,write_diag,reduce_diag,oberrflg,bflag,ndat,dthin,dmesh,l_do_adjoint
   public :: diag_radardbz
+  public :: diag_fed
   public :: lsaveobsens
-  public :: i_ps_ob_type,i_t_ob_type,i_w_ob_type,i_q_ob_type
-  public :: i_spd_ob_type,i_rw_ob_type,i_dw_ob_type,i_sst_ob_type
-  public :: i_gust_ob_type,i_vis_ob_type,i_pblh_ob_type,i_wspd10m_ob_type,i_td2m_ob_type
-  public :: i_uwnd10m_ob_type,i_vwnd10m_ob_type
-  public :: i_mxtm_ob_type,i_mitm_ob_type,i_pmsl_ob_type,i_howv_ob_type,i_tcamt_ob_type,i_lcbas_ob_type
-  public :: i_cldch_ob_type, iout_cldch, mype_cldch
-  public :: i_pw_ob_type,i_pcp_ob_type,i_oz_ob_type,i_o3l_ob_type,i_colvk_ob_type,i_gps_ob_type
-  public :: i_rad_ob_type,i_tcp_ob_type,i_lag_ob_type
-  public :: i_swcp_ob_type, i_lwcp_ob_type
-  public :: i_light_ob_type
-  public :: obscounts,nobs_type
-  public :: cobstype,nprof_gps,time_offset,ianldate
-  public :: iout_oz,iout_co,dsis,ref_obs,obsfile_all,lobserver,perturb_obs,ditype,dsfcalc,dplat
+  public :: iout_cldch, mype_cldch
+  public :: nprof_gps,time_offset,ianldate,tcp_box
+  public :: iout_oz,iout_co,dsis,ref_obs,obsfile_all,lobserver,tcp_posmatch,perturb_obs,ditype,dsfcalc,dplat
   public :: time_window,dval,dtype,dfile,dirname,obs_setup,oberror_tune,offtime_data
   public :: lobsdiagsave,lobsdiag_forenkf,blacklst,hilbert_curve,lobskeep,time_window_max,sfcmodel,ext_sonde
+  public :: neutral_stability_windfact_2dvar
+  public :: use_similarity_2dvar
   public :: time_window_rad
   public :: perturb_fact,dtbduv_on,nsat1,obs_sub_comm,mype_diaghdr
+  public :: ta2tb
   public :: lobsdiag_allocated
-  public :: i_aero_ob_type
-  public :: i_aerol_ob_type
-  public :: i_pm2_5_ob_type
-  public :: i_pm10_ob_type
   public :: nloz_v8,nloz_v6,nloz_omi,nlco,nobskeep
-  public :: grids_dim,rmiss_single,nchan_total,mype_sst,mype_gps
+  public :: rmiss_single,nchan_total,mype_sst,mype_gps
   public :: mype_uv,mype_dw,mype_rw,mype_q,mype_tcp,mype_lag,mype_ps,mype_t
   public :: mype_pw,iout_rw,iout_dw,iout_sst,iout_pw,iout_t,iout_q,iout_tcp
   public :: iout_lag,iout_uv,iout_gps,iout_ps,iout_light,mype_light
   public :: mype_gust,mype_vis,mype_pblh,iout_gust,iout_vis,iout_pblh
   public :: mype_tcamt,mype_lcbas,iout_tcamt,iout_lcbas
-  public :: mype_wspd10m,mype_td2m,iout_wspd10m,iout_td2m
-  public :: mype_uwnd10m,mype_vwnd10m,iout_uwnd10m,iout_vwnd10m
+  public :: mype_wspd10m,mype_gnssrspd,mype_td2m,iout_wspd10m,iout_gnssrspd,iout_td2m
+  public :: mype_uwnd10m,mype_vwnd10m,iout_uwnd10m,iout_vwnd10m 
   public :: mype_mxtm,mype_mitm,iout_mxtm,iout_mitm
   public :: mype_pmsl,mype_howv,iout_pmsl,iout_howv
   public :: mype_swcp,mype_lwcp,iout_swcp,iout_lwcp
   public :: lread_obs_save,obs_input_common,lread_obs_skip
   public :: ndat_times,lwrite_predterms,lwrite_peakwt
   public :: bmiss
-  public :: obs_diags                   ! types
-  public :: obs_diag                    ! types
-  public :: aofp_obs_diag               ! types
-  public :: obsptr                      ! a local working pointer (to be removed)
-  public :: obsdiags                    ! objects
-  public :: inquire_obsdiags
   public :: mype_aero,iout_aero,nlaero
   public :: mype_pm2_5,iout_pm2_5
   public :: mype_pm10,iout_pm10
@@ -453,13 +481,13 @@ module obsmod
   ! ==== DBZ DA ===
   public :: ntilt_radarfiles
   public :: whichradar
-  public :: i_dbz_ob_type
-  public :: vr_dealisingopt, if_vterminal, if_model_dbz, inflate_obserr, if_vrobs_raw
+  public :: vr_dealisingopt, if_vterminal, if_model_dbz, if_vrobs_raw, if_use_w_vr, l2rwthin
+  public :: inflate_dbz_obserr
 
   public :: doradaroneob,oneoblat,oneoblon
   public :: oneobddiff,oneobvalue,oneobheight,oneobradid
-  public :: ens_hx_dbz_cut,static_gsi_nopcp_dbz,rmesh_dbz,zmesh_dbz,rmesh_vr,zmesh_vr
-  public :: radar_no_thinning
+  public :: ens_hx_dbz_cut,static_gsi_nopcp_dbz,rmesh_dbz,zmesh_dbz,rmesh_vr,zmesh_vr,pmot_dbz
+  public :: radar_no_thinning,pmot_vr
   public :: mintiltvr,maxtiltvr,minobrangevr,maxobrangevr
   public :: mintiltdbz,maxtiltdbz,minobrangedbz,maxobrangedbz
   public :: debugmode
@@ -467,14 +495,69 @@ module obsmod
 
   public :: iout_dbz, mype_dbz
   ! --- DBZ DA ---
-  
+
+  ! ==== FED DA ===
+  public :: if_model_fed, innov_use_model_fed
+  public :: r_hgt_fed
+  public :: iout_fed, mype_fed  
+  public :: dofedoneob
+  ! --- FED DA ---
+
   public :: obsmod_init_instr_table
   public :: obsmod_final_instr_table
   public :: nobs_sub
 
   public :: netcdf_diag, binary_diag
+  public :: l_obsprvdiag
 
   public :: l_wcp_cwm
+  public :: aircraft_recon
+  public :: hurricane_radar 
+
+  ! The following public variables are the coefficients that describe
+  ! the linear regression fits that are used to define the dynamic
+  ! observation error (DOE) specifications for all reconnissance
+  ! observations collected within hurricanes/tropical cyclones; these
+  ! apply only to the regional forecast models (e.g., HWRF); Henry
+  ! R. Winterbottom (henry.winterbottom@noaa.gov).
+
+  ! Observation types:
+
+  ! 1/236: HDOB (e.g., flight-level) observations.
+
+  ! 1/237: Dropsonde observations.
+
+  ! 213: SFMR observations.
+  
+  ! The following correspond to the specific humidity (q)
+  ! observations:
+  
+  public :: q_doe_a_136
+  public :: q_doe_a_137
+  public :: q_doe_b_136
+  public :: q_doe_b_137
+
+  ! The following correspond to the temperature (t) observations:
+
+  public :: t_doe_a_136
+  public :: t_doe_a_137
+  public :: t_doe_b_136
+  public :: t_doe_b_137
+
+  ! The following correspond to the wind (uv) observations:
+  
+  public :: uv_doe_a_236
+  public :: uv_doe_a_237
+  public :: uv_doe_a_213
+  public :: uv_doe_b_236
+  public :: uv_doe_b_237
+  public :: uv_doe_b_213
+
+  public :: vad_near_analtime
+
+  ! The following correspond to OMPS LP observations:
+
+  public :: ompslp_mult_fact
 
   interface obsmod_init_instr_table
           module procedure init_instr_table_
@@ -495,81 +578,11 @@ module obsmod
 
   logical luse_obsdiag
   logical binary_diag, netcdf_diag 
+  logical l_obsprvdiag 
 
 ! Declare types
 
-  integer(i_kind),parameter::  i_ps_ob_type= 1    ! ps_ob_type
-  integer(i_kind),parameter::   i_t_ob_type= 2    ! t_ob_type
-  integer(i_kind),parameter::   i_w_ob_type= 3    ! w_ob_type
-  integer(i_kind),parameter::   i_q_ob_type= 4    ! q_ob_type
-  integer(i_kind),parameter:: i_spd_ob_type= 5    ! spd_ob_type
-  integer(i_kind),parameter::  i_rw_ob_type= 6    ! rw_ob_type
-  integer(i_kind),parameter::  i_dw_ob_type= 7    ! dw_ob_type
-  integer(i_kind),parameter:: i_sst_ob_type= 8    ! sst_ob_type
-  integer(i_kind),parameter::  i_pw_ob_type= 9    ! pw_ob_type
-  integer(i_kind),parameter:: i_pcp_ob_type=10    ! pcp_ob_type
-  integer(i_kind),parameter::  i_oz_ob_type=11    ! oz_ob_type
-  integer(i_kind),parameter:: i_o3l_ob_type=12    ! o3l_ob_type
-  integer(i_kind),parameter:: i_gps_ob_type=13    ! gps_ob_type
-  integer(i_kind),parameter:: i_rad_ob_type=14    ! rad_ob_type
-  integer(i_kind),parameter:: i_tcp_ob_type=15    ! tcp_ob_type
-  integer(i_kind),parameter:: i_lag_ob_type=16    ! lag_ob_type
-  integer(i_kind),parameter:: i_colvk_ob_type= 17 ! colvk_ob_type
-  integer(i_kind),parameter:: i_aero_ob_type =18  ! aero_ob_type
-  integer(i_kind),parameter:: i_aerol_ob_type=19  ! aerol_ob_type
-  integer(i_kind),parameter:: i_pm2_5_ob_type=20  ! pm2_5_ob_type
-  integer(i_kind),parameter:: i_gust_ob_type=21   ! gust_ob_type
-  integer(i_kind),parameter:: i_vis_ob_type=22    ! vis_ob_type
-  integer(i_kind),parameter:: i_pblh_ob_type=23   ! pblh_ob_type
-  integer(i_kind),parameter:: i_wspd10m_ob_type=24! wspd10m_ob_type
-  integer(i_kind),parameter:: i_td2m_ob_type=25   ! td2m_ob_type
-  integer(i_kind),parameter:: i_mxtm_ob_type=26   ! mxtm_ob_type
-  integer(i_kind),parameter:: i_mitm_ob_type=27   ! mitm_ob_type
-  integer(i_kind),parameter:: i_pmsl_ob_type=28   ! pmsl_ob_type
-  integer(i_kind),parameter:: i_howv_ob_type=29   ! howv_ob_type
-  integer(i_kind),parameter:: i_tcamt_ob_type=30  ! tcamt_ob_type
-  integer(i_kind),parameter:: i_lcbas_ob_type=31  ! lcbas_ob_type  
-  integer(i_kind),parameter:: i_pm10_ob_type=32   ! pm10_ob_type
-  integer(i_kind),parameter:: i_cldch_ob_type=33  ! cldch_ob_type
-  integer(i_kind),parameter:: i_uwnd10m_ob_type=34! uwnd10m_ob_type
-  integer(i_kind),parameter:: i_vwnd10m_ob_type=35! vwnd10m_ob_type
-
-  integer(i_kind),parameter:: i_swcp_ob_type=36   ! swcp_ob_type
-  integer(i_kind),parameter:: i_lwcp_ob_type=37   ! lwcp_ob_type
-  integer(i_kind),parameter:: i_light_ob_type=38  ! light_ob_type
-
-  integer(i_kind),parameter:: i_dbz_ob_type=39    ! dbz_ob_type
-  integer(i_kind),parameter:: nobs_type = 39      ! number of observation types
-
 ! Structure for diagnostics
-
-  type obs_diag
-     type(obs_diag), pointer :: next => NULL()
-     real(r_kind), pointer :: nldepart(:) => null()    ! (miter+1)
-     real(r_kind), pointer :: tldepart(:) => null()    ! (miter)
-     real(r_kind), pointer :: obssen(:)   => null()    ! (miter)
-     real(r_kind) :: wgtjo
-     real(r_kind) :: elat, elon         ! earth lat-lon for redistribution
-     integer(i_kind) :: indxglb         ! a combined index similar to (ich,iob)
-     integer(i_kind) :: nchnperobs      ! number of channels per observations
-     integer(i_kind) :: idv,iob,ich     ! device, obs., and channel indices
-     logical, pointer :: muse(:)          => null()    ! (miter+1), according the setup()s
-     logical :: luse
-  end type obs_diag
-
-  type aofp_obs_diag   ! array-of-Fortran-pointers of type(obs_diag)
-     type(obs_diag), pointer :: ptr => NULL()
-  end type aofp_obs_diag
-
-  type obs_diags
-     integer(i_kind):: n_alloc=0
-     type(obs_diag), pointer :: head => NULL()
-     type(obs_diag), pointer :: tail => NULL()
-     type(aofp_obs_diag), allocatable, dimension(:):: lookup
-  end type obs_diags
-
-  type(obs_diags), pointer :: obsdiags(:,:) => null()  ! (nobs_type,nobs_bins)
-  type(obs_diag), pointer :: obsptr => null()
 
 ! Declare interfaces
   interface destroyobs; module procedure destroyobs_; end interface
@@ -578,8 +591,8 @@ module obsmod
 
   real(r_kind) perturb_fact,time_window_max,time_offset,time_window_rad
   real(r_kind),dimension(50):: dmesh
-
-  integer(i_kind) grids_dim,nchan_total,ianldate
+  real(r_kind) r_hgt_fed
+  integer(i_kind) nchan_total,ianldate
   integer(i_kind) ndat,ndat_types,ndat_times,nprof_gps
   integer(i_kind) lunobs_obs,nloz_v6,nloz_v8,nobskeep,nloz_omi
   integer(i_kind) nlco,use_limit
@@ -588,13 +601,13 @@ module obsmod
   integer(i_kind) iout_dw,iout_gps,iout_sst,iout_tcp,iout_lag
   integer(i_kind) iout_co,iout_gust,iout_vis,iout_pblh,iout_tcamt,iout_lcbas
   integer(i_kind) iout_cldch
-  integer(i_kind) iout_wspd10m,iout_td2m,iout_mxtm,iout_mitm,iout_pmsl,iout_howv
-  integer(i_kind) iout_uwnd10m,iout_vwnd10m
+  integer(i_kind) iout_wspd10m,iout_gnssrspd,iout_td2m,iout_mxtm,iout_mitm,iout_pmsl,iout_howv
+  integer(i_kind) iout_uwnd10m,iout_vwnd10m,iout_fed
   integer(i_kind) mype_t,mype_q,mype_uv,mype_ps,mype_pw, &
                   mype_rw,mype_dw,mype_gps,mype_sst, &
                   mype_tcp,mype_lag,mype_co,mype_gust,mype_vis,mype_pblh, &
-                  mype_wspd10m,mype_td2m,mype_mxtm,mype_mitm,mype_pmsl,mype_howv,&
-                  mype_uwnd10m,mype_vwnd10m, mype_tcamt,mype_lcbas, mype_dbz
+                  mype_wspd10m,mype_gnssrspd,mype_td2m,mype_mxtm,mype_mitm,mype_pmsl,mype_howv,&
+                  mype_uwnd10m,mype_vwnd10m, mype_tcamt,mype_lcbas, mype_dbz, mype_fed
   integer(i_kind) mype_cldch
   integer(i_kind) iout_swcp, iout_lwcp
   integer(i_kind) mype_swcp, mype_lwcp
@@ -607,24 +620,25 @@ module obsmod
   integer(i_kind),allocatable,dimension(:):: dsfcalc,dthin,ipoint
   integer(i_kind),allocatable,dimension(:)::  nsat1,mype_diaghdr
   integer(i_kind),allocatable :: nobs_sub(:,:)
-  integer(i_kind),allocatable :: obscounts(:,:)
   integer(i_kind),allocatable :: obs_sub_comm(:)
   
   character(128) obs_setup
   character(128) dirname
   character(128) obs_input_common
   character(20),allocatable,dimension(:):: obsfile_all
-  character(10),allocatable,dimension(:):: dtype,ditype,dplat
+  character(10),allocatable,dimension(:):: dtype,ditype
+  character(11),allocatable,dimension(:):: dplat
   character(120),allocatable,dimension(:):: dfile
   character(20),allocatable,dimension(:):: dsis
   real(r_kind) ,allocatable,dimension(:):: dval
   real(r_kind) ,allocatable,dimension(:):: time_window
-  character(len=20) :: cobstype(nobs_type)
 
-  integer(i_kind) ntilt_radarfiles
+  integer(i_kind) ntilt_radarfiles,tcp_posmatch,tcp_box,pmot_dbz,pmot_vr
 
-  logical ::  doradaroneob
-  logical :: vr_dealisingopt, if_vterminal, if_model_dbz, inflate_obserr, if_vrobs_raw
+  logical ::  ta2tb
+  logical ::  doradaroneob,dofedoneob
+  logical :: vr_dealisingopt, if_vterminal, if_model_dbz,if_model_fed, innov_use_model_fed, if_vrobs_raw, if_use_w_vr, l2rwthin
+  logical :: inflate_dbz_obserr
   character(4) :: whichradar,oneobradid
   real(r_kind) :: oneoblat,oneoblon,oneobddiff,oneobvalue,oneobheight
   logical :: radar_no_thinning
@@ -645,6 +659,7 @@ module obsmod
   logical lobserver,l_do_adjoint, lobsdiag_forenkf
   logical,dimension(0:50):: write_diag
   logical diag_radardbz 
+  logical diag_fed
   logical reduce_diag
   logical offtime_data
   logical hilbert_curve
@@ -655,10 +670,53 @@ module obsmod
   logical ext_sonde
   logical lrun_subdirs
   logical l_foreaft_thin
+  logical neutral_stability_windfact_2dvar
+  logical use_similarity_2dvar
 
   logical l_wcp_cwm
+  logical aircraft_recon
+  logical hurricane_radar 
 
   character(len=*),parameter:: myname='obsmod'
+
+  ! The following variable declarations pertain to the coefficients
+  ! that describe the linear regression fits that are used to define
+  ! the dynamic observation error (DOE) specifications for all
+  ! reconnissance observations collected within hurricanes/tropical
+  ! cyclones; these apply only to the regional forecast models (e.g.,
+  ! HWRF); Henry R. Winterbottom (henry.winterbottom@noaa.gov).
+
+  ! Observation types:
+
+  ! 1/236: HDOB (e.g., flight-level) observations.
+
+  ! 1/237: Dropsonde observations.
+
+  ! 213: SFMR observations.
+
+  ! The following correspond to the specific humidity (q)
+  ! observations:
+  
+  real(r_kind) :: q_doe_a_136, q_doe_b_136
+  real(r_kind) :: q_doe_a_137, q_doe_b_137
+
+  ! The following correspond to the temperature (t) observations:
+  
+  real(r_kind) :: t_doe_a_136, t_doe_b_136
+  real(r_kind) :: t_doe_a_137, t_doe_b_137
+
+  ! The following correspond to the wind (uv) observations:
+  
+  real(r_kind) :: uv_doe_a_236, uv_doe_b_236
+  real(r_kind) :: uv_doe_a_237, uv_doe_b_237
+  real(r_kind) :: uv_doe_a_213, uv_doe_b_213
+
+  logical vad_near_analtime 
+  
+ ! The following correspond to OMPS LP observations:
+
+  real(r_kind) :: ompslp_mult_fact
+
 contains
 
   subroutine init_obsmod_dflts
@@ -691,6 +749,7 @@ contains
 !   2015-07-10  pondeca - add cldch
 !   2015-10-27  todling - default to luse_obsdiag is true now
 !   2016-03-07  pondeca - add uwnd10m,vwnd10m
+!   2021-11-16  zhao    - add initialization of l_obsprvdiag (.FALSE. as default)
 !
 !   input argument list:
 !
@@ -708,13 +767,19 @@ contains
     ntilt_radarfiles=1
     vr_dealisingopt=.false.
     if_vterminal=.false.
+    l2rwthin    =.false.  
     if_vrobs_raw=.false.
-    if_model_dbz=.true.
-    inflate_obserr=.false.
+    if_use_w_vr=.true.
+    if_model_dbz=.false.
+    if_model_fed=.false.
+    innov_use_model_fed=.false.
+    inflate_dbz_obserr=.false.
     whichradar="KKKK"
 
     oneobradid="KKKK"
     doradaroneob=.false.
+    r_hgt_fed=6500_r_kind
+    dofedoneob=.false.
     oneoblat=-999_r_kind
     oneoblon=-999_r_kind
     oneobddiff=-999_r_kind
@@ -725,6 +790,14 @@ contains
     static_gsi_nopcp_dbz=0.0_r_kind
     rmesh_dbz=2
     rmesh_vr=2
+!  pmot_dbz values of 0,1,2,3 will save different sets of obs output
+!      pmot_dbz - all obs - thin obs
+!      pmot_dbz - all obs
+!      pmot_dbz - use obs
+!      pmot_dbz - use obs + thin obs
+
+    pmot_dbz=0
+    pmot_vr=2
     zmesh_dbz=500.0_r_kind
     zmesh_vr=500.0_r_kind
     minobrangedbz=10000.0_r_kind
@@ -741,6 +814,8 @@ contains
 
 !   Set logical flag
     perturb_obs = .false.   ! .true. = perturb observations
+    tcp_posmatch = 0     
+    tcp_box = 5     
     oberror_tune = .false.   ! .true. = tune oberror
     perturb_fact = one 
     do i=0,50
@@ -748,6 +823,7 @@ contains
     end do
     write_diag(1)=.true.
     diag_radardbz = .false.
+    diag_fed = .false.
     reduce_diag = .false.
     use_limit = -1
     lobsdiagsave=.false.
@@ -757,6 +833,8 @@ contains
     nobskeep=0
     lsaveobsens=.false.
     l_do_adjoint=.true.     ! .true. = apply H^T when in int routines
+    ta2tb=.false.           ! .true. = assimilation antenna temperature for
+                            !          AMSU-A, ATMS and MHS
     oberrflg  = .false.
     bflag     = .false.     ! 
     sfcmodel  = .false.     ! .false. = do not use boundary layer model 
@@ -789,7 +867,7 @@ contains
     iout_tcp=214   ! synthetic tc-mslp
     iout_lag=215   ! lagrangian tracers
     iout_co=216    ! co tracers
-    iout_aero=217  ! aerosol product (aod)
+    iout_aero=217  ! aerosol product (aod) CURRENTLY NOT USED
     iout_gust=218  ! wind gust
     iout_vis=219   ! visibility
     iout_pblh=221  ! pbl height
@@ -810,6 +888,8 @@ contains
     iout_lwcp=236  ! liquid-water content path
     iout_light=237 ! lightning
     iout_dbz=238 ! radar reflectivity
+    iout_fed=239   ! flash extent density
+    iout_gnssrspd=240 ! GNSS-R wind speed
 
     mype_ps = npe-1          ! surface pressure
     mype_t  = max(0,npe-2)   ! temperature
@@ -844,6 +924,8 @@ contains
     mype_lwcp=max(0,npe-31)  ! liquid-water content path
     mype_light=max(0,npe-32)! GOES/GLM lightning
     mype_dbz=max(0,npe-33)   ! radar reflectivity
+    mype_fed= max(0,npe-34)  ! flash extent density
+    mype_gnssrspd= max(0,npe-35) ! surface GNSS-R speed
 
 
 !   Initialize arrays used in namelist obs_input 
@@ -861,52 +943,11 @@ contains
                                ! related to brightness temperature and 
                                ! precipitation rate observations
 
-    grids_dim= 80              ! grid points for integration of GPS bend
-
     nprof_gps = 0
 
-!   Define a name for obs types
-    cobstype( i_ps_ob_type)  ="surface pressure    " ! ps_ob_type
-    cobstype(  i_t_ob_type)  ="temperature         " ! t_ob_type
-    cobstype(  i_w_ob_type)  ="wind                " ! w_ob_type
-    cobstype(  i_q_ob_type)  ="moisture            " ! q_ob_type
-    cobstype(i_spd_ob_type)  ="wind speed          " ! spd_ob_type
-    cobstype( i_rw_ob_type)  ="radial wind         " ! rw_ob_type
-    cobstype( i_dw_ob_type)  ="doppler wind        " ! dw_ob_type
-    cobstype(i_sst_ob_type)  ="sst                 " ! sst_ob_type
-    cobstype( i_pw_ob_type)  ="precipitable water  " ! pw_ob_type
-    cobstype(i_pcp_ob_type)  ="precipitation       " ! pcp_ob_type
-    cobstype( i_oz_ob_type)  ="ozone               " ! oz_ob_type
-    cobstype(i_o3l_ob_type)  ="level ozone         " ! o3l_ob_type
-    cobstype(i_gps_ob_type)  ="gps                 " ! gps_ob_type
-    cobstype(i_rad_ob_type)  ="radiance            " ! rad_ob_type
-    cobstype(i_tcp_ob_type)  ="tcp (tropic cyclone)" ! tcp_ob_type
-    cobstype(i_lag_ob_type)  ="lagrangian tracer   " ! lag_ob_type
-    cobstype(i_colvk_ob_type)="carbon monoxide     " ! colvk_ob_type
-    cobstype( i_aero_ob_type)="aerosol aod         " ! aero_ob_type
-    cobstype(i_aerol_ob_type)="level aero aod      " ! aerol_ob_type
-    cobstype( i_pm2_5_ob_type)="in-situ pm2_5 obs  " ! pm2_5_ob_type
-    cobstype( i_pm10_ob_type)="in-situ pm10 obs    " ! pm10_ob_type
-    cobstype(i_gust_ob_type) ="gust                " ! gust_ob_type
-    cobstype(i_vis_ob_type)  ="vis                 " ! vis_ob_type
-    cobstype(i_pblh_ob_type) ="pblh                " ! pblh_ob_type
-    cobstype(i_wspd10m_ob_type) ="wspd10m             " ! wspd10m_ob_type
-    cobstype(i_td2m_ob_type) ="td2m                " ! td2m_ob_type
-    cobstype(i_mxtm_ob_type) ="mxtm                " ! mxtm_ob_type
-    cobstype(i_mitm_ob_type) ="mitm                " ! mitm_ob_type
-    cobstype(i_pmsl_ob_type) ="pmsl                " ! pmsl_ob_type
-    cobstype(i_howv_ob_type) ="howv                " ! howv_ob_type
-    cobstype(i_tcamt_ob_type)="tcamt               " ! tcamt_ob_type
-    cobstype(i_lcbas_ob_type)="lcbas               " ! lcbas_ob_type
-    cobstype(i_cldch_ob_type)="cldch               " ! cldch_ob_type
-    cobstype(i_uwnd10m_ob_type) ="uwnd10m          " ! uwnd10m_ob_type
-    cobstype(i_vwnd10m_ob_type) ="vwnd10m          " ! vwnd10m_ob_type
-    cobstype(i_swcp_ob_type) ="swcp                " ! swcp_ob_type
-    cobstype(i_lwcp_ob_type) ="lwcp                " ! lwcp_ob_type
-    cobstype(i_light_ob_type) ="light              " ! light_ob_type
-    cobstype( i_dbz_ob_type)  ="radar reflectivity " ! dbz_ob_type
-
     hilbert_curve=.false.
+    neutral_stability_windfact_2dvar=.false.
+    use_similarity_2dvar=.false.
 
     obs_input_common = 'obs_input.common'
     lread_obs_save   = .false.
@@ -921,12 +962,65 @@ contains
     netcdf_diag = .false. ! by default, do not write netcdf_diag
     binary_diag = .true.  ! by default, do write binary diag
 
+!   set default on triggering the output of obs provider info into obsdiags file
+    l_obsprvdiag = .false. ! by default, do not write obs provider info
+
     l_wcp_cwm          = .false.                 ! .true. = use operator that involves cwm
+    aircraft_recon     = .false.                 ! .true. = use DOE for aircraft data
+    hurricane_radar    = .false.                 ! .true. = use radar data for hurricane application 
+
+    ! The following variable initializations pertain to the
+    ! coefficients that describe the linear regression fits that are
+    ! used to define the dynamic observation error (DOE)
+    ! specifications for all reconnissance observations collected
+    ! within hurricanes/tropical cyclones; these apply only to the
+    ! regional forecast models (e.g., HWRF); Henry R. Winterbottom
+    ! (henry.winterbottom@noaa.gov).
+
+    ! Observation types:
+    
+    ! 1/236: HDOB (e.g., flight-level) observations.
+    
+    ! 1/237: Dropsonde observations.
+    
+    ! 213: SFMR observations.
+    
+    ! The following correspond to the specific humidity (q)
+    ! observations:
+
+    q_doe_a_136 = 1.0_r_kind
+    q_doe_b_136 = 0.0_r_kind
+    q_doe_a_137 = 1.0_r_kind
+    q_doe_b_137 = 0.0_r_kind
+
+    ! The following correspond to the temperature (t) observations:
+
+    t_doe_a_136 = 1.0_r_kind
+    t_doe_b_136 = 0.0_r_kind
+    t_doe_a_137 = 1.0_r_kind
+    t_doe_b_137 = 0.0_r_kind    
+
+    ! The following correspond to the wind (uv) observations:
+
+    uv_doe_a_236 = 1.0_r_kind
+    uv_doe_b_236 = 0.0_r_kind
+    uv_doe_a_237 = 1.0_r_kind
+    uv_doe_b_237 = 0.0_r_kind      
+    uv_doe_a_213 = 1.0_r_kind
+    uv_doe_b_213 = 0.0_r_kind
+
+    ! This flag was set to assimilate newvad obs around anaylsis time only.
+    ! see 'read_prepbufr.f90'
+    vad_near_analtime = .false.
+    
+    ! The following correspond to OMPS LP  observations:
+
+    ompslp_mult_fact = 2.0_r_kind
 
     return
   end subroutine init_obsmod_dflts
   
-  subroutine init_directories(mype)
+  subroutine init_directories(in_pe,num_pe)
 !$$$  subprogram documentation block
 !                .      .    .                                       .
 ! subprogram:    create sub-directories
@@ -951,20 +1045,47 @@ contains
 !   machine:  ibm rs/6000 sp
 !
 !$$$ end documentation block
+#ifdef __INTEL_COMPILER
+    use IFPORT
+#endif
     implicit none
 
-    integer(i_kind),intent(in   ) :: mype
+    integer(i_kind),intent(in   ) :: in_pe
+    integer(i_kind),intent(in   ) :: num_pe
+    logical :: l_mkdir_stat, l_dir_exist
 
     character(len=144):: command
-    character(len=8):: pe_name
+    character(len=8):: pe_name, loc_pe_name
+    character(len=128):: loc_dirname
+    integer(i_kind) :: i, ierror
 
     if (lrun_subdirs) then
-       write(pe_name,'(i4.4)') mype
+       write(pe_name,'(i4.4)') in_pe
        dirname = 'dir.'//trim(pe_name)//'/'
-       command = 'mkdir -m 755 ' // trim(dirname)
-       call system(command)
+! Only create directories on one PE
+       if(in_pe == 0) then
+          do i = 0, num_pe
+             write(loc_pe_name,'(i4.4)') i
+             loc_dirname = 'dir.'//trim(loc_pe_name)
+#ifdef __INTEL_COMPILER
+             INQUIRE(directory=trim(loc_dirname), exist=l_dir_exist)
+             if (.not.l_dir_exist) then
+                l_mkdir_stat = MAKEDIRQQ(trim(loc_dirname))
+                if(.not.l_mkdir_stat) then
+                   ierror=GETLASTERRORQQ()
+                   write(6, *) "INIT_DIRECTORIES:  ***ERROR** Failed to create directory ", &
+                        trim(loc_dirname)," for PE ", loc_pe_name, ' ierror= ', ierror
+                   call stop2(678)
+                endif
+             endif
+#else
+             command = 'mkdir -p -m 755 ' // trim(loc_dirname)
+             call system(command)
+#endif
+          enddo
+       endif
     else
-       write(pe_name,100) mype
+       write(pe_name,100) in_pe
 100 format('pe',i4.4,'.')
        dirname= trim(pe_name)
     end if
@@ -994,7 +1115,6 @@ contains
 !   machine:  ibm rs/6000 sp
 !
 !$$$ end documentation block
-    use gsi_4dvar, only: nobs_bins
     use mpimod, only: mype
     implicit none
 
@@ -1017,12 +1137,6 @@ contains
 
     allocate (nsat1(ndat),mype_diaghdr(ndat),obs_sub_comm(ndat))
 
-
-    if(luse_obsdiag)then
-      ALLOCATE(obsdiags(nobs_type,nobs_bins))
-    else
-      ALLOCATE(obsdiags(0,0))
-    endif
 
     return
   end subroutine create_obsmod_vars
@@ -1072,7 +1186,7 @@ contains
        endif
 ! for cris, iasi, atms, regional analysis may want shorter time window
        if (index(dtype(ii),'cris') /= 0 .or. index(dtype(ii),'atms') /= 0 .or. &
-           index(dtype(ii),'iasi') /= 0 ) then
+           index(dtype(ii),'iasi') /= 0 .or. index(dtype(ii),'iasi-ng') /= 0) then
           if(time_window(ii)>time_window_rad) then
              time_window(ii) = time_window_rad
              if (mype==0) write(6,*) 'INIT_OBSMOD_VARS: reset time window for ',dtype(ii),&
@@ -1154,7 +1268,6 @@ contains
 
     implicit none
 
-    if (allocated(obscounts)) deallocate(obscounts) 
     if (allocated(nobs_sub)) deallocate(nobs_sub) 
 
     return
@@ -1225,69 +1338,6 @@ contains
     ran01dom=(ran01dom-five)/0.912345_r_kind
     return
   end function ran01dom
-
-! ----------------------------------------------------------------------
-subroutine inquire_obsdiags(kiter)
-!$$$  subprogram documentation block
-!                .      .    .                                       .
-! subprogram:    inquire_obsdiags
-!   prgmmr:
-!
-! abstract:
-!
-! program history log:
-!   2009-08-07  lueken - added  subprogram doc block
-!
-!   input argument list:
-!    kiter
-!
-!   output argument list:
-!
-! attributes:
-!   language: f90
-!   machine:
-!
-!$$$ end documentation block
-
-implicit none
-
-integer(i_kind), intent(in   ) :: kiter
-
-real(r_kind) :: sizei, sizer, sizel, sizep, ziter, zsize, ztot
-integer(i_kind) :: ii,jj,iobsa(2),iobsb(2)
-
-! Any better way to determine size or i_kind, r_kind, etc... ?
-sizei=four
-sizer=8.0_r_kind
-sizel=one
-sizep=four
-
-iobsa(:)=0
-do ii=1,size(obsdiags,2)
-   do jj=1,size(obsdiags,1)
-      obsptr => obsdiags(jj,ii)%head
-      do while (associated(obsptr))
-         iobsa(1)=iobsa(1)+1
-         if (ANY(obsptr%muse(:))) iobsa(2)=iobsa(2)+1
-         obsptr => obsptr%next
-      enddo
-   enddo
-enddo
-
-call mpi_reduce(iobsa,iobsb,2,mpi_itype,mpi_max,0,mpi_comm_world,ierror)
-
-if (mype==0) then
-   ziter=real(kiter,r_kind)
-   zsize = sizer*(three*ziter+two) + sizei + sizel*(ziter+one) + sizep*five
-   ztot=real(iobsb(1),r_kind)*zsize
-   ztot=ztot/(1024.0_r_kind*1024.0_r_kind)
- 
-   write(6,*)'obsdiags: Bytes per element=',NINT(zsize)
-   write(6,*)'obsdiags: length total, used=',iobsb(1),iobsb(2)
-   write(6,'(A,F8.1,A)')'obsdiags: Estimated memory usage= ',ztot,' Mb'
-endif
-
-end subroutine inquire_obsdiags
 
 ! ----------------------------------------------------------------------
 subroutine init_instr_table_ (nhr_assim,nall,iamroot,rcname)

@@ -4,22 +4,22 @@
 #  To run with hybrid ensemble option on, change HYBENS_GLOBAL and/or HYBENS_REGIONAL from "false" to "true".
 #  These are located at the end of this script.
 
-if [ "$#" = 8 ] ; then
-  export machine=$1
-  export basedir=$2
-  export builddir=$3
-  export gsisrc=$4
-  export gsiexec_updat=$5
-  export enkfexec_updat=$6
-  export gsiexec_contrl=$7
-  export enkfexec_contrl=$8
+if [ "$#" = 7 ] ; then
+  export basedir=$1
+  export builddir=$2
+  export gsisrc=$3
+  export gsiexec_updat=$4
+  export enkfexec_updat=$5
+  export gsiexec_contrl=$6
+  export enkfexec_contrl=$7
   export fixgsi="$gsisrc/fix"
   export scripts="$gsisrc/regression"
+  export modulefiles="$gsisrc/modulefiles"
   export ush="$gsisrc/ush"
   export cmaketest="true"
   export clean="false"
-  export ptmpName=`echo $builddir | sed -e "s/\//_/g"`
-  echo $ptmpName
+  dir_root="${builddir%/*}"
+  export ptmpName="${dir_root##*/}"
 else
   # Name of the branch being tested
   updat="XXXXXXXX"
@@ -28,183 +28,169 @@ else
   export clean="false"
   export ptmpName=""
 fi
-echo "beginning regression_var.sh, machine is $machine"
-# If we don't know already determine what machine are we on:
-if [ -z ${machine+x} ]; then 
-  echo "machine is unset"; 
-  if [ -d /da ]; then # WCOSS
-     export machine="WCOSS"
-  elif [ -d /glade/scratch ]; then # Cheyenne
-   export machine="Cheyenne"
-  elif [ -d /scratch4/NCEPDEV/da ]; then # Theia
-   export machine="Theia"
-  elif [ -d /gpfs/hps/ptmp ]; then # LUNA or SURGE
-   export machine="WCOSS_C"
-  elif [ -d /gpfs/dell1/ptmp ]; then # venus or mars
-   export machine="WCOSS_D"
-  elif [ -d /data/users ]; then # S4
-   export machine="s4"
-elif [ -d /discover/nobackup ]; then # NCCS Discover
-   export machine="Discover"
+
+# Determine the machine
+if [[ -d /scratch1 ]]; then # Hera
+  export machine="Hera"
+elif [[ -d /mnt/lfs4 || -d /jetmon || -d /mnt/lfs5 ]]; then # Jet
+  export machine="Jet"
+elif [[ -d /discover ]]; then # NCCS Discover
+  export machine="Discover"
+elif [[ -d /gpfs/f5 ]]; then # GaeaC5
+  export machine="gaeac5"
+elif [[ -d /gpfs/f6 ]]; then # GaeaC6
+  export machine="gaeac6"
+elif [[ -d /data/prod ]]; then # S4
+  export machine="S4"
+elif [[ -d /work ]]; then # Orion or Hercules
+  mount=$(findmnt -n -o SOURCE /home)
+  if [[ ${mount} =~ "hercules" ]]; then
+    export machine="Hercules"
+  else
+    export machine="Orion"
   fi
-else echo "machine is set to '$machine'"; 
+elif [[ -d /lfs/h2 ]]; then # wcoss2 or acorn
+  if [[ $(hostname -f) =~ "alogin" ]]; then
+    export machine="acorn"
+  else
+    export machine="wcoss2"
+  fi
 fi
+echo "Running Regression Tests on '$machine'";
 
 case $machine in
-   WCOSS_D)
-   export noscrub=/gpfs/dell2/emc/modeling/noscrub/$LOGNAME
-   export group="dev"
-   export queue="dev"
+  gaeac5)
+    export queue="normal"
+    export group="ufs-ard"
+    export noscrub="/gpfs/f5/${group}/scratch/${USER}/$LOGNAME/gsi_tmp/noscrub"
+    export ptmp="/gpfs/f5/${group}/scratch/${USER}/$LOGNAME/gsi_tmp/ptmp"
+    export casesdir="/gpfs/f5/ufs-ard/world-shared/GSI_data/CASES/regtest"
 
-   export ptmp="/gpfs/dell2/ptmp/$LOGNAME/$ptmpName"
+    export check_resource="no"
+    export accnt="ufs-ard"
+  ;;
+  gaeac6)
+    export queue="normal"
+    export group="bil-fire8"
+    export noscrub="/gpfs/f6/${group}/scratch/${USER}/${LOGNAME}/gsi_tmp/noscrub"
+    export ptmp="/gpfs/f6/${group}/scratch/${USER}/${LOGNAME}/gsi_tmp/ptmp"
+    export casesdir="/gpfs/f6/bil-fire8/world-shared/GSI_data/CASES/regtest"
 
-   export fixcrtm="/gpfs/dell2/emc/modeling/noscrub/Michael.Lueken/fix_update"
-   if [ -d /gpfs/td2 ]; then
-       export casesdir="/gpfs/td2/emc/da/noscrub/Michael.Lueken/CASES"
-   elif [ -d /gpfs/gd2 ]; then
-       export casesdir="/gpfs/gd2/emc/da/noscrub/Michael.Lueken/CASES"
-   fi
-   export ndate=${NDATE:-"$builddir/bin/ndate.x"}
+    export check_resource="no"
+    export accnt="bil-fire8"
+  ;;
+  wcoss2 | acorn)
+      export local_or_default="${local_or_default:-/lfs/h2/emc/da/noscrub/$LOGNAME}"
+      if [ -d $local_or_default ]; then
+          export noscrub="$local_or_default/noscrub"
+      elif [ -d /lfs/h2/emc/global/noscrub/$LOGNAME ]; then
+          export noscrub="/lfs/h2/emc/global/noscrub/$LOGNAME/noscrub"
+      fi
 
-   export check_resource="yes"
+      export queue="${queue:-dev}"
+      export group="${group:-global}"
+      if [[ "$cmaketest" = "false" ]]; then
+	  export basedir="/lfs/h2/emc/da/noscrub/$LOGNAME/gsi"
+      fi
+      export ptmp="${ptmp:-/lfs/h2/emc/ptmp/$LOGNAME/$ptmpName}"
 
-   export accnt=""
-   ;;
-   WCOSS)
-   if [ -d /da/noscrub/$LOGNAME ]; then 
-     export noscrub=/da/noscrub/$LOGNAME
-   elif [ -d /global/noscrub/$LOGNAME ]; then
-     export noscrub=/global/noscrub/$LOGNAME
-   fi
-   if [[ "$cmaketest" = "false" ]]; then
-     export basedir="/global/save/$LOGNAME/gsi"
-   fi
-   export group="dev"
-   export queue="dev"
+      export casesdir="/lfs/h2/emc/da/noscrub/russ.treadon/CASES/regtest"
 
-   export ptmp="/ptmpp1/$LOGNAME/$ptmpName"
+      export check_resource="no"
+      export accnt="${accnt:-GFS-DEV}"
+  ;;      
+  Orion | Hercules)
+      export local_or_default="${local_or_default:-/work/noaa/da/$LOGNAME}"
+      if [ -d $local_or_default ]; then
+         export noscrub="$local_or_default/noscrub"
+      elif [ -d /work/noaa/global/$LOGNAME ]; then
+         export noscrub="/work/noaa/global/$LOGNAME/noscrub"
+      fi
 
-   export fixcrtm="/da/save/Michael.Lueken/CRTM_REL-2.2.3/crtm_v2.2.3/fix_update"
-   export casesdir="/da/noscrub/Michael.Lueken/CASES"
-   export ndate="/nwprod/util/exec/ndate"
+      export queue="${queue:-batch}"
 
-   export check_resource="yes"
+      if [[ "${machine}" == "Orion" ]]; then
+         export partition="${partition:-orion}"
+      else
+         export partition="${partition:-hercules}"
+      fi
 
-   export accnt=""
-   ;;
-   Cheyenne)
-   export queue="economy"
-   export noscrub="/glade/scratch/$LOGNAME"
-   export group="global"
-   if [[ "$cmaketest" = "false" ]]; then
-     export basedir="/glade/scratch/$LOGNAME/gsi"
-   fi 
-   export ptmp="/glade/scratch/$LOGNAME/$ptmpName"
+      export group="${group:-global}"
+      if [[ "$cmaketest" = "false" ]]; then
+         export basedir="/work/noaa/da/$LOGNAME/gsi"
+      fi
+      export ptmp="${ptmp:-/work/noaa/stmp/$LOGNAME/$ptmpName}"
 
-   export fixcrtm="/glade/p/ral/jntp/tools/crtm/2.2.3/fix_update"
-   export casesdir="/glade/p/ral/jntp/tools/CASES"
-   export ndate="$builddir/bin/ndate.x"
+      export casesdir="/work/noaa/da/rtreadon/CASES/regtest"
 
-   export check_resource="no"
-   export accnt="p48503002"
-   ;;
-   Theia)
-   if [ -d /scratch4/NCEPDEV/da/noscrub/$LOGNAME ]; then 
-     export noscrub="/scratch4/NCEPDEV/da/noscrub/$LOGNAME"
-   elif [ -d /scratch4/NCEPDEV/global/noscrub/$LOGNAME ]; then 
-     export noscrub="/scratch4/NCEPDEV/global/noscrub/$LOGNAME"
-    elif [ -d /scratch3/BMC/gsienkf/$LOGNAME ]; then
-     export noscrub="/scratch3/BMC/gsienkf/$LOGNAME"
-   fi
-   export group="global"
-   export queue="batch"
-   if [[ "$cmaketest" = "false" ]]; then
-     export basedir="/scratch4/NCEPDEV/da/save/$LOGNAME/git/gsi"
-   fi 
+      export check_resource="no"
+      export accnt="${accnt:-da-cpu}"
+  ;;      
+  Hera)
 
-   export ptmp="/scratch4/NCEPDEV/stmp3/$LOGNAME/$ptmpName"
+    export local_or_default="${local_or_default:-/scratch1/NCEPDEV/da/$LOGNAME}"
+    if [ -d $local_or_default ]; then
+      export noscrub="$local_or_default/noscrub"
+    elif [ -d /scratch1/NCEPDEV/global/$LOGNAME ]; then
+      export noscrub="/scratch1/NCEPDEV/global/$LOGNAME/noscrub"
+     elif [ -d /scratch2/BMC/gsienkf/$LOGNAME ]; then
+      export noscrub="/scratch2/BMC/gsienkf/$LOGNAME"
+    fi
 
-   export fixcrtm="/scratch4/NCEPDEV/da/save/Michael.Lueken/nwprod/lib/crtm/2.2.3/fix_update"
-   export casesdir="/scratch4/NCEPDEV/da/noscrub/Michael.Lueken/CASES"
-   export ndate="/scratch4/NCEPDEV/da/save/Michael.Lueken/nwprod/util/exec/ndate"
+    export group="${group:-global}"
+    export queue="${queue:-batch}"
+    if [[ "$cmaketest" = "false" ]]; then
+      export basedir="/scratch1/NCEPDEV/da/$LOGNAME/git/gsi"
+    fi
 
-   export check_resource="no"
+    export ptmp="${ptmp:-/scratch1/NCEPDEV/stmp2/$LOGNAME/$ptmpName}"
 
-   export accnt="da-cpu"
+    export casesdir="/scratch1/NCEPDEV/da/Russ.Treadon/CASES/regtest"
 
-   #  On Theia, there are no scrubbers to remove old contents from stmp* directories.
-   #  After completion of regression tests, will remove the regression test subdirecories
-   export clean=".true."
-   ;;
-   WCOSS_C)
-   if [ -d /gpfs/hps3/emc/global/noscrub/$LOGNAME ]; then
-      export noscrub="/gpfs/hps3/emc/global/noscrub/$LOGNAME"
-   elif [ -d /gpfs/hps3/emc/da/noscrub/$LOGNAME ]; then
-      export noscrub="/gpfs/hps3/emc/da/noscrub/$LOGNAME"
-   fi
-   if [[ "$cmaketest" = "false" ]]; then
-     export basedir="/gpfs/hps3/emc/global/noscrub/$LOGNAME/svn/gsi"
-   fi
-   export group="dev"
-   export queue="dev"
+    export check_resource="no"
+    export accnt="${accnt:-da-cpu}"
 
-   export ptmp="/gpfs/hps/ptmp/$LOGNAME/$ptmpName"
+    #  On Hera, there are no scrubbers to remove old contents from stmp* directories.
+    #  After completion of regression tests, will remove the regression test subdirecories
+    export clean=".false."
+  ;;
+  Jet)
 
-   export fixcrtm="/gpfs/hps3/emc/da/noscrub/Michael.Lueken/CRTM_REL-2.2.3/fix_update"
-   export casesdir="/gpfs/hps3/emc/da/noscrub/Michael.Lueken/CASES"
-   export ndate=$NDATE
+    export noscrub=/lfs5/NESDIS/nesdis-rdo2/$LOGNAME/noscrub
+    export ptmp=/lfs5/NESDIS/nesdis-rdo2/$LOGNAME/ptmp
+    export casesdir="/lfs5/NESDIS/nesdis-rdo2/David.Huber/save/CASES/regtest"
+    export check_resource="no"
+    export accnt="nesdis-rdo2"
 
-   export check_resource="no"
+    export group="global"
+    export queue="batch"
+    if [[ "$cmaketest" = "false" ]]; then
+      export basedir="/lfs5/NESDIS/nesdis-rdo2/$LOGNAME/save/git/gsi"
+    fi
 
-   export accnt=""
-   ;;
-   s4)
-   export noscrub="/data/users/$LOGNAME"
-   if [[ "$cmaketest" = "false" ]]; then
-     export basedir="/home/$LOGNAME/gsi"
-   fi
-   export group="dev"
-   export queue="dev"
-   export NWPROD="/usr/local/jcsda/nwprod_gdas_2014"
-   export ptmp="/scratch/short/$LOGNAME/$ptmpName"
-
-   export fixcrtm="/home/mpotts/gsi/trunk/lib/CRTM_REL-2.2.3/fix_update"
-   export casesdir="/data/users/mpotts/CASES"
-   export ndate="$NWPROD/util/exec/ndate"
-
-   export check_resource="no"
-
-   export accnt="star"
-   ;;
-   Discover)
-   if [[ "$cmaketest" = "false" ]]; then
-       echo "Regression tests on Discover need to be run via ctest"
-       exit 1
-   fi
-   export ptmp=$basedir
-   export ptmp=$basedir
-   export noscrub=$basedir
-   export fixcrtm="/discover/nobackup/projects/gmao/share/gmao_ops/fvInput_4dvar/gsi/etc/fix_ncep20170329/REL-2.2.3-r60152_local-rev_1/CRTM_Coeffs/$endianness"
-   export casesdir="/discover/nobackup/projects/gmao/obsdev/wrmccart/NCEP_regression/CASES"
-   export ndate="/home/pchakrab/.local/bin/ndate"
-   export check_resource="no"
-   export accnt="g0613"
-   export queue="compute"
-   export clean=".false."
-   ;;
+    #  On Jet, there are no scrubbers to remove old contents from stmp* directories.
+    #  After completion of regression tests, will remove the regression test subdirecories
+    export clean=".true."
+  ;;
+  Discover)
+    if [[ "$cmaketest" = "false" ]]; then
+        echo "Regression tests on Discover need to be run via ctest"
+        exit 1
+    fi
+    export ptmp=$basedir
+    export ptmp=$basedir
+    export noscrub=$basedir
+    export casesdir="/discover/nobackup/projects/gmao/obsdev/wrmccart/NCEP_regression/CASES"
+    export check_resource="no"
+    export accnt="g0613"
+    export queue="compute"
+    export clean=".false."
+  ;;
+  *)
+    echo "Regression tests are not setup on '$machine', ABORT!"
+    exit 1
+  ;;
 esac
-
-if [[ "$cmaketest" = "false" ]]; then
-  export builddir=$noscrub/build
-  export gsisrc="$basedir/$updat/src"
-  export gsiexec_updat="$gsisrc/global_gsi.x"
-  export gsiexec_contrl="$basedir/$contrl/src/global_gsi.x"
-  export enkfexec_updat="$gsisrc/enkf/global_enkf.x"
-  export enkfexec_contrl="$basedir/$contrl/src/enkf/global_enkf.x"
-  export fixgsi="$basedir/$updat/fix"
-  export scripts="$basedir/$updat/regression"
-  export ush="$basedir/$updat/ush"
-fi
 
 # We are dealing with *which* endian files
 export endianness="Big_Endian"
@@ -219,56 +205,25 @@ export savdir="$ptmp"
 export JCAP="62"
 
 # Case Study analysis dates
-export global_T62_adate="2016120300"
-export global_4dvar_T62_adate="2014080400"
-export global_hybrid_T126_adate="2014092912"
-export global_4denvar_T126_adate="2019041500"
-export global_fv3_4denvar_T126_adate="2018110500"
-export global_enkf_T62_adate="2014092912"
-export global_lanczos_T62_adate="2014080400"
-export global_nemsio_T62_adate="2013011400"
-export nmmb_nems_adate="2015061000"
-export arw_binary_adate="2010072412"
-export arw_netcdf_adate="2008051112"
-export nmm_binary_adate="2010021600"
-export nmm_netcdf_adate="2007122000"
-export rtma_adate="2017031218"
-export hwrf_nmm_adate="2012102812"
-export fv3_netcdf_adate="2017030100"
+export global_adate="2024022300"
+export rtma_adate="2020022420"
+export rrfs_enkf_adate="2023061012"
+export rrfs_3denvar_rdasens_adate="2023061012"
+export hafs_envar_adate="2020082512"
 
 # Paths for canned case data.
-export global_T62_obs="$casesdir/global/sigmap/$global_T62_adate"
-export global_T62_ges="$casesdir/global/sigmap/$global_T62_adate"
-export global_4dvar_T62_obs="$casesdir/global/sigmap/$global_4dvar_T62_adate"
-export global_4dvar_T62_ges="$casesdir/global/sigmap/$global_4dvar_T62_adate"
-export global_hybrid_T126_datobs="$casesdir/global/sigmap/$global_hybrid_T126_adate/obs"
-export global_4denvar_T126_datges="$casesdir/global/sigmap/$global_4denvar_T126_adate"
-export global_4denvar_T126_datobs="$casesdir/global/sigmap/$global_4denvar_T126_adate"
-export global_fv3_4denvar_T126_datges="$casesdir/global/fv3/$global_fv3_4denvar_T126_adate"
-export global_fv3_4denvar_T126_datobs=$global_fv3_4denvar_T126_datges
-export global_hybrid_T126_datges="$casesdir/global/sigmap/$global_hybrid_T126_adate/ges"
-export global_enkf_T62_datobs="$casesdir/global/sigmap/$global_enkf_T62_adate/new_obs"
-export global_enkf_T62_datges="$casesdir/global/sigmap/$global_enkf_T62_adate/ges"
-export global_lanczos_T62_obs="$casesdir/global/sigmap/$global_lanczos_T62_adate"
-export global_lanczos_T62_ges="$casesdir/global/sigmap/$global_lanczos_T62_adate"
-export global_nemsio_T62_obs="$casesdir/global/sigmap/$global_nemsio_T62_adate"
-export global_nemsio_T62_ges="$casesdir/global/sigmap_nemsio/$global_nemsio_T62_adate"
-export nmmb_nems_4denvar_obs="$casesdir/regional/nmmb_nems/$nmmb_nems_adate"
-export nmmb_nems_4denvar_ges="$casesdir/regional/nmmb_nems/$nmmb_nems_adate"
-export arw_binary_obs="$casesdir/regional/arw_binary/$arw_binary_adate"
-export arw_binary_ges="$casesdir/regional/arw_binary/$arw_binary_adate"
-export arw_netcdf_obs="$casesdir/regional/arw_netcdf/$arw_netcdf_adate"
-export arw_netcdf_ges="$casesdir/regional/arw_netcdf/$arw_netcdf_adate"
-export nmm_binary_obs="$casesdir/regional/ndas_binary/$nmm_binary_adate"
-export nmm_binary_ges="$casesdir/regional/ndas_binary/$nmm_binary_adate"
-export nmm_netcdf_obs="$casesdir/regional/ndas_binary/$nmm_netcdf_adate"
-export nmm_netcdf_ges="$casesdir/regional/nmm_netcdf/$nmm_netcdf_adate"
+export global_data="$casesdir/gfs/prod"
 export rtma_obs="$casesdir/regional/rtma_binary/$rtma_adate"
 export rtma_ges="$casesdir/regional/rtma_binary/$rtma_adate"
-export hwrf_nmm_obs="$casesdir/regional/hwrf_nmm/$hwrf_nmm_adate"
-export hwrf_nmm_ges="$casesdir/regional/hwrf_nmm/$hwrf_nmm_adate"
-export fv3_netcdf_obs="$casesdir/regional/fv3_netcdf/$fv3_netcdf_adate"
-export fv3_netcdf_ges="$casesdir/regional/fv3_netcdf/$fv3_netcdf_adate"
+export rrfs_enkf_diag="$casesdir/regional/rrfs/$rrfs_enkf_adate/diag"
+export rrfs_enkf_ges="$casesdir/regional/rrfs/$rrfs_enkf_adate/ens"
+export rrfs_3denvar_rdasens_obs="$casesdir/regional/rrfs/$rrfs_3denvar_rdasens_adate/obs"
+export rrfs_3denvar_rdasens_ges="$casesdir/regional/rrfs/$rrfs_3denvar_rdasens_adate/ges"
+export rrfs_3denvar_rdasens_ens="$casesdir/regional/rrfs/$rrfs_3denvar_rdasens_adate/ens"
+export hafs_envar_obs="$casesdir/regional/hafs_RTdata/$hafs_envar_adate/obs"
+export hafs_envar_ges="$casesdir/regional/hafs_RTdata/$hafs_envar_adate/ges"
+export hafs_envar_ens="$casesdir/regional/hafs_RTdata/$hafs_envar_adate/ens"
+
 
 # Define type of GPSRO data to be assimilated (refractivity or bending angle)
 export gps_dtype="gps_bnd"
@@ -279,7 +234,7 @@ export regression_vfydir="$noscrub/regression"
 # Define debug variable - If you want to run the debug tests, set this variable to .true.  Default is .false.
 export debug=".false."
 
-# Define parameters for global_T62_3d4dvar and global_T62_4dvar
+# Define parameters for global_4denvar
 export minimization="lanczos"  # If "lanczos", use sqrtb lanczos minimization algorithm.  Otherwise use "pcgsoi".
 export nhr_obsbin="6"          # Time window for observation binning.  Use "6" for 3d4dvar test.  Otherwise use "1"
 

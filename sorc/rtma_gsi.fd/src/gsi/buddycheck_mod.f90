@@ -50,7 +50,8 @@ subroutine buddy_check_t(is,data,luse,mype,nele,nobs,muse,buddyuse)
 
   use gridmod, only: nsig,regional
   use guess_grids, only: nfldsig, hrdifsig,ges_lnprsl,&
-       geop_hgtl,ges_tsen,pt_ll
+       geop_hgtl,ges_tsen
+  use gridmod,only:pt_ll
   use constants, only: zero,one,r10
   use obsmod, only: bmiss,sfcmodel,time_offset  
   use m_dtime, only: dtime_setup, dtime_check, dtime_show
@@ -199,7 +200,7 @@ subroutine buddy_check_t(is,data,luse,mype,nele,nobs,muse,buddyuse)
   end if
 
 
-  rsig=float(nsig)
+  rsig=real(nsig,r_kind)
   mm1=mype+1
 
   !initialize buddyuse to 1, start by assuming all obs are good!

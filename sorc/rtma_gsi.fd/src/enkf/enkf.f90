@@ -51,7 +51,7 @@ module enkf
 !  NH, tropics and SH, and in the horizontal, vertical and time dimensions,
 !  using the namelist parameters  corrlengthnh, corrlengthtr, corrlengthsh,
 !  lnsigcutoffnh, lnsigcutofftr, lnsigcutoffsh (lnsigcutoffsatnh,
-!  lnsigcutoffsattr, lnsigcutoffsatsh for satellite obs, similar for ps obs)
+!  lnsigcutoffsattr, lnsigcutoffsatsh for satellite obs, similar for ps and fed obs)
 !  obtimelnh, obtimeltr, obtimelsh. The length scales should be given in km for the
 !  horizontal, hours for time, and 'scale heights' (units of -log(p/pref)) in the
 !  vertical. The function used for localization (function taper)
@@ -97,6 +97,12 @@ module enkf
 !                used to be the same) and the "chunks" come from loadbal
 !   2018-05-31:  whitaker:  add modulated ensemble model-space vertical
 !                localization (neigv>0) and denkf option.
+!   2022-04-01:  Y. Wang and X. Wang: Add dbz_ind related if-blocks to fix spurious
+!                analysis increments due to some unstable amplifying behaviors near edges of
+!                strong precipitation when clear air and large reflectivity values are
+!                assimilated in locations near each other (as may be the case in the leading
+!                line of an MCS).
+!                poc: xuguang.wang@ou.edu
 !
 ! attributes:
 !   language: f95
@@ -107,7 +113,6 @@ use mpimod, only: mpi_comm_world
 use mpisetup, only: mpi_real4,mpi_sum,mpi_comm_io,mpi_in_place,numproc,nproc,&
                 mpi_integer,mpi_wtime,mpi_status,mpi_real8,mpi_max,mpi_realkind,&
                 mpi_2real,mpi_minloc,mpi_real
-
 use covlocal, only:  taper
 use kinds, only: r_double,i_kind,r_single,r_single
 use kdtree2_module, only: kdtree2_r_nearest, kdtree2_result
@@ -124,14 +129,15 @@ use enkf_obsmod, only: oberrvar, ob, ensmean_ob, obloc, oblnp, &
                   obtype, oberrvarmean, numobspersat, deltapredx, biaspreds,&
                   oberrvar_orig, probgrosserr, prpgerr,&
                   corrlengthsq,lnsigl,obtimel,obloclat,obloclon,obpress,stattype,&
-                  anal_ob
+                  anal_ob,anal_ob_post,assimltd_flag
 use constants, only: pi, one, zero
 use params, only: sprd_tol, paoverpb_thresh, datapath, nanals,&
                   iassim_order,sortinc,deterministic,numiter,nlevs,&
                   zhuberleft,zhuberright,varqc,lupd_satbiasc,huber,univaroz,&
                   covl_minfact,covl_efold,nbackgrounds,nhr_anal,fhr_assim,&
-                  iseed_perturbed_obs,lupd_obspace_serial,fso_cycling,&
+                  iseed_perturbed_obs,lupd_obspace_serial,efsoi_cycling,&
                   neigv,vlocal_evecs,denkf
+
 use radinfo, only: npred,nusis,nuchan,jpch_rad,predx
 use radbias, only: apply_biascorr, update_biascorr
 use gridinfo, only: nlevs_pres
@@ -153,7 +159,8 @@ use random_normal, only : rnorm, set_random_seed
 
 ! local variables.
 integer(i_kind) nob,nob1,nob2,nob3,npob,nf,nf2,ii,nobx,nskip,&
-                niter,i,nrej,npt,nuse,ncount,ncount_check,nb,np
+                niter,i,nrej,npt,nuse,ncount,ncount_check,nb,np,&
+                nuseconvoz,nusesat,nobs_convoz
 integer(i_kind) indxens1(nanals),indxens2(nanals)
 integer(i_kind) indxens1_modens(nanals*neigv),indxens2_modens(nanals*neigv)
 real(r_single) hxpost(nanals),hxprior(nanals),hxinc(nanals),&
@@ -181,7 +188,7 @@ real(r_single), allocatable, dimension(:) :: paoverpb_min, paoverpb_min1, paover
 integer(i_kind) ierr
 ! kd-tree search results
 type(kdtree2_result),dimension(:),allocatable :: sresults1,sresults2 
-integer(i_kind) nanal,nn,nnn,nobm,nsame,nn1,nn2,oz_ind,nlev
+integer(i_kind) nanal,nn,nnn,nobm,nsame,nn1,nn2,oz_ind,nlev,dbz_ind
 real(r_single),dimension(nlevs_pres):: taperv
 logical lastiter, kdgrid, kdobs
 
@@ -608,6 +615,7 @@ do niter=1,numiter
           nn2 = ncdim
       end if
       if (nf2 > 0) then
+          dbz_ind = getindex(cvars3d, 'dbz')
 !$omp parallel do schedule(dynamic,1) private(ii,i,nb,obt,nn,nnn,nlev,lnsig,kfgain,ens_tmp,taper1,taper3,taperv)
           do ii=1,nf2 ! loop over nearby horiz grid points
              do nb=1,nbackgrounds ! loop over background time levels
@@ -627,8 +635,13 @@ do niter=1,numiter
                        ! (through hpfhtcon)
                        kfgain=taper1*sum(ens_tmp*anal_obtmp_modens)
                        ! update mean.
-                       ensmean_chunk(i,nn,nb) = ensmean_chunk(i,nn,nb) + &
-                                                kfgain*obinc_tmp
+                       if ( (nn >= (dbz_ind-1)*nlevs+1 .and. nn <= (dbz_ind-1)*nlevs+nlevs) )then
+                          ensmean_chunk(i,nn,nb) = max(ensmean_chunk(i,nn,nb) + &
+                                                        kfgain*obinc_tmp,zero)
+                       else
+                          ensmean_chunk(i,nn,nb) = ensmean_chunk(i,nn,nb) + &
+                                                    kfgain*obinc_tmp
+                       end if
                        ! update perturbations.
                        anal_chunk(:,i,nn,nb) = anal_chunk(:,i,nn,nb) + &
                                                kfgain*obganl(:)
@@ -651,7 +664,11 @@ do niter=1,numiter
                         ! (through hpfhtcon)
                         kfgain=taperv(nnn)*sum(anal_chunk(:,i,nn,nb)*anal_obtmp)
                         ! update mean.
-                        ensmean_chunk(i,nn,nb) = ensmean_chunk(i,nn,nb) + kfgain*obinc_tmp
+                        if ( (nn >= (dbz_ind-1)*nlevs+1 .and. nn <= (dbz_ind-1)*nlevs+nlevs) )then
+                           ensmean_chunk(i,nn,nb) = max(ensmean_chunk(i,nn,nb) + kfgain*obinc_tmp,zero)
+                        else
+                           ensmean_chunk(i,nn,nb) = ensmean_chunk(i,nn,nb) + kfgain*obinc_tmp
+                        end if
                         ! update perturbations.
                         anal_chunk(:,i,nn,nb) = anal_chunk(:,i,nn,nb) + kfgain*obganl(:)
                     end if
@@ -680,7 +697,13 @@ do niter=1,numiter
                           taper(obt*obtimelinv)* &
                           sum(anal_obchunk_modens(:,nob2)*anal_obtmp_modens)*hpfhtcon
                  ! update mean.
-                 ensmean_obchunk(nob2) = ensmean_obchunk(nob2) + kfgain*obinc_tmp
+                 nob3 = indxproc_obs(nproc+1,nob2)
+                 if(trim(obtype(nob3)) == 'dbz' ) then
+                    ensmean_obchunk(nob2) = max((ensmean_obchunk(nob2) + &
+                                            kfgain*obinc_tmp),zero)
+                 else
+                    ensmean_obchunk(nob2) = ensmean_obchunk(nob2) + kfgain*obinc_tmp
+                 end if
                  ! update perturbations.
                  anal_obchunk(:,nob2) = anal_obchunk(:,nob2) + kfgain*obganl
                  anal_obchunk_modens(:,nob2) = anal_obchunk_modens(:,nob2) + kfgain*obganl_modens
@@ -706,7 +729,13 @@ do niter=1,numiter
                            taper(lnsig*lnsiglinv)*taper(obt*obtimelinv)* &
                            sum(anal_obchunk(:,nob2)*anal_obtmp)*hpfhtcon
                   ! update mean.
-                  ensmean_obchunk(nob2) = ensmean_obchunk(nob2) + kfgain*obinc_tmp
+                  nob3 = indxproc_obs(nproc+1,nob2)
+                  if(trim(obtype(nob3)) == 'dbz' ) then
+                     ensmean_obchunk(nob2) = max((ensmean_obchunk(nob2) + &
+                                               kfgain*obinc_tmp),zero)
+                  else
+                     ensmean_obchunk(nob2) = ensmean_obchunk(nob2) + kfgain*obinc_tmp
+                  end if
                   ! update perturbations.
                   anal_obchunk(:,nob2) = anal_obchunk(:,nob2) + kfgain*obganl
                   ! recompute ob space spread ratio  for unassimlated obs
@@ -757,17 +786,32 @@ do niter=1,numiter
   tend = mpi_wtime()
   if (nproc .eq. 0) then
       write(6,8003) niter,'timing on proc',nproc,' = ',tend-tbegin,t2,t3,t4,t5,t6,nrej
+      if(allocated(assimltd_flag))deallocate(assimltd_flag)
+      allocate(assimltd_flag(nobstot))
+      assimltd_flag = 99999
       if (iassim_order == 2) then
           ncount_check = ncount
       else
           ncount_check = nobstot
       endif
       nuse = 0; covl_fact = 0.
+      nuseconvoz=0; nusesat = 0
+      nobs_convoz = nobs_conv + nobs_oz
       do nob1=1,ncount_check
          nob = indxassim(nob1)
          if (iskip(nob) .ne. 1) then
             covl_fact = covl_fact + sqrt(corrlengthsq(nob)/corrlengthsq_orig(nob))
             nuse = nuse + 1
+            assimltd_flag(nob) = 1
+            if (nob .le. nobs_convoz) then
+               nuseconvoz = nuseconvoz +1
+            else if (nob .gt. nobs_convoz) then
+               nusesat = nusesat + 1
+            else
+               print *,'nob ', nob ,' falling through'
+            endif
+         else
+            assimltd_flag(nob) = 0
          endif
       enddo
       nskip = nobstot-nuse
@@ -776,6 +820,8 @@ do niter=1,numiter
       if (covl_fact < 0.99) print *,'mean covl_fact = ',covl_fact
       if (nskip > 0) print *,nskip,' out of',nobstot,'obs skipped,',nuse,' used'
       if (nsame > 0) print *,nsame,' out of', nobstot-nskip,' same lat/long'
+      if (nuseconvoz > 0 ) print *,nuseconvoz,' out of',nobs_conv + nobs_oz ,'convobs used'
+      if (nusesat > 0 ) print *,nusesat ,' out of',nobs_sat ,'satobs used'
       if (nrej >  0) print *,nrej,' obs rejected by varqc'
   endif
   8003  format(i2,1x,a14,1x,i5,1x,a3,6(f7.2,1x),i4)
@@ -826,24 +872,24 @@ deltapredx = 0.0
 
 ! Gathering analysis perturbations 
 ! in observation space for EFSO
-if(fso_cycling) then  
+if(efsoi_cycling) then  
    if(nproc /= 0) then   
       call mpi_send(anal_obchunk,numobsperproc(nproc+1)*nanals,mpi_real,0, &   
                     1,mpi_comm_world,ierr)   
    else   
-      allocate(anal_ob(1:nanals,nobstot))   
+      allocate(anal_ob_post(1:nanals,nobstot))   
       allocate(buffertmp3(nanals,nobs_max))   
       do np=1,numproc-1   
          call mpi_recv(buffertmp3,numobsperproc(np+1)*nanals,mpi_real,np, &   
                        1,mpi_comm_world,mpi_status,ierr)   
          do nob1=1,numobsperproc(np+1)   
             nob2 = indxproc_obs(np+1,nob1)   
-            anal_ob(:,nob2) = buffertmp3(:,nob1)   
+            anal_ob_post(:,nob2) = buffertmp3(:,nob1)   
          end do   
       end do   
       do nob1=1,numobsperproc(1)   
          nob2 = indxproc_obs(1,nob1)   
-         anal_ob(:,nob2) = anal_obchunk(:,nob1)   
+         anal_ob_post(:,nob2) = anal_obchunk(:,nob1)   
       end do   
       deallocate(buffertmp3)   
    end if   

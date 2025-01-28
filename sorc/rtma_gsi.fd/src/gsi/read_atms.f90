@@ -35,6 +35,8 @@ subroutine read_atms(mype,val_tovs,ithin,isfcalc,&
 !                         channels are missing.
 !  2016-10-25  zhu - add changes for assimilating radiances affected by non-precipitating clouds
 !  2018-02-05  collard - get orbit height from BUFR file
+!  2018-04-19  eliu - allow data selection for precipitation-affected data 
+!  2018-05-21  j.jin  - added time-thinning, to replace thin4d
 !
 !   input argument list:
 !     mype     - mpi task id
@@ -73,6 +75,8 @@ subroutine read_atms(mype,val_tovs,ithin,isfcalc,&
   use kinds, only: r_kind,r_double,i_kind
   use satthin, only: super_val,itxmax,makegrids,destroygrids,checkob, &
       finalcheck,map2tgrid,score_crit
+  use satthin, only: radthin_time_info,tdiff2crit
+  use obsmod,  only: time_window_max, ta2tb
   use radinfo, only: iuse_rad,newchn,cbias,nusis,jpch_rad,air_rad,ang_rad, &
       use_edges,radedge1,radedge2,nusis,radstart,radstep,newpc4pred,maxscan
   use radinfo, only: adp_anglebc
@@ -80,7 +84,7 @@ subroutine read_atms(mype,val_tovs,ithin,isfcalc,&
   use constants, only: deg2rad,zero,one,two,three,rad2deg,r60inv,r100,rearth_equator
   use crtm_module, only : max_sensor_zenith_angle
   use calc_fov_crosstrk, only : instrument_init, fov_cleanup, fov_check
-  use gsi_4dvar, only: l4dvar,l4densvar,iwinbgn,winlen,thin4d
+  use gsi_4dvar, only: l4dvar,l4densvar,iwinbgn,winlen
   use deter_sfc_mod, only: deter_sfc_fov,deter_sfc
   use atms_spatial_average_mod, only : atms_spatial_average
   use gsi_nstcouplermod, only: nst_gsi,nstinfo
@@ -166,6 +170,7 @@ subroutine read_atms(mype,val_tovs,ithin,isfcalc,&
   real(r_kind), POINTER :: bt_in(:), crit1,rsat, t4dv, solzen, solazi
   real(r_kind), POINTER :: dlon_earth,dlat_earth,satazi, lza
 
+  integer(i_kind), ALLOCATABLE, TARGET :: it_mesh_save(:)
   real(r_kind), ALLOCATABLE, TARGET :: rsat_save(:)
   real(r_kind), ALLOCATABLE, TARGET :: t4dv_save(:)
   real(r_kind), ALLOCATABLE, TARGET :: dlon_earth_save(:)
@@ -185,6 +190,9 @@ subroutine read_atms(mype,val_tovs,ithin,isfcalc,&
   real(r_kind) cdist,disterr,disterrmax,dlon00,dlat00
 
   logical :: critical_channels_missing
+  real(r_kind)    :: ptime,timeinflat,crit0
+  integer(i_kind) :: ithin_time,n_tbin
+  integer(i_kind),pointer :: it_mesh => null()
 
 !**************************************************************************
 ! Initialize variables
@@ -204,8 +212,14 @@ subroutine read_atms(mype,val_tovs,ithin,isfcalc,&
      call gsi_nstcoupler_skindepth(obstype,zob)
   endif
 
+  call radthin_time_info(obstype, jsatid, sis, ptime, ithin_time)
+  if( ptime > 0.0_r_kind) then
+     n_tbin=nint(2*time_window_max/ptime)
+  else
+     n_tbin=1
+  endif
 ! Make thinning grids
-  call makegrids(rmesh,ithin)
+  call makegrids(rmesh,ithin,n_tbin=n_tbin)
 
 ! Set nadir position based on value of maxscan
   if (maxscan < 96) then
@@ -220,7 +234,7 @@ subroutine read_atms(mype,val_tovs,ithin,isfcalc,&
 ! Set various variables depending on type of data to be read
 
   if (obstype /= 'atms') then
-     write(*,*) 'READ_ATMS called for obstype '//obstype//': RETURNING'
+     write(6,*) 'READ_ATMS called for obstype '//obstype//': RETURNING'
      return
   end if
 
@@ -252,7 +266,7 @@ subroutine read_atms(mype,val_tovs,ithin,isfcalc,&
   elseif (jsatid == 'n21') then
      kidsat = 226
   else 
-     write(*,*) 'READ_ATMS: Unrecognized value for jsatid '//jsatid//': RETURNING'
+     write(6,*) 'READ_ATMS: Unrecognized value for jsatid '//jsatid//': RETURNING'
      return
   end if
 
@@ -336,6 +350,7 @@ subroutine read_atms(mype,val_tovs,ithin,isfcalc,&
   ALLOCATE(dlon_earth_save(maxobs))
   ALLOCATE(dlat_earth_save(maxobs))
   ALLOCATE(crit1_save(maxobs))
+  ALLOCATE(it_mesh_save(maxobs))
   ALLOCATE(lza_save(maxobs))
   ALLOCATE(satazi_save(maxobs))
   ALLOCATE(solzen_save(maxobs)) 
@@ -359,7 +374,6 @@ subroutine read_atms(mype,val_tovs,ithin,isfcalc,&
      end if
 
 !    Reopen unit to satellite bufr file
-     call closbf(lnbufr)
      open(lnbufr,file=trim(infile2),form='unformatted',status = 'old', &
          iostat = ierr)
      if(ierr /= 0) cycle ears_db_loop
@@ -378,6 +392,7 @@ subroutine read_atms(mype,val_tovs,ithin,isfcalc,&
            dlon_earth => dlon_earth_save(iob)
            dlat_earth => dlat_earth_save(iob)
            crit1      => crit1_save(iob)
+           it_mesh    => it_mesh_save(iob)
            ifov       => ifov_save(iob)
            lza        => lza_save(iob)
            satazi     => satazi_save(iob)
@@ -385,8 +400,8 @@ subroutine read_atms(mype,val_tovs,ithin,isfcalc,&
            solazi     => solazi_save(iob)
 
 !          inflate selection value for ears_db data
-           crit1 = zero
-           if ( llll > 1 ) crit1 = r100 * float(llll)
+           crit0 = 0.01_r_kind
+           if ( llll > 1 ) crit0 = crit0 + r100 * real(llll,r_kind)
 
            call ufbint(lnbufr,bfr1bhdr,n1bhdr,1,iret,hdr1b)
 
@@ -425,11 +440,9 @@ subroutine read_atms(mype,val_tovs,ithin,isfcalc,&
            else
               if(abs(tdiff) > twind+one_minute) cycle read_loop
            endif
-           if (thin4d) then
-              crit1 = crit1 + zero
-           else
-              crit1 = crit1 + two*abs(tdiff)        ! range:  0 to 6
-           endif
+
+           timeinflat=two
+           call tdiff2crit(tdiff,ptime,ithin_time,timeinflat,crit0,crit1,it_mesh)
  
            call ufbint(lnbufr,bfr2bhdr,n2bhdr,1,iret,hdr2b)
 
@@ -442,7 +455,7 @@ subroutine read_atms(mype,val_tovs,ithin,isfcalc,&
            lza = bfr2bhdr(1)*deg2rad      ! local zenith angle
            if(ifov <= 48)    lza=-lza
 
-           panglr=(start+float(ifov-1)*step)*deg2rad
+           panglr=(start+real(ifov-1,r_kind)*step)*deg2rad
            satellite_height=bfr1bhdr(13)
 !          Ensure orbit height is reasonable
            if (satellite_height < 780000.0_r_kind .OR. &
@@ -469,7 +482,11 @@ subroutine read_atms(mype,val_tovs,ithin,isfcalc,&
 !          TMBR is actually the antenna temperature for most microwave sounders but for
 !          ATMS it is stored in TMANT.
 !          ATMS is assumed not to come via EARS
-           call ufbrep(lnbufr,data1b8,1,nchanl,iret,'TMANT')
+           if (ta2tb) then
+              call ufbrep(lnbufr,data1b8,1,nchanl,iret,'TMBR')
+           else
+              call ufbrep(lnbufr,data1b8,1,nchanl,iret,'TMANT')
+           endif
 
            bt_save(1:nchanl,iob) = data1b8(1:nchanl)
 
@@ -478,13 +495,14 @@ subroutine read_atms(mype,val_tovs,ithin,isfcalc,&
         end do read_loop
      end do read_subset
      call closbf(lnbufr)
+     close(lnbufr)
   end do ears_db_loop
   deallocate(data1b8)
 
   num_obs = iob-1
 
   if (num_obs <= 0) then
-     write(*,*) 'READ_ATMS: No ATMS Data were read in'
+     write(6,*) 'READ_ATMS: No ATMS Data were read in'
      return
   end if
 
@@ -493,14 +511,14 @@ subroutine read_atms(mype,val_tovs,ithin,isfcalc,&
   ALLOCATE(Relative_Time_In_Seconds(Num_Obs))
   ALLOCATE(IScan(Num_Obs))
   Relative_Time_In_Seconds = 3600.0_r_kind*T4DV_Save(1:Num_Obs)
-  write(*,*) 'Calling ATMS_Spatial_Average'
+! write(6,*) 'Calling ATMS_Spatial_Average'
   CALL ATMS_Spatial_Average(Num_Obs, NChanl, IFOV_Save(1:Num_Obs), &
        Relative_Time_In_Seconds, BT_Save(1:nchanl,1:Num_Obs), IScan, IRet)
-  write(*,*) 'ATMS_Spatial_Average Called with IRet=',IRet
+! write(6,*) 'ATMS_Spatial_Average Called with IRet=',IRet
   DEALLOCATE(Relative_Time_In_Seconds)
   
   IF (IRet /= 0) THEN
-     write(*,*) 'Error Calling ATMS_Spatial_Average from READ_ATMS'
+     write(6,*) 'Error Calling ATMS_Spatial_Average from READ_ATMS'
      RETURN
   END IF
 
@@ -513,6 +531,7 @@ subroutine read_atms(mype,val_tovs,ithin,isfcalc,&
      dlon_earth => dlon_earth_save(iob)
      dlat_earth => dlat_earth_save(iob)
      crit1      => crit1_save(iob)
+     it_mesh    => it_mesh_save(iob)
      ifov       => ifov_save(iob)
      lza        => lza_save(iob)
      satazi     => satazi_save(iob)
@@ -524,11 +543,6 @@ subroutine read_atms(mype,val_tovs,ithin,isfcalc,&
      dlon_earth_deg = dlon_earth
      dlat_earth = dlat_earth*deg2rad
      dlon_earth = dlon_earth*deg2rad   
-
-! Just use every fifth scan position and scanline (and make sure that we have
-! position 48 as we need it for scan bias)
-     if (5*NINT(REAL(IScan(Iob))/5_r_kind) /= IScan(IOb) .OR. &
-          5*NINT(REAL(IFov-3)/5_r_kind) /= IFOV -3 ) CYCLE ObsLoop 
 
 !    Regional case
      if(regional)then
@@ -563,7 +577,7 @@ subroutine read_atms(mype,val_tovs,ithin,isfcalc,&
      endif
  
 !    Map obs to thinning grid
-     call map2tgrid(dlat_earth,dlon_earth,dist1,crit1,itx,ithin,itt,iuse,sis)
+     call map2tgrid(dlat_earth,dlon_earth,dist1,crit1,itx,ithin,itt,iuse,sis,it_mesh=it_mesh)
      if(.not. iuse)cycle ObsLoop
 
 !
@@ -629,7 +643,7 @@ subroutine read_atms(mype,val_tovs,ithin,isfcalc,&
              idomsfc(1),sfcpct,ts,tsavg,vty,vfr,sty,stp,sm,sn,zz,ff10,sfcr)
      endif
 
-     crit1 = crit1 + rlndsea(isflg) + 10._r_kind*float(iskip) + 0.01_r_kind * abs(zz)
+     crit1 = crit1 + rlndsea(isflg) + 10._r_kind*real(iskip,r_kind) + 0.01_r_kind * abs(zz)
      call checkob(dist1,crit1,itx,iuse)
      if(.not. iuse)cycle ObsLoop
 
@@ -664,6 +678,7 @@ subroutine read_atms(mype,val_tovs,ithin,isfcalc,&
                     else
                        qval  = zero
                     end if
+                    if (radmod%lprecip) qval=zero 
                  else 
                     d0    = 8.24_r_kind - 2.622_r_kind*cosza + 1.846_r_kind*cosza*cosza
                     qval  = cosza*(d0+d1*log(285.0_r_kind-ch1)+d2*log(285.0_r_kind-ch2))
@@ -706,7 +721,7 @@ subroutine read_atms(mype,val_tovs,ithin,isfcalc,&
      endif
 
 ! Re-calculate look angle
-     panglr=(start+float(ifov-1)*step)*deg2rad
+     panglr=(start+real(ifov-1,r_kind)*step)*deg2rad
 
 
 !     Load selected observation into data array
@@ -770,6 +785,7 @@ subroutine read_atms(mype,val_tovs,ithin,isfcalc,&
   DEALLOCATE(dlon_earth_save)
   DEALLOCATE(dlat_earth_save)
   DEALLOCATE(crit1_save)
+  DEALLOCATE(it_mesh_save)
   DEALLOCATE(lza_save)
   DEALLOCATE(satazi_save)
   DEALLOCATE(solzen_save) 

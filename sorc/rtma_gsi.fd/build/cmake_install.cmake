@@ -1,8 +1,8 @@
-# Install script for directory: /lfs/h2/emc/da/noscrub/edward.colon/3drtma_hrrr/sorc/rtma_gsi.fd
+# Install script for directory: /lfs/h2/emc/da/noscrub/Edward.Colon/NOAA_3drtma_new/sorc/rtma_gsi.fd
 
 # Set the install prefix
 if(NOT DEFINED CMAKE_INSTALL_PREFIX)
-  set(CMAKE_INSTALL_PREFIX "/usr/local")
+  set(CMAKE_INSTALL_PREFIX "/lfs/h2/emc/da/noscrub/Edward.Colon/NOAA_3drtma_new/sorc/rtma_gsi.fd/install")
 endif()
 string(REGEX REPLACE "/$" "" CMAKE_INSTALL_PREFIX "${CMAKE_INSTALL_PREFIX}")
 
@@ -12,7 +12,7 @@ if(NOT DEFINED CMAKE_INSTALL_CONFIG_NAME)
     string(REGEX REPLACE "^[^A-Za-z0-9_]+" ""
            CMAKE_INSTALL_CONFIG_NAME "${BUILD_TYPE}")
   else()
-    set(CMAKE_INSTALL_CONFIG_NAME "RELEASE")
+    set(CMAKE_INSTALL_CONFIG_NAME "Release")
   endif()
   message(STATUS "Install configuration: \"${CMAKE_INSTALL_CONFIG_NAME}\"")
 endif()
@@ -27,9 +27,14 @@ if(NOT CMAKE_INSTALL_COMPONENT)
   endif()
 endif()
 
+# Install shared libraries without execute permission?
+if(NOT DEFINED CMAKE_INSTALL_SO_NO_EXE)
+  set(CMAKE_INSTALL_SO_NO_EXE "0")
+endif()
+
 # Is this installation the result of a crosscompile?
 if(NOT DEFINED CMAKE_CROSSCOMPILING)
-  set(CMAKE_CROSSCOMPILING "TRUE")
+  set(CMAKE_CROSSCOMPILING "FALSE")
 endif()
 
 # Set default install directory permissions.
@@ -38,25 +43,18 @@ if(NOT DEFINED CMAKE_OBJDUMP)
 endif()
 
 if(NOT CMAKE_INSTALL_LOCAL_ONLY)
-  # Include the install script for each subdirectory.
-  include("/lfs/h2/emc/da/noscrub/edward.colon/3drtma_hrrr/sorc/rtma_gsi.fd/build/libsrc/wrflib/cmake_install.cmake")
-  include("/lfs/h2/emc/da/noscrub/edward.colon/3drtma_hrrr/sorc/rtma_gsi.fd/build/libsrc/bacio/cmake_install.cmake")
-  include("/lfs/h2/emc/da/noscrub/edward.colon/3drtma_hrrr/sorc/rtma_gsi.fd/build/libsrc/bufr/cmake_install.cmake")
-  include("/lfs/h2/emc/da/noscrub/edward.colon/3drtma_hrrr/sorc/rtma_gsi.fd/build/libsrc/sigio/cmake_install.cmake")
-  include("/lfs/h2/emc/da/noscrub/edward.colon/3drtma_hrrr/sorc/rtma_gsi.fd/build/libsrc/nemsio/cmake_install.cmake")
-  include("/lfs/h2/emc/da/noscrub/edward.colon/3drtma_hrrr/sorc/rtma_gsi.fd/build/libsrc/crtm/cmake_install.cmake")
-  include("/lfs/h2/emc/da/noscrub/edward.colon/3drtma_hrrr/sorc/rtma_gsi.fd/build/libsrc/sp/cmake_install.cmake")
-  include("/lfs/h2/emc/da/noscrub/edward.colon/3drtma_hrrr/sorc/rtma_gsi.fd/build/libsrc/sfcio/cmake_install.cmake")
-  include("/lfs/h2/emc/da/noscrub/edward.colon/3drtma_hrrr/sorc/rtma_gsi.fd/build/libsrc/w3emc/cmake_install.cmake")
-  include("/lfs/h2/emc/da/noscrub/edward.colon/3drtma_hrrr/sorc/rtma_gsi.fd/build/libsrc/ip/cmake_install.cmake")
-  include("/lfs/h2/emc/da/noscrub/edward.colon/3drtma_hrrr/sorc/rtma_gsi.fd/build/src/ncdiag/cmake_install.cmake")
-  include("/lfs/h2/emc/da/noscrub/edward.colon/3drtma_hrrr/sorc/rtma_gsi.fd/build/src/fv3gfs_ncio/cmake_install.cmake")
-  include("/lfs/h2/emc/da/noscrub/edward.colon/3drtma_hrrr/sorc/rtma_gsi.fd/build/libsrc/GSD/gsdcloud/cmake_install.cmake")
-  include("/lfs/h2/emc/da/noscrub/edward.colon/3drtma_hrrr/sorc/rtma_gsi.fd/build/src/gsi/cmake_install.cmake")
-  include("/lfs/h2/emc/da/noscrub/edward.colon/3drtma_hrrr/sorc/rtma_gsi.fd/build/src/enkf/cmake_install.cmake")
-  include("/lfs/h2/emc/da/noscrub/edward.colon/3drtma_hrrr/sorc/rtma_gsi.fd/build/util/ndate/cmake_install.cmake")
-  include("/lfs/h2/emc/da/noscrub/edward.colon/3drtma_hrrr/sorc/rtma_gsi.fd/build/util/EnKF/arw/src/cmake_install.cmake")
+  # Include the install script for the subdirectory.
+  include("/lfs/h2/emc/da/noscrub/Edward.Colon/NOAA_3drtma_new/sorc/rtma_gsi.fd/build/src/cmake_install.cmake")
+endif()
 
+if(NOT CMAKE_INSTALL_LOCAL_ONLY)
+  # Include the install script for the subdirectory.
+  include("/lfs/h2/emc/da/noscrub/Edward.Colon/NOAA_3drtma_new/sorc/rtma_gsi.fd/build/fix/cmake_install.cmake")
+endif()
+
+if(NOT CMAKE_INSTALL_LOCAL_ONLY)
+  # Include the install script for the subdirectory.
+  include("/lfs/h2/emc/da/noscrub/Edward.Colon/NOAA_3drtma_new/sorc/rtma_gsi.fd/build/regression/cmake_install.cmake")
 endif()
 
 if(CMAKE_INSTALL_COMPONENT)
@@ -67,5 +65,5 @@ endif()
 
 string(REPLACE ";" "\n" CMAKE_INSTALL_MANIFEST_CONTENT
        "${CMAKE_INSTALL_MANIFEST_FILES}")
-file(WRITE "/lfs/h2/emc/da/noscrub/edward.colon/3drtma_hrrr/sorc/rtma_gsi.fd/build/${CMAKE_INSTALL_MANIFEST}"
+file(WRITE "/lfs/h2/emc/da/noscrub/Edward.Colon/NOAA_3drtma_new/sorc/rtma_gsi.fd/build/${CMAKE_INSTALL_MANIFEST}"
      "${CMAKE_INSTALL_MANIFEST_CONTENT}")

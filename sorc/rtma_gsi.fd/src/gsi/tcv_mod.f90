@@ -148,7 +148,7 @@ contains
        iret = 0
        return
     else
-       write(6,*)'GET_STORMINFO:  ***ERROR*** num storms to be processed <= 0'
+       write(6,*)'GET_STORMINFO:  ***WARNING*** num storms to be processed <= 0'
        write(6,*)'GET_STORMINFO:     Check file assigned to unit lucard=',lucard
        iret = 99
        return
@@ -228,14 +228,14 @@ contains
           write (6,31) storm(i)
  
           if (storm(i)%tcv_lonew == 'W') then
-             slonfg(i) =  360._r_kind - float(storm(i)%tcv_lon)/10.0_r_kind
+             slonfg(i) =  360._r_kind - real(storm(i)%tcv_lon,r_kind)/10.0_r_kind
           else
-             slonfg(i) = float(storm(i)%tcv_lon)/10.0_r_kind
+             slonfg(i) = real(storm(i)%tcv_lon,r_kind)/10.0_r_kind
           endif
           if (storm(i)%tcv_latns == 'S') then
-             slatfg(i) = -one * float(storm(i)%tcv_lat)/10.0_r_kind
+             slatfg(i) = -one * real(storm(i)%tcv_lat,r_kind)/10.0_r_kind
           else
-             slatfg(i) = float(storm(i)%tcv_lat)/10.0_r_kind
+             slatfg(i) = real(storm(i)%tcv_lat,r_kind)/10.0_r_kind
           endif
         
           centerid(i) = storm(i)%tcv_center
@@ -255,7 +255,7 @@ contains
        iret = 0
        return
     else
-       write(6,*)'READ_TCV_CARD:  ***ERROR*** num storms to be processed <=0 '
+       write(6,*)'READ_TCV_CARD:  ***WARNING*** num storms to be processed <=0 '
        write(6,*)'READ_TCV_CARD:     Check file assigned to unit lucard=',lucard
        iret = 99
        return

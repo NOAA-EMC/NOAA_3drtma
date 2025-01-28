@@ -29,6 +29,7 @@ use m_obsNode, only: obsNode
 use m_gpsNode, only: gpsNode
 use m_gpsNode, only: gpsNode_typecast
 use m_gpsNode, only: gpsNode_nextcast
+use m_obsdiagNode, only: obsdiagNode_set
 implicit none
 
 PRIVATE
@@ -117,6 +118,7 @@ subroutine intgps_(gpshead,rval,sval)
   real(r_kind) :: w1,w2,w3,w4
   real(r_kind) :: p_TL,p_AD,t_TL,t_AD,q_TL,q_AD
   real(r_kind) :: val,pg_gps
+  real(r_kind),dimension(nsig) :: valk
   real(r_kind) ::cg_gps,grad,p0,wnotgross,wgross
   real(r_kind),pointer,dimension(:) :: st,sq
   real(r_kind),pointer,dimension(:) :: rt,rq
@@ -153,24 +155,29 @@ subroutine intgps_(gpshead,rval,sval)
      w3=gpsptr%wij(3)
      w4=gpsptr%wij(4)
 
-
-     val=zero
-
 !  local refractivity (linear operator)
 
+!$omp parallel do schedule(dynamic,1) private(j,t_TL,q_TL,p_TL)
      do j=1,nsig
-        t_TL=w1* st(i1(j))+w2* st(i2(j))+w3* st(i3(j))+w4* st(i4(j))
-        q_TL=w1* sq(i1(j))+w2* sq(i2(j))+w3* sq(i3(j))+w4* sq(i4(j))
-        p_TL=w1* sp(i1(j))+w2* sp(i2(j))+w3* sp(i3(j))+w4* sp(i4(j))
-        val = val + p_TL*gpsptr%jac_p(j) + t_TL*gpsptr%jac_t(j)+q_TL*gpsptr%jac_q(j)
+        t_TL=w1*st(i1(j))+w2*st(i2(j))+w3*st(i3(j))+w4*st(i4(j))
+        q_TL=w1*sq(i1(j))+w2*sq(i2(j))+w3*sq(i3(j))+w4*sq(i4(j))
+        p_TL=w1*sp(i1(j))+w2*sp(i2(j))+w3*sp(i3(j))+w4*sp(i4(j))
+        valk(j) = p_TL*gpsptr%jac_p(j) + t_TL*gpsptr%jac_t(j)+q_TL*gpsptr%jac_q(j)
+     end do
+
+     val=zero
+     do j=1,nsig
+       val = val+valk(j)
      end do
 
      if (luse_obsdiag)then
         if (lsaveobsens) then
            grad = val*gpsptr%raterr2*gpsptr%err2
-           gpsptr%diags%obssen(jiter) = grad
+           !-- gpsptr%diags%obssen(jiter) = grad
+           call obsdiagNode_set(gpsptr%diags,jiter=jiter,obssen=grad)
         else
-           if (gpsptr%luse) gpsptr%diags%tldepart(jiter)=val
+           !-- if (gpsptr%luse) gpsptr%diags%tldepart(jiter)=val
+           if (gpsptr%luse) call obsdiagNode_set(gpsptr%diags,jiter=jiter,tldepart=val)
         endif
      endif
 
@@ -201,6 +208,7 @@ subroutine intgps_(gpshead,rval,sval)
 
 !       adjoint 
 
+!$omp parallel do schedule(dynamic,1) private(j,t_AD,q_AD,p_AD)
         do j=1,nsig
            t_AD = grad*gpsptr%jac_t(j)
            rt(i1(j))=rt(i1(j))+w1*t_AD

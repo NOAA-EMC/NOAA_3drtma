@@ -61,6 +61,15 @@ $BASE/build_rtma_post.sh > $logs_dir/build_rtma_post.log 2>&1
 
 fi
 
+
+if [ $BUILD_rtma_gsi = yes ] ; then
+
+echo " .... Building rtma_gsi .... "
+$BASE/build_rtma_gsi.sh > $logs_dir/build_rtma_gsi.log 2>&1
+
+fi
+
+
 module use $BASE/../modulefiles
 source $BASE/../modulefiles/HRRR/v4.0.0
 
@@ -71,15 +80,6 @@ if [ $BUILD_rtma_wrfarw = yes ] ; then
 
 echo " .... Building rtma_wrfarw .... "
 $BASE/build_rtma_wrfarw.sh > $logs_dir/build_rtma_wrfarw.log 2>&1
-
-fi
-
-##############################
-
-if [ $BUILD_rtma_gsi = yes ] ; then
-
-echo " .... Building rtma_gsi .... "
-$BASE/build_rtma_gsi.sh > $logs_dir/build_rtma_gsi.log 2>&1
 
 fi
 

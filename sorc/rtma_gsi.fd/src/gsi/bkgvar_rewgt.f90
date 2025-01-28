@@ -99,7 +99,7 @@ subroutine bkgvar_rewgt(sfvar,vpvar,tvar,psvar,mype)
   balt   =zero ; bald    =zero ; balps =zero
 
 ! Set count to number of global grid points in quad precision
-  fcount = float(nlat)*float(nlon)
+  fcount = real(nlat*nlon,r_kind)
 
 ! Set parameter for communication
   mm1=mype+1
@@ -222,15 +222,15 @@ subroutine bkgvar_rewgt(sfvar,vpvar,tvar,psvar,mype)
   do k=1,nsig
      do j=1,lon2
         do i=1,lat2
-           delpsi(i,j,k)=sqrt( delpsi(i,j,k)**two )
-           delchi(i,j,k)=sqrt( delchi(i,j,k)**two )
-           deltv (i,j,k)=sqrt( deltv (i,j,k)**two )
+           delpsi(i,j,k)=abs( delpsi(i,j,k) )
+           delchi(i,j,k)=abs( delchi(i,j,k) )
+           deltv (i,j,k)=abs( deltv (i,j,k) )
         end do
      end do
   end do
   do j=1,lon2
      do i=1,lat2
-        delps(i,j)=sqrt( delps(i,j)**two )
+        delps(i,j)=abs( delps(i,j) )
      end do
   end do
 

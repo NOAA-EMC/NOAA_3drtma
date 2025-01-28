@@ -16,6 +16,7 @@ module stptmod
 !   2014-04-12       su - add non linear qc from Purser's scheme
 !   2015-02-26       su - add njqc as an option to choos new non linear qc
 !   2016-05-18  guo     - replaced ob_type with polymorphic obsNode through type casting
+!   2019-09-20  Su      - remove current VQC part and add VQC subroutine call
 !
 ! subroutines included:
 !   sub stpt
@@ -99,7 +100,7 @@ subroutine stpt(thead,dval,xval,out,sges,nstep,rpred,spred)
 !
 !$$$
   use kinds, only: r_kind,i_kind,r_quad
-  use qcmod, only: nlnqc_iter,varqc_iter,njqc,vqc
+  use qcmod, only: nlnqc_iter,varqc_iter,njqc,vqc,nvqc
   use constants, only: zero,half,one,two,tiny_r_kind,cg_term,zero_quad,r3600
   use aircraftinfo, only: npredt,ntail,aircraft_t_bc_pof,aircraft_t_bc
   use gsi_bundlemod, only: gsi_bundle
@@ -123,7 +124,7 @@ subroutine stpt(thead,dval,xval,out,sges,nstep,rpred,spred)
   integer(i_kind) ier,istatus,isst
   integer(i_kind) j1,j2,j3,j4,j5,j6,j7,j8,kk,n,ix
   real(r_kind) w1,w2,w3,w4,w5,w6,w7,w8
-  real(r_kind) cg_t,val,val2,wgross,wnotgross,t_pg
+  real(r_kind) cg_t,val,val2,t_pg,var_jb
   real(r_kind),dimension(max(1,nstep))::pen,tt
   real(r_kind) tg_prime,valq,valq2,valp,valp2,valu,valu2
   real(r_kind) ts_prime,valv,valv2,valsst,valsst2
@@ -131,6 +132,7 @@ subroutine stpt(thead,dval,xval,out,sges,nstep,rpred,spred)
   real(r_kind) us_prime
   real(r_kind) vs_prime
   real(r_kind) psfc_prime
+  integer(i_kind) ibb,ikk
   type(tNode), pointer :: tptr
   real(r_kind),pointer,dimension(:) :: rt,st,rtv,stv,rq,sq,ru,su,rv,sv
   real(r_kind),pointer,dimension(:) :: rsst,ssst
@@ -182,7 +184,6 @@ subroutine stpt(thead,dval,xval,out,sges,nstep,rpred,spred)
            w6=tptr%wij(6)
            w7=tptr%wij(7)
            w8=tptr%wij(8)
-!    Note time derivative stuff not consistent for virtual temperature
 
            if(tptr%tv_ob)then
               val= w1*rtv(j1)+w2*rtv(j2)+w3*rtv(j3)+w4*rtv(j4)+ &
@@ -191,10 +192,10 @@ subroutine stpt(thead,dval,xval,out,sges,nstep,rpred,spred)
               val2=w1*stv(j1)+w2*stv(j2)+w3*stv(j3)+w4*stv(j4)+ &
                    w5*stv(j5)+w6*stv(j6)+w7*stv(j7)+w8*stv(j8)
            else
-              val= w1*    rt(j1)+w2*    rt(j2)+w3*    rt(j3)+w4*    rt(j4)+ &
-                   w5*    rt(j5)+w6*    rt(j6)+w7*    rt(j7)+w8*    rt(j8)
-              val2=w1*    st(j1)+w2*    st(j2)+w3*    st(j3)+w4*    st(j4)+ &
-                   w5*    st(j5)+w6*    st(j6)+w7*    st(j7)+w8*    st(j8)
+              val= w1* rt(j1)+w2* rt(j2)+w3* rt(j3)+w4* rt(j4)+ &
+                   w5* rt(j5)+w6* rt(j6)+w7* rt(j7)+w8* rt(j8)
+              val2=w1* st(j1)+w2* st(j2)+w3* st(j3)+w4* st(j4)+ &
+                   w5* st(j5)+w6* st(j6)+w7* st(j7)+w8* st(j8)
            end if
 
 !          contribution from bias correction
@@ -206,9 +207,6 @@ subroutine stpt(thead,dval,xval,out,sges,nstep,rpred,spred)
               end do 
            end if
 
-           do kk=1,nstep
-              tt(kk)=val2+sges(kk)*val
-           end do
 
            if(tptr%use_sfc_model) then
 
@@ -227,24 +225,29 @@ subroutine stpt(thead,dval,xval,out,sges,nstep,rpred,spred)
               valv2=w1* sv(j1)+w2* sv(j2)+w3* sv(j3)+w4* sv(j4)
               valp =w1* rp(j1)+w2* rp(j2)+w3* rp(j3)+w4* rp(j4)
               valp2=w1* sp(j1)+w2* sp(j2)+w3* sp(j3)+w4* sp(j4)
+
               do kk=1,nstep
-                 ts_prime=tt(kk)
+                 ts_prime=val2+sges(kk)*val
                  tg_prime=valsst2+sges(kk)*valsst
                  qs_prime=valq2+sges(kk)*valq
-                 us_prime=valu2+sges(kk)*val
-                 vs_prime=valv2+sges(kk)*val
-                 psfc_prime=val2+sges(1)*val
+                 us_prime=valu2+sges(kk)*valu
+                 vs_prime=valv2+sges(kk)*valv
+                 psfc_prime=valp2+sges(1)*valp
 
                  tt(kk)=psfc_prime*tptr%tlm_tsfc(1) + tg_prime*tptr%tlm_tsfc(2) + &
                         ts_prime  *tptr%tlm_tsfc(3) + qs_prime*tptr%tlm_tsfc(4) + &
-                        us_prime  *tptr%tlm_tsfc(5) + vs_prime*tptr%tlm_tsfc(6)
+                        us_prime  *tptr%tlm_tsfc(5) + vs_prime*tptr%tlm_tsfc(6) - &
+                        tptr%res
+              end do
+
+           else
+
+              do kk=1,nstep
+                 tt(kk)=val2+sges(kk)*val-tptr%res
               end do
 
            end if
  
-           do kk=1,nstep
-              tt(kk)=tt(kk)-tptr%res
-           end do
         else
            tt(1)=tptr%res
         end if
@@ -254,35 +257,40 @@ subroutine stpt(thead,dval,xval,out,sges,nstep,rpred,spred)
         end do
 
 !  Modify penalty term if nonlinear QC
-
-        if (vqc .and. nlnqc_iter .and. tptr%pg > tiny_r_kind .and. tptr%b >tiny_r_kind) then
+! EC VQc
+        if (vqc .and. nlnqc_iter .and. tptr%pg > tiny_r_kind &
+            .and. tptr%b >tiny_r_kind) then
            t_pg=tptr%pg*varqc_iter
            cg_t=cg_term/tptr%b
-           wnotgross= one-t_pg
-           wgross =t_pg*cg_t/wnotgross
-           do kk=1,max(1,nstep)
-              pen(kk) = -two*log((exp(-half*pen(kk))+wgross)/(one+wgross))
-           end do
+        else
+           t_pg=zero
+           cg_t=zero
         endif
 
-!       Note:  if wgross=0 (no gross error, then wnotgross=1 and this all 
-!              reduces to the linear case (no qc)
 
 !  Jim Purse's non linear QC scheme
         if(njqc .and. tptr%jb  > tiny_r_kind .and. tptr%jb <10.0_r_kind) then
-           do kk=1,max(1,nstep)
-              pen(kk) = two*two*tptr%jb*log(cosh(sqrt(pen(kk)/(two*tptr%jb))))
-           enddo
-           out(1) = out(1)+pen(1)*tptr%raterr2
-           do kk=2,nstep
-              out(kk) = out(kk)+(pen(kk)-pen(1))*tptr%raterr2
-           end do
+           var_jb =tptr%jb
         else
-           out(1) = out(1)+pen(1)*tptr%raterr2
-           do kk=2,nstep
-              out(kk) = out(kk)+(pen(kk)-pen(1))*tptr%raterr2
-           end do
+           var_jb=zero
         endif
+        
+!  mix model VQC
+       if(nvqc .and. tptr%ib >0) then
+          ibb=tptr%ib
+          ikk=tptr%ik
+       else
+          ibb=0
+          ikk=0
+       endif
+
+
+       call vqc_stp(pen,nstep,t_pg,cg_t,var_jb,ibb,ikk)
+
+       out(1) = out(1)+pen(1)*tptr%raterr2
+       do kk=2,nstep
+          out(kk) = out(kk)+(pen(kk)-pen(1))*tptr%raterr2
+       end do
 
      endif
      tptr => tNode_nextcast(tptr)

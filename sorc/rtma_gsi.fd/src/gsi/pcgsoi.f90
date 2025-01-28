@@ -13,8 +13,9 @@ module pcgsoimod
 !   2008-11-26  Todling - remove pcgsoi_tl
 !   2009-08-12  lueken  - update documentation
 !   2009-09-17  parrish - add bkerror_a_en and anbkerror_reg_a_en for hybrid ensemble control variable a_en
-!   2014-12-03  derber - thread dot products and modify so obsdiag can be turned
-!               off
+!   2014-12-03  derber - thread dot products and modify so obsdiag can be turned off
+!   2018-08-10  guo     - removed m_obsHeadBundle references
+!                       - replaced stpjo_setup() with a new stpjomod::stpjo_setup()
 !
 ! subroutines included:
 !   sub pcgsoi
@@ -126,13 +127,12 @@ subroutine pcgsoi()
   use obsmod, only: destroyobs,oberror_tune,luse_obsdiag
   use jfunc, only: iter,jiter,jiterstart,niter,miter,iout_iter,&
        nclen,penorig,gnormorig,xhatsave,yhatsave,&
-       iguess,read_guess_solution,diag_precon,step_start, &
-       niter_no_qc,print_diag_pcg,lgschmidt
+       iguess,read_guess_solution, &
+       niter_no_qc,print_diag_pcg
   use gsi_4dvar, only: nobs_bins, nsubwin, l4dvar, iwrtinc, ladtest, &
-                       iorthomax
-  use gridmod, only: twodvar_regional
-  use constants, only: zero,one,five,tiny_r_kind
-  use anberror, only: anisotropic
+                       iorthomax,lsqrtb
+  use gridmod, only: twodvar_regional,periodic,minmype
+  use constants, only: zero,one,tiny_r_kind
   use mpimod, only: mype
   use mpl_allreducemod, only: mpl_allreduce
   use intallmod, only: intall
@@ -144,25 +144,23 @@ subroutine pcgsoi()
   use state_vectors, only : allocate_state,deallocate_state,&
        prt_state_norms,inquire_state
   use bias_predictors, only: allocate_preds,deallocate_preds,predictors,assignment(=)
+  use anberror, only: anisotropic
   use bias_predictors, only: update_bias_preds
   use xhat_vordivmod, only : xhat_vordiv_init, xhat_vordiv_calc, xhat_vordiv_clean
   use timermod, only: timer_ini,timer_fnl
-  use projmethod_support, only: init_mgram_schmidt, &
-                                mgram_schmidt,destroy_mgram_schmidt
-  use hybrid_ensemble_parameters,only : l_hyb_ens,aniso_a_en,ntlevs_ens
-  use hybrid_ensemble_isotropic, only: bkerror_a_en
+  use hybrid_ensemble_parameters,only : l_hyb_ens,ntlevs_ens,aniso_a_en
   use gsi_bundlemod, only : gsi_bundle
   use gsi_bundlemod, only : self_add,assignment(=)
   use gsi_bundlemod, only : gsi_bundleprint
+  use gsi_bundlemod, only : gsi_bundlegetpointer
   use gsi_4dcouplermod, only : gsi_4dcoupler_grtests
   use rapidrefresh_cldsurf_mod, only: i_gsdcldanal_type
   use gsi_io, only: verbose
   use berror, only: vprecond
-
   use stpjomod, only: stpjo_setup
-  use m_obsHeadBundle, only: obsHeadBundle
-  use m_obsHeadBundle, only: obsHeadBundle_create
-  use m_obsHeadBundle, only: obsHeadBundle_destroy
+  use intradmod, only: setrad
+  
+
   implicit none
 
 ! Declare passed variables
@@ -174,16 +172,15 @@ subroutine pcgsoi()
   character(5) step(2)
   integer(i_kind) i,istep,iobs,ii,nprt
   real(r_kind) stp,b,converge
-  real(r_kind) gsave,small_step
+  real(r_kind) gsave,small_step,aindex
   real(r_kind) gnormx,penx,penalty,penaltynew
-  real(r_double) pennorm
-  real(r_quad) zjo
-  real(r_quad) :: zdla
-  real(r_quad),dimension(4):: dprod
-  real(r_kind),dimension(3):: gnorm
   real(r_kind) :: zgini,zfini,fjcost(4),fjcostnew(4),zgend,zfend
   real(r_kind) :: fjcost_e
-  type(control_vector) :: xhat,gradx,grady,dirx,diry,ydiff,xdiff
+  real(r_kind),dimension(3):: gnorm
+  real(r_double) pennorm
+  real(r_quad) :: zdla,zjo
+  real(r_quad),dimension(4):: dprod
+  type(control_vector) :: gradx,grady,dirx,diry,ydiff,xdiff
   type(gsi_bundle) :: sval(nobs_bins), rval(nobs_bins)
   type(gsi_bundle) :: eval(ntlevs_ens)
   type(gsi_bundle) :: mval(nsubwin)
@@ -191,10 +188,9 @@ subroutine pcgsoi()
   
   type(control_vector), allocatable, dimension(:) :: cglwork
   type(control_vector), allocatable, dimension(:) :: cglworkhat
-  type(obsHeadBundle),pointer,dimension(:):: yobs
   integer(i_kind) :: iortho
-  logical :: print_verbose
-  logical:: lanlerr
+  logical :: print_verbose,ortho,diag_print
+  logical :: lanlerr,read_success
 
 ! Step size diagnostic strings
   data step /'good', 'SMALL'/
@@ -211,16 +207,17 @@ subroutine pcgsoi()
 
 ! Set constants.  Initialize variables.
   restart=.false.
-  if (jiter==0 .and. (iguess==1 .or. iguess==2)) restart=.true.
+  if (jiter==jiterstart .and. (iguess==1 .or. iguess==2)) restart=.true.
   pennorm=10.e50_r_double
   iout_6=.true.
   if (iout_iter==6) iout_6=.false.
-  stp=step_start
-  if(diag_precon)stp=one
+  stp=one
   small_step=1.e-2_r_kind*stp
   end_iter=.false.
   llouter=.false.
+  gnorm=zero
   gsave=zero
+  read_success=.false.
   
 
 ! Convergence criterion needs to be relaxed a bit for anisotropic mode,
@@ -237,13 +234,12 @@ subroutine pcgsoi()
   call init_
   if(print_diag_pcg)call prt_guess('guess')
 
-  if ( lanlerr .and. lgschmidt ) call init_mgram_schmidt
   nlnqc_iter=.false.
-  call obsHeadBundle_create(yobs,nobs_bins)
-  call stpjo_setup(yobs)
-  call obsHeadBundle_destroy(yobs)
+  call stpjo_setup(nobs_bins)
 
+  ortho=.false.
   if(iorthomax>0) then 
+     ortho=.true.
      allocate(cglwork(iorthomax+1))
      DO ii=1,iorthomax+1
         CALL allocate_cv(cglwork(ii))
@@ -255,11 +251,24 @@ subroutine pcgsoi()
         cglworkhat(ii)=zero
      END DO
   end if
+  do ii=1,nobs_bins
+     sval(ii)=zero
+  end do
+  sbias=zero
 
+  call setrad(sval(1))
+  if(l_hyb_ens .and. .not. aniso_a_en) then
+     if (lsqrtb) then
+        write(6,*)'l_hyb_ens: not for use with lsqrtb'
+        call stop2(317)
+     end if
+  end if
 ! Perform inner iteration
   inner_iteration: do iter=0,niter(jiter)
+ 
+     diag_print= iter <= 1 .and. print_diag_pcg
 
-! Gradually turn on variational qc to avoid possible convergence problems
+! Gradually turn on old variational qc to avoid possible convergence problems
      if(vqc) then
         nlnqc_iter = iter >= niter_no_qc(jiter)
         if(jiter == jiterstart) then
@@ -269,41 +278,12 @@ subroutine pcgsoi()
            varqc_iter=one
         endif
      end if
-
-     do ii=1,nobs_bins
-        rval(ii)=zero
-     end do
+!    1. Calculate gradient
      gradx=zero
-     llprt=(mype==0).and.(iter<=1)
 
-!    Convert from control space directly to physical
-!    space for comparison with obs.
-     call control2state(xhat,mval,sbias)
-     if (l4dvar) then
-        if (l_hyb_ens) then
-           call ensctl2state(xhat,mval(1),eval)
-           mval(1)=eval(1)
-        end if
+     llprt=(mype==minmype).and.(iter<=1)
 
-!       Perform test of AGCM TLM and ADM
-        call gsi_4dcoupler_grtests(mval,sval,nsubwin,nobs_bins)
-
-!       Run TL model to fill sval
-        call model_tl(mval,sval,llprt)
-     else
-        if (l_hyb_ens) then
-           call ensctl2state(xhat,mval(1),eval)
-           do ii=1,nobs_bins
-              sval(ii)=eval(ii)
-           end do
-        else
-           do ii=1,nobs_bins
-              sval(ii)=mval(1)
-           end do
-        end if
-     end if
-
-     if (iter<=1 .and. print_diag_pcg) then
+     if (diag_print) then
         do ii=1,nobs_bins
            call prt_state_norms(sval(ii),'sval')
         enddo
@@ -312,56 +292,33 @@ subroutine pcgsoi()
 !    Compare obs to solution and transpose back to grid
      call intall(sval,sbias,rval,rbias)
 
-     if (iter<=1 .and. print_diag_pcg) then
+     if (diag_print) then
         do ii=1,nobs_bins
            call prt_state_norms(rval(ii),'rval')
         enddo
      endif
 
-!    Adjoint of convert control var to physical space
-     if (l4dvar) then
-!       Run adjoint model
-        call model_ad(mval,rval,llprt)
 
-        if (l_hyb_ens) then
-           eval(1)=mval(1)
-           call ensctl2state_ad(eval,mval(1),gradx)
-        end if
-     else
-
-!       Convert to control space directly from physical space.
-        if (l_hyb_ens) then
-           do ii=1,nobs_bins
-              eval(ii)=rval(ii)
-           end do
-           call ensctl2state_ad(eval,mval(1),gradx)
-        else
-           mval(1)=rval(1)
-           if (nobs_bins > 1 ) then
-              do ii=2,nobs_bins
-                 call self_add(mval(1),rval(ii))
-              enddo
-           end if
-        end if
-
-     end if
-     call control2state_ad(mval,rbias,gradx)
-!    End adjoint of convert control var to physical space
+!    Adjoint of control to state
+     call c2s_ad(gradx,rval,rbias,llprt)
 
 !    Print initial Jo table
-     if (iter==0 .and. print_diag_pcg .and. luse_obsdiag) then
-        nprt=2
-        call evaljo(zjo,iobs,nprt,llouter)
-        call prt_control_norms(gradx,'gradx')
+     if (iter==0) then
+        if(print_diag_pcg .and. luse_obsdiag) then
+           nprt=2
+           call evaljo(zjo,iobs,nprt,llouter)
+           call prt_control_norms(gradx,'gradx')
+        end if
      endif
 
 !    Add contribution from background term
      do i=1,nclen
         gradx%values(i)=gradx%values(i)+yhatsave%values(i)
      end do
+!  End of gradient calculation
 
 !    Re-orthonormalization if requested
-     if(iorthomax>0) then 
+     if(ortho) then 
         iortho=min(iorthomax,iter) 
         if(iter .ne. 0) then 
            do ii=iortho,1,-1
@@ -373,167 +330,108 @@ subroutine pcgsoi()
         end if
      end if
 
-!    Multiply by background error
-     if(anisotropic) then
-        call anbkerror(gradx,grady)
-        if(lanlerr .and. lgschmidt) call mgram_schmidt(gradx,grady)
-     else
-        call bkerror(gradx,grady)
-     end if
+!    2. Multiply by background error
+     call multb(gradx,grady)
 
-!    If hybrid ensemble run, then multiply ensemble control variable a_en 
-!                                    by its localization correlation
-     if(l_hyb_ens) then
-        if(aniso_a_en) then
-    !      call anbkerror_a_en(gradx,grady)    !  not available yet
-           write(6,*)' ANBKERROR_A_EN not written yet, program stops'
-           stop
-        else
-           call bkerror_a_en(gradx,grady)
-        end if
-
-     end if
-
-     if(iorthomax>0) then
+     if(ortho) then
 !       save gradients
         if (iter <= iortho) then
-           zdla = sqrt(dot_product(gradx,grady,r_quad))
+           zdla = one/sqrt(dot_product(gradx,grady,r_quad))
            do i=1,nclen
-              cglwork(iter+1)%values(i)=gradx%values(i)/zdla
-              cglworkhat(iter+1)%values(i)=grady%values(i)/zdla
+              cglwork(iter+1)%values(i)=gradx%values(i)*zdla
+              cglworkhat(iter+1)%values(i)=grady%values(i)*zdla
            end do
         end if
      end if
 
-     if (iter==0 .and. print_diag_pcg) then
-        call prt_control_norms(grady,'grady')
-     endif
 
-!    Calculate new norm of gradients
-     if (iter>0) gsave=gnorm(3)
+!    3. Calculate new norm of gradients and factors going into b calculation
      dprod(1) = qdot_prod_sub(gradx,grady)
-     if(diag_precon)then
-        if (lanlerr) then
+     if(iter > 0 .and. .not. lanlerr)then
+        dprod(3) = qdot_prod_sub(xdiff,grady)
+        dprod(4) = qdot_prod_sub(ydiff,gradx)
 ! xdiff used as a temporary array
-           do i=1,nclen
-              xdiff%values(i)=vprecond(i)*gradx%values(i)
-           end do
-           dprod(2) = qdot_prod_sub(xdiff,grady)
-           call mpl_allreduce(2,qpvals=dprod)
-           gnorm(2)=dprod(2)
-           gnorm(3)=dprod(2)
-        else
-           do i=1,nclen
-              xdiff%values(i)=vprecond(i)*(gradx%values(i)-xdiff%values(i))
-              ydiff%values(i)=vprecond(i)*(grady%values(i)-ydiff%values(i))
-           end do
-           dprod(2) = qdot_prod_sub(xdiff,grady)
-           dprod(3) = qdot_prod_sub(ydiff,gradx)
-! xdiff used as a temporary array
-           do i=1,nclen
-              xdiff%values(i)=vprecond(i)*gradx%values(i)
-           end do
-           dprod(4) = qdot_prod_sub(xdiff,grady)
-           call mpl_allreduce(4,qpvals=dprod)
-!          Two dot products in gnorm(2) should be same, but are slightly
-!          different due to round off, so use average.
-           gnorm(2)=0.5_r_quad*(dprod(2)+dprod(3))
-           gnorm(3)=dprod(4)
+        do i=1,nclen
+           xdiff%values(i)=vprecond(i)*gradx%values(i)
+        end do
+        dprod(2) = qdot_prod_sub(xdiff,grady)
+        call mpl_allreduce(4,qpvals=dprod)
+!       Two dot products in dprod(3) and dprod(4) should be same, but are slightly
+!       different due to round off, so use average.
+        gnorm(2)=dprod(2)-0.5_r_quad*(dprod(3)+dprod(4))
+        gnorm(3)=dprod(2)
+        if(mype == minmype)then
+           aindex=abs(dprod(3)/dprod(2))
+           write(iout_iter,*) 'NL Index ',aindex
+           if(aindex > 0.5_r_kind .or. print_verbose) write(iout_iter,*) 'NL Values ', dprod(3),dprod(2)
         end if
      else
-        if (lanlerr) then
-           call mpl_allreduce(1,qpvals=dprod)
-           gnorm(2)=dprod(1)
-           gnorm(3)=dprod(1)
-        else
-           do i=1,nclen
-              xdiff%values(i)=gradx%values(i)-xdiff%values(i)
-              ydiff%values(i)=grady%values(i)-ydiff%values(i)
-           end do
-           dprod(2) = qdot_prod_sub(xdiff,grady)
-           dprod(3) = qdot_prod_sub(ydiff,gradx)
-           call mpl_allreduce(3,qpvals=dprod)
-!          Two dot products in gnorm(2) should be same, but are slightly
-!          different due to round off, so use average.
-           gnorm(2)=0.5_r_quad*(dprod(2)+dprod(3))
-           gnorm(3)=dprod(1)
-        end if
+! xdiff used as a temporary array
+        do i=1,nclen
+           xdiff%values(i)=vprecond(i)*gradx%values(i)
+        end do
+        dprod(2) = qdot_prod_sub(xdiff,grady)
+        call mpl_allreduce(2,qpvals=dprod)
+        if(print_diag_pcg) call prt_control_norms(grady,'grady')
+        gnorm(2)=dprod(2)
+        gnorm(3)=dprod(2)
+
      end if
 
      gnorm(1)=dprod(1)
 
-     b=zero
-     if (gsave>1.e-16_r_kind .and. iter>0) b=gnorm(2)/gsave
-     if(mype == 0)write(iout_iter,*)'Minimization iteration',iter
-     if (b<zero .or. b>five) then
-        if (mype==0) then
-           if (iout_6) write(6,105) gnorm(2),gsave,b
-           write(iout_iter,105) gnorm(2),gsave,b
-        endif
-        b=zero
-     endif
-     if (mype==0 .and. print_verbose) write(6,888)'pcgsoi: gnorm(1:3),b=',gnorm,b
+     if(mype == minmype)write(iout_iter,*)'Minimization iteration',iter
 
+!    4. Calculate b and new search direction
+     b=zero
+     if (.not. restart .or. iter > 0) then
+        if (iter > 1 .or. .not. read_success)then
+           if (gsave>1.e-16_r_kind) b=gnorm(2)/gsave
+           if (b<zero .or. b>30.0_r_kind) then
+              if (mype==minmype) then
+                 if (iout_6) write(6,105) gnorm(2),gsave,b
+                 write(iout_iter,105) gnorm(2),gsave,b
+              endif
+              b=zero
+           endif
+           if (mype==minmype .and. print_verbose) write(6,888)'pcgsoi: gnorm(1:3),b=',gnorm,b
+        end if
+
+        do i=1,nclen
 !    Calculate new search direction
-     if (.not. restart) then
-       if(.not. lanlerr)then
-           do i=1,nclen
-              xdiff%values(i)=gradx%values(i)
-              ydiff%values(i)=grady%values(i)
-           end do
-        end if
-        if(diag_precon)then
-           do i=1,nclen
-              dirx%values(i)=-vprecond(i)*grady%values(i)+b*dirx%values(i)
-              diry%values(i)=-vprecond(i)*gradx%values(i)+b*diry%values(i)
-           end do
-        else
-           do i=1,nclen
-              dirx%values(i)=-grady%values(i)+b*dirx%values(i)
-              diry%values(i)=-gradx%values(i)+b*diry%values(i)
-           end do
-        end if
+           ydiff%values(i)=vprecond(i)*grady%values(i)
+           dirx%values(i)=-ydiff%values(i)+b*dirx%values(i)
+           xdiff%values(i)=vprecond(i)*gradx%values(i)
+           diry%values(i)=-xdiff%values(i)+b*diry%values(i)
+        end do
      else
 !    If previous solution available, transfer into local arrays.
-        if( .not. lanlerr)then
-           xdiff=zero
-           ydiff=zero
-        end if
-        call read_guess_solution(dirx,diry,mype)
-        stp=one
+!    Fill with grady first so that if we read in part of diry there is something
+        do i=1,nclen
+           diry%values(i)=-vprecond(i)*gradx%values(i)
+        end do
+        call read_guess_solution(diry,mype,read_success)
+!       Multiply by background error
+        call multb(diry,dirx)
+        restart=.false.
      endif
-
+     gsave=gnorm(3)
+  
+!    5. Calculate stepsize and update solution
 !    Convert search direction from control space to physical space
-     call control2state(dirx,mval,rbias)
-     if (l4dvar) then
-        if (l_hyb_ens) then
-           call ensctl2state(dirx,mval(1),eval)
-           mval(1)=eval(1)
-        end if
-
-        call model_tl(mval,rval,llprt)
-     else
-
-        if (l_hyb_ens) then
-           call ensctl2state(dirx,mval(1),eval)
-           do ii=1,nobs_bins
-              rval(ii)=eval(ii)
-           end do
-        else
-           do ii=1,nobs_bins
-              rval(ii)=mval(1)
-           end do
-        end if
-
-     end if
+     do ii=1,nobs_bins
+        rval(ii)=zero
+     end do
+     rbias=zero
+     call c2s(dirx,rval,rbias,.false.,.true.)
 
 !    Calculate stepsize
-     call stpcalc(stp,sval,sbias,xhat,dirx,rval,rbias, &
+     call stpcalc(stp,sval,sbias,dirx,rval,rbias, &
                   diry,penalty,penaltynew,fjcost,fjcostnew,end_iter)
 
      if (lanlerr) call writeout_gradients(gradx,grady,niter(jiter),stp,b,mype)
 
-!    Diagnostic calculations
+!    6. Diagnostic calculations
      if (iter==0) then
         if(jiter==jiterstart .or. oberror_tune) then
            gnormorig=gnorm(1)
@@ -544,22 +442,20 @@ subroutine pcgsoi()
      gnormx=gnorm(1)/gnormorig
      penx=penalty/penorig
 
-     if (mype==0) then
+     if (mype==minmype) then
         if (iter==0) then
            zgini=gnorm(1)
            zfini=penalty
            write(6,888)'Initial cost function =',zfini
            write(6,888)'Initial gradient norm =',sqrt(zgini)
         endif
-        if(print_verbose)then
-           write(iout_iter,888)'pcgsoi: gnorm(1:2)',gnorm
-           write(iout_iter,999)'costterms Jb,Jo,Jc,Jl  =',jiter,iter,fjcost
-        end if
         istep=1
         if (stp<small_step) istep=2
         write(6,9992)'cost,grad,step,b,step? =',jiter,iter,penalty,sqrt(gnorm(1)),stp,b,step(istep)
         write(iout_iter,9992)'cost,grad,step,b,step? =',jiter,iter,penalty,sqrt(gnorm(1)),stp,b,step(istep)
         if(print_verbose)then
+           write(iout_iter,888)'pcgsoi: gnorm(1:2)',gnorm
+           write(iout_iter,999)'costterms Jb,Jo,Jc,Jl  =',jiter,iter,fjcost
            if (zgini>tiny_r_kind .and. zfini>tiny_r_kind) then
               write(iout_iter,9993) 'estimated penalty reduction this iteration',&
                     jiter,iter,(penalty-penaltynew),(penalty-penaltynew)/penorig,'%'
@@ -575,11 +471,11 @@ subroutine pcgsoi()
 9992 format(A,2(1X,I3),4(1X,ES25.18),1x,A6)
 9993 format(A,2(1X,I3),2(1X,ES25.18),A1)
 
-!    Check for convergence or failure of algorithm
+!    7. Check for convergence or failure of algorithm
      if(gnormx < converge .or. penalty < converge  .or.  &
         penx >= pennorm .or. end_iter)then
 
-        if(mype == 0)then
+        if(mype == minmype)then
            if(iout_6) write(6,101)
            write(iout_iter,101)
 
@@ -620,7 +516,7 @@ subroutine pcgsoi()
 !  End of inner iteration
 
 !  Deallocate space for renormalization
-  if(iorthomax>0) then 
+  if(ortho) then 
      do ii=1,iorthomax+1
         call deallocate_cv(cglwork(ii))
      enddo
@@ -630,22 +526,11 @@ subroutine pcgsoi()
      enddo
      deallocate(cglworkhat)
   end if
-  if (lanlerr .and. lgschmidt) call destroy_mgram_schmidt
 
 ! Calculate adjusted observation error factor
   if( oberror_tune .and. (.not.l4dvar) ) then
-     if (mype == 0) write(6,*) 'PCGSOI:  call penal for obs perturbation'
-     call control2state(xhat,mval,sbias)
-     if (l_hyb_ens) then
-        call ensctl2state(xhat,mval(1),eval)
-        do ii=1,nobs_bins
-           sval(ii)=eval(ii)
-        end do
-     else
-        do ii=1,nobs_bins
-           sval(ii)=mval(1)
-        end do
-     end if
+     if (mype == minmype) write(6,*) 'PCGSOI:  call penal for obs perturbation'
+!    call c2s(xhat,sval,sbias,.false.,.false.)
 
      call penal(sval(1))
      xhatsave=zero
@@ -658,59 +543,17 @@ subroutine pcgsoi()
 
   if (l_tlnmc .and. baldiag_inc) call strong_baldiag_inc(sval,size(sval))
 
-  llprt=(mype==0)
-  call control2state(xhat,mval,sbias)
-  if (l4dvar) then
-    if (l_hyb_ens) then
-       call ensctl2state(xhat,mval(1),eval)
-       mval(1)=eval(1)
-    end if
-    call model_tl(mval,sval,llprt)
-  else
-    if (l_hyb_ens) then
-       call ensctl2state(xhat,mval(1),eval)
-       do ii=1,nobs_bins
-          sval(ii)=eval(ii)
-       end do
-    else
-       do ii=1,nobs_bins
-          sval(ii)=mval(1)
-       end do
-    end if
-  end if
+  llprt=(mype==minmype)
+! call c2s(xhat,sval,sbias,llprt,.false.)
 
   if(print_diag_pcg)then
 
 ! Evaluate final cost function and gradient
-     if (mype==0) write(6,*)'Minimization final diagnostics'
+     if (mype==minmype) write(6,*)'Minimization final diagnostics'
 
-     do ii=1,nobs_bins
-       rval(ii)=zero
-     end do
      call intall(sval,sbias,rval,rbias)
      gradx=zero
-     if (l4dvar) then
-       call model_ad(mval,rval,llprt)
-       if (l_hyb_ens) then
-          eval(1)=mval(1)
-          call ensctl2state_ad(eval,mval(1),gradx)
-       end if
-     else
-       if (l_hyb_ens) then
-          do ii=1,nobs_bins
-            eval(ii)=rval(ii)
-          end do
-          call ensctl2state_ad(eval,mval(1),gradx)
-       else
-          mval(1)=rval(1)
-          if (nobs_bins > 1 ) then
-             do ii=2,nobs_bins
-                call self_add(mval(1),rval(ii))
-             enddo
-          end if
-       end if
-     end if
-     call control2state_ad(mval,rbias,gradx)
+     call c2s_ad(gradx,rval,rbias,llprt)
   
 !    Add contribution from background term
      do i=1,nclen
@@ -718,24 +561,7 @@ subroutine pcgsoi()
      end do
   
 !    Multiply by background error
-     if(anisotropic) then
-       call anbkerror(gradx,grady)
-     else
-       call bkerror(gradx,grady)
-     end if
-  
-!    If hybrid ensemble run, then multiply ensemble control variable a_en 
-!                                    by its localization correlation
-     if(l_hyb_ens) then
-       if(aniso_a_en) then
-    !     call anbkerror_a_en(gradx,grady)    !  not available yet
-          write(6,*)' ANBKERROR_A_EN not written yet, program stops'
-          stop
-       else
-          call bkerror_a_en(gradx,grady)
-       end if
-
-     end if
+     call multb(gradx,grady)
 
 ! Print final Jo table
      zgend=dot_product(gradx,grady,r_quad)
@@ -754,16 +580,16 @@ subroutine pcgsoi()
 !       fjcost(1) = dot_product(xhatsave,yhatsave,r_quad)
      end if
 !    fjcost(2) = zjo
-     zfend=penaltynew
-!    if(l_hyb_ens) zfend=zfend+fjcost_e
 
-     if (mype==0) then
+     if (mype==minmype) then
+        zfend=penaltynew
         if(l_hyb_ens) then
 
 !          If hybrid ensemble run, print out contribution to Jb and Je separately
 
            write(iout_iter,999)'costterms Jb,Je,Jo,Jc,Jl =',jiter,iter,fjcostnew(1)- fjcost_e, &
                fjcost_e,fjcostnew(2:4)
+!          zfend=zfend+fjcost_e
 
         else
            write(iout_iter,999)'costterms Jb,Jo,Jc,Jl =',jiter,iter,fjcostnew
@@ -797,8 +623,7 @@ subroutine pcgsoi()
 ! if (mype==0) write(6,*)'pcgsoi: Updating guess'
   if(iwrtinc<=0) call update_guess(sval,sbias)
 
-! cloud analysis  after iteration
-! if(jiter == miter .and. i_gsdcldanal_type==1) then
+! gsd cloud analysis  after iteration
   if(jiter == miter) then
     if(i_gsdcldanal_type==2) then
        call gsdcloudanalysis4nmmb(mype)
@@ -809,16 +634,11 @@ subroutine pcgsoi()
     endif
   endif
 
+
 ! Write output analysis files
   if(.not.l4dvar) call prt_guess('analysis')
   call prt_state_norms(sval(1),'increment')
-  if (twodvar_regional) then
-      call write_all(-1)
-    else
-      if(jiter == miter) then
-         call write_all(-1)
-      endif
-  endif
+  if (twodvar_regional .or. jiter == miter) call write_all(-1)
 
 ! Overwrite guess with increment (4d-var only, for now)
   if (iwrtinc>0) then
@@ -868,11 +688,9 @@ subroutine init_
 !
 !$$$ end documentation block
 
-  use jfunc, only: diag_precon
   implicit none
 
 ! Allocate local variables
-  call allocate_cv(xhat)
   call allocate_cv(gradx)
   call allocate_cv(grady)
   call allocate_cv(dirx)
@@ -899,7 +717,6 @@ subroutine init_
   diry=zero
   ydiff=zero
   xdiff=zero
-  xhat=zero
 
 
 end subroutine init_
@@ -925,7 +742,6 @@ subroutine clean_
 !
 !$$$ end documentation block
 
-  use jfunc, only: diag_precon
   use m_obsdiags, only: obsdiags_reset
   use obsmod, only: destroyobs,lobsdiagsave
   implicit none
@@ -935,7 +751,6 @@ subroutine clean_
   if (.not.l4dvar) call obsdiags_reset(obsdiags_keep=lobsdiagsave)   ! replacing destroyobs()
 
 ! Release state-vector memory
-  call deallocate_cv(xhat)
   call deallocate_cv(gradx)
   call deallocate_cv(grady)
   call deallocate_cv(dirx)
@@ -960,6 +775,244 @@ subroutine clean_
 ! call inquire_state
 
 end subroutine clean_
+ 
+subroutine periodic_(gradx)
+!$$$  subprogram documentation block
+!                .      .    .                                       .
+! subprogram:    periodic_    ensure grad x is periodic
+!   prgmmr:      Todling
+!   
+! abstract: ensure gradx is periodic
+!
+! program history log:
+!   2021-02-02  Derber
+!
+!   input argument list:
+!      gradx - gradient of x
+!
+!   output argument list:
+!      gradx - gradient of x
+!
+! attributes:
+!   language: f90
+!   machine:
+!
+!$$$ end documentation block
+
+  use gridmod, only: nlat,nlon
+  use general_commvars_mod, only: s2g_cv
+  use general_sub2grid_mod, only: general_sub2grid,general_grid2sub
+  implicit none
+
+  type(control_vector),intent(inout) :: gradx
+  real(r_kind),dimension(nlat*nlon*s2g_cv%nlevs_alloc)::workcv
+
+! If dealing with periodic (sub)domain, gather full domain grids,
+! account for periodicity, and redistribute to subdomains.  This
+! only needs to be done when running with a single mpi task and
+! then only for array gradx.
+  do ii=1,nsubwin
+     call general_sub2grid(s2g_cv,gradx%step(ii)%values,workcv)
+     call general_grid2sub(s2g_cv,workcv,gradx%step(ii)%values)
+  end do
+
+
+end subroutine periodic_
+
+subroutine multb(vec1,vec2)
+!$$$  subprogram documentation block
+!                .      .    .                                       .
+! subprogram:    multb    multiply vec1 by background error to equal vec2
+!   prgmmr:      derber
+!   
+! abstract: multply vec1 by background error 
+!
+! program history log:
+!   2021-01-25  derber
+!
+!   input argument list:
+!      vec1 - input vector
+!
+!   output argument list:
+!      vec2 - output vector
+!
+! attributes:
+!   language: f90
+!   machine:
+!
+!$$$ end documentation block
+
+  use hybrid_ensemble_parameters,only : l_hyb_ens,aniso_a_en
+  use hybrid_ensemble_isotropic, only: bkerror_a_en
+  use control_vectors, only: control_vector
+  implicit none
+  
+  type(control_vector),intent(inout) :: vec1
+  type(control_vector),intent(inout) :: vec2
+
+     if(periodic)call periodic_(vec1)
+!   start by setting vec2=vec1 and then operate on vec2 (unless gram_schmidt)
+     vec2=vec1
+!    Multiply by background error
+     if(anisotropic) then
+        call anbkerror(vec2)
+     else
+        call bkerror(vec2)
+     end if
+
+!    If hybrid ensemble run, then multiply ensemble control variable a_en 
+!                                    by its localization correlation
+     if(l_hyb_ens) then
+        if(aniso_a_en) then
+    !      call anbkerror_a_en(grady)    !  not available yet
+           write(6,*)' ANBKERROR_A_EN not written yet, program stops'
+           stop
+        else
+           call bkerror_a_en(vec2)
+        end if
+
+     end if
+     return
+end subroutine multb
+subroutine c2s(hat,val,bias,llprt,ltest)
+!$$$  subprogram documentation block
+!                .      .    .                                       .
+! subprogram:    c2s   control2state for all options
+!   prgmmr:      derber
+!   
+! abstract: generalized control2state 
+!
+! program history log:
+!   2021-01-25  derber
+!
+!   input argument list:
+!      vec1 - input vector
+!
+!   output argument list:
+!      vec2 - output vector
+!
+! attributes:
+!   language: f90
+!   machine:
+!
+!$$$ end documentation block
+
+  use hybrid_ensemble_parameters,only : l_hyb_ens
+  use hybrid_ensemble_isotropic, only: bkerror_a_en
+  use control_vectors, only: control_vector
+  use bias_predictors, only: predictors
+  use gsi_bundlemod, only : gsi_bundle,assignment(=)
+  use gsi_4dvar, only: nobs_bins, nsubwin, l4dvar
+  use gsi_4dcouplermod, only : gsi_4dcoupler_grtests
+  use control2state_mod, only: control2state,control2state_ad
+  use ensctl2state_mod, only: ensctl2state
+  implicit none
+  
+  type(control_vector)                     ,intent(inout) :: hat
+  type(gsi_bundle)    ,dimension(nobs_bins),intent(inout) :: val
+  type(predictors)                         ,intent(inout) :: bias
+  logical                                  ,intent(in   ) :: llprt,ltest
+
+
+!    Convert from control space directly to physical
+!    space for comparison with obs.
+     call control2state(hat,mval,bias)
+     if (l4dvar) then
+        if (l_hyb_ens) then
+           call ensctl2state(hat,mval(1),eval)
+           mval(1)=eval(1)
+        end if
+
+!       Perform test of AGCM TLM and ADM
+        if(ltest)call gsi_4dcoupler_grtests(mval,val,nsubwin,nobs_bins)
+
+!       Run TL model to fill val
+        call model_tl(mval,val,llprt)
+     else
+        if (l_hyb_ens) then
+           call ensctl2state(hat,mval(1),eval)
+           do ii=1,nobs_bins
+              val(ii)=eval(ii)
+           end do
+        else
+           do ii=1,nobs_bins
+              val(ii)=mval(1)
+           end do
+        end if
+     end if
+     return
+end subroutine c2s
+subroutine c2s_ad(hat,val,bias,llprt)
+!$$$  subprogram documentation block
+!                .      .    .                                       .
+! subprogram:    c2s_ad   adjoint of control2state for all options
+!   prgmmr:      derber
+!   
+! abstract: generalized control2state 
+!
+! program history log:
+!   2021-01-25  derber
+!
+!   input argument list:
+!      vec1 - input vector
+!
+!   output argument list:
+!      vec2 - output vector
+!
+! attributes:
+!   language: f90
+!   machine:
+!
+!$$$ end documentation block
+
+  use hybrid_ensemble_parameters,only : l_hyb_ens
+  use hybrid_ensemble_isotropic, only: bkerror_a_en
+  use control_vectors, only: control_vector
+  use bias_predictors, only: predictors
+  use gsi_bundlemod, only : gsi_bundle,assignment(=)
+  use gsi_bundlemod, only : self_add
+  use gsi_4dvar, only: nobs_bins, nsubwin, l4dvar
+  use control2state_mod, only: control2state_ad
+  use ensctl2state_mod, only: ensctl2state_ad
+  implicit none
+  
+  type(control_vector)                     ,intent(inout) :: hat
+  type(gsi_bundle)    ,dimension(nobs_bins),intent(inout) :: val
+  type(predictors)                         ,intent(inout) :: bias
+  logical                                  ,intent(in   ) :: llprt
+
+
+!    Adjoint of convert control var to physical space
+     if (l4dvar) then
+!       Run adjoint model
+        call model_ad(mval,val,llprt)
+
+        if (l_hyb_ens) then
+           eval(1)=mval(1)
+           call ensctl2state_ad(eval,mval(1),hat)
+        end if
+     else
+
+!       Convert to control space directly from physical space.
+        if (l_hyb_ens) then
+           do ii=1,nobs_bins
+              eval(ii)=val(ii)
+           end do
+           call ensctl2state_ad(eval,mval(1),hat)
+        else
+           mval(1)=val(1)
+           if (nobs_bins > 1 ) then
+              do ii=2,nobs_bins
+                 call self_add(mval(1),val(ii))
+              enddo
+           end if
+        end if
+
+     end if
+     call control2state_ad(mval,bias,hat)
+!    End adjoint of convert control var to physical space
+     return
+end subroutine c2s_ad
 
 end subroutine pcgsoi
 

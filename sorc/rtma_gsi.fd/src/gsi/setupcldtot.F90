@@ -1,10 +1,18 @@
-#ifdef RR_CLOUDANALYSIS
-subroutine setupcldtot(lunin,mype,bwork,awork,nele,nobs,is,conv_diagsave)
+module cldtot_setup
+  implicit none
+  private
+  public:: setup
+        interface setup; module procedure setupcldtot; end interface
+
+  character(len=*),parameter:: myname="cldtot_setup"
+contains
+
+subroutine setupcldtot(obsLL,odiagLL,lunin,mype,bwork,awork,nele,nobs,is,conv_diagsave)
 !$$$  subprogram documentation block
 !!                .      .    .                                       .
 ! subprogram:    setupcldtot      compute rhs of oi for pseudo moisture observations from
 !                                 METAR and Satellite cloud observations
-!   prgmmr: Ladwag          org: GSD                date: 2019-06-01
+!   prgmmr: Ladwig          org: GSD                date: 2019-06-01
 !
 ! abstract:  For moisture observations, this routine
 !              a) reads obs assigned to given mpi task (geographic region),
@@ -37,15 +45,22 @@ subroutine setupcldtot(lunin,mype,bwork,awork,nele,nobs,is,conv_diagsave)
   use mpeu_util, only: die,perr
   use kinds, only: r_kind,r_single,r_double,i_kind
 
-  use m_obsdiags, only: qhead
-  use obsmod, only: rmiss_single,i_q_ob_type,time_offset
-  use obsmod, only: obs_diag
+  use constants, only: zero,one,r1000,r10,r100
+  use constants, only: huge_single,wgtlim,three
+  use constants, only: tiny_r_kind,five,half,two,r0_01
+  use constants, only: zero,one, h1000
+
+  use obsmod, only: rmiss_single,time_offset
+  use obsmod, only: netcdf_diag, binary_diag, dirname, ianldate
+  use obsmod, only: luse_obsdiag
+  use m_obsLList, only: obsLList
+  use m_obsdiagNode, only: obs_diags
   use m_obsNode, only: obsNode
   use m_qNode, only: qNode
-  use m_obsLList, only: obsLList_appendNode
+  use m_qNode, only: qNode_appendto
+  use m_dtime, only: dtime_setup, dtime_check, dtime_show
   use gsi_4dvar, only: nobs_bins,hr_obsbin
 
-  use obsmod, only: netcdf_diag, binary_diag, dirname, ianldate
   use nc_diag_write_mod,only: nc_diag_init, nc_diag_header,nc_diag_metadata, &
                               nc_diag_write, nc_diag_data2d
   use nc_diag_read_mod, only: nc_diag_read_init,nc_diag_read_get_dim, &
@@ -54,35 +69,35 @@ subroutine setupcldtot(lunin,mype,bwork,awork,nele,nobs,is,conv_diagsave)
 
   use guess_grids, only: geop_hgtl,hrdifsig,nfldsig,ges_tsen,ges_prsl
   use gridmod, only: nsig,get_ijk
-  use constants, only: zero,one,r1000,r10,r100
-  use constants, only: huge_single,wgtlim,three
-  use constants, only: tiny_r_kind,five,half,two,r0_01
   use qcmod, only: npres_print
   use jfunc, only: jiter
   use convinfo, only: nconvtype
   use convinfo, only: icsubtype
-  use m_dtime, only: dtime_setup, dtime_check, dtime_show
   use rapidrefresh_cldsurf_mod, only: i_cloud_q_innovation, &
                                       cld_bld_hgt,i_ens_mean
   use gsi_bundlemod, only : gsi_bundlegetpointer
   use gsi_metguess_mod, only : gsi_metguess_get,gsi_metguess_bundle
 
   use mpimod, only: mpi_comm_world
-  use constants, only: zero,one, h1000
   use gsdcloudlib_pseudoq_mod, only: cloudLWC_pseudo,cloudCover_Surface_col
+
 
   implicit none
 
-  real(r_single) :: cloudqvis
-
 ! Declare passed variables
-  logical                                          ,intent(in   ) :: conv_diagsave
+  type(obsLList ),target,dimension(:),intent(in):: obsLL
+  type(obs_diags),target,dimension(:),intent(in):: odiagLL
+
   integer(i_kind)                                  ,intent(in   ) :: lunin,mype,nele,nobs
   real(r_kind),dimension(100+7*nsig)               ,intent(inout) :: awork
   real(r_kind),dimension(npres_print,nconvtype,5,3),intent(inout) :: bwork
-  integer(i_kind)                                  ,intent(inout) :: is	! ndat index
+  integer(i_kind)                                  ,intent(in   ) :: is     ! ndat index
+  logical                                          ,intent(in   ) :: conv_diagsave
 
+#ifdef RR_CLOUDANALYSIS
 ! Declare local parameters
+  real(r_single) :: cloudqvis
+
   real(r_kind),parameter:: small1=0.0001_r_kind
   real(r_kind),parameter:: small2=0.0002_r_kind
   real(r_kind),parameter:: r0_7=0.7_r_kind
@@ -95,7 +110,6 @@ subroutine setupcldtot(lunin,mype,bwork,awork,nele,nobs,is,conv_diagsave)
   external:: tintrp2a1,tintrp2a11
   external:: tintrp31,tintrp3
   external:: grdcrd1
-  external:: genqsat
   external:: stop2
 
 ! Declare local variables  
@@ -129,8 +143,6 @@ subroutine setupcldtot(lunin,mype,bwork,awork,nele,nobs,is,conv_diagsave)
   logical,dimension(nobs):: luse,muse
 
   logical:: in_curbin, in_anybin
-  integer(i_kind),dimension(nobs_bins) :: m_alloc
-  class(obsNode),pointer:: my_node
   type(qNode),pointer:: my_headq
 
   equivalence(rstation_id,station_id)
@@ -168,7 +180,8 @@ subroutine setupcldtot(lunin,mype,bwork,awork,nele,nobs,is,conv_diagsave)
                                                       ! 2,4,... bottom
                                                       ! 3,5,... top
   real(r_single) :: vis2qc           ! fog
-  real(r_single) :: ruc_saturation 
+  real(r_single),external :: ruc_saturation     ! an external function accesseed through
+                                                ! an implicit interface from GSD
 
   real(r_single), allocatable :: cld_cover_obs(:)  ! cloud cover obs
 
@@ -199,6 +212,11 @@ subroutine setupcldtot(lunin,mype,bwork,awork,nele,nobs,is,conv_diagsave)
   logical:: lhere
   integer(i_kind):: istat1,istat2,istat3
 
+  type(obsLList),pointer,dimension(:):: qhead
+
+  if(luse_obsdiag) call die(myname,'not implemented for luse_obsdiag =',luse_obsdiag)
+
+  qhead => obsLL(:)
 !
   awork=0.0_r_kind
   bwork=0.0_r_kind
@@ -226,8 +244,6 @@ subroutine setupcldtot(lunin,mype,bwork,awork,nele,nobs,is,conv_diagsave)
 
 ! If require guess vars available, extract from bundle ...
   call init_vars_
-
-  m_alloc(:)=0
 
   allocate(h_bk(nsig))
   allocate(t_bk(nsig))
@@ -257,7 +273,7 @@ subroutine setupcldtot(lunin,mype,bwork,awork,nele,nobs,is,conv_diagsave)
          allocate(cdiagbuf(nobs*nsig),rdiagbuf(nreal,nobs*nsig))
          rdiagbuf=zero
      endif
-     if (i_cloud_q_innovation == 2 .or. i_cloud_q_innovation == 3) then
+     if (i_cloud_q_innovation >= 20 .or. i_cloud_q_innovation == 3) then
          iip=0
          allocate(cdiagbufp(nobs*nsig),rdiagbufp(nreal,nobs*nsig))
          cdiagbufp="EMPTY"
@@ -445,7 +461,7 @@ subroutine setupcldtot(lunin,mype,bwork,awork,nele,nobs,is,conv_diagsave)
              cycle
          endif
    
-         call cloudCover_surface_col(mype,nsig,cld_bld_hgt,h_bk,z_bk, &
+         call cloudCover_surface_col(mype,nsig,i_cloud_q_innovation,cld_bld_hgt,h_bk,z_bk, &
                  nvarcld_p,ocld,oelvtn,wthr_type,pcp_type_obs,vis2qc,cld_cover_obs)
    
    
@@ -500,28 +516,41 @@ subroutine setupcldtot(lunin,mype,bwork,awork,nele,nobs,is,conv_diagsave)
                 muse(i)=.true.
    
            !*******************************************************************************
-               if (i_cloud_q_innovation /= 2) then
-                   write(*,*) "Warning - setupcldtot: this code version is only designed for i_cloud_q_innovation == 2"
+               if (i_cloud_q_innovation < 20 .or. i_cloud_q_innovation > 22 ) then
+                   write(*,*) "Warning - setupcldtot: this code version is only designed for i_cloud_q_innovation == 20,21,22"
                    return
                else
    
 !!!!!Warning you hard coded q values here
-                   ibin = 1 ! q ob bin
-                   is = 4   ! q ob type number, these come from list in gsiparm
+               warning_your_hard_coded_values_here: associate(is=>4,ibin=>1)
+                     !ibin = 1 ! q ob bin
+                     !is = 4   ! q ob type number, these come from list in gsiparm
+
+                   ! Within an association construct, "is" and "ibin" as
+                   ! associats, would be purely local, i.e. significant
+                   ! only in this construct.
+                   !
+                   ! On the other hand, %(idv,iob,ich) are sequential indices
+                   ! referencing to the input observation stream.  While in
+                   ! principle, one can hard-wire these values as long as
+                   ! values are unique, variable "is" itself is a higher level
+                   ! looping index with an intent(in) attribute, thus should
+                   ! not be modified within this routine.
        
                    allocate(my_headq)
-                   m_alloc(ibin) = m_alloc(ibin) +1
-                   my_node => my_headq  
-                   call obsLList_appendNode(qhead(ibin),my_node)
-                   my_node => null()
+                   call qNode_appendto(my_headq,qhead(ibin))
        
                    my_headq%idv = is
                    my_headq%iob = i
+                   my_headq%ich0= 0
+                   my_headq%elat= data(ilat,i)
+                   my_headq%elon= data(ilon,i)
+                 end associate warning_your_hard_coded_values_here
        
                    ! Set (i,j,k) indices of guess gridpoint that bound obs location
                    mm1=mype+1
                    dpres=k
-                   call get_ijk(mm1,dlat,dlon,dpres,my_headq%ij(1),my_headq%wij(1))
+                   call get_ijk(mm1,dlat,dlon,dpres,my_headq%ij,my_headq%wij)
        
                    pressure=p_bk(k)*10.0_r_kind
                    cloudqvis= ruc_saturation(t_bk(k),pressure)
@@ -537,6 +566,8 @@ subroutine setupcldtot(lunin,mype,bwork,awork,nele,nobs,is,conv_diagsave)
                            ddiff=qv_ob-q_bk(k)
                            q_build0_count=q_build0_count+1
                        endif
+                       ! build error = 80%
+                       error=one/(cloudqvis*8.E-01_r_kind)
        
                    elseif (qob > -0.000001_r_single) then
                        
@@ -549,13 +580,15 @@ subroutine setupcldtot(lunin,mype,bwork,awork,nele,nobs,is,conv_diagsave)
                            ddiff=qv_ob-q_bk(k) 
                            q_clear0_count=q_clear0_count+1
                        endif
+                       ! clear error = 30%
+                       error=one/(cloudqvis*3.E-01_r_kind)
                    else
                        cycle
                    endif
        
                    q_obcount=q_obcount+1
        
-                   error=one/(cloudqvis*3.E-01_r_kind)
+                   ! all obs errors = 30%
                    ratio_errors=1.0_r_kind
                    val = error*ddiff
        
@@ -613,7 +646,7 @@ subroutine setupcldtot(lunin,mype,bwork,awork,nele,nobs,is,conv_diagsave)
          enddo !end k loop
      enddo ! end loop over obs
   
-     write(*,'(A,7i)') 'qobcount',mype,q_obcount,obcount,q_build_count, &
+     write(*,'(A,7I12)') 'qobcount',mype,q_obcount,obcount,q_build_count, &
                                   q_build0_count,q_clear_count,q_clear0_count
 
      deallocate(cld_cover_obs,pcp_type_obs)
@@ -683,8 +716,7 @@ subroutine setupcldtot(lunin,mype,bwork,awork,nele,nobs,is,conv_diagsave)
 
   !! Write information to diagnostic file
   if(conv_diagsave)then
-     if (i_cloud_q_innovation == 2 .and. iip>0) then
-         call dtime_show(myname,'diagsave:q',i_q_ob_type)
+     if (i_cloud_q_innovation >= 20 .and. iip>0) then
         if(netcdf_diag) call nc_diag_write
         if(binary_diag)then
            write(7)'  q',nchar,nreal,iip,mype,ioff0
@@ -701,7 +733,6 @@ subroutine setupcldtot(lunin,mype,bwork,awork,nele,nobs,is,conv_diagsave)
      endif
   endif
 
-  is = 77
   ! Release memory of local guess arrays
   call final_vars_
 
@@ -895,7 +926,7 @@ subroutine setupcldtot(lunin,mype,bwork,awork,nele,nobs,is,conv_diagsave)
         endif
      end if
 
-     call nc_diag_init(diag_conv_file)
+     call nc_diag_init(diag_conv_file, append=append_diag)
 
      if (.not. append_diag) then ! don't write headers on append - the module will break?
         call nc_diag_header("date_time",ianldate )
@@ -1006,52 +1037,15 @@ subroutine setupcldtot(lunin,mype,bwork,awork,nele,nobs,is,conv_diagsave)
 
   end subroutine contents_netcdf_diag_mem_
 
-end subroutine setupcldtot
-
 #else
 
-subroutine setupcldtot(lunin,mype,bwork,awork,nele,nobs,is,conv_diagsave)
-!$$$  subprogram documentation block
-!!                .      .    .                                       .
-! subprogram:    setupcldtot      compute rhs of oi for pseudo moisture
-! observations from
-!                                 METAR and Satellite cloud observations
-!   prgmmr: Ladwag          org: GSD                date: 2019-06-01
-!
-! program history log:
-!   2016-04-06  Ladwig new setup routine for METAR ceilometer obs
-!
-!   input argument list:
-!     lunin    - unit from which to read observations
-!     mype     - mpi task id
-!     nele     - number of data elements per observation
-!     nobs     - number of observations
-!
-!   output argument list:
-!     bwork    - array containing information about obs-ges statistics
-!     awork    - array containing information for data counts and gross checks
-!
-! attributes:
-!   language: f90
-!   machine:  
-!
-!
-!
-!$$$
-! Declare passed variables
-  use kinds, only: r_kind,i_kind
-  use gridmod, only: nsig
-  use qcmod, only: npres_print
-  use convinfo, only: nconvtype
+  character(len=*),parameter:: myname_=myname//"::setupcldtot"
+  integer(i_kind):: ier
 
-  implicit none
-
-  logical                                          ,intent(in   ) :: conv_diagsave
-  integer(i_kind)                                  ,intent(in   ) :: lunin,mype,nele,nobs
-  real(r_kind),dimension(100+7*nsig)               ,intent(inout) :: awork
-  real(r_kind),dimension(npres_print,nconvtype,5,3),intent(inout) :: bwork
-  integer(i_kind)                                  ,intent(inout) :: is	! ndat index
+! Skip the record, and does nothing
+  read(lunin,iostat=ier)
+  if(ier/=0) call die(myname_,'unexpected empty block, iostat =',ier)
+#endif
 
 end subroutine setupcldtot
-
-#endif
+end module cldtot_setup

@@ -50,13 +50,14 @@ module aircraftinfo
   public :: upd_aircraft
   public :: nsort,itail_sort,idx_sort
   public :: hdist_aircraft
+  
   logical :: aircraft_t_bc ! logical to turn off or on the aircraft temperature bias correction
   logical :: aircraft_t_bc_pof ! logical to turn off or on the aircraft temperature bias correction with pof
   logical :: aircraft_t_bc_ext ! logical to turn off or on the externally supplied aircraft bias correction
   logical :: cleanup_tail ! logical to remove tail number no longer used
   logical :: upd_aircraft ! indicator if update bias at 06Z & 18Z
   
-  integer(i_kind), parameter :: max_tail=10000  ! max tail numbers
+  integer(i_kind), parameter :: max_tail=100000  ! max tail numbers
   integer(i_kind) npredt          ! predictor number
   integer(i_kind) ntail           ! total tail number
   integer(i_kind) ntail_update    ! new total tail number
@@ -76,8 +77,7 @@ module aircraftinfo
   real(r_kind),allocatable,dimension(:,:):: varA_t
   real(r_quad),allocatable,dimension(:,:):: ostats_t
   real(r_quad),allocatable,dimension(:,:):: rstats_t
-
-
+  
 contains
 
 
@@ -122,7 +122,7 @@ contains
     upd_pred_t=one
 
     hdist_aircraft=60000.0_r_kind
-
+    
   end subroutine init_aircraft
 
 

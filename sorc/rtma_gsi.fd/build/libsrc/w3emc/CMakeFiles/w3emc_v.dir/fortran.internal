@@ -1,5 +1,0 @@
-# The fortran modules provided by this target.
-provides
- args_mod.mod
- gblevn_module.mod
- mersenne_twister.mod

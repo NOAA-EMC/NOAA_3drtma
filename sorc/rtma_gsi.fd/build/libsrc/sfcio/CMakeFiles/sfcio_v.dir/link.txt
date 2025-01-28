@@ -1,2 +1,0 @@
-/usr/bin/ar qc ../../lib/libsfcio_v.a CMakeFiles/sfcio_v.dir/sfcio_module.f.o
-/usr/bin/ranlib ../../lib/libsfcio_v.a

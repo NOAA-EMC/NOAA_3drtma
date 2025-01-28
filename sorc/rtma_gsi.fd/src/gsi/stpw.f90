@@ -16,6 +16,7 @@ module stpwmod
 !   2014-04-12       su - add non linear qc from Purser's scheme
 !   2015-02-26       su - add njqc as an option to chose new non linear qc
 !   2016-05-18  guo     - replaced ob_type with polymorphic obsNode through type casting
+!   2019-05-31  Su      - remove current VQC part and add VQC subroutine call
 !
 ! subroutines included:
 !   sub stpw
@@ -81,8 +82,8 @@ subroutine stpw(whead,rval,sval,out,sges,nstep)
 !
 !$$$
   use kinds, only: r_kind,i_kind,r_quad
-  use qcmod, only: nlnqc_iter,varqc_iter,njqc,vqc
-  use constants, only: one,half,two,tiny_r_kind,cg_term,zero_quad,r3600
+  use qcmod, only: nlnqc_iter,varqc_iter,njqc,vqc,nvqc
+  use constants, only: one,half,two,tiny_r_kind,cg_term,zero_quad,r3600,zero
   use gsi_bundlemod, only: gsi_bundle
   use gsi_bundlemod, only: gsi_bundlegetpointer
   use m_obsNode, only: obsNode
@@ -99,12 +100,12 @@ subroutine stpw(whead,rval,sval,out,sges,nstep)
   real(r_kind),dimension(max(1,nstep)),intent(in):: sges
 
 ! Declare local variables
-  integer(i_kind) ier,istatus
+  integer(i_kind) ier,istatus,ibb,ikk
   integer(i_kind) j1,j2,j3,j4,j5,j6,j7,j8,kk
   real(r_kind) valu,facu,valv,facv,w1,w2,w3,w4,w5,w6,w7,w8
-  real(r_kind) cg_w,wgross,wnotgross,w_pg
+  real(r_kind) cg_t,t_pg,var_jb 
   real(r_kind) uu,vv
-  real(r_kind),dimension(max(1,nstep))::pen
+  real(r_kind),dimension(max(1,nstep))::pen,penu,penv
   real(r_kind),pointer,dimension(:):: ru,rv,su,sv
   type(wNode), pointer :: wptr
 
@@ -156,40 +157,44 @@ subroutine stpw(whead,rval,sval,out,sges,nstep)
            do kk=1,nstep
               uu=facu+sges(kk)*valu
               vv=facv+sges(kk)*valv
-              pen(kk)= (uu*uu+vv*vv)*wptr%err2
+              penu(kk)= (uu*uu)*wptr%err2
+              penv(kk)= (vv*vv)*wptr%err2
            end do
         else
-           pen(1)= (wptr%ures*wptr%ures+wptr%vres*wptr%vres)*wptr%err2
+           penu(1)= (wptr%ures*wptr%ures)*wptr%err2
+           penv(1)= (wptr%vres*wptr%vres)*wptr%err2
         end if
 
 !  Modify penalty term if nonlinear QC
 
-        if (vqc .and. nlnqc_iter .and. wptr%pg > tiny_r_kind .and.  &
+        t_pg=zero
+        cg_t=zero
+        var_jb=zero
+        ibb=0
+        ikk=0
+        if (vqc  .and. nlnqc_iter .and. wptr%pg > tiny_r_kind .and. &
                              wptr%b  > tiny_r_kind) then
-           w_pg=wptr%pg*varqc_iter
-           cg_w=cg_term/wptr%b
-           wnotgross= one-w_pg
-           wgross =w_pg*cg_w/wnotgross
-           do kk=1,max(1,nstep)
-              pen(kk)= -two*log((exp(-half*pen(kk))+wgross)/(one+wgross))
-           end do
+           t_pg=wptr%pg*varqc_iter
+           cg_t=cg_term/wptr%b
+        else if(njqc  .and. wptr%jb > tiny_r_kind .and. wptr%jb <10.0_r_kind) then
+!   for Dr. Jim purser' non liear quality control
+           var_jb =wptr%jb
+        else if(nvqc .and. wptr%ib >0) then
+!  mix model VQC
+           ibb=wptr%ib
+           ikk=wptr%ik
         endif
+        
+        call vqc_stp(penu,nstep,t_pg,cg_t,var_jb,ibb,ikk)
+        call vqc_stp(penv,nstep,t_pg,cg_t,var_jb,ibb,ikk)
+        do kk=1,nstep
+          pen(kk)=penu(kk)+penv(kk)
+        end do
+        out(1) = out(1)+pen(1)*wptr%raterr2
+        do kk=2,nstep
+           out(kk) = out(kk)+(pen(kk)-pen(1))*wptr%raterr2
+        end do
 
-! Purser's scheme
-        if(njqc .and. wptr%jb  > tiny_r_kind .and. wptr%jb <10.0_r_kind) then
-           do kk=1,max(1,nstep)
-              pen(kk) = two*two*wptr%jb*log(cosh(sqrt(pen(kk)/(two*wptr%jb))))
-           enddo
-           out(1) = out(1)+pen(1)*wptr%raterr2
-           do kk=2,nstep
-              out(kk) = out(kk)+(pen(kk)-pen(1))*wptr%raterr2
-           end do
-        else
-           out(1) = out(1)+pen(1)*wptr%raterr2
-           do kk=2,nstep
-              out(kk) = out(kk)+(pen(kk)-pen(1))*wptr%raterr2
-           end do
-        endif
      end if
 
      wptr => wNode_nextcast(wptr)

@@ -1,6 +1,6 @@
 # Remove fortran modules provided by this target.
 FILE(REMOVE
-  "../../include/wrf/gsimod.mod"
-  "../../include/wrf/GSIMOD.mod"
+  "include/gsi/gsimod.mod"
+  "include/gsi/GSIMOD.mod"
   "CMakeFiles/gsi.x.dir/gsimod.mod.stamp"
   )

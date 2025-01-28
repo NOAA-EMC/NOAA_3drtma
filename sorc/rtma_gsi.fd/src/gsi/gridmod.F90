@@ -88,6 +88,12 @@ module gridmod
 !   2017-08-31  Li      - add sfcnst_comb to handle surface and nsst combined file
 !   2018-02-15  wu      - add fv3_regional & grid_ratio_fv3_regional
 !   2019-03-05  martin  - add wgtfactlats for factqmin/factqmax scaling
+!   2019-04-19  martin  - add use_fv3_aero option to distingiush between NGAC and FV3-Chem
+!   2019-09-04  martin  - add write_fv3_incr to write netCDF increment rather than analysis in NEMSIO format
+!   2019-09-23  martin  - add use_gfs_ncio to read global first guess from netCDF file
+!   2020-12-18  Hu      - add grid_type_fv3_regional
+!   2021-12-30  Hu      - add fv3_io_layout_y
+!   2022-03-01  X.Lu & X.Wang - add corresponding variables for dual ens for HAFS. POC: xuguang.wang@ou.edu
 !
 !                        
 !
@@ -125,6 +131,7 @@ module gridmod
   public :: vectosub
   public :: reload
   public :: strip_periodic
+  public :: minmype
 
 ! set passed variables to public
   public :: nnnn1o,iglobal,itotsub,ijn,ijn_s,lat2,lon2,lat1,lon1,nsig,nsig_soil
@@ -140,20 +147,25 @@ module gridmod
   public :: regional_fhr,region_dyi,coeffx,region_dxi,coeffy,nsig_hlf,regional_fmin
   public :: nsig2,wgtlats,corlats,rbs2,ncepgfs_headv,regional_time,wgtfactlats
   public :: nlat_regional,nlon_regional,update_regsfc,half_grid,gencode
+  public :: nlat_regionalens,nlon_regionalens
   public :: diagnostic_reg,nmmb_reference_grid,filled_grid
   public :: grid_ratio_nmmb,isd_g,isc_g,dx_gfs,lpl_gfs,nsig5,nmmb_verttype
-  public :: grid_ratio_fv3_regional,fv3_regional
+  public :: grid_ratio_fv3_regional,fv3_io_layout_y,fv3_regional,fv3_cmaq_regional,grid_type_fv3_regional
+  public :: l_reg_update_hydro_delz
   public :: nsig3,nsig4,grid_ratio_wrfmass
   public :: use_gfs_ozone,check_gfs_ozone_date,regional_ozone,nvege_type
   public :: jcap,jcap_b,hires_b,sp_a,grd_a
   public :: jtstart,jtstop,nthreads
   public :: use_gfs_nemsio
   public :: use_gfs_ncio
+  public :: fv3_full_hydro  
+  public :: use_fv3_aero
   public :: sfcnst_comb
   public :: use_readin_anl_sfcmask
   public :: jcap_gfs,nlat_gfs,nlon_gfs
   public :: use_sp_eqspace,jcap_cut
   public :: wrf_mass_hybridcord
+  public :: write_fv3_incr
 
   interface strip
      module procedure strip_single_rank33_
@@ -170,6 +182,8 @@ module gridmod
 
   logical wrf_nmm_regional  !
   logical fv3_regional      ! .t. to run with fv3 regional model
+  logical fv3_cmaq_regional ! .t. to run with fv3_cmaq_regional model
+  logical l_reg_update_hydro_delz  ! .true. to update delz in fv3 model
   logical nems_nmmb_regional! .t. to run with NEMS NMMB model
   logical wrf_mass_regional !
   logical wrf_mass_hybridcord
@@ -186,13 +200,18 @@ module gridmod
   logical hires_b           ! .t. when jcap_b requires double FFT
   logical use_gfs_nemsio    ! .t. for using NEMSIO to real global first guess
   logical use_gfs_ncio      ! .t. for using netCDF to real global first guess
+  logical fv3_full_hydro    ! .t. for using NEMSIO to real global first guess
+  logical use_fv3_aero      ! .t. for using FV3 Aerosols, .f. for NGAC
   logical sfcnst_comb       ! .t. for using combined sfc & nst file
   logical use_sp_eqspace    ! .t. use equally-space grid in spectral transforms
+  logical write_fv3_incr    ! .t. write netCDF increment rather than NEMSIO analysis
 
   logical use_readin_anl_sfcmask        ! .t. for using readin surface mask
   character(1) nmmb_reference_grid      ! ='H': use nmmb H grid as reference for analysis grid
                                         ! ='V': use nmmb V grid as reference for analysis grid
   real(r_kind) grid_ratio_fv3_regional  ! ratio of analysis grid to fv3 model grid in fv3 grid units.
+  integer(i_kind) fv3_io_layout_y       ! = io_layout(2) of fv3 regional model (subdomain y direction).
+  integer(i_kind) grid_type_fv3_regional! type of fv3 model grid (grid orientation).
   real(r_kind) grid_ratio_nmmb ! ratio of analysis grid to nmmb model grid in nmmb model grid units.
   real(r_kind) grid_ratio_wrfmass ! ratio of analysis grid to wrf model grid in wrf mass grid units.
   character(3) nmmb_verttype   !   'OLD' for old vertical coordinate definition
@@ -251,6 +270,7 @@ module gridmod
   integer(i_kind) jcap              ! spectral triangular truncation of ncep global analysis
   integer(i_kind) jcap_b            ! spectral triangular truncation of ncep global background
   integer(i_kind) nthreads          ! number of threads used (currently only used in calctends routines)
+  integer(i_kind) minmype           ! processor with minimum size subdomain
 
 
   logical periodic                              ! logical flag for periodic e/w domains
@@ -311,7 +331,7 @@ module gridmod
   real(r_kind) rlon_min_dd,rlon_max_dd,rlat_min_dd,rlat_max_dd
   real(r_kind) dt_ll,pdtop_ll,pt_ll
 
-  integer(i_kind) nlon_regional,nlat_regional
+  integer(i_kind) nlon_regional,nlat_regional,nlon_regionalens,nlat_regionalens
   real(r_kind) regional_fhr,regional_fmin
   integer(i_kind) regional_time(6)
   integer(i_kind) jcap_gfs,nlat_gfs,nlon_gfs
@@ -401,8 +421,9 @@ contains
 !   2011-09-14  todling - add use_sp_eqspace to better control lat/lon grid case
 !   2016-08-28       li - tic591: add use_readin_anl_sfcmask for consistent sfcmask
 !                         between analysis grids and others
-!   2019-09-23  martin  - add flag use_gfs_ncio to determine whether to use
-!   netCDF to read global first gues field
+!   2019-04-19  martin  - add use_fv3_aero option for NGAC vs FV3-Chem
+!   2019-09-23  martin  - add flag use_gfs_ncio to determine whether to use netCDF to read global first gues field
+!   2021-01-05  x.zhang/lei  - add code for updating delz analysis in regional da
 !
 ! !REMARKS:
 !   language: f90
@@ -439,6 +460,8 @@ contains
     wrf_mass_hybridcord = .false.
     cmaq_regional=.false.
     fv3_regional=.false.
+    fv3_cmaq_regional=.false.
+    l_reg_update_hydro_delz=.false.
     nems_nmmb_regional = .false.
     twodvar_regional = .false. 
     use_gfs_ozone = .false.
@@ -448,6 +471,8 @@ contains
     filled_grid = .false.
     half_grid = .false.
     grid_ratio_fv3_regional = one
+    fv3_io_layout_y = 1
+    grid_type_fv3_regional = 0
     grid_ratio_nmmb = sqrt(two)
     grid_ratio_wrfmass = one
     nmmb_reference_grid = 'H'
@@ -462,6 +487,8 @@ contains
     update_regsfc = .false.
     nlon_regional = 0
     nlat_regional = 0
+    nlon_regionalens = 0
+    nlat_regionalens = 0
 
     msig = nsig
     do k=1,size(nlayers)
@@ -481,6 +508,8 @@ contains
 
     use_gfs_nemsio  = .false.
     use_gfs_ncio = .false.
+    fv3_full_hydro  = .false. 
+    use_fv3_aero  = .false.
     sfcnst_comb = .false.
     use_readin_anl_sfcmask = .false.
 
@@ -509,6 +538,7 @@ contains
     use mpeu_util, only: getindex
     use general_specmod, only: spec_cut
     use gsi_io, only: verbose
+    use gsi_metguess_mod, only: gsi_metguess_get
     implicit none
 
 ! !INPUT PARAMETERS:
@@ -549,6 +579,8 @@ contains
     integer(i_kind) i,k,inner_vars,num_fields
     integer(i_kind) n3d,n2d,nvars,tid,nth
     integer(i_kind) ipsf,ipvp,jpsf,jpvp,isfb,isfe,ivpb,ivpe
+    integer(i_kind) istatus,icw,iql,iqi
+    integer(i_kind) icw_cv,iql_cv,iqi_cv,minmax
     logical,allocatable,dimension(:):: vector
     logical print_verbose
 
@@ -568,6 +600,17 @@ contains
     n3d  =size(cvars3d)
     n2d  =size(cvars2d)
     nvars=size(cvars)
+
+    icw_cv = getindex(cvars3d(1:n3d),'cw')
+    iql_cv = getindex(cvars3d(1:n3d),'ql')
+    iqi_cv = getindex(cvars3d(1:n3d),'qi')
+    call gsi_metguess_get('var::cw', icw, istatus)
+    call gsi_metguess_get('var::ql', iql, istatus)
+    call gsi_metguess_get('var::qi', iqi, istatus)
+    fv3_full_hydro = ( iql>0    .and. iqi>0    .and. (.not. icw>0)   ) .and. &
+                     ( iql_cv>0 .and. iqi_cv>0 .and. (.not. icw_cv>0))
+
+    if (mype==0) write(6,*) myname, ' fv3_full_hydro ', fv3_full_hydro
 
 ! Allocate and initialize variables for mapping between global
 ! domain and subdomains
@@ -650,6 +693,8 @@ contains
 
     periodic=grd_a%periodic
 
+    minmype=0
+    minmax=grd_a%ilat1(1)*grd_a%jlon1(1)
     do i=1,npe
        istart(i)    =grd_a%istart(i)
        jstart(i)    =grd_a%jstart(i)
@@ -662,7 +707,12 @@ contains
        displs_s(i)  =grd_a%displs_s(i)
        ijn(i)       =grd_a%ijn(i)
        displs_g(i)  =grd_a%displs_g(i)
+       if(grd_a%ilat1(i)*grd_a%jlon1(i)< minmax)then
+         minmax=grd_a%ilat1(i)*grd_a%jlon1(i)
+         minmype=i-1
+       end if
     end do
+    if(mype == minmype) write(6,*) ' minmype = ',minmype
 
 !#omp parallel private(nth,tid)
     nth = omp_get_max_threads()
@@ -1075,6 +1125,7 @@ contains
        rlat_max_dd=rlat_max_ll-r1_5/grid_ratio_fv3_regional
        rlon_min_dd=rlon_min_ll+r1_5/grid_ratio_fv3_regional
        rlon_max_dd=rlon_max_ll-r1_5/grid_ratio_fv3_regional
+       pt_ll=zero
     endif    !  fv3_regional
 
     if(wrf_nmm_regional) then     ! begin wrf_nmm section

@@ -32,6 +32,7 @@ use m_obsNode, only: obsNode
 use m_tNode, only: tNode
 use m_tNode, only: tNode_typecast
 use m_tNode, only: tNode_nextcast
+use m_obsdiagNode, only: obsdiagNode_set
 implicit none
 
 PRIVATE
@@ -82,6 +83,7 @@ subroutine intt_(thead,rval,sval,rpred,spred)
 !   2013-05-26  zhu  - add aircraft temperature bias correction contribution
 !   2014-12-03  derber  - modify so that use of obsdiags can be turned off
 !   2015-12-21  yang    - Parrish's correction to the previous code in new varqc.
+!   2019-09-20  Su      - remove current VQC part and add VQC subroutine call
 !
 !   input argument list:
 !     thead    - obs type pointer to obs structure
@@ -117,7 +119,7 @@ subroutine intt_(thead,rval,sval,rpred,spred)
   use kinds, only: r_kind,i_kind,r_quad
   use constants, only: half,one,zero,tiny_r_kind,cg_term,r3600,two
   use obsmod, only: lsaveobsens,l_do_adjoint,luse_obsdiag
-  use qcmod, only: nlnqc_iter,varqc_iter,njqc,vqc
+  use qcmod, only: nlnqc_iter,varqc_iter,njqc,vqc,nvqc
   use jfunc, only: jiter
   use gsi_bundlemod, only: gsi_bundle
   use gsi_bundlemod, only: gsi_bundlegetpointer
@@ -143,13 +145,14 @@ subroutine intt_(thead,rval,sval,rpred,spred)
 
 ! Declare local variables
   integer(i_kind) j1,j2,j3,j4,j5,j6,j7,j8,ier,istatus,isst,ix,n
-  real(r_kind) w1,w2,w3,w4,w5,w6,w7,w8,time_t
+  real(r_kind) w1,w2,w3,w4,w5,w6,w7,w8
 ! real(r_kind) penalty
-  real(r_kind) cg_t,val,p0,grad,wnotgross,wgross,t_pg
+  real(r_kind) cg_t,val,grad,rat_err2,error2,t_pg,var_jb
   real(r_kind) psfc_grad,tg_grad
   real(r_kind) ts_grad,us_grad,vs_grad,qs_grad
   real(r_kind) qs_prime0,tg_prime0,ts_prime0,psfc_prime0
   real(r_kind) us_prime0,vs_prime0
+  integer(i_kind) ibb,ikk
   type(tNode), pointer :: tptr
 
 !  If no t data return
@@ -157,14 +160,13 @@ subroutine intt_(thead,rval,sval,rpred,spred)
 
 ! Retrieve pointers
 ! Simply return if any pointer not found
-  ier=0; isst=0
-  call gsi_bundlegetpointer(sval,'tsen', st,istatus);ier=istatus+ier
+  call gsi_bundlegetpointer(sval,'tsen', st,istatus);ier=istatus
   call gsi_bundlegetpointer(sval,'tv',  stv,istatus);ier=istatus+ier
   call gsi_bundlegetpointer(sval,'q',    sq,istatus);ier=istatus+ier
   call gsi_bundlegetpointer(sval,'u',    su,istatus);ier=istatus+ier
   call gsi_bundlegetpointer(sval,'v',    sv,istatus);ier=istatus+ier
   call gsi_bundlegetpointer(sval,'prse', sp,istatus);ier=istatus+ier
-  call gsi_bundlegetpointer(sval,'sst',ssst,istatus);isst=istatus+isst
+  call gsi_bundlegetpointer(sval,'sst',ssst,istatus);isst=istatus
   if(ier/=0) return
 
   call gsi_bundlegetpointer(rval,'tsen', rt,istatus);ier=istatus+ier
@@ -176,7 +178,6 @@ subroutine intt_(thead,rval,sval,rpred,spred)
   call gsi_bundlegetpointer(rval,'sst',rsst,istatus);isst=istatus+isst
   if(ier/=0) return
 
-  time_t=zero
   !tptr => thead
   tptr => tNode_typecast(thead)
   do while (associated(tptr))
@@ -202,20 +203,22 @@ subroutine intt_(thead,rval,sval,rpred,spred)
 
 !----------use surface model----------------------
 
+        qs_prime0=w1*   sq(j1)+w2*  sq(j2)+w3*  sq(j3)+w4*  sq(j4)
+        us_prime0=w1*   su(j1)+w2*  su(j2)+w3*  su(j3)+w4*  su(j4)
+        vs_prime0=w1*   sv(j1)+w2*  sv(j2)+w3*  sv(j3)+w4*  sv(j4)
+        psfc_prime0=w1* sp(j1)+w2*  sp(j2)+w3*  sp(j3)+w4*  sp(j4)
+
         if(tptr%tv_ob)then
            ts_prime0=w1*stv(j1)+w2*stv(j2)+w3*stv(j3)+w4*stv(j4)
         else
            ts_prime0=w1*st(j1)+w2*st(j2)+w3*st(j3)+w4*st(j4)
         end if 
+
         if (isst==0) then 
            tg_prime0=w1* ssst(j1)+w2*ssst(j2)+w3*ssst(j3)+w4*ssst(j4)
         else 
            tg_prime0=zero
         end if
-        qs_prime0=w1*   sq(j1)+w2*  sq(j2)+w3*  sq(j3)+w4*  sq(j4)
-        us_prime0=w1*   su(j1)+w2*  su(j2)+w3*  su(j3)+w4*  su(j4)
-        vs_prime0=w1*   sv(j1)+w2*  sv(j2)+w3*  sv(j3)+w4*  sv(j4)
-        psfc_prime0=w1* sp(j1)+w2*  sp(j2)+w3*  sp(j3)+w4*  sp(j4)
 
         val=psfc_prime0*tptr%tlm_tsfc(1) + tg_prime0*tptr%tlm_tsfc(2) + &
             ts_prime0  *tptr%tlm_tsfc(3) + qs_prime0*tptr%tlm_tsfc(4) + &
@@ -228,8 +231,8 @@ subroutine intt_(thead,rval,sval,rpred,spred)
            val=w1*stv(j1)+w2*stv(j2)+w3*stv(j3)+w4*stv(j4)&
               +w5*stv(j5)+w6*stv(j6)+w7*stv(j7)+w8*stv(j8)
         else
-           val=w1*    st(j1)+w2*    st(j2)+w3*    st(j3)+w4*    st(j4)&
-              +w5*    st(j5)+w6*    st(j6)+w7*    st(j7)+w8*    st(j8)
+           val=w1*st(j1)+ w2*st(j2)+ w3*st(j3)+ w4*st(j4)&
+              +w5*st(j5)+ w6*st(j6)+ w7*st(j7)+ w8*st(j8)
         end if
 
      end if
@@ -245,9 +248,11 @@ subroutine intt_(thead,rval,sval,rpred,spred)
      if(luse_obsdiag)then
         if (lsaveobsens) then
            grad = val*tptr%raterr2*tptr%err2
-           tptr%diags%obssen(jiter) = grad
+           !-- tptr%diags%obssen(jiter) = grad
+           call obsdiagNode_set(tptr%diags,jiter=jiter,obssen=grad)
         else
-           if (tptr%luse) tptr%diags%tldepart(jiter)=val
+           !-- if (tptr%luse) tptr%diags%tldepart(jiter)=val
+           if (tptr%luse) call obsdiagNode_set(tptr%diags,jiter=jiter,tldepart=val)
         endif
      endif
 
@@ -257,22 +262,31 @@ subroutine intt_(thead,rval,sval,rpred,spred)
            if( .not. ladtest_obs)   val=val-tptr%res
  
 !          gradient of nonlinear operator
-
+           error2=tptr%err2
+           rat_err2=tptr%raterr2
            if (vqc .and. nlnqc_iter .and. tptr%pg > tiny_r_kind .and.  &
                                 tptr%b  > tiny_r_kind) then
               t_pg=tptr%pg*varqc_iter
               cg_t=cg_term/tptr%b
-              wnotgross= one-t_pg
-              wgross =t_pg*cg_t/wnotgross
-              p0=wgross/(wgross+exp(-half*tptr%err2*val**2))
-              val=val*(one-p0)                  
+           else
+              t_pg=zero
+              cg_t=zero
            endif
            if (njqc .and. tptr%jb > tiny_r_kind .and. tptr%jb <10.0_r_kind) then
-              val=sqrt(two*tptr%jb)*tanh(sqrt(tptr%err2)*val/sqrt(two*tptr%jb))
-              grad = val*tptr%raterr2*sqrt(tptr%err2)
-           else
-              grad = val*tptr%raterr2*tptr%err2
+              var_jb=tptr%jb
+           else 
+              var_jb=zero
            endif
+           if (nvqc .and. tptr%ib > tiny_r_kind ) then
+              ibb=tptr%ib
+              ikk=tptr%ik
+           else
+              ibb=0
+              ikk=0
+           endif
+
+           call vqc_int(error2,rat_err2,t_pg,cg_t,var_jb,ibb,ikk,val,grad)
+ 
            if(ladtest_obs) then
               grad = val
            endif
@@ -296,21 +310,7 @@ subroutine intt_(thead,rval,sval,rpred,spred)
            rp(j2)=rp(j2)+w2*psfc_grad
            rp(j3)=rp(j3)+w3*psfc_grad
            rp(j4)=rp(j4)+w4*psfc_grad
-           vs_grad  =tptr%tlm_tsfc(6)*grad
-           rv(j1)=rv(j1)+w1*vs_grad
-           rv(j2)=rv(j2)+w2*vs_grad
-           rv(j3)=rv(j3)+w3*vs_grad
-           rv(j4)=rv(j4)+w4*vs_grad
-           us_grad  =tptr%tlm_tsfc(5)*grad
-           ru(j1)=ru(j1)+w1*us_grad
-           ru(j2)=ru(j2)+w2*us_grad
-           ru(j3)=ru(j3)+w3*us_grad
-           ru(j4)=ru(j4)+w4*us_grad
-           qs_grad  =tptr%tlm_tsfc(4)*grad
-           rq(j1)=rq(j1)+w1*qs_grad
-           rq(j2)=rq(j2)+w2*qs_grad
-           rq(j3)=rq(j3)+w3*qs_grad
-           rq(j4)=rq(j4)+w4*qs_grad
+
            if (isst==0) then
               tg_grad  =tptr%tlm_tsfc(2)*grad
               rsst(j1)=rsst(j1)+w1*tg_grad
@@ -319,21 +319,38 @@ subroutine intt_(thead,rval,sval,rpred,spred)
               rsst(j4)=rsst(j4)+w4*tg_grad
            end if
 
-
            ts_grad  =tptr%tlm_tsfc(3)*grad
            if(tptr%tv_ob)then
               rtv(j1)=rtv(j1)+w1*ts_grad
               rtv(j2)=rtv(j2)+w2*ts_grad
               rtv(j3)=rtv(j3)+w3*ts_grad
               rtv(j4)=rtv(j4)+w4*ts_grad
-
            else
               rt(j1)=rt(j1)+w1*ts_grad
               rt(j2)=rt(j2)+w2*ts_grad
               rt(j3)=rt(j3)+w3*ts_grad
               rt(j4)=rt(j4)+w4*ts_grad
- 
            end if
+
+           qs_grad  =tptr%tlm_tsfc(4)*grad
+           rq(j1)=rq(j1)+w1*qs_grad
+           rq(j2)=rq(j2)+w2*qs_grad
+           rq(j3)=rq(j3)+w3*qs_grad
+           rq(j4)=rq(j4)+w4*qs_grad
+
+           us_grad  =tptr%tlm_tsfc(5)*grad
+           ru(j1)=ru(j1)+w1*us_grad
+           ru(j2)=ru(j2)+w2*us_grad
+           ru(j3)=ru(j3)+w3*us_grad
+           ru(j4)=ru(j4)+w4*us_grad
+
+           vs_grad  =tptr%tlm_tsfc(6)*grad
+           rv(j1)=rv(j1)+w1*vs_grad
+           rv(j2)=rv(j2)+w2*vs_grad
+           rv(j3)=rv(j3)+w3*vs_grad
+           rv(j4)=rv(j4)+w4*vs_grad
+
+
 
         else
 

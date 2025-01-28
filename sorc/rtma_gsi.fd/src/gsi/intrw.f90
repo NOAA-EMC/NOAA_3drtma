@@ -29,6 +29,7 @@ use m_obsNode, only: obsNode
 use m_rwNode, only: rwNode
 use m_rwNode, only: rwNode_typecast
 use m_rwNode, only: rwNode_nextcast
+use m_obsdiagNode, only: obsdiagNode_set
 implicit none
 
 PRIVATE
@@ -95,7 +96,7 @@ subroutine intrw_(rwhead,rval,sval)
 !$$$
   use kinds, only: r_kind,i_kind
   use constants, only: half,one,tiny_r_kind,cg_term,r3600
-  use obsmod, only: lsaveobsens,l_do_adjoint,luse_obsdiag
+  use obsmod, only: lsaveobsens,l_do_adjoint,luse_obsdiag,if_use_w_vr
   use qcmod, only: nlnqc_iter,varqc_iter
   use jfunc, only: jiter
   use gsi_bundlemod, only: gsi_bundle
@@ -126,23 +127,17 @@ subroutine intrw_(rwhead,rval,sval)
   ier=0
   call gsi_bundlegetpointer(sval,'u',su,istatus);ier=istatus+ier
   call gsi_bundlegetpointer(sval,'v',sv,istatus);ier=istatus+ier
-  call gsi_bundlegetpointer(sval,'w',sw,istatus)
-  if (istatus==0) then
-     include_w=.true.
-  else
-     include_w=.false.
-  end if
   call gsi_bundlegetpointer(rval,'u',ru,istatus);ier=istatus+ier
   call gsi_bundlegetpointer(rval,'v',rv,istatus);ier=istatus+ier
-  call gsi_bundlegetpointer(rval,'w',rw,istatus)
-  if (istatus==0) then
-     include_w=.true.
-  else
-     include_w=.false.
-  end if
 
   if(ier/=0)return
 
+  include_w=.false.
+  call gsi_bundlegetpointer(sval,'w',sw,istatus)
+  if (if_use_w_vr.and.istatus==0) then
+     call gsi_bundlegetpointer(rval,'w',rw,istatus)
+     if(istatus == 0)include_w=.true.
+  end if
 
   !rwptr => rwhead
   rwptr => rwNode_typecast(rwhead)
@@ -179,9 +174,11 @@ subroutine intrw_(rwhead,rval,sval)
      if(luse_obsdiag)then
         if (lsaveobsens) then
            grad = val*rwptr%raterr2*rwptr%err2
-           rwptr%diags%obssen(jiter) = grad
+           !-- rwptr%diags%obssen(jiter) = grad
+           call obsdiagNode_set(rwptr%diags,jiter=jiter,obssen=grad)
         else
-           if (rwptr%luse) rwptr%diags%tldepart(jiter)=val
+           !-- if (rwptr%luse) rwptr%diags%tldepart(jiter)=val
+           if (rwptr%luse) call obsdiagNode_set(rwptr%diags,jiter=jiter,tldepart=val)
         endif
      endif
 

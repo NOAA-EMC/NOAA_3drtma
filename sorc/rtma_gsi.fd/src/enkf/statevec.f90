@@ -14,7 +14,7 @@ module statevec
 !
 ! Public Variables:
 !  nanals: (integer scalar) number of ensemble members (from module params)
-!  nlevs: number of analysis vertical levels (from module params).
+!  nlevs: number of analysis atmos vertical levels (from module params).
 !  ns3d: number of 3D variables
 !  ns2d: number of 2D variables
 !  svars3d: names of 3D variables
@@ -39,13 +39,14 @@ module statevec
 !
 !$$$
 
-use gridio, only: readgriddata
+use gridio, only: readgriddata, readgriddata_pnc
 use mpisetup, only: mpi_real4,mpi_sum,mpi_comm_io,mpi_in_place,numproc,nproc
 use mpimod, only: mpi_comm_world
 use gridinfo, only: getgridinfo, gridinfo_cleanup,               &
                     npts, vars3d_supported, vars2d_supported
 use params, only: nlevs,nstatefields,nanals,statefileprefixes,&
-                  ntasks_io,nanals_per_iotask,nanal1,nanal2
+                  ntasks_io,nanals_per_iotask,nanal1,nanal2, &
+                  statesfcfileprefixes, paranc
 use kinds, only: r_kind, i_kind, r_double, r_single
 use mpeu_util, only: gettablesize, gettable, getindex
 use constants, only : max_varname_length
@@ -119,7 +120,7 @@ do ii=1,nvars
       svars3d(ns3d)=trim(adjustl(var))
       slevels(ns3d)=ilev + slevels(ns3d-1)
    else 
-      if (nproc .eq. 0) print *,'Error: only ', nlevs, ' and ', nlevs+1,' number of levels is supported in current version, got ',ilev
+      if (nproc .eq. 0) print *,'Error statevec: - only ', nlevs, ' and ', nlevs+1,' number of levels is supported in current version, got ',ilev
       call stop2(503)
    endif
 enddo
@@ -135,7 +136,7 @@ endif
 do i = 1, ns2d
   if (getindex(vars2d_supported, svars2d(i))<0) then
     if (nproc .eq. 0) then
-      print *,'Error: 2D variable ', svars2d(i), ' is not supported in current version.'
+      print *,'Error: state 2D variable ', svars2d(i), ' is not supported in current version.'
       print *,'Supported variables: ', vars2d_supported
     endif
     call stop2(502)
@@ -144,7 +145,7 @@ enddo
 do i = 1, ns3d
   if (getindex(vars3d_supported, svars3d(i))<0) then
     if (nproc .eq. 0) then 
-       print *,'Error: 3D variable ', svars3d(i), ' is not supported in current version.'
+       print *,'Error: state 3D variable ', svars3d(i), ' is not supported in current version.'
        print *,'Supported variables: ', vars3d_supported
     endif
     call stop2(502)
@@ -184,12 +185,19 @@ if (npts < numproc) then
 end if
 
 ! read in whole state vector on i/o procs - keep in memory 
-if (nproc <= ntasks_io-1) then
-   allocate(state_d(npts,nsdim,nstatefields,nanals_per_iotask))
-   allocate(qsat(npts,nlevs,nstatefields,nanals_per_iotask))
-   nanal = nproc + 1
+allocate(state_d(npts,nsdim,nstatefields,nanals_per_iotask))
+allocate(qsat(npts,nlevs,nstatefields,nanals_per_iotask))
+if (paranc) then
+   call readgriddata_pnc(svars3d,svars2d,ns3d,ns2d,slevels,nsdim,nstatefields, &
+                         statefileprefixes,statesfcfileprefixes,.false.,state_d,qsat)
+end if
 
-   call readgriddata(nanal1(nproc),nanal2(nproc),svars3d,svars2d,ns3d,ns2d,slevels,nsdim,nstatefields,statefileprefixes,.false.,state_d,qsat)
+if (nproc <= ntasks_io-1) then
+   nanal = nproc + 1
+   if ( .not. paranc) then
+      call readgriddata(nanal1(nproc),nanal2(nproc),svars3d,svars2d,ns3d,ns2d,slevels,nsdim,nstatefields, &
+                     statefileprefixes,statesfcfileprefixes,.false.,state_d,qsat)
+   end if
 
    ! subtract the mean
    allocate(state_mean(npts)) 
@@ -205,7 +213,8 @@ if (nproc <= ntasks_io-1) then
    enddo
    deallocate(state_mean)
    deallocate(qsat)
-
+else
+   deallocate(state_d)
 endif
 
 end subroutine read_state

@@ -43,6 +43,7 @@ use mpeu_util, only: getindex
 use gsi_metguess_mod, only: gsi_metguess_get
 use mod_strong, only: tlnmc_option
 use timermod, only: timer_ini,timer_fnl
+use hybrid_ensemble_parameters,only: naensgrp
 implicit none
 
 ! Declare passed variables
@@ -51,14 +52,14 @@ type(gsi_bundle)    , intent(in   ) :: mval
 type(gsi_bundle)    , intent(inout) :: eval(ntlevs_ens)
 
 ! Declare local variables
-character(len=*),parameter::myname='ensctl2state'
+character(len=*),parameter::myname='ensctl2model'
 character(len=max_varname_length),allocatable,dimension(:) :: clouds
 integer(i_kind) :: jj,ic,id,istatus,nclouds,nn
 
 integer(i_kind), parameter :: ncvars = 5
 integer(i_kind) :: icps(ncvars)
 type(gsi_bundle):: wbundle_c ! work bundle
-type(gsi_bundle),allocatable :: ebundle(:)
+type(gsi_bundle),allocatable :: ebundle(:,:)
 character(len=3), parameter :: mycvars(ncvars) = (/  &  ! vars from CV needed here
                                'sf ', 'vp ', 'ps ', 't  ',    &
                                'q  '/)
@@ -77,6 +78,7 @@ real(r_kind),pointer,dimension(:,:,:) :: sv_rank3
 
 logical :: do_getprs_tl,do_normal_rh_to_q,do_tv_to_tsen,do_getuv,lstrong_bk_vars
 logical :: do_tlnmc,do_q_copy
+integer(i_kind) :: ig
 ! ****************************************************************************
 
 ! Initialize timer
@@ -117,24 +119,28 @@ do jj=1,ntlevs_ens
    do_tlnmc = lstrong_bk_vars .and. ( (tlnmc_option==3) .or. &
          (jj==ibin_anl .and. tlnmc_option==2) )
 
-   allocate(ebundle(n_ens))
-   do nn=1,n_ens
-      call gsi_bundlecreate (ebundle(nn),xhat%aens(1,1),'c2m ensemble work',istatus)
-      if(istatus/=0) then
-         write(6,*) trim(myname), ': trouble creating work ens-bundle'
-         call stop2(999)
-      endif
+   allocate(ebundle(naensgrp,n_ens))
+   do ig=1,naensgrp
+      do nn=1,n_ens
+         call gsi_bundlecreate (ebundle(ig,nn),xhat%aens(1,1,1),'c2m ensemble work',istatus)
+         if(istatus/=0) then
+            write(6,*) trim(myname), ': trouble creating work ens-bundle'
+            call stop2(999)
+         endif
+      enddo
    enddo
 
 !  Apply square-root of ensemble error covariance
-   call ckgcov_a_en_new_factorization(xhat%aens(jj,1)%values(:),ebundle)
+   do ig=1,naensgrp
+      call ckgcov_a_en_new_factorization(ig,xhat%aens(jj,ig,1)%values(:),ebundle(ig,:))
+   enddo
    call sqrt_beta_e_mult(ebundle)
 
 ! Initialize ensemble contribution to zero
    eval(jj)%values=zero
 
 !  Create a temporary bundle similar to xhat, and copy contents of xhat into it
-   call gsi_bundlecreate ( wbundle_c, xhat%step(1), 'ensctl2state work', istatus )
+   call gsi_bundlecreate ( wbundle_c, xhat%step(1), 'ensctl2model work', istatus )
    if(istatus/=0) then
       write(6,*) trim(myname), ': trouble creating work bundle'
       call stop2(999)
@@ -230,12 +236,14 @@ do jj=1,ntlevs_ens
       call stop2(999)
    endif
 
-   do nn=n_ens,1,-1 ! first in; last out
-      call gsi_bundledestroy(ebundle(nn),istatus)
-      if(istatus/=0) then
-         write(6,*) trim(myname), ': trouble destroying work ens bundle, ', istatus
-         call stop2(999)
-      endif
+   do ig=1,naensgrp
+      do nn=n_ens,1,-1 ! first in; last out
+         call gsi_bundledestroy(ebundle(ig,nn),istatus)
+         if(istatus/=0) then
+            write(6,*) trim(myname), ': trouble destroying work ens bundle, ', istatus
+            call stop2(999)
+         endif
+      enddo
    enddo
    deallocate(ebundle)
 

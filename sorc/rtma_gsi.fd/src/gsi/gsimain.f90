@@ -9,6 +9,8 @@
 
    program gsi
 
+   use gsi_fixture, only: my_fixture_config => fixture_config
+
    use gsimod, only: gsimain_initialize,gsimain_run,gsimain_finalize
    use gsi_4dvar, only: l4dvar
    use gsi_4dcouplermod, only: gsi_4dcoupler_init_traj
@@ -127,6 +129,10 @@
 !   2018-02-15  wu      - add fv3_regional
 !   2017-11-29  apodaca - add information, source codes, and exit states
 !                         related to the GOES/GLM lightnig assimilation
+!   2019-07-09  todling - add initialization of abstract layer defining use of GFS ensemble
+!   2019-08-04  guo     - moved ensemble object configuration into module gsi_fixture.
+!   2022-03-15  K Apodaca - add CYGNSS and Spire Ocean wind speed observations
+!   2023-03-15  K Apodaca - add GNSS-R Doppler Delay Map observations
 !
 ! usage:
 !   input files:
@@ -190,7 +196,7 @@
 !         read_goesglm, read_goesndr, read_gps_ref, read_guess, read_ieeetovs, 
 !         read_lidar, read_obs, read_ozone, read_pcp, read_prepbufr, read_radar, 
 !         read_superwinds, read_wrf_mass_files, read_wrf_mass_guess, 
-!         read_wrf_nmm_files, read_wrf_nmm_guess, rfdpar, rsearch, satthin,
+!         read_wrf_nmm_files, read_wrf_nmm_guess, read_gnssrspd, rfdpar, rsearch, satthin,
 !         setupdw, setupoz, setuppcp, setupps, setuppw, setupq, setuprad,
 !         setupref, setupbend, setuplight, setuprhsall, setuprw, setupspd, setupsst,
 !         setupt, setupw, simpin1, simpin1_init, smooth121, smoothrf,
@@ -612,6 +618,11 @@
    character(len=*),parameter:: myname='gsimain'
 
    call gsimain_initialize
+
+   call my_fixture_config()     ! Choose configurable extensions for a
+                                ! particular system fixture.  Note a user
+                                ! defined gsi_fixture implementation is uniquely
+                                ! selected in CMakeLists.txt at build-time.
 
 ! Initialize atmospheric AD and TL model trajectory
 !  if(l4dvar) then

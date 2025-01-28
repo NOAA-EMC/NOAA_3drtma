@@ -92,6 +92,7 @@ module enkf_obsmod
 !        for oz and it crashes EnKF compiled by GNU Fortran
 !     NOTE: this requires anavinfo file to be present at running directory
 !   2016-11-29  shlyaeva: Added the option of writing out ensemble spread in diag files
+!   2019-03-21  CAPS(C. Tong) - added the code for direct reflecitivity DA capability
 !
 ! attributes:
 !   language: f95
@@ -104,15 +105,21 @@ use mpisetup, only: mpi_real4,mpi_sum,mpi_comm_io,mpi_in_place,numproc,nproc,&
 use kinds, only : r_kind, r_double, i_kind, r_single
 use constants, only: zero, one, deg2rad, rad2deg, rd, cp, pi
 use params, only: & 
-      datestring,datapath,sprd_tol,nanals,saterrfact, &
+      letkf_flag,nobsl_max,datestring,datapath,sprd_tol,nanals,saterrfact, &
       lnsigcutoffnh, lnsigcutoffsh, lnsigcutofftr, corrlengthnh,&
       corrlengthtr, corrlengthsh, obtimelnh, obtimeltr, obtimelsh,&
       lnsigcutoffsatnh, lnsigcutoffsatsh, lnsigcutoffsattr,&
-      varqc, huber, zhuberleft, zhuberright,&
-      lnsigcutoffpsnh, lnsigcutoffpssh, lnsigcutoffpstr, neigv
+      lnsigcutofffednh, lnsigcutofffedsh, lnsigcutofffedtr,&
+      corrlengthfednh, corrlengthfedtr, corrlengthfedsh,   &
+      varqc, huber, zhuberleft, zhuberright, modelspace_vloc, &
+      lnsigcutoffpsnh, lnsigcutoffpssh, lnsigcutoffpstr, neigv, &
+      lnsigcutoffrdrnh, lnsigcutoffrdrsh, lnsigcutoffrdrtr,&
+      corrlengthrdrnh, corrlengthrdrtr, corrlengthrdrsh,   &
+      l_use_enkf_directZDA
 
 use state_vectors, only: init_anasv
 use mpi_readobs, only:  mpi_getobs
+use, intrinsic :: iso_c_binding
 
 implicit none
 private
@@ -136,11 +143,20 @@ character(len=20), public, allocatable, dimension(:) :: obtype
 integer(i_kind), public ::  nobs_sat, nobs_oz, nobs_conv, nobstot
 integer(i_kind) :: nobs_convdiag, nobs_ozdiag, nobs_satdiag, nobstotdiag
 
-! for serial enkf, anal_ob is only used here and in loadbal. It is deallocated in loadbal.
-! for letkf, anal_ob used on all tasks in letkf_update (bcast from root in loadbal), deallocated
-! in letkf_update.
-! same goes for anal_ob_modens when modelspace_vloc=T.
-real(r_single), public, allocatable, dimension(:,:) :: anal_ob, anal_ob_modens
+! ob-space prior ensemble
+! pointers used for MPI-3 shared memory manipulations.
+! allocated and filled in mpi_readobs
+real(r_single),public,pointer, dimension(:,:) :: anal_ob        ! Fortran pointer
+type(c_ptr)                             :: anal_ob_cp           ! C pointer
+real(r_single),public,pointer, dimension(:,:) :: anal_ob_modens ! Fortran pointer
+type(c_ptr)                             :: anal_ob_modens_cp    ! C pointer
+integer :: shm_win, shm_win2
+
+! ob-space posterior ensemble, needed for EFSOI
+real(r_single),public,allocatable, dimension(:,:) :: anal_ob_post   ! Fortran pointer
+! is the observation assimilated? logical would be preferable, but that confuses
+! Python
+integer(i_kind),public,allocatable, dimension(:) :: assimltd_flag ! Fortran pointer
 
 contains
 
@@ -185,13 +201,21 @@ call mpi_getobs(datapath, datestring, nobs_conv, nobs_oz, nobs_sat, nobstot,  &
                 obsprd_prior, ensmean_obnobc, ensmean_ob, ob,                 &
                 oberrvar, obloclon, obloclat, obpress,                        &
                 obtime, oberrvar_orig, stattype, obtype, biaspreds, diagused, &
-                anal_ob,anal_ob_modens,indxsat,nanals,neigv)
+                anal_ob,anal_ob_modens,anal_ob_cp,anal_ob_modens_cp,          &
+                shm_win,shm_win2, indxsat, nanals, neigv)
 
 tdiff = mpi_wtime()-t1
 call mpi_reduce(tdiff,tdiffmax,1,mpi_real4,mpi_max,0,mpi_comm_world,ierr)
 if (nproc == 0) then
  print *,'max time in mpireadobs  = ',tdiffmax
  print *,'total number of obs ',nobstot
+ print *,'min/max obtime ',minval(obtime),maxval(obtime)
+endif
+! if nobsl_max set for LETKF, and the total number of obs < nobsl_max,
+! reset nobsl_max to -1
+if (letkf_flag .and. nobsl_max > 0 .and. nobstot < nobsl_max) then
+   if (nproc == 0) print *,'resetting nobsl_max to -1'
+   nobsl_max=-1
 endif
 allocate(obfit_prior(nobstot))
 ! screen out some obs by setting ob error to a very large number
@@ -240,7 +264,6 @@ allocate(oblnp(nobstot)) ! log(p) at ob locations.
 allocate(corrlengthsq(nobstot),lnsigl(nobstot),obtimel(nobstot))
 lnsigl=1.e10
 do nob=1,nobstot
-   oblnp(nob) = -log(obpress(nob)) ! distance measured in log(p) units
    if (obloclon(nob) < zero) obloclon(nob) = obloclon(nob) + 360._r_single
    radlon=deg2rad*obloclon(nob)
    radlat=deg2rad*obloclat(nob)
@@ -250,14 +273,33 @@ do nob=1,nobstot
    obloc(3,nob) = sin(radlat)
    deglat = obloclat(nob)
 !  get limits on corrlength,lnsig,and obtime
+   if (.not. modelspace_vloc) then
    if (nob > nobs_conv+nobs_oz) then
       lnsigl(nob) = latval(deglat,lnsigcutoffsatnh,lnsigcutoffsattr,lnsigcutoffsatsh)
    else if (obtype(nob)(1:3) == ' ps') then
       lnsigl(nob) = latval(deglat,lnsigcutoffpsnh,lnsigcutoffpstr,lnsigcutoffpssh)
+   else if (obtype(nob)(1:3) == 'fed') then
+      lnsigl(nob) = latval(deglat,lnsigcutofffednh,lnsigcutofffedtr,lnsigcutofffedsh)
+   else if ( (obtype(nob)(1:3) == 'dbz' .or. obtype(nob)(1:3) == ' rw') .and. l_use_enkf_directZDA ) then
+      lnsigl(nob) = latval(deglat,lnsigcutoffrdrnh,lnsigcutoffrdrtr,lnsigcutoffrdrsh)
    else
       lnsigl(nob)=latval(deglat,lnsigcutoffnh,lnsigcutofftr,lnsigcutoffsh)
    end if
+   endif
+   ! total column ozone has pressure set to zero, set to 0.001Pa
+   ! and turn vertical localization off (no effect if modelspace_vloc=T)
+   if (obpress(nob) < 0.001 .and. obtype(nob)(1:3) .eq. ' oz') then
+      lnsigl(nob) = 1.e30    ! turn ob-space vert localization off
+      obpress(nob) = 0.001   ! set to a non-zero value
+   endif
+   oblnp(nob) = -log(obpress(nob)) ! distance measured in log(p) units
    corrlengthsq(nob)=latval(deglat,corrlengthnh,corrlengthtr,corrlengthsh)**2
+   if ( (obtype(nob)(1:3) == 'dbz' .or. obtype(nob)(1:3) == ' rw') .and. l_use_enkf_directZDA ) then
+       corrlengthsq(nob)=latval(deglat,corrlengthrdrnh,corrlengthrdrtr,corrlengthrdrsh)**2
+   end if
+   if (obtype(nob)(1:3) == 'fed') then
+       corrlengthsq(nob)=latval(deglat,corrlengthfednh,corrlengthfedtr,corrlengthfedsh)**2
+   end if
    obtimel(nob)=latval(deglat,obtimelnh,obtimeltr,obtimelsh)
 end do
 
@@ -420,6 +462,7 @@ enddo
 end subroutine channelstats
 
 subroutine obsmod_cleanup()
+integer ierr
 ! deallocate module-level allocatable arrays
 if (allocated(obsprd_prior)) deallocate(obsprd_prior)
 if (allocated(obfit_prior)) deallocate(obfit_prior)
@@ -444,9 +487,17 @@ if (allocated(indxsat)) deallocate(indxsat)
 if (allocated(obtype)) deallocate(obtype)
 if (allocated(probgrosserr)) deallocate(probgrosserr)
 if (allocated(prpgerr)) deallocate(prpgerr)
-if (allocated(anal_ob)) deallocate(anal_ob)
-if (allocated(anal_ob_modens)) deallocate(anal_ob_modens)
 if (allocated(diagused)) deallocate(diagused)
+if (allocated(anal_ob_post)) deallocate(anal_ob_post)
+if (allocated(assimltd_flag)) deallocate(assimltd_flag)
+! free shared memory segement, fortran pointer to that memory.
+nullify(anal_ob)
+call MPI_Barrier(mpi_comm_world,ierr)
+call MPI_Win_free(shm_win, ierr)
+if (neigv > 0) then
+   nullify(anal_ob_modens)
+   call MPI_Win_free(shm_win2, ierr)
+endif
 end subroutine obsmod_cleanup
 
 

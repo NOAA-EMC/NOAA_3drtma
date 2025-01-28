@@ -11,7 +11,6 @@ subroutine read_locinfo()
    use mpimod, only: mpi_comm_world
    use mpisetup, only: mpi_real4,mpi_sum,mpi_in_place,numproc,nproc,&
                 mpi_integer,mpi_wtime,mpi_real8,mpi_max,mpi_min
-
    logical lexist
    character(len=40)  :: fname = 'hybens_info'
    real(r_kind) oblnp_indx(1)

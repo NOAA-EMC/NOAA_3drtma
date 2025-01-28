@@ -73,6 +73,10 @@ subroutine read_guess(iyear,month,idd,mype)
 !                         proximity over full domain instead of subdomain
 !   2016-03-02  s.liu/carley - remove use_reflectivity and use i_gsdcldanal_type 
 !   2017-10-10  Wu W    - add code for FV3 netcdf guess input 
+!   2019-09-18  martin  - added new fields to save guess tsen, q, geop_hgt for writing increment
+!   2019-09-23  martin  - add code for FV3 GFS netcdf guess input
+!   2020-11-19  Lu & Wang - modify file read for fgat, POC: xuguang.wang@ou.edu
+!   2021-01-05  x.zhang/lei  - add code for updating delz analysis in regional da 
 !
 !   input argument list:
 !     mype     - mpi task id
@@ -86,9 +90,9 @@ subroutine read_guess(iyear,month,idd,mype)
 !$$$
 
   use kinds, only: r_kind,i_kind
-  use jfunc, only: bcoption,clip_supersaturation
-  use guess_grids, only:  nfldsig,ges_tsen,load_prsges,load_geop_hgt,ges_prsl
-  use guess_grids, only:  geop_hgti, ges_geopi
+  use jfunc, only: bcoption,clip_supersaturation,superfact
+  use guess_grids, only: nfldsig,ges_tsen,load_prsges,load_geop_hgt,ges_prsl,&
+                         ges_tsen1,geop_hgti,ges_geopi,ges_q1
   use m_gsiBiases,only : bkg_bias_correction,nbc
   use m_gsiBiases, only: gsi_bkgbias_bundle
   use gsi_bias, only: read_bias
@@ -97,18 +101,25 @@ subroutine read_guess(iyear,month,idd,mype)
   use gridmod, only: wrf_mass_regional,wrf_nmm_regional,cmaq_regional,&
        fv3_regional,&
        twodvar_regional,netcdf,regional,nems_nmmb_regional,use_gfs_ozone
-  use gridmod, only: use_gfs_nemsio
+  use gridmod, only: use_gfs_nemsio, use_gfs_ncio, write_fv3_incr
   use gfs_stratosphere, only: use_gfs_stratosphere
 
   use constants, only: zero,one,fv,qmin
   use ncepgfs_io, only: read_gfs,read_gfs_chem
   use ncepnems_io, only: read_nems,read_nems_chem
+  use netcdfgfs_io, only: read_gfsnc, read_gfsnc_chem
   use gsi_metguess_mod, only: gsi_metguess_bundle
   use gsi_bundlemod, only: gsi_bundlegetpointer
   use gsd_update_mod, only: gsd_gen_coast_prox 
   use read_wrf_mass_guess_mod, only: read_wrf_mass_guess_class
   use read_wrf_nmm_guess_mod, only: read_wrf_nmm_guess_class
   use gsi_rfv3io_mod, only: read_fv3_netcdf_guess
+
+  use gridmod,only: l_reg_update_hydro_delz
+  use guess_grids, only:geom_hgti,geom_hgti_bg
+
+  use gsi_rfv3io_mod, only: bg_fv3regfilenameg
+  use mpimod, only: mpi_comm_world
 
   implicit none
 
@@ -159,7 +170,11 @@ subroutine read_guess(iyear,month,idd,mype)
         else if (nems_nmmb_regional) then
            call nmm_binary_guess%read_nems_nmmb_guess(mype)
         else if (fv3_regional      ) then
-           call  read_fv3_netcdf_guess
+           allocate(bg_fv3regfilenameg(nfldsig))
+           do it=1,nfldsig   
+              call bg_fv3regfilenameg(it)%init(it)
+           end do
+           call read_fv3_netcdf_guess(bg_fv3regfilenameg)
         else if (cmaq_regional) then
            call read_cmaq_guess(mype)
         end if
@@ -182,6 +197,9 @@ subroutine read_guess(iyear,month,idd,mype)
 !!           WRITE(6,*)'WARNING :: you elect to read first guess field in NEMSIO format'
            call read_nems
            call read_nems_chem(iyear,month,idd)
+        else if ( use_gfs_ncio ) then
+           call read_gfsnc
+           call read_gfsnc_chem(iyear,month,idd)
         else
            call read_gfs
            call read_gfs_chem(iyear,month,idd)
@@ -209,14 +227,17 @@ subroutine read_guess(iyear,month,idd,mype)
              do i=1,lat2
 !               ges_tsen(i,j,k,it)= ges_tv(i,j,k)/(one+fv*max(qmin,ges_q(i,j,k)))
                 ges_tsen(i,j,k,it)= ges_tv(i,j,k)/(one+fv*max(zero,ges_q(i,j,k)))
+                if (write_fv3_incr) ges_q1(i,j,k,it) = max(zero, ges_q(i,j,k))
              end do
           end do
        end do
     end if
   end do
 
+
 ! Load 3d subdomain pressure arrays from the guess fields
   call load_prsges
+
 
 ! recompute sensible temperature to remove supersaturation
   if ( clip_supersaturation ) then
@@ -233,13 +254,14 @@ subroutine read_guess(iyear,month,idd,mype)
       do k=1,nsig
          do j=1,lon2
             do i=1,lat2
-               satval = min(ges_q(i,j,k),satq(i,j,k))
+               satval = min(ges_q(i,j,k),superfact*satq(i,j,k))
                satval = max(qmin,satval)
                ges_q(i,j,k) = satval
                ges_tsen(i,j,k,it)= ges_tv(i,j,k)/(one+fv*ges_q(i,j,k))
             end do
          end do
       end do
+      if (write_fv3_incr) ges_q1(:,:,:,it) = ges_q(i,j,k)
     end do
   endif   ! clip_supersaturation
 
@@ -247,8 +269,15 @@ subroutine read_guess(iyear,month,idd,mype)
 ! Compute 3d subdomain geopotential heights from the guess fields
   call load_geop_hgt
 
+   if(l_reg_update_hydro_delz) then
+     geom_hgti_bg=geom_hgti
+   endif
+
 ! save guess geopotential height at level interface for use in write_atm
   ges_geopi=geop_hgti
+
+! save this for writing increment
+  ges_tsen1(:,:,:,:) = ges_tsen(:,:,:,:)
 
 ! Compute the coast proximity
   call gsd_gen_coast_prox

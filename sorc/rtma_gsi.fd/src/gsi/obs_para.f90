@@ -41,11 +41,10 @@ subroutine obs_para(ndata,mype)
 !                         grid.
 !
 !   input argument list:
-!     ndata(*,1)- number of prefiles retained for further processing
+!     ndata(*,1)- number of profiles retained for further processing
 !     ndata(*,2)- number of observations read
 !     ndata(*,3)- number of observations keep after read
 !     mype     - mpi task number
-!     ipoint   - pointer in array containing information about all obs type to process
 !
 !   output argument list:
 !
@@ -58,8 +57,8 @@ subroutine obs_para(ndata,mype)
   use constants, only: zero
   use jfunc, only: factqmin,factqmax
   use mpimod, only: npe,mpi_itype,mpi_comm_world,ierror
-  use obsmod, only: obs_setup,dtype,mype_diaghdr,ndat,nsat1, &
-              obsfile_all,dplat,nobs_sub,obs_sub_comm 
+  use obsmod, only: obs_setup,dtype,mype_diaghdr,ndat,nsat1
+  use obsmod, only: obsfile_all,dplat,nobs_sub,obs_sub_comm 
   use gridmod, only: twodvar_regional 
   use qcmod, only: buddycheck_t,buddydiag_save 
   use gsi_io, only: verbose, print_obs_para
@@ -104,7 +103,7 @@ subroutine obs_para(ndata,mype)
         if (dtype(is)=='lag') then    ! lagrangian data
            call dislag(ndata(is,1),mm1,lunout,obsfile_all(is),dtype(is),&
                 nobs_s) 
-        nsat1(is)= nobs_sub(mm1,is)
+           nsat1(is)= nobs_sub(mm1,is)
         else 
            obproc:do ii=1,npe
              if(nobs_sub(ii,is) > 0)then
@@ -342,7 +341,8 @@ subroutine count_obs(ndata,nn_obs,lat_data,lon_data,obs_data,nobs_s)
   integer(i_kind)               ,intent(in   ) :: ndata,lat_data,lon_data
   integer(i_kind)               ,intent(in   ) :: nn_obs
   integer(i_kind),dimension(npe),intent(inout) :: nobs_s
-  real(r_kind),dimension(nn_obs,ndata),intent(in) :: obs_data
+  real(r_kind),dimension(nn_obs,*),intent(in) :: obs_data
+! real(r_kind),dimension(nn_obs,ndata),intent(in) :: obs_data
 
 ! Declare local variables
   integer(i_kind) lon,lat,n,k

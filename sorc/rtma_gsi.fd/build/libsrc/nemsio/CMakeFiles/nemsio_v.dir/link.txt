@@ -1,2 +1,0 @@
-/usr/bin/ar qc ../../lib/libnemsio_v.a CMakeFiles/nemsio_v.dir/nemsio_module.f90.o CMakeFiles/nemsio_v.dir/nemsio_module_mpi.f90.o CMakeFiles/nemsio_v.dir/nemsio_openclose.f90.o CMakeFiles/nemsio_v.dir/nemsio_read.f90.o CMakeFiles/nemsio_v.dir/nemsio_write.f90.o
-/usr/bin/ranlib ../../lib/libnemsio_v.a

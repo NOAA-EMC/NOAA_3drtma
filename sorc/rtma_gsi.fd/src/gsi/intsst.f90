@@ -30,6 +30,7 @@ use m_obsNode, only: obsNode
 use m_sstNode, only: sstNode
 use m_sstNode, only: sstNode_typecast
 use m_sstNode, only: sstNode_nextcast
+use m_obsdiagNode, only: obsdiagNode_set
 implicit none
 
 PRIVATE
@@ -78,7 +79,7 @@ subroutine intsst(ssthead,rval,sval)
 !
 !$$$
   use kinds, only: r_kind,i_kind
-  use constants, only: half,one,tiny_r_kind,cg_term
+  use constants, only: zero,half,one,tiny_r_kind,cg_term
   use obsmod, only: lsaveobsens, l_do_adjoint,luse_obsdiag
   use qcmod, only: nlnqc_iter,varqc_iter
   use gsi_nstcouplermod, only: nst_gsi
@@ -99,7 +100,6 @@ subroutine intsst(ssthead,rval,sval)
 ! real(r_kind) penalty
   real(r_kind) w1,w2,w3,w4
   real(r_kind) val
-  real(r_kind) tval,tdir
   real(r_kind) cg_sst,p0,grad,wnotgross,wgross,pg_sst
   real(r_kind),pointer,dimension(:) :: ssst
   real(r_kind),pointer,dimension(:) :: rsst
@@ -107,15 +107,14 @@ subroutine intsst(ssthead,rval,sval)
 
 !  If no sst data return
   if(.not. associated(ssthead))return
+  if(.not. nst_gsi > 2) return 
 
 ! Retrieve pointers
 ! Simply return if any pointer not found
-  ier=0
-  call gsi_bundlegetpointer(sval,'sst',ssst,istatus);ier=istatus+ier
+  call gsi_bundlegetpointer(sval,'sst',ssst,istatus);ier=istatus
   call gsi_bundlegetpointer(rval,'sst',rsst,istatus);ier=istatus+ier
   if(ier/=0)return
 
-  !sstptr => ssthead
   sstptr => sstNode_typecast(ssthead)
   do while (associated(sstptr))
      j1=sstptr%ij(1)
@@ -128,23 +127,19 @@ subroutine intsst(ssthead,rval,sval)
      w4=sstptr%wij(4)
 
 !    Forward model
-     val=w1*ssst(j1)+w2*ssst(j2)&
-        +w3*ssst(j3)+w4*ssst(j4)
+     val=w1*ssst(j1)+w2*ssst(j2)+w3*ssst(j3)+w4*ssst(j4)
 
-     if ( nst_gsi > 2 ) then
-       tdir = w1*ssst(j1)+w2*ssst(j2)+w3*ssst(j3)+w4*ssst(j4)         ! Forward
-       val  = tdir*sstptr%tz_tr                                       ! Include contributions from Tz jacobian
-     else
-       val = w1*ssst(j1)+w2*ssst(j2)+w3*ssst(j3)+w4*ssst(j4)          ! Forward
-     endif
+     val  = val*sstptr%tz_tr                                        ! Include contributions from Tz jacobian
 
 
      if(luse_obsdiag)then
         if (lsaveobsens) then
            grad = val*sstptr%raterr2*sstptr%err2
-           sstptr%diags%obssen(jiter) = grad
+           !-- sstptr%diags%obssen(jiter) = grad
+           call obsdiagNode_set(sstptr%diags,jiter=jiter,obssen=grad)
         else
-           if (sstptr%luse) sstptr%diags%tldepart(jiter)=val
+           !-- if (sstptr%luse) sstptr%diags%tldepart(jiter)=val
+           if (sstptr%luse) call obsdiagNode_set(sstptr%diags,jiter=jiter,tldepart=val)
         endif
      endif
 
@@ -170,18 +165,12 @@ subroutine intsst(ssthead,rval,sval)
         endif
 
 !      Adjoint
-       if ( nst_gsi > 2 ) then
-         tval = sstptr%tz_tr*grad                     ! Extract contributions from surface jacobian
-         rsst(j1)=rsst(j1)+w1*tval                    ! Distribute adjoint contributions over surrounding grid points
-         rsst(j2)=rsst(j2)+w2*tval
-         rsst(j3)=rsst(j3)+w3*tval
-         rsst(j4)=rsst(j4)+w4*tval
-       else
-         rsst(j1)=rsst(j1)+w1*grad
-         rsst(j2)=rsst(j2)+w2*grad
-         rsst(j3)=rsst(j3)+w3*grad
-         rsst(j4)=rsst(j4)+w4*grad
-       endif
+       grad = sstptr%tz_tr*grad                 ! Extract contributions from surface jacobian
+
+       rsst(j1)=rsst(j1)+w1*grad
+       rsst(j2)=rsst(j2)+w2*grad
+       rsst(j3)=rsst(j3)+w3*grad
+       rsst(j4)=rsst(j4)+w4*grad
 
      endif                           ! if (l_do_adjoint) then
 
