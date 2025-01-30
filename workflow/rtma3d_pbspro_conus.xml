@@ -65,7 +65,7 @@
 <!ENTITY OBS_USELIST    "&NWROOT;/fix/obsuselist">
 <!ENTITY AIRCRAFT_REJECT  "&NWROOT;/fix/obsuselist/amdar_reject_lists">
 <!ENTITY SFCOBS_USELIST   "&NWROOT;/fix/obsuselist/mesonet_uselists">
-<!ENTITY SFCOBS_PROVIDER  "&NWROOT;/fix/obsuselist/sfcobs_provider">
+<!ENTITY SFCOBS_PROVIDER  "&FIXgsi;">
 <!ENTITY PARMwrf        "&NWROOT;/parm/wrf">
 <!ENTITY PARMupp        "&NWROOT;/parm/upp">
 <!ENTITY PARMgsi        "&NWROOT;/parm/gsi">
