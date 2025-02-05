@@ -57,7 +57,7 @@ fi
 #default to cohreswexp akhres prico hawaii
 
 if [[ -z "$1" ]] ; then
-    grids="hrrr"
+    grids="akrtma3d"
 else
     grids=$1
 fi
@@ -78,11 +78,11 @@ while [[ $nn -lt $num ]] ; do
     let nnp1="nn+1"
     dname=${gridsarray[$nn]}
     echo "     gridnames($nnp1)=${dname}," >> gridsinfo_input
-    if [[ $dname = "cohreswexp" || $dname = "cohresext" || $dname = "cohres" || $dname = "rtma3d" || $dname = "hrrr" ]] ; then
+    if [[ $dname = "cohreswexp" || $dname = "cohresext" || $dname = "cohres" || $dname = "rtma3d" || $dname = "hrrr" || $dname = "akrtma3d" ]] ; then
 	if [[ $Tur = yes ]] ; then
 	    err_exit echo "MULTIPLE GRIDS FROM RTMA3D3D DOMAIN!"
 	else
-	    run="rtma3d"
+	    run="akrtma3d"
 	    Tur=yes
 	fi
     else
@@ -90,8 +90,8 @@ while [[ $nn -lt $num ]] ; do
     fi
 
     #now find and run wgrib2 on all the relevant files for that grid
-    CYCLE="${PDY}0600"
-    CYCLE_STOP="${PDYm1}0600"
+    CYCLE="${PDY}06"
+    CYCLE_STOP="${PDYm1}06"
 
     while [[ $CYCLE -ge $CYCLE_STOP ]]; do
 
@@ -99,10 +99,10 @@ while [[ $nn -lt $num ]] ; do
 	HH=`echo $CYCLE | cut -c 9-10`
 
 	#find proper name of ges and analysis files to run wgrib2 on based on run and domain name
-	if [[ $run = "rtma3d" ]] ; then
-	    if [[ $dname == "hrrr" ]] ; then
-		opsfile=${COM_IN}/${NET}.${YYYYMMDD}/postprd.t${HH}00z/${NET}.t${HH}00z.wrfsubhnat.grib2
-		gesfile=${COM_IN}/${NET}.${YYYYMMDD}/postprd.t${HH}00z/${NET}.t${HH}00z.wrfsubhnat_fgs.grib2
+	if [[ $run = "akrtma3d" ]] ; then
+	    if [[ $dname == "akrtma3d" ]] ; then
+		opsfile=${COM_IN}/${NET}.${YYYYMMDD}/postprd.t${HH}z/${RUN}.t${HH}z.wrfsubhnat.grib2
+		gesfile=${COM_IN}/${NET}.${YYYYMMDD}/postprd.t${HH}z/${RUN}.t${HH}z.wrfsubhnat_fgs.grib2
 	    fi
 	fi
 	#now use wgrib2 to pull ges/analysis from the file
@@ -123,12 +123,12 @@ while [[ $nn -lt $num ]] ; do
 	#get template grid for 20Z
 
 	if [ ${HH} -eq 20 ] ; then
-	    if [[ $run == "rtma3d" ]] ; then
+	    if [[ $run == "akrtma3d" ]] ; then
 		cpfs $gesfile gesfileus.grb2
 	    fi
 	fi
 
-	CYCLE=`$MDATE -60 $CYCLE`
+	CYCLE=`$NDATE -1 $CYCLE`
     done
     let nn="$nn+1"
 done
@@ -151,7 +151,7 @@ cpfs $FIXminmax/conusexttz.bin .
 cpfs $FIXminmax/conustz.bin .
 cpfs $FIXminmax/conustz_ndfdonly.bin .
 
-export pgm=rtma_maxtgb
+export pgm=rtma_maxtbg
 startmsg
 $EXECrtma3d/$pgm >> $pgmout 2> errfile
 export err=$?; err_chk

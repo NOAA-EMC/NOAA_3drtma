@@ -2,10 +2,10 @@
 
 #   DOCBLOCK
 #
-# Script Name: rtma_mintbg.sh
+# Script Name: rtma_maxtbg.sh
 # Author: Steven Levine
 # Abstract: Read in previous 25 RTMA3D background/analysis files, use those
-# to compute minT background for 08Z RTMA3D
+# to compute maxT background for 08Z RTMA3D
 # History Log:
 #    9/2015: Initial write for WCOSS
 #    11/2016: Generalized to some extent to account for westward expanded
@@ -21,10 +21,10 @@
 #    specified in variables opsfile and gesfile
 #
 #  Output files:
-#    rtma3d.${PDY}.minT.bin, rtma3d.${PDY}.minT.grb2
-#    akrtma.${PDY}.minT.bin, akrtma.${PDY}.minT.grb2
-#    hirtma.${PDY}.minT.bin, hirtma.${PDY}.minT.grb2
-#    prrtma.${PDY}.minT.bin, prrtma.${PDY}.minT.grb2
+#    rtma3d.${PDY}.maxT.bin, rtma3d.${PDY}.maxT.grb2
+#    akrtma.${PDY}.maxT.bin, akrtma.${PDY}.maxT.grb2
+#    hirtma.${PDY}.maxT.bin, hirtma.${PDY}.maxT.grb2
+#    prrtma.${PDY}.maxT.bin, prrtma.${PDY}.maxT.grb2
 #
 #  User controllable options:
 #     $1 is an array of grid names.  Grid names are specified in sorc file domain_dims.f
@@ -38,7 +38,7 @@
 #           If user tries to include grid name in domain_dims.f but not specified in beginning of first 
 #           while loop, the script will abort.
 #           The missing grid names are: juneau and hrrr
-#    NOTE 2: A minimum of one grid for each domain (CONUS/HI/PR/AK) may be specified in $1.  Examples of grid combinations 
+#    NOTE 2: A maximum of one grid for each domain (CONUS/HI/PR/AK) may be specified in $1.  Examples of grid combinations 
 #           not allowed include: conus & cohreswexp, alaska & akhres.  This is to prevent file name conflicts.
 #    NOTE 3: that if no grid names are provided in $1, script will default to cohreswexp, ahres, prico, and hawaii
 #           which are the current grids in operation.
@@ -80,7 +80,7 @@ while [[ $nn -lt $num ]] ; do
     echo "     gridnames($nnp1)=${dname}," >> gridsinfo_input
     if [[ $dname = "cohreswexp" || $dname = "cohresext" || $dname = "cohres" || $dname = "rtma3d" || $dname = "hrrr" ]] ; then
 	if [[ $Tur = yes ]] ; then
-	    err_exit echo "MULTIPLE GRIDS FROM RTMA3D DOMAIN!"
+	    err_exit echo "MULTIPLE GRIDS FROM RTMA3D3D DOMAIN!"
 	else
 	    run="rtma3d"
 	    Tur=yes
@@ -90,8 +90,8 @@ while [[ $nn -lt $num ]] ; do
     fi
 
     #now find and run wgrib2 on all the relevant files for that grid
-    CYCLE="${PDY}1800"
-    CYCLE_STOP="${PDYm1}1800"
+    CYCLE="${PDY}06"
+    CYCLE_STOP="${PDYm1}06"
 
     while [[ $CYCLE -ge $CYCLE_STOP ]]; do
 
@@ -101,8 +101,8 @@ while [[ $nn -lt $num ]] ; do
 	#find proper name of ges and analysis files to run wgrib2 on based on run and domain name
 	if [[ $run = "rtma3d" ]] ; then
 	    if [[ $dname == "hrrr" ]] ; then
-		opsfile=${COM_IN}/${NET}.${YYYYMMDD}/postprd.t${HH}00z/${NET}.t${HH}00z.wrfsubhnat.grib2
-		gesfile=${COM_IN}/${NET}.${YYYYMMDD}/postprd.t${HH}00z/${NET}.t${HH}00z.wrfsubhnat_fgs.grib2
+		opsfile=${COM_IN}/${NET}.${YYYYMMDD}/postprd.t${HH}z/${RUN}.t${HH}z.wrfsubhnat.grib2
+		gesfile=${COM_IN}/${NET}.${YYYYMMDD}/postprd.t${HH}z/${RUN}.t${HH}z.wrfsubhnat_fgs.grib2
 	    fi
 	fi
 	#now use wgrib2 to pull ges/analysis from the file
@@ -128,7 +128,7 @@ while [[ $nn -lt $num ]] ; do
 	    fi
 	fi
 
-	CYCLE=`$MDATE -60 $CYCLE`
+	CYCLE=`$NDATE -1 $CYCLE`
     done
     let nn="$nn+1"
 done
@@ -143,26 +143,26 @@ EOF
 
 . prep_step
 
-export FORT71=rtma3d.${PDYm1}.mint_diag_bg.dat
-export FORT72=rtma3d.${PDYm1}.mint_diag_anl.dat
+export FORT71=rtma3d.${PDYm1}.maxt_diag_bg.dat
+export FORT72=rtma3d.${PDYm1}.maxt_diag_anl.dat
 
 cpfs $FIXminmax/aktz.bin .
 cpfs $FIXminmax/conusexttz.bin .
 cpfs $FIXminmax/conustz.bin .
 cpfs $FIXminmax/conustz_ndfdonly.bin .
 
-export pgm=rtma_mintgb
+export pgm=rtma_maxtbg
 startmsg
 $EXECrtma3d/$pgm >> $pgmout 2> errfile
 export err=$?; err_chk
 cat $pgmout
 
 if [[ $Tur = yes ]]; then
-if [ -s $DATA/mint_rtma3d_bg.bin ] ; then
+if [ -s $DATA/maxt_rtma3d_bg.bin ] ; then
     $WGRIB2 $DATA/gesfileus.grb2 -match ":TMP:" -grib_out $DATA/tempgribus.grb2
-    $WGRIB2 $DATA/tempgribus.grb2 -import_ieee $DATA/mint_rtma3d_bg.bin -set_date "${PDY}20" -set_var TMIN -set_ftime "12 hour fcst" -undefine_val 0 -grib_out $DATA/rtma3d.${PDYm1}.minT.grb2
-    cpfs $DATA/mint_rtma3d_bg.bin $DATA/rtma3d.${PDYm1}.minT.bin
-    cpfs $DATA/rtma3d.${PDYm1}.minT.grb2 $COMOUTpost_rtma3d/rtma3d.minT.grib2
+    $WGRIB2 $DATA/tempgribus.grb2 -import_ieee maxt_rtma3d_bg.bin -set_date "${PDY}08" -set_var TMAX -set_ftime "12 hour fcst" -undefine_val 0 -grib_out $DATA/rtma3d.${PDYm1}.maxT.grb2
+    cpfs $DATA/maxt_rtma3d_bg.bin $DATA/rtma3d.${PDYm1}.maxT.bin
+    cpfs $DATA/rtma3d.${PDYm1}.maxT.grb2 $COMOUTpost_rtma3d/rtma3d.maxT.grib2
 else
     err_exit "RTMA3D background was not generated or copied properly!"
 fi

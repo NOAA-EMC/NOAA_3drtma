@@ -161,7 +161,7 @@ postmsg "$jlogfile" "$msg"
 
 #copy executable to running directory
 ${CP} ${EXECrtma3d}/${exefile_name_post} ./rtma3d_wrfpost
-export APRUN="mpiexec -l -n 64 -ppn 64"
+export APRUN="mpiexec -l -n 128 -ppn 128"
 runline="${APRUN} ./rtma3d_wrfpost"
 $runline < itag > ${pgmout} 2>errfile
 export err=$? ; err_chk

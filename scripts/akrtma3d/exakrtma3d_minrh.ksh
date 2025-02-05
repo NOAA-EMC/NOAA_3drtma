@@ -56,7 +56,7 @@ cd ${DATA}
 #input list is of domains
 #default to cohreswexp akhres prico hawaii
 if [[ -z "$1" ]] ; then
-    grids="hrrr"
+    grids="akrtma3d"
 else
     grids=$1
 fi
@@ -79,11 +79,11 @@ while [[ $nn -lt $num ]] ; do
     dname=${gridsarray[$nn]}
     echo "     gridnames($nnp1)=${dname}," >> gridsinfo_input
     Tur=yes
-    run=rtma3d
+    run=akrtma3d
 	Tur=yes
 
-	CYCLE=${PDYm1}1800
-        CYCLE_STOP=${PDY}0600
+	CYCLE=${PDYm1}18
+        CYCLE_STOP=${PDY}06
 
     hr=0 #hour number to go in output (from wgrib2) file name
     
@@ -102,9 +102,9 @@ while [[ $nn -lt $num ]] ; do
 	#find proper name of ges and analysis files to run wgrib2 on based on run and domain name
        #find proper name of ges and analysis files to run wgrib2 on based on run and domain name
         if [[ $NET = "rtma3d" ]] ; then
-            if [[ $dname == "hrrr" ]] ; then
-                opsfile=${COM_IN}/${NET}.${YYYYMMDD}/postprd.t${HH}00z/${NET}.t${HH}00z.wrfsubhnat.grib2
-                gesfile=${COM_IN}/${NET}.${YYYYMMDD}/postprd.t${HH}00z/${NET}.t${HH}00z.wrfsubhnat_fgs.grib2
+            if [[ $dname == "akrtma3d" ]] ; then
+                opsfile=${COM_IN}/${NET}.${YYYYMMDD}/postprd.t${HH}z/${RUN}.t${HH}z.wrfsubhnat.grib2
+                gesfile=${COM_IN}/${NET}.${YYYYMMDD}/postprd.t${HH}z/${RUN}.t${HH}z.wrfsubhnat_fgs.grib2
             fi
         fi
 	#now use wgrib2 to pull ges/analysis from the file
@@ -121,9 +121,9 @@ while [[ $nn -lt $num ]] ; do
 	else
 	    echo "WARNING: ${NET} file unavailable for ${CYCLE}!";
 	fi	
-	CYCLE=`$MDATE +60 $CYCLE`
+	CYCLE=`$NDATE +1 $CYCLE`
         if [ ${HH} -eq 06 ] ; then
-            if [[ $run == "rtma3d" ]] ; then
+            if [[ $run == "akrtma3d" ]] ; then
                 cpfs $gesfile gesfileus.grb2
             fi
         fi

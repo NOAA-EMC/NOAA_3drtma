@@ -125,7 +125,7 @@ fi
 ######################
 # Execute the script.
 ######################
-${exSCR_OBSPREP_LGHTN:-$HOMErtma3d/scripts/ex${NET}_obsprep_lghtn.ksh}
+${exSCR_OBSPREP_LGHTN:-$HOMErtma3d/scripts/${RUN}/ex${RUN}_obsprep_lghtn.ksh}
 export err=$?; err_chk
 
 msg="$0 of $job completed normally"

@@ -60,10 +60,10 @@
 <!ENTITY FIXgsi         "&NWROOT;/fix/gsi">
 <!ENTITY FIXwps         "&NWROOT;/fix/wps">
 <!ENTITY FIXwrf         "&NWROOT;/fix/wrf">
-<!ENTITY FIXminmax      "&NWROOT;/fix/minmax">
-<!ENTITY OBS_USELIST    "&NWROOT;/fix/obsuselist">
-<!ENTITY AIRCRAFT_REJECT  "&NWROOT;/fix/obsuselist/amdar_reject_lists">
-<!ENTITY SFCOBS_USELIST   "&NWROOT;/fix/obsuselist/mesonet_uselists">
+<!ENTITY FIXminmax      "&FIXrtma3d;/minmax">
+<!ENTITY OBS_USELIST    "/lfs/h2/emc/da/noscrub/matthew.t.morris/FixData/obsuselist">
+<!ENTITY AIRCRAFT_REJECT  "/lfs/h2/emc/da/noscrub/matthew.t.morris/FixData/obsuselist/amdar_reject_lists">
+<!ENTITY SFCOBS_USELIST   "/lfs/h2/emc/da/noscrub/matthew.t.morris/FixData/obsuselist/mesonet_uselists">
 <!ENTITY SFCOBS_PROVIDER  "&FIXgsi;">
 <!ENTITY PARMwrf        "&NWROOT;/parm/wrf">
 <!ENTITY PARMupp        "&NWROOT;/parm/upp">
@@ -130,7 +130,7 @@
 <!ENTITY exSCR_OBSPREP_RADAR   "&SCRIPT_DIR;/&RUN;/ex&RUN;_obsprep_radar.ksh">
 <!ENTITY exefile_name_mosaic   "">
 <!ENTITY JJOB_OBSPREP_LGHTN    "&JJOB_DIR;/J&CAP_RUN;_OBSPREP_LGHTN">
-<!ENTITY exSCR_OBSPREP_LGHTN   "&SCRIPT_DIR;/ex&NET;_obsprep_lghtn.ksh">
+<!ENTITY exSCR_OBSPREP_LGHTN   "&SCRIPT_DIR;/&RUN;/ex&RUN;_obsprep_lghtn.ksh">
 <!ENTITY exefile_name_lightning "rtma_process_lightning">
 <!ENTITY JJOB_OBSPREP_CLOUD    "&JJOB_DIR;/J&CAP_RUN;_OBSPREP_CLOUD">
 <!ENTITY exSCR_OBSPREP_CLOUD   "&SCRIPT_DIR;/&RUN;/ex&RUN;_obsprep_cloud.ksh">
@@ -140,7 +140,7 @@
 <!ENTITY JJOB_PREPFGS    "&JJOB_DIR;/J&CAP_RUN;_PREPFGS">
 <!ENTITY exSCR_PREPFGS   "&SCRIPT_DIR;/&RUN;/ex&RUN;_prepfgs.ksh">
 <!ENTITY JJOB_GSIANL	 "&JJOB_DIR;/J&CAP_RUN;_GSIANL">
-<!ENTITY exSCR_GSIANL	 "&SCRIPT_DIR;/ex&NET;_gsianl.ksh">
+<!ENTITY exSCR_GSIANL	 "&SCRIPT_DIR;/&RUN;/ex&RUN;_gsianl.ksh">
 <!ENTITY exefile_name_gsi      "rtma_gsi">
 <!ENTITY JJOB_AUTOQC     "&JJOB_DIR;/J&CAP_RUN;_AUTOQC">
 <!ENTITY exSCR_AUTOQC    "&SCRIPT_DIR;/ex&NET;_autoqc.ksh">
@@ -212,14 +212,19 @@
 <!ENTITY GSI_PROC "14">
 <!ENTITY GSI_THREADS "1">
 <!ENTITY GSI_OMP_STACKSIZE "512M">
-<!ENTITY GSI_RESOURCES '<walltime>00:40:00</walltime>'> 
-<!ENTITY GSI_RESERVATION '<nodes>4:ppn=64:vntype=cray_compute:mem=500GB</nodes><native>-l place=scatter</native><queue>&QUEUE;</queue><account>&ACCOUNT;</account>'>
+<!ENTITY GSI_RESOURCES '<walltime>00:40:00</walltime>'>
+<!ENTITY GSI_RESERVATION '<nodes>2:ppn=60:vntype=cray_compute:mem=500GB</nodes><native>-l place=vscatter,select=1:ncpus=120</native><queue>&QUEUE;</queue><account>&ACCOUNT;</account>'>
 
 <!ENTITY GSI_START_TIME "00:40:00">
 <!ENTITY GSI_DEADLINE   "01:30:00">
 <!ENTITY START_TIME_RADAR "00:10:00">
 <!ENTITY GSI_WALL_LIMIT 
    '<deadline><cyclestr offset="&GSI_DEADLINE;">@Y@m@d@H@M</cyclestr></deadline>'>
+
+<!ENTITY MINMAX_PROC "1">
+<!ENTITY MINMAX_RESOURCES '<walltime>00:10:00</walltime>'>
+<!ENTITY MINMAX_RESERVATION '<nodes>1:ppn=1:vntype=cray_compute:mem=500GB</nodes><native>-l place=scatter</native><queue>&QUEUE;</queue><account>&ACCOUNT;</account>'>
+
 
 <!ENTITY AUTOQC_PROC "1">
 <!ENTITY AUTOQC_RESOURCES '<walltime>00:30:00</walltime>'>
@@ -228,6 +233,7 @@
 <!ENTITY MINMAX_PROC "1">
 <!ENTITY MINMAX_RESOURCES '<walltime>00:10:00</walltime>'>
 <!ENTITY MINMAX_RESERVATION '<nodes>1:ppn=1:vntype=cray_compute:mem=500GB</nodes><native>-l place=scatter</native><queue>&QUEUE;</queue><account>&ACCOUNT;</account>'>
+
 <!ENTITY UPDATEVARS_PROC "14">
 <!ENTITY UPDATEVARS_THREADS "1">
 <!ENTITY UPDATEVARS_OMP_STACKSIZE "512M">
@@ -239,7 +245,7 @@
 <!ENTITY POST_THREADS "1">
 <!ENTITY POST_OMP_STACKSIZE "512MB">
 <!ENTITY POST_RESOURCES '<walltime>00:20:00</walltime>'> 
-<!ENTITY POST_RESERVATION '<nodes>1:ppn=64:vntype=cray_compute:mem=200GB</nodes><native>-l place=scatter</native><queue>&QUEUE;</queue><account>&ACCOUNT;</account>'>
+<!ENTITY POST_RESERVATION '<nodes>1:ppn=128:vntype=cray_compute:mem=200GB</nodes><native>-l place=scatter</native><queue>&QUEUE;</queue><account>&ACCOUNT;</account>'>
 
 <!-- Variables in Namelist -->
 <!ENTITY GSI_grid_ratio_in_var       "1">
@@ -769,6 +775,45 @@
       <name>JJOB_POST</name>
       <value>&JJOB_POST;</value>
     </envar>'>
+
+<!ENTITY ENVARS_MINMAX
+    '<envar>
+      <name>START_TIME</name>
+      <value><cyclestr>@Y@m@d@H</cyclestr></value>
+    </envar>
+    <envar>
+       <name>JJOB_MINT</name>
+       <value>&JJOB_MINT;</value>
+    </envar>
+    <envar>
+       <name>JJOB_MAXT</name>
+       <value>&JJOB_MAXT;</value>
+    </envar>
+    <envar>
+       <name>exSCR_MAXTBG</name>
+       <value>&exSCR_MAXTBG;</value>
+    </envar>
+    <envar>
+       <name>exSCR_MAXTOBS</name>
+       <value>&exSCR_MAXTOBS;</value>
+    </envar>
+    <envar>
+       <name>exSCR_MINTOBS</name>
+       <value>&exSCR_MINTOBS;</value>
+    </envar>
+    <envar>
+       <name>exSCR_MINTBG</name>
+       <value>&exSCR_MINTBG;</value>
+    </envar>
+    <envar>
+       <name>exSCR_MINRH</name>
+       <value>&exSCR_MINRH;</value>
+    </envar>
+    <envar>
+       <name>exSCR_MAXRH</name>
+       <value>&exSCR_MAXRH;</value>
+    </envar>'>
+
 
 
 <!ENTITY ENVARS_AUTOQC

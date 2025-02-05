@@ -21,7 +21,7 @@ export RUN_ENVIR=${RUN_ENVIR:-nco}
 # Set NET and RUN
 #################
 export NET=rtma3d
-export RUN=rtma3d
+#export RUN=rtma3d
 
 # Note: grib_util module loaded in submission (lsf or ecFlow) script
 
@@ -121,14 +121,21 @@ fi
 
 export COM_IN=${COM_IN:-$COMROOT/${NET}/${envir}}
 
-${exSCR_POST:-$HOMErtma3d/scripts/ex${RUN}_maxtbg.ksh}
+#${exSCR_POST:-$HOMErtma3d/scripts/${RUN}/ex${RUN}_maxtbg.ksh}
+#export err=$?; err_chk
+
+#msg="$0 of $job completed normally"
+#postmsg $jlogfile "$msg"
+
+${exSCR_POST:-$HOMErtma3d/scripts/${RUN}/ex${RUN}_maxtobs.ksh}
 export err=$?; err_chk
 
 msg="$0 of $job completed normally"
 postmsg $jlogfile "$msg"
 
-${exSCR_POST:-$HOMErtma3d/scripts/ex${RUN}_minrh.ksh}
-export err=$?; err_chk
+
+#${exSCR_POST:-$HOMErtma3d/scripts/${RUN}/ex${RUN}_minrh.ksh}
+#export err=$?; err_chk
 
 msg="$0 of $job completed normally"
 postmsg $jlogfile "$msg"

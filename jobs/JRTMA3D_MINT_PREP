@@ -21,7 +21,7 @@ export RUN_ENVIR=${RUN_ENVIR:-nco}
 # Set NET and RUN
 #################
 export NET=rtma3d
-export RUN=rtma3d
+#export RUN=rtma3d
 
 # Note: grib_util module loaded in submission (lsf or ecFlow) script
 
@@ -127,27 +127,35 @@ export COM_IN=${COM_IN:-$COMROOT/${NET}/${envir}}
 # Execute the script.
 ######################
 
-${exSCR_POST:-$HOMErtma3d/scripts/ex${RUN}_mintbg.ksh} 
+#${exSCR_POST:-$HOMErtma3d/scripts/${RUN}/ex${RUN}_mintbg.ksh} 
+#export err=$?; err_chk
+
+#msg="$0 of $job completed normally"
+#postmsg $jlogfile "$msg"
+
+
+${exSCR_POST:-$HOMErtma3d/scripts/${RUN}/ex${RUN}_mintobs.ksh}
 export err=$?; err_chk
 
 msg="$0 of $job completed normally"
 postmsg $jlogfile "$msg"
 
-${exSCR_POST:-$HOMErtma3d/scripts/ex${RUN}_maxrh.ksh} 
-export err=$?; err_chk
 
-msg="$0 of $job completed normally"
-postmsg $jlogfile "$msg"
+#${exSCR_POST:-$HOMErtma3d/scripts/${RUN}/ex${RUN}_maxrh.ksh} 
+#export err=$?; err_chk
 
-if [ -e "${pgmout}" ] ; then
-   cat $pgmout
-   cpreq -p $pgmout ${LOG_PGMOUT}
-fi
+#msg="$0 of $job completed normally"
+#postmsg $jlogfile "$msg"
 
-postmsg $jlogfile "$0 of $job completed normally"
+#if [ -e "${pgmout}" ] ; then
+#   cat $pgmout
+#   cpreq -p $pgmout ${LOG_PGMOUT}
+#fi
 
-if [ "${KEEPDATA}" != YES ]; then
-    rm -rf $DATA
-fi
+#postmsg $jlogfile "$0 of $job completed normally"
+
+#if [ "${KEEPDATA}" != YES ]; then
+#    rm -rf $DATA
+#fi
 
 date
