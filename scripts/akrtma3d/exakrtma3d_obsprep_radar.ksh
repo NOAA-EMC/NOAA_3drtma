@@ -150,7 +150,7 @@ postmsg "$jlogfile" "$msg"
 msg="***********************************************************"
 postmsg "$jlogfile" "$msg"
 ${CP_LN} ${EXECrtma3d}/${exefile_name_radar} ${pgm}
-APRUN="mpiexec -n 128 -ppn 128 --cpu-bind core --depth 1"
+APRUN="mpiexec -n 36 -ppn 36 --cpu-bind core --depth 1"
 ${APRUN} ./${pgm} > ${pgmout} 2>errfile
 #${MPIRUN} ./${pgm} > ${pgmout} 2>errfile
 export err=$?; err_chk

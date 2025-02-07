@@ -388,7 +388,7 @@ if [ "${envir}" == "lsf" ] || [ "${envir}" == "pbspro" ];  then
   APRUN="mpiexec -n 360 -ppn 30 --cpu-bind core --depth 4"
   export FI_OFI_RXM_SAR_LIMIT=3145728
   export OMP_STACKSIZE=500M
-  export OMP_NUM_THREADS=4
+#  export OMP_NUM_THREADS=4
   rm ${DATA}/rtma_gsi
   cpreq ${EXECrtma3d}/rtma_gsi ${DATA}
   $APRUN ${DATA}/rtma_gsi < ${DATA}/gsiparm.anl > stdout 2>&1
