@@ -47,7 +47,7 @@ time_str2=`${DATE} "+%Y-%m-%d_%H_00_00" -d "${START_TIME}"`
 #----- enter working directory -------
 cd ${DATA}
 ${ECHO} "enter working directory:${DATA}"
-nc_diag_cat=/lfs/h2/emc/da/noscrub/edward.colon/save/RTMA/bin/ncdiag_cat_serial.x
+nc_diag_cat=${EXECrtma3d}/ncdiag_cat_serial.x
 # Define the loghistory file depending on if this is the full or partial cycle
 #ifsoilnudge=.true.
 ifsoilnudge=.true.
@@ -122,7 +122,7 @@ if [ "${envir}" = "lsf" ] || [ "${envir}" = "pbspro" ] && [ ${HRRRDAS_BEC} -eq 0
   export nhr_assimilation=03
   ##typeset -Z2 nhr_assimilation
 
-  /usr/bin/python ${UTILrtma3d_dev}/getbest_EnKF_FV3GDAS.py -v $YYYYMMDDHH --exact=no --minsize=${nens} -d ${COMINGDAS}/enkfgdas -m no -o filelist${nhr_assimilation} --o3fname=gfs_sigf${nhr_assimilation} --gfs_netcdf=yes   
+  python ${UTILrtma3d_dev}/getbest_EnKF_FV3GDAS.py -v $YYYYMMDDHH --exact=no --minsize=${nens} -d ${COMINGDAS}/enkfgdas -m no -o filelist${nhr_assimilation} --o3fname=gfs_sigf${nhr_assimilation} --gfs_netcdf=yes   
   #Check to see if ensembles were found 
   numfiles=`cat filelist03 | wc -l`
 
@@ -177,7 +177,7 @@ if [[ ${hrrrmem} -gt 30 ]] && [[ ${HRRRDAS_BEC} -eq 1  ]]; then #if HRRRDAS BEC 
   nummem=${hrrrmem}
   cpreq filelist.hrrrdas filelist03
   ${CP} ${PARMgsi}/hybens_info_hrrrdas hybens_info
-  beta1_inv=$(( 1 - $EnsWgt  ))
+  beta1_inv=0.9
   ifhyb=.true.
   regional_ensemble_option=3
   grid_ratio_ens=1
@@ -187,7 +187,7 @@ if [[ ${hrrrmem} -gt 30 ]] && [[ ${HRRRDAS_BEC} -eq 1  ]]; then #if HRRRDAS BEC 
 elif [[ ${nummem} -eq 80 ]]; then
   echo "Do hybrid with GDAS directly"
   ${CP} ${PARMgsi}/hybens_info_hrrrdas hybens_info
-  beta1_inv=$(( 1 - $EnsWgt  ))
+  beta1_inv=0.5
   ifhyb=.true.
   regional_ensemble_option=1
   grid_ratio_ens=3 #ensemble resolution=3 * grid_ratio * grid_ratio_ens

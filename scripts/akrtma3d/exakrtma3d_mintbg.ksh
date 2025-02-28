@@ -150,7 +150,7 @@ cpfs $FIXminmax/aktz.bin .
 cpfs $FIXminmax/conusexttz.bin .
 cpfs $FIXminmax/conustz.bin .
 cpfs $FIXminmax/conustz_ndfdonly.bin .
-
+cpfs $FIXminmax/akhrrr.bin .
 export pgm=rtma_mintbg
 startmsg
 $EXECrtma3d/$pgm >> $pgmout 2> errfile

@@ -127,13 +127,6 @@ export COM_IN=${COM_IN:-$COMROOT/${NET}/${envir}}
 #msg="$0 of $job completed normally"
 #postmsg $jlogfile "$msg"
 
-${exSCR_POST:-$HOMErtma3d/scripts/${RUN}/ex${RUN}_maxtobs.ksh}
-export err=$?; err_chk
-
-msg="$0 of $job completed normally"
-postmsg $jlogfile "$msg"
-
-
 #${exSCR_POST:-$HOMErtma3d/scripts/${RUN}/ex${RUN}_minrh.ksh}
 #export err=$?; err_chk
 

@@ -35,7 +35,7 @@
 ##
 ##-----------------------------------------------------------------------
 ##
-
+set -x
 cd ${DATA}
 
 if [ -z "$WGRIB2" ]; then
@@ -65,7 +65,6 @@ ulimit -a
 CYCLE="${PDY}06"
 CYCLE_STOP="${PDYm1}06"
 
-OBS_DIR=${DATAOBSHOME}
 obsfileprefix=rtma
 
 while [[ $CYCLE -ge $CYCLE_STOP ]] ; do
@@ -78,29 +77,29 @@ while [[ $CYCLE -ge $CYCLE_STOP ]] ; do
 
 
    if [[ $CYCLE -eq $CYCLE_STOP ]] ; then
-     cpfs $DATAROOT/$envir/$RUN.${YYYYMMDD}${HH}00/obsprd/${obsfileprefix}.t${HH}z.prepbufr.tm00 ${obsfileprefix}.t${HH}z.prepbufr.tm00_prevday
-   else
-     cpfs $DATAROOT/$envir/$RUN.${YYYYMMDD}${HH}00/obsprd/${obsfileprefix}.t${HH}z.prepbufr.tm00 ${obsfileprefix}.t${HH}z.prepbufr.tm00
+     cpfs $COMINPREP/rtma.${YYYYMMDD}/${obsfileprefix}.t${HH}z.prepbufr.tm00 ${obsfileprefix}.t${HH}z.prepbufr.tm00_prevday
+   else 
+     cpfs $COMINPREP/rtma.${YYYYMMDD}/${obsfileprefix}.t${HH}z.prepbufr.tm00 ${obsfileprefix}.t${HH}z.prepbufr.tm00
    fi
    CYCLE=`$NDATE -01 $CYCLE | cut -c 1-10`
 done
 #. prep_step
 #Assign fortran unit variables
 #INPUT
-ln -sf $FIXminmax/metar.dat fort.11
-ln -sf $FIXminmax/metarak.dat fort.12
-ln -sf $FIXminmax/mesoa.dat fort.13
-ln -sf $FIXminmax/mesob.dat fort.14
-ln -sf $FIXminmax/mesoc.dat fort.15
-ln -sf $FIXminmax/mesod.dat fort.16
-ln -sf $FIXminmax/mesoe.dat fort.17
-ln -sf $FIXminmax/mesof.dat fort.18
-ln -sf $FIXminmax/mesoak.dat fort.19
-ln -sf $FIXminmax/mesopr.dat fort.20
-ln -sf $FIXminmax/mesohi.dat fort.21
-ln -sf $FIXminmax/mesogu.dat fort.22
-ln -sf $FIXminmax/ship.dat fort.23
-ln -sf $FIXminmax/shipak.dat fort.24
+export FORT11=$FIXminmax/metar.dat
+export FORT12=$FIXminmax/metarak.dat
+export FORT13=$FIXminmax/mesoa.dat
+export FORT14=$FIXminmax/mesob.dat
+export FORT15=$FIXminmax/mesoc.dat
+export FORT16=$FIXminmax/mesod.dat
+export FORT17=$FIXminmax/mesoe.dat
+export FORT18=$FIXminmax/mesof.dat
+export FORT19=$FIXminmax/mesoak.dat
+export FORT20=$FIXminmax/mesopr.dat
+export FORT21=$FIXminmax/mesohi.dat
+export FORT22=$FIXminmax/mesogu.dat
+export FORT23=$FIXminmax/ship.dat
+export FORT24=$FIXminmax/shipak.dat
 export FORT25=${obsfileprefix}.t06z.prepbufr.tm00_prevday
 export FORT26=${obsfileprefix}.t07z.prepbufr.tm00
 export FORT27=${obsfileprefix}.t08z.prepbufr.tm00
@@ -150,8 +149,9 @@ $EXECrtma3d/$pgm  > $pgmout 2>errfile
 export err=$?; err_chk
 cat $pgmout
 
-if [ -s rtma.${PDYm1}.maxtobs.dat ] ; then
-    cp rtma.${PDYm1}.maxtobs.dat $COMOUTgsi_rtma3d/
+if [ -s ${DATA}/rtma.${PDYm1}.maxtobs.dat ] ; then
+    cp ${DATA}/rtma.${PDYm1}.maxtobs.dat  ${COMINobsproc_rtma3d}/rtma.${PDYm1}.maxtobs.dat
+    cp ${COMINobsproc_rtma3d}/rtma.${PDYm1}.maxtobs.dat ${DATA_OBSPRD}/rtma.${PDYm1}.maxtobs.dat
 else
     echo "WARNING: RTMA maxT ob file was not generated properly!"
     echo "URMA maxT will have no obs!"

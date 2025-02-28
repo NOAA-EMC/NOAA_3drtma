@@ -28,7 +28,7 @@ export NET=rtma3d
 ##########################################################
 # obtain unique process id (pid) and make temp directories
 
-
+export PDYm1=`$NDATE -24 ${PDY}${cyc} | cut -c 1-8`
 
 ##########################################################
 export jobid=${jobid:-"${outid}.o$$"}
@@ -40,7 +40,6 @@ else
 fi
 cd $DATA
 
-export PDYm1=`$NDATE -24 ${PDY}${cyc} | cut -c 1-8`
 
   export cycle=${cycle:-t${cyc}z}
   export pgmout=${pgmout:-"OUTPUT.${PDY}${cyc}.${jobid}"}
@@ -82,8 +81,8 @@ export FGS_OPT=${FGS_OPT:-1}
 # Run setpdy and initialize PDY variables
 ###########################################
 
-if [ ${cyc} != "19" ] ; then
-    echo -e "\nWARNING: GETMINT only runs at 1900z. Exiting.\n"
+if [ ${cyc} != "07" ] ; then
+    echo -e "\nWARNING: GETMAXT only runs at 1900z. Exiting.\n"
     exit 0
 fi
 
@@ -94,12 +93,10 @@ fi
 #################################################
 ### COM_IN used to retrieve ges and analysis files from 2p5, ak, gu, hi, and pr
 export COMIN=${COMIN:-${COMROOT}/${NET}/${envir}/${NET}.${PDY}}
-export COMINm1=${COMINm1:-${COMROOT}/${NET}/${envir}/${NET}.${PDYm1}}
 export COMOUT=${COMOUT:-${COMROOT}/${NET}/${envir}/${NET}.${PDY}}
 
 ### Observations Products/Input for the RTMA3D (prepbufr files) 
 export COMINobsproc_rtma3d=${COMINobsproc_rtma3d:-"${COMIN}/obsprd.${cycle}"}
-export COMINobsproc_rtma3dm1=${COMINobsproc_rtma3dm1:-"${COMINm1}/obsprd.${cycle}"}
 
 ### Firstguess Products/Input for the RTMA3D (netcdf) 
 export GESINhrrr_rtma3d=${GESINhrrr_rtma3d:-"${COMIN}/fgsprd.${cycle}"}
@@ -110,8 +107,8 @@ export COMOUTgsi_rtma3d=${COMOUTgsi_rtma3d:-"${COMOUT}/gsiprd.${cycle}"}
 ### 3DRTMA UNI-POST Products (grib2)
 export COMOUTpost_rtma3d=${COMOUTpost_rtma3d:-"${COMOUT}/postprd.${cycle}"}
 
-### 3DRTMA MIN Products (grib2)
-#export COMOUTmintmaxrh_rtma3d=${COMOUTmintmaxrh_rtma3d:-"${COMOUT}/mintmaxrhprd.${cycle}"}
+### 3DRTMA MINMAX Products (grib2)
+#export COMOUTmaxtminrh_rtma3d=${COMOUTmaxtminrh_rtma3d:-"${COMOUT}/maxtminrhprd.${cycle}"}
 
 
 if [ ! -d "${COMIN}" ] ; then
@@ -121,34 +118,25 @@ if [ ! -d "${COMOUT}" ] ; then
    mkdir -p $COMOUT
 fi
 
+
 export COM_IN=${COM_IN:-$COMROOT/${NET}/${envir}}
 
-######################
-# Execute the script.
-######################
+${exSCR_POST:-$HOMErtma3d/scripts/${RUN}/ex${RUN}_maxtobs.ksh}
+export err=$?; err_chk
 
-#${exSCR_POST:-$HOMErtma3d/scripts/${RUN}/ex${RUN}_mintbg.ksh} 
-#export err=$?; err_chk
-
-#msg="$0 of $job completed normally"
-#postmsg $jlogfile "$msg"
+msg="$0 of $job completed normally"
+postmsg $jlogfile "$msg"
 
 
-#${exSCR_POST:-$HOMErtma3d/scripts/${RUN}/ex${RUN}_maxrh.ksh} 
-#export err=$?; err_chk
+if [ -e "${pgmout}" ] ; then
+   cat $pgmout
+   cpreq -p $pgmout ${LOG_PGMOUT}
+fi
 
-#msg="$0 of $job completed normally"
-#postmsg $jlogfile "$msg"
+postmsg $jlogfile "$0 of $job completed normally"
 
-#if [ -e "${pgmout}" ] ; then
-#   cat $pgmout
-#   cpreq -p $pgmout ${LOG_PGMOUT}
-#fi
-
-#postmsg $jlogfile "$0 of $job completed normally"
-
-#if [ "${KEEPDATA}" != YES ]; then
-#    rm -rf $DATA
-#fi
+if [ "${KEEPDATA}" != YES ]; then
+    rm -rf $DATA
+fi
 
 date
