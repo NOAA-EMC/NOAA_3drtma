@@ -48,6 +48,7 @@ cp -r /lfs/h2/emc/da/noscrub/edward.colon/FixData/GSI-fix gsi
 cp -r /lfs/h2/emc/da/noscrub/edward.colon/FixData/minmaxtrh minmax
 cp -r /lfs/h2/emc/da/noscrub/edward.colon/FixData/wps wps
 cp -r /lfs/h2/emc/da/noscrub/edward.colon/FixData/wrf wrf
+cp -r /lfs/h2/emc/da/noscrub/edward.colon/FixData/wrfbufr wrfbufr
 fi
 
 cd $BASE
@@ -66,6 +67,7 @@ if [ $BUILD_rtma_gsi = yes ] ; then
 
 echo " .... Building rtma_gsi .... "
 $BASE/build_rtma_gsi.sh > $logs_dir/build_rtma_gsi.log 2>&1
+cp  /lfs/h2/emc/da/noscrub/edward.colon/NOAA_3drtma_new/exec/ncdiag_cat_serial.x ../exec
 
 fi
 
