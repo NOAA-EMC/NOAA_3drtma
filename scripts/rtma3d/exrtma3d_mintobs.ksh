@@ -35,7 +35,7 @@
 ##
 ##-----------------------------------------------------------------------
 ##
-
+set -x
 cd ${DATA}
 
 if [ -z "$WGRIB2" ]; then
@@ -75,57 +75,57 @@ while [[ $CYCLE -ge $CYCLE_STOP ]] ; do
    #copy URMA prepbufr files into workind directory
    #account for 25 hours by using _prevday for same hour, prev day
    if [[ $CYCLE -eq $CYCLE_STOP ]] ; then
-     cpfs $DATAROOT/$envir/$RUN.${YYYYMMDD}${HH}00/obsprd/${obsfileprefix}.t${HH}z.prepbufr.tm00 ${obsfileprefix}.t${HH}z.prepbufr.tm00_prevday
+     cpfs $COMINPREP/rtma.${YYYYMMDD}/${obsfileprefix}.t${HH}z.prepbufr.tm00 ${obsfileprefix}.t${HH}z.prepbufr.tm00_prevday
    else
-     cpfs $DATAROOT/$envir/$RUN.${YYYYMMDD}${HH}00/obsprd/${obsfileprefix}.t${HH}z.prepbufr.tm00 ${obsfileprefix}.t${HH}z.prepbufr.tm00
+     cpfs $COMINPREP/rtma.${YYYYMMDD}/${obsfileprefix}.t${HH}z.prepbufr.tm00 ${obsfileprefix}.t${HH}z.prepbufr.tm00
    fi
    CYCLE=`$NDATE -01 $CYCLE | cut -c 1-10`
 done
 #. prep_step
 #Assign fortran unit variables
 #INPUT
-ln -sf $FIXminmax/metar.dat fort.11
-ln -sf $FIXminmax/metarak.dat fort.12
-ln -sf $FIXminmax/mesoa.dat fort.13
-ln -sf $FIXminmax/mesob.dat fort.14
-ln -sf $FIXminmax/mesoc.dat fort.15
-ln -sf $FIXminmax/mesod.dat fort.16
-ln -sf $FIXminmax/mesoe.dat fort.17
-ln -sf $FIXminmax/mesof.dat fort.18
-ln -sf $FIXminmax/mesoak.dat fort.19
-ln -sf $FIXminmax/mesopr.dat fort.20
-ln -sf $FIXminmax/mesohi.dat fort.21
-ln -sf $FIXminmax/mesogu.dat fort.22
-ln -sf $FIXminmax/ship.dat fort.23
-ln -sf $FIXminmax/shipak.dat fort.24
-export FORT25=${obsfileprefix}.t06z.prepbufr.tm00_prevday
-export FORT26=${obsfileprefix}.t07z.prepbufr.tm00
-export FORT27=${obsfileprefix}.t08z.prepbufr.tm00
-export FORT28=${obsfileprefix}.t09z.prepbufr.tm00
-export FORT29=${obsfileprefix}.t10z.prepbufr.tm00
-export FORT30=${obsfileprefix}.t11z.prepbufr.tm00
-export FORT31=${obsfileprefix}.t12z.prepbufr.tm00
-export FORT32=${obsfileprefix}.t13z.prepbufr.tm00
-export FORT33=${obsfileprefix}.t14z.prepbufr.tm00
-export FORT34=${obsfileprefix}.t15z.prepbufr.tm00
-export FORT35=${obsfileprefix}.t16z.prepbufr.tm00
-export FORT36=${obsfileprefix}.t17z.prepbufr.tm00
-export FORT37=${obsfileprefix}.t18z.prepbufr.tm00
-export FORT38=${obsfileprefix}.t19z.prepbufr.tm00
-export FORT39=${obsfileprefix}.t20z.prepbufr.tm00
-export FORT40=${obsfileprefix}.t21z.prepbufr.tm00
-export FORT41=${obsfileprefix}.t22z.prepbufr.tm00
-export FORT42=${obsfileprefix}.t23z.prepbufr.tm00
-export FORT43=${obsfileprefix}.t00z.prepbufr.tm00
-export FORT44=${obsfileprefix}.t01z.prepbufr.tm00
-export FORT45=${obsfileprefix}.t02z.prepbufr.tm00
-export FORT46=${obsfileprefix}.t03z.prepbufr.tm00
-export FORT47=${obsfileprefix}.t04z.prepbufr.tm00
-export FORT48=${obsfileprefix}.t05z.prepbufr.tm00
-export FORT49=${obsfileprefix}.t06z.prepbufr.tm00
+export FORT11=$FIXminmax/metar.dat
+export FORT12=$FIXminmax/metarak.dat
+export FORT13=$FIXminmax/mesoa.dat
+export FORT14=$FIXminmax/mesob.dat
+export FORT15=$FIXminmax/mesoc.dat
+export FORT16=$FIXminmax/mesod.dat
+export FORT17=$FIXminmax/mesoe.dat
+export FORT18=$FIXminmax/mesof.dat
+export FORT19=$FIXminmax/mesoak.dat
+export FORT20=$FIXminmax/mesopr.dat
+export FORT21=$FIXminmax/mesohi.dat
+export FORT22=$FIXminmax/mesogu.dat
+export FORT23=$FIXminmax/ship.dat
+export FORT24=$FIXminmax/shipak.dat
+export FORT25=${obsfileprefix}.t18z.prepbufr.tm00_prevday
+export FORT26=${obsfileprefix}.t19z.prepbufr.tm00
+export FORT27=${obsfileprefix}.t20z.prepbufr.tm00
+export FORT28=${obsfileprefix}.t21z.prepbufr.tm00
+export FORT29=${obsfileprefix}.t22z.prepbufr.tm00
+export FORT30=${obsfileprefix}.t23z.prepbufr.tm00
+export FORT31=${obsfileprefix}.t00z.prepbufr.tm00
+export FORT32=${obsfileprefix}.t01z.prepbufr.tm00
+export FORT33=${obsfileprefix}.t02z.prepbufr.tm00
+export FORT34=${obsfileprefix}.t03z.prepbufr.tm00
+export FORT35=${obsfileprefix}.t04z.prepbufr.tm00
+export FORT36=${obsfileprefix}.t05z.prepbufr.tm00
+export FORT37=${obsfileprefix}.t06z.prepbufr.tm00
+export FORT38=${obsfileprefix}.t07z.prepbufr.tm00
+export FORT39=${obsfileprefix}.t08z.prepbufr.tm00
+export FORT40=${obsfileprefix}.t09z.prepbufr.tm00
+export FORT41=${obsfileprefix}.t10z.prepbufr.tm00
+export FORT42=${obsfileprefix}.t11z.prepbufr.tm00
+export FORT43=${obsfileprefix}.t12z.prepbufr.tm00
+export FORT44=${obsfileprefix}.t13z.prepbufr.tm00
+export FORT45=${obsfileprefix}.t14z.prepbufr.tm00
+export FORT46=${obsfileprefix}.t15z.prepbufr.tm00
+export FORT47=${obsfileprefix}.t16z.prepbufr.tm00
+export FORT48=${obsfileprefix}.t17z.prepbufr.tm00
+export FORT49=${obsfileprefix}.t18z.prepbufr.tm00
 
 #OUTPUT
-export FORT61=rtma.${PDYm1}.mintobs.dat
+export FORT61=rtma.${PDY}.mintobs.dat
 export FORT71=adpsfc_min_diag.dat
 export FORT72=adpsfcak_min_diag.dat
 export FORT73=ships_min_diag.dat
@@ -147,8 +147,9 @@ $EXECrtma3d/$pgm  > $pgmout 2>errfile
 export err=$?; err_chk
 cat $pgmout
 
-if [ -s rtma.${PDYm1}.mintobs.dat ] ; then
-    cp rtma.${PDYm1}.mintobs.dat  $COMOUTgsi_rtma3d/
+if [ -s ${DATA}/rtma.${PDY}.mintobs.dat ] ; then
+    cp ${DATA}/rtma.${PDY}.mintobs.dat   ${COMINobsproc_rtma3d}/rtma.${PDY}.mintobs.dat
+    cp ${COMINobsproc_rtma3d}/rtma.${PDY}.mintobs.dat ${DATA_OBSPRD}/rtma.${PDY}.mintobs.dat
 else
     echo "WARNING: RTMA minT ob file was not generated properly!"
     echo "URMA minT will have no obs!"

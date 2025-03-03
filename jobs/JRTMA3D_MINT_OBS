@@ -41,7 +41,7 @@ fi
 cd $DATA
 
 export PDYm1=`$NDATE -24 ${PDY}${cyc} | cut -c 1-8`
-
+export PDYm2=`$NDATE -48 ${PDY}${cyc} | cut -c 1-8`
   export cycle=${cycle:-t${cyc}z}
   export pgmout=${pgmout:-"OUTPUT.${PDY}${cyc}.${jobid}"}
 
@@ -127,18 +127,12 @@ export COM_IN=${COM_IN:-$COMROOT/${NET}/${envir}}
 # Execute the script.
 ######################
 
-#${exSCR_POST:-$HOMErtma3d/scripts/${RUN}/ex${RUN}_mintbg.ksh} 
-#export err=$?; err_chk
+${exSCR_POST:-$HOMErtma3d/scripts/${RUN}/ex${RUN}_mintobs.ksh}
+export err=$?; err_chk
 
-#msg="$0 of $job completed normally"
-#postmsg $jlogfile "$msg"
+msg="$0 of $job completed normally"
+postmsg $jlogfile "$msg"
 
-
-#${exSCR_POST:-$HOMErtma3d/scripts/${RUN}/ex${RUN}_maxrh.ksh} 
-#export err=$?; err_chk
-
-#msg="$0 of $job completed normally"
-#postmsg $jlogfile "$msg"
 
 #if [ -e "${pgmout}" ] ; then
 #   cat $pgmout

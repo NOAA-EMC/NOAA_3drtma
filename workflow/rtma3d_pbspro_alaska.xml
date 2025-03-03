@@ -28,7 +28,7 @@
 <!ENTITY COMINHRRR      "/lfs/h1/ops/prod/com/hrrr/v4.1">
 <!ENTITY COMINRADAR      "/lfs/h1/ops/prod/dcom/ldmdata/obs/upperair/mrms/alaska">
 <!ENTITY GESINHRRR      "/lfs/h1/ops/prod/com/hrrr/v4.1/nwges/hrrrges_sfc/alaska">
-<!ENTITY COMINHRRRDAS   "/lfs/h1/ops/canned/com/hrrr/v4.1/nwges/hrrrdasges">
+<!ENTITY COMINHRRRDAS   "/lfs/h1/ops/prod/com/hrrr/v4.1/nwges/hrrrdasges">
 <!ENTITY COMINGDAS      "/lfs/h1/ops/prod/com/gfs/v16.3">
 <!ENTITY NWROOT		"/lfs/h2/emc/da/noscrub/&USER;/NOAA_3drtma_new">
 <!ENTITY COMINPREP      "/lfs/h2/emc/ptmp/ashley.stanfield/CRON/3drtma_v13/com/obsproc/v1.3">
@@ -60,6 +60,7 @@
 <!ENTITY FIXgsi         "&NWROOT;/fix/gsi">
 <!ENTITY FIXwps         "&NWROOT;/fix/wps">
 <!ENTITY FIXwrf         "&NWROOT;/fix/wrf">
+<!ENTITY FIXwrfbufr     "&NWROOT;/fix/wrfbufr">
 <!ENTITY FIXminmax      "&FIXrtma3d;/minmax">
 <!ENTITY OBS_USELIST    "/lfs/h2/emc/da/noscrub/matthew.t.morris/FixData/obsuselist">
 <!ENTITY AIRCRAFT_REJECT  "/lfs/h2/emc/da/noscrub/matthew.t.morris/FixData/obsuselist/amdar_reject_lists">
@@ -97,6 +98,8 @@
 <!ENTITY DATA_OBSPREP_LGHTN    "&DATA_RUNDIR;/obsprep_lghtn">
 <!ENTITY DATA_OBSPREP_RADAR    "&DATA_RUNDIR;/obsprep_radar">
 <!ENTITY DATA_OBSPREP_CLOUD    "&DATA_RUNDIR;/obsprep_cloud">
+<!ENTITY DATA_WRFBUFR   "&DATA_RUNDIR;/wrfbufr">
+<!ENTITY DATA_POSTSND   "&DATA_RUNDIR;/wrfbufr">
 <!ENTITY hpsspath0      "/NCEPDEV/emc-meso/5year/&USER;/pbspro_rtma3d">
 <!ENTITY hpsspath1      "/NCEPPROD/hpssprod/runhistory">
 <!ENTITY hpsspath1_1yr  "/NCEPPROD/1year/hpssprod/runhistory">
@@ -163,7 +166,10 @@
 <!ENTITY exefile_name_updatevars_wrf  "rtma_wrfarw_fcst">
 <!ENTITY exefile_name_updatevars_ncfields  "rtma_updatevars_ncfields">
 <!ENTITY exefile_name_updatevars_ndown  "rtma_updatevars_ndown">
-
+<!ENTITY JJOB_WRFBUFR     "&JJOB_DIR;/J&CAP_RUN;_WRFBUFR">
+<!ENTITY exSCR_WRFBUFR    "&SCRIPT_DIR;/&RUN;/ex&RUN;_wrfbufr.ksh">
+<!ENTITY JJOB_POSTSND     "&JJOB_DIR;/J&CAP_RUN;_POSTSND">
+<!ENTITY exSCR_POSTSND    "&SCRIPT_DIR;/&RUN;/ex&RUN;_postsnd.ksh">
 <!ENTITY JJOB_POST  	 "&JJOB_DIR;/J&CAP_RUN;_POST">
 <!ENTITY exSCR_POST      "&SCRIPT_DIR;/ex&NET;_post.ksh">
 <!ENTITY exefile_name_post     "upp.x">
@@ -246,7 +252,7 @@
 <!ENTITY POST_THREADS "1">
 <!ENTITY POST_OMP_STACKSIZE "512MB">
 <!ENTITY POST_RESOURCES '<walltime>00:20:00</walltime>'> 
-<!ENTITY POST_RESERVATION '<nodes>1:ppn=128:vntype=cray_compute:mem=200GB</nodes><native>-l place=scatter</native><queue>&QUEUE;</queue><account>&ACCOUNT;</account>'>
+<!ENTITY POST_RESERVATION '<nodes>1:ppn=128:mem=200GB</nodes><native>-l place=scatter</native><queue>&QUEUE;</queue><account>&ACCOUNT;</account>'>
 
 <!-- Variables in Namelist -->
 <!ENTITY GSI_grid_ratio_in_var       "1">
@@ -399,6 +405,10 @@
    <envar>
         <name>PARMwrf</name>
         <value>&PARMwrf;</value>
+   </envar>
+   <envar>
+        <name>FIXwrfbufr</name>
+        <value>&FIXwrfbufr;</value>
    </envar>
    <envar>
         <name>PARMupp</name>
@@ -1150,6 +1160,48 @@
       </and>
      </dependency>
   </task>
+
+    <task name="&RUN;_wrfbufr_@Y@m@d@H@M" cycledefs="hourly" maxtries="&maxtries;">
+    &ENVARS;
+    <envar>
+       <name>rundir_task</name>
+       <value><cyclestr>&DATA_WRFBUFR;</cyclestr></value>
+    </envar>
+    &MINMAX_RESOURCES;
+    &MINMAX_RESERVATION;
+    &ENVARS_MINMAX;
+
+    <command>&JJOB_DIR;/launch.ksh &JJOB_WRFBUFR;</command>
+    <jobname>&NET;_wrfbufr</jobname>
+    <join><cyclestr>&LOG_DIR;/&RUN;_wrfbufr_@Y@m@d@H@M.log</cyclestr></join>
+    <dependency>
+      <taskdep task="&RUN;_gsianl_task_@Y@m@d@H@M"/>
+    </dependency>
+
+  </task>
+
+
+  <task name="&RUN;_postsnd_@Y@m@d@H@M" cycledefs="hourly" maxtries="&maxtries;">
+    &ENVARS;
+    <envar>
+       <name>rundir_task</name>
+       <value><cyclestr>&DATA_WRFBUFR;</cyclestr></value>
+    </envar>
+    &MINMAX_RESOURCES;
+    &MINMAX_RESERVATION;
+    &ENVARS_MINMAX;
+
+    <command>&JJOB_DIR;/launch.ksh &JJOB_POSTSND;</command>
+    <jobname>&NET;_postsnd</jobname>
+    <join><cyclestr>&LOG_DIR;/&RUN;_postsnd_@Y@m@d@H@M.log</cyclestr></join>
+    <dependency>
+      <and>
+      <taskdep task="&RUN;_gsianl_task_@Y@m@d@H@M"/>
+      <taskdep task="&RUN;_wrfbufr_@Y@m@d@H@M"/>
+      </and>
+    </dependency>
+  </task>
+
 
  <task name="&RUN;_updatevars_task_@Y@m@d@H@M" cycledefs="hourly" maxtries="1">
 

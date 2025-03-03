@@ -47,7 +47,7 @@ time_str2=`${DATE} "+%Y-%m-%d_%H_00_00" -d "${START_TIME}"`
 #----- enter working directory -------
 cd ${DATA}
 ${ECHO} "enter working directory:${DATA}"
-nc_diag_cat=/lfs/h2/emc/da/noscrub/edward.colon/save/RTMA/bin/ncdiag_cat_serial.x
+nc_diag_cat=${EXECrtma3d}/ncdiag_cat_serial.x
 # Define the loghistory file depending on if this is the full or partial cycle
 #ifsoilnudge=.true.
 ifsoilnudge=.true.
@@ -103,6 +103,25 @@ else
   ${ECHO} "Warning: ${OBS_DIR}:  does not exist!"
 fi
 
+if [[ $cyc == $cyc_mitm ]]  ; then
+    if [ -s ${DATA_OBSPRDm1}/rtma.${PDY}.mintobs.dat ] #use only if conventional data also available
+       then
+        cpreq ${DATA_OBSPRDm1}/rtma.${PDY}.mintobs.dat mitmdat
+        echo `ls -l mitmdat`
+    else
+        echo "* WARNING: minT observation file $COM_IN/${NET}.${PDY}/${NET}.${PDY}.mintobs.dat is not available ..."
+    fi
+fi
+if [[ $cyc == $cyc_mxtm ]]  ; then
+      if [ -s  ${DATA_OBSPRDm1}/rtma.${PDYm1}.maxtobs.dat ] #use only if conventional data also available
+        then
+          cpreq  ${DATA_OBSPRDm1}/rtma.${PDYm1}.maxtobs.dat mxtmdat
+          echo `ls -l mxtmdat`
+       else
+         echo "* WARNING: maxT observation file $COM_IN/${NET}.${PDYm1}/${NET}.${PDYm1}.maxtobs.dat is not available ..."
+      fi
+fi
+
 
 if [ "${envir}" = "lsf" ] || [ "${envir}" = "pbspro" ] && [ ${HRRRDAS_BEC} -eq 0 ] ; then #WCOSS
   # Set runtime and save directories
@@ -122,7 +141,7 @@ if [ "${envir}" = "lsf" ] || [ "${envir}" = "pbspro" ] && [ ${HRRRDAS_BEC} -eq 0
   export nhr_assimilation=03
   ##typeset -Z2 nhr_assimilation
 
-  /usr/bin/python ${UTILrtma3d_dev}/getbest_EnKF_FV3GDAS.py -v $YYYYMMDDHH --exact=no --minsize=${nens} -d ${COMINGDAS}/enkfgdas -m no -o filelist${nhr_assimilation} --o3fname=gfs_sigf${nhr_assimilation} --gfs_netcdf=yes   
+  python ${UTILrtma3d_dev}/getbest_EnKF_FV3GDAS.py -v $YYYYMMDDHH --exact=no --minsize=${nens} -d ${COMINGDAS}/enkfgdas -m no -o filelist${nhr_assimilation} --o3fname=gfs_sigf${nhr_assimilation} --gfs_netcdf=yes   
   #Check to see if ensembles were found 
   numfiles=`cat filelist03 | wc -l`
 
@@ -223,7 +242,16 @@ PCPINFO=${FIXgsi}/global_pcpinfo.txt
 OBERROR=${FIXgsi}/3drtma_errtable_smallSFCerr_ascat
 #OBERROR=${FIXgsi}/nam_errtable.r3dv
 # Fixed fields
-cpreq $anavinfo anavinfo
+
+if [[ $cyc == $cyc_mitm ]]  ; then
+   cpreq $FIXgsi/anavinfo_arw_netcdf_mitm anavinfo
+ elif [[ $cyc == $cyc_mxtm ]]  ; then
+   cpreq $FIXgsi/anavinfo_arw_netcdf_mxtm anavinfo
+ else
+   cpreq $anavinfo anavinfo
+fi
+
+#cpreq $anavinfo anavinfo
 cpreq $BERROR   berror_stats
 cpreq $SATANGL  satbias_angle
 cpreq $SATINFO  satinfo
