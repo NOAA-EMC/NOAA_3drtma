@@ -196,7 +196,7 @@ if [[ ${hrrrmem} -gt 30 ]] && [[ ${HRRRDAS_BEC} -eq 1  ]]; then #if HRRRDAS BEC 
   nummem=${hrrrmem}
   cpreq filelist.hrrrdas filelist03
   ${CP} ${PARMgsi}/hybens_info_hrrrdas hybens_info
-  beta1_inv=0.9
+  beta1_inv=$(( 1 - $EnsWgt  ))
   ifhyb=.true.
   regional_ensemble_option=3
   grid_ratio_ens=1
@@ -206,7 +206,7 @@ if [[ ${hrrrmem} -gt 30 ]] && [[ ${HRRRDAS_BEC} -eq 1  ]]; then #if HRRRDAS BEC 
 elif [[ ${nummem} -eq 80 ]]; then
   echo "Do hybrid with GDAS directly"
   ${CP} ${PARMgsi}/hybens_info_hrrrdas hybens_info
-  beta1_inv=0.5
+  beta1_inv=$(( 1 - $EnsWgt  ))
   ifhyb=.true.
   regional_ensemble_option=1
   grid_ratio_ens=3 #ensemble resolution=3 * grid_ratio * grid_ratio_ens
