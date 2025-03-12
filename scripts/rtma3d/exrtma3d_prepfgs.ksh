@@ -61,6 +61,9 @@ YYYYMMDDHH_m1hr=`echo ${PDYHH_cycm1} | cut -c 1-10`
 #   export FGS_OPT=2
 # fi
 
+# DATE & TIME used in HOWV processing
+CDATEymdh=${YYYYMMDDHH}
+
 #############################################################################
 
 # Create the working directory and cd into it
@@ -75,29 +78,422 @@ pgm=${NET}_prepfgs
 startmsg
 msg="***********************************************************"
 postmsg "$jlogfile" "$msg"
-msg="  begin copy firstguess to fgsprd.${cycle}"
+msg="  begin retrieveing howv/gust and appending them to fgs, then copy firstguess to fgsprd.${cycle}"
 postmsg "$jlogfile" "$msg"
 msg="***********************************************************"
 postmsg "$jlogfile" "$msg"
-
-# Look for bqckground from pre-forecast background
+#
+#-----------------------------------------------------------------------
+#
+# Look for background from pre-forecast background
+#
+#-----------------------------------------------------------------------
 ind=1	
 FGShrrr_FNAME2="hrrr_${PDYHH_cycm1}f00${ind}"
         if [ -r ${GESINhrrr}/${FGShrrr_FNAME2} ] ; then
-                ${LN} -sf ${GESINhrrr}/${FGShrrr_FNAME2}   ${GESINhrrr_rtma3d}/${FGSrtma3d_FNAME}
-                ${LN} -sf ${GESINhrrr_rtma3d}/${FGSrtma3d_FNAME}     ${DATA}/${FGSrtma3d_FNAME}
-                ${ECHO} " Cycle ${YYYYMMDDHH}: PREPFGS background --> ${DATA}/${FGShrrr_FNAME2} "
+#               cp     -p ${GESINhrrr}/${FGShrrr_FNAME2}   ${GESINhrrr_rtma3d}/${FGSrtma3d_FNAME}
+#               ${LN} -sf ${GESINhrrr_rtma3d}/${FGSrtma3d_FNAME}     ${DATA}/${FGSrtma3d_FNAME}
+#               The firstguess file might be appended with more fields (eg, howv), the
+#                   linked fgs file could not work with ncks, so the fgs file must be 
+#                   copied to working directory.
+#               using cp, cpfs, or cpfeq?
+                cp     -p ${GESINhrrr}/${FGShrrr_FNAME2}   ${DATA}/${FGSrtma3d_FNAME}
+
+                ${ECHO} " Cycle ${YYYYMMDDHH}: PREPFGS background --> ${DATA}/${FGSrtma3d_FNAME} "
+                ls -l ${DATA}/${FGSrtma3d_FNAME}
         else
-                ${ECHO} "ERROR: No background file for analysis at ${time_run}!!!!"
+                ${ECHO} "ERROR: No HRRR-background file found under ${GESINhrrr} for analysis at ${time_run}!!!!"
                 ${ECHO} " Cycle ${YYYYMMDDHH}: PREPFGS failed because of no background" >> ${pgmout}
                 exit 1
         fi
 
-
-
 # Snow cover building and trimming currently set to run in the 00z cycle
 
 # Update SST currently set to run in the 01z cycle
+
+#
+#-----------------------------------------------------------------------
+#
+# Appending Firstguess of Ocean Significant Wave Height (HOWV) to Firstguess file
+#
+#-----------------------------------------------------------------------
+  rm -f $COMOUT/${NET}.t${HH}z.fgs.howvgust.grib2     # single grib2 file with howv and gust in it
+#
+# 1.1 define the Grid Specification for domain of 3DRTMA (used by wgrib2)
+#
+# grid_specs_WG2wexp: for operational RTMA/URMA
+  grid_specs_WG2wexp="lambert:265.0:25.0:25.0 233.723448:2345:2539.703 19.228976:1597:2539.703"
+
+# grid_specs_hrrr: for exp hrrr-based 3D RTMA on CONUS domain
+  grid_specs_hrrr="lambert:-97.5:38.5:38.5 -122.719528:1799:3000.0 21.138123:1059:3000.0"
+
+# grid_specs_rrfsnarll: for exp RRFS-based 3D RTMA on North America domain on Rotated Latlon grid
+  grid_specs_rrfsnarll="rot-ll:247.0:-35.0:0.0 299.0:4881:0.025 -37.0:2961:0.025"
+
+# grid_specs_rrfsnapol: for exp RRFS-based 3D RTMA on North America domain on Polar Stereographic grid
+  grid_specs_rrfsnapol="nps:245.0:60.0 206.5:5200:3170.0 -4.0:3268:3170.0"
+
+  grid_specs=${grid_specs_hrrr}
+#
+# 1.2  fix dir (for slmask.grib2 file)
+  print_info_msg "$VERBOSE" "FIXgsi is $FIXgsi"
+#
+#  Sea-Land Mask for the correct interpolation of the howv Background.
+  if [[ -f $FIXgsi/hrrr_conus_3km_slmask_nolakes.grib2 ]] ; then
+      echo "Sea-Land no-lakes mask file --> $FIXgsi/hrrr_conus_3km_slmask_nolakes.grib2"
+      cp -p $FIXgsi/hrrr_conus_3km_slmask_nolakes.grib2    ./slmask.grib2
+  else
+      echo "No Sea-Land no-lakes mask file is used for Wave Height firtguess"
+  fi
+#
+# 2. Retrieving significant wave height from WW3 forecast, re-mapping to HRRR-conus model grid,
+#    then dumping out to grib2 file
+# 2.1 Wave Background at Great Lakes
+#
+  print_info_msg "$VERBOSE" "COMINww3GL is $COMINww3GL (Wave background from Great Lakes model)"
+
+   found_ww3gesGL=no
+   ic=0
+   while [ $ic -le 23 ] ; do
+      ww3FHH_GL=$ic
+      ww3FHH_GL=`printf %03d $ww3FHH_GL`
+      ww3CYCLE_GL=`$NDATE -$ww3FHH_GL $CDATEymdh`
+      ww3PDY_GL=`echo $ww3CYCLE_GL |cut -c1-8`
+      ww3CC_GL=`echo $ww3CYCLE_GL |cut -c9-10`
+#
+      probe_ww3_GL_guess_grb2=$COMINww3GL/glwu.${ww3PDY_GL}/glwu.grlr_500m.t${ww3CC_GL}z.grib2
+#
+      if [ -s $probe_ww3_GL_guess_grb2 ]; then
+
+         print_info_msg "$VERBOSE" "found wave background for Great Lakes: $probe_ww3_GL_guess_grb2"
+         cpreq $probe_ww3_GL_guess_grb2 ww3.guess5.grib2
+#        cp -p $probe_ww3_GL_guess_grb2 ww3.guess5.grib2
+         cp -p $probe_ww3_GL_guess_grb2 $COMOUT/glwu.grlr_500m.t${ww3CC_GL}z.grib2     # save for retro run
+         if [ $ic == 0 ]; then
+            FHH_st="(HTSGW:surface:anl)"
+         else
+            FHH_st="(HTSGW:surface:$ic hour fcst)"
+         fi
+         $WGRIB2 ww3.guess5.grib2 -match "${FHH_st}" -grib ww3GL.guess.grib2
+
+         GL_InputGribmerge=' -i ww3GL.guess.grib2 '
+
+         echo "export ww3CYCLE_GL=$ww3CYCLE_GL" >> $COMOUT/${RUN}.t${cyc}z.envir.sh
+         echo "export ww3FHH_GL=$ww3FHH_GL" >> $COMOUT/${RUN}.t${cyc}z.envir.sh
+
+         found_ww3gesGL=yes
+
+         break
+      else
+         let "ic=ic+1"
+      fi
+   done
+   if [[ ${found_ww3gesGL} = no ]] ; then
+       err_exit "No WW3 guess for Great Lakes available. The missing files in the above while-do loop are of the from $COMINww3GL/glwu.${ww3PDY}/glwu.grlr_500m.t${ww3CC}z.grib2. The script must be able to find at least one file out of the 24 files that it queries"
+   fi
+#
+# 2.2 Ocean Waves Background
+  print_info_msg "$VERBOSE" "COMINww3 is $COMINww3 (Wave background from WW3 Ocean Wave model)"
+   found_ww3ges=no
+   ic=0
+   while [ $ic -le 24 ] ; do
+      ww3FHH=$ic
+      ww3FHH=`printf %03d $ww3FHH`
+      ww3CYCLE=`$NDATE -$ww3FHH $CDATEymdh`
+      ww3PDY=`echo $ww3CYCLE |cut -c1-8`
+      ww3CC=`echo $ww3CYCLE |cut -c9-10`
+
+#     "set -A" only works for K-Shell 
+      set -A  probe_ww3_guess_grb2  "$COMINww3/gfs.${ww3PDY}/${ww3CC}/wave/gridded/gfswave.t${ww3CC}z.arctic.9km.f${ww3FHH}.grib2" \
+                                    "$COMINww3/gfs.${ww3PDY}/${ww3CC}/wave/gridded/gfswave.t${ww3CC}z.global.0p16.f${ww3FHH}.grib2"
+#     In Bash, to create an array:
+#     declare -a  probe_ww3_guess_grb2=( \
+#         [0]="$COMINww3/gfs.${ww3PDY}/${ww3CC}/wave/gridded/gfswave.t${ww3CC}z.arctic.9km.f${ww3FHH}.grib2"  \
+#         [1]="$COMINww3/gfs.${ww3PDY}/${ww3CC}/wave/gridded/gfswave.t${ww3CC}z.global.0p16.f${ww3FHH}.grib2" \
+#     )
+#     or the following way to create 
+#       probe_ww3_guess_grb2=("$COMINww3/gfs.${ww3PDY}/${ww3CC}/wave/gridded/gfswave.t${ww3CC}z.arctic.9km.f${ww3FHH}.grib2"   \
+#                             "$COMINww3/gfs.${ww3PDY}/${ww3CC}/wave/gridded/gfswave.t${ww3CC}z.global.0p16.f${ww3FHH}.grib2"   )
+
+      if [ -s "${probe_ww3_guess_grb2[0]}" ] && \
+         [ -s "${probe_ww3_guess_grb2[1]}" ]    ; then
+
+         print_info_msg "$VERBOSE" "found wave background for Arctic: ${probe_ww3_guess_grb2[0]}"
+         print_info_msg "$VERBOSE" "found wave background for Global: ${probe_ww3_guess_grb2[1]}"
+         cpreq ${probe_ww3_guess_grb2[0]} ww3.guess0.grib2
+#        cp -p ${probe_ww3_guess_grb2[0]} ww3.guess0.grib2
+         cpreq ${probe_ww3_guess_grb2[1]} ww3.guess1.grib2
+#        cp -p ${probe_ww3_guess_grb2[1]} ww3.guess1.grib2
+
+         # save gfswave forecast files to $COMOUT
+         cp -p ${probe_ww3_guess_grb2[0]} $COMOUT/gfswave.t${ww3CC}z.arctic.9km.f${ww3FHH}.grib2     # save for retro run
+         cp -p ${probe_ww3_guess_grb2[1]} $COMOUT/gfswave.t${ww3CC}z.global.0p16.f${ww3FHH}.grib2     # save for retro run
+
+         ${HOMEscript}/exrtma3d_GribMerge_urma.sh ${GL_InputGribmerge} -i ww3.guess0.grib2 -i ww3.guess1.grib2 \
+                        -v HTSGW -g "${grid_specs}" \
+                        -m slmask.grib2 \
+                        -o ww3.guess.grib2
+ 
+         echo "export ww3CYCLE=$ww3CYCLE" >> $COMOUT/${RUN}.t${cyc}z.envir.sh
+         echo "export ww3FHH=$ww3FHH" >> $COMOUT/${RUN}.t${cyc}z.envir.sh
+         found_ww3ges=yes
+         break
+      else
+         let "ic=ic+1"
+      fi
+   done
+   if [[ ${found_ww3ges} = no ]] ; then
+       err_exit "No ocean WW3 guess available. Check availability of  \
+gfs.${ww3PDY}/${ww3CC}/wave/gridded/gfswave.t${ww3CC}z.arctic.9km.f${ww3FHH}.grib2, \
+gfs.${ww3PDY}/${ww3CC}/wave/gridded/gfswave.t${ww3CC}z.global.0p16.f${ww3FHH}.grib2 \
+queried in the above while-do-loop."
+   fi
+
+   # save the firstguess grib2 file to $COMOUT
+   cp -p ww3.guess.grib2 $COMOUT/${NET}.t${ww3CC}z.fgs.howv.f${ww3FHH}.grib2       # forecast time saved in name of firstguess file
+   cp -p ww3.guess.grib2 $COMOUT/${NET}.t${HH}z.fgs.howv.grib2                     # analysis time saved in name of firstguess file
+   wgrib2 ww3.guess.grib2 -append -grib $COMOUT/${NET}.t${HH}z.fgs.howvgust.grib2  # single grib2 file with howv and gust in it
+
+# 3. Appending Wave height (2-D) field to 3D-RTMA firstguess file (netcdf format)
+
+    keyword_data="howv"
+    keyword_howv="howv"
+    varname_grb2ncf="HTSGW_surface"
+    varname_ncf="HOWV"
+
+    if [[ "${keyword_data}" == "howv" ]] ; then
+      FillValue=-0.01                     # -0.01 for wave height; -9999.0 for other variables;
+    else
+      FillValue=-9999.00                  # -0.01 for wave height; -9999.0 for other variables;
+    fi
+
+    data_grb2="ww3.guess.grib2"
+    data_ncf="${keyword_data}.guess.nc"
+    data_ncf_new="${keyword_data}.guess.new.nc"
+    data_ONLY_ncf="${keyword_data}.guess.${keyword_data}.nc"
+
+#   DATDIR_FGS="${GESINhrrr_rtma3d}"
+    DATDIR_FGS="./"
+#   FGS_FILE="hrrr.t${F_HOUR}00z.f0100.netcdf"          # old naming rule for 3drtma fgs from hrrr forecast
+    FGS_FILE="${FGSrtma3d_FNAME}"                       #<-- ${NET}.${cycle}.firstguess.nc
+    FGS_FILE_basename=$(basename ${FGS_FILE} ".nc")
+#   FGS_FILE_new="${FGS_FILE_basename}.${keyword_data}.netcdf"
+    FGS_FILE_new="${FGS_FILE}"
+
+    echo " retrieving ${keyword_data} from grib2 (${data_grb2}) and appending it to firstguess (${FGS_FILE}) "
+
+# step a. convert grib2 data to netcdf data
+    DATDIR_HOWV="./"
+    if [ ! -f ${DATDIR_HOWV}/${data_grb2} ] ; then
+      echo " Cannot find grib2 file for ${keyword_data}:  ${DATDIR_HOWV}/${data_grb2}, job aborted ..."
+      exit 1
+    fi
+    rm -f ./${data_ncf}
+    $WGRIB2 ./${data_grb2} -netcdf ./${data_ncf}
+    if [ ! -f ./${data_ncf} ] ; then
+      echo " '$WGRIB2' failed to convert  ./${data_grb2} to ./${data_ncf}"
+      exit 2
+    fi
+
+# step b. pre-processing the ww3-guess netdf data before appending to fgs netcdf file
+#   i) renaming some variables (e.g., HTSGW_surface --> HOWV) and some attributes
+    rm -f ./${data_ncf_new}
+    cp -p ./${data_ncf} ./${data_ncf_new}
+    ncrename -h -d y,south_north -d x,west_east -d time,Time               ./${data_ncf_new}
+#   ncrename -h -v latitude,XLAT -v longitude,XLONG -v time,XTIME -v HTSGW_surface,HOWV  ./${data_ncf_new}
+    ncrename -h -v latitude,XLAT -v longitude,XLONG -v time,XTIME -v ${varname_grb2ncf},${varname_ncf}  ./${data_ncf_new}
+
+#   Do NOT set the -0.01 as undefined value for HOWV (following Manuel's suggestion to use the filled value in grib2 file)
+#   MUST set the undefined value to be a meaningful value (-0.01 here for land area, otherwise it is very huge number)
+    ncatted  -h -O -a _FillValue,${varname_ncf},o,f,${FillValue} ./${data_ncf_new}
+
+    ncatted  -h -O -a coordinates,${varname_ncf},o,c,"XLONG XLAT XTIME"   ./${data_ncf_new}
+    ncatted  -h -O -a stagger,${varname_ncf},c,c,""   ./${data_ncf_new}
+    ncatted  -h -O -a units,${varname_ncf},o,c,"M"   ./${data_ncf_new}
+    ncatted  -h -O -a MemoryOrder,${varname_ncf},c,c,"XY "   ./${data_ncf_new}
+    ncatted  -h -O -a FieldType,${varname_ncf},c,l,"104"   ./${data_ncf_new}
+    ncatted  -h -O -a description,${varname_ncf},c,c,"Significant Height of Combined Wind Waves and Swell"   ./${data_ncf_new}
+  
+#   ii) fetching out only the requested HOWV data and writing to a new netcdf file
+    rm -f ./${data_ONLY_ncf}
+#    ncks -h -C -3/4/5/6/7/? -v HOWV           ./${data_ncf_new} -o ./${data_ONLY_ncf}
+    ncks -h -C               -v ${varname_ncf} ./${data_ncf_new} -o ./${data_ONLY_ncf}
+  
+# step c. appending netcdf data into the firstguess data file (in netcdf format)
+    if [ ! -f ${DATDIR_FGS}/${FGS_FILE} ] ; then
+      echo "Cannot find hrrr firstguess file: ${DATDIR_FGS}/${FGS_FILE}, job aborted ..."
+      exit 3
+    fi
+    ls -l ./${FGS_FILE_new}
+
+#   set -x
+#   ncks -A -v HOWV           ./${data_ONLY_ncf} ./${FGS_FILE_new}
+    ncks -A -v ${varname_ncf} ./${data_ONLY_ncf} ./${FGS_FILE_new}
+#   set +x
+
+    if [ $? -ne 0 ] ; then
+      echo "Failled to append ${keyword_data} in ${data_ONLY_ncf} to ${FGS_FILE_new}. Exit abnormally   "
+      exit 4
+    else
+      echo "${keyword_data} data is appended to ${FGS_FILE_new} and updated to the fgs file under directory ${DATDIR_FGS}, and Check the file size: ? "
+      ls -l ./${FGS_FILE_new}   ${DATDIR_FGS}/${FGS_FILE}
+    fi
+#
+#-----------------------------------------------------------------------
+#
+# Appending Firstguess of 10-meter Wind Gust (GUST) to Firstguess File
+#
+#-----------------------------------------------------------------------
+#
+# 1. Retrieving Wind Gust from HRRR forecast (grib2 file)
+#    and dumping out to grib2 file
+   found_gustges=no
+   ic=0
+   while [ $ic -le 3 ] ; do
+      PRE_YYYYMMDDHH=$(date +"%Y%m%d%H" -d "${START_TIME} ${ic} hour ago")
+      PRE_YYYYMMDD=$(echo ${PRE_YYYYMMDDHH} | cut -c1-8)
+      PRE_HH=$(echo ${PRE_YYYYMMDDHH} | cut -c9-10)
+      ic3=$(printf %03d ${ic})
+      ic2=$(printf %02d ${ic})
+
+      hrrr_guess_grb2=${COMINHRRR}/hrrr.${PRE_YYYYMMDD}/conus/hrrr.t${PRE_HH}z.wrfprsf${ic2}.grib2    # wrfprs; wrfnat; wrfsfc;
+
+      if [[ -f ${hrrr_guess_grb2} ]] ; then 
+         print_info_msg "VERBOSE" "found HRRR ${ic} hour forecast grib2 file ${hrrr_guess_grb2} and retrieve 10-m Wind Gust from it: "
+         rm -f ./hrrr_guess.grib2
+         ln -sf ${hrrr_guess_grb2}   ./hrrr_guess.grib2
+         if [ $ic == 0 ]; then
+            FHH_string=":GUST:surface:anl:"
+         else
+            FHH_string=":GUST:surface:$ic hour fcst:"
+         fi
+         # wgrib2 ./hrrr_guess.grib2 | grep "GUST" | wgrib2 -i ./hrrr_guess.grib2 -grib ./gust.guess.grib2
+         # wgrib2 ./hrrr_guess.grib2 -match ":GUST:surface" -grib ./gust.guess.grib2
+         wgrib2 ./hrrr_guess.grib2 -match "${FHH_string}" -grib ./gust.guess.grib2
+         export err=$?; err_chk
+         # save the firstguess grib2 file to $COMOUT
+         cp -p ./gust.guess.grib2 $COMOUT/${NET}.t${PRE_HH}z.fgs.gust.f${ic2}.grib2       # forecast time saved in name of firstguess file
+         cp -p ./gust.guess.grib2 $COMOUT/${NET}.t${HH}z.fgs.gust.grib2                   # analysis time saved in name of firstguess file
+         wgrib2 gust.guess.grib2 -append -grib $COMOUT/${NET}.t${HH}z.fgs.howvgust.grib2  # single grib2 file with howv and gust in it
+
+         found_gustges=yes
+
+         break
+      else
+         let "ic=ic+1"
+      fi
+   done
+   if [[ "${found_gustges}" == "no" ]] ; then
+      err_exit "Could NOT find any HRRR 0~3 hours forecast grib2 file to \
+                provide firstguess for 10-m wind gust.  exit with error.  "
+   fi
+#
+# 2. Appending wind gust to firstguess (netcdf format)
+    keyword_data="gust"
+    keyword_gust="gust"
+    varname_grb2ncf="GUST_surface"
+#   varname_ncf=$(echo ${keyword_data} | tr '[:lower:]' '[:upper:]')       # standard POSIX way with tr
+#   varname_ncf=$(echo ${keyword_data} | awk '{print toupper($0)}')        # standard POSIX way with awk
+    varname_ncf="GUST"
+
+    if [[ "${keyword_data}" == "howv" ]] ; then
+      FillValue=-0.01                     # -0.01 for wave height; -9999.0 for other variables;
+    else
+      FillValue=-9999.00                  # -0.01 for wave height; -9999.0 for other variables;
+    fi
+
+#   data_grb2="hrrr.t23z.gust.surf.f001.grib2"
+    data_grb2="gust.guess.grib2"
+    data_ncf="${keyword_data}.guess.nc"
+    data_ncf_new="${keyword_data}.guess.new.nc"
+#   data_ONLY_ncf="${keyword_data}.guess.GUST.nc"
+    data_ONLY_ncf="${keyword_data}.guess.${keyword_data}.nc"
+
+#   DATDIR_FGS="${GESINhrrr_rtma3d}"
+    DATDIR_FGS="./"
+    FGS_FILE="${FGSrtma3d_FNAME}"                       #<-- ${NET}.${cycle}.firstguess.nc
+    FGS_FILE_basename=$(basename ${FGS_FILE} ".nc")
+    FGS_FILE_new="${FGS_FILE}"
+
+    echo " retrieving ${keyword_data} from grib2 (${data_grb2}) and appending it to firstguess (${FGS_FILE}) "
+
+# step a. convert grib2 data to netcdf data
+    DATDIR_GUST="./"
+    if [ ! -f ${DATDIR_GUST}/${data_grb2} ] ; then
+      echo " Cannot find grib2 file for ${keyword_data} :  ${DATDIR_GUST}/${data_grb2}, job aborted ..."
+      exit 1
+    fi
+    rm -f ./${data_ncf}
+    $WGRIB2 ./${data_grb2} -netcdf ./${data_ncf}
+    if [ ! -f ./${data_ncf} ] ; then
+      echo " '$WGRIB2' failed to convert  ./${data_grb2} to ./${data_ncf}"
+      exit 2
+    fi
+
+# step b. pre-processing the GUST-guess netdf data before appending to fgs netcdf file
+#   i) renaming some variables (e.g., GUST_surface --> GUST) and some attributes
+    rm -f ./${data_ncf_new}
+    cp -p ./${data_ncf} ./${data_ncf_new}
+    ncrename -h -d y,south_north -d x,west_east -d time,Time               ./${data_ncf_new}
+#   ncrename -h -v latitude,XLAT -v longitude,XLONG -v time,XTIME -v GUST_surface,GUST  ./${data_ncf_new}
+    ncrename -h -v latitude,XLAT -v longitude,XLONG -v time,XTIME -v ${varname_grb2ncf},${varname_ncf}  ./${data_ncf_new}
+
+#   Do not set the filled value (undefined value)
+#   set the undefined value = -9999.0
+    ncatted  -h -O -a _FillValue,${varname_ncf},o,f,${FillValue} ./${data_ncf_new}
+
+    ncatted  -h -O -a coordinates,${varname_ncf},o,c,"XLONG XLAT XTIME"         ./${data_ncf_new}
+    ncatted  -h -O -a stagger,${varname_ncf},c,c,""                             ./${data_ncf_new}
+    ncatted  -h -O -a units,${varname_ncf},o,c,"M/S"                            ./${data_ncf_new}
+    ncatted  -h -O -a MemoryOrder,${varname_ncf},c,c,"XY "   ./${data_ncf_new}
+    ncatted  -h -O -a FieldType,${varname_ncf},c,l,"104"   ./${data_ncf_new}
+    ncatted  -h -O -a description,${varname_ncf},c,c,"GUST Wind Speed (Gust)"   ./${data_ncf_new}
+
+#   ii) fetching out only the required GUST data and writing to a new netcdf file
+    rm -f ./${data_ONLY_ncf}
+#    ncks -h -C -3/4/5/6/7/?  -v GUST ./${data_ncf_new} -o ./${data_ONLY_ncf}
+    ncks -h -C               -v ${varname_ncf} ./${data_ncf_new} -o ./${data_ONLY_ncf}
+
+# step c. appending netcdf data into the firstguess data file (in netcdf format)
+    if [ ! -f ${DATDIR_FGS}/${FGS_FILE} ] ; then
+      echo "Cannot find hrrr firstguess file: ${DATDIR_FGS}/${FGS_FILE}, job aborted ..."
+      exit 3
+    fi
+    ls -l ./${FGS_FILE_new}
+
+#   set -x
+#   ncks -A -v GUST ./${data_ONLY_ncf} ./${FGS_FILE_new}
+    ncks -A -v ${varname_ncf} ./${data_ONLY_ncf} ./${FGS_FILE_new}
+#   set +x
+
+    if [ $? -ne 0 ] ; then
+      echo "Failled to append ${keyword_data} in ${data_ONLY_ncf} to ${FGS_FILE_new}. Exit abnormally   "
+      exit 4
+    else
+      echo "${keyword_data} data is appended to ${FGS_FILE_new} and updated to the fgs file under directory ${DATDIR_FGS}, and Check the file size: ? "
+      ls -l ./${FGS_FILE_new}   ${DATDIR_FGS}/${FGS_FILE}
+    fi
+#
+#-----------------------------------------------------------------------
+#
+#  Copy/Link the background file to cycle running directory
+#
+#-----------------------------------------------------------------------
+    if [ -r ${DATA}/${FGSrtma3d_FNAME} ] ; then
+#      ${LN} -sf ${GESINhrrr_rtma3d}/${FGSrtma3d_FNAME}     ${DATA}/${FGSrtma3d_FNAME}
+       ${ECHO} "PREPFGS: Saving the Firstguess of Cycle ${YYYYMMDDHH} --> ${GESINhrrr_rtma3d}/${FGSrtma3d_FNAME} "
+       cp -p ${DATA}/${FGSrtma3d_FNAME}     ${GESINhrrr_rtma3d}/${FGSrtma3d_FNAME}    
+
+#      to save the disck space, removing the firstguess file under working directry (fgsprd), 
+#        and making a link for the fgs file to the saved fgs file ${GESINhrrr_rtma3d}/${FGSrtma3d_FNAME}
+       rm -f ${DATA}/${FGSrtma3d_FNAME}
+       ${LN} -sf ${GESINhrrr_rtma3d}/${FGSrtma3d_FNAME}     ${DATA}/${FGSrtma3d_FNAME}
+       ls -l ${DATA}/${FGSrtma3d_FNAME} ${GESINhrrr_rtma3d}/${FGSrtma3d_FNAME}
+    else
+       ${ECHO} "ERROR: No background file under working directory for analysis at ${time_run}!!!!"
+       ${ECHO} " Cycle ${YYYYMMDDHH}: PREPFGS failed because of no background" >> ${pgmout}
+       exit 1
+    fi
 
 export err=$? ; err_chk
 

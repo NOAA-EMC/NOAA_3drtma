@@ -20,7 +20,7 @@ cd ${BASE}/rtma_wrfarw.fd/WRFV3.9
 ./clean -aa
 ./clean -a
 ./clean
-cpreq configure.wrf.useme configure.wrf
+cp -p configure.wrf.useme configure.wrf
 
 export PNETCDF_QUILT=1
 export WRFIO_NCD_LARGE_FILE_SUPPORT=1
@@ -29,7 +29,7 @@ export WRF_SMOKE=1
 
 ./compile -j 1 em_real
 
-cpreq main/real.exe ${BASE}/../exec/rtma_wrfarw_real
-cpreq main/wrf.exe ${BASE}/../exec/rtma_wrfarw_fcst
+cp -p main/real.exe ${BASE}/../exec/rtma_wrfarw_real
+cp -p main/wrf.exe ${BASE}/../exec/rtma_wrfarw_fcst
 
 ##############################

@@ -173,6 +173,9 @@ fi
     export AIRCRAFT_REJECT=${AIRCRAFT_REJECT:-"${FIXrtma3d}/gsi"}
     export SFCOBS_PROVIDER=${SFCOBS_PROVIDER:-"${FIXrtma3d}/gsi"}
 
+#   parameters used in GSI analysis
+    export READIN_LOCALIZATION=${READIN_LOCALIZATION:-"TRUE"}
+
 ##########################################################
 
 ######################

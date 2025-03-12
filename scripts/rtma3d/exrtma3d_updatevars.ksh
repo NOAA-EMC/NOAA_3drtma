@@ -222,10 +222,13 @@ ${ECHO} "Assemble Reflectivity fields back into wrf_inout"
 
 ${NCKS} -A -v REFL_10CM,COMPOSITE_REFL_10CM,REFL_10CM_1KM,REFL_10CM_4KM wrfout_d01 wrf_inout
 
-if [ -f ${COMOUTgsi_rtma3d}/${ANLrtma3d_FNAME} ]; then
-  ${ECHO} "Erasing the GSI generated analysis file to be replaced by modified analysis."
-  ${MV} ${COMOUTgsi_rtma3d}/${ANLrtma3d_FNAME} ${COMOUTgsi_rtma3d}/old_analysis
-fi
+## skipping the following if-block which savs the old analysis file 
+#   (since only reflectivity fields are updated, and the original reflectivity are available
+#     in the firstguess file which is saved.)
+# if [ -f ${COMOUTgsi_rtma3d}/${ANLrtma3d_FNAME} ]; then
+#   ${ECHO} "Erasing the GSI generated analysis file to be replaced by modified analysis."
+#   ${MV} ${COMOUTgsi_rtma3d}/${ANLrtma3d_FNAME} ${COMOUTgsi_rtma3d}/old_analysis
+# fi
 
 ${CP_LN} -p wrf_inout ${COMOUTgsi_rtma3d}/${ANLrtma3d_FNAME}
 
