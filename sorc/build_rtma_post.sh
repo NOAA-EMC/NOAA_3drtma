@@ -12,6 +12,6 @@ module reset
 cd ${BASE}/rtma_post.fd/tests
 ./compile_upp.sh
 
-cpreq  ${BASE}/rtma_post.fd/exec/upp.x  ${BASE}/../exec
+cp -p ${BASE}/rtma_post.fd/exec/upp.x  ${BASE}/../exec
 
 ##############################

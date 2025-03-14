@@ -144,14 +144,19 @@ fi
     ${LN} -sf  ${COMINPREP}/rtma.${YYYYMMDD}/rtma.t${HH}z.satwnd.tm00.bufr_d ${DATA}/rtma.t${HH}z.satwnd.tm00.bufr_d
   fi
 
+# the radial velocity data (nexrad))
   if [ -r  ${COMINPREP}/rtma.${YYYYMMDD}/rtma.t${HH}z.nexrad.tm00.bufr_d  ]; then
-    ${ECHO} "using preocessed satwnd data"
+    ${ECHO} "using preocessed nexrad data (Dopplar Radar radial wind)"
     cpreq   ${COMINPREP}/rtma.${YYYYMMDD}/rtma.t${HH}z.nexrad.tm00.bufr_d ${COMINobsproc_rtma3d}
     ${LN} -sf  ${COMINPREP}/rtma.${YYYYMMDD}/rtma.t${HH}z.nexrad.tm00.bufr_d ${DATA}/rtma.t${HH}z.nexrad.tm00.bufr_d
   fi
 
-
-# the radial velocity data
+# satellite oceanic wave height data (HOWV)
+  if [ -r  ${COMINPREP}/rtma.${YYYYMMDD}/rtma.t${HH}z.satmar.tm00.bufr_d  ]; then
+    ${ECHO} "using preocessed satmar data for wave heigt (howv)"
+    cpreq   ${COMINPREP}/rtma.${YYYYMMDD}/rtma.t${HH}z.satmar.tm00.bufr_d ${COMINobsproc_rtma3d}
+    ${LN} -sf  ${COMINPREP}/rtma.${YYYYMMDD}/rtma.t${HH}z.satmar.tm00.bufr_d ${DATA}/rtma.t${HH}z.satmar.tm00.bufr_d
+  fi
 
 # Snow cover building and trimming currently set to run in the 00z cycle
 

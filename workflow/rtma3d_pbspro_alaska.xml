@@ -1,9 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <!DOCTYPE workflow [
-<!ENTITY USER     "edward.colon">
+
 <!-- Key variables -->
 <!-- date/time of cases or cycles -->
+<!ENTITY USER           "user.name">
 <!ENTITY startCDATE     "201907121400">
 <!ENTITY endCDATE       "201907121400">
 <!ENTITY realtime       "T">
@@ -17,20 +18,23 @@
 <!--<!ENTITY CAP_RUN_ENVIR	""> -->
 <!ENTITY model		"&RUN;">
 <!ENTITY HRRRDAS_BEC     "0">
+<!ENTITY READIN_LOCALIZATION     "TRUE">
+
 <!ENTITY MACHINE	"cray">
 <!ENTITY machine	"&MACHINE;">
 
 <!ENTITY SCHEDULER      "pbspro">
+
 <!-- Variables Defined by absolute paths -->
 
-<!ENTITY ptmp_base	"/lfs/h2/emc/ptmp/&USER;/3DRTMA_HRRR_ALASKA_NEW_WRKDIR">
+<!ENTITY ptmp_base	"/lfs/h2/emc/ptmp/&USER;/3DRTMA_HRRR_ALASKA_WRKDIR">
 <!ENTITY COMINRAP       "/lfs/h1/ops/prod/com/obsproc/v1.2">
 <!ENTITY COMINHRRR      "/lfs/h1/ops/prod/com/hrrr/v4.1">
 <!ENTITY COMINRADAR      "/lfs/h1/ops/prod/dcom/ldmdata/obs/upperair/mrms/alaska">
 <!ENTITY GESINHRRR      "/lfs/h1/ops/prod/com/hrrr/v4.1/nwges/hrrrges_sfc/alaska">
 <!ENTITY COMINHRRRDAS   "/lfs/h1/ops/prod/com/hrrr/v4.1/nwges/hrrrdasges">
 <!ENTITY COMINGDAS      "/lfs/h1/ops/prod/com/gfs/v16.3">
-<!ENTITY NWROOT		"/lfs/h2/emc/da/noscrub/&USER;/NOAA_3drtma_new">
+<!ENTITY NWROOT		"/lfs/h2/emc/da/noscrub/&USER;/NOAA_3drtma">
 <!ENTITY COMINPREP      "/lfs/h2/emc/ptmp/ashley.stanfield/CRON/3drtma_v13/com/obsproc/v1.3">
 <!ENTITY OBS_DIR	"/scratch4/NCEPDEV/fv3-cam/save/Gang.Zhao/Data/GSD_GSI_Case/obs">
 <!ENTITY HRRR_DIR	"/scratch4/NCEPDEV/fv3-cam/save/Gang.Zhao/Data/GSD_GSI_Case/fgs">
@@ -43,7 +47,7 @@
 <!ENTITY GESROOT	"&ptmp_base;/nwges2/&NET;">
 
 <!ENTITY HOMErtma3d	"&NWROOT;">
-<!ENTITY LOG_DIR	"/lfs/h2/emc/ptmp/&USER;/3DRTMA_HRRR_ALASKA_NEW_LOG">
+<!ENTITY LOG_DIR	"/lfs/h2/emc/ptmp/&USER;/3DRTMA_HRRR_ALASKA_LOG">
 <!ENTITY JJOB_DIR	"&HOMErtma3d;/jobs">
 <!ENTITY SCRIPT_DIR	"&HOMErtma3d;/scripts">
 <!ENTITY USHrtma3d	"&HOMErtma3d;/ush">
@@ -90,6 +94,7 @@
 <!ENTITY DATA_GSIANL    "&DATA_RUNDIR;/gsiprd">
 <!ENTITY DATA_OBSPRD    "&DATA_RUNDIR;/obsprd">
 <!ENTITY DATA_FGSPRD    "&DATA_RUNDIR;/fgsprd">
+<!ENTITY DATA_ANLDUMP   "&DATA_RUNDIR;/anldump">
 <!ENTITY DATA_POST      "&DATA_RUNDIR;/postprd">
 <!ENTITY DATA_POST4FGS  "&DATA_RUNDIR;/postprd4fgs">
 <!ENTITY DATA_AUTOQC    "&DATA_RUNDIR;/autoqc">
@@ -144,6 +149,8 @@
 <!ENTITY exSCR_PREPFGS   "&SCRIPT_DIR;/&RUN;/ex&RUN;_prepfgs.ksh">
 <!ENTITY JJOB_GSIANL	 "&JJOB_DIR;/J&CAP_RUN;_GSIANL">
 <!ENTITY exSCR_GSIANL	 "&SCRIPT_DIR;/&RUN;/ex&RUN;_gsianl.ksh">
+<!ENTITY JJOB_ANLDUMP    "&JJOB_DIR;/J&CAP_RUN;_ANLDUMP">
+<!ENTITY exSCR_ANLDUMP   "&SCRIPT_DIR;/&RUN;/ex&RUN;_anldump.ksh">
 <!ENTITY exefile_name_gsi      "rtma_gsi">
 <!ENTITY JJOB_AUTOQC     "&JJOB_DIR;/J&CAP_RUN;_AUTOQC">
 <!ENTITY exSCR_AUTOQC    "&SCRIPT_DIR;/ex&NET;_autoqc.ksh">
@@ -212,11 +219,11 @@
 <!ENTITY PREPOBS_RESERVATION '<nodes>1:ppn=1:vntype=cray_compute:mem=4000MB</nodes><native>-l place=scatter</native><queue>&QUEUE;</queue><account>&ACCOUNT;</account>'>
 
 <!ENTITY PREPFGS_PROC "1">
-<!ENTITY PREPFGS_RESOURCES '<walltime>00:10:00</walltime>'>
-<!ENTITY PREPFGS_RESERVATION '<nodes>1:ppn=1:vntype=cray_compute:mem=4000MB</nodes><native>-l place=scatter</native><queue>&QUEUE;</queue><account>&ACCOUNT;</account>'>
+<!ENTITY PREPFGS_RESOURCES '<walltime>00:15:00</walltime>'>
+<!ENTITY PREPFGS_RESERVATION '<nodes>1:ppn=1:vntype=cray_compute:mem=20GB</nodes><native>-l place=scatter</native><queue>&QUEUE;</queue><account>&ACCOUNT;</account>'>
 
 <!ENTITY GSI_PROC "14">
-<!ENTITY GSI_THREADS "1">
+<!ENTITY GSI_THREADS "2">
 <!ENTITY GSI_OMP_STACKSIZE "512M">
 <!ENTITY GSI_RESOURCES '<walltime>00:40:00</walltime>'>
 <!ENTITY GSI_RESERVATION '<nodes>2:ppn=60:tpp=2</nodes><native>-l place=vscatter,select=2:ncpus=60</native><queue>&QUEUE;</queue><account>&ACCOUNT;</account>'>	
@@ -228,10 +235,13 @@
 <!ENTITY GSI_WALL_LIMIT 
    '<deadline><cyclestr offset="&GSI_DEADLINE;">@Y@m@d@H@M</cyclestr></deadline>'>
 
+<!ENTITY ANLDUMP_PROC "1">
+<!ENTITY ANLDUMP_RESOURCES '<walltime>00:10:00</walltime>'>
+<!ENTITY ANLDUMP_RESERVATION '<nodes>1:ppn=1:vntype=cray_compute:mem=4GB</nodes><native>-l place=scatter</native><queue>&QUEUE;</queue><account>&ACCOUNT;</account>'>
+
 <!ENTITY MINMAX_PROC "1">
 <!ENTITY MINMAX_RESOURCES '<walltime>00:10:00</walltime>'>
 <!ENTITY MINMAX_RESERVATION '<nodes>1:ppn=1:vntype=cray_compute:mem=500GB</nodes><native>-l place=scatter</native><queue>&QUEUE;</queue><account>&ACCOUNT;</account>'>
-
 
 <!ENTITY AUTOQC_PROC "1">
 <!ENTITY AUTOQC_RESOURCES '<walltime>00:30:00</walltime>'>
@@ -555,6 +565,10 @@
       <value><cyclestr>&DATA_FGSPRD;</cyclestr></value>
    </envar>
    <envar>
+      <name>DATA_ANLDUMP</name>
+      <value><cyclestr>&DATA_ANLDUMP;</cyclestr></value>
+   </envar>
+   <envar>
       <name>exefile_name_gsi</name>
       <value><cyclestr>&exefile_name_gsi;</cyclestr></value>
    </envar>
@@ -644,6 +658,10 @@
     <envar>
       <name>HRRRDAS_BEC</name>
       <value>&HRRRDAS_BEC;</value>
+    </envar>
+    <envar>
+      <name>READIN_LOCALIZATION</name>
+      <value>&READIN_LOCALIZATION;</value>
     </envar>
     <envar>
       <name>GSIANL_RES</name>
@@ -933,7 +951,7 @@
 
   <cycledef group="rap">0 0,12 * 01-12 2022-2025 *</cycledef>
 
-  <task name="&RUN;_obsprep_lghtn_task_@Y@m@d@H@M" cycledefs="hourly" maxtries="&maxtries;">
+  <task name="&RUN;_obsprep_lghtn_task" cycledefs="hourly" maxtries="&maxtries;">
 
     &ENVARS;
     <envar>
@@ -955,7 +973,7 @@
    </dependency>
   </task>
 
-  <task name="&RUN;_obsprep_cloud_task_@Y@m@d@H@M" cycledefs="hourly" maxtries="&maxtries;">
+  <task name="&RUN;_obsprep_cloud_task" cycledefs="hourly" maxtries="&maxtries;">
 
     &ENVARS;
     <envar>
@@ -977,7 +995,7 @@
    </dependency>
   </task>
 
-  <task name="&RUN;_obsprep_radar_task_@Y@m@d@H@M" cycledefs="hourly" maxtries="&maxtries;">
+  <task name="&RUN;_obsprep_radar_task" cycledefs="hourly" maxtries="&maxtries;">
 
     &ENVARS;
    <envar>
@@ -1022,7 +1040,7 @@
    </dependency>
   </task>
 
-    <task name="&RUN;_prepobs_task_@Y@m@d@H@M" cycledefs="hourly" maxtries="&maxtries;">
+    <task name="&RUN;_prepobs_task" cycledefs="hourly" maxtries="&maxtries;">
 
     &ENVARS;
     <envar>
@@ -1045,13 +1063,13 @@
        <datadep age="2"><cyclestr>&COMINPREP;/rtma.@Y@m@d/rtma.t@Hz.nexrad.tm00.bufr_d</cyclestr></datadep>
        <and>
        <or>
-       <taskdep task="&RUN;_obsprep_lghtn_task_@Y@m@d@H@M"/>
+       <taskdep task="&RUN;_obsprep_lghtn_task"/>
        </or>
        <or>
-       <taskdep task="&RUN;_obsprep_cloud_task_@Y@m@d@H@M"/>
+       <taskdep task="&RUN;_obsprep_cloud_task"/>
        </or>
        <or>
-       <taskdep task="&RUN;_obsprep_radar_task_@Y@m@d@H@M"/>
+       <taskdep task="&RUN;_obsprep_radar_task"/>
        </or>
        </and>
        </and>   
@@ -1060,7 +1078,7 @@
   </task>
 
 
-  <task name="&RUN;_prepfgs_ind1_task_@Y@m@d@H@M" cycledefs="ind1" maxtries="&maxtries;">
+  <task name="&RUN;_prepfgs_ind1_task" cycledefs="ind1" maxtries="&maxtries;">
 
     &ENVARS;
     <envar>
@@ -1077,13 +1095,13 @@
     &PREPFGS_RESERVATION;
 
     &ENVARS_PREPJOB;
-   <dependency>
-   <datadep age="10"><cyclestr offset="-3600">&GESINHRRR;/hrrrak_@Y@m@d@Hf001</cyclestr></datadep>
-   </dependency>
-   </task>
+    <dependency>
+      <datadep age="10"><cyclestr offset="-3600">&GESINHRRR;/hrrrak_@Y@m@d@Hf001</cyclestr></datadep>
+    </dependency>
+  </task>
 
 
-     <task name="&RUN;_prepfgs_ind2_task_@Y@m@d@H@M" cycledefs="ind2" maxtries="&maxtries;">
+  <task name="&RUN;_prepfgs_ind2_task" cycledefs="ind2" maxtries="&maxtries;">
 
     &ENVARS;
     <envar>
@@ -1101,11 +1119,11 @@
 
     &ENVARS_PREPJOB;
     <dependency>
-   <datadep age="10"><cyclestr offset="-7200">&GESINHRRR;/hrrrak_@Y@m@d@Hf002</cyclestr></datadep>
-   </dependency>
-   </task>
+      <datadep age="10"><cyclestr offset="-7200">&GESINHRRR;/hrrrak_@Y@m@d@Hf002</cyclestr></datadep>
+    </dependency>
+  </task>
 
-     <task name="&RUN;_prepfgs_ind3_task_@Y@m@d@H@M" cycledefs="ind3" maxtries="&maxtries;">
+  <task name="&RUN;_prepfgs_ind3_task" cycledefs="ind3" maxtries="&maxtries;">
 
     &ENVARS;
     <envar>
@@ -1122,16 +1140,12 @@
     &PREPFGS_RESERVATION;
 
     &ENVARS_PREPJOB;
-   <dependency>
-	   <datadep age="10"><cyclestr>&GESINHRRR;/hrrrak_@Y@m@d@Hf000</cyclestr></datadep>
-   </dependency>
-   </task>
-   
+    <dependency>
+      <datadep age="10"><cyclestr>&GESINHRRR;/hrrrak_@Y@m@d@Hf000</cyclestr></datadep>
+    </dependency>
+  </task>
 
-
-
-
-  <task name="&RUN;_gsianl_task_@Y@m@d@H@M" cycledefs="hourly" maxtries="&maxtries;">
+  <task name="&RUN;_gsianl_task" cycledefs="hourly" maxtries="&maxtries;">
 
     &ENVARS;
     &GSI_RESOURCES;
@@ -1152,16 +1166,36 @@
     <dependency>
       <and>
           <or>
-		  <taskdep task="&RUN;_prepfgs_ind1_task_@Y@m@d@H@M"/>
-		  <taskdep task="&RUN;_prepfgs_ind2_task_@Y@m@d@H@M"/>
-		  <taskdep task="&RUN;_prepfgs_ind3_task_@Y@m@d@H@M"/>
+		  <taskdep task="&RUN;_prepfgs_ind1_task"/>
+		  <taskdep task="&RUN;_prepfgs_ind2_task"/>
+		  <taskdep task="&RUN;_prepfgs_ind3_task"/>
 	  </or>	  
-          <taskdep task="&RUN;_prepobs_task_@Y@m@d@H@M"/>
+          <taskdep task="&RUN;_prepobs_task"/>
       </and>
      </dependency>
   </task>
 
-    <task name="&RUN;_wrfbufr_@Y@m@d@H@M" cycledefs="hourly" maxtries="&maxtries;">
+  <task name="&RUN;_anldump_task" cycledefs="hourly" maxtries="&maxtries;">
+    &ENVARS;
+    <envar>
+       <name>rundir_task</name>
+       <value><cyclestr>&DATA_ANLDUMP;</cyclestr></value>
+    </envar>
+    &ANLDUMP_RESOURCES;
+    &ANLDUMP_RESERVATION;
+
+    <command>&JJOB_DIR;/launch.ksh &JJOB_ANLDUMP;</command>
+    <jobname><cyclestr>&RUN;_anldump_job_@Y@m@d@H@M</cyclestr></jobname>
+    <join><cyclestr>&LOG_SCHDLR;/&RUN;_&envir;_anldump_@Y@m@d@H.log</cyclestr></join>
+
+    &ENVARS_PREPJOB;
+
+    <dependency>
+       <taskdep task="&RUN;_gsianl_task"/>
+    </dependency>
+  </task>
+
+  <task name="&RUN;_wrfbufr" cycledefs="hourly" maxtries="&maxtries;">
     &ENVARS;
     <envar>
        <name>rundir_task</name>
@@ -1175,13 +1209,13 @@
     <jobname>&NET;_wrfbufr</jobname>
     <join><cyclestr>&LOG_DIR;/&RUN;_wrfbufr_@Y@m@d@H@M.log</cyclestr></join>
     <dependency>
-      <taskdep task="&RUN;_gsianl_task_@Y@m@d@H@M"/>
+      <taskdep task="&RUN;_gsianl_task"/>
     </dependency>
 
   </task>
 
 
-  <task name="&RUN;_postsnd_@Y@m@d@H@M" cycledefs="hourly" maxtries="&maxtries;">
+  <task name="&RUN;_postsnd" cycledefs="hourly" maxtries="&maxtries;">
     &ENVARS;
     <envar>
        <name>rundir_task</name>
@@ -1196,14 +1230,14 @@
     <join><cyclestr>&LOG_DIR;/&RUN;_postsnd_@Y@m@d@H@M.log</cyclestr></join>
     <dependency>
       <and>
-      <taskdep task="&RUN;_gsianl_task_@Y@m@d@H@M"/>
-      <taskdep task="&RUN;_wrfbufr_@Y@m@d@H@M"/>
+      <taskdep task="&RUN;_gsianl_task"/>
+      <taskdep task="&RUN;_wrfbufr"/>
       </and>
     </dependency>
   </task>
 
 
- <task name="&RUN;_updatevars_task_@Y@m@d@H@M" cycledefs="hourly" maxtries="1">
+  <task name="&RUN;_updatevars_task" cycledefs="hourly" maxtries="1">
 
     &ENVARS;
     &UPDATEVARS_RESOURCES;
@@ -1216,13 +1250,13 @@
     &ENVARS_UPDATEVARS;
 
     <dependency>
-          <taskdep task="&RUN;_gsianl_task_@Y@m@d@H@M"/>
+          <taskdep task="&RUN;_gsianl_task"/>
     </dependency>
 
   </task>
 
 
-  <task name="&RUN;_post_task_@Y@m@d@H@M" cycledefs="hourly" maxtries="&maxtries;">
+  <task name="&RUN;_post_task" cycledefs="hourly" maxtries="&maxtries;">
 
     &ENVARS;
     &POST_RESOURCES;
@@ -1247,13 +1281,12 @@
 
     &ENVARS_POST;
 
-
     <dependency> 
-          <taskdep task="&RUN;_updatevars_task_@Y@m@d@H@M"/>
+          <taskdep task="&RUN;_updatevars_task"/>
     </dependency>
   </task>
 
-  <task name="&RUN;_post4fgs_task_@Y@m@d@H@M" cycledefs="hourly" maxtries="&maxtries;">
+  <task name="&RUN;_post4fgs_task" cycledefs="hourly" maxtries="&maxtries;">
 
     &ENVARS;
     &POST_RESOURCES;
@@ -1270,11 +1303,11 @@
     &ENVARS_POST; 
 
     <dependency> 
-          <taskdep task="&RUN;_updatevars_task_@Y@m@d@H@M"/>
+          <taskdep task="&RUN;_updatevars_task"/>
     </dependency>
   </task>
 
-  <task name="&RUN;_mint_prep_@Y@m@d@H@M" cycledefs="hourly" maxtries="&maxtries;">
+  <task name="&RUN;_mint_prep" cycledefs="hourly" maxtries="&maxtries;">
     &ENVARS;
     <envar>
        <name>rundir_task</name>
@@ -1289,11 +1322,11 @@
     <join><cyclestr>&LOG_DIR;/&RUN;_mint_prep_@Y@m@d@H@M.log</cyclestr></join>
 
     <dependency>
-      <taskdep task="&RUN;_post_task_@Y@m@d@H@M"/>
+      <taskdep task="&RUN;_post_task"/>
     </dependency>
 
   </task>
-    <task name="&RUN;_maxt_prep_@Y@m@d@H@M" cycledefs="hourly" maxtries="&maxtries;">
+    <task name="&RUN;_maxt_prep" cycledefs="hourly" maxtries="&maxtries;">
     &ENVARS;
     <envar>
        <name>rundir_task</name>
@@ -1308,7 +1341,7 @@
     <join><cyclestr>&LOG_DIR;/&RUN;_maxt_prep_@Y@m@d@H@M.log</cyclestr></join>
 
     <dependency>
-      <taskdep task="&RUN;_post_task_@Y@m@d@H@M"/>
+      <taskdep task="&RUN;_post_task"/>
     </dependency>
 
   </task>
