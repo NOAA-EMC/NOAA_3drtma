@@ -25,18 +25,16 @@
 
 <!ENTITY SCHEDULER      "pbspro">
 
-<!--- ENTITY ExpName is used to specify the testing or experiment name, and can be used in  the defination of PATH names. -->
-<!ENTITY ExpName        "">
 <!-- Variables Defined by absolute paths -->
 
-<!ENTITY ptmp_base	"/lfs/h2/emc/ptmp/&USER;/3DRTMA_HRRR_CONUS&ExpName;_WRKDIR">
+<!ENTITY ptmp_base	"/lfs/h2/emc/ptmp/&USER;/3DRTMA_HRRR_CONUS_WRKDIR">
 <!ENTITY COMINRAP       "/lfs/h1/ops/prod/com/obsproc/v1.2">
 <!ENTITY COMINHRRR      "/lfs/h1/ops/prod/com/hrrr/v4.1">
 <!ENTITY COMINRADAR      "/lfs/h1/ops/prod/dcom/ldmdata/obs/upperair/mrms/conus">
 <!ENTITY GESINHRRR      "/lfs/h1/ops/prod/com/hrrr/v4.1/nwges/hrrrges_sfc/conus">
 <!ENTITY COMINHRRRDAS   "/lfs/h1/ops/prod/com/hrrr/v4.1/nwges/hrrrdasges">
 <!ENTITY COMINGDAS      "/lfs/h1/ops/prod/com/gfs/v16.3">
-<!ENTITY NWROOT		"/lfs/h2/emc/da/noscrub/&USER;/NOAA_3drtma&ExpName;">
+<!ENTITY NWROOT		"/lfs/h2/emc/da/noscrub/&USER;/NOAA_3drtma">
 <!ENTITY COMINPREP      "/lfs/h2/emc/ptmp/ashley.stanfield/CRON/3drtma_v13/com/obsproc/v1.3">
 <!ENTITY OBS_DIR	"/scratch4/NCEPDEV/fv3-cam/save/Gang.Zhao/Data/GSD_GSI_Case/obs">
 <!ENTITY HRRR_DIR	"/scratch4/NCEPDEV/fv3-cam/save/Gang.Zhao/Data/GSD_GSI_Case/fgs">
@@ -49,7 +47,7 @@
 <!ENTITY GESROOT	"&ptmp_base;/nwges2/&NET;">
 
 <!ENTITY HOMErtma3d	"&NWROOT;">
-<!ENTITY LOG_DIR	"/lfs/h2/emc/ptmp/&USER;/3DRTMA_HRRR_CONUS&ExpName;_LOG">
+<!ENTITY LOG_DIR	"/lfs/h2/emc/ptmp/&USER;/3DRTMA_HRRR_CONUS_LOG">
 <!ENTITY JJOB_DIR	"&HOMErtma3d;/jobs">
 <!ENTITY SCRIPT_DIR	"&HOMErtma3d;/scripts">
 <!ENTITY USHrtma3d	"&HOMErtma3d;/ush">

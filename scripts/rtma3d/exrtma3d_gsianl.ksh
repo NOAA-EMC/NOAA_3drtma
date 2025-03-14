@@ -466,7 +466,7 @@ if [ "${envir}" == "lsf" ] || [ "${envir}" == "pbspro" ]; then #WCOSS
 fi
 
 #====  set GSI namelist options for analysis of HOWV and GUST  ====#
-  oerr_gust="-1.0"                #Obs Err of gust (if<0, use preset value 1.0 defined in read_prepbufr.f90)
+  oerr_gust="1.0"                #Obs Err of gust (if<0, use preset value 1.0 defined in read_prepbufr.f90)
   corp_howv0="0.42"        #static BE of howv (0.42 is tuned for pure 3DVar, needs to be changed in hyrid run)
   corp_gust0="3.0"         #static BE of gust (if<0, use preset 3.0 defined in gsi code)
   hwllp_howv="170000.0"           #static BE de-correlation length scale of howv (if<0, using default preset value in GSI code --> hwllp of q at level 1, which is too short)

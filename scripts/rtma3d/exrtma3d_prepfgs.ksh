@@ -127,6 +127,9 @@ FGShrrr_FNAME2="hrrr_${PDYHH_cycm1}f00${ind}"
 # grid_specs_hrrr: for exp hrrr-based 3D RTMA on CONUS domain
   grid_specs_hrrr="lambert:-97.5:38.5:38.5 -122.719528:1799:3000.0 21.138123:1059:3000.0"
 
+# grid_specs_hrrrak: for hrrr-based 3D RTMA on Alaska domain
+  grid_specs_hrrrak="nps:225:60.000000 185.117126:1299:3000.0 41.612949:919:3000.0"
+
 # grid_specs_rrfsnarll: for exp RRFS-based 3D RTMA on North America domain on Rotated Latlon grid
   grid_specs_rrfsnarll="rot-ll:247.0:-35.0:0.0 299.0:4881:0.025 -37.0:2961:0.025"
 
@@ -139,6 +142,7 @@ FGShrrr_FNAME2="hrrr_${PDYHH_cycm1}f00${ind}"
   print_info_msg "$VERBOSE" "FIXgsi is $FIXgsi"
 #
 #  Sea-Land Mask for the correct interpolation of the howv Background.
+  rm -f ./slmask.grib2
   if [[ -f $FIXgsi/hrrr_conus_3km_slmask_nolakes.grib2 ]] ; then
       echo "Sea-Land no-lakes mask file --> $FIXgsi/hrrr_conus_3km_slmask_nolakes.grib2"
       cp -p $FIXgsi/hrrr_conus_3km_slmask_nolakes.grib2    ./slmask.grib2
