@@ -112,7 +112,7 @@
 <!ENTITY hpsspath1_AGibbs  "/NCEPDEV/emc-meso/1year/Annette.Gibbs">
 
 <!ENTITY FGS_OPT        "1">
-<!ENTITY READDIAG "/lfs/h2/emc/da/save/Matthew.T.Morris/NOAA_3drtma_new/sorc/rtma_gsi.fd/build/bin/read_diag_conv.x">
+<!ENTITY READDIAG "&NWROOT;/exec/rtma3d_read_diag.exe">
 
 <!-- for obs pre-processing -->
 <!ENTITY obsprep_radar  "1">
@@ -1008,7 +1008,7 @@
    </dependency>
   </task>
 
-  <task name="&RUN;_mint_obs" cycledefs="hourly" maxtries="&maxtries;">
+<!--  <task name="&RUN;_mint_obs" cycledefs="hourly" maxtries="&maxtries;">
     &ENVARS;
     <envar>
        <name>rundir_task</name>
@@ -1026,9 +1026,9 @@
       <datadep age="2"><cyclestr>&COMINPREP;/rtma.@Y@m@d/rtma.t19z.prepbufr.tm00</cyclestr></datadep>
     </dependency>
 
-  </task>
+  </task> -->
 
-  <task name="&RUN;_maxt_obs" cycledefs="hourly" maxtries="&maxtries;">
+<!--  <task name="&RUN;_maxt_obs" cycledefs="hourly" maxtries="&maxtries;">
     &ENVARS;
     <envar>
        <name>rundir_task</name>
@@ -1045,7 +1045,7 @@
     <dependency>
       <datadep age="2"><cyclestr>&COMINPREP;/rtma.@Y@m@d/rtma.t07z.prepbufr.tm00</cyclestr></datadep>
     </dependency>
-  </task>
+  </task> -->
 
     <task name="&RUN;_prepobs_task" cycledefs="hourly" maxtries="&maxtries;">
 
@@ -1168,6 +1168,29 @@
       <taskdep task="&RUN;_gsianl_task"/>
     </dependency>
 
+  </task>
+
+  <task name="&RUN;_autoqc_task" cycledefs="hourly" maxtries="&maxtries;">
+   
+    &ENVARS;
+    &AUTOQC_RESOURCES;  
+    &AUTOQC_RESERVATION;
+      
+    <envar>
+       <name>rundir_task</name>
+       <value><cyclestr>&DATA_AUTOQC;</cyclestr></value>
+    </envar>
+      
+    <command>&JJOB_DIR;/launch.ksh &JJOB_AUTOQC;</command>
+    <jobname><cyclestr>&RUN;_autoqc_job_@Y@m@d@H@M</cyclestr></jobname>
+    <join><cyclestr>&LOG_SCHDLR;/&RUN;_&envir;_autoqc_@Y@m@d@H.log</cyclestr></join>
+      
+    &ENVARS_AUTOQC;
+    
+    <dependency>
+          <taskdep task="&RUN;_gsianl_task"/>
+    </dependency>
+      
   </task>
 
   <task name="&RUN;_postsnd" cycledefs="hourly" maxtries="&maxtries;">

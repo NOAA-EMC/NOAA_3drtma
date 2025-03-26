@@ -17,6 +17,7 @@ export BUILD_rtma_wrfbufr_conus=yes
 export BUILD_rtma_wrfbufr_alaska=yes
 export BUILD_rtma_stnmlist=yes
 export BUILD_rtma_smartinit=yes
+export BUILD_rtma3d_read_diag=yes
 export BUILD_rtma_minmax=yes
 module reset
 
@@ -155,6 +156,16 @@ if [ $BUILD_rtma_smartinit = yes ] ; then
 
 echo " .... Building rtma_smartinit .... "
 $BASE/build_rtma_smartinit.sh > $logs_dir/build_smartinit.log 2>&1
+
+fi
+
+##############################
+
+if [ $BUILD_rtma3d_read_diag = yes ] ; then
+
+echo " .... Building rtma3d_read_diag .... "
+$BASE/build_rtma3d_read_diag.sh > $logs_dir/build_rtma3d_read_diag.log 2>&1
+cp $BASE/rtma3d_read_diag.fd/rtma3d_read_diag.exe ../exec
 
 fi
 

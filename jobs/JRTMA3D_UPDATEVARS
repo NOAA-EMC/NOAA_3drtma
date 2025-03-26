@@ -131,7 +131,7 @@ if [ "${envir}" != "esrl" ]; then #WCOSS
     fi
     export DATAHOME=${DATA_RUNDIR}/gsiprd
 #    ${RM} -rf ${DATAHOME}
-    ${LN} -s  ${DATA}  ${DATAHOME}
+#    ${LN} -s  ${DATA}  ${DATAHOME}
 
     export DATAOBSHOME=${DATA_RUNDIR}/obsprd
 #    ${RM} -rf ${DATAOBSHOME}

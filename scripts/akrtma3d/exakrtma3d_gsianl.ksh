@@ -27,7 +27,8 @@ OBS_DIR=${DATAOBSHOME}
 BKG_DIR=${DATAHOME_BK}
 COMINhrrrdas=${COMINHRRRDAS}
 fi
-START_TIME=`${DATE} -d "${PDY} ${cyc} ${SUBH_TIME} minutes"`
+#START_TIME=`${DATE} -d "${PDY} ${cyc} ${SUBH_TIME} minutes"`
+START_TIME=`${DATE} -d "${PDY} ${cyc} ${subcyc} minutes"`
 if [ ${HRRRDAS_BEC} -eq 0 ]; then
 EnsWgt=0.5
 else
@@ -344,37 +345,59 @@ for file in `awk '{if($1!~"!"){print $1}}' ./satinfo | sort | uniq` ;do
    ln -s ${FIXcrtm}/${file}.SpcCoeff.bin ./
    ln -s ${FIXcrtm}/${file}.TauCoeff.bin ./
 done
-#found_rjlist=False
-#max_cycs=168 # Number of cycles to look back
-#probe_MM=`echo ${START_TIME} | cut -c 11-12`
-#if [ ${probe_MM} == '00' ]; then
-#  i=1
-#else
-#  i=0
-#fi
-#export PDYprev_dir=${COMOUTautoqc_rtma3d}
-#while [ ${i} -lt ${max_cycs} ]; do
-#  export probe_cyc=`/gpfs/dell1/nco/ops/nwprod/prod_util.v1.1.4/exec/ips/ndate -${i} ${YYYYMMDDHH}`
-#  probe_YYYYMMDD=`echo $probe_cyc | cut -c 1-8`
-#  probe_HH=`echo $probe_cyc | cut -c 9-10`
-##  probe_MM=`echo $YYYYMMDDHHMM | cut -c 11-12`
-#  probe_dir=${COMOUTautoqc_base}/${NET}.${probe_YYYYMMDD}/autoqcprd.t${probe_HH}00z
-#  if [ -s ${probe_dir}/done.${probe_YYYYMMDD}${probe_HH}00 ]; then
-#    export PDYprev_dir=${probe_dir}
-#    found_rjlist=True
-#    break
-#  else
-#    let "i=i+1"
-#  fi
-#done
 
-#if [ $found_rjlist == True ]; then
-#  cpreq ${PDYprev_dir}/reject_conus_t_${probe_cyc}00.txt    t_rejectlist
-#  cpreq ${PDYprev_dir}/reject_conus_q_${probe_cyc}00.txt    q_rejectlist
-#  cpreq ${PDYprev_dir}/reject_conus_ps_${probe_cyc}00.txt   p_rejectlist
-#  cpreq ${PDYprev_dir}/reject_conus_wst_${probe_cyc}00.txt  w_rejectlist
-#  cpreq ${PDYprev_dir}/accept_conus_wst_${probe_cyc}00.txt  mesonet_stnuselist
-#fi
+# Get reject/accept lists derived from automated QC package
+found_rjlist=False
+max_cycs=168 # Number of cycles to look back
+i=1
+export PDYprev_dir=${COMOUTautoqc_rtma3d}
+while [ ${i} -lt ${max_cycs} ]; do
+  export probe_cyc=`${NDATE} -${i} ${YYYYMMDDHH}`
+  probe_YYYYMMDDHH=`echo $probe_cyc | cut -c 1-10`
+  probe_YYYYMMDD=`echo $probe_cyc | cut -c 1-8`
+  probe_HH=`echo $probe_cyc | cut -c 9-10`
+  probe_dir=${COMOUTautoqc_base}/${NET}.${probe_YYYYMMDD}/autoqcprd.t${probe_HH}z
+  if [ -s ${probe_dir}/done.${probe_YYYYMMDDHH} ]; then
+    export PDYprev_dir=${probe_dir}
+    found_rjlist=True
+    break
+  else
+    let "i=i+1"
+  fi
+done
+echo "PDYprev_dir = " $PDYprev_dir
+
+if [ $found_rjlist == True ]; then
+  cpreq ${PDYprev_dir}/accept_merged_para_${RUN}_${probe_cyc}.txt  sfcobs_uselist.txt
+fi
+
+export sfcwndob_biasc=.true.
+if [[ "$sfcwndob_biasc" = ".true." ]]; then
+  # Search previous cycles for most recent wind bias information
+  found_prevcyc=False
+  max_cycs=168 # Number of cycles to look back
+  i=1
+  export PDYprev_dir=${COMOUTautoqc_rtma3d}
+  while [ ${i} -lt ${max_cycs} ]; do
+    export probe_cyc=`${NDATE} -${i} ${YYYYMMDDHH}`
+    probe_YYYYMMDDHH=`echo $probe_cyc | cut -c 1-10`
+    probe_YYYYMMDD=`echo $probe_cyc | cut -c 1-8`
+    probe_HH=`echo $probe_cyc | cut -c 9-10`
+    probe_dir=${COMOUTautoqc_base}/${RUN}.${probe_YYYYMMDD}/autoqcprd.t${probe_HH}z
+    if [ -s ${probe_dir}/done.${probe_YYYYMMDDHH} ]; then
+      export PDYprev_dir=${probe_dir}
+      found_prevcyc=True
+      break
+    else
+      let "i=i+1"
+    fi
+  done
+  echo "PDYprev_dir = " $PDYprev_dir
+
+  if [ $found_prevcyc == True ]; then
+    cpreq ${PDYprev_dir}/windbias_${RUN}_${probe_YYYYMMDDHH}.txt    stnwindbiascor
+  fi
+fi
 
 # Get aircraft reject list, mesonet_uselist, sfcobs_provider
 #if [ $cyc = "08" ]; then
@@ -385,8 +408,8 @@ done
 #${MV} ${SFCOBS_USELIST}/current_mesonet_uselist.txt ${SFCOBS_USELIST}/${PDYm1}_mesonet_uselist.txt
 #scpreq Edward.Colon@dtn-jet.boulder.rdhpcs.noaa.gov:/mnt/lfs4/HFIP/hfv3gfs/Edward.Colon/reject_use_lists/current_mesonet_uselist.txt ${SFCOBS_USELIST}/
 #fi
-${CP} ${AIRCRAFT_REJECT}/current_bad_aircraft.txt current_bad_aircraft
-${CP} ${SFCOBS_USELIST}/current_mesonet_uselist.txt gsd_sfcobs_uselist.txt
+#${CP} ${AIRCRAFT_REJECT}/current_bad_aircraft.txt current_bad_aircraft
+#${CP} ${SFCOBS_USELIST}/current_mesonet_uselist.txt gsd_sfcobs_uselist.txt
 ${CP} ${SFCOBS_PROVIDER}/gsd_sfcobs_provider.txt gsd_sfcobs_provider.txt
 
 bufrtable=${FIXgsi}/prepobs_prep.bufrtable
