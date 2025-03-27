@@ -4,14 +4,14 @@ set -x
 
 #-- Testing the status of some important variables. --#
 # Make sure these variables for key directories are defined and exists
-if [ ! "${COMINrap}" ]; then
-  ${ECHO} "ERROR: \${COMINrap} is not defined!"
-  exit 1
-fi
-if [ ! -d "${COMINrap}" ]; then
-  ${ECHO} "ERROR: $COMINrap does not exist!"
-  exit 1
-fi
+#if [ ! "${COMINrap}" ]; then
+#  ${ECHO} "ERROR: \${COMINrap} is not defined!"
+#  exit 1
+#fi
+#if [ ! -d "${COMINrap}" ]; then
+#  ${ECHO} "ERROR: $COMINrap does not exist!"
+#  exit 1
+#fi
 
 #if [ ! "${COMINhrrr}" ]; then
 #  ${ECHO} "ERROR: \${COMINhrrr} is not defined!"
