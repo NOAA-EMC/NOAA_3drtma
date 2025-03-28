@@ -30,7 +30,7 @@
 <!ENTITY ptmp_base	"/lfs/h2/emc/ptmp/&USER;/3DRTMA_HRRR_ALASKA_WRKDIR">
 <!ENTITY COMINRAP       "/lfs/h1/ops/prod/com/obsproc/v1.2">
 <!ENTITY COMINHRRR      "/lfs/h1/ops/prod/com/hrrr/v4.1">
-<!ENTITY COMINRADAR      "/lfs/h1/ops/prod/dcom/ldmdata/obs/upperair/mrms/alaska">
+<!ENTITY COMINRADAR     "/lfs/h1/ops/dev/dcom/ldmdata/obs/upperair/mrms/alaska">
 <!ENTITY GESINHRRR      "/lfs/h1/ops/prod/com/hrrr/v4.1/nwges/hrrrges_sfc/alaska">
 <!ENTITY COMINHRRRDAS   "/lfs/h1/ops/prod/com/hrrr/v4.1/nwges/hrrrdasges">
 <!ENTITY COMINGDAS      "/lfs/h1/ops/prod/com/gfs/v16.3">
@@ -81,9 +81,9 @@
 <!ENTITY LOG_PGMOUT     "&LOG_DIR;/pgmout">
 <!ENTITY jlogfile       "&LOG_JJOB;/jlogfile_pbspro.@Y@m@d@H">
 <!ENTITY obsname_conus  "MergedReflectivityQC">
-<!ENTITY obsname_alaska "MergedReflectivityQComposite">
+<!ENTITY obsname_alaska "MergedReflectivityQC">
 <!ENTITY numlim_conus   "MergedReflectivityQC">
-<!ENTITY numlim_alaska  "MergedReflectivityQComposite">
+<!ENTITY numlim_alaska  "MergedReflectivityQC">
 
 
 <!-- definition of name of the top running directory for all tasks -->
@@ -112,7 +112,7 @@
 <!ENTITY hpsspath1_AGibbs  "/NCEPDEV/emc-meso/1year/Annette.Gibbs">
 
 <!ENTITY FGS_OPT        "1">
-<!ENTITY READDIAG "/lfs/h2/emc/da/save/Matthew.T.Morris/NOAA_3drtma_new/sorc/rtma_gsi.fd/build/bin/read_diag_conv.x">
+<!ENTITY READDIAG "&NWROOT;/exec/rtma3d_read_diag.exe">
 
 <!-- for obs pre-processing -->
 <!ENTITY obsprep_radar  "1">
@@ -1214,6 +1214,28 @@
 
   </task>
 
+  <task name="&RUN;_autoqc_task" cycledefs="hourly" maxtries="&maxtries;">
+   
+    &ENVARS;
+    &AUTOQC_RESOURCES;  
+    &AUTOQC_RESERVATION;
+      
+    <envar>
+       <name>rundir_task</name>
+       <value><cyclestr>&DATA_AUTOQC;</cyclestr></value>
+    </envar>
+      
+    <command>&JJOB_DIR;/launch.ksh &JJOB_AUTOQC;</command>
+    <jobname><cyclestr>&RUN;_autoqc_job_@Y@m@d@H@M</cyclestr></jobname>
+    <join><cyclestr>&LOG_SCHDLR;/&RUN;_&envir;_autoqc_@Y@m@d@H.log</cyclestr></join>
+      
+    &ENVARS_AUTOQC;
+    
+    <dependency>
+          <taskdep task="&RUN;_gsianl_task"/>
+    </dependency>
+      
+  </task>
 
   <task name="&RUN;_postsnd" cycledefs="hourly" maxtries="&maxtries;">
     &ENVARS;

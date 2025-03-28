@@ -4,12 +4,14 @@ set -x
 
 #############################################################################
 # Make sure START_TIME is defined and in the correct format
-START_TIME=`${DATE} -d "${PDY} ${cyc} minutes"`
+START_TIME=`${DATE} -d "${PDY} ${cyc} ${subcyc} minutes"`
 echo $START_TIME
 echo $cyc
 
+# Constants needed for mesonet wind bias correction algorithm
+tinf=30. # Constant timescale associated with an observation
+
 # Compute date & time components for the analysis time
-YYYYMMDDHHMM=`${DATE} +"%Y%m%d%H%M" -d "${START_TIME}"`
 YYYYMMDDHH=`${DATE} +"%Y%m%d%H" -d "${START_TIME}"`
 YYYYMMDD=`${DATE} +"%Y%m%d" -d "${START_TIME}"`
 YYYY=`${DATE} +"%Y" -d "${START_TIME}"`
@@ -24,17 +26,16 @@ HH=`${DATE} +"%H" -d "${START_TIME}"`
 # Find the directory containing the previous database file
 max_cycs=168 # Number of cycles to look back
 i=1
-export PDYprev=${YYYYMMDDHHMM}
+export PDYprev=${YYYYMMDDHH}
 export PDYprev_dir=${COMOUTautoqc_rtma3d}
 while [ ${i} -lt ${max_cycs} ]; do
-  probe=`/gpfs/dell1/nco/ops/nwprod/prod_util.v1.1.4/exec/ips/ndate -${i} ${YYYYMMDDHH}`
+  probe=`${NDATE} -${i} ${YYYYMMDDHH}`
   probe_YYYYMMDD=`echo $probe | cut -c 1-8`
   probe_HH=`echo $probe | cut -c 9-10`
-  probe_MM=`echo $YYYYMMDDHHMM | cut -c 11-12`
-  probe_dir=${COMOUTautoqc_base}/${NET}.${probe_YYYYMMDD}/autoqcprd.t${probe_HH}${probe_MM}z
-  if [ -s ${probe_dir}/done.${probe_YYYYMMDD}${probe_HH}${probe_MM} ]; then
+  probe_dir=${COMOUTautoqc_base}/${NET}.${probe_YYYYMMDD}/autoqcprd.t${probe_HH}z
+  if [ -s ${probe_dir}/done.${probe} ]; then
     echo $probe
-    export PDYprev=${probe}${probe_MM}
+    export PDYprev=${probe}
     export PDYprev_dir=${probe_dir}
     break
   else
@@ -45,15 +46,14 @@ done
 # Find the most recent cycle with computed long-term reject lists
 max_cycs=168 # Number of cycles to look back
 i=1
-export probecyc_long=${YYYYMMDDHHMM}
+export probecyc_long=${YYYYMMDDHH}
 while [ ${i} -lt ${max_cycs} ]; do
-  probe=`/gpfs/dell1/nco/ops/nwprod/prod_util.v1.1.4/exec/ips/ndate -${i} $YYYYMMDDHH`
+  probe=`${NDATE} -${i} $YYYYMMDDHH`
   probe_YYYYMMDD=`echo $probe | cut -c 1-8`
   probe_HH=`echo $probe | cut -c 9-10`
-  probe_MM=`echo $YYYYMMDDHHMM | cut -c 11-12`
-  probe_dir=${COMOUTautoqc_base}/${NET}.${probe_YYYYMMDD}/autoqcprd.t${probe_HH}${probe_MM}z
-  if [ $probe_HH -eq "23" ] && [ -s ${probe_dir}/done.${probe_YYYYMMDD}${probe_HH}${probe_MM} ]; then
-    export probecyc_long=${probe}${probe_MM}
+  probe_dir=${COMOUTautoqc_base}/${NET}.${probe_YYYYMMDD}/autoqcprd.t${probe_HH}z
+  if [ $probe_HH -eq "23" ] && [ -s ${probe_dir}/done.${probe} ]; then
+    export probecyc_long=${probe}
     break
   else
     let "i=i+1"
@@ -86,14 +86,14 @@ export pgm="rtma3d_autoqc"
 #cd ${DATA}
 time_str=`${DATE} "+%Y-%m-%d_%H_%M_%S" -d "${START_TIME}"`
 ${ECHO} " time_str = ${time_str}"
-python ${NWROOT}/sorc/rtma_autoqc.fd/gen_database_autoqc.py ${YYYYMMDDHHMM} ${DATA} ${COMOUTautoqc_rtma3d} ${PDYprev_dir} ${PDYprev} ${probecyc_long}
+python ${NWROOT}/ush/gen_database_autoqc.py ${RUN} ${YYYYMMDDHH} ${DATA} ${COMOUTautoqc_rtma3d} ${PDYprev_dir} ${PDYprev} ${probecyc_long} ${tinf}
 
 export err=$?; err_chk
 if [ err -eq 0 ] ; then
 echo "AUTOQC SUCCESS."
 elif [ err -gt 0 ] ; then
 echo "AUTOQC FAILED."
-#mail -s "AUTOQC failed at cycle: $YYYYMMDDHHMM" Edward.Colon@noaa.gov < /dev/null
+#mail -s "AUTOQC failed at cycle: $YYYYMMDDHH" Edward.Colon@noaa.gov < /dev/null
 fi
 
 ${CP} -p * ${COMOUTautoqc_rtma3d}
