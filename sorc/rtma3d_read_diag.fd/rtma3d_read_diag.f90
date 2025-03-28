@@ -134,7 +134,7 @@ PROGRAM read_diag_conv
              rhgt=rdiagbuf(7,i)     ! observation height (meters)
              rdhr=rdiagbuf(8,i)     ! obs time (hours relative to analysis time)
              iuse=int(rdiagbuf(12,i))    ! analysis usage flag (1=use, -1=monitoring ) 
-             iusev=int(rdiagbuf(11,i))    ! analysis usage flag ( value ) 
+             iusev=rdiagbuf(11,i)   ! analysis usage flag ( value ) 
              ddiff=rdiagbuf(18,i)   ! obs-ges used in analysis (K)
              rerr = 0._r_single
              if (rdiagbuf(16,i) > 1.0E-12_r_single) then   ! final inverse observation error (K**-1)
