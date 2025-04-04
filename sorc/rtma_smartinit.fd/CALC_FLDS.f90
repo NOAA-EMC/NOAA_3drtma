@@ -5,17 +5,24 @@
       use aset2d
       use asetdown
 
-      character*4 model
+      character*6 model
       REAL, ALLOCATABLE :: PBLMARK(:,:),RH(:,:,:)
       allocate (rh(im,jm,maxlev),pblmark(im,jm))
 
-      print*,'begin calc_flds=',im,jm,malxev,model
+      print*,'begin calc_flds=',im,jm,maxlev,model
 
       DO J=1,JM
       DO I=1,IM
         IF (VALIDPT(I,J)) THEN
-          SPEED=SQRT(DOWNU(I,J)*DOWNU(I,J)+DOWNV(I,J)*DOWNV(I,J))
-          WGUST(I,J)=MAX(GUST(I,J),SPEED)
+          WSPD(I,J)=SQRT(DOWNU(I,J)*DOWNU(I,J)+DOWNV(I,J)*DOWNV(I,J))
+          WGUST(I,J)=MAX(GUST(I,J),WSPD(I,J))
+          IF (WSPD(I,J).EQ.0.) THEN
+            WDIR(I,J)=0.
+          ELSE
+            WDIR(I,J)=ATAN2(-DOWNU(I,J),-DOWNV(I,J)) / 0.0174
+          ENDIF
+          IF(WDIR(I,J).LT.0.) WDIR(I,J)=WDIR(I,J)+360.0
+          IF(WDIR(I,J).GT.360.) WDIR(I,J)=WDIR(I,J)-360.0
         ELSE
           WGUST(I,J)=SPVAL
           PSFC(I,J)=SPVAL
@@ -24,6 +31,8 @@
           VIS(I,J)=SPVAL
           SFCR(I,J)=SPVAL
           SST(I,J)=SPVAL
+          WSPD(I,J)=SPVAL
+          WDIR(I,J)=SPVAL
         ENDIF
       ENDDO
       ENDDO

@@ -42,7 +42,7 @@
       CHARACTER*80 FNAME
       CHARACTER*4 DUM1
       character*2 domain
-      character*4 model
+      character*6 model
       TYPE(GRIBFIELD)::GFLD
  
       REAL, ALLOCATABLE   :: htagl(:,:),mdlsfc(:,:)
@@ -381,11 +381,14 @@
       endif
 
 ! Get surface wind gust
+! Get 10 m wind gust
       JDISC = 0
       JPDT(1) = 002
       JPDT(2) = 022
-      JPDT(10) = -9999
-      JPDT(12) = -9999
+!     JPDT(10) = -9999
+!     JPDT(12) = -9999
+      JPDT(10) = 103
+      JPDT(12) = 10
       J=0
 
       CALL SETVAR_g2(LUGB,LUGI,NUMVAL,J,JDISC,JIDS,JPDTN,JPDT,JGDTN, &
@@ -487,6 +490,8 @@
         JPDT(2) = 0
       elseif(domain == 'CS' .and. trim(model) == 'HRRR') then
         JPDT(2) = 0
+      elseif(domain == 'CS' .and. trim(model) == '3DRTMA') then
+        JPDT(2) = 0
       else
         JPDT(2) = 198
       endif
@@ -502,10 +507,18 @@
 
 ! Get ceiling
       JDISC  = 0
-      JPDT(1) = 3
-      JPDT(2) = 5
-      JPDT(10) = 215
-      JPDT(12) = -9999
+!     if(trim(model) == '3DRTMA')then
+! 3DRTMA WRFNAT
+!       JPDT(1) = 6
+!       JPDT(2) = 13
+!       JPDT(10) = 255
+!     else
+! HRRR, 3DRTMA,  or RAP WRFNAT
+        JPDT(1) = 3
+        JPDT(2) = 5
+        JPDT(10) = 215
+        JPDT(12) = -9999
+!     endif
       J=0
 
       CALL SETVAR_g2(LUGB,LUGI,NUMVAL,J,JDISC,JIDS,JPDTN,JPDT,JGDTN, &
@@ -517,8 +530,9 @@
 
 ! Get sea level pressure
       JPDT(1) = 3
-      JPDT(2) = 198
-      JPDT(10) = -9999
+!     JPDT(2) = 198
+      JPDT(2) = 1
+      JPDT(10) = 101
       JPDT(12) = -9999
       J=0
       CALL SETVAR_g2(LUGB,LUGI,NUMVAL,J,JDISC,JIDS,JPDTN,JPDT,JGDTN, &

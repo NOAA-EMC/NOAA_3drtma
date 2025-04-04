@@ -91,6 +91,10 @@ postmsg "$jlogfile" "$msg"
   fi
     
 ############################################################################
+# grid_specs_hrrr: for exp hrrr-based 3D RTMA on CONUS domain
+  grid_specs_hrrr="lambert:-97.5:38.5:38.5 -122.719528:1799:3000.0 21.138123:1059:3000.0"
+  grid_specs=$grid_specs_hrrr
+
 #   checking if howv/gust exists in the analysis file (netcdf)
   i_found_howv=0
   RUN_HOWV="FALSE"
@@ -147,13 +151,94 @@ postmsg "$jlogfile" "$msg"
         rm -f ./${grib2_fname}
         # wgrib2 ./grb2_tmplate_${varname}.grib2 -import_bin ./anl_${varname}_bin.dat -no_header -set_var ${varname_grb} -set_ftime "anl" -set_date ${ADATEymdh} -undefine_val ${undefval}  -set_lev "${level_info}" -set_grib_type $grib_type ${scaling_set} -grib_out ./${grib2_fname}
         wgrib2 ./grb2_tmplate_${varname}.grib2 -import_bin ./anl_${varname}_bin.dat -no_header -set_var ${varname_grb} -set_ftime "anl" -set_date ${ADATEymdh} -set_lev "${level_info}" -grib_out ./${grib2_fname}
+
+        if [[ -f $FIXgsi/hrrr_conus_3km_slmask_nolakes.grib2 ]] ; then
+          echo "Sea-Land no-lakes mask file --> $FIXgsi/hrrr_conus_3km_slmask_nolakes.grib2"
+          cp -p $FIXgsi/hrrr_conus_3km_slmask_nolakes.grib2    ./slmask.grib2
+        else
+          echo "No Sea-Land no-lakes mask file is used for Wave Height analysis"
+        fi
+
+        CDATE=$PDY$cyc
+        echo $CDATE
+
+        # Ice Analysis
+        found_seaice=no
+        ic=0
+        while [ $ic -le 120 ] ; do
+           sice_FHH=`printf %03d $ic`
+           siceCYCLE=`$NDATE -$sice_FHH $CDATE`
+           sicePDY=`echo $siceCYCLE |cut -c1-8`
+
+           probe_sice_grb2=$COMINsice/seaice_analysis.${sicePDY}/seaice.t00z.5min.grb.grib2
+#
+           if [ -s ${probe_sice_grb2} ]; then
+              cpreq $probe_sice_grb2 seaice.grb2
+
+# 1. Ice Interpolation
+              wgrib2 seaice.grb2 -match "ICEC:mean sea level" \
+                     -new_grid_winds earth -new_grid ${grid_specs} ice_int.grb2
+
+# 2. Create the ice mask#
+              wgrib2 ice_int.grb2 -set_grib_type c3 \
+              -if "ICEC:mean sea" -rpn "0.0:>" -fi -grib_out ice_mask.grb2
+
+# 3. Ice + SLmask
+              cat slmask.grib2 ice_mask.grb2 > ISL_mask.grb2
+
+# 4. Create the new SLMask
+              wgrib2 ISL_mask.grb2 \
+                 -if ":LAND:" -rpn "sto_1" -fi \
+                 -if ":ICEC:" -rpn "sto_2" -fi \
+                 -if_reg 1:2 \
+                    -rpn "rcl_1:rcl_2:max:clr_1" \
+                    -set_var LAND \
+                    -grib_out howv_mask.grb2
+
+# 6. Delete temporary files
+         #rm -rf ice_int.grb2 ice_mask.grb2 ISL_mask.grb2
+
+         found_seaice=yes
+         break
+      else
+         let "ic=ic+24"
+      fi
+   done
+   if [[ ${found_seaice} = no ]] ; then
+       err_exit "No sice available. The missing files in the above while-do loop are of the from $COMINsice/seaice_analysis.${sicePDY}/seaice.t00z.grb.grib2. 
+                 The script must be able to find at least one file out of the 5 files that it queries"
+   fi
+
+   field=':HTSGW:surface:'
+   mask=':LAND:surface:anl:'
+   leveltype=prslev
+#     wgrib2 ${COMIN}/${RUN}.t${cyc}z.anl_${leveltype}_ndfd.grib2 -not_if $field -grib tmpout_no_waves.grib2tmp
+#     wgrib2 ${FIXrtma3d}/${RUN}/${RUN}_slmask_nolakes.grb2 -match ${mask} -grib tmpmask.grib2tmp
+#     wgrib2 ${COMIN}/${RUN}.t${cyc}z.prslev.f${fhr}.${domain}.grib2 -match ${field} -grib tmpdata.grib2tmp
+
+      cp howv_mask.grb2 tmpmask.grib2tmp
+      cat ${grib2_fname} >> tmpmask.grib2tmp
+#     cat ${RUN}.t${cyc}z.anl.howv_ndfd.grib2 >> tmpmask.grib2tmp
+#     cp tmpdata.grib2tmp tmpdata.grib2tmp.${domain}
+#     cat tmpdata.grib2tmp >> tmpmask.grib2tmp
+      wgrib2 tmpmask.grib2tmp \
+        -if '^1:' \
+           -rpn '0:==:sto_1' \
+        -fi \
+        -if $field \
+           -rpn 'rcl_1:mask' \
+           -set_bitmap 0 -set_grib_type c3 \
+           -grib_out tmpout.grib2tmp
+
         export err=$?
         if [ $err -eq 0 ] ; then
            echo "           Successfully convert netcdf file to grib2 file for ${varname}."
            # save the analysis file (grib2) to $COMOUT
-           cp -p ./${grib2_fname}     ${COMOUT}/${NET}.t${HH}z.anl.${varname}.grib2     
+#          cp -p ./${grib2_fname}     ${COMOUT}/${NET}.t${HH}z.anl.${varname}.grib2     
+           cp -p tmpout.grib2tmp     ${COMOUT}/${NET}.t${HH}z.anl.${varname}.grib2
            # appending to a single grib2 file
-           wgrib2 ${grib2_fname}      -append -grib ${COMOUT}/${NET}.t${HH}z.anl.howvgust.grib2
+#          wgrib2 ${grib2_fname}      -append -grib ${COMOUT}/${NET}.t${HH}z.anl.howvgust.grib2
+           wgrib2 tmpout.grib2tmp      -append -grib ${COMOUT}/${NET}.t${HH}z.anl.howvgust.grib2
         else
            echo "conversion of ${varname} in analysis from netcdf to grib2 failed."
         fi

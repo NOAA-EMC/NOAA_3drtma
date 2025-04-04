@@ -13,7 +13,7 @@
       TYPE(GRIBFIELD)::GFLD
 
       CHARACTER *80 FNAMEOUT
-      character*4 model
+      character*6 model
       character*2 domain
       integer fhr
 
@@ -43,7 +43,7 @@
       GFLD%ipdtmpl(10)=1
       GFLD%ipdtmpl(12)=0
 
-      if(trim(model) == 'HRRR')then
+      if(trim(model) == 'HRRR' .or. trim(model) == '3DRTMA')then
        DO KK = 1, ITOT
          IF(MOD(KK,IM).EQ.0) THEN
            M=IM
@@ -88,7 +88,7 @@
       GFLD%ipdtmpl(2)=6
       GFLD%ipdtmpl(10)=1
       GFLD%ipdtmpl(12)=0
-      if(trim(model) == 'HRRR')then
+      if(trim(model) == 'HRRR' .or. trim(model) == '3DRTMA')then
       GFLD%ibmap=0
       DEC=-4.0
       GFLD%ipdtmpl(10)=103
@@ -112,7 +112,7 @@
       GFLD%ipdtmpl(12)=0
       GFLD%idrtmpl(2)=DEC
 
-      if(trim(model) == 'HRRR')then
+      if(trim(model) == 'HRRR' .or. trim(model) == '3DRTMA')then
       GFLD%ibmap=0
       GFLD%ipdtmpl(10)=103
       GFLD%ipdtmpl(12)=2
@@ -132,7 +132,7 @@
       GFLD%ipdtmpl(12)=0
       GFLD%idrtmpl(2)=DEC
 
-      if(trim(model) == 'HRRR')then
+      if(trim(model) == 'HRRR' .or. trim(model) == '3DRTMA')then
       GFLD%ibmap=0
       GFLD%ipdtmpl(10)=103
       GFLD%ipdtmpl(12)=10
@@ -152,7 +152,7 @@
       GFLD%ipdtmpl(12)=0
       GFLD%idrtmpl(2)=DEC
 
-      if(trim(model) == 'HRRR')then
+      if(trim(model) == 'HRRR' .or. trim(model) == '3DRTMA')then
       GFLD%ibmap=0
       GFLD%ipdtmpl(10)=103
       GFLD%ipdtmpl(12)=10
@@ -161,12 +161,50 @@
       CALL set_scale(gfld,DEC)
       CALL PUTGB2(71,GFLD,IRET)
 
+      if(trim(model) == '3DRTMA')then
+
+! Write 10-m wind speed
+        print*, 'maxval(WSPD),minval(WSPD) at 10 m: ', maxval(WSPD),minval(WSPD)
+        DEC=-3.0
+
+        CALL FILL_FLD(GFLD,ITOT,IM,JM,WSPD)
+
+        GFLD%ipdtmpl(1)=2
+        GFLD%ipdtmpl(2)=1
+        GFLD%ipdtmpl(10)=103
+        GFLD%ipdtmpl(12)=10
+        GFLD%idrtmpl(2)=DEC
+
+        CALL set_scale(gfld,DEC)
+        CALL PUTGB2(71,GFLD,IRET)
+
+! Write 10-m wind direction
+        print*,'maxval(WDIR),minval(WDIR) at 10 m: ', maxval(WDIR),minval(WDIR)
+        DEC=3.0
+
+        CALL FILL_FLD(GFLD,ITOT,IM,JM,WDIR)
+
+        GFLD%ipdtmpl(1)=2
+        GFLD%ipdtmpl(2)=0
+        GFLD%ipdtmpl(10)=103
+        GFLD%ipdtmpl(12)=10
+        GFLD%idrtmpl(2)=DEC
+
+        CALL set_scale(gfld,DEC)
+        CALL PUTGB2(71,GFLD,IRET)
+
+      endif
+
 ! Write wind gust to grib2
 ! Increased precision for wind gust
       DEC=-4.0
 
+!     if(trim(model) == 'HRRR' .or. trim(model) == '3DRTMA')then
       if(trim(model) == 'HRRR')then
       CALL FILL_FLD(GFLD,ITOT,IM,JM,GUST)
+      GFLD%ibmap=0
+      elseif(trim(model) == '3DRTMA')then
+      CALL FILL_FLD(GFLD,ITOT,IM,JM,WGUST)
       GFLD%ibmap=0
       else
       CALL FILL_FLD(GFLD,ITOT,IM,JM,WGUST)
@@ -175,7 +213,14 @@
       GFLD%ipdtmpl(1)=2
       GFLD%ipdtmpl(2)=022
       GFLD%ipdtmpl(10)=1
-      GFLD%ipdtmpl(12)=0
+      if(trim(model) == '3DRTMA')then
+        GFLD%ipdtmpl(3)=0
+        GFLD%ipdtmpl(5)=109
+        GFLD%ipdtmpl(10)=103
+        GFLD%ipdtmpl(12)=10
+      else
+        GFLD%ipdtmpl(12)=0
+      endif
       GFLD%idrtmpl(2)=DEC
 
       CALL set_scale(gfld,DEC)
@@ -205,7 +250,7 @@
 
       CALL FILL_FLD(GFLD,ITOT,IM,JM,DOWNP)
 
-      if (trim(model) == 'HRRR') then
+      if (trim(model) == 'HRRR' .or. trim(model) == '3DRTMA') then
       GFLD%ibmap=0
       else
       GFLD%ibmap=255
@@ -222,7 +267,7 @@
 ! Write topography to grib2
       DEC=-2.0
 
-      if(trim(model) == 'HRRR')then
+      if(trim(model) == 'HRRR' .or. trim(model) == '3DRTMA')then
       DEC=3.0
       endif
 
@@ -238,17 +283,21 @@
       CALL PUTGB2(71,GFLD,IRET)
 
 ! Write computed TCLD to grib2
-      DEC=3.0
 
       CALL FILL_FLD(GFLD,ITOT,IM,JM,SKY)
 
       GFLD%ipdtmpl(1)=6
       GFLD%ipdtmpl(2)=1
-      GFLD%ipdtmpl(10)=1
       GFLD%ipdtmpl(12)=0
-      if(trim(model) == 'HRRR')then
-       DEC=-3.0
-       GFLD%ipdtmpl(10)=200
+      if(trim(model) == 'HRRR' .or. trim(model) == '3DRTMA')then
+        DEC=-3.0
+        GFLD%ipdtmpl(10)=200
+!     elseif(trim(model) == '3DRTMA')then
+!       DEC=-3.0
+!       GFLD%ipdtmpl(10)=10
+      else
+        DEC=3.0
+        GFLD%ipdtmpl(10)=1
       endif
       GFLD%idrtmpl(2)=DEC
 
@@ -257,6 +306,7 @@
 
 ! Write cloud base to grib2
 
+      if(trim(model) /= '3DRTMA')then
       if(trim(model) == 'RAP')then
       GFLD%ibmap=255
       DO KK = 1, ITOT
@@ -301,6 +351,7 @@
 
       CALL set_scale(gfld,DEC)
       CALL PUTGB2(71,GFLD,IRET)
+      endif   ! skip for 3DRTMA
 
 ! Write ceiling height to grib2
 
@@ -341,9 +392,23 @@
 
       CALL FILL_FLD(GFLD,ITOT,IM,JM,CEIL)
 
-      GFLD%ipdtmpl(1)=3
-      GFLD%ipdtmpl(2)=5
-      GFLD%ipdtmpl(10)=215
+      GFLD%discipline=0
+      GFLD%ipdtnum=0
+
+!     if(trim(model) == '3DRTMA')then
+!       GFLD%ipdtmpl(1)=6
+!       GFLD%ipdtmpl(2)=13
+!       GFLD%ipdtmpl(10)=255
+!       GFLD%ipdtmpl(1)=3
+!       GFLD%ipdtmpl(2)=5
+!       GFLD%ipdtmpl(9)=1
+!       GFLD%ipdtmpl(10)=215
+!     else
+        GFLD%ipdtmpl(1)=3
+        GFLD%ipdtmpl(2)=5
+        GFLD%ipdtmpl(10)=215
+!     endif
+
       GFLD%ipdtmpl(12)=0
       GFLD%idrtmpl(2)=DEC
 
@@ -352,6 +417,7 @@
 
 ! Write SLP to grib2
 
+      if(trim(model) /= '3DRTMA')then ! skip for 3DRTMA
 ! Do not need to change precision, it matches the NDFD grid
       if (trim(model) == 'RAP') GFLD%ibmap=255
       DEC=-3.0
@@ -363,7 +429,7 @@
       GFLD%ipdtmpl(10)=101
       GFLD%ipdtmpl(12)=0
 
-      if(trim(model) == 'HRRR')then
+      if(trim(model) == 'HRRR' .or. trim(model) == '3DRTMA')then
        DO KK = 1, ITOT
          IF(MOD(KK,IM).EQ.0) THEN
            M=IM
@@ -550,7 +616,7 @@
 
 ! HGHT at model level 1
         DEC=-3.0
-        if(trim(model) == 'HRRR')DEC=-5.0
+        if(trim(model) == 'HRRR' .or. trim(model) == '3DRTMA')DEC=-5.0
 
         CALL FILL_FLD(GFLD,ITOT,IM,JM,HGHT(:,:,1))
 
@@ -570,7 +636,7 @@
 
 ! SFC Roughness
         DEC=2.7
-        if(trim(model) == 'HRRR')DEC=4.0
+        if(trim(model) == 'HRRR' .or. trim(model) == '3DRTMA')DEC=4.0
 
         CALL FILL_FLD(GFLD,ITOT,IM,JM,SFCR)
 
@@ -590,7 +656,7 @@
 
 ! Skin Temperature/SST
        DEC=-2.0
-       if(trim(model) == 'HRRR')DEC=-4.0
+       if(trim(model) == 'HRRR' .or. trim(model) == '3DRTMA')DEC=-4.0
        DEC=-4.0
 
        CALL FILL_FLD(GFLD,ITOT,IM,JM,SST)
@@ -635,7 +701,7 @@
 
       CALL FILL_FLD(GFLD,ITOT,IM,JM,PSFC)
 
-      if (trim(model) == 'HRRR') then
+      if (trim(model) == 'HRRR' .or. trim(model) == '3DRTMA') then
       GFLD%ibmap=0
       else
       GFLD%ibmap=255
@@ -744,6 +810,7 @@
       CALL set_scale(gfld,DEC)
       CALL PUTGB2(71,GFLD,IRET)
       endif
+      endif ! skip for 3DRTMA
 
 ! VISIBILITY
 ! Write visibility to grib2
@@ -758,7 +825,7 @@
       GFLD%ipdtmpl(12)=0
       GFLD%idrtmpl(2)=DEC
 
-      if (trim(model) == 'HRRR') then
+      if (trim(model) == 'HRRR' .or. trim(model) == '3DRTMA') then
        DO KK = 1, ITOT
          IF(MOD(KK,IM).EQ.0) THEN
            M=IM

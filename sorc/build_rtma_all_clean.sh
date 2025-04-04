@@ -16,6 +16,7 @@ export BUILD_rtma_wrfbufr_conus=yes
 export BUILD_rtma_wrfbufr_alaska=yes
 export BUILD_rtma_stnmlist=yes
 export BUILD_rtma_smartinit=yes
+export BUILD_rtma_obslist=yes
 export BUILD_rtma3d_read_diag=yes
 export BUILD_rtma_minmax=yes
 
@@ -102,6 +103,13 @@ fi
 if [ $BUILD_rtma_smartinit = yes ] ; then
 
 cd ${BASE}/rtma_smartinit.fd
+make clean
+
+fi
+
+if [ $BUILD_rtma_obslist = yes ] ; then
+
+cd ${BASE}/rtma_obslist.fd
 make clean
 
 fi
