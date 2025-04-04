@@ -207,9 +207,27 @@ if [ ! -s "${workdir}/wrfsubhnat.grib2" ]; then
 fi
 
 # transfer the output grib2 files to $COMOUTpost_rtma3d
+# add gust and howv (wave height) to the prslev and natlev files
+# change name from surface gust to 10-m gust
 
+# Note: NET should be RUN - AMG
+${WGRIB2} -V ${COMOUT}/${NET}.t${cyc}z.anl.gust.grib2 -set_lev "10 m above ground" -grib tmpgust.grib2
+if [ "${RUN}" == "rtma3d" ]; then
+  cat tmpgust.grib2 ${COMOUT}/${NET}.t${cyc}z.anl.howv.grib2 >> ${workdir}/wrfsubhprs.grib2
+  cat tmpgust.grib2 ${COMOUT}/${NET}.t${cyc}z.anl.howv.grib2 >> ${workdir}/wrfsubhnat.grib2
+else
+  cat tmpgust.grib2  >> ${workdir}/wrfsubhprs.grib2
+  cat tmpgust.grib2  >> ${workdir}/wrfsubhnat.grib2
+fi
 ${WGRIB2} ${workdir}/wrfsubhprs.grib2 -set center 7 -grib ${COMOUTpost_rtma3d}/${PROD_HEAD}.wrfsubhprs.grib2
 ${WGRIB2} ${workdir}/wrfsubhnat.grib2 -set center 7 -grib ${COMOUTpost_rtma3d}/${PROD_HEAD}.wrfsubhnat.grib2
+${WGRIB2} ${workdir}/wrfsubhprs.grib2 -set center 7 -grib ${COMOUT}/${PROD_HEAD}.anl_prslev.grib2
+${WGRIB2} ${workdir}/wrfsubhnat.grib2 -set center 7 -grib ${COMOUT}/${PROD_HEAD}.anl_natlev.grib2
+# Create index file
+wgrib2 ${COMOUT}/${RUN}.t${cyc}z.anl_prslev.grib2 -s > ${RUN}.t${cyc}z.anl_prslev.grib2.idx
+wgrib2 ${COMOUT}/${RUN}.t${cyc}z.anl_natlev.grib2 -s > ${RUN}.t${cyc}z.anl_natlev.grib2.idx
+cp ${RUN}.t${cyc}z.anl_prslev.grib2.idx $COMOUT/
+cp ${RUN}.t${cyc}z.anl_natlev.grib2.idx $COMOUT/
 
 
 

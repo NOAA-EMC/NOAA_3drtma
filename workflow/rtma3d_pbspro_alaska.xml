@@ -5,6 +5,7 @@
 <!-- Key variables -->
 <!-- date/time of cases or cycles -->
 <!ENTITY USER           "user.name">
+<!ENTITY rtma3d_ver     "v1.0.0">
 <!ENTITY startCDATE     "201907121400">
 <!ENTITY endCDATE       "201907121400">
 <!ENTITY realtime       "T">
@@ -27,14 +28,15 @@
 
 <!-- Variables Defined by absolute paths -->
 
-<!ENTITY ptmp_base	"/lfs/h2/emc/ptmp/&USER;/3DRTMA_HRRR_ALASKA_WRKDIR">
+<!ENTITY ptmp_base	"/lfs/h2/emc/ptmp/&USER;/rtma3d/alaska">
 <!ENTITY COMINRAP       "/lfs/h1/ops/prod/com/obsproc/v1.2">
 <!ENTITY COMINHRRR      "/lfs/h1/ops/prod/com/hrrr/v4.1">
 <!ENTITY COMINRADAR     "/lfs/h1/ops/dev/dcom/ldmdata/obs/upperair/mrms/alaska">
 <!ENTITY GESINHRRR      "/lfs/h1/ops/prod/com/hrrr/v4.1/nwges/hrrrges_sfc/alaska">
 <!ENTITY COMINHRRRDAS   "/lfs/h1/ops/prod/com/hrrr/v4.1/nwges/hrrrdasges">
 <!ENTITY COMINGDAS      "/lfs/h1/ops/prod/com/gfs/v16.3">
-<!ENTITY NWROOT		"/lfs/h2/emc/da/noscrub/&USER;/NOAA_3drtma">
+<!ENTITY NWROOT		"/lfs/h2/emc/da/noscrub/&USER;/packages/rtma3d.&rtma3d_ver;">
+<!ENTITY PACKAGEROOT    "&NWROOT;">
 <!ENTITY COMINPREP      "/lfs/h2/emc/ptmp/ashley.stanfield/CRON/3drtma_v13/com/obsproc/v1.3">
 <!ENTITY OBS_DIR	"/scratch4/NCEPDEV/fv3-cam/save/Gang.Zhao/Data/GSD_GSI_Case/obs">
 <!ENTITY HRRR_DIR	"/scratch4/NCEPDEV/fv3-cam/save/Gang.Zhao/Data/GSD_GSI_Case/fgs">
@@ -47,7 +49,7 @@
 <!ENTITY GESROOT	"&ptmp_base;/nwges2/&NET;">
 
 <!ENTITY HOMErtma3d	"&NWROOT;">
-<!ENTITY LOG_DIR	"/lfs/h2/emc/ptmp/&USER;/3DRTMA_HRRR_ALASKA_LOG">
+<!ENTITY LOG_DIR	"/lfs/h2/emc/ptmp/&USER;/rtma3d_logs/alaska">
 <!ENTITY JJOB_DIR	"&HOMErtma3d;/jobs">
 <!ENTITY SCRIPT_DIR	"&HOMErtma3d;/scripts">
 <!ENTITY USHrtma3d	"&HOMErtma3d;/ush">
@@ -103,6 +105,7 @@
 <!ENTITY DATA_OBSPREP_LGHTN    "&DATA_RUNDIR;/obsprep_lghtn">
 <!ENTITY DATA_OBSPREP_RADAR    "&DATA_RUNDIR;/obsprep_radar">
 <!ENTITY DATA_OBSPREP_CLOUD    "&DATA_RUNDIR;/obsprep_cloud">
+<!ENTITY DATA_PRDGEN    "&DATA_RUNDIR;/prdgen">
 <!ENTITY DATA_WRFBUFR   "&DATA_RUNDIR;/wrfbufr">
 <!ENTITY DATA_POSTSND   "&DATA_RUNDIR;/wrfbufr">
 <!ENTITY hpsspath0      "/NCEPDEV/emc-meso/5year/&USER;/pbspro_rtma3d">
@@ -127,7 +130,7 @@
 
 <!-- for workflow -->
 
-<!ENTITY maxtries	"10">
+<!ENTITY maxtries	"3">
 <!ENTITY KEEPDATA	"YES">
 <!ENTITY SENDCOM	"YES">
 
@@ -182,6 +185,7 @@
 <!ENTITY exefile_name_post     "upp.x">
 <!ENTITY JJOB_POST4FGS   "&JJOB_DIR;/J&CAP_RUN;_POST4FGS">
 <!ENTITY exSCR_POST4FGS  "&SCRIPT_DIR;/ex&NET;_post4fgs.ksh">
+<!ENTITY JJOB_PRDGEN     "&JJOB_DIR;/J&CAP_RUN;_PRDGEN">
 
 
 <!-- Resources -->
@@ -264,6 +268,10 @@
 <!ENTITY POST_RESOURCES '<walltime>00:20:00</walltime>'> 
 <!ENTITY POST_RESERVATION '<nodes>1:ppn=128:mem=200GB</nodes><native>-l place=scatter</native><queue>&QUEUE;</queue><account>&ACCOUNT;</account>'>
 
+<!ENTITY PRDGEN_PROC "1">
+<!ENTITY PRDGEN_RESOURCES '<walltime>00:30:00</walltime>'>
+<!ENTITY PRDGEN_RESERVATION '<nodes>1:ppn=128:mem=256GB</nodes><native>-l place=scatter</native><queue>&QUEUE;</queue><account>&ACCOUNT;</account>'>
+
 <!-- Variables in Namelist -->
 <!ENTITY GSI_grid_ratio_in_var       "1">
 <!ENTITY GSI_grid_ratio_in_cldanl    "1">
@@ -343,6 +351,10 @@
    <envar>
         <name>GESINHRRR</name>
         <value>&GESINHRRR;</value>
+   </envar>
+   <envar>
+        <name>PACKAGEROOT</name>
+        <value>&PACKAGEROOT;</value>
    </envar>
    <envar>
         <name>NWROOT</name>
@@ -539,6 +551,10 @@
    <envar>
       <name>DATA_POST4FGS</name>
       <value><cyclestr>&DATA_POST4FGS;</cyclestr></value>
+   </envar>
+   <envar>
+      <name>DATA_PRDGEN</name>
+      <value><cyclestr>&DATA_PRDGEN;</cyclestr></value>
    </envar>
    <envar>
       <name>DATA_AUTOQC</name>
@@ -803,6 +819,16 @@
     <envar>
       <name>JJOB_POST</name>
       <value>&JJOB_POST;</value>
+    </envar>'>
+
+<!ENTITY ENVARS_PRDGEN
+    '<envar>
+      <name>START_TIME</name>
+      <value><cyclestr>@Y@m@d@H</cyclestr></value>
+    </envar>
+    <envar>
+      <name>JJOB_PRDGEN</name>
+      <value>&JJOB_PRDGEN;</value>
     </envar>'>
 
 <!ENTITY ENVARS_MINMAX
@@ -1326,6 +1352,27 @@
 
     <dependency> 
           <taskdep task="&RUN;_updatevars_task"/>
+    </dependency>
+  </task>
+
+  <task name="&RUN;_prdgen_task" cycledefs="hourly" maxtries="&maxtries;">
+    
+    &ENVARS;
+    &PRDGEN_RESOURCES;
+    &PRDGEN_RESERVATION;
+    <envar>
+       <name>rundir_task</name>
+       <value><cyclestr>&DATA_PRDGEN;</cyclestr></value>
+    </envar>
+
+    <command>&JJOB_DIR;/launch.ksh &JJOB_PRDGEN;</command>
+    <jobname><cyclestr>&RUN;_prdgen_job_@Y@m@d@H@M</cyclestr></jobname>
+    <join><cyclestr>&LOG_SCHDLR;/&RUN;_&envir;_prdgen_@Y@m@d@H.log</cyclestr></join>
+
+    &ENVARS_PRDGEN;
+
+    <dependency>
+          <taskdep task="&RUN;_post_task"/>
     </dependency>
   </task>
 

@@ -30,6 +30,7 @@ export nam_ver=v4.2
 export hiresw_ver=v8.1
 export obsproc_rtma_ver=v3.4
 export gfs_ver=v16.2
+export seaice_analysis_ver=v4.5
 
 
 ## Canned data test only (rtma2p5, akrtma, hirtma, prrtma, gurtma, rtma2p5)
