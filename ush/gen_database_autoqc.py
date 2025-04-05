@@ -3,7 +3,7 @@
 from datetime import datetime,timedelta
 import numpy as np
 import pandas as pd
-import os,sys,math
+import os,sys,math,re
 import sqlite3
 from functools import reduce
 
@@ -104,10 +104,10 @@ def windbias(dat_var):
   cols_wbias=['t_now_','t_bar_','alpha_','a_','alpha_bar_','w_','EFFECTIVE_OB_']
   dat_wbias = dat_var.loc[:, dat_var.columns.str.startswith(tuple(keep_cols+cols_wbias))].copy()
   dat_wbias=dat_wbias[keep_cols+list(filter(lambda x: (datetime.strptime(x.split('_')[-1],'%Y%m%d%H') >= PDYm1),dat_wbias.columns[len(keep_cols):]))]
-  dat_wbias.to_csv('windbias_'+exp+'_'+thisRUN+'_'+vars[var]+'_'+cyclestr+'.csv', index=False)
+  dat_wbias.to_csv(thisRUN+'.t'+cycle_HH+'z.windbias_'+cyclestr+'.csv', index=False)
 
   # Generate text files with the wind bias correction output (current cycle ONLY)
-  fname = 'windbias_'+thisRUN+'_'+cyclestr+'.txt'
+  fname = thisRUN+'.t'+cycle_HH+'z.windbias_'+cyclestr+'.txt'
   dat_wbias=dat_wbias.loc[(dat_var['PBUFTYP'].isin(mnet_bctypes))]
   write_wbias(dat_wbias[keep_cols+['a_'+cyclestr]],fname)
   # Write out text files with the wind bias correction output (values < 0.5 or >= 2.0)
@@ -162,7 +162,7 @@ def gen_database(dat_var,columns,cyc_purge,eps,geps,rjrmse):
   else: dat_var_save.replace(np.nan,'NaN|NaN|NaN|NaN|NaN',regex=True,inplace=True)
   dat_var_save.dropna(subset=[column for column in dat_var_save.columns if column.startswith('DAT_')],how='all',inplace=True)
   dat_var_save.to_sql(name=var_str,con=cnx,index=False,if_exists ='replace')
-  dat_var_save.to_csv(exp+'_'+thisRUN+'_'+vars[var]+'_'+cyclestr+'.csv', index=False)
+  dat_var_save.to_csv(thisRUN+'.t'+cycle_HH+'z.database_'+vars[var]+'_'+cyclestr+'.csv', index=False)
   cnx.close()
 
   # Generate SQL database with statistics output
@@ -193,7 +193,7 @@ def gen_database(dat_var,columns,cyc_purge,eps,geps,rjrmse):
   # Drop stations from the database that haven't reported recently (i.e., all values are missing)
   dat_var_stats.dropna(subset=[column for column in dat_var_stats.columns if column.startswith(tuple(stats_cols[1:]))],how='all',inplace=True)
   dat_var_stats.to_sql(name=var_str,con=cnx,index=False,if_exists ='replace')
-  dat_var_stats.to_csv('stats_'+exp+'_'+thisRUN+'_'+vars[var]+'_'+cyclestr+'.csv', index=False)
+  dat_var_stats.to_csv(thisRUN+'.t'+cycle_HH+'z.stats_database_'+vars[var]+'.csv', index=False)
   cnx.close()
 
   dat_var = dat_var.loc[:, ~dat_var.columns.str.startswith(('counts_','SUM_OmFs_','SUM_OmFs2_','RMSE_','Bias_'))]
@@ -252,7 +252,7 @@ def gen_accept_lists(dat_var,eps,geps,rjrmse):
         suspect_obs = dat_var_stuck[dat_var_obs_subset.apply(lambda x: max(np.float64(x))-min(np.float64(x))<eps,axis=1)]
         if suspect_obs.shape[0]>0:
           # Sanity check for Step #1 (After)
-          suspect_obs.to_csv('suspect_obs_'+exp+'_'+thisRUN+'_'+vars[var]+'_'+cyclestr+'.csv', index=False)
+          suspect_obs.to_csv(thisRUN+'.t'+cycle_HH+'z.suspect_obs_'+vars[var]+'_'+cyclestr+'.csv', index=False)
           # Second: Background must vary more than "geps" over specified # of hours
           dat_var_obs_subset=suspect_obs.loc[:, [y for y in suspect_obs.columns if y.startswith('GES_')]]
           stuck_inst = suspect_obs[dat_var_obs_subset.apply(lambda y: max(np.float64(y))-min(np.float64(y))>geps,axis=1)]
@@ -261,7 +261,7 @@ def gen_accept_lists(dat_var,eps,geps,rjrmse):
           # Finalize and write to CSV file
           if stuck_inst.shape[0]>0:
             stuck_flag=True
-            stuck_inst[keep_cols+['STUCK']].to_csv('stuck_inst_'+exp+'_'+thisRUN+'_'+vars[var]+'_'+cyclestr+'.csv', index=False)
+            stuck_inst[keep_cols+['STUCK']].to_csv(thisRUN+'.t'+cycle_HH+'z.stuck_inst_'+vars[var]+'_'+cyclestr+'.csv', index=False)
 
   # Run a check for flatlining temperature reports and merge results with the stuck instrument check to be EXCLUDED in
   # the generation of automated accept lists.
@@ -271,14 +271,13 @@ def gen_accept_lists(dat_var,eps,geps,rjrmse):
     flat_inst = flat_inst[keep_cols]
     flat_inst['FLAT']=1.
     if flat_inst.shape[0]>0:
-      flat_inst[keep_cols+['FLAT']].to_csv('flat_inst_'+exp+'_'+thisRUN+'_'+vars[var]+'_'+cyclestr+'.csv', index=False)
+      flat_inst[keep_cols+['FLAT']].to_csv(thisRUN+'.t'+cycle_HH+'z.flat_inst_'+vars[var]+'_'+cyclestr+'.csv', index=False)
       if stuck_flag==True:
         stuck_inst=pd.concat([stuck_inst,flat_inst],sort=False)
       else:
         stuck_inst=flat_inst
         stuck_flag=True
 
-  #stuck_flag=False # MTM!!!
   dat_var_sum = dat_var.loc[:, ~dat_var.columns.str.startswith(('counts_','SUM_OmFs_','SUM_OmFs2_','RMSE_','Bias_'))]
   columns=list(dat_var_sum.columns)
   columns=columns[len(keep_cols):]
@@ -286,8 +285,8 @@ def gen_accept_lists(dat_var,eps,geps,rjrmse):
 
   itercyc=datetime.strptime(probecyc_long,'%Y%m%d%H')
   probeday_long = itercyc.strftime('%Y%m%d')
-  probeHHMM_long = itercyc.strftime('%H')
-  COMprev_long = os.path.abspath(os.path.join(os.path.dirname(COM), '../'+'/'+thisRUN+'.'+probeday_long+'/autoqcprd.t'+probeHHMM_long+'z'))
+  probeHH_long = itercyc.strftime('%H')
+  COMprev_long = os.path.abspath(os.path.join(os.path.dirname(COM), '../'+'/'+thisRUN+'.'+probeday_long+'/autoqcprd.t'+probeHH_long+'z'))
 
   if np.float(cycle_HH)%num_cycs==num_cycs-1 and dat_var.shape[0]>0:
     cyc_delim=datetime.strptime(cyclestr,'%Y%m%d%H')+timedelta(hours=-num_cycs)
@@ -392,8 +391,8 @@ def gen_accept_lists(dat_var,eps,geps,rjrmse):
           dat_var_accept['AC_SHORT']=np.where(dat_var_accept['RMSE_'+cyclestr]<rjrmse*(1.0+(3.0-1.0)*(1-dat_var_accept['VMAP'])),1,0)
         else:
           print('Invalid choice of aclist_type. Exiting...'); exit()
-        dat_var_accept = dat_var_accept.loc[:, dat_var_accept.columns.str.startswith(tuple(keep_cols+['stddev_','Bias_']))].copy()
-        dat_var_accept.to_csv('accept_partial_'+exp+'_'+thisRUN+'_'+vars[var]+'_'+cyclestr+'.csv', index=False)
+        dat_var_accept = dat_var_accept.loc[:, dat_var_accept.columns.str.startswith(tuple(keep_cols+['stddev_','Bias_','AC_SHORT']))].copy()
+        dat_var_accept.to_csv(thisRUN+'.t'+cycle_HH+'z.accept_partial_'+vars[var]+'_'+cyclestr+'.csv', index=False)
       else: dat_var_accept = pd.DataFrame(columns=keep_cols)
       if cycle_HH=='23':
         dat_var_accept_long=dat_var.copy()
@@ -412,15 +411,15 @@ def gen_accept_lists(dat_var,eps,geps,rjrmse):
         else:
           print('Invalid choice of aclist_type. Exiting...'); exit()
         dat_var_accept_long = dat_var_accept_long.loc[:, dat_var_accept_long.columns.str.startswith(tuple(keep_cols+['counts_','stddev_','Bias_','AC_LONG']))].copy()
-        dat_var_accept_long.to_csv('accept_long_'+exp+'_'+thisRUN+'_'+vars[var]+'_'+cyclestr+'.csv', index=False)
+        dat_var_accept_long.to_csv(thisRUN+'.t'+cycle_HH+'z.accept_long_'+vars[var]+'_'+cyclestr+'.csv', index=False)
         dat_var_accept=pd.concat([dat_var_accept_long,dat_var_accept],sort=False)
-      elif cycle_HH!='23' and os.path.exists(COMprev_long+'/accept_long_'+exp+'_'+thisRUN+'_'+vars[var]+'_'+probecyc_long+'.csv'):
+      elif cycle_HH!='23' and os.path.exists(COMprev_long+'/'+thisRUN+'.t'+probeHH_long+'z.accept_long_'+vars[var]+'_'+probecyc_long+'.csv'):
         print('FOUND PRIOR LONG ACCEPT LIST FOR DOMAIN =',thisRUN,'CYCLESTR =',cyclestr,'and VAR =',vars[var])
-        prior_long_aclist = pd.read_csv(COMprev_long+'/accept_long_'+exp+'_'+thisRUN+'_'+vars[var]+'_'+probecyc_long+'.csv')
+        prior_long_aclist = pd.read_csv(COMprev_long+'/'+thisRUN+'.t'+probeHH_long+'z.accept_long_'+vars[var]+'_'+probecyc_long+'.csv')
         dat_var_accept=pd.concat([prior_long_aclist,dat_var_accept],sort=False)
       if stuck_flag==True and dat_var_accept.shape[0]>0:
         dat_var_accept.loc[(dat_var_accept['SAID'].isin(stuck_inst['SAID']) & dat_var_accept['PROVIDER'].isin(stuck_inst['PROVIDER'])),'AC_LONG']=0.
-      fname = 'accept_'+thisRUN+'_'+vars[var]+'_'+cyclestr+'.txt'
+      fname = thisRUN+'.t'+cycle_HH+'z.accept_'+vars[var]+'_'+cyclestr+'.txt'
       write_lists(dat_var_accept,fname)
 
   else:
@@ -432,11 +431,12 @@ def gen_accept_lists(dat_var,eps,geps,rjrmse):
       if (num_cycs - np.float64(iter_HH))%num_cycs==1:
         probecyc = itercyc.strftime('%Y%m%d%H')
         probeday = itercyc.strftime('%Y%m%d')
-        probeHHMM = itercyc.strftime('%H')
-        COMprior = os.path.abspath(os.path.join(os.path.dirname(COM), '../'+'/'+exp+'.'+probeday+'/autoqcprd.t'+probeHHMM+'z'))
+        probeHH = itercyc.strftime('%H')
+        COMprior = os.path.abspath(os.path.join(os.path.dirname(COM), '../'+'/'+thisRUN+'.'+probeday+'/autoqcprd.t'+probeHH+'z'))
         print('COMPRIOR = ',COMprior)
         probecyc_m1 = datetime.strftime(datetime.strptime(probecyc,'%Y%m%d%H')-timedelta(hours=num_cycs),'%Y%m%d%H')
-        COMprior_m1 = os.path.abspath(os.path.join(os.path.dirname(COM), '../'+'/'+exp+'.'+probecyc_m1[0:8]+'/autoqcprd.t'+probecyc_m1[8:12]+'z'))
+        probeHH_m1 = datetime.strftime(datetime.strptime(probecyc,'%Y%m%d%H')-timedelta(hours=num_cycs),'%H')
+        COMprior_m1 = os.path.abspath(os.path.join(os.path.dirname(COM), '../'+'/'+thisRUN+'.'+probecyc_m1[0:8]+'/autoqcprd.t'+probecyc_m1[8:10]+'z'))
         print('COMprior_m1 =',COMprior_m1)
         break
       itercyc = itercyc - delta
@@ -444,27 +444,29 @@ def gen_accept_lists(dat_var,eps,geps,rjrmse):
 
     if vars[var] in ['t','ps','q','wst']:
       # Probe for previous partial accept list generated with RMSE stats
-      if os.path.exists(COMprior+'/accept_partial_'+exp+'_'+thisRUN+'_'+vars[var]+'_'+probecyc+'.csv'):
-        dat_var_accept = pd.read_csv(COMprior+'/accept_partial_'+exp+'_'+thisRUN+'_'+vars[var]+'_'+probecyc+'.csv')
-      elif os.path.exists(COMprior_m1+'/accept_partial_'+exp+'_'+thisRUN+'_'+vars[var]+'_'+probecyc_m1+'.csv'):
-        dat_var_accept = pd.read_csv(COMprior_m1+'/accept_partial_'+exp+'_'+thisRUN+'_'+vars[var]+'_'+probecyc_m1+'.csv')
+      print('SEARCHING FOR:',COMprior+'/'+thisRUN+'.t'+probe_HH+'z.accept_partial_'+vars[var]+'_'+probecyc+'.csv')
+      print('SEARCHING FOR:',COMprior_m1+'/'+thisRUN+'.t'+probeHHm1+'z.accept_partial_'+vars[var]+'_'+probecyc_m1+'.csv')
+      if os.path.exists(COMprior+'/'+thisRUN+'.t'+probe_HH+'z.accept_partial_'+vars[var]+'_'+probecyc+'.csv'):
+        dat_var_accept = pd.read_csv(COMprior+'/'+thisRUN+'.t'+cycle_HH+'z.accept_partial_'+vars[var]+'_'+probecyc+'.csv')
+      elif os.path.exists(COMprior_m1+'/'+thisRUN+'.t'+probeHHm1+'z.accept_partial_'+vars[var]+'_'+probecyc_m1+'.csv'):
+        dat_var_accept = pd.read_csv(COMprior_m1+'/'+thisRUN+'.t'+probeHHm1+'z.accept_partial_'+vars[var]+'_'+probecyc_m1+'.csv')
       else: dat_var_accept=pd.DataFrame(columns=keep_cols)
 
-      if os.path.exists(COMprev_long+'/accept_long_'+exp+'_'+thisRUN+'_'+vars[var]+'_'+probecyc_long+'.csv'):
+      if os.path.exists(COMprev_long+'/'+thisRUN+'.t'+probeHH_long+'z.accept_long_'+vars[var]+'_'+probecyc_long+'.csv'):
         print('FOUND PRIOR LONG ACCEPT LIST FOR DOMAIN =',thisRUN,'CYCLESTR =',cyclestr,'and VAR =',vars[var])
-        prior_long_aclist = pd.read_csv(COMprev_long+'/accept_long_'+exp+'_'+thisRUN+'_'+vars[var]+'_'+probecyc_long+'.csv')
+        prior_long_aclist = pd.read_csv(COMprev_long+'/'+thisRUN+'.t'+probeHH_long+'z.accept_long_'+vars[var]+'_'+probecyc_long+'.csv')
         dat_var_accept = pd.concat([prior_long_aclist,dat_var_accept],sort=False)
 
       if stuck_flag==True and dat_var_accept.shape[0]>0:
         dat_var_accept.loc[(dat_var_accept['SAID'].isin(stuck_inst['SAID']) & dat_var_accept['PROVIDER'].isin(stuck_inst['PROVIDER'])),'AC_LONG']=0.
 
-      fname = 'accept_'+thisRUN+'_'+vars[var]+'_'+cyclestr+'.txt'
+      fname = thisRUN+'.t'+cycle_HH+'z.accept_'+vars[var]+'_'+cyclestr+'.txt'
       write_lists(dat_var_accept,fname)
 
   return(dat_var)
 
 def write_lists(input_list,fname):
-  ltyp=fname.split('_')[0]
+  ltyp=re.split(r"[._]",fname)[2]
   if ltyp!='accept': out_file=open(fname,'w')
   if ltyp!='accept':
     out_file.write('********************************************************************************\n')
@@ -493,7 +495,7 @@ def write_lists(input_list,fname):
       input_list[['AC_SHORT','AC_LONG']] = input_list[['AC_SHORT','AC_LONG']].fillna(value=0.)
       input_list[['AC_SHORT','AC_LONG']] = input_list.groupby(keep_cols)[['AC_SHORT','AC_LONG']].transform('sum')
   input_list.drop_duplicates(subset=keep_cols,inplace=True)
-  input_list.to_csv(ltyp+'_'+exp+'_'+thisRUN+'_'+vars[var]+'_'+cyclestr+'.csv', index=False)
+  input_list.to_csv(thisRUN+'.t'+cycle_HH+'z.'+ltyp+'_'+vars[var]+'_'+cyclestr+'.csv', index=False)
 
   if ltyp!='accept':
     out_file.write('********************************************************************************\n')
@@ -522,10 +524,10 @@ def write_wbias(input_file,fname):
 
 def combine_accept_lists(dat_var):
   # Read in individual accept lists
-  temp_list = pd.read_csv('accept_'+exp+'_'+thisRUN+'_t_'+cyclestr+'.csv')
-  wind_list = pd.read_csv('accept_'+exp+'_'+thisRUN+'_wst_'+cyclestr+'.csv')
-  dwpt_list = pd.read_csv('accept_'+exp+'_'+thisRUN+'_q_'+cyclestr+'.csv')
-  pres_list = pd.read_csv('accept_'+exp+'_'+thisRUN+'_ps_'+cyclestr+'.csv')
+  temp_list = pd.read_csv(thisRUN+'.t'+cycle_HH+'z.accept_t_'+cyclestr+'.csv')
+  wind_list = pd.read_csv(thisRUN+'.t'+cycle_HH+'z.accept_wst_'+cyclestr+'.csv')
+  dwpt_list = pd.read_csv(thisRUN+'.t'+cycle_HH+'z.accept_q_'+cyclestr+'.csv')
+  pres_list = pd.read_csv(thisRUN+'.t'+cycle_HH+'z.accept_ps_'+cyclestr+'.csv')
 
   temp_list.replace({'PBUFTYP': {187:"SFC", 188:"MSO", 287:"SFC", 288:"MSO"}},inplace=True)
   wind_list.replace({'PBUFTYP': {187:"SFC", 188:"MSO", 287:"SFC", 288:"MSO"}},inplace=True)
@@ -572,7 +574,7 @@ def combine_accept_lists(dat_var):
   try: merged_list[['N-T','N-Td','N-W','N-P']] = merged_list[['N-T','N-Td','N-W','N-P']].fillna(value=0).astype(np.int64)
   except: pass
 
-  fname_merged='accept_merged_'+exp+'_'+thisRUN+'_'+cyclestr+'.txt'
+  fname_merged=thisRUN+'.t'+cycle_HH+'z.accept_merged_'+cyclestr+'.txt'
   with open(fname_merged,'w') as out_file:
     header=';Station Provider Subprov Type Lat   Lon    W-T-Td-G-P N-W  Std-W    Bias-W   Std-DIR  Bias-DIR N-T  Std-T    Bias-T   N-Td Std-Td   Bias-Td N-P  Std-P    Bias-P'+'\n'
     out_file.write(header)
@@ -597,9 +599,9 @@ def duplicates(dat_var):
   dat_var_new_duplicates['LAST_CYC']=np.int(cyclestr)
   dat_var_new_duplicates = dat_var_new_duplicates[keep_cols+['LAST_CYC']]
 
-  if os.path.exists(COMm1+'/'+'duplicates_'+exp+'_'+thisRUN+'_'+vars[var]+'_'+cyclestr_m1+'.csv'):
+  if os.path.exists(COMm1+'/'+thisRUN+'.t'+HHm1+'z.duplicates_'+vars[var]+'_'+cyclestr_m1+'.csv'):
     # Duplicates found in previous diagnostic files
-    orig_duplicates = pd.read_csv(COMm1+'/'+'duplicates_'+exp+'_'+thisRUN+'_'+vars[var]+'_'+cyclestr_m1+'.csv')
+    orig_duplicates = pd.read_csv(COMm1+'/'+thisRUN+'.t'+HHm1+'z.duplicates_'+vars[var]+'_'+cyclestr_m1+'.csv')
     stations = orig_duplicates['SAID'].str.strip()
     # Make sure none of the original duplicates show up using a different configuration
     new_duplicates = dat_var_new_duplicates.loc[dat_var_new_duplicates['SAID'].isin(stations)]
@@ -627,7 +629,7 @@ def duplicates(dat_var):
   dat_var_duplicates = dat_var_duplicates[keep_cols+['LAST_CYC']]
   dat_var_duplicates = dat_var_duplicates[dat_var_duplicates['LAST_CYC']>np.int(cyc_purge_dups.strftime('%Y%m%d%H'))]
   dat_var_duplicates = dat_var_duplicates[dat_var_duplicates.duplicated(['SAID'],keep=False)]
-  if not dat_var_duplicates.empty: dat_var_duplicates.to_csv('duplicates_'+exp+'_'+thisRUN+'_'+vars[var]+'_'+cyclestr+'.csv', index=False)
+  if not dat_var_duplicates.empty: dat_var_duplicates.to_csv(thisRUN+'.t'+cycle_HH+'z.duplicates_'+vars[var]+'_'+cyclestr+'.csv', index=False)
 
   # Update: Allow the duplicate stations to populate the SQL database
   #dat_var = dat_var.loc[~dat_var['SAID'].isin(dat_var_duplicates['SAID'].values)]
@@ -652,6 +654,7 @@ if __name__ == "__main__":
   cyclestr=dateobj
   datestr=dateobj[0:8]
   cycle_HH=dateobj[8:10]
+  HHm1=cyclestr_m1[8:10]
   cyc_purge=datetime.strptime(cyclestr,'%Y%m%d%H')+timedelta(days=-14)
 
   epochcyc=datetime.strptime(str(197001010000),'%Y%m%d%H%M')

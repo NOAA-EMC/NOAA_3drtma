@@ -353,11 +353,10 @@ i=1
 export PDYprev_dir=${COMOUTautoqc_rtma3d}
 while [ ${i} -lt ${max_cycs} ]; do
   export probe_cyc=`${NDATE} -${i} ${YYYYMMDDHH}`
-  probe_YYYYMMDDHH=`echo $probe_cyc | cut -c 1-10`
   probe_YYYYMMDD=`echo $probe_cyc | cut -c 1-8`
-  probe_HH=`echo $probe_cyc | cut -c 9-10`
+  export probe_HH=`echo $probe_cyc | cut -c 9-10`
   probe_dir=${COMOUTautoqc_base}/${NET}.${probe_YYYYMMDD}/autoqcprd.t${probe_HH}z
-  if [ -s ${probe_dir}/done.${probe_YYYYMMDDHH} ]; then
+  if [ -s ${probe_dir}/done.${probe_cyc} ]; then
     export PDYprev_dir=${probe_dir}
     found_rjlist=True
     break
@@ -368,7 +367,7 @@ done
 echo "PDYprev_dir = " $PDYprev_dir
 
 if [ $found_rjlist == True ]; then
-  cpreq ${PDYprev_dir}/accept_merged_para_${RUN}_${probe_cyc}.txt  sfcobs_uselist.txt
+  cpreq ${PDYprev_dir}/${RUN}.t${probe_HH}z.accept_merged_${probe_cyc}.txt sfcobs_uselist.txt
 fi
 
 export sfcwndob_biasc=.true.
@@ -380,11 +379,10 @@ if [[ "$sfcwndob_biasc" = ".true." ]]; then
   export PDYprev_dir=${COMOUTautoqc_rtma3d}
   while [ ${i} -lt ${max_cycs} ]; do
     export probe_cyc=`${NDATE} -${i} ${YYYYMMDDHH}`
-    probe_YYYYMMDDHH=`echo $probe_cyc | cut -c 1-10`
     probe_YYYYMMDD=`echo $probe_cyc | cut -c 1-8`
-    probe_HH=`echo $probe_cyc | cut -c 9-10`
+    export probe_HH=`echo $probe_cyc | cut -c 9-10`
     probe_dir=${COMOUTautoqc_base}/${RUN}.${probe_YYYYMMDD}/autoqcprd.t${probe_HH}z
-    if [ -s ${probe_dir}/done.${probe_YYYYMMDDHH} ]; then
+    if [ -s ${probe_dir}/done.${probe_cyc} ]; then
       export PDYprev_dir=${probe_dir}
       found_prevcyc=True
       break
@@ -395,7 +393,7 @@ if [[ "$sfcwndob_biasc" = ".true." ]]; then
   echo "PDYprev_dir = " $PDYprev_dir
 
   if [ $found_prevcyc == True ]; then
-    cpreq ${PDYprev_dir}/windbias_${RUN}_${probe_YYYYMMDDHH}.txt    stnwindbiascor
+    cpreq ${PDYprev_dir}/${RUN}.t${probe_HH}z.windbias_${probe_cyc}.txt stnwindbiascor
   fi
 fi
 
