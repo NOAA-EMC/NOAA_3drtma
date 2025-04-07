@@ -32,7 +32,7 @@ while [ ${i} -lt ${max_cycs} ]; do
   probe=`${NDATE} -${i} ${YYYYMMDDHH}`
   probe_YYYYMMDD=`echo $probe | cut -c 1-8`
   probe_HH=`echo $probe | cut -c 9-10`
-  probe_dir=${COMOUTautoqc_base}/${NET}.${probe_YYYYMMDD}/autoqcprd.t${probe_HH}z
+  probe_dir=${COMOUTautoqc_base}/${NET}.${probe_YYYYMMDD}/autoqcprd.t${probe_HH}z # MTM - revert NET to RUN
   if [ -s ${probe_dir}/done.${probe} ]; then
     echo $probe
     export PDYprev=${probe}
@@ -51,7 +51,7 @@ while [ ${i} -lt ${max_cycs} ]; do
   probe=`${NDATE} -${i} $YYYYMMDDHH`
   probe_YYYYMMDD=`echo $probe | cut -c 1-8`
   probe_HH=`echo $probe | cut -c 9-10`
-  probe_dir=${COMOUTautoqc_base}/${NET}.${probe_YYYYMMDD}/autoqcprd.t${probe_HH}z
+  probe_dir=${COMOUTautoqc_base}/${NET}.${probe_YYYYMMDD}/autoqcprd.t${probe_HH}z # MTM - revert NET to RUN
   if [ $probe_HH -eq "23" ] && [ -s ${probe_dir}/done.${probe} ]; then
     export probecyc_long=${probe}
     break

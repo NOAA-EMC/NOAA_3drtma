@@ -650,6 +650,7 @@ if __name__ == "__main__":
   tinf=np.float64(sys.argv[8]) # Constant timescale associated with an observation
 
   exp='para'
+  NET='rtma3d' # MTM - remove after RUN is defined correctly
 
   cyclestr=dateobj
   datestr=dateobj[0:8]
