@@ -386,7 +386,7 @@ while [ ${i} -lt ${max_cycs} ]; do
   probe_YYYYMMDD=`echo $probe_cyc | cut -c 1-8`
   export probe_HH=`echo $probe_cyc | cut -c 9-10`
   probe_dir=${COMOUTautoqc_base}/${NET}.${probe_YYYYMMDD}/autoqcprd.t${probe_HH}z # MTM - revert NET to RUN
-  if [ -s ${probe_dir}/done.${probe_cyc} ]; then
+  if [ -s ${probe_dir}/${RUN}.t${probe_HH}z.accept_merged_${probe_cyc}.txt ]; then
     export PDYprev_dir=${probe_dir}
     found_rjlist=True
     break
@@ -412,7 +412,7 @@ if [[ "$sfcwndob_biasc" = ".true." ]]; then
     probe_YYYYMMDD=`echo $probe_cyc | cut -c 1-8`
     export probe_HH=`echo $probe_cyc | cut -c 9-10`
     probe_dir=${COMOUTautoqc_base}/${NET}.${probe_YYYYMMDD}/autoqcprd.t${probe_HH}z # MTM - revert NET to RUN
-    if [ -s ${probe_dir}/done.${probe_cyc} ]; then
+    if [ -s ${probe_dir}/${RUN}.t${probe_HH}z.windbias_${probe_cyc}.txt ]; then
       export PDYprev_dir=${probe_dir}
       found_prevcyc=True
       break

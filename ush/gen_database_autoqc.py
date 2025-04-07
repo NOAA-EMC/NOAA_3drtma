@@ -111,7 +111,7 @@ def windbias(dat_var):
   dat_wbias=dat_wbias.loc[(dat_var['PBUFTYP'].isin(mnet_bctypes))]
   write_wbias(dat_wbias[keep_cols+['a_'+cyclestr]],fname)
   # Write out text files with the wind bias correction output (values < 0.5 or >= 2.0)
-  fname_extremes = 'windbias_'+thisRUN+'_'+cyclestr+'_extremes.txt'
+  fname_extremes = thisRUN+'.t'+cycle_HH+'z.windbias_'+cyclestr+'_extremes.txt'
   dat_wbias_extremes=dat_wbias.loc[(dat_wbias['a_'+cyclestr]<0.5) | (dat_wbias['a_'+cyclestr]>=2.0)]
   write_wbias(dat_wbias_extremes[keep_cols+['a_'+cyclestr]],fname_extremes)
 
@@ -125,9 +125,9 @@ def windbias(dat_var):
 def gen_database(dat_var,columns,cyc_purge,eps,geps,rjrmse):
 
   # If file exists, merge new dat_var array with data from existing database
-  if os.path.exists(COMm1+'/'+exp+'_'+thisRUN+'_'+vars[var]+'_'+cyclestr_m1+'.db'):
+  if os.path.exists(COMm1+'/'+thisRUN+'.t'+HHm1+'z.database_'+vars[var]+'_'+cyclestr_m1+'.db'):
     # Open the connection to the SQLite database
-    cnx = sqlite3.connect(COMm1+'/'+exp+'_'+thisRUN+'_'+vars[var]+'_'+cyclestr_m1+'.db')
+    cnx = sqlite3.connect(COMm1+'/'+thisRUN+'.t'+HHm1+'z.database_'+vars[var]+'_'+cyclestr_m1+'.db')
     data = pd.read_sql("SELECT * FROM "+var_str,cnx)
     columns=list(data.columns)
     data=data[keep_cols+list(filter(lambda x: (datetime.strptime(x.split('_')[-1],'%Y%m%d%H') > cyc_purge),columns[len(keep_cols):]))]
@@ -137,7 +137,7 @@ def gen_database(dat_var,columns,cyc_purge,eps,geps,rjrmse):
     cnx.close()
 
   # Open the connection to the SQLite database (will create one if it doesn't exist)
-  cnx = sqlite3.connect(exp+'_'+thisRUN+'_'+vars[var]+'_'+cyclestr+'.db')
+  cnx = sqlite3.connect(thisRUN+'.t'+cycle_HH+'z.database_'+vars[var]+'_'+cyclestr+'.db')
 
   dat_var = duplicates(dat_var)
 
@@ -168,9 +168,9 @@ def gen_database(dat_var,columns,cyc_purge,eps,geps,rjrmse):
   # Generate SQL database with statistics output
 
   # If file exists, merge new dat_var array with data from existing database
-  if os.path.exists(COMm1+'/stats_'+exp+'_'+thisRUN+'_'+vars[var]+'_'+cyclestr_m1+'.db'):
+  if os.path.exists(COMm1+'/'+thisRUN+'.t'+HHm1+'z.stats_database_'+vars[var]+'_'+cyclestr_m1+'.db'):
     # Open the connection to the SQLite database
-    cnx = sqlite3.connect(COMm1+'/stats_'+exp+'_'+thisRUN+'_'+vars[var]+'_'+cyclestr_m1+'.db')
+    cnx = sqlite3.connect(COMm1+'/'+thisRUN+'.t'+HHm1+'z.stats_database_'+vars[var]+'_'+cyclestr_m1+'.db')
     data = pd.read_sql("SELECT * FROM "+var_str,cnx)
     stat_cols =  list(data.columns)
     data=data[keep_cols+list(filter(lambda x: (datetime.strptime(x.split('_')[-1],'%Y%m%d%H') > cyc_purge_stats),stat_cols[len(keep_cols):]))]
@@ -181,7 +181,7 @@ def gen_database(dat_var,columns,cyc_purge,eps,geps,rjrmse):
     cnx.close()
 
   # Open the connection to the SQLite database (will create one if it doesn't exist)
-  cnx = sqlite3.connect('stats_'+exp+'_'+thisRUN+'_'+vars[var]+'_'+cyclestr+'.db')
+  cnx = sqlite3.connect(thisRUN+'.t'+cycle_HH+'z.stats_database_'+vars[var]+'_'+cyclestr+'.db')
 
   stats_cols=['counts_','mean_OmFs_','sum_devs_squared','stddev_','SUM_OmFs_','SUM_OmFs2_','RMSE_','Bias_']
   dat_var_stats = dat_var.loc[:, dat_var.columns.str.startswith(tuple(keep_cols+stats_cols))]
@@ -193,7 +193,7 @@ def gen_database(dat_var,columns,cyc_purge,eps,geps,rjrmse):
   # Drop stations from the database that haven't reported recently (i.e., all values are missing)
   dat_var_stats.dropna(subset=[column for column in dat_var_stats.columns if column.startswith(tuple(stats_cols[1:]))],how='all',inplace=True)
   dat_var_stats.to_sql(name=var_str,con=cnx,index=False,if_exists ='replace')
-  dat_var_stats.to_csv(thisRUN+'.t'+cycle_HH+'z.stats_database_'+vars[var]+'.csv', index=False)
+  dat_var_stats.to_csv(thisRUN+'.t'+cycle_HH+'z.stats_database_'+vars[var]+'_'+cyclestr+'.csv', index=False)
   cnx.close()
 
   dat_var = dat_var.loc[:, ~dat_var.columns.str.startswith(('counts_','SUM_OmFs_','SUM_OmFs2_','RMSE_','Bias_'))]
@@ -286,7 +286,7 @@ def gen_accept_lists(dat_var,eps,geps,rjrmse):
   itercyc=datetime.strptime(probecyc_long,'%Y%m%d%H')
   probeday_long = itercyc.strftime('%Y%m%d')
   probeHH_long = itercyc.strftime('%H')
-  COMprev_long = os.path.abspath(os.path.join(os.path.dirname(COM), '../'+'/'+thisRUN+'.'+probeday_long+'/autoqcprd.t'+probeHH_long+'z'))
+  COMprev_long = os.path.abspath(os.path.join(os.path.dirname(COM), '../'+'/'+NET+'.'+probeday_long+'/autoqcprd.t'+probeHH_long+'z')) # MTM - revert NET to thisRUN
 
   if np.float(cycle_HH)%num_cycs==num_cycs-1 and dat_var.shape[0]>0:
     cyc_delim=datetime.strptime(cyclestr,'%Y%m%d%H')+timedelta(hours=-num_cycs)
@@ -432,11 +432,11 @@ def gen_accept_lists(dat_var,eps,geps,rjrmse):
         probecyc = itercyc.strftime('%Y%m%d%H')
         probeday = itercyc.strftime('%Y%m%d')
         probeHH = itercyc.strftime('%H')
-        COMprior = os.path.abspath(os.path.join(os.path.dirname(COM), '../'+'/'+thisRUN+'.'+probeday+'/autoqcprd.t'+probeHH+'z'))
+        COMprior = os.path.abspath(os.path.join(os.path.dirname(COM), '../'+'/'+NET+'.'+probeday+'/autoqcprd.t'+probeHH+'z')) # MTM - revert NET to thisRUN
         print('COMPRIOR = ',COMprior)
         probecyc_m1 = datetime.strftime(datetime.strptime(probecyc,'%Y%m%d%H')-timedelta(hours=num_cycs),'%Y%m%d%H')
         probeHH_m1 = datetime.strftime(datetime.strptime(probecyc,'%Y%m%d%H')-timedelta(hours=num_cycs),'%H')
-        COMprior_m1 = os.path.abspath(os.path.join(os.path.dirname(COM), '../'+'/'+thisRUN+'.'+probecyc_m1[0:8]+'/autoqcprd.t'+probecyc_m1[8:10]+'z'))
+        COMprior_m1 = os.path.abspath(os.path.join(os.path.dirname(COM), '../'+'/'+NET+'.'+probecyc_m1[0:8]+'/autoqcprd.t'+probecyc_m1[8:10]+'z')) # MTM - revert NET to thisRUN
         print('COMprior_m1 =',COMprior_m1)
         break
       itercyc = itercyc - delta
@@ -444,12 +444,12 @@ def gen_accept_lists(dat_var,eps,geps,rjrmse):
 
     if vars[var] in ['t','ps','q','wst']:
       # Probe for previous partial accept list generated with RMSE stats
-      print('SEARCHING FOR:',COMprior+'/'+thisRUN+'.t'+probe_HH+'z.accept_partial_'+vars[var]+'_'+probecyc+'.csv')
-      print('SEARCHING FOR:',COMprior_m1+'/'+thisRUN+'.t'+probeHHm1+'z.accept_partial_'+vars[var]+'_'+probecyc_m1+'.csv')
-      if os.path.exists(COMprior+'/'+thisRUN+'.t'+probe_HH+'z.accept_partial_'+vars[var]+'_'+probecyc+'.csv'):
-        dat_var_accept = pd.read_csv(COMprior+'/'+thisRUN+'.t'+cycle_HH+'z.accept_partial_'+vars[var]+'_'+probecyc+'.csv')
-      elif os.path.exists(COMprior_m1+'/'+thisRUN+'.t'+probeHHm1+'z.accept_partial_'+vars[var]+'_'+probecyc_m1+'.csv'):
-        dat_var_accept = pd.read_csv(COMprior_m1+'/'+thisRUN+'.t'+probeHHm1+'z.accept_partial_'+vars[var]+'_'+probecyc_m1+'.csv')
+      print('SEARCHING FOR:',COMprior+'/'+thisRUN+'.t'+probeHH+'z.accept_partial_'+vars[var]+'_'+probecyc+'.csv')
+      print('SEARCHING FOR:',COMprior_m1+'/'+thisRUN+'.t'+probeHH_m1+'z.accept_partial_'+vars[var]+'_'+probecyc_m1+'.csv')
+      if os.path.exists(COMprior+'/'+thisRUN+'.t'+probeHH+'z.accept_partial_'+vars[var]+'_'+probecyc+'.csv'):
+        dat_var_accept = pd.read_csv(COMprior+'/'+thisRUN+'.t'+probeHH+'z.accept_partial_'+vars[var]+'_'+probecyc+'.csv')
+      elif os.path.exists(COMprior_m1+'/'+thisRUN+'.t'+probeHH_m1+'z.accept_partial_'+vars[var]+'_'+probecyc_m1+'.csv'):
+        dat_var_accept = pd.read_csv(COMprior_m1+'/'+thisRUN+'.t'+probeHH_m1+'z.accept_partial_'+vars[var]+'_'+probecyc_m1+'.csv')
       else: dat_var_accept=pd.DataFrame(columns=keep_cols)
 
       if os.path.exists(COMprev_long+'/'+thisRUN+'.t'+probeHH_long+'z.accept_long_'+vars[var]+'_'+probecyc_long+'.csv'):
@@ -907,7 +907,7 @@ if __name__ == "__main__":
   # Once the individual lists are created, merge together to form the final accept list
   combine_accept_lists(dat_var)
 
-  f_out='done.'+cyclestr
-  with open(f_out,'w') as out_file:
-    out_file.write('AUTOQC step has completed successfully for '+cyclestr)
+  #f_out='done.'+cyclestr
+  #with open(f_out,'w') as out_file:
+  #  out_file.write('AUTOQC step has completed successfully for '+cyclestr)
 
