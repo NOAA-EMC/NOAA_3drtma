@@ -512,6 +512,18 @@ cat << EOF > gsiparm.anl
 $gsi_namelist
 EOF
 
+export l_valleygcheck=${l_valleygcheck:-".true."}
+cat << EOF > parmcard_input
+&parmcardreadprepb
+    cgrid="hrrr",
+    valleygcheck=${l_valleygcheck},
+/
+EOF
+
+cp -p ${FIXgsi}/rtma3d_conus_terrain.dat          ./rtma_terrain.dat
+cp -p ${FIXgsi}/rtma3d_conus_anl_slmask.dat       ./rtma_slmask.dat
+cp -p ${FIXgsi}/valley_map_hrrr_conus_ieee.dat  ./valley_map.dat
+
 ## satellite bias correction
 ${CP} ${FIXgsi}/rap_satbias_starting_file.txt ./satbias_in
 ${CP} ${FIXgsi}/rap_satbias_pc_starting_file.txt ./satbias_pc
@@ -546,6 +558,7 @@ if [ "${envir}" == "lsf" ] || [ "${envir}" == "pbspro" ];  then
   cpreq ${EXECrtma3d}/rtma_gsi ${DATA}
   $APRUN ${DATA}/rtma_gsi < ${DATA}/gsiparm.anl > stdout 2>&1
   export err=$?
+  err_chk
 fi
 ##save some information for possible debugging before err_chk
 ${CAT} fort.* >   fits_${cycle_str}.txt

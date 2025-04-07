@@ -1,9 +1,10 @@
 #!/bin/ksh
 
-# --- for debug --- #
 date
 export PS4=' $SECONDS + ' 
 set -x
+
+#module load cfp/2.0.4
 
 #######################################################
 # The following variable could be defined in the 
@@ -15,11 +16,10 @@ set -x
 export RUN_ENVIR=${RUN_ENVIR:-nco}
 
 ###################################
-# Specify NET and RUN Name and model
+# Specify NET and RUN Name
 ####################################
 export NET=${NET:-rtma3d}
-export RUN=${RUN:-rtma3d}
-export model=${model:-rtma3d}
+#export RUN=rtma3d, akrtma3d ! Set in ecf script instead of j-job
 
 ##########################################################
 # obtain unique process id (pid)
@@ -28,17 +28,12 @@ export job=${job:-"${outid}.o$$"}
 export jobid=${jobid:-"${outid}.o$$"}
 export MPIRUN=${MPIRUN:-"mpirun"}
 
-export CNVGRIB=${CNVGRIB:-cnvgrib}
-
 ##########################################################
 # make temp/running directories
 ##########################################################
 export DATA=${DATA:-$DATAROOT/${jobid:?}} #jobid ($job.$LSB_JOBID MUST BE DEFINED IN TERMS OF $RUN IN UPPER LEVEL SCRIPT /MPondeca, 26Jul2015
-if [ -d $DATA ] ; then
-   rm  -rf $DATA/*
-else
-   mkdir -p $DATA
-fi
+
+mkdir -p $DATA
 cd $DATA
 
 #####################################################
@@ -47,17 +42,20 @@ cd $DATA
 #    $PDY and $cyc already defined in advance
 #####################################################
 #setpdy.sh
-#. ${DATA}/PDY
+#. ./PDY
 
+export cycle=t${cyc}z}
 
-export cycle=${cycle:-t${cyc}z}
+####################################
+# Determine Job Output Name on System
+####################################
+export pgmout=${pgmout:-"OUTPUT.$$"}
+
 ####################################
 # Determine Job Output Name on System
 ####################################
 export LOG_JJOB=${LOG_JJOB:-$COMROOT/logs/jlogfiles}
 export jlogfile=${jlogfile:-$LOG_JJOB/jlogfile.${jobid}}
-# export pgmout=${pgmout:-"OUTPUT.$$"}
-export pgmout=${pgmout:-"OUTPUT.${PDY}${cyc}.${jobid}"}
 if [ ! -d ${LOG_JJOB} ] ; then
    mkdir -p ${LOG_JJOB}
 fi
@@ -65,48 +63,35 @@ if [ ! -d ${LOG_PGMOUT} ] ; then
    mkdir -p ${LOG_PGMOUT}
 fi
 
-# specify the file head for the file names of the archived data files
-export PROD_HEAD=${PROD_HEAD:-"${NET}.t${cyc}z"}
-
 # Specify Execution Areas
-export HOMErtma3d=${HOMErtma3d:-$NWROOT/rtma.${rtma_ver}}
+export HOMErtma3d=${HOMErtma3d:-${PACKAGEROOT}/${NET}.${rtma3d_ver}}
+export HOMEscript=${HOMEscript:-${HOMErtma3d}/scripts}
 export EXECrtma3d=${EXECrtma3d:-$HOMErtma3d/exec}
+#export FIXrtma3d=${FIXrtma3d:-$HOMErtma3d/fix/${RUN}}
 export FIXrtma3d=${FIXrtma3d:-$HOMErtma3d/fix/${NET}}
-export PARMrtma3d=${PARMrtma3d:-$HOMErtma3d/parm/${NET}}
-export USHrtma3d=${USHrtma3d:-$HOMErtma3d/ush/${NET}}
-export UTILrtma3d=${UTILrtma3d:-$HOMErtma3d/util/${NET}}
+export PARMrtma3d=${PARMrtma3d:-$HOMErtma3d/parm}
+export USHrtma3d=${USHrtma3d:-$HOMErtma3d/ush}
 
 #################################################
 # Set up the INPUT and OUTPUT directories
+# Set up paths for input model data
 #################################################
-export COMIN=${COMIN:-${COMROOT}/${NET}/${envir}/${NET}.${PDY}}
+#export COMIN=${COMIN:-$(compath.py  ${envir}/${NET}/${rtma3d_ver})/${RUN}.${PDY}}
+#export COMOUT=${COMOUT:-$(compath.py -o  ${envir}/${NET}/${rtma3d_ver})/${RUN}.${PDY}}
+export COMIN=${COMOUT:-${COMROOT}/${NET}/${envir}/${NET}.${PDY}}
 export COMOUT=${COMOUT:-${COMROOT}/${NET}/${envir}/${NET}.${PDY}}
+export seaice_analysis_ver=v4.5
+export COMINsice=${COMINsice:-$(compath.py prod/seaice_analysis/${seaice_analysis_ver})}
 
-# Directory to store the Pre-processed obs and ready as input for the RTMA3D (BUFR?) 
-export COMINrap=${COMINRAP}/rtma.${PDY}
-export COMINhrrr=${COMINHRRR}/hrrr.${PDY}/${NET}
-export COMINobsproc_rtma3d=${COMINobsproc_rtma3d:-"${COMIN}/obsprd.${cycle}"}
-# export OBS_DIR_CYCLE=${OBS_DIR}/${PDY}${cyc}
+mkdir -p $COMOUT
 
-if [ ! -d "${COMOUT}" ] ; then
-   mkdir -p $COMOUT
-fi
-
-if [ ! -d "${COMINobsproc_rtma3d}" ] ; then
-   mkdir -p $COMINobsproc_rtma3d
-fi
-
-#if [ ! -d "${COMINhrrr}" ] ; then
-#  ${ECHO} "ERROR: ${COMINhrrr} does not exist!"
-#  exit 1
-#fi
-
-###########################################################
+env
 
 ######################
 # Execute the script.
 ######################
-${exSCR_PREPOBS:-$HOMErtma3d/scripts/ex${NET}_prepobs.ksh}
+#$HOMErtma3d/scripts/${RUN}/ex${RUN}_prdgen.sh
+$HOMErtma3d/scripts/${RUN}/ex${RUN}_prdgen.ksh
 export err=$?; err_chk
 
 msg="$0 of $job completed normally"
@@ -114,7 +99,7 @@ postmsg $jlogfile "$msg"
 
 if [ -e "${pgmout}" ] ; then
    cat $pgmout
-   cpreq -p $pgmout   ${LOG_PGMOUT}
+   cpreq -p $pgmout ${LOG_PGMOUT}
 fi
 
 ##############################

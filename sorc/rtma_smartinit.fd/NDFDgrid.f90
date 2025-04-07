@@ -30,7 +30,7 @@
       real tmean,dz
 
       character*2 domain
-      character*4 model
+      character*6 model
 
       print *, '***********************************'
       print *, 'Into NDFDgrid for domain ',domain
@@ -115,7 +115,7 @@
 ! Check first to make sure the terrain elevation does not exceed the highest model level read in
 ! at each gridpoint. Only done for the HRRR, since only 20 levels are read in rather than the
 ! complete set of vertical levels.
-      if (trim(model) == 'HRRR') then
+      if (trim(model) == 'HRRR' .or. trim(model) == '3DRTMA') then
         jloop: do j=1,jm
         iloop: do i=1,im
           If(.not. validpt(i,j)) cycle iloop 
@@ -162,7 +162,8 @@
       jloop2: do j=1,jm
       iloop2: do i=1,im
         IF(.NOT. VALIDPT(I,J)) cycle iloop2
-        if (trim(model) == 'HRRR' .and. coast(i,j) == 0.) then
+        if (trim(model) == 'HRRR' .and. coast(i,j) == 0. .or. &
+            trim(model) == '3DRTMA' .and. coast(i,j) == 0.) then
           TNEW(I,J)=T2(I,J)
           DEWNEW(I,J)=D2(I,J)
           QNEW(I,J)=Q2(I,J)
@@ -192,7 +193,7 @@
 
 ! ---   get values at level 6 for lapse rate calculations
 
-        if (trim(model) == 'HRRR') then
+        if (trim(model) == 'HRRR' .or. trim(model) == '3DRTMA') then
           tupr=T(I,J,5)
           zupr=HGHT(I,J,5)
         else

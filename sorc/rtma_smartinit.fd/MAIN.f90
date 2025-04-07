@@ -26,7 +26,7 @@
       INTEGER JPDS(200),JGDS(200),KPDS(200),KGDS(200),ID(25)
       INTEGER DATE,LUB,NUMVAL,FHR,CYC
       CHARACTER *80 FNAMEOUT
-      character*4 model
+      character*6 model
       character*2 domain
       character*6 datafmt
 
@@ -43,7 +43,7 @@
       READ (5,*) datafmt
       READ (5,*) FHR
       READ (5,*) CYC
-      print*, 'Running Smartinit for ', model, domain
+      print*, 'Running Smartinit for ', trim(model), ' ',domain
       print *, 'Into Main ', 'fhr=',FHR, 'cyc=',cyc
 
 !  Read index file to get the grid specs; set maxlev based on model
@@ -57,7 +57,7 @@
       itot=numval
       if (trim(model) == 'RAP') then
         maxlev=50
-      elseif (trim(model) == 'HRRR') then
+      elseif (trim(model) == 'HRRR' .or. trim(model) == '3DRTMA' ) then
         maxlev=20
       else
         print*,'Model is not specified, set model in smartinit script'
@@ -86,7 +86,7 @@
 ! Used for downscaling output
 
       allocate (downt(im,jm),downdew(im,jm),downu(im,jm),downv(im,jm))
-      allocate (downq(im,jm),downp(im,jm),wgust(im,jm))
+      allocate (downq(im,jm),downp(im,jm),wgust(im,jm),wspd(im,jm),wdir(im,jm))
       allocate (dirtrans(im,jm),mgtrans(im,jm),lal(im,jm),sky(im,jm))
       allocate (mixhgt(im,jm),blr(im,jm))
 
@@ -122,7 +122,7 @@
 
 !     deallocate (hght,t,q,uwnd,vwnd,psfc,zsfc,rh,pblmark,blr)
       deallocate (hght,t,q,uwnd,vwnd,psfc,zsfc,blr)
-      deallocate (sky,tcld,wetfrz,dirtrans,vis,gust,d2)
+      deallocate (sky,tcld,wetfrz,dirtrans,vis,gust,d2,wspd,wdir)
       deallocate (lcld,mcld,hcld,wgust,u10,v10,refc,t2,q2,bli)
       deallocate (topo_ndfd,coast,downt,downdew,downu,downv,downq) 
       deallocate (downp,mixhgt,mgtrans,lal,basez,snod,slp,ceil)
