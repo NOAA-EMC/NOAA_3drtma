@@ -32,8 +32,8 @@ while [ ${i} -lt ${max_cycs} ]; do
   probe=`${NDATE} -${i} ${YYYYMMDDHH}`
   probe_YYYYMMDD=`echo $probe | cut -c 1-8`
   probe_HH=`echo $probe | cut -c 9-10`
-  probe_dir=${COMOUTautoqc_base}/${NET}.${probe_YYYYMMDD}/autoqcprd.t${probe_HH}z
-  if [ -s ${probe_dir}/done.${probe} ]; then
+  probe_dir=${COMOUTautoqc_base}/${NET}.${probe_YYYYMMDD}/autoqcprd.t${probe_HH}z # MTM - revert NET to RUN
+  if [ -s ${probe_dir}/${RUN}.t${probe_HH}z.accept_merged_${probe}.txt ]; then
     echo $probe
     export PDYprev=${probe}
     export PDYprev_dir=${probe_dir}
@@ -51,8 +51,8 @@ while [ ${i} -lt ${max_cycs} ]; do
   probe=`${NDATE} -${i} $YYYYMMDDHH`
   probe_YYYYMMDD=`echo $probe | cut -c 1-8`
   probe_HH=`echo $probe | cut -c 9-10`
-  probe_dir=${COMOUTautoqc_base}/${NET}.${probe_YYYYMMDD}/autoqcprd.t${probe_HH}z
-  if [ $probe_HH -eq "23" ] && [ -s ${probe_dir}/done.${probe} ]; then
+  probe_dir=${COMOUTautoqc_base}/${NET}.${probe_YYYYMMDD}/autoqcprd.t${probe_HH}z # MTM - revert NET to RUN
+  if [ $probe_HH -eq "23" ] && [ -s ${probe_dir}/${RUN}.t${probe_HH}z.accept_merged_${probe}.txt ]; then
     export probecyc_long=${probe}
     break
   else
