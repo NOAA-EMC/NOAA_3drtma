@@ -139,7 +139,7 @@ def gen_database(dat_var,columns,cyc_purge,eps,geps,rjrmse):
   # Open the connection to the SQLite database (will create one if it doesn't exist)
   cnx = sqlite3.connect(thisRUN+'.t'+cycle_HH+'z.database_'+vars[var]+'_'+cyclestr+'.db')
 
-  dat_var = duplicates(dat_var)
+  #dat_var = duplicates(dat_var)
 
   dat_var = gen_accept_lists(dat_var,eps,geps,rjrmse)
 
@@ -682,7 +682,7 @@ if __name__ == "__main__":
 
   delta = timedelta(minutes=60)
   aclist_type='std_bias' # Select from std_bias or rmse
-  comp_partial_flag=True # Controls whether the short-term stats & accept lists are computed
+  comp_partial_flag=False # Controls whether the short-term stats & accept lists are computed
   num_cycs=6 # Number of cycles to compute stats (RMSE, bias) over
   num_stuck=8 # Number of cycles for the "stuck" instrument check
   num_cycs_long=24*7 # Number of hours to compute long-term RMSE stats
