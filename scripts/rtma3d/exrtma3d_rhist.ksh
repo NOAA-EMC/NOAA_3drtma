@@ -187,8 +187,12 @@ ls -1r */*/* | awk '
 
            /.db/ { print "./"$0 > "perm" ; next }
 
-	   /obs/ { print "./"$0 > "perm" ; next }
- 
+	   /obs.listing/ { print "./"$0 > "perm" ; next }
+
+           /stn_analysis/ { print "./"$0 > "perm" ; next }
+
+           /envir.sh/ { print "./"$0 > "perm" ; next }
+           
            /firstguess.nc/ { print "./"$0 > "perm" ; next }'
 
 
