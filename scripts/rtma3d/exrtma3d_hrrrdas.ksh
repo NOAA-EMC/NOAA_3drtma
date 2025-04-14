@@ -35,7 +35,6 @@ else
 fi
 
 # Compute date & time components for the analysis time
-YYYYJJJHH00=`${DATE} +"%Y%j%H00" -d "${START_TIME}"`
 YYYYMMDDHH=`${DATE} +"%Y%m%d%H" -d "${START_TIME}"`
 YYYYMMDD=`${DATE} +"%Y%m%d" -d "${START_TIME}"`
 YYYY=`${DATE} +"%Y" -d "${START_TIME}"`
