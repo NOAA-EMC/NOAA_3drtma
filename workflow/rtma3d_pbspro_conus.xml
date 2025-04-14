@@ -952,12 +952,12 @@
       <value>&DATABASE_DIR;</value>
     </envar>
     <envar>
-     <name>exSCR_HRRRDAS</name>
+     <name>exSCR_RHIST</name>
      <value>&exSCR_RHIST;</value>
     </envar>
     <envar>
       <name>JJOB_HRRRDAS</name>
-     <value>&JJOB_RHIST;</value>
+     <value>&JJOB_HRRDAS;</value>
     </envar>'>
 <!ENTITY ENVARS_UPDATEVARS
     '<envar>
