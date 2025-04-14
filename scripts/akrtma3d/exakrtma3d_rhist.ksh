@@ -119,9 +119,7 @@ ls -1r */* | awk '
  
 	   /fit/ { print "./"$0 > "perm" ; next }
 
-	   /.db/ { print "./"$0 > "perm" ; next }
-
-           /firstguess.nc/ { print "./"$0 > "perm" ; next }'
+	   /firstguess.nc/ { print "./"$0 > "perm" ; next }'
 
 ls -1r */* | awk '
 
