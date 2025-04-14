@@ -21,27 +21,37 @@ export RUN_ENVIR=${RUN_ENVIR:-nco}
 # Set NET and RUN
 #################
 export NET=rtma3d
-#export RUN=rtma3d
 
+KEEPDATA="YES"
 # Note: grib_util module loaded in submission (lsf or ecFlow) script
 
 ##########################################################
 # obtain unique process id (pid) and make temp directories
-
-export PDYm1=`$NDATE -24 ${PDY}${cyc} | cut -c 1-8`
-
+#export PDYm=${PDY}${cyc}
+for i in 1 2 3
+do
+export PDYm$i=`$NDATE -$i ${PDY}${cyc} | cut -c 1-10`
+export PDYn$i=`$NDATE -$i ${PDY}${cyc} | cut -c 1-8`
+export cycm$i=`$NDATE -$i ${PDY}${cyc} | cut -c 9-10`
+done
 ##########################################################
 export jobid=${jobid:-"${outid}.o$$"}
 export DATA=${DATA:-$DATAROOT/${jobid:?}} #jobid ($job.$LSB_JOBID MUST BE DEFINED IN TERMS OF $RUN IN UPPER LEVEL SCRIPT /MPondeca, 26Jul2015
 if [ -d $DATA ] ; then
    rm  -rf $DATA/*
 else
-   mkdir -p $DATA
+#   mkdir -p $DATA/$PDY${cyc}	 
+   mkdir -p $DATA/$PDYm1
+   mkdir -p $DATA/$PDYm2
+   mkdir -p $DATA/$PDYm3
 fi
 cd $DATA
 
-
   export cycle=${cycle:-t${cyc}z}
+  export cyclem1=${cyclem1:-t${cycm1}z}
+  export cyclem2=${cyclem2:-t${cycm2}z}
+  export cyclem3=${cyclem3:-t${cycm3}z}
+
   export pgmout=${pgmout:-"OUTPUT.${PDY}${cyc}.${jobid}"}
 
 
@@ -73,19 +83,11 @@ export UTILrtma3d=${UTILrtma3d:-$HOMErtma3d/util/${NET}}
 # date and time for previous and next cycle
 export PDYHH="${PDY}${cyc}"
 export PDYHH_cycm1=$($NDATE -01  "${PDYHH}")
+export PDYHH_cycm2=$($NDATE -02  "${PDYHH}")
+export PDYHH_cycm3=$($NDATE -03  "${PDYHH}")
+
 export PDYHH_cycp1=$($NDATE +01  "${PDYHH}")
 export FGS_OPT=${FGS_OPT:-1}
-
-
-###########################################
-# Run setpdy and initialize PDY variables
-###########################################
-
-if [ ${cyc} != "07" ] ; then
-    echo -e "\nWARNING: GETMAXT only runs at 1900z. Exiting.\n"
-    exit 0
-fi
-
 
 
 #################################################
@@ -94,22 +96,60 @@ fi
 ### COM_IN used to retrieve ges and analysis files from 2p5, ak, gu, hi, and pr
 export COMIN=${COMIN:-${COMROOT}/${NET}/${envir}/${NET}.${PDY}}
 export COMOUT=${COMOUT:-${COMROOT}/${NET}/${envir}/${NET}.${PDY}}
+export COMINobsproc_rtma3d=${COMINobsproc_rtma3d:-"${COMIN}/obsprd.${cycle}"}
+export GESINhrrr_rtma3d=${GESINhrrr_rtma3d:-"${COMIN}/fgsprd.${cycle}"}
+export COMOUTgsi_rtma3d=${COMOUTgsi_rtma3d:-"${COMOUT}/gsiprd.${cycle}"}
+export COMOUTpost_rtma3d=${COMOUTpost_rtma3d:-"${COMOUT}/postprd.${cycle}"}
+export COMOUTbufrsnd_rtma3d=${COMOUTbufrsnd_rtma3d:-"${COMOUT}/bufrsnd.${cycle}"}
+export COMINm1=${COMINm1:-${COMROOT}/${NET}/${envir}/${NET}.${PDYn1}}
+export COMINm2=${COMINm2:-${COMROOT}/${NET}/${envir}/${NET}.${PDYn2}}
+export COMINm3=${COMINm3:-${COMROOT}/${NET}/${envir}/${NET}.${PDYn3}}
+
+
+export COMOUTm1=${COMOUTm1:-${COMROOT}/${NET}/${envir}/${NET}.${PDYn1}}
+export COMOUTm2=${COMOUTm2:-${COMROOT}/${NET}/${envir}/${NET}.${PDYn2}}
+export COMOUTm3=${COMOUTm3:-${COMROOT}/${NET}/${envir}/${NET}.${PDYn3}}
 
 ### Observations Products/Input for the RTMA3D (prepbufr files) 
-export COMINobsproc_rtma3d=${COMINobsproc_rtma3d:-"${COMIN}/obsprd.${cycle}"}
+export COMINobsproc_rtma3dm1=${COMINobsproc_rtma3dm1:-"${COMINm1}/obsprd.${cyclem1}"}
+export COMINobsproc_rtma3dm2=${COMINobsproc_rtma3dm2:-"${COMINm2}/obsprd.${cyclem2}"}
+export COMINobsproc_rtma3dm3=${COMINobsproc_rtma3dm3:-"${COMINm3}/obsprd.${cyclem3}"}
 
 ### Firstguess Products/Input for the RTMA3D (netcdf) 
-export GESINhrrr_rtma3d=${GESINhrrr_rtma3d:-"${COMIN}/fgsprd.${cycle}"}
+export GESINhrrr_rtma3dm1=${GESINhrrr_rtma3dm1:-"${COMINm1}/fgsprd.${cyclem1}"}
+export GESINhrrr_rtma3dm2=${GESINhrrr_rtma3dm2:-"${COMINm2}/fgsprd.${cyclem2}"}
+export GESINhrrr_rtma3dm3=${GESINhrrr_rtma3dm3:-"${COMINm3}/fgsprd.${cyclem3}"}
 
 ### 3DRTMA GSIANL Products (netcdf)
-export COMOUTgsi_rtma3d=${COMOUTgsi_rtma3d:-"${COMOUT}/gsiprd.${cycle}"}
+export COMOUTgsi_rtma3dm1=${COMOUTgsi_rtma3dm1:-"${COMOUTm1}/gsiprd.${cyclem1}"}
+export COMOUTgsi_rtma3dm2=${COMOUTgsi_rtma3dm2:-"${COMOUTm2}/gsiprd.${cyclem2}"}
+export COMOUTgsi_rtma3dm3=${COMOUTgsi_rtma3dm3:-"${COMOUTm3}/gsiprd.${cyclem3}"}
 
 ### 3DRTMA UNI-POST Products (grib2)
-export COMOUTpost_rtma3d=${COMOUTpost_rtma3d:-"${COMOUT}/postprd.${cycle}"}
+export COMOUTpost_rtma3dm1=${COMOUTpost_rtma3dm1:-"${COMOUTm1}/postprd.${cyclem1}"}
+export COMOUTpost_rtma3dm2=${COMOUTpost_rtma3dm2:-"${COMOUTm2}/postprd.${cyclem2}"}
+export COMOUTpost_rtma3dm3=${COMOUTpost_rtma3dm3:-"${COMOUTm3}/postprd.${cyclem3}"}
+
+### 3DRTMA  BUFRSND (bufr)
+export COMOUTbufrsnd_rtma3dm1=${COMOUTbufrsnd_rtma3dm1:-"${COMOUTm1}/bufrsnd.${cyclem1}"}
+export COMOUTbufrsnd_rtma3dm2=${COMOUTbufrsnd_rtma3dm2:-"${COMOUTm2}/bufrsnd.${cyclem2}"}
+export COMOUTbufrsnd_rtma3dm3=${COMOUTbufrsnd_rtma3dm3:-"${COMOUTm3}/bufrsnd.${cyclem3}"}
+
+### 3DRTMA   Autoqc 
+export COMOUTautoqc_rtma3dm1=${COMOUTautoqc_rtma3dm1:-"${COMOUTm1}/autoqcprd.${cyclem1}"}
+export COMOUTautoqc_rtma3dm2=${COMOUTautoqc_rtma3dm2:-"${COMOUTm2}/autoqcprd.${cyclem2}"}
+export COMOUTautoqc_rtma3dm3=${COMOUTautoqc_rtma3dm3:-"${COMOUTm3}/autoqcprd.${cyclem3}"}
+
+### 3DRTMA   hrrrdas
+export COMOUThrrrdas_rtma3dm1=${COMOUThrrrdas_rtma3dm1:-"${COMOUTm1}/hrrrdas.${cyclem1}"}
+export COMOUThrrrdas_rtma3dm2=${COMOUThrrrdas_rtma3dm2:-"${COMOUTm2}/hrrrdas.${cyclem2}"}
+export COMOUThrrrdas_rtma3dm3=${COMOUThrrrdas_rtma3dm3:-"${COMOUTm3}/hrrrdas.${cyclem3}"}
+
+
+
 
 ### 3DRTMA MINMAX Products (grib2)
 #export COMOUTmaxtminrh_rtma3d=${COMOUTmaxtminrh_rtma3d:-"${COMOUT}/maxtminrhprd.${cycle}"}
-
 
 if [ ! -d "${COMIN}" ] ; then
    mkdir -p $COMIN
@@ -121,17 +161,12 @@ fi
 
 export COM_IN=${COM_IN:-$COMROOT/${NET}/${envir}}
 
-#${exSCR_POST:-$HOMErtma3d/scripts/${RUN}/ex${RUN}_maxtbg.ksh}
-#export err=$?; err_chk
-
-#msg="$0 of $job completed normally"
-#postmsg $jlogfile "$msg"
-
-#${exSCR_POST:-$HOMErtma3d/scripts/${RUN}/ex${RUN}_minrh.ksh}
-#export err=$?; err_chk
+${exSCR_POST:-$HOMErtma3d/scripts/${RUN}/ex${RUN}_rhist.ksh}
+export err=$?; err_chk
 
 msg="$0 of $job completed normally"
 postmsg $jlogfile "$msg"
+
 
 if [ -e "${pgmout}" ] ; then
    cat $pgmout
