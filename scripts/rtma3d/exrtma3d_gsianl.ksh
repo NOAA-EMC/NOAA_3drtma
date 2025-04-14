@@ -685,8 +685,6 @@ if [ "${envir}" == "lsf" ] || [ "${envir}" == "pbspro" ]; then #wcoss
   ${CP} -p filelist.hrrrdas 		               ${COMOUTgsi_rtma3d}
   ${CP} -p filelist03                          ${COMOUTgsi_rtma3d}
   ${CP} -p hybens_info                         ${COMOUTgsi_rtma3d}
-  ${CP} -p current_bad_aircraft                ${COMOUTgsi_rtma3d}
-  ${CP} -p gsd_sfcobs_uselist.txt              ${COMOUTgsi_rtma3d}
   # extra backup (NOT necessary)
   #${LN} -sf ${COMOUTgsi_rtma3d}/${ANLrtma3d_FNAME} ${COMOUT}/${ANLrtma3d_FNAME}
   #${CP} -p ${pgmout_stdout}        ${COMOUT}/${pgmout_stdout}_gsianl.${cycle_str}
