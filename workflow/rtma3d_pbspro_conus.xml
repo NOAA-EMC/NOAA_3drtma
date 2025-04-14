@@ -581,7 +581,7 @@
    </envar>
    <envar>
       <name>DATA_RHIST</name>
-      <value><cyclestr>&DATA_AUTOQC;</cyclestr></value>
+      <value><cyclestr>&DATA_RHIST;</cyclestr></value>
    </envar>
    <envar>
       <name>DATA_HRRRDAS</name>
