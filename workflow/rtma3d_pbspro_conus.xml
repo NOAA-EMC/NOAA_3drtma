@@ -40,7 +40,7 @@
 <!ENTITY COMINPREP      "/lfs/h2/emc/ptmp/ashley.stanfield/CRON/rtma3d_v13/com/obsproc/v1.3">
 <!ENTITY OBS_DIR	"/scratch4/NCEPDEV/fv3-cam/save/Gang.Zhao/Data/GSD_GSI_Case/obs">
 <!ENTITY HRRR_DIR	"/scratch4/NCEPDEV/fv3-cam/save/Gang.Zhao/Data/GSD_GSI_Case/fgs">
-
+<!ENTITY HPSSOUT        "/NCEPDEV/emc-meso/5year/Edward.Colon/rtma3d">
 <!--  -->
 
 <!ENTITY DATAROOT	"&ptmp_base;/data">
@@ -108,6 +108,9 @@
 <!ENTITY DATA_PRDGEN    "&DATA_RUNDIR;/prdgen">
 <!ENTITY DATA_WRFBUFR   "&DATA_RUNDIR;/wrfbufr">
 <!ENTITY DATA_POSTSND   "&DATA_RUNDIR;/wrfbufr">
+<!ENTITY DATA_RHIST     "&DATA_RUNDIR;/rhist">
+<!ENTITY DATA_HRRRDAS   "&DATA_RUNDIR;/hrrrdas">
+
 <!ENTITY hpsspath0      "/NCEPDEV/emc-meso/5year/&USER;/pbspro_rtma3d">
 <!ENTITY hpsspath1      "/NCEPPROD/hpssprod/runhistory">
 <!ENTITY hpsspath1_1yr  "/NCEPPROD/1year/hpssprod/runhistory">
@@ -188,7 +191,10 @@
 <!ENTITY JJOB_POST4FGS   "&JJOB_DIR;/J&CAP_RUN;_POST4FGS">
 <!ENTITY exSCR_POST4FGS  "&SCRIPT_DIR;/ex&RUN;_post4fgs.ksh">
 <!ENTITY JJOB_PRDGEN     "&JJOB_DIR;/J&CAP_RUN;_PRDGEN">
-
+<!ENTITY JJOB_RHIST   "&JJOB_DIR;/J&CAP_RUN;_RHIST">
+<!ENTITY exSCR_RHIST  "&SCRIPT_DIR;/&RUN;/ex&RUN;_rhist.ksh">
+<!ENTITY JJOB_HRRRDAS   "&JJOB_DIR;/J&CAP_RUN;_HRRRDAS">
+<!ENTITY exSCR_HRRRDAS  "&SCRIPT_DIR;/&RUN;/ex&RUN;_hrrrdas.ksh">
 
 <!-- Resources -->
 
@@ -258,6 +264,14 @@
 <!ENTITY UPDATEVARS_RESOURCES '<walltime>00:30:00</walltime>'> 
 <!ENTITY UPDATEVARS_RESERVATION '<nodes>6:ppn=64:mem=500GB</nodes><native>-l place=vscatter</native><queue>&QUEUE;</queue><account>&ACCOUNT;</account>'>
 <!ENTITY FCST_LENGTH "20"> <!--20 secconds -->
+
+<!ENTITY RHIST_PROC "1">
+<!ENTITY RHIST_RESOURCES '<walltime>01:20:00</walltime>'>
+<!ENTITY RHIST_RESERVATION '<nodes>1:ppn=1:vntype=cray_compute:mem=4000MB</nodes><native>-l place=scatter</native><queue>&QUEUE_SVC;</queue><account>&ACCOUNT;</account>'>
+
+<!ENTITY HRRRDAS_PROC "1">
+<!ENTITY HRRRDAS_RESOURCES '<walltime>01:20:00</walltime>'>
+<!ENTITY HRRRDAS_RESERVATION '<nodes>1:ppn=1:vntype=cray_compute:mem=4000MB</nodes><native>-l place=scatter</native><queue>&QUEUE;</queue><account>&ACCOUNT;</account>'>
 
 <!ENTITY POST_PROC "14">
 <!ENTITY POST_THREADS "1">
@@ -564,6 +578,14 @@
    <envar>
       <name>DATA_OBSPRD</name>
       <value><cyclestr>&DATA_OBSPRD;</cyclestr></value>
+   </envar>
+   <envar>
+      <name>DATA_RHIST</name>
+      <value><cyclestr>&DATA_RHIST;</cyclestr></value>
+   </envar>
+   <envar>
+      <name>DATA_HRRRDAS</name>
+      <value><cyclestr>&DATA_HRRRDAS;</cyclestr></value>
    </envar>
    <envar>
       <name>DATA_OBSPRDm1</name>
@@ -899,8 +921,44 @@
        <name>exSCR_MAXRH</name>
        <value>&exSCR_MAXRH;</value>
     </envar>'>
-
-
+ <!ENTITY ENVARS_RHIST
+     '<envar>
+       <name>START_TIME</name>
+       <value><cyclestr>@Y@m@d@H</cyclestr></value>
+      </envar>
+      <envar>
+       <name>DATABASE_DIR</name>
+       <value>&DATABASE_DIR;</value>
+      </envar>
+      <envar>
+       <name>HPSSOUT</name>
+       <value>&HPSSOUT;</value>
+      </envar>
+      <envar>
+       <name>exSCR_RHIST</name>
+       <value>&exSCR_RHIST;</value>
+      </envar>
+      <envar>
+       <name>JJOB_RHIST</name>
+       <value>&JJOB_RHIST;</value>
+     </envar>'>
+ <!ENTITY ENVARS_HRRRDAS
+    '<envar>
+      <name>START_TIME</name>
+      <value><cyclestr>@Y@m@d@H</cyclestr></value>
+    </envar>
+    <envar>
+      <name>DATABASE_DIR</name>
+      <value>&DATABASE_DIR;</value>
+    </envar>
+    <envar>
+     <name>exSCR_RHIST</name>
+     <value>&exSCR_RHIST;</value>
+    </envar>
+    <envar>
+      <name>JJOB_HRRRDAS</name>
+     <value>&JJOB_HRRDAS;</value>
+    </envar>'>
 <!ENTITY ENVARS_UPDATEVARS
     '<envar>
       <name>START_TIME</name>
@@ -944,6 +1002,8 @@
   <cycledef group="rap_e">0 01-11,13-23 * 01-12 2022-2025 *</cycledef>
 
   <cycledef group="rap">0 0,12 * 01-12 2022-2025 *</cycledef>
+  
+  <cycledef group="3hours">0 */3 * 01-12 2022-2025 *</cycledef>
 
   <task name="&RUN;_obsprep_lghtn_task" cycledefs="hourly" maxtries="&maxtries;">
 
@@ -1033,45 +1093,6 @@
    </dependency>
   </task>
 
-<!--  <task name="&RUN;_mint_obs" cycledefs="hourly" maxtries="&maxtries;">
-    &ENVARS;
-    <envar>
-       <name>rundir_task</name>
-       <value><cyclestr>&DATA_MINTMAXRH;</cyclestr></value>
-    </envar>
-
-    &MINMAX_RESOURCES;
-    &MINMAX_RESERVATION;
-    &ENVARS_MINMAX;
-    <command>&JJOB_DIR;/launch.ksh &JJOB_MINTOBS;</command>
-    <jobname>&NET;_mint_obs</jobname>
-    <join><cyclestr>&LOG_DIR;/&RUN;_mint_obs_@Y@m@d@H@M.log</cyclestr></join>
-
-    <dependency>
-      <datadep age="2"><cyclestr>&COMINPREP;/rtma.@Y@m@d/rtma.t19z.prepbufr.tm00</cyclestr></datadep>
-    </dependency>
-
-  </task> -->
-
-<!--  <task name="&RUN;_maxt_obs" cycledefs="hourly" maxtries="&maxtries;">
-    &ENVARS;
-    <envar>
-       <name>rundir_task</name>
-       <value><cyclestr>&DATA_MAXTMINRH;</cyclestr></value>
-    </envar>
-
-    &MINMAX_RESOURCES;
-    &MINMAX_RESERVATION;
-    &ENVARS_MINMAX;
-    <command>&JJOB_DIR;/launch.ksh &JJOB_MAXTOBS;</command>
-    <jobname>&NET;_maxt_obs</jobname>
-    <join><cyclestr>&LOG_DIR;/&RUN;_maxt_obs_@Y@m@d@H@M.log</cyclestr></join>
-
-    <dependency>
-      <datadep age="2"><cyclestr>&COMINPREP;/rtma.@Y@m@d/rtma.t07z.prepbufr.tm00</cyclestr></datadep>
-    </dependency>
-  </task> -->
-
     <task name="&RUN;_prepobs_task" cycledefs="hourly" maxtries="&maxtries;">
 
     &ENVARS;
@@ -1156,6 +1177,24 @@
      </dependency>
   </task>
 
+ <task name="&RUN;_hrrrdas_task" cycledefs="hourly" maxtries="&maxtries;">
+       &ENVARS;
+       <envar>
+           <name>rundir_task</name>
+         <value><cyclestr>&DATA_HRRRDAS;</cyclestr></value>
+       </envar>
+       &HRRRDAS_RESOURCES;
+       &HRRRDAS_RESERVATION;
+
+       <command>&JJOB_DIR;/launch.ksh &JJOB_HRRRDAS;</command>
+       <jobname><cyclestr>&RUN;_hrrrdas_job_@Y@m@d@H@M</cyclestr></jobname>
+       <join><cyclestr>&LOG_SCHDLR;/&RUN;_&envir;_hrrrdas_@Y@m@d@H.log</cyclestr></join>
+       &ENVARS_HRRRDAS;
+
+       <dependency>
+        <taskdep task="&RUN;_gsianl_task"/>
+       </dependency>
+  </task>
   <task name="&RUN;_anldump_task" cycledefs="hourly" maxtries="&maxtries;">
     &ENVARS;
     <envar>
@@ -1331,46 +1370,22 @@
     </dependency>
     </task>
 
-  <task name="&RUN;_mint_prep" cycledefs="hourly" maxtries="&maxtries;">
-    &ENVARS;
-    <envar>
-       <name>rundir_task</name>
-       <value><cyclestr>&DATA_MINTMAXRH;</cyclestr></value>
-    </envar>
-
-    &MINMAX_RESOURCES;
-    &MINMAX_RESERVATION;
-    &ENVARS_MINMAX;
-    <command>&JJOB_DIR;/launch.ksh &JJOB_MINT;</command>
-    <jobname>&NET;_mint_prep</jobname>
-    <join><cyclestr>&LOG_DIR;/&RUN;_mint_prep_@Y@m@d@H@M.log</cyclestr></join>
-
-
-    <dependency>
-      <taskdep task="&RUN;_post_task"/>
-    </dependency>
-
-  </task>
-    <task name="&RUN;_maxt_prep" cycledefs="hourly" maxtries="&maxtries;">
-    &ENVARS;
-    <envar>
-       <name>rundir_task</name>
-       <value><cyclestr>&DATA_MAXTMINRH;</cyclestr></value>
-    </envar>
-    &MINMAX_RESOURCES;
-    &MINMAX_RESERVATION;
-    &ENVARS_MINMAX;
-
-    <command>&JJOB_DIR;/launch.ksh &JJOB_MAXT;</command>
-    <jobname>&NET;_maxt_prep</jobname>
-    <join><cyclestr>&LOG_DIR;/&RUN;_maxt_prep_@Y@m@d@H@M.log</cyclestr></join>
-
-
-    <dependency>
-      <taskdep task="&RUN;_post_task"/>
-    </dependency>
-
-  </task>
+   <task name="&RUN;_rhist_task" cycledefs="3hours" maxtries="&maxtries;">
+       &ENVARS;
+       &RHIST_RESOURCES;
+       &RHIST_RESERVATION;
+       <envar>
+         <name>rundir_task</name>
+         <value><cyclestr>&DATA_RHIST;</cyclestr></value>
+       </envar>
+       <command>&JJOB_DIR;/launch.ksh &JJOB_RHIST;</command>
+       <jobname><cyclestr>&RUN;_rhist_job_@Y@m@d@H@M</cyclestr></jobname>
+       <join><cyclestr>&LOG_SCHDLR;/&RUN;_&envir;_rhist_@Y@m@d@H.log</cyclestr></join>
+          &ENVARS_RHIST;
+       <dependency>
+        <taskdep task="&RUN;_prdgen_task"/>
+       </dependency>
+    </task>
 
 </workflow>
 

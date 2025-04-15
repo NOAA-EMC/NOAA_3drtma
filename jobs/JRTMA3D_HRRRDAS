@@ -21,14 +21,9 @@ export RUN_ENVIR=${RUN_ENVIR:-nco}
 # Set NET and RUN
 #################
 export NET=rtma3d
-#export RUN=rtma3d
 
+KEEPDATA="YES"
 # Note: grib_util module loaded in submission (lsf or ecFlow) script
-
-##########################################################
-# obtain unique process id (pid) and make temp directories
-
-
 
 ##########################################################
 export jobid=${jobid:-"${outid}.o$$"}
@@ -36,14 +31,12 @@ export DATA=${DATA:-$DATAROOT/${jobid:?}} #jobid ($job.$LSB_JOBID MUST BE DEFINE
 if [ -d $DATA ] ; then
    rm  -rf $DATA/*
 else
-   mkdir -p $DATA
+   mkdir -p $DATA	 
 fi
 cd $DATA
 
-export PDYm1=`$NDATE -24 ${PDY}${cyc} | cut -c 1-8`
-
-  export cycle=${cycle:-t${cyc}z}
-  export pgmout=${pgmout:-"OUTPUT.${PDY}${cyc}.${jobid}"}
+export cycle=${cycle:-t${cyc}z}
+export pgmout=${pgmout:-"OUTPUT.${PDY}${cyc}.${jobid}"}
 
 
 export jlogfile=${jlogfile:-$COMROOT/logs/jlogfiles/jlogfile.$jobid}
@@ -74,19 +67,6 @@ export UTILrtma3d=${UTILrtma3d:-$HOMErtma3d/util/${NET}}
 # date and time for previous and next cycle
 export PDYHH="${PDY}${cyc}"
 export PDYHH_cycm1=$($NDATE -01  "${PDYHH}")
-export PDYHH_cycp1=$($NDATE +01  "${PDYHH}")
-export FGS_OPT=${FGS_OPT:-1}
-
-
-###########################################
-# Run setpdy and initialize PDY variables
-###########################################
-
-if [ ${cyc} != "19" ] ; then
-    echo -e "\nWARNING: GETMINT only runs at 1900z. Exiting.\n"
-    exit 0
-fi
-
 
 
 #################################################
@@ -94,26 +74,12 @@ fi
 #################################################
 ### COM_IN used to retrieve ges and analysis files from 2p5, ak, gu, hi, and pr
 export COMIN=${COMIN:-${COMROOT}/${NET}/${envir}/${NET}.${PDY}}
-export COMINm1=${COMINm1:-${COMROOT}/${NET}/${envir}/${NET}.${PDYm1}}
 export COMOUT=${COMOUT:-${COMROOT}/${NET}/${envir}/${NET}.${PDY}}
-
-### Observations Products/Input for the RTMA3D (prepbufr files) 
-export COMINobsproc_rtma3d=${COMINobsproc_rtma3d:-"${COMIN}/obsprd.${cycle}"}
-export COMINobsproc_rtma3dm1=${COMINobsproc_rtma3dm1:-"${COMINm1}/obsprd.${cycle}"}
-
-### Firstguess Products/Input for the RTMA3D (netcdf) 
-export GESINhrrr_rtma3d=${GESINhrrr_rtma3d:-"${COMIN}/fgsprd.${cycle}"}
-
-### 3DRTMA GSIANL Products (netcdf)
 export COMOUTgsi_rtma3d=${COMOUTgsi_rtma3d:-"${COMOUT}/gsiprd.${cycle}"}
-
-### 3DRTMA UNI-POST Products (grib2)
-export COMOUTpost_rtma3d=${COMOUTpost_rtma3d:-"${COMOUT}/postprd.${cycle}"}
-
-### 3DRTMA MIN Products (grib2)
-#export COMOUTmintmaxrh_rtma3d=${COMOUTmintmaxrh_rtma3d:-"${COMOUT}/mintmaxrhprd.${cycle}"}
-
-
+export COMOUThrrrdas_rtma3d=${COMOUThrrrdas_rtma3d:-"${COMOUT}/hrrrdas.${cycle}"}
+if [ ! -d "${COMOUThrrrdas_rtma3d}" ] ; then
+  mkdir -p ${COMOUThrrrdas_rtma3d}
+fi
 if [ ! -d "${COMIN}" ] ; then
    mkdir -p $COMIN
 fi
@@ -121,34 +87,25 @@ if [ ! -d "${COMOUT}" ] ; then
    mkdir -p $COMOUT
 fi
 
+
 export COM_IN=${COM_IN:-$COMROOT/${NET}/${envir}}
 
-######################
-# Execute the script.
-######################
+${exSCR_POST:-$HOMErtma3d/scripts/${RUN}/ex${RUN}_hrrrdas.ksh}
+export err=$?; err_chk
 
-#${exSCR_POST:-$HOMErtma3d/scripts/${RUN}/ex${RUN}_mintbg.ksh} 
-#export err=$?; err_chk
-
-#msg="$0 of $job completed normally"
-#postmsg $jlogfile "$msg"
+msg="$0 of $job completed normally"
+postmsg $jlogfile "$msg"
 
 
-#${exSCR_POST:-$HOMErtma3d/scripts/${RUN}/ex${RUN}_maxrh.ksh} 
-#export err=$?; err_chk
+if [ -e "${pgmout}" ] ; then
+   cat $pgmout
+   cpreq -p $pgmout ${LOG_PGMOUT}
+fi
 
-#msg="$0 of $job completed normally"
-#postmsg $jlogfile "$msg"
+postmsg $jlogfile "$0 of $job completed normally"
 
-#if [ -e "${pgmout}" ] ; then
-#   cat $pgmout
-#   cpreq -p $pgmout ${LOG_PGMOUT}
-#fi
-
-#postmsg $jlogfile "$0 of $job completed normally"
-
-#if [ "${KEEPDATA}" != YES ]; then
-#    rm -rf $DATA
-#fi
+if [ "${KEEPDATA}" != YES ]; then
+    rm -rf $DATA
+fi
 
 date
