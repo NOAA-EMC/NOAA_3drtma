@@ -88,6 +88,8 @@ def windbias(dat_var):
   dat_var.loc[(dat_var['OB_'+cyclestr]>speed_min) & (dat_var['GES_'+cyclestr]>speed_min) & (dat_var['PBUFTYP'].isin(mnet_bctypes)),'alpha_'+cyclestr] = \
           dat_var['alpha_'+cyclestr]+(np.log(dat_var['GES_'+cyclestr]/dat_var['OB_'+cyclestr])-dat_var['alpha_'+cyclestr])/dat_var['w_'+cyclestr]
   dat_var['a_'+cyclestr] = np.exp(dat_var['alpha_'+cyclestr])
+  # Restrict adjustment factor values to range [0.75,1.5]
+  dat_var['a_'+cyclestr] = dat_var['a_'+cyclestr].clip(lower=0.75,upper=1.5)
 
   # Update t_bar, i.e., effective time-of-origin of present bias estimate, from new w,
   # and update alpha_bar from new alpha:
@@ -251,8 +253,6 @@ def gen_accept_lists(dat_var,eps,geps,rjrmse):
         dat_var_obs_subset=dat_var_obs
         suspect_obs = dat_var_stuck[dat_var_obs_subset.apply(lambda x: max(np.float64(x))-min(np.float64(x))<eps,axis=1)]
         if suspect_obs.shape[0]>0:
-          # Sanity check for Step #1 (After)
-          suspect_obs.to_csv(thisRUN+'.t'+cycle_HH+'z.suspect_obs_'+vars[var]+'_'+cyclestr+'.csv', index=False)
           # Second: Background must vary more than "geps" over specified # of hours
           dat_var_obs_subset=suspect_obs.loc[:, [y for y in suspect_obs.columns if y.startswith('GES_')]]
           stuck_inst = suspect_obs[dat_var_obs_subset.apply(lambda y: max(np.float64(y))-min(np.float64(y))>geps,axis=1)]
@@ -778,9 +778,6 @@ if __name__ == "__main__":
   # together the anl and ges files.
   #--------------------------------------------------------------------#
 
-  dat_anl['VMAP']=1.0
-  dat_ges['VMAP']=1.0
-
   # Added [::-1] to reverse time series, such that positive DHRs will be encountered before negative DHRs, thus giving those
   # preference in the event that two DHRs with same absolute value, but of opposite sign, are encoutnered.  This is how these
   # observations are selected in the GSI ob selection algorithm to only use the observation valid closest to the analysis time.
@@ -793,8 +790,12 @@ if __name__ == "__main__":
     if j==0: df.rename(columns={col:'{}-ANL'.format(col, j) for col in ('PRES','IUSE','INC','VINC','RUSAGE')}, inplace=True)
     if j==1: df.rename(columns={col:'{}-GES'.format(col, j) for col in ('PRES','IUSE','INC','VINC','RUSAGE')}, inplace=True)
 
-  merge_cols=keep_cols+['OBTYPE','DHR','OB','VOB','TDRY']
+  merge_cols=['SAID','PROVIDER','SUBPROVIDER','PBUFTYP','LAT','LON','HGHT','OBTYPE','DHR','OB','VOB','TDRY']
   dat_merged = reduce(lambda left,right: pd.merge(left,right,on=merge_cols), dfs)
+
+  # Determine VMAP information. Set to 0 for valleys (RUSAGE ends in 0.25 or 0.75).
+  dat_merged['RUSAGE_remainder']=np.modf(dat_merged['RUSAGE-ANL'])[0]
+  dat_merged['VMAP']=np.where((dat_merged['RUSAGE_remainder']==0.25) | (dat_merged['RUSAGE_remainder']==0.75),0,1)
 
   dat_merged.replace({'PBUFTYP': {192:181, 193:187, 194:183, 195:188, 292:281, 293:287, 294:284, 295:288}},inplace=True)
 
