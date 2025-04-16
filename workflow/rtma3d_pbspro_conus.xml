@@ -1216,7 +1216,7 @@
            <datadep age="10"><cyclestr offset="-3600">&COMINHRRRDAS;/hrrrdas_small_d02_@Y@m@d@H00f01_mem0035</cyclestr></datadep>
            <datadep age="10"><cyclestr offset="-3600">&COMINHRRRDAS;/hrrrdas_small_d02_@Y@m@d@H00f01_mem0036</cyclestr></datadep>
            <or>
-		<timedep><cyclestr @Y@m@d@H&HRRRDAS_CUTOFF;@S</cyclestr></timedep>
+		<timedep><cyclestr>@Y@m@d@H&HRRRDAS_CUTOFF;@S</cyclestr></timedep>
 	   </or>
       </and>
      </dependency>
