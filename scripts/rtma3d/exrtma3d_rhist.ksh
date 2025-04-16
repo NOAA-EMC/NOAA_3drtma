@@ -196,7 +196,7 @@ ls -1r */*/* | awk '
            /firstguess.nc/ { print "./"$0 > "perm" ; next }'
 
 
-ls -1r */* | awk '
+ls -1r */*/* | awk '
 
             /fits/ { print "./"$0 > "2yr" ; next }
 
@@ -204,7 +204,7 @@ ls -1r */* | awk '
 
 	    /OUTPUT/ { print "./"$0 > "2yr" ; next }'
 
-ls -1r */* | awk '
+ls -1r */*/* | awk '
 
             /hrrrdas_small/ { print "./"$0 > "perm_hrrrdas" ; next }'
 
