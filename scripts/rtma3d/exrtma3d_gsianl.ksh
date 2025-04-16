@@ -29,7 +29,14 @@ COMINhrrrdas=${COMINHRRRDAS}
 fi
 #START_TIME=`${DATE} -d "${PDY} ${cyc} ${SUBH_TIME} minutes"`
 START_TIME=`${DATE} -d "${PDY} ${cyc} ${subcyc} minutes"`
-if [ ${HRRRDAS_BEC} -eq 0 ]; then
+START_TIME_HRRRDAS_CUTOFF=`${DATE} -d "${PDY} ${HRRRDAS_CUTOFF} ${subcyc} minutes"`
+if [ "${START_TIME} -le ${START_TIME_HRRRDAS_CUTOFF} ]; then
+HRRRDAS_STATE=${HRRRDAS_BEC}
+else
+HRRRDAS_STATE=0
+fi
+
+if [ ${HRRRDAS_STATE} -eq 0 ]; then
 EnsWgt=0.5
 else
 EnsWgt=0.9
@@ -150,7 +157,7 @@ else
   ${ECHO} "Warning: ${OBS_DIR}: satmar does not exist!"
 fi
 
-if [ "${envir}" = "lsf" ] || [ "${envir}" = "pbspro" ] && [ ${HRRRDAS_BEC} -eq 0 ] ; then #WCOSS
+if [ "${envir}" = "lsf" ] || [ "${envir}" = "pbspro" ] && [ ${HRRRDAS_STATE} -eq 0 ] ; then #WCOSS
   # Set runtime and save directories
   export endianness=Big_Endian
 
@@ -188,8 +195,8 @@ if [ "${envir}" = "lsf" ] || [ "${envir}" = "pbspro" ] && [ ${HRRRDAS_BEC} -eq 0
 fi
 
 
-if [ ${HRRRDAS_BEC} -eq 1 ]; then
-  ${ECHO} "\$HRRRDAS_BEC=${HRRRDAS_BEC}, so HRRRDAS will be used if available"
+if [ ${HRRRDAS_STATE} -eq 1 ]; then
+  ${ECHO} "\$HRRRDAS_BEC=${HRRRDAS_STATE}, so HRRRDAS will be used if available"
   #----------------------------------------------------
   # generate list of HRRRDAS members for ensemble covariances
   # Use 1-hr forecasts from the HRRRDAS cycling
@@ -212,7 +219,7 @@ if [ ${HRRRDAS_BEC} -eq 1 ]; then
    ((c = c + 1))
   done
 else
-  ${ECHO} "\$HRRRDAS_BEC=${HRRRDAS_BEC}, so HRRRDAS will NOT be used"
+  ${ECHO} "\$HRRRDAS_BEC=${HRRRDAS_STATE}, so HRRRDAS will NOT be used"
   ${TOUCH} filelist.hrrrdas #so as to avoid "no such file" error message
 fi
 
@@ -224,7 +231,7 @@ nummem=`more filelist03 | wc -l`
 nummem=$((nummem - 3 ))
 hrrrmem=`more filelist.hrrrdas | wc -l`
 hrrrmem=$((hrrrmem - 3 ))
-if [[ ${hrrrmem} -gt 30 ]] && [[ ${HRRRDAS_BEC} -eq 1  ]]; then #if HRRRDAS BEC is available, use it as first choice
+if [[ ${hrrrmem} -gt 30 ]] && [[ ${HRRRDAS_STATE} -eq 1  ]]; then #if HRRRDAS BEC is available, use it as first choice
   echo "Do hybrid with HRRRDAS BEC"
   nummem=${hrrrmem}
   cpreq filelist.hrrrdas filelist03
