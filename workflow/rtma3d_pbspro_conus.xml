@@ -19,7 +19,9 @@
 <!--<!ENTITY CAP_RUN_ENVIR	""> -->
 <!ENTITY model		"&RUN;">
 <!ENTITY HRRRDAS_BEC     "1">
+<!ENTITY HRRRDAS_CUTOFF  "32">
 <!ENTITY READIN_LOCALIZATION     "TRUE">
+
 
 <!ENTITY MACHINE	"cray">
 <!ENTITY machine	"&MACHINE;">
@@ -711,6 +713,10 @@
       <value>&HRRRDAS_BEC;</value>
     </envar>
     <envar>
+      <name>HRRRDAS_CUTOFF</name>
+      <value>&HRRRDAS_CUTOFF;</value>
+    </envar>
+    <envar>
       <name>READIN_LOCALIZATION</name>
       <value>&READIN_LOCALIZATION;</value>
     </envar>
@@ -1170,8 +1176,10 @@
     &ENVARS_GSI;
 
     <dependency>
-      <and>
-           <datadep age="10"><cyclestr offset="-3600">&COMINHRRRDAS;/hrrrdas_small_d02_@Y@m@d@H00f01_mem0001</cyclestr></datadep>
+      <and> 
+	   <taskdep task="&RUN;_prepfgs_task"/> 
+           <taskdep task="&RUN;_prepobs_task"/>
+	   <datadep age="10"><cyclestr offset="-3600">&COMINHRRRDAS;/hrrrdas_small_d02_@Y@m@d@H00f01_mem0001</cyclestr></datadep>
            <datadep age="10"><cyclestr offset="-3600">&COMINHRRRDAS;/hrrrdas_small_d02_@Y@m@d@H00f01_mem0002</cyclestr></datadep>
            <datadep age="10"><cyclestr offset="-3600">&COMINHRRRDAS;/hrrrdas_small_d02_@Y@m@d@H00f01_mem0003</cyclestr></datadep>
            <datadep age="10"><cyclestr offset="-3600">&COMINHRRRDAS;/hrrrdas_small_d02_@Y@m@d@H00f01_mem0004</cyclestr></datadep>
@@ -1207,8 +1215,9 @@
            <datadep age="10"><cyclestr offset="-3600">&COMINHRRRDAS;/hrrrdas_small_d02_@Y@m@d@H00f01_mem0034</cyclestr></datadep>
            <datadep age="10"><cyclestr offset="-3600">&COMINHRRRDAS;/hrrrdas_small_d02_@Y@m@d@H00f01_mem0035</cyclestr></datadep>
            <datadep age="10"><cyclestr offset="-3600">&COMINHRRRDAS;/hrrrdas_small_d02_@Y@m@d@H00f01_mem0036</cyclestr></datadep>
-           <taskdep task="&RUN;_prepfgs_task"/> 
-           <taskdep task="&RUN;_prepobs_task"/>
+           <or>
+		<timedep><cyclestr @Y@m@d@H&HRRRDAS_CUTOFF;@S</cyclestr></timedep>
+	   </or>
       </and>
      </dependency>
   </task>
