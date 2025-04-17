@@ -202,7 +202,7 @@
 
 <!ENTITY ACCOUNT         "RTMA-DEV">
 <!ENTITY QUEUE           "dev">
-<!ENTITY QUEUE_DBG       "debug">/time_int\
+<!ENTITY QUEUE_DBG       "debug">
 <!ENTITY QUEUE_SVC       "dev_transfer">
 <!ENTITY QUEUE_SHARED    "dev_shared">
 
