@@ -79,7 +79,7 @@ ln -sf $COMOUTautoqc_rtma3dm2 $DATA/$PDYm2
 ln -sf $COMOUTautoqc_rtma3dm3 $DATA/$PDYm3
 
 
-ls -1r */* | awk '
+ls -1r */*/* | awk '
 
             /prepbufr/ { print "./"$0 > "perm" ; next }
 
@@ -125,7 +125,7 @@ ls -1r */* | awk '
 
 	   /firstguess.nc/ { print "./"$0 > "perm" ; next }'
 
-ls -1r */* | awk '
+ls -1r */*/* | awk '
 
             /fits/ { print "./"$0 > "2yr" ; next }
 
