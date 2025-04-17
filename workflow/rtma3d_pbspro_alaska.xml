@@ -230,11 +230,10 @@
 <!ENTITY PREPFGS_RESERVATION '<nodes>1:ppn=1:vntype=cray_compute:mem=20GB</nodes><native>-l place=scatter</native><queue>&QUEUE;</queue><account>&ACCOUNT;</account>'>
 
 <!ENTITY GSI_PROC "14">
-<!ENTITY GSI_THREADS "2">
+<!ENTITY GSI_THREADS "4">
 <!ENTITY GSI_OMP_STACKSIZE "512M">
 <!ENTITY GSI_RESOURCES '<walltime>00:40:00</walltime>'>
-<!ENTITY GSI_RESERVATION '<nodes>2:ppn=60:tpp=2</nodes><native>-l place=vscatter,select=2:ncpus=60</native><queue>&QUEUE;</queue><account>&ACCOUNT;</account>'>	
-
+<!ENTITY GSI_RESERVATION '<nodes>12:ppn=30:tpp=4</nodes><native>-l place=vscatter:excl,select=12:ncpus=120</native><queue>&QUEUE;</queue><account>&ACCOUNT;</account>'>
 
 <!ENTITY GSI_START_TIME "00:40:00">
 <!ENTITY GSI_DEADLINE   "01:30:00">
