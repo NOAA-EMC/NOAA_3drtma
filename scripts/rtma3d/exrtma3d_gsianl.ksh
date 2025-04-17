@@ -557,7 +557,7 @@ if [ "${envir}" == "lsf" ] || [ "${envir}" == "pbspro" ];  then
 #module use /lfs/h2/emc/lam/noscrub/Ming.Hu/rrfs/testD/ufs-srweather-app/env
 #source /lfs/h2/emc/lam/noscrub/Ming.Hu/rrfs/testD/ufs-srweather-app/env/build_wcoss2_intel.env
 #module list
-  APRUN="mpiexec -n 360 -ppn 15 --cpu-bind core --depth 8"
+  APRUN="mpiexec -n 450 -ppn 15 --cpu-bind core --depth 8"
   export FI_OFI_RXM_SAR_LIMIT=3145728
   export OMP_STACKSIZE=${OMP_STACKSIZE:-"512M"}
   export OMP_NUM_THREADS=${OMP_NUM_THREADS:-8}
