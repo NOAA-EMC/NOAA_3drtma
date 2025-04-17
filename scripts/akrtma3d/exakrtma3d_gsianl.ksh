@@ -519,10 +519,10 @@ if [ "${envir}" == "lsf" ] || [ "${envir}" == "pbspro" ];  then
 #module use /lfs/h2/emc/lam/noscrub/Ming.Hu/rrfs/testD/ufs-srweather-app/env
 #source /lfs/h2/emc/lam/noscrub/Ming.Hu/rrfs/testD/ufs-srweather-app/env/build_wcoss2_intel.env
 #module list
-  APRUN="mpiexec -n 120 -ppn 60 --cpu-bind core --depth 2"
+  APRUN="mpiexec -n 360 -ppn 30 --cpu-bind core --depth 4"
   export FI_OFI_RXM_SAR_LIMIT=3145728
   export OMP_STACKSIZE=${OMP_STACKSIZE:-"512M"}
-  export OMP_NUM_THREADS=${OMP_NUM_THREADS:-2}
+  export OMP_NUM_THREADS=${OMP_NUM_THREADS:-4}
   rm ${DATA}/rtma_gsi
   cpreq ${EXECrtma3d}/rtma_gsi ${DATA}
   $APRUN ${DATA}/rtma_gsi < ${DATA}/gsiparm.anl > stdout 2>&1
