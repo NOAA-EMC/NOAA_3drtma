@@ -11,11 +11,6 @@ if [ ! -d "${DATA}" ]; then
   exit 1
 fi
 
-if [  "${DATA_FGSPRD}" ]; then
-  ${RM} -f  ${DATA_FGSPRD}
-  ${LN} -sf ${DATA} ${DATA_FGSPRD}
-fi
-
 #############################################################################
 # Make sure START_TIME is defined and in the correct format
 START_TIME=${START_TIME:-"{PDY} ${cyc}"}

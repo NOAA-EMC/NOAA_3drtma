@@ -40,7 +40,7 @@
 <!ENTITY COMINPREP      "/lfs/h2/emc/ptmp/ashley.stanfield/CRON/rtma3d_v13/com/obsproc/v1.3">
 <!ENTITY OBS_DIR	"/scratch4/NCEPDEV/fv3-cam/save/Gang.Zhao/Data/GSD_GSI_Case/obs">
 <!ENTITY HRRR_DIR	"/scratch4/NCEPDEV/fv3-cam/save/Gang.Zhao/Data/GSD_GSI_Case/fgs">
-<!ENTITY HPSSOUT        "/NCEPDEV/emc-meso/5year/Edward.Colon/rtma3d">
+<!ENTITY HPSSOUT        "/NCEPDEV/emc-meso/5year/&USER;/rtma3d">
 <!--  -->
 
 <!ENTITY DATAROOT	"&ptmp_base;/data">
