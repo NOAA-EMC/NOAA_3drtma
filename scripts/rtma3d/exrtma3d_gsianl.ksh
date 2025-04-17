@@ -29,12 +29,12 @@ COMINhrrrdas=${COMINHRRRDAS}
 fi
 #START_TIME=`${DATE} -d "${PDY} ${cyc} ${SUBH_TIME} minutes"`
 START_TIME=`${DATE} -d "${PDY} ${cyc} ${subcyc} minutes"`
-START_TIME_HRRRDAS_CUTOFF=`${DATE} -d "${PDY} ${HRRRDAS_CUTOFF} ${subcyc} minutes"`
-if [ "${START_TIME} -le ${START_TIME_HRRRDAS_CUTOFF} ]; then
+#START_TIME_HRRRDAS_CUTOFF=`${DATE} -d "${PDY} ${cyc} ${HRRRDAS_CUTOFF} minutes"`
+#if [ ${START_TIME} -le ${START_TIME_HRRRDAS_CUTOFF} ]; then
 HRRRDAS_STATE=${HRRRDAS_BEC}
-else
-HRRRDAS_STATE=0
-fi
+#else
+#HRRRDAS_STATE=0
+#fi
 
 if [ ${HRRRDAS_STATE} -eq 0 ]; then
 EnsWgt=0.5

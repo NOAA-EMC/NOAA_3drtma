@@ -963,7 +963,7 @@
     </envar>
     <envar>
       <name>JJOB_HRRRDAS</name>
-     <value>&JJOB_HRRDAS;</value>
+     <value>&JJOB_HRRRDAS;</value>
     </envar>'>
 <!ENTITY ENVARS_UPDATEVARS
     '<envar>
