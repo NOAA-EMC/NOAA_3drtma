@@ -27,14 +27,15 @@ OBS_DIR=${DATAOBSHOME}
 BKG_DIR=${DATAHOME_BK}
 COMINhrrrdas=${COMINHRRRDAS}
 fi
-#START_TIME=`${DATE} -d "${PDY} ${cyc} ${SUBH_TIME} minutes"`
 START_TIME=`${DATE} -d "${PDY} ${cyc} ${subcyc} minutes"`
-#START_TIME_HRRRDAS_CUTOFF=`${DATE} -d "${PDY} ${cyc} ${HRRRDAS_CUTOFF} minutes"`
-#if [ ${START_TIME} -le ${START_TIME_HRRRDAS_CUTOFF} ]; then
+
+CURRMIN=`$MDATE | cut -c11-12`
+#reverting to gdas if current min exceeds cutoff min
+if [ ${CURRMIN} -le ${HRRRDAS_CUTOFF} ]; then
 HRRRDAS_STATE=${HRRRDAS_BEC}
-#else
-#HRRRDAS_STATE=0
-#fi
+else
+HRRRDAS_STATE=0
+fi
 
 if [ ${HRRRDAS_STATE} -eq 0 ]; then
 EnsWgt=0.5
@@ -689,9 +690,11 @@ if [ "${envir}" == "lsf" ] || [ "${envir}" == "pbspro" ]; then #wcoss
     ./current_bad_aircraft ./gsd_sfcobs_uselist.txt ./gsd_sfcobs_provider.txt ./stdout*
   ${CP} -p  misc_info.tgz                      ${COMOUTgsi_rtma3d}
   gzip ${COMOUTgsi_rtma3d}/diag_*
-  ${CP} -p filelist.hrrrdas 		               ${COMOUTgsi_rtma3d}
+  ${CP} -p filelist.hrrrdas 		       ${COMOUTgsi_rtma3d}
   ${CP} -p filelist03                          ${COMOUTgsi_rtma3d}
   ${CP} -p hybens_info                         ${COMOUTgsi_rtma3d}
+  ${CP} -p stdout                              ${COMOUTgsi_rtma3d}
+  ${CP} -p OUTPUT*                             ${COMOUTgsi_rtma3d}
   # extra backup (NOT necessary)
   #${LN} -sf ${COMOUTgsi_rtma3d}/${ANLrtma3d_FNAME} ${COMOUT}/${ANLrtma3d_FNAME}
   #${CP} -p ${pgmout_stdout}        ${COMOUT}/${pgmout_stdout}_gsianl.${cycle_str}
