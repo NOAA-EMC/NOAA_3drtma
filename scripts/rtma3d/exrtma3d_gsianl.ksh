@@ -30,12 +30,22 @@ fi
 START_TIME=`${DATE} -d "${PDY} ${cyc} ${subcyc} minutes"`
 
 CURRMIN=`$MDATE | cut -c11-12`
-#reverting to gdas if current min exceeds cutoff min
-if [ ${CURRMIN} -le ${HRRRDAS_CUTOFF} ]; then
+CURRTIME=`$MDATE | cut -c1-10`
+STARTTIME=$PDY$cyc
+
+#If this is a catchup cycle, the HRRRDAS_STATE reverts to 1 assuming that the HRRRDAS files from previous
+#cycles are present.
+#Otherwise, the current minute past the hour is compared to hrrrdas cutoff.
+#Reverting to gdas forecast ensemble files if current min exceeds cutoff min.
+
+if [ ${CURRTIME} -gt ${STARTTIME} ]; then
 HRRRDAS_STATE=${HRRRDAS_BEC}
+elif [ ${CURRMIN} -le ${HRRRDAS_CUTOFF} ]; then
+  HRRRDAS_STATE=${HRRRDAS_BEC}
 else
-HRRRDAS_STATE=0
+  HRRRDAS_STATE=0
 fi
+
 
 if [ ${HRRRDAS_STATE} -eq 0 ]; then
 EnsWgt=0.5
