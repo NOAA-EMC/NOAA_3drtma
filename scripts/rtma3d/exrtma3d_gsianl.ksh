@@ -28,30 +28,6 @@ BKG_DIR=${DATAHOME_BK}
 COMINhrrrdas=${COMINHRRRDAS}
 fi
 START_TIME=`${DATE} -d "${PDY} ${cyc} ${subcyc} minutes"`
-
-CURRMIN=`$MDATE | cut -c11-12`
-CURRTIME=`$MDATE | cut -c1-10`
-STARTTIME=$PDY$cyc
-
-#If this is a catchup cycle, the HRRRDAS_STATE reverts to 1 assuming that the HRRRDAS files from previous
-#cycles are present.
-#Otherwise, the current minute past the hour is compared to hrrrdas cutoff.
-#Reverting to gdas forecast ensemble files if current min exceeds cutoff min.
-
-if [ ${CURRTIME} -gt ${STARTTIME} ]; then
-HRRRDAS_STATE=${HRRRDAS_BEC}
-elif [ ${CURRMIN} -le ${HRRRDAS_CUTOFF} ]; then
-  HRRRDAS_STATE=${HRRRDAS_BEC}
-else
-  HRRRDAS_STATE=0
-fi
-
-
-if [ ${HRRRDAS_STATE} -eq 0 ]; then
-EnsWgt=0.5
-else
-EnsWgt=0.9
-fi
 # Compute date & time components for the analysis time
 YYYYMMDDHH=`${DATE} +"%Y%m%d%H" -d "${START_TIME}"`
 YYYYMMDDHHMM=`${DATE} +"%Y%m%d%H%M" -d "${START_TIME}"`
@@ -168,7 +144,7 @@ else
   ${ECHO} "Warning: ${OBS_DIR}: satmar does not exist!"
 fi
 
-if [ "${envir}" = "lsf" ] || [ "${envir}" = "pbspro" ] && [ ${HRRRDAS_STATE} -eq 0 ] ; then #WCOSS
+#if [ "${envir}" = "lsf" ] || [ "${envir}" = "pbspro" ] && [ ${HRRRDAS_BEC} -eq 0 ] ; then #WCOSS
   # Set runtime and save directories
   export endianness=Big_Endian
 
@@ -203,11 +179,11 @@ if [ "${envir}" = "lsf" ] || [ "${envir}" = "pbspro" ] && [ ${HRRRDAS_STATE} -eq
   #   if not, set ifhyb=false
       cpreq ${UTILrtma3d_dev}/convert.sh .
   fi
-fi
+#fi
 
 
-if [ ${HRRRDAS_STATE} -eq 1 ]; then
-  ${ECHO} "\$HRRRDAS_BEC=${HRRRDAS_STATE}, so HRRRDAS will be used if available"
+if [ ${HRRRDAS_BEC} -eq 1 ]; then
+  ${ECHO} "\$HRRRDAS_BEC=${HRRRDAS_BEC}, so HRRRDAS will be used if available"
   #----------------------------------------------------
   # generate list of HRRRDAS members for ensemble covariances
   # Use 1-hr forecasts from the HRRRDAS cycling
@@ -230,7 +206,7 @@ if [ ${HRRRDAS_STATE} -eq 1 ]; then
    ((c = c + 1))
   done
 else
-  ${ECHO} "\$HRRRDAS_BEC=${HRRRDAS_STATE}, so HRRRDAS will NOT be used"
+  ${ECHO} "\$HRRRDAS_BEC=${HRRRDAS_BEC}, so HRRRDAS will NOT be used"
   ${TOUCH} filelist.hrrrdas #so as to avoid "no such file" error message
 fi
 
@@ -242,8 +218,9 @@ nummem=`more filelist03 | wc -l`
 nummem=$((nummem - 3 ))
 hrrrmem=`more filelist.hrrrdas | wc -l`
 hrrrmem=$((hrrrmem - 3 ))
-if [[ ${hrrrmem} -gt 30 ]] && [[ ${HRRRDAS_STATE} -eq 1  ]]; then #if HRRRDAS BEC is available, use it as first choice
+if [[ ${hrrrmem} -gt 30 ]] && [[ ${HRRRDAS_BEC} -eq 1  ]]; then #if HRRRDAS BEC is available, use it as first choice
   echo "Do hybrid with HRRRDAS BEC"
+  EnsWgt=0.9
   nummem=${hrrrmem}
   cpreq filelist.hrrrdas filelist03
   ${CP} ${PARMgsi}/hybens_info_hrrrdas hybens_info
@@ -259,6 +236,7 @@ if [[ ${hrrrmem} -gt 30 ]] && [[ ${HRRRDAS_STATE} -eq 1  ]]; then #if HRRRDAS BE
   ${ECHO} " Cycle ${YYYYMMDDHH}: GSI hybrid uses HRRRDAS BEC with n_ens=${nummem}" >> ${pgmout}
 elif [[ ${nummem} -eq 80 ]]; then
   echo "Do hybrid with GDAS directly"
+  EnsWgt=0.5
   ${CP} ${PARMgsi}/hybens_info_hrrrdas hybens_info
   beta1_inv=$(( 1 - $EnsWgt  ))
   ifhyb=.true.
