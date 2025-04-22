@@ -1201,7 +1201,7 @@
 
     &ENVARS_PREPJOB;
     <dependency>
-      <datadep age="10"><cyclestr>&GESINHRRR;/hrrrak_@Y@m@d@Hf000</cyclestr></datadep>
+      <datadep age="10"><cyclestr offset="-10800">&GESINHRRR;/hrrrak_@Y@m@d@Hf003</cyclestr></datadep>
     </dependency>
   </task>
 

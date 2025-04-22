@@ -46,11 +46,10 @@ cd $DATA
 #    setpdy.sh needs the variables 
 #    $PDY and $cyc already defined in advance
 #####################################################
-#setpdy.sh
-#. ${DATA}/PDY
-
-
 export cycle=${cycle:-t${cyc}z}
+setpdy.sh
+. ./PDY
+
 export PDYHH="${PDY}${cyc}"
 PDYm1=`$NDATE -24 ${PDY}${cyc} | cut -c 1-8`
 
