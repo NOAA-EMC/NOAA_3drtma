@@ -91,43 +91,43 @@ RUN_GUST="FALSE"
 #fi
 
 # Link to the prepbufr data
-if [ -r ${OBS_DIR}/rtma.t${cyc}z.prepbufr.tm00 ]; then
-  ${LN} -sf ${OBS_DIR}/rtma.t${cyc}z.prepbufr.tm00 ./prepbufr
+if [ -r ${OBS_DIR}/${NET}.t${cyc}z.prepbufr.tm00 ]; then
+  ${LN} -sf ${OBS_DIR}/${NET}.t${cyc}z.prepbufr.tm00 ./prepbufr
 fi
 
-if [ -r "${OBS_DIR}/rtma3d.t${cyc}z.NSSLRefInGSI.bufr" ]; then
-  ${LN} -sf ${OBS_DIR}/rtma3d.t${cyc}z.NSSLRefInGSI.bufr ./refInGSI
+if [ -r "${OBS_DIR}/${NET}.t${cyc}z.NSSLRefInGSI.bufr" ]; then
+  ${LN} -sf ${OBS_DIR}/${NET}.t${cyc}z.NSSLRefInGSI.bufr ./refInGSI
 else
   ${ECHO} "Warning: ${OBS_DIR}: NSSLRefInGSI.bufr does not exist!"
 fi
 
-if [ -r "${OBS_DIR}/rtma.t${cyc}z.LightningInGSI_bufr.bufr" ]; then
-  ${LN} -sf ${OBS_DIR}/rtma.t${cyc}z.LightningInGSI_bufr.bufr ./lghtInGSI
+if [ -r "${OBS_DIR}/${NET}.t${cyc}z.LightningInGSI_bufr.bufr" ]; then
+  ${LN} -sf ${OBS_DIR}/${NET}.t${cyc}z.LightningInGSI_bufr.bufr ./lghtInGSI
 else
   ${ECHO} "Warning: ${OBS_DIR}: LightningInGSI.bufr does not exist!"
 fi
 
-if [ -r "${OBS_DIR}/rtma.t${cyc}z.NASALaRCCloudInGSI.bufr" ]; then
-  ${LN} -sf ${OBS_DIR}/rtma.t${cyc}z.NASALaRCCloudInGSI.bufr ./larcInGSI
+if [ -r "${OBS_DIR}/${NET}.t${cyc}z.NASALaRCCloudInGSI.bufr" ]; then
+  ${LN} -sf ${OBS_DIR}/${NET}.t${cyc}z.NASALaRCCloudInGSI.bufr ./larcInGSI
 else
   ${ECHO} "Warning: ${OBS_DIR}: NASALaRCCloudInGSI.bufr does not exist!"
 fi
 
-if [ -r "${OBS_DIR}/rtma.t${cyc}z.satwnd.tm00.bufr_d" ]; then
-  ${LN} -sf ${OBS_DIR}/rtma.t${cyc}z.satwnd.tm00.bufr_d ./satwndbufr
+if [ -r "${OBS_DIR}/${NET}.t${cyc}z.satwnd.tm00.bufr_d" ]; then
+  ${LN} -sf ${OBS_DIR}/${NET}.t${cyc}z.satwnd.tm00.bufr_d ./satwndbufr
 else
   ${ECHO} "Warning: ${OBS_DIR}: satwnd does not exist!"
 fi
 
-if [ -r "${OBS_DIR}/rtma.t${cyc}z.nexrad.tm00.bufr_d" ]; then
-  ${LN} -sf ${OBS_DIR}/rtma.t${cyc}z.nexrad.tm00.bufr_d ./nexradbufr
+if [ -r "${OBS_DIR}/${NET}.t${cyc}z.nexrad.tm00.bufr_d" ]; then
+  ${LN} -sf ${OBS_DIR}/${NET}.t${cyc}z.nexrad.tm00.bufr_d ./nexradbufr
 else
   ${ECHO} "Warning: ${OBS_DIR}: nexrad does not exist!"
 fi
 
 
-if [ -r "${OBS_DIR}/rtma.t${cyc}z.satmar.tm00.bufr_d" ]; then
-  ${LN} -sf ${OBS_DIR}/rtma.t${cyc}z.satmar.tm00.bufr_d ./satmar
+if [ -r "${OBS_DIR}/${NET}.t${cyc}z.satmar.tm00.bufr_d" ]; then
+  ${LN} -sf ${OBS_DIR}/${NET}.t${cyc}z.satmar.tm00.bufr_d ./satmar
 else
   ${ECHO} "Warning: ${OBS_DIR}: satmar does not exist!"
 fi

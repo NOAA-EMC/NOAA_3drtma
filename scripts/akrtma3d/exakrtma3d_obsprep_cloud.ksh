@@ -38,8 +38,8 @@ ${ECHO} "SUBH_TIME: "${SUBH_TIME}
 ${ECHO} "YYYYMMDDHH: "${YYYYMMDDHH}
 
 # Link to the NASA LaRC cloud data
-${LN} -sf ${COMINPREP}/rtma.${YYYYMMDD}/rtma.t${HH}z.lgycld.tm00.bufr_d ./rtma.t${cyc}z.lgycld.tm00.bufr_d
-${LN} -sf ./rtma.t${cyc}z.lgycld.tm00.bufr_d ./NASA_LaRC_cloud.bufr
+${LN} -sf ${COMINPREP}/${NET}.${YYYYMMDD}/${NET}.t${HH}z.lgycld.tm00.bufr_d ./${NET}.t${cyc}z.lgycld.tm00.bufr_d
+${LN} -sf ./${NET}.t${cyc}z.lgycld.tm00.bufr_d ./NASA_LaRC_cloud.bufr
 
 
 
@@ -76,7 +76,7 @@ postmsg "$jlogfile" "$msg"
 
 targetfile="NASALaRCCloudInGSI.bufr"
 if [ -f ${DATA}/${targetfile} ] ; then
-  cpreq ${DATA}/${targetfile} ${COMINobsproc_rtma3d}/rtma.t${cyc}z.${targetfile}
+  cpreq ${DATA}/${targetfile} ${COMINobsproc_rtma3d}/${NET}.t${cyc}z.${targetfile}
 else
   msg="WARNING $pgm terminated normally but ${DATA}/${targetfile} does NOT exist."
   ${ECHO} "$msg"
