@@ -651,7 +651,8 @@ if [ "${envir}" == "lsf" ] || [ "${envir}" == "pbspro" ]; then #wcoss
     ./current_bad_aircraft ./gsd_sfcobs_uselist.txt ./gsd_sfcobs_provider.txt ./stdout*
   ${CP} -p  misc_info.tgz                      ${COMOUTgsi_rtma3d}
   gzip ${COMOUTgsi_rtma3d}/diag_*
-
+  ${CP} -p  stdout 			       ${COMOUTgsi_rtma3d}
+  ${CP} -p  OUTPUT*                            ${COMOUTgsi_rtma3d}
   # extra backup (NOT necessary)
   #${LN} -sf ${COMOUTgsi_rtma3d}/${ANLrtma3d_FNAME} ${COMOUT}/${ANLrtma3d_FNAME}
   #${CP} -p ${pgmout_stdout}        ${COMOUT}/${pgmout_stdout}_gsianl.${cycle_str}
