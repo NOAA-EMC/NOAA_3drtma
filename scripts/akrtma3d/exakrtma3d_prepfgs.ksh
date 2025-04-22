@@ -80,130 +80,39 @@ postmsg "$jlogfile" "$msg"
 msg="***********************************************************"
 postmsg "$jlogfile" "$msg"
 #
-#-----------------------------------------------------------------------
-#
-# Look for bqckground from pre-forecast background
-#
-#-----------------------------------------------------------------------
-          case  $HH  in
-               00)       
-                    export PDYHH_AK=${PDYHH}
-		    ind=0
-                    ;;
-               01)
-		    export PDYHH_AK=$($NDATE -01  "${PDYHH}")
-		    ind=1   
-                    ;;
-               02)       
-                    export PDYHH_AK=$($NDATE -02  "${PDYHH}")
-                    ind=2		    
-                    ;;
-               03)  
-                    export PDYHH_AK=${PDYHH}
-		    ind=0
-		    ;;
-               04)  
-                    export PDYHH_AK=$($NDATE -01  "${PDYHH}")
-	            ind=1	    
-                    ;;
-               05) 
-		    export PDYHH_AK=$($NDATE -02  "${PDYHH}")
-		    ind=2    
-                    ;;
-               06)
-                    export PDYHH_AK=${PDYHH}
-		    ind=0 
-                    ;;
-               07)
-                    export PDYHH_AK=$($NDATE -01  "${PDYHH}")
-		    ind=1
-                    ;;
-               08)
-                    export PDYHH_AK=$($NDATE -02  "${PDYHH}")
-		    ind=2
-                    ;;
-               09)
-                    export PDYHH_AK=${PDYHH}
-		    ind=0
-                    ;;
-               10)
-                    export PDYHH_AK=$($NDATE -01  "${PDYHH}")
-		    ind=1
-	            ;;
-               11)
-                    export PDYHH_AK=$($NDATE -02  "${PDYHH}")
-		    ind=2
-                    ;;
-               12)
-                    export PDYHH_AK=${PDYHH}
-		    ind=0
-                    ;;
-               13)
-                    export PDYHH_AK=$($NDATE -01  "${PDYHH}")
-		    ind=1
-                    ;;
-               14)
-	            export PDYHH_AK=$($NDATE -02  "${PDYHH}")
-		    ind=2
-                    ;;
-               15)  
-                    export PDYHH_AK=${PDYHH}
-		    ind=0
-                    ;;
-               16)  
-                    export PDYHH_AK=$($NDATE -01  "${PDYHH}")
-		    ind=1
-                    ;;
-               17)  
-		    export PDYHH_AK=$($NDATE -02  "${PDYHH}")
-		    ind=2
-                    ;;
-               18)
-                    export PDYHH_AK=${PDYHH}
-		    ind=0
-                    ;;
-               19)
-                    export PDYHH_AK=$($NDATE -01  "${PDYHH}")
-		    ind=1
-                    ;;
-               20)
-                    export PDYHH_AK=$($NDATE -02  "${PDYHH}")
-		    ind=2
-                    ;;
-               21)
-                    export PDYHH_AK=${PDYHH}
-		    ind=0
-                    ;;
-               22)
-                    export PDYHH_AK=$($NDATE -01  "${PDYHH}")
-		    ind=1
-                    ;;
-               23)
-                    export PDYHH_AK=$($NDATE -02  "${PDYHH}")
-		    ind=2
-                    ;;
-          esac 
-FGShrrr_FNAME2="hrrrak_${PDYHH_AK}f00${ind}"
-        if [ -r ${GESINhrrr}/${FGShrrr_FNAME2} ] ; then
-#               cp     -p ${GESINhrrr}/${FGShrrr_FNAME2}   ${GESINhrrr_rtma3d}/${FGSrtma3d_FNAME}
-#               ${LN} -sf ${GESINhrrr_rtma3d}/${FGSrtma3d_FNAME}     ${DATA}/${FGSrtma3d_FNAME}
-#               The firstguess file might be appended with more fields (eg, howv), the
-#                   linked fgs file could not work with ncks, so the fgs file must be 
-#                   copied to working directory.
-#               using cp, cpfs, or cpfeq?
-                cp     -p ${GESINhrrr}/${FGShrrr_FNAME2}   ${DATA}/${FGSrtma3d_FNAME}
+CDATE=$PDY$cyc
 
-                ${ECHO} " Cycle ${YYYYMMDDHH}: PREPFGS background --> ${DATA}/${FGShrrr_FNAME2} "
-                ls -l ${DATA}/${FGSrtma3d_FNAME}
-        else
-                ${ECHO} "ERROR: No HRRR-background file found under ${GESINhrrr} for analysis at ${time_run}!!!!"
-                ${ECHO} " Cycle ${YYYYMMDDHH}: PREPFGS failed because of no background" >> ${pgmout}
-                exit 1
-        fi
+###################################################################################
+# Look for the HRRR-first guess
+###################################################################################
+   found_hrrrges=no
+   ic=1
+   while [ $ic -le 9 ] ; do
+     hrrrFHH=$ic
+     hrrrFHH=`printf %02d $hrrrFHH`
+     hrrrCYCLE=`$NDATE -$hrrrFHH $CDATE`
+     hrrrPDY=`echo $hrrrCYCLE |cut -c1-8`
+     hrrrCC=`echo $hrrrCYCLE |cut -c9-10`
+     if [[ $hrrrCC == "00" || $hrrrCC == "03" || $hrrrCC == "06" \
+        || $hrrrCC == "09" || $hrrrCC == "12" || $hrrrCC == "15" || $hrrrCC == "18" || $hrrrCC == "21" ]] ; then
+#       probe_hrrr_guess_nc=$GESINhrrr/alaska/hrrrak_${hrrrCYCLE}f0${hrrrFHH}
+        probe_hrrr_guess_nc=$GESINhrrr/hrrrak_${hrrrCYCLE}f0${hrrrFHH}
+        if [ -s $probe_hrrr_guess_nc ]; then
+#           cpreq $probe_hrrr_guess_nc $COMOUT/${RUN}.t${cyc}z.hrrrak_${hrrrCYCLE}f0${hrrrFHH}
+            cpreq $probe_hrrr_guess_nc ${DATA}/${FGSrtma3d_FNAME}
+            ind=$ic
+            PDYHH_AK=$hrrrCYCLE
+            found_hrrrges=yes
+           break
+         fi
+     fi
+     let "ic=ic+1"
+   done
+   echo "found_hrrrges: "$found_hrrrges
 
-# Snow cover building and trimming currently set to run in the 00z cycle
-
-# Update SST currently set to run in the 01z cycle
+   if [[ ${found_hrrrges} = no ]] ; then
+       err_exit "No HRRR guess available. The missing files are GESINhrrr/alaska/hrrrak__${hrrrCYCLE}f0${hrrrFHH}. The script must be able to find at least one file in the above querying do-while loop"
+   fi
 
 #
 #-----------------------------------------------------------------------

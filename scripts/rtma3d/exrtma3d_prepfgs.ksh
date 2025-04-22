@@ -83,33 +83,38 @@ postmsg "$jlogfile" "$msg"
 msg="***********************************************************"
 postmsg "$jlogfile" "$msg"
 #
-#-----------------------------------------------------------------------
-#
-# Look for background from pre-forecast background
-#
-#-----------------------------------------------------------------------
-ind=1	
-FGShrrr_FNAME2="hrrr_${PDYHH_cycm1}f00${ind}"
-        if [ -r ${GESINhrrr}/${FGShrrr_FNAME2} ] ; then
-#               cp     -p ${GESINhrrr}/${FGShrrr_FNAME2}   ${GESINhrrr_rtma3d}/${FGSrtma3d_FNAME}
-#               ${LN} -sf ${GESINhrrr_rtma3d}/${FGSrtma3d_FNAME}     ${DATA}/${FGSrtma3d_FNAME}
-#               The firstguess file might be appended with more fields (eg, howv), the
-#                   linked fgs file could not work with ncks, so the fgs file must be 
-#                   copied to working directory.
-#               using cp, cpfs, or cpfeq?
-                cp     -p ${GESINhrrr}/${FGShrrr_FNAME2}   ${DATA}/${FGSrtma3d_FNAME}
 
-                ${ECHO} " Cycle ${YYYYMMDDHH}: PREPFGS background --> ${DATA}/${FGSrtma3d_FNAME} "
-                ls -l ${DATA}/${FGSrtma3d_FNAME}
-        else
-                ${ECHO} "ERROR: No HRRR-background file found under ${GESINhrrr} for analysis at ${time_run}!!!!"
-                ${ECHO} " Cycle ${YYYYMMDDHH}: PREPFGS failed because of no background" >> ${pgmout}
-                exit 1
-        fi
+CDATE=$PDY$cyc
 
-# Snow cover building and trimming currently set to run in the 00z cycle
+###################################################################################
+# Look for the HRRR-first guess
+###################################################################################
 
-# Update SST currently set to run in the 01z cycle
+   found_hrrrges=no
+   ic=1
+   while [ $ic -le 9 ] ; do
+     hrrrFHH=$ic
+     hrrrFHH=`printf %02d $hrrrFHH`
+     hrrrCYCLE=`$NDATE -$hrrrFHH $CDATE`
+     hrrrPDY=`echo $hrrrCYCLE |cut -c1-8`
+     hrrrCC=`echo $hrrrCYCLE |cut -c9-10`
+
+#    probe_hrrr_guess_nc=$GESINhrrr/conus/hrrr_${hrrrCYCLE}f0${hrrrFHH}
+     probe_hrrr_guess_nc=$GESINhrrr/hrrr_${hrrrCYCLE}f0${hrrrFHH}
+     if [ -s $probe_hrrr_guess_nc ]; then
+         found_hrrrges=yes
+#        cpreq ${probe_hrrr_guess_nc} $COMOUT/${RUN}.t${cyc}z.hrrr_${hrrrCYCLE}f0${hrrrFHH}
+         cpreq ${probe_hrrr_guess_nc} ${DATA}/${FGSrtma3d_FNAME}
+        break
+     else
+        let "ic=ic+1"
+      fi
+   done
+   echo "found_hrrrges: "$found_hrrrges
+
+   if [[ ${found_hrrrges} = no ]] ; then
+       err_exit "No HRRR guess available. The missing files in the above while-do loop are of the form GESINhrrr/conus/hrrr_${hrrrCYCLE}f0${hrrrFHH}. The script must be able to find at least one file out of the 9 files that it queries"
+   fi
 
 #
 #-----------------------------------------------------------------------
@@ -352,7 +357,9 @@ queried in the above while-do-loop."
 # 1. Retrieving Wind Gust from HRRR forecast (grib2 file)
 #    and dumping out to grib2 file
    found_gustges=no
-   ic=0
+# Change to 1 as we do not want to use the analysis file - AMG
+#  ic=0
+   ic=1
    while [ $ic -le 3 ] ; do
       PRE_YYYYMMDDHH=$(date +"%Y%m%d%H" -d "${START_TIME} ${ic} hour ago")
       PRE_YYYYMMDD=$(echo ${PRE_YYYYMMDDHH} | cut -c1-8)
