@@ -27,20 +27,7 @@ OBS_DIR=${DATAOBSHOME}
 BKG_DIR=${DATAHOME_BK}
 COMINhrrrdas=${COMINHRRRDAS}
 fi
-#START_TIME=`${DATE} -d "${PDY} ${cyc} ${SUBH_TIME} minutes"`
 START_TIME=`${DATE} -d "${PDY} ${cyc} ${subcyc} minutes"`
-#START_TIME_HRRRDAS_CUTOFF=`${DATE} -d "${PDY} ${cyc} ${HRRRDAS_CUTOFF} minutes"`
-#if [ ${START_TIME} -le ${START_TIME_HRRRDAS_CUTOFF} ]; then
-HRRRDAS_STATE=${HRRRDAS_BEC}
-#else
-#HRRRDAS_STATE=0
-#fi
-
-if [ ${HRRRDAS_STATE} -eq 0 ]; then
-EnsWgt=0.5
-else
-EnsWgt=0.9
-fi
 # Compute date & time components for the analysis time
 YYYYMMDDHH=`${DATE} +"%Y%m%d%H" -d "${START_TIME}"`
 YYYYMMDDHHMM=`${DATE} +"%Y%m%d%H%M" -d "${START_TIME}"`
@@ -157,7 +144,7 @@ else
   ${ECHO} "Warning: ${OBS_DIR}: satmar does not exist!"
 fi
 
-if [ "${envir}" = "lsf" ] || [ "${envir}" = "pbspro" ] && [ ${HRRRDAS_STATE} -eq 0 ] ; then #WCOSS
+#if [ "${envir}" = "lsf" ] || [ "${envir}" = "pbspro" ] && [ ${HRRRDAS_BEC} -eq 0 ] ; then #WCOSS
   # Set runtime and save directories
   export endianness=Big_Endian
 
@@ -192,11 +179,11 @@ if [ "${envir}" = "lsf" ] || [ "${envir}" = "pbspro" ] && [ ${HRRRDAS_STATE} -eq
   #   if not, set ifhyb=false
       cpreq ${UTILrtma3d_dev}/convert.sh .
   fi
-fi
+#fi
 
 
-if [ ${HRRRDAS_STATE} -eq 1 ]; then
-  ${ECHO} "\$HRRRDAS_BEC=${HRRRDAS_STATE}, so HRRRDAS will be used if available"
+if [ ${HRRRDAS_BEC} -eq 1 ]; then
+  ${ECHO} "\$HRRRDAS_BEC=${HRRRDAS_BEC}, so HRRRDAS will be used if available"
   #----------------------------------------------------
   # generate list of HRRRDAS members for ensemble covariances
   # Use 1-hr forecasts from the HRRRDAS cycling
@@ -219,7 +206,7 @@ if [ ${HRRRDAS_STATE} -eq 1 ]; then
    ((c = c + 1))
   done
 else
-  ${ECHO} "\$HRRRDAS_BEC=${HRRRDAS_STATE}, so HRRRDAS will NOT be used"
+  ${ECHO} "\$HRRRDAS_BEC=${HRRRDAS_BEC}, so HRRRDAS will NOT be used"
   ${TOUCH} filelist.hrrrdas #so as to avoid "no such file" error message
 fi
 
@@ -231,8 +218,9 @@ nummem=`more filelist03 | wc -l`
 nummem=$((nummem - 3 ))
 hrrrmem=`more filelist.hrrrdas | wc -l`
 hrrrmem=$((hrrrmem - 3 ))
-if [[ ${hrrrmem} -gt 30 ]] && [[ ${HRRRDAS_STATE} -eq 1  ]]; then #if HRRRDAS BEC is available, use it as first choice
+if [[ ${hrrrmem} -gt 30 ]] && [[ ${HRRRDAS_BEC} -eq 1  ]]; then #if HRRRDAS BEC is available, use it as first choice
   echo "Do hybrid with HRRRDAS BEC"
+  EnsWgt=0.9
   nummem=${hrrrmem}
   cpreq filelist.hrrrdas filelist03
   ${CP} ${PARMgsi}/hybens_info_hrrrdas hybens_info
@@ -248,6 +236,7 @@ if [[ ${hrrrmem} -gt 30 ]] && [[ ${HRRRDAS_STATE} -eq 1  ]]; then #if HRRRDAS BE
   ${ECHO} " Cycle ${YYYYMMDDHH}: GSI hybrid uses HRRRDAS BEC with n_ens=${nummem}" >> ${pgmout}
 elif [[ ${nummem} -eq 80 ]]; then
   echo "Do hybrid with GDAS directly"
+  EnsWgt=0.5
   ${CP} ${PARMgsi}/hybens_info_hrrrdas hybens_info
   beta1_inv=$(( 1 - $EnsWgt  ))
   ifhyb=.true.
@@ -689,9 +678,11 @@ if [ "${envir}" == "lsf" ] || [ "${envir}" == "pbspro" ]; then #wcoss
     ./current_bad_aircraft ./gsd_sfcobs_uselist.txt ./gsd_sfcobs_provider.txt ./stdout*
   ${CP} -p  misc_info.tgz                      ${COMOUTgsi_rtma3d}
   gzip ${COMOUTgsi_rtma3d}/diag_*
-  ${CP} -p filelist.hrrrdas 		               ${COMOUTgsi_rtma3d}
+  ${CP} -p filelist.hrrrdas 		       ${COMOUTgsi_rtma3d}
   ${CP} -p filelist03                          ${COMOUTgsi_rtma3d}
   ${CP} -p hybens_info                         ${COMOUTgsi_rtma3d}
+  ${CP} -p stdout                              ${COMOUTgsi_rtma3d}
+  ${CP} -p OUTPUT*                             ${COMOUTgsi_rtma3d}
   # extra backup (NOT necessary)
   #${LN} -sf ${COMOUTgsi_rtma3d}/${ANLrtma3d_FNAME} ${COMOUT}/${ANLrtma3d_FNAME}
   #${CP} -p ${pgmout_stdout}        ${COMOUT}/${pgmout_stdout}_gsianl.${cycle_str}
