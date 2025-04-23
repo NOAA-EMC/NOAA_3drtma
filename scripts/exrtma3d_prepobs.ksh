@@ -121,20 +121,20 @@ fi
 
 # lightning obs (pre-processed/re-mapped to model grid)
 
-  if [ -r ${COMINobsproc_rtma3d}/${NET}.t${HH}z.LightningInGSI_bufr.bufr ]; then
+  if [ -r ${COMINobsproc_rtma3d}/${RUN}.t${HH}z.LightningInGSI_bufr.bufr ]; then
     ${ECHO} "using preocessed RAP BUFR lightning data"
-    ${LN} -sf ${COMINobsproc_rtma3d}/${NET}.t${HH}z.LightningInGSI_bufr.bufr ${DATA}/${NET}.t${HH}z.LightningInGSI_bufr.bufr
+    ${LN} -sf ${COMINobsproc_rtma3d}/${RUN}.t${HH}z.LightningInGSI_bufr.bufr ${DATA}/${RUN}.t${HH}z.LightningInGSI_bufr.bufr
   else
-    ${ECHO} "Warning: ${COMINobsproc_rtma3d}/${NET}.t${HH}z.LightningInGSI_bufr.bufr  does not exist!"
+    ${ECHO} "Warning: ${COMINobsproc_rtma3d}/${RUN}.t${HH}z.LightningInGSI_bufr.bufr  does not exist!"
   fi
 
 
 # NASA LaRC Cloud data (pre-processed/re-mapped to model grid)
-  if [ -r ${COMINobsproc_rtma3d}/${NET}.t${HH}z.NASALaRCCloudInGSI.bufr ]; then
+  if [ -r ${COMINobsproc_rtma3d}/${RUN}.t${HH}z.NASALaRCCloudInGSI.bufr ]; then
     ${ECHO} "using preocessed satellite cloud data from NASA LaRC NETCDF satellite cloud obs"
-    ${LN} -sf ${COMINobsproc_rtma3d}/${NET}.t${HH}z.NASALaRCCloudInGSI.bufr ${DATA}/${NET}.t${HH}z.NASALaRCCloudInGSI.bufr
+    ${LN} -sf ${COMINobsproc_rtma3d}/${RUN}.t${HH}z.NASALaRCCloudInGSI.bufr ${DATA}/${RUN}.t${HH}z.NASALaRCCloudInGSI.bufr
   else
-    ${ECHO} "Warning: ${COMINobsproc_rtma3d}/${NET}.t${HH}z.NASALaRCCloudInGSI(_bufr).bufr  does not exist!"
+    ${ECHO} "Warning: ${COMINobsproc_rtma3d}/${RUN}.t${HH}z.NASALaRCCloudInGSI(_bufr).bufr  does not exist!"
   fi
 
 # satellite wind data

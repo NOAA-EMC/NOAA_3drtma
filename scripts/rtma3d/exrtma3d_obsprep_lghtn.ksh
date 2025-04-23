@@ -139,7 +139,7 @@ postmsg "$jlogfile" "$msg"
 cpreq  ${DATA}/LightningInGSI.bufr ${DATA}/LightningInGSI_bufr.bufr
 lghtng_bufr="LightningInGSI_bufr.bufr"
 if [ -f ${DATA}/${lghtng_bufr} ] ; then
-  cpreq ${DATA}/${lghtng_bufr} ${COMINobsproc_rtma3d}/${NET}.t${cyc}z.${lghtng_bufr}
+  cpreq ${DATA}/${lghtng_bufr} ${COMINobsproc_rtma3d}/${RUN}.t${cyc}z.${lghtng_bufr}
 else
   msg="WARNING $pgm terminated normally but ${DATA}/${lghtng_bufr} does NOT exist."
   ${ECHO} "$msg"

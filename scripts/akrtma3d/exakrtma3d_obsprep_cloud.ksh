@@ -76,7 +76,7 @@ postmsg "$jlogfile" "$msg"
 
 targetfile="NASALaRCCloudInGSI.bufr"
 if [ -f ${DATA}/${targetfile} ] ; then
-  cpreq ${DATA}/${targetfile} ${COMINobsproc_rtma3d}/${NET}.t${cyc}z.${targetfile}
+  cpreq ${DATA}/${targetfile} ${COMINobsproc_rtma3d}/${RUN}.t${cyc}z.${targetfile}
 else
   msg="WARNING $pgm terminated normally but ${DATA}/${targetfile} does NOT exist."
   ${ECHO} "$msg"

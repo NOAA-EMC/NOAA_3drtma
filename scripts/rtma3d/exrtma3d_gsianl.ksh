@@ -95,14 +95,14 @@ else
   ${ECHO} "Warning: ${OBS_DIR}: NSSLRefInGSI.bufr does not exist!"
 fi
 
-if [ -r "${OBS_DIR}/${NET}.t${cyc}z.LightningInGSI_bufr.bufr" ]; then
-  ${LN} -sf ${OBS_DIR}/${NET}.t${cyc}z.LightningInGSI_bufr.bufr ./lghtInGSI
+if [ -r "${OBS_DIR}/${RUN}.t${cyc}z.LightningInGSI_bufr.bufr" ]; then
+  ${LN} -sf ${OBS_DIR}/${RUN}.t${cyc}z.LightningInGSI_bufr.bufr ./lghtInGSI
 else
   ${ECHO} "Warning: ${OBS_DIR}: LightningInGSI.bufr does not exist!"
 fi
 
-if [ -r "${OBS_DIR}/${NET}.t${cyc}z.NASALaRCCloudInGSI.bufr" ]; then
-  ${LN} -sf ${OBS_DIR}/${NET}.t${cyc}z.NASALaRCCloudInGSI.bufr ./larcInGSI
+if [ -r "${OBS_DIR}/${RUN}.t${cyc}z.NASALaRCCloudInGSI.bufr" ]; then
+  ${LN} -sf ${OBS_DIR}/${RUN}.t${cyc}z.NASALaRCCloudInGSI.bufr ./larcInGSI
 else
   ${ECHO} "Warning: ${OBS_DIR}: NASALaRCCloudInGSI.bufr does not exist!"
 fi
