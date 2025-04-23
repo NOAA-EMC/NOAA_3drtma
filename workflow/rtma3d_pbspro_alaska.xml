@@ -1029,7 +1029,7 @@
     &ENVARS_PREPJOB;
 
     <dependency>
-	 <datadep age="2"><cyclestr>&COMINPREP;/rtma.@Y@m@d/rtma.t@Hz.lghtng.tm00.bufr_d</cyclestr></datadep>
+	 <datadep age="2"><cyclestr>&COMINPREP;/&NET;.@Y@m@d/&NET;.t@Hz.lghtng.tm00.bufr_d</cyclestr></datadep>
    </dependency>
   </task>
 
@@ -1051,7 +1051,7 @@
     &ENVARS_PREPJOB; 
 
     <dependency>
-       <datadep age="2"><cyclestr>&COMINPREP;/rtma.@Y@m@d/rtma.t@Hz.lgycld.tm00.bufr_d</cyclestr></datadep>
+       <datadep age="2"><cyclestr>&COMINPREP;/&NET;.@Y@m@d/&NET;.t@Hz.lgycld.tm00.bufr_d</cyclestr></datadep>
    </dependency>
   </task>
 
@@ -1118,9 +1118,9 @@
 
    <dependency>
        <and>
-       <datadep age="2"><cyclestr>&COMINPREP;/rtma.@Y@m@d/rtma.t@Hz.prepbufr.tm00</cyclestr></datadep>
-       <datadep age="2"><cyclestr>&COMINPREP;/rtma.@Y@m@d/rtma.t@Hz.satwnd.tm00.bufr_d</cyclestr></datadep>
-       <datadep age="2"><cyclestr>&COMINPREP;/rtma.@Y@m@d/rtma.t@Hz.nexrad.tm00.bufr_d</cyclestr></datadep>
+       <datadep age="2"><cyclestr>&COMINPREP;/&NET;.@Y@m@d/&NET;.t@Hz.prepbufr.tm00</cyclestr></datadep>
+       <datadep age="2"><cyclestr>&COMINPREP;/&NET;.@Y@m@d/&NET;.t@Hz.satwnd.tm00.bufr_d</cyclestr></datadep>
+       <datadep age="2"><cyclestr>&COMINPREP;/&NET;.@Y@m@d/&NET;.t@Hz.nexrad.tm00.bufr_d</cyclestr></datadep>
        <and>
        <or>
        <taskdep task="&RUN;_obsprep_lghtn_task"/>

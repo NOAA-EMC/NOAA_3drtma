@@ -86,9 +86,9 @@ if [ ${obsprep_lghtn} -eq 1 ] ; then
 
 # find lightning bufr file
 
-${LN} -sf ${COMINPREP}/rtma.${YYYYMMDD}/rtma.t${HH}z.lghtng.tm00.bufr_d ./rtma.t${cyc}z.lghtng.tm00.bufr_d
+${LN} -sf ${COMINPREP}/${NET}.${YYYYMMDD}/${NET}.t${HH}z.lghtng.tm00.bufr_d ./${NET}.t${cyc}z.lghtng.tm00.bufr_d
 
-${LN} -sf rtma.t${cyc}z.lghtng.tm00.bufr_d  lghtngbufr
+${LN} -sf ${NET}.t${cyc}z.lghtng.tm00.bufr_d  lghtngbufr
 
   echo ${PDY}${cyc} > ./lightning_cycle_date
 
@@ -139,7 +139,7 @@ postmsg "$jlogfile" "$msg"
 cpreq  ${DATA}/LightningInGSI.bufr ${DATA}/LightningInGSI_bufr.bufr
 lghtng_bufr="LightningInGSI_bufr.bufr"
 if [ -f ${DATA}/${lghtng_bufr} ] ; then
-  cpreq ${DATA}/${lghtng_bufr} ${COMINobsproc_rtma3d}/rtma.t${cyc}z.${lghtng_bufr}
+  cpreq ${DATA}/${lghtng_bufr} ${COMINobsproc_rtma3d}/${RUN}.t${cyc}z.${lghtng_bufr}
 else
   msg="WARNING $pgm terminated normally but ${DATA}/${lghtng_bufr} does NOT exist."
   ${ECHO} "$msg"
