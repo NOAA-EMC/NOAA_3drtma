@@ -116,9 +116,7 @@ ls -1r */*/* | awk '
 
            /envir/ { print "./"$0 > "perm2" ; next }
 
-           /.db/ { print "./"$0 > "perm2" ; next }
-              
-          /firstguess.nc/ { print "./"$0 > "perm2" ; next }'  
+           /.db/ { print "./"$0 > "perm2" ; next }'  
 
 ls -1r */*/* | awk '
 
@@ -126,12 +124,14 @@ ls -1r */*/* | awk '
 	    
             /obs.listing/ { print "./"$0 > "perm1" ; next }
 	    
+	    /firstguess.nc/ { print "./"$0 > "perm2" ; next }  
+     
             /fits/ { print "./"$0 > "perm2" ; next }
 	    
             /minimization/ { print "./"$0 > "perm2" ; next }
 
             /stn_analysis/ { print "./"$0 > "perm1" ; next }
-            
+  
 	    /OUTPUT/ { print "./"$0 > "2yr" ; next }'
 
 ls -1r */*/* | awk '
