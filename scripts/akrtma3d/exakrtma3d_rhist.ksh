@@ -22,35 +22,6 @@
 ################################################################3
 set -x
 
-#if [ $# -ne 2 ]
-#then
-#  echo "Usage: rhist_savertma.sh Directory Date(YYYYMMDDHH format) "
-#  exit 1
-#fi 
-
-#if [ $# -ne 3 ]
-#then
-#  echo "Usage: rhist_savertma.sh Directory Date(YYYYMMDDHH format) tarfile #"
-#  exit 1
-#fi
-
-#${USHrhist}/rhist_check.sh $1 $2
-#if [ $? -eq 0 ] ; then
-#    echo "Log entry found in $LOGrhist, skipped processing for: $0 $1 $2"
-#    exit 0
-#fi
-
-#
-#   Get directory to be tarred from the first command line argument,
-#   and check to make sure that the directory exists.
-#
-
-dir=$DATA
-if [ ! -d $dir ]
-then
-  echo "rhist_savertma.sh:  Directory $dir does not exist."
-  exit 2
-fi 
 
 export CHECK_HPSS_IDX="YES"
 #
@@ -111,27 +82,13 @@ ls -1r */* | awk '
 
             /rejectlist/ { print "./"$0 > "perm1" ; next }
 
-            /smarthrrrconus/ { print "./"$0 > "perm1" ; next }
-
-	    /smarthrrrak/ { print "./"$0 > "perm1" ; next }
-
             /prslev/ { print "./"$0 > "perm1" ; next }
 
             /natlev/ { print "./"$0 > "perm1" ; next }
 
             /howv/ { print "./"$0 > "perm1" ; next }
 
-            /grib2/ { print "./"$0 > "perm1" ; next }
-
-            /gust/ { print "./"$0 > "perm1" ; next }
-
-            /smartak/ { print "./"$0 > "perm1" ; next }
-
-            /wavebg/ { print "./"$0 > "perm1" ; next }
-
-	   /obs.listing/ { print "./"$0 > "perm1" ; next }
-
-           /stn_analysis/ { print "./"$0 > "perm1" ; next }'
+            /gust/ { print "./"$0 > "perm1" ; next }'
 
 ls -1r */*/* | awk '
 
@@ -149,8 +106,6 @@ ls -1r */*/* | awk '
 
             /filelist/ { print "./"$0 > "perm2" ; next }
 
-            /fits/ { print "./"$0 > "perm2" ; next }
-
             /wrf_inout/ { print "./"$0 > "perm2" ; next }
  
            /.stat/ { print "./"$0 > "perm2" ; next }
@@ -163,14 +118,20 @@ ls -1r */*/* | awk '
 
            /.db/ { print "./"$0 > "perm2" ; next }
            
-          /minimization/ { print "./"$0 > "perm2" ; next }
-           
           /firstguess.nc/ { print "./"$0 > "perm2" ; next }'  
 
 ls -1r */*/* | awk '
 
-            /stdout/ { print "./"$0 > "2yr" ; next }
+            /stdout/ { print "./"$0 > "2yr" ; next } 
+	    
+            /fits/ { print "./"$0 > "perm2" ; next }
+	    
+            /minimization/ { print "./"$0 > "perm2" ; next }
+	    
+            /obs.listing/ { print "./"$0 > "perm1" ; next }
 
+            /stn_analysis/ { print "./"$0 > "perm1" ; next }
+	    `
 	    /OUTPUT/ { print "./"$0 > "2yr" ; next }'
 
 export sync_list="perm1 perm2 2yr perm_hrrrdas"
@@ -184,7 +145,6 @@ do
 
       perm2)   hpssdir=$hpssdir0
               tarfile=com_akrtma3d_main_${PDYn1}_${cycm3}z-${cycm1}z.tar;;
-
 
       2yr)    hpssdir=$hpssdir2
 	      tarfile=com_akrtma3d_${PDYn1}_${cycm3}z-${cycm1}z.tar;;
@@ -219,6 +179,5 @@ do
    
 done
 
-#[[ $DRY_RUN_ONLY != "YES" ]] && ${USHrhist}/rhist_log.sh $1 $2   #MPondeca 30Jul2017
-#exit 0                                #MPondeca 30Jul2017
+
 
