@@ -497,16 +497,6 @@ def write_lists(input_list,fname):
   input_list.drop_duplicates(subset=keep_cols,inplace=True)
   input_list.to_csv(thisRUN+'.t'+cycle_HH+'z.'+ltyp+'_'+vars[var]+'_'+cyclestr+'.csv', index=False)
 
-  if ltyp!='accept':
-    out_file.write('********************************************************************************\n')
-    for index, row in input_list.iterrows():
-      if ltyp=='accept': line=str(row[0]).ljust(8)+"| itype="+str(row[3])+"  lat="+str("%.4f" %row[5]).rjust(10)+"  lon="+\
-        str("%.4f" %(row[6]-360)).rjust(10)+"  loc=US  origin: "+row[-1]+'\n'
-      elif ltyp=='reject': line="'"+str(row[0]).ljust(8)+"| itype="+str(row[3])+"  lat="+str("%.4f" %row[5]).rjust(10)+"  lon="+\
-        str("%.4f" %(row[6]-360)).rjust(10)+"  loc=US  origin: "+row[-1]+"'"+'\n'
-      out_file.write(line)
-    out_file.close()
-
 def write_wbias(input_file,fname):
   with open(fname,'w') as out_file:
     for prov in input_file['PROVIDER'].unique():
@@ -517,7 +507,7 @@ def write_wbias(input_file,fname):
         out_file.write('SUBPROVIDER: '+subprov+'\n')
         for index,row in input_file_subprov.iterrows():
           line=str(row[0]).ljust(8)+"| itype="+str(row[3])+"  lat="+str("%.4f" %row[4]).rjust(10)+"  lon="+\
-               str("%.4f" %(row[5]-360)).rjust(10)+"  loc=US  a="+str("%.4f" %row[8])+'\n'
+               str("%.4f" %(row[5]-360)).rjust(10)+"  loc=US  a="+str("%.4f" %row[7])+'\n'
           out_file.write(line)
         out_file.write('End of subprovider list\n')
       out_file.write('End of provider list\n')
