@@ -22,35 +22,6 @@
 ################################################################3
 set -x
 
-#if [ $# -ne 2 ]
-#then
-#  echo "Usage: rhist_savertma.sh Directory Date(YYYYMMDDHH format) "
-#  exit 1
-#fi 
-
-#if [ $# -ne 3 ]
-#then
-#  echo "Usage: rhist_savertma.sh Directory Date(YYYYMMDDHH format) tarfile #"
-#  exit 1
-#fi
-
-#${USHrhist}/rhist_check.sh $1 $2
-#if [ $? -eq 0 ] ; then
-#    echo "Log entry found in $LOGrhist, skipped processing for: $0 $1 $2"
-#    exit 0
-#fi
-
-#
-#   Get directory to be tarred from the first command line argument,
-#   and check to make sure that the directory exists.
-#
-
-dir=$DATA
-if [ ! -d $dir ]
-then
-  echo "rhist_savertma.sh:  Directory $dir does not exist."
-  exit 2
-fi 
 
 export CHECK_HPSS_IDX="YES"
 #
@@ -68,30 +39,6 @@ rhcycle=t${rhcyc}z
 hpssdir2=${HPSSOUT}/2year/rh${year}/${yearmo}/$yrmoday
 hpssdir0=${HPSSOUT}/rh${year}/${yearmo}/$yrmoday
 
-#
-#   Get a listing of all files in the directory to be tarred
-#   and break the file list up into groups of files.
-#   Each list of files names the contents of its associated tar file.
-#   Then cd to the directory to be tarred.
-# 
-#cyclist=t25z
-#if [ $rhcyc = "00" ]
-#then
-#   cyclist="t00z|t01z|t02z|t03z|t04z|t05z"
-#   endcyc=05
-#elif [ $rhcyc = "06" ]
-#then
-#   cyclist="t06z|t07z|t08z|t09z|t10z|t11z"
-#   endcyc=11
-#elif [ $rhcyc = "12" ]
-#then
-#   cyclist="t12z|t13z|t14z|t15z|t16z|t17z"
-#   endcyc=17
-#elif [ $rhcyc = "18" ]
-##then
- #  cyclist="t18z|t19z|t20z|t21z|t22z|t23z"
- #  endcyc=23
-#fi
 
    #Redefine cyclist to save single analysis files MPondeca/30Jul2017
    cyclist="${rhcyc}"                            #MPondeca/30Jul2017
