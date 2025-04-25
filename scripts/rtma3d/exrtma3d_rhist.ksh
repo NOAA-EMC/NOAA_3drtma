@@ -82,26 +82,14 @@ ls -1r */* | awk '
 
             /rejectlist/ { print "./"$0 > "perm1" ; next }
 
-            /smarthrrrconus/ { print "./"$0 > "perm1" ; next }
-
-	    /smarthrrrak/ { print "./"$0 > "perm1" ; next }
-
             /prslev/ { print "./"$0 > "perm1" ; next }
 
             /natlev/ { print "./"$0 > "perm1" ; next }
 
             /howv/ { print "./"$0 > "perm1" ; next }
 
-            /gust/ { print "./"$0 > "perm1" ; next }
-
-            /smartak/ { print "./"$0 > "perm1" ; next }
-
-            /wavebg/ { print "./"$0 > "perm1" ; next }
-
-	   /obs.listing/ { print "./"$0 > "perm1" ; next }
-
-           /stn_analysis/ { print "./"$0 > "perm1" ; next }'
-
+            /gust/ { print "./"$0 > "perm1" ; next }'
+ 
 ls -1r */*/* | awk '
 
             /prepbufr/ { print "./"$0 > "perm2" ; next }
@@ -118,8 +106,6 @@ ls -1r */*/* | awk '
 
             /filelist/ { print "./"$0 > "perm2" ; next }
 
-            /fits/ { print "./"$0 > "perm2" ; next }
-
             /wrf_inout/ { print "./"$0 > "perm2" ; next }
  
            /.stat/ { print "./"$0 > "perm2" ; next }
@@ -131,15 +117,21 @@ ls -1r */*/* | awk '
            /envir/ { print "./"$0 > "perm2" ; next }
 
            /.db/ { print "./"$0 > "perm2" ; next }
-           
-          /minimization/ { print "./"$0 > "perm2" ; next }
-           
+              
           /firstguess.nc/ { print "./"$0 > "perm2" ; next }'  
 
 ls -1r */*/* | awk '
 
             /stdout/ { print "./"$0 > "2yr" ; next }
+	    
+            /obs.listing/ { print "./"$0 > "perm1" ; next }
+	    
+            /fits/ { print "./"$0 > "perm2" ; next }
+	    
+            /minimization/ { print "./"$0 > "perm2" ; next }
 
+            /stn_analysis/ { print "./"$0 > "perm1" ; next }
+            
 	    /OUTPUT/ { print "./"$0 > "2yr" ; next }'
 
 ls -1r */*/* | awk '
@@ -158,7 +150,6 @@ do
 
       perm2)   hpssdir=$hpssdir0
               tarfile=com_rtma3d_main_${PDYn1}_${cycm3}z-${cycm1}z.tar;;
-
 
       2yr)    hpssdir=$hpssdir2
 	      tarfile=com_rtma3d_${PDYn1}_${cycm3}z-${cycm1}z.tar;;
