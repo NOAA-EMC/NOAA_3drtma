@@ -656,7 +656,7 @@ if __name__ == "__main__":
   datestr=dateobj[0:8]
   cycle_HH=dateobj[8:10]
   HHm1=cyclestr_m1[8:10]
-  cyc_purge=datetime.strptime(cyclestr,'%Y%m%d%H')+timedelta(days=-14)
+  cyc_purge=datetime.strptime(cyclestr,'%Y%m%d%H')+timedelta(days=-7)
 
   epochcyc=datetime.strptime(str(197001010000),'%Y%m%d%H%M')
 
@@ -723,12 +723,12 @@ if __name__ == "__main__":
   rjstd_wdir=90. # Degrees
   rjbias_wdir=40. # Degrees
 
-  keep_cols=['SAID','PROVIDER','SUBPROVIDER','PBUFTYP','LAT','LON','HGHT','VMAP']
+  keep_cols=['SAID','PROVIDER','SUBPROVIDER','PBUFTYP','LAT','LON','VMAP']
   columns=keep_cols.copy()
 
 #  ndays_purge = math.ceil((999-len(keep_cols))/((1.+24./num_cycs)*5.))-1. # Account for current day by subtracting 1
 #  cyc_purge_stats=datetime.strptime(cyclestr,'%Y%m%d%H')+timedelta(days=-ndays_purge)
-  cyc_purge_stats=datetime.strptime(cyclestr,'%Y%m%d%H')+timedelta(days=-14)
+  cyc_purge_stats=datetime.strptime(cyclestr,'%Y%m%d%H')+timedelta(days=-7)
   cyc_purge_dups=datetime.strptime(cyclestr,'%Y%m%d%H')+timedelta(days=-7)
 
   diagdir=DATA
