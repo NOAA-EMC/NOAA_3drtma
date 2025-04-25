@@ -131,74 +131,65 @@ ln -sf  $COMOUThrrrdas_rtma3dm2 $DATA/$PDYm2
 ln -sf  $COMOUThrrrdas_rtma3dm3 $DATA/$PDYm3
 
 
-ls -1r */*/* | awk '
+ls -1r */* | awk '
 
-            /prepbufr/ { print "./"$0 > "perm" ; next }
+            /rejectlist/ { print "./"$0 > "perm1" ; next }
 
-	    /bufr/ { print "./"$0 > "perm" ; next }
+            /smarthrrrconus/ { print "./"$0 > "perm1" ; next }
 
-            /grib2/ { print "./"$0 > "perm" ; next }
+	    /smarthrrrak/ { print "./"$0 > "perm1" ; next }
 
-	    /grb2/ { print "./"$0 > "perm" ; next }
+            /prslev/ { print "./"$0 > "perm1" ; next }
 
-            /rejectlist/ { print "./"$0 > "perm" ; next }
+            /natlev/ { print "./"$0 > "perm1" ; next }
 
-	    /NASALaRCCloudInGSI/ { print "./"$0 > "perm" ; next }
+            /howv/ { print "./"$0 > "perm1" ; next }
 
-            /NSSLRefInGSI/ { print "./"$0 > "perm" ; next }
+            /gust/ { print "./"$0 > "perm1" ; next }
 
-            /LightningInGSI.bufr/ { print "./"$0 > "perm" ; next }
+            /smartak/ { print "./"$0 > "perm1" ; next }
 
-            /satwnd/ { print "./"$0 > "perm" ; next }
+            /wavebg/ { print "./"$0 > "perm1" ; next }
 
-	    /nexrad/ { print "./"$0 > "perm" ; next }
+	   /obs.listing/ { print "./"$0 > "perm1" ; next }
 
-	    /firstguess.nc/ { print "./"$0 > "perm" ; next }
-           
-            /subhprs/ { print "./"$0 > "perm" ; next } 
-
-            /subhnat/ { print "./"$0 > "perm" ; next }
-           
-            /smarthrrrconus/ { print "./"$0 > "perm" ; next }
-
-	    /smarthrrrak/ { print "./"$0 > "perm" ; next }
-
-            /smartak/ { print "./"$0 > "perm" ; next }
-
-            /wavebg/ { print "./"$0 > "perm" ; next }
-
-	    /multi_1/ { print "./"$0 > "perm" ; next }
-       
-       	    /ww3/ { print "./"$0 > "perm" ; next }
-
-	    /minimization/ { print "./"$0 > "perm" ; next }
-
-            /gsiparm.anl/ { print "./"$0 > "perm" ; next }
-
-            /diag/  { print "./"$0 > "perm" ; next }
-
-           /.stat/ { print "./"$0 > "perm" ; next } 
-
-           /.csv/ { print "./"$0 > "perm" ; next }
-
-           /.txt/ { print "./"$0 > "perm" ; next } 
-
-           /envir/ { print "./"$0 > "perm" ; next } 
-
-           /.db/ { print "./"$0 > "perm" ; next }
-
-	   /obs.listing/ { print "./"$0 > "perm" ; next }
-
-           /stn_analysis/ { print "./"$0 > "perm" ; next }
-
-           /envir.sh/ { print "./"$0 > "perm" ; next }
-           
-           /firstguess.nc/ { print "./"$0 > "perm" ; next }'
-
+           /stn_analysis/ { print "./"$0 > "perm1" ; next }'
 
 ls -1r */*/* | awk '
 
-            /fits/ { print "./"$0 > "2yr" ; next }
+            /prepbufr/ { print "./"$0 > "perm2" ; next }
+
+            /bufr/ { print "./"$0 > "perm2" ; next }
+
+            /grib2/ { print "./"$0 > "perm2" ; next }
+
+            /grb2/ { print "./"$0 > "perm2" ; next }
+
+            /diag/  { print "./"$0 > "perm2" ; next }
+
+           /gsiparm.anl/ { print "./"$0 > "perm2" ; next }
+
+            /filelist/ { print "./"$0 > "perm2" ; next }
+
+            /fits/ { print "./"$0 > "perm2" ; next }
+
+            /wrf_inout/ { print "./"$0 > "perm2" ; next }
+ 
+           /.stat/ { print "./"$0 > "perm2" ; next }
+
+           /.csv/ { print "./"$0 > "perm2" ; next }
+
+           /.txt/ { print "./"$0 > "perm2" ; next }
+
+           /envir/ { print "./"$0 > "perm2" ; next }
+
+           /.db/ { print "./"$0 > "perm2" ; next }
+           
+          /minimization/ { print "./"$0 > "perm2" ; next }
+           
+          /firstguess.nc/ { print "./"$0 > "perm2" ; next }'  
+
+ls -1r */*/* | awk '
 
             /stdout/ { print "./"$0 > "2yr" ; next }
 
@@ -209,20 +200,24 @@ ls -1r */*/* | awk '
             /hrrrdas_small/ { print "./"$0 > "perm_hrrrdas" ; next }'
 
 
-export sync_list="perm 2yr perm_hrrrdas"
+export sync_list="perm1 perm2 2yr perm_hrrrdas"
 
 for file in ${sync_list}
 do
 
    case $file in
-      perm)   hpssdir=$hpssdir0
-	      tarfile=com_rtma3d_${PDY}_${cycm3}z-${cycm1}z.tar;;
+      perm1)   hpssdir=$hpssdir0
+	      tarfile=com_rtma3d_prdgen_${PDYn1}_${cycm3}z-${cycm1}z.tar;;
+
+      perm2)   hpssdir=$hpssdir0
+              tarfile=com_rtma3d_main_${PDYn1}_${cycm3}z-${cycm1}z.tar;;
+
 
       2yr)    hpssdir=$hpssdir2
-	      tarfile=com_rtma3d_${PDY}_${cycm3}z-${cycm1}z.tar;;
+	      tarfile=com_rtma3d_${PDYn1}_${cycm3}z-${cycm1}z.tar;;
 
       perm_hrrrdas) hpssdir=$hpssdir0
-              tarfile=com_rtma3d_hrrrdas_${PDY}_${cycm3}z-${cycm1}z.tar;;
+              tarfile=com_rtma3d_hrrrdas_${PDYn1}_${cycm3}z-${cycm1}z.tar;;
    esac
 
    if [[ $CHECK_HPSS_IDX == "YES" ]] ; then
