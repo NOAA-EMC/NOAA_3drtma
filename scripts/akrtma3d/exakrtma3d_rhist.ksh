@@ -128,10 +128,10 @@ do
 
    case $file in
       perm)   hpssdir=$hpssdir0
-              tarfile=com_akrtma3d_main_${PDYn1}_${cycm3}z-${cycm1}z.tar;;
+              tarfile=com_akrtma3d_${PDYn1}_${cycm3}z-${cycm1}z.tar;;
 
       2yr)    hpssdir=$hpssdir2
-	      tarfile=com_akrtma3d_2yr_${PDYn1}_${cycm3}z-${cycm1}z.tar;;
+	      tarfile=com_akrtma3d_${PDYn1}_${cycm3}z-${cycm1}z.tar;;
    esac
 
    if [[ $CHECK_HPSS_IDX == "YES" ]] ; then
