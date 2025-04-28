@@ -122,15 +122,15 @@ ls -1r */*/* | awk '
 
             /stdout/ { print "./"$0 > "2yr" ; next } 
 	    
-            /fits/ { print "./"$0 > "perm2" ; next }
+            /fits/ { print "./"$0 > "2yr" ; next }
 	    
-            /minimization/ { print "./"$0 > "perm2" ; next }
+            /minimization/ { print "./"$0 > "2yr" ; next }
 	    
-            /obs.listing/ { print "./"$0 > "perm1" ; next }
+            /obs.listing/ { print "./"$0 > "2yr" ; next }
 
-            /stn_analysis/ { print "./"$0 > "perm1" ; next }
+            /stn_analysis/ { print "./"$0 > "2yr" ; next }
 	    
-            /firstguess.nc/ { print "./"$0 > "perm2" ; next } 
+            /firstguess.nc/ { print "./"$0 > "2yr" ; next } 
 `
 	    /OUTPUT/ { print "./"$0 > "2yr" ; next }'
 
