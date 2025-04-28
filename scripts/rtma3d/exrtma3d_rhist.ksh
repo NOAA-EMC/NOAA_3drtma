@@ -133,10 +133,10 @@ do
 
    case $file in
       perm)   hpssdir=$hpssdir0
-              tarfile=com_rtma3d_main_${PDYn1}_${cycm3}z-${cycm1}z.tar;;
+              tarfile=com_rtma3d_${PDYn1}_${cycm3}z-${cycm1}z.tar;;
 
       2yr)    hpssdir=$hpssdir2
-	      tarfile=com_rtma3d_2yr_${PDYn1}_${cycm3}z-${cycm1}z.tar;;
+	      tarfile=com_rtma3d_${PDYn1}_${cycm3}z-${cycm1}z.tar;;
 
       perm_hrrrdas) hpssdir=$hpssdir0
               tarfile=com_rtma3d_hrrrdas_${PDYn1}_${cycm3}z-${cycm1}z.tar;;
