@@ -45,9 +45,9 @@ hpssdir0=${HPSSOUT}/rh${year}/${yearmo}/$yrmoday
 
 cd $DATA
 
-cp $COMINm1/rtma3d.${cyclem1}.* $DATA/$PDYm1
-cp $COMINm2/rtma3d.${cyclem2}.* $DATA/$PDYm2
-cp $COMINm3/rtma3d.${cyclem3}.* $DATA/$PDYm3
+cp $COMINm1/rtma3d.${cyclem1}.* $DATA/$PDYm1/prdgen.${cyclem1}
+cp $COMINm2/rtma3d.${cyclem2}.* $DATA/$PDYm2/prdgen.${cyclem2}
+cp $COMINm3/rtma3d.${cyclem3}.* $DATA/$PDYm3/prdgen.${cyclem3}
 
 ln -sf  $COMINobsproc_rtma3dm1 $DATA/$PDYm1
 ln -sf  $COMINobsproc_rtma3dm2 $DATA/$PDYm2
@@ -76,47 +76,38 @@ ln -sf  $COMOUTautoqc_rtma3dm3 $DATA/$PDYm3
 ln -sf  $COMOUThrrrdas_rtma3dm1 $DATA/$PDYm1
 ln -sf  $COMOUThrrrdas_rtma3dm2 $DATA/$PDYm2
 ln -sf  $COMOUThrrrdas_rtma3dm3 $DATA/$PDYm3
-
-
-ls -1r */* | awk '
-
-            /rejectlist/ { print "./"$0 > "perm1" ; next }
-
-            /prslev/ { print "./"$0 > "perm1" ; next }
-
-            /natlev/ { print "./"$0 > "perm1" ; next }
-
-            /howv/ { print "./"$0 > "perm1" ; next }
-
-            /gust/ { print "./"$0 > "perm1" ; next }'
  
 ls -1r */*/* | awk '
 
-            /prepbufr/ { print "./"$0 > "perm2" ; next }
+            /prepbufr/ { print "./"$0 > "perm" ; next }
 
-            /bufr/ { print "./"$0 > "perm2" ; next }
+            /bufr/ { print "./"$0 > "perm" ; next }
 
-            /grib2/ { print "./"$0 > "perm2" ; next }
+            /grib2/ { print "./"$0 > "perm" ; next }
 
-            /grb2/ { print "./"$0 > "perm2" ; next }
+            /grb2/ { print "./"$0 > "perm" ; next }
 
-            /diag/  { print "./"$0 > "perm2" ; next }
+            /diag/  { print "./"$0 > "perm" ; next }
 
-           /gsiparm.anl/ { print "./"$0 > "perm2" ; next }
+           /gsiparm.anl/ { print "./"$0 > "perm" ; next }
 
-            /filelist/ { print "./"$0 > "perm2" ; next }
+            /filelist/ { print "./"$0 > "perm" ; next }
 
-            /wrf_inout/ { print "./"$0 > "perm2" ; next }
+            /wrf_inout/ { print "./"$0 > "perm" ; next }
+
+           /stn_analysis/ { print "./"$0 > "perm" ; next }
+
+           /firstguess.nc/ { print "./"$0 > "perm" ; next }  
  
-           /.stat/ { print "./"$0 > "perm2" ; next }
+           /.stat/ { print "./"$0 > "perm" ; next }
 
-           /.csv/ { print "./"$0 > "perm2" ; next }
+           /.csv/ { print "./"$0 > "perm" ; next }
 
-           /.txt/ { print "./"$0 > "perm2" ; next }
+           /.txt/ { print "./"$0 > "perm" ; next }
 
-           /envir/ { print "./"$0 > "perm2" ; next }
+           /envir/ { print "./"$0 > "perm" ; next }
 
-           /.db/ { print "./"$0 > "perm2" ; next }'  
+           /.db/ { print "./"$0 > "perm" ; next }'  
 
 ls -1r */*/* | awk '
 
@@ -124,14 +115,10 @@ ls -1r */*/* | awk '
 	    
             /obs.listing/ { print "./"$0 > "2yr" ; next }
 	    
-	    /firstguess.nc/ { print "./"$0 > "2yr" ; next }  
-     
             /fits/ { print "./"$0 > "2yr" ; next }
 	    
             /minimization/ { print "./"$0 > "2yr" ; next }
 
-            /stn_analysis/ { print "./"$0 > "2yr" ; next }
-  
 	    /OUTPUT/ { print "./"$0 > "2yr" ; next }'
 
 ls -1r */*/* | awk '
@@ -139,20 +126,17 @@ ls -1r */*/* | awk '
             /hrrrdas_small/ { print "./"$0 > "perm_hrrrdas" ; next }'
 
 
-export sync_list="perm1 perm2 2yr perm_hrrrdas"
+export sync_list="perm 2yr perm_hrrrdas"
 
 for file in ${sync_list}
 do
 
    case $file in
-      perm1)   hpssdir=$hpssdir0
-	      tarfile=com_rtma3d_prdgen_${PDYn1}_${cycm3}z-${cycm1}z.tar;;
-
-      perm2)   hpssdir=$hpssdir0
+      perm)   hpssdir=$hpssdir0
               tarfile=com_rtma3d_main_${PDYn1}_${cycm3}z-${cycm1}z.tar;;
 
       2yr)    hpssdir=$hpssdir2
-	      tarfile=com_rtma3d_${PDYn1}_${cycm3}z-${cycm1}z.tar;;
+	      tarfile=com_rtma3d_2yr_${PDYn1}_${cycm3}z-${cycm1}z.tar;;
 
       perm_hrrrdas) hpssdir=$hpssdir0
               tarfile=com_rtma3d_hrrrdas_${PDYn1}_${cycm3}z-${cycm1}z.tar;;
@@ -186,7 +170,4 @@ do
 #rm  ${DATA}/$file                     #MPondeca 30Jul2017
    
 done
-
-#[[ $DRY_RUN_ONLY != "YES" ]] && ${USHrhist}/rhist_log.sh $1 $2   #MPondeca 30Jul2017
-#exit 0                                #MPondeca 30Jul2017
 
