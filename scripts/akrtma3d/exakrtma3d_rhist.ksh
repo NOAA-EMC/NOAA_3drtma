@@ -138,7 +138,8 @@ do
               tarfile=com_akrtma3d_${tarcyc}_${cycm3}z-${cycm1}z.tar;;
 
       2yr)    hpssdir=$hpssdir2
-	      tarfile=com_akrtma3d_${tarcyc}_${cycm3}z-${cycm1}z.tar;;
+	            tarfile=com_akrtma3d_${tarcyc}_${cycm3}z-${cycm1}z.tar;;
+
    esac
 
    if [[ $CHECK_HPSS_IDX == "YES" ]] ; then

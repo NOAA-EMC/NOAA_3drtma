@@ -497,16 +497,6 @@ def write_lists(input_list,fname):
   input_list.drop_duplicates(subset=keep_cols,inplace=True)
   input_list.to_csv(thisRUN+'.t'+cycle_HH+'z.'+ltyp+'_'+vars[var]+'_'+cyclestr+'.csv', index=False)
 
-  if ltyp!='accept':
-    out_file.write('********************************************************************************\n')
-    for index, row in input_list.iterrows():
-      if ltyp=='accept': line=str(row[0]).ljust(8)+"| itype="+str(row[3])+"  lat="+str("%.4f" %row[5]).rjust(10)+"  lon="+\
-        str("%.4f" %(row[6]-360)).rjust(10)+"  loc=US  origin: "+row[-1]+'\n'
-      elif ltyp=='reject': line="'"+str(row[0]).ljust(8)+"| itype="+str(row[3])+"  lat="+str("%.4f" %row[5]).rjust(10)+"  lon="+\
-        str("%.4f" %(row[6]-360)).rjust(10)+"  loc=US  origin: "+row[-1]+"'"+'\n'
-      out_file.write(line)
-    out_file.close()
-
 def write_wbias(input_file,fname):
   with open(fname,'w') as out_file:
     for prov in input_file['PROVIDER'].unique():
@@ -517,7 +507,7 @@ def write_wbias(input_file,fname):
         out_file.write('SUBPROVIDER: '+subprov+'\n')
         for index,row in input_file_subprov.iterrows():
           line=str(row[0]).ljust(8)+"| itype="+str(row[3])+"  lat="+str("%.4f" %row[4]).rjust(10)+"  lon="+\
-               str("%.4f" %(row[5]-360)).rjust(10)+"  loc=US  a="+str("%.4f" %row[8])+'\n'
+               str("%.4f" %(row[5]-360)).rjust(10)+"  loc=US  a="+str("%.4f" %row[7])+'\n'
           out_file.write(line)
         out_file.write('End of subprovider list\n')
       out_file.write('End of provider list\n')
@@ -656,7 +646,7 @@ if __name__ == "__main__":
   datestr=dateobj[0:8]
   cycle_HH=dateobj[8:10]
   HHm1=cyclestr_m1[8:10]
-  cyc_purge=datetime.strptime(cyclestr,'%Y%m%d%H')+timedelta(days=-14)
+  cyc_purge=datetime.strptime(cyclestr,'%Y%m%d%H')+timedelta(days=-7)
 
   epochcyc=datetime.strptime(str(197001010000),'%Y%m%d%H%M')
 
@@ -723,12 +713,12 @@ if __name__ == "__main__":
   rjstd_wdir=90. # Degrees
   rjbias_wdir=40. # Degrees
 
-  keep_cols=['SAID','PROVIDER','SUBPROVIDER','PBUFTYP','LAT','LON','HGHT','VMAP']
+  keep_cols=['SAID','PROVIDER','SUBPROVIDER','PBUFTYP','LAT','LON','VMAP']
   columns=keep_cols.copy()
 
 #  ndays_purge = math.ceil((999-len(keep_cols))/((1.+24./num_cycs)*5.))-1. # Account for current day by subtracting 1
 #  cyc_purge_stats=datetime.strptime(cyclestr,'%Y%m%d%H')+timedelta(days=-ndays_purge)
-  cyc_purge_stats=datetime.strptime(cyclestr,'%Y%m%d%H')+timedelta(days=-14)
+  cyc_purge_stats=datetime.strptime(cyclestr,'%Y%m%d%H')+timedelta(days=-7)
   cyc_purge_dups=datetime.strptime(cyclestr,'%Y%m%d%H')+timedelta(days=-7)
 
   diagdir=DATA
