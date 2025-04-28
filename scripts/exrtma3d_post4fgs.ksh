@@ -285,7 +285,6 @@ cp ${RUN}.t${cyc}z.fgs_natlev.grib2.idx $COMOUT/
   sed -n -e '145,160p' prslev.txt > ${domain}_prslev_10.txt
   sed -n -e '161,176p' prslev.txt > ${domain}_prslev_11.txt
   sed -n -e '177,192p' prslev.txt > ${domain}_prslev_12.txt
-  sed -n -e '177,192p' prslev.txt > ${domain}_prslev_12.txt
   sed -n -e '193,208p' prslev.txt > ${domain}_prslev_13.txt
   sed -n -e '209,224p' prslev.txt > ${domain}_prslev_14.txt
   sed -n -e '225,240p' prslev.txt > ${domain}_prslev_15.txt
