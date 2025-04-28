@@ -52,6 +52,12 @@ cd $DATA
   export cyclem2=${cyclem2:-t${cycm2}z}
   export cyclem3=${cyclem3:-t${cycm3}z}
 
+  #temporary storage directories for rhist
+
+  mkdir -p $DATA/$PDYm1/prdgen.${cyclem1}
+  mkdir -p $DATA/$PDYm2/prdgen.${cyclem2}
+  mkdir -p $DATA/$PDYm3/prdgen.${cyclem3}
+  
   export pgmout=${pgmout:-"OUTPUT.${PDY}${cyc}.${jobid}"}
 
 
