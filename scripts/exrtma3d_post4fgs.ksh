@@ -228,9 +228,144 @@ if [ ! -s "${workdir}/wrfsubhnat_fgs.grib2" ]; then
 fi
 
 # transfer the output grib2 files to $COMOUTpost_rtma3d
+# add gust and howv (wave height) to the prslev and natlev files
+# change name from surface gust to 10-m gust
+
+# Note: NET should be RUN - AMG
+${WGRIB2} -V ${COMOUT}/${NET}.t${cyc}z.fgs.gust.grib2 -set_lev "10 m above ground" -grib tmpgust.grib2
+if [ "${RUN}" == "rtma3d" ]; then
+  cat tmpgust.grib2 ${COMOUT}/${NET}.t${cyc}z.fgs.howv.grib2 >> ${workdir}/wrfsubhprs_fgs.grib2
+  cat tmpgust.grib2 ${COMOUT}/${NET}.t${cyc}z.fgs.howv.grib2 >> ${workdir}/wrfsubhnat_fgs.grib2
+else
+  cat tmpgust.grib2  >> ${workdir}/wrfsubhprs_fgs.grib2
+  cat tmpgust.grib2  >> ${workdir}/wrfsubhnat_fgs.grib2
+fi
 
 ${WGRIB2} ${workdir}/wrfsubhprs_fgs.grib2 -set center 7 -grib ${COMOUTpost_rtma3d}/${PROD_HEAD2}.wrfsubhprs_fgs.grib2
 ${WGRIB2} ${workdir}/wrfsubhnat_fgs.grib2 -set center 7 -grib ${COMOUTpost_rtma3d}/${PROD_HEAD2}.wrfsubhnat_fgs.grib2
+${WGRIB2} ${workdir}/wrfsubhprs_fgs.grib2 -set center 7 -grib ${COMOUT}/${PROD_HEAD2}.fgs_prslev.grib2
+${WGRIB2} ${workdir}/wrfsubhnat_fgs.grib2 -set center 7 -grib ${COMOUT}/${PROD_HEAD2}.fgs_natlev.grib2
+# Create index file
+wgrib2 ${COMOUT}/${RUN}.t${cyc}z.fgs_prslev.grib2 -s > ${RUN}.t${cyc}z.fgs_prslev.grib2.idx
+wgrib2 ${COMOUT}/${RUN}.t${cyc}z.fgs_natlev.grib2 -s > ${RUN}.t${cyc}z.fgs_natlev.grib2.idx
+cp ${RUN}.t${cyc}z.fgs_prslev.grib2.idx $COMOUT/
+cp ${RUN}.t${cyc}z.fgs_natlev.grib2.idx $COMOUT/
+
+
+# parallel processing
+
+  wgrib2 ${COMIN}/${RUN}.t${cyc}z.fgs_prslev.grib2 -not_if ":GUST:surface:" -grib ${RUN}.t${cyc}z.fgs_prslev.grib2_no_sfcgust
+# Note: NET should be RUN - AMG 
+  if [ "${RUN}" == "akrtma3d" ]; then
+    cat ${COMOUT}/${NET}.t${cyc}z.fgs.howv.grib2 >> ${RUN}.t${cyc}z.fgs_prslev.grib2_no_sfcgust 
+  fi
+  infile_prslev=${workdir}/${RUN}.t${cyc}z.fgs_prslev.grib2_no_sfcgust
+# infile_prslev=${DATA}/${RUN}.t${cyc}z.fgs_prslev.grib2
+##infile_prslev=${COMIN}/${RUN}.t${cyc}z.fgs_prslev.grib2
+  wgrib2 ${infile_prslev} > prslev.txt
+
+  if [ "${RUN}" == "rtma3d" ]; then
+    domain="conus"
+  else
+    domain="alaska"
+  fi
+
+# Create parm files for subsetting on the fly 
+# 48 subpieces for CONUS or Alaska prslev and natlev files
+
+  sed -n -e '1,15p' prslev.txt > ${domain}_prslev_1.txt
+  sed -n -e '16,31p' prslev.txt > ${domain}_prslev_2.txt
+  sed -n -e '32,48p' prslev.txt > ${domain}_prslev_3.txt
+  sed -n -e '49,64p' prslev.txt > ${domain}_prslev_4.txt
+  sed -n -e '65,80p' prslev.txt > ${domain}_prslev_5.txt
+  sed -n -e '81,96p' prslev.txt > ${domain}_prslev_6.txt
+  sed -n -e '97,112p' prslev.txt > ${domain}_prslev_7.txt
+  sed -n -e '113,128p' prslev.txt > ${domain}_prslev_8.txt
+  sed -n -e '129,144p' prslev.txt > ${domain}_prslev_9.txt
+  sed -n -e '145,160p' prslev.txt > ${domain}_prslev_10.txt
+  sed -n -e '161,176p' prslev.txt > ${domain}_prslev_11.txt
+  sed -n -e '177,192p' prslev.txt > ${domain}_prslev_12.txt
+  sed -n -e '177,192p' prslev.txt > ${domain}_prslev_12.txt
+  sed -n -e '193,208p' prslev.txt > ${domain}_prslev_13.txt
+  sed -n -e '209,224p' prslev.txt > ${domain}_prslev_14.txt
+  sed -n -e '225,240p' prslev.txt > ${domain}_prslev_15.txt
+  sed -n -e '241,256p' prslev.txt > ${domain}_prslev_16.txt
+  sed -n -e '257,272p' prslev.txt > ${domain}_prslev_17.txt
+  sed -n -e '273,288p' prslev.txt > ${domain}_prslev_18.txt
+  sed -n -e '289,304p' prslev.txt > ${domain}_prslev_19.txt
+  sed -n -e '305,320p' prslev.txt > ${domain}_prslev_20.txt
+  sed -n -e '321,336p' prslev.txt > ${domain}_prslev_21.txt
+  sed -n -e '337,352p' prslev.txt > ${domain}_prslev_22.txt
+  sed -n -e '353,368p' prslev.txt > ${domain}_prslev_23.txt
+  sed -n -e '369,384p' prslev.txt > ${domain}_prslev_24.txt
+  sed -n -e '385,400p' prslev.txt > ${domain}_prslev_25.txt
+  sed -n -e '401,416p' prslev.txt > ${domain}_prslev_26.txt
+  sed -n -e '417,432p' prslev.txt > ${domain}_prslev_27.txt
+  sed -n -e '433,448p' prslev.txt > ${domain}_prslev_28.txt
+  sed -n -e '449,463p' prslev.txt > ${domain}_prslev_29.txt
+  sed -n -e '464,479p' prslev.txt > ${domain}_prslev_30.txt
+  sed -n -e '480,495p' prslev.txt > ${domain}_prslev_31.txt
+  sed -n -e '496,512p' prslev.txt > ${domain}_prslev_32.txt
+  sed -n -e '513,528p' prslev.txt > ${domain}_prslev_33.txt
+  sed -n -e '529,544p' prslev.txt > ${domain}_prslev_34.txt
+  sed -n -e '545,560p' prslev.txt > ${domain}_prslev_35.txt
+  sed -n -e '561,576p' prslev.txt > ${domain}_prslev_36.txt
+  sed -n -e '577,593p' prslev.txt > ${domain}_prslev_37.txt
+  sed -n -e '594,609p' prslev.txt > ${domain}_prslev_38.txt
+  sed -n -e '610,625p' prslev.txt > ${domain}_prslev_39.txt
+  sed -n -e '626,641p' prslev.txt > ${domain}_prslev_40.txt
+  sed -n -e '642,657p' prslev.txt > ${domain}_prslev_41.txt
+  sed -n -e '658,673p' prslev.txt > ${domain}_prslev_42.txt
+  sed -n -e '674,689p' prslev.txt > ${domain}_prslev_43.txt
+  sed -n -e '690,705p' prslev.txt > ${domain}_prslev_44.txt
+  sed -n -e '706,721p' prslev.txt > ${domain}_prslev_45.txt
+  sed -n -e '722,737p' prslev.txt > ${domain}_prslev_46.txt
+  sed -n -e '738,753p' prslev.txt > ${domain}_prslev_47.txt
+  sed -n -e '754,$p' prslev.txt > ${domain}_prslev_48.txt
+
+  tasks=(48)
+# domain=conus
+  count=0
+# for leveltype in prslev
+  for leveltype in prslev
+  do
+    for task in $(seq ${tasks[count]})
+    do
+      if [ "${leveltype}" = "prslev" ]; then
+        infile=${infile_prslev}
+      else
+        infile=${infile_natlev}
+      fi
+      mkdir -p ${workdir}/prdgen_${domain}_${leveltype}_${task}
+      echo "$USHrtma3d/${RUN}/${RUN}_prdgen_subpiece.sh $cyc $task $domain ${infile} ${workdir} ${COMOUT} ${leveltype} " >> ${workdir}/poescript
+    done
+    count=$count+1
+  done
+
+  chmod 775 ${workdir}/poescript
+
+# Execute the script
+  export CMDFILE=${workdir}/poescript
+  mpiexec -np 48 --cpu-bind core cfp $CMDFILE >>$pgmout 2>errfile
+  export err=$?; err_chk
+
+# reassemble the output grids
+  tasks=(48)
+# domain=conus
+  count=0
+# for leveltype in prslev
+  for leveltype in prslev
+  do
+    for task in $(seq ${tasks[count]})
+    do
+      cat ${workdir}/prdgen_${domain}_${leveltype}_${task}/${domain}_${leveltype}_${task}.grib2 >> ${RUN}.t${cyc}z.fgs_${leveltype}_ndfd.grib2
+    done
+    count=$count+1
+
+    wgrib2 ${RUN}.t${cyc}z.fgs_${leveltype}_ndfd.grib2 -s > ${RUN}.t${cyc}z.fgs_${leveltype}_ndfd.grib2.idx
+    cpreq ${RUN}.t${cyc}z.fgs_${leveltype}_ndfd.grib2 ${COMOUT}/${RUN}.t${cyc}z.fgs_${leveltype}_ndfd.grib2
+    cpreq ${RUN}.t${cyc}z.fgs_${leveltype}_ndfd.grib2.idx ${COMOUT}/${RUN}.t${cyc}z.fgs_${leveltype}_ndfd.grib2.idx
+  done
 
 #================================================================================#
   ${RM} -f  ${workdir}/wrfsubh???_fgs.grib2

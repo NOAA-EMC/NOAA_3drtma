@@ -1319,7 +1319,7 @@
   </task>
 
 
-  <task name="&RUN;_updatevars_task" cycledefs="hourly" maxtries="1">
+  <task name="&RUN;_updatevars_task" cycledefs="hourly" maxtries="&maxtries;">
 
     &ENVARS;
     &UPDATEVARS_RESOURCES;
