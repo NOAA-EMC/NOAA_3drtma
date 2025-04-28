@@ -22,35 +22,6 @@
 ################################################################3
 set -x
 
-#if [ $# -ne 2 ]
-#then
-#  echo "Usage: rhist_savertma.sh Directory Date(YYYYMMDDHH format) "
-#  exit 1
-#fi 
-
-#if [ $# -ne 3 ]
-#then
-#  echo "Usage: rhist_savertma.sh Directory Date(YYYYMMDDHH format) tarfile #"
-#  exit 1
-#fi
-
-#${USHrhist}/rhist_check.sh $1 $2
-#if [ $? -eq 0 ] ; then
-#    echo "Log entry found in $LOGrhist, skipped processing for: $0 $1 $2"
-#    exit 0
-#fi
-
-#
-#   Get directory to be tarred from the first command line argument,
-#   and check to make sure that the directory exists.
-#
-
-dir=$DATA
-if [ ! -d $dir ]
-then
-  echo "rhist_savertma.sh:  Directory $dir does not exist."
-  exit 2
-fi 
 
 export CHECK_HPSS_IDX="YES"
 #
@@ -68,39 +39,15 @@ rhcycle=t${rhcyc}z
 hpssdir2=${HPSSOUT}/2year/rh${year}/${yearmo}/$yrmoday
 hpssdir0=${HPSSOUT}/rh${year}/${yearmo}/$yrmoday
 
-#
-#   Get a listing of all files in the directory to be tarred
-#   and break the file list up into groups of files.
-#   Each list of files names the contents of its associated tar file.
-#   Then cd to the directory to be tarred.
-# 
-#cyclist=t25z
-#if [ $rhcyc = "00" ]
-#then
-#   cyclist="t00z|t01z|t02z|t03z|t04z|t05z"
-#   endcyc=05
-#elif [ $rhcyc = "06" ]
-#then
-#   cyclist="t06z|t07z|t08z|t09z|t10z|t11z"
-#   endcyc=11
-#elif [ $rhcyc = "12" ]
-#then
-#   cyclist="t12z|t13z|t14z|t15z|t16z|t17z"
-#   endcyc=17
-#elif [ $rhcyc = "18" ]
-##then
- #  cyclist="t18z|t19z|t20z|t21z|t22z|t23z"
- #  endcyc=23
-#fi
 
    #Redefine cyclist to save single analysis files MPondeca/30Jul2017
    cyclist="${rhcyc}"                            #MPondeca/30Jul2017
 
 cd $DATA
 
-cp $COMINm1/rtma3d.${cyclem1}.* $DATA/$PDYm1
-cp $COMINm2/rtma3d.${cyclem2}.* $DATA/$PDYm2
-cp $COMINm3/rtma3d.${cyclem3}.* $DATA/$PDYm3
+cp $COMINm1/rtma3d.${cyclem1}.* $DATA/$PDYm1/prdgen.${cyclem1}
+cp $COMINm2/rtma3d.${cyclem2}.* $DATA/$PDYm2/prdgen.${cyclem2}
+cp $COMINm3/rtma3d.${cyclem3}.* $DATA/$PDYm3/prdgen.${cyclem3}
 
 ln -sf  $COMINobsproc_rtma3dm1 $DATA/$PDYm1
 ln -sf  $COMINobsproc_rtma3dm2 $DATA/$PDYm2
@@ -129,78 +76,48 @@ ln -sf  $COMOUTautoqc_rtma3dm3 $DATA/$PDYm3
 ln -sf  $COMOUThrrrdas_rtma3dm1 $DATA/$PDYm1
 ln -sf  $COMOUThrrrdas_rtma3dm2 $DATA/$PDYm2
 ln -sf  $COMOUThrrrdas_rtma3dm3 $DATA/$PDYm3
-
-
+ 
 ls -1r */*/* | awk '
 
             /prepbufr/ { print "./"$0 > "perm" ; next }
 
-	    /bufr/ { print "./"$0 > "perm" ; next }
+            /bufr/ { print "./"$0 > "perm" ; next }
 
             /grib2/ { print "./"$0 > "perm" ; next }
 
-	    /grb2/ { print "./"$0 > "perm" ; next }
-
-            /rejectlist/ { print "./"$0 > "perm" ; next }
-
-	    /NASALaRCCloudInGSI/ { print "./"$0 > "perm" ; next }
-
-            /NSSLRefInGSI/ { print "./"$0 > "perm" ; next }
-
-            /LightningInGSI.bufr/ { print "./"$0 > "perm" ; next }
-
-            /satwnd/ { print "./"$0 > "perm" ; next }
-
-	    /nexrad/ { print "./"$0 > "perm" ; next }
-
-	    /firstguess.nc/ { print "./"$0 > "perm" ; next }
-           
-            /subhprs/ { print "./"$0 > "perm" ; next } 
-
-            /subhnat/ { print "./"$0 > "perm" ; next }
-           
-            /smarthrrrconus/ { print "./"$0 > "perm" ; next }
-
-	    /smarthrrrak/ { print "./"$0 > "perm" ; next }
-
-            /smartak/ { print "./"$0 > "perm" ; next }
-
-            /wavebg/ { print "./"$0 > "perm" ; next }
-
-	    /multi_1/ { print "./"$0 > "perm" ; next }
-       
-       	    /ww3/ { print "./"$0 > "perm" ; next }
-
-	    /minimization/ { print "./"$0 > "perm" ; next }
-
-            /gsiparm.anl/ { print "./"$0 > "perm" ; next }
+            /grb2/ { print "./"$0 > "perm" ; next }
 
             /diag/  { print "./"$0 > "perm" ; next }
 
-           /.stat/ { print "./"$0 > "perm" ; next } 
+           /gsiparm.anl/ { print "./"$0 > "perm" ; next }
 
-           /.csv/ { print "./"$0 > "perm" ; next }
+            /filelist/ { print "./"$0 > "perm" ; next }
 
-           /.txt/ { print "./"$0 > "perm" ; next } 
-
-           /envir/ { print "./"$0 > "perm" ; next } 
-
-           /.db/ { print "./"$0 > "perm" ; next }
-
-	   /obs.listing/ { print "./"$0 > "perm" ; next }
+            /wrf_inout/ { print "./"$0 > "perm" ; next }
 
            /stn_analysis/ { print "./"$0 > "perm" ; next }
 
-           /envir.sh/ { print "./"$0 > "perm" ; next }
-           
-           /firstguess.nc/ { print "./"$0 > "perm" ; next }'
+           /firstguess.nc/ { print "./"$0 > "perm" ; next }  
+ 
+           /.stat/ { print "./"$0 > "perm" ; next }
 
+           /.csv/ { print "./"$0 > "perm" ; next }
+
+           /.txt/ { print "./"$0 > "perm" ; next }
+
+           /envir/ { print "./"$0 > "perm" ; next }
+
+           /.db/ { print "./"$0 > "perm" ; next }'  
 
 ls -1r */*/* | awk '
 
-            /fits/ { print "./"$0 > "2yr" ; next }
-
             /stdout/ { print "./"$0 > "2yr" ; next }
+	    
+            /obs.listing/ { print "./"$0 > "2yr" ; next }
+	    
+            /fits/ { print "./"$0 > "2yr" ; next }
+	    
+            /minimization/ { print "./"$0 > "2yr" ; next }
 
 	    /OUTPUT/ { print "./"$0 > "2yr" ; next }'
 
@@ -216,13 +133,13 @@ do
 
    case $file in
       perm)   hpssdir=$hpssdir0
-	      tarfile=com_rtma3d_${PDY}_${cycm3}z-${cycm1}z.tar;;
+              tarfile=com_rtma3d_${PDYn1}_${cycm3}z-${cycm1}z.tar;;
 
       2yr)    hpssdir=$hpssdir2
-	      tarfile=com_rtma3d_${PDY}_${cycm3}z-${cycm1}z.tar;;
+	      tarfile=com_rtma3d_${PDYn1}_${cycm3}z-${cycm1}z.tar;;
 
       perm_hrrrdas) hpssdir=$hpssdir0
-              tarfile=com_rtma3d_hrrrdas_${PDY}_${cycm3}z-${cycm1}z.tar;;
+              tarfile=com_rtma3d_hrrrdas_${PDYn1}_${cycm3}z-${cycm1}z.tar;;
    esac
 
    if [[ $CHECK_HPSS_IDX == "YES" ]] ; then
@@ -253,7 +170,4 @@ do
 #rm  ${DATA}/$file                     #MPondeca 30Jul2017
    
 done
-
-#[[ $DRY_RUN_ONLY != "YES" ]] && ${USHrhist}/rhist_log.sh $1 $2   #MPondeca 30Jul2017
-#exit 0                                #MPondeca 30Jul2017
 
