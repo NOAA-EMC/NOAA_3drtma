@@ -30,9 +30,11 @@ export CHECK_HPSS_IDX="YES"
 #
 
 region=$RUN
-year=`echo $PDY$cyc | cut -c 1-4`
-yearmo=`echo $PDY$cyc | cut -c 1-6`
-yrmoday=`echo $PDY$cyc | cut -c 1-8`
+
+year=`echo $PDYn1$cyc | cut -c 1-4`
+yearmo=`echo $PDYn1$cyc | cut -c 1-6`
+yrmoday=`echo $PDYn1$cyc | cut -c 1-8`
+
 rhcyc=`echo $PDY$cyc | cut -c 9-10`
 rhcycle=t${rhcyc}z
 
