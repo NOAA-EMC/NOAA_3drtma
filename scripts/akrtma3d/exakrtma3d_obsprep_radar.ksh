@@ -127,7 +127,7 @@ if [ -s filelist_mrms ]; then
    echo "NSSL grib2 file levels = $numgrib2"
 else
    echo "ERROR: Not enough radar reflectivity files available."
-   exit 1
+   exit
 fi
 
 cat << EOF > mosaic.namelist
