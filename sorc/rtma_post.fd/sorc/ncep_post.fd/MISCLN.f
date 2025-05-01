@@ -4079,7 +4079,7 @@
                DO I=ISTA,IEND
                  IF(LLOW(I,J)<spval.and.LUPP(I,J)<spval.and.&
                  VH(I,J,MIDCAL)<spval.and.VH(I,J,LLOW(I,J))<spval)THEN
-                       MIDCAL=INT(LLOW(I,J)+D50*(IEQL(I,J)-LLOW(I,J)))
+                       MIDCAL=INT(LLOW(I,J)+D50*(LUPP(I,J)-LLOW(I,J)))
                                                             !mid-layer 
                                                             !vertical
                                                             !index
