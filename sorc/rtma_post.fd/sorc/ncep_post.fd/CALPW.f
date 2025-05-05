@@ -36,6 +36,8 @@
 !> 2019-07-25 | Li(Kate) Zhang | Merge Sarah Lu's update for FV3-Chem
 !> 2020-11-10 | Jesse Meng     | Use UPP_PHYSICS Module
 !> 2021-09-02 | Bo Cui         | Decompose UPP in X direction          
+!> 2022-11-16 | Eric James     | Adding calculation of vertically integrated dust from RRFS
+!> 2023-02-23 | Eric James     | Adding vertically integrated coarse PM from RRFS
 !>     
 !> @author Russ Treadon W/NP2 @date 1992-12-24
       SUBROUTINE CALPW(PW,IDECID)
@@ -44,7 +46,7 @@
       use vrbls3d,    only: q, qqw, qqi, qqr, qqs, cwm, qqg, t, rswtt,    &
                             train, tcucn, mcvg, pmid, o3, ext, pint, rlwtt, &
                             taod5503d,sca, asy
-      use vrbls4d,    only: smoke
+      use vrbls4d,    only: smoke, fv3dust, coarsepm
       use masks,      only: htm
       use params_mod, only: tfrz, gi
       use ctlblk_mod, only: lm, jsta, jend, im, spval, ista, iend
@@ -236,7 +238,7 @@
 !$omp  parallel do private(i,j)
           DO J=JSTA,JEND
             DO I=ISTA,IEND
-              Qdum(I,J) = SMOKE(I,J,L,1)/1000000000.
+              Qdum(I,J) = SMOKE(I,J,L,1)/(1E9)
             ENDDO
           END DO
 !
@@ -265,6 +267,26 @@
           DO J=JSTA,JEND
             DO I=ISTA,IEND
               Qdum(I,J) = ASY(I,J,L)
+            ENDDO
+          END DO
+
+! E. James - 14 Sep 2022
+! DUST (from RRFS)
+        ELSE IF (IDECID == 22) THEN
+!$omp  parallel do private(i,j)
+          DO J=JSTA,JEND
+            DO I=ISTA,IEND
+              Qdum(I,J) = FV3DUST(I,J,L,1)/(1E9)
+            ENDDO
+          END DO
+
+! E. James - 23 Feb 2023
+! COARSEPM (from RRFS)
+        ELSE IF (IDECID == 23) THEN
+!$omp  parallel do private(i,j)
+          DO J=JSTA,JEND
+            DO I=ISTA,IEND
+              Qdum(I,J) = COARSEPM(I,J,L,1)/(1E9)
             ENDDO
           END DO
         ENDIF

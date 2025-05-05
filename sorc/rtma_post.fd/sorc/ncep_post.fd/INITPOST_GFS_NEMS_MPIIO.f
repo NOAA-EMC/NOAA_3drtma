@@ -24,6 +24,9 @@
 !> 2016-07-21 | Jun Wang       | Change averaged field name with suffix
 !> 2019-07-24 | Li(Kate) Zhang | Merge and update NGAC UPP into FV3-Chem
 !> 2021-03-11 | Bo Cui         | Change local arrays to dimension (im,jsta:jend)
+!> 2022-09-22 | Li(Kate) Zhang | Remove duplicated initializations which have been done in ALLCOCATE_ALL.f
+!> 2023-04-04 |Li(Kate Zhang)  |Add namelist optoin for CCPP-Chem (UFS-Chem) 
+!         and 2D diag. output (d2d_chem) for GEFS-Aerosols and CCPP-Chem model.
 !>
 !> @author Hui-Ya Chuang @date 2007-03-04
       SUBROUTINE INITPOST_GFS_NEMS_MPIIO(iostatusAER)
@@ -71,8 +74,8 @@
               jend_m, imin, imp_physics, dt, spval, pdtop, pt, qmin, nbin_du, nphs, dtq2, ardlw,&
               ardsw, asrfc, avrain, avcnvc, theat, gdsdegr, spl, lsm, alsl, im, jm, im_jm, lm,  &
               jsta_2l, jend_2u, nsoil, lp1, icu_physics, ivegsrc, novegtype, nbin_ss, nbin_bc,  &
-              nbin_oc, nbin_su, gocart_on, pt_tbl, hyb_sigp, filenameFlux, fileNameAER, &
-              iSF_SURFACE_PHYSICS
+              nbin_oc, nbin_su, gocart_on, gccpp_on, pt_tbl, hyb_sigp, filenameFlux, fileNameAER, &
+              iSF_SURFACE_PHYSICS, d2d_chem
       use gridspec_mod, only: maptype, gridtype, latstart, latlast, lonstart, lonlast, cenlon,  &
               dxval, dyval, truelat2, truelat1, psmapf, cenlat
       use nemsio_module_mpi
@@ -236,7 +239,7 @@
         end do
       end do
 
-!     write(0,*)'nrec=',nrec
+!     write(*,*)'nrec=',nrec
       allocate(recname(nrec),reclevtyp(nrec),reclev(nrec))
       allocate(glat1d(im*jm),glon1d(im*jm))
       allocate(vcoord4(lm+1,3,2))
@@ -1155,7 +1158,7 @@
                          vcrd, pint(1,j,lp1), psx2d(1,j), psy2d(1,j),   &
                          d2d,  u2d, v2d, pi2d, pm2d, omga2d, me)
 !     if (j ==1 .or. j == jm) &
-!     write (0,*)' omga2d=',omga2d(1,:),' j=',j
+!     write (*,*)' omga2d=',omga2d(1,:),' j=',j
 
           if (npass <= 0 ) then
 !$omp parallel do private(i,l,ll)
@@ -1197,7 +1200,7 @@
 !         Average omega for the last point near the poles - moorthi
           if (j ==1 .or. j == jm) then
             tx1 = 1.0 / im
-!     write(0,*)' j=',j,' omgamax=',maxval(omga(:,j,:)),' omgamin=',minval(omga(:,j,:))
+!     write(*,*)' j=',j,' omgamax=',maxval(omga(:,j,:)),' omgamin=',minval(omga(:,j,:))
 !$omp parallel do private(i,l,tx2)
             do l=1,lm
               tx2 = 0.0
@@ -1330,22 +1333,13 @@
 !      deallocate(wrk1,wrk2)
 
 
-      print *, 'gocart_on2=',gocart_on
-      if (gocart_on) then
+      print *, 'gocart_on=',gocart_on
+      print *, 'gccpp_on=',gccpp_on
+      if (gocart_on .or. gccpp_on) then
 
 ! GFS output dust in nemsio (GOCART)
         dustcb=0.0
         dustallcb=0.0
-        do n=1,nbin_du
-          do l=1,lm
-!$omp parallel do private(i,j)
-            do j=jsta_2l,jend_2u
-              do i=1,im
-                dust(i,j,l,n) = spval
-              enddo
-            enddo
-          enddo
-        enddo
 !       DUST = SPVAL
         !VarName='du001'
         VarName='dust1'
@@ -1423,16 +1417,6 @@
 ! GFS output sea salt in nemsio (GOCART)
         sscb=0.0
         ssallcb=0.0
-        do n=1,nbin_ss
-          do l=1,lm
-!$omp parallel do private(i,j)
-            do j=jsta_2l,jend_2u
-              do i=1,im
-                salt(i,j,l,n) = spval
-              enddo
-            enddo
-          enddo
-        enddo
 !       SALT = SPVAL
         !VarName='ss001'
         VarName='seas1'
@@ -1511,16 +1495,6 @@
 
 ! GFS output black carbon in nemsio (GOCART)
         bccb=0.0
-        do n=1,nbin_bc
-          do l=1,lm
-!$omp parallel do private(i,j)
-            do j=jsta_2l,jend_2u
-              do i=1,im
-                soot(i,j,l,n) = spval
-              enddo
-            enddo
-          enddo
-        enddo
 !       SOOT = SPVAL
         !VarName='bcphobic'
         VarName='bc1'
@@ -1554,16 +1528,6 @@
 
         occb=0.0
 ! GFS output organic carbon in nemsio (GOCART)
-        do n=1,nbin_oc
-          do l=1,lm
-!$omp parallel do private(i,j)
-            do j=jsta_2l,jend_2u
-              do i=1,im
-                waso(i,j,l,n) = spval
-              enddo
-            enddo
-          enddo
-        enddo
 !       WASO = SPVAL
         !VarName='ocphobic'
         VarName='oc1'
@@ -1597,16 +1561,6 @@
 
 ! GFS output sulfate in nemsio (GOCART)
         sulfcb=0.0
-        do n=1,nbin_su
-          do l=1,lm
-!$omp parallel do private(i,j)
-            do j=jsta_2l,jend_2u
-              do i=1,im
-                suso(i,j,l,n) = spval
-              enddo
-            enddo
-          enddo
-        enddo
 !       SUSO = SPVAL
         !VarName='so4'
         VarName='sulf'
@@ -1627,16 +1581,6 @@
 
 ! GFS output pp25 in nemsio (GOCART)
         pp25cb=0.0
-        do n=1,nbin_su
-          do l=1,lm
-!$omp parallel do private(i,j)
-            do j=jsta_2l,jend_2u
-              do i=1,im
-                pp25(i,j,l,n) = spval
-              enddo
-            enddo
-          enddo
-        enddo
 !       PP25 = SPVAL
         !VarName='so4'
         VarName='pp25'
@@ -1655,16 +1599,6 @@
         end do ! do loop for l
 ! GFS output pp10 in nemsio (GOCART)
         pp10cb=0.0
-        do n=1,nbin_su
-          do l=1,lm
-!$omp parallel do private(i,j)
-            do j=jsta_2l,jend_2u
-              do i=1,im
-                pp10(i,j,l,n) = spval
-              enddo
-            enddo
-          enddo
-        enddo
 !       PP10 = SPVAL
         !VarName='so4'
         VarName='pp10'
@@ -1967,7 +1901,7 @@
       do j=jsta,jend
         do i=1,im
           if (ths(i,j) /= spval) then
-!    write(0,*)' i=',i,' j=',j,' ths=',ths(i,j),' pint=',pint(i,j,lp1)
+!    write(*,*)' i=',i,' j=',j,' ths=',ths(i,j),' pint=',pint(i,j,lp1)
             ths(i,j) = ths(i,j) * (p1000/pint(i,j,lp1))**capa
           endif
           QS(i,j)    = SPVAL ! GFS does not have surface specific humidity
@@ -3676,6 +3610,7 @@
         enddo
       enddo
 
+      if ((gocart_on .or. gccpp_on) .and. d2d_chem ) then
 ! retrieve dust emission fluxes
       do K = 1, nbin_du
        if ( K == 1) VarName='duem001'
@@ -3683,7 +3618,7 @@
        if ( K == 3) VarName='duem003'
        if ( K == 4) VarName='duem004'
        if ( K == 5) VarName='duem005'
-       VcoordName='atmos sfc'
+       VcoordName='sfc'
        l=1
        call assignnemsiovar(im,jsta,jend,jsta_2l,jend_2u               &
                            ,l,nrec,fldsize,spval,tmp                   &
@@ -3699,7 +3634,7 @@
        if ( K == 3) VarName='dust3sd'
        if ( K == 4) VarName='dust4sd'
        if ( K == 5) VarName='dsut5sd'
-       VcoordName='atmos sfc'
+       VcoordName='sfc'
        l=1
        call assignnemsiovar(im,jsta,jend,jsta_2l,jend_2u               &
                            ,l,nrec,fldsize,spval,tmp                   &
@@ -3715,7 +3650,7 @@
        if ( K == 3) VarName='dust3dp'
        if ( K == 4) VarName='dust4dp'
        if ( K == 5) VarName='dust5dp'
-       VcoordName='atmos sfc'
+       VcoordName='sfc'
        l=1
        call assignnemsiovar(im,jsta,jend,jsta_2l,jend_2u               &
                            ,l,nrec,fldsize,spval,tmp                   &
@@ -3733,7 +3668,7 @@
        if ( K == 3) VarName='dust3wtl'
        if ( K == 4) VarName='dust4wtl'
        if ( K == 5) VarName='dust5wtl'
-       VcoordName='atmos sfc'
+       VcoordName='sfc'
        l=1
        call assignnemsiovar(im,jsta,jend,jsta_2l,jend_2u               &
                            ,l,nrec,fldsize,spval,tmp                   &
@@ -3747,7 +3682,7 @@
        if ( K == 3) VarName='dust3wtc'
        if ( K == 4) VarName='dust4wtc'
        if ( K == 5) VarName='dust5wtc'
-       VcoordName='atmos sfc'
+       VcoordName='sfc'
        l=1
        call assignnemsiovar(im,jsta,jend,jsta_2l,jend_2u               &
                            ,l,nrec,fldsize,spval,tmp                   &
@@ -3762,7 +3697,7 @@
        if ( K == 3) VarName='ssem003'
        if ( K == 4) VarName='ssem004'
        if ( K == 5) VarName='ssem005'
-       VcoordName='atmos sfc'
+       VcoordName='sfc'
        l=1
        call assignnemsiovar(im,jsta,jend,jsta_2l,jend_2u               &
                            ,l,nrec,fldsize,spval,tmp                   &
@@ -3793,7 +3728,7 @@
        if ( K == 3) VarName='seas3dp'
        if ( K == 4) VarName='seas4dp'
        if ( K == 5) VarName='seas5dp'
-       VcoordName='atmos sfc'
+       VcoordName='sfc'
        l=1
        call assignnemsiovar(im,jsta,jend,jsta_2l,jend_2u               &
                            ,l,nrec,fldsize,spval,tmp                   &
@@ -3808,7 +3743,7 @@
        if ( K == 3) VarName='seas3wtl'
        if ( K == 4) VarName='seas4wtl'
        if ( K == 5) VarName='seas5wtl'
-       VcoordName='atmos sfc'
+       VcoordName='sfc'
        l=1
        call assignnemsiovar(im,jsta,jend,jsta_2l,jend_2u               &
                            ,l,nrec,fldsize,spval,tmp                   &
@@ -3823,7 +3758,7 @@
        if ( K == 3) VarName='seas1wtc'
        if ( K == 4) VarName='seas1wtc'
        if ( K == 5) VarName='seas1wtc'
-       VcoordName='atmos sfc'
+       VcoordName='sfc'
        l=1
        call assignnemsiovar(im,jsta,jend,jsta_2l,jend_2u               &
                            ,l,nrec,fldsize,spval,tmp                   &
@@ -3835,7 +3770,7 @@
       do K = 1, nbin_bc
        if ( K == 1) VarName='bceman'
        if ( K == 2) VarName='bcembb'
-       VcoordName='atmos sfc'
+       VcoordName='sfc'
        l=1
        call assignnemsiovar(im,jsta,jend,jsta_2l,jend_2u               &
                            ,l,nrec,fldsize,spval,tmp                   &
@@ -3847,7 +3782,7 @@
       do K = 1, nbin_bc
        if ( K == 1) VarName='bc1sd'
        if ( K == 2) VarName='bc2sd'
-       VcoordName='atmos sfc'
+       VcoordName='sfc'
        l=1
        call assignnemsiovar(im,jsta,jend,jsta_2l,jend_2u               &
                            ,l,nrec,fldsize,spval,tmp                   &
@@ -3859,7 +3794,7 @@
       do K = 1, nbin_bc
        if ( K == 1) VarName='bc1dp'
        if ( K == 2) VarName='bc2dp'
-       VcoordName='atmos sfc'
+       VcoordName='sfc'
        l=1
        call assignnemsiovar(im,jsta,jend,jsta_2l,jend_2u               &
                            ,l,nrec,fldsize,spval,tmp                   &
@@ -3871,7 +3806,7 @@
       do K = 1, nbin_bc
        if ( K == 1) VarName='bc1wtl'
        if ( K == 2) VarName='bc2wtl'
-       VcoordName='atmos sfc'
+       VcoordName='sfc'
        l=1
        call assignnemsiovar(im,jsta,jend,jsta_2l,jend_2u               &
                            ,l,nrec,fldsize,spval,tmp                   &
@@ -3883,7 +3818,7 @@
       do K = 1, nbin_bc
        if ( K == 1) VarName='bc1wtc'
        if ( K == 2) VarName='bc2wtc'
-       VcoordName='atmos sfc'
+       VcoordName='sfc'
        l=1
        call assignnemsiovar(im,jsta,jend,jsta_2l,jend_2u               &
                            ,l,nrec,fldsize,spval,tmp                   &
@@ -3895,7 +3830,7 @@
       do K = 1, nbin_oc
        if ( K == 1) VarName='oceman'
        if ( K == 2) VarName='ocembb'
-       VcoordName='atmos sfc'
+       VcoordName='sfc'
        l=1
        call assignnemsiovar(im,jsta,jend,jsta_2l,jend_2u               &
                            ,l,nrec,fldsize,spval,tmp                   &
@@ -3907,7 +3842,7 @@
       do K = 1, nbin_oc
        if ( K == 1) VarName='oc1sd'
        if ( K == 2) VarName='oc2sd'
-       VcoordName='atmos sfc'
+       VcoordName='sfc'
        l=1
        call assignnemsiovar(im,jsta,jend,jsta_2l,jend_2u               &
                            ,l,nrec,fldsize,spval,tmp                   &
@@ -3919,7 +3854,7 @@
       do K = 1, nbin_oc
        if ( K == 1) VarName='oc1dp'
        if ( K == 2) VarName='oc2dp'
-       VcoordName='atmos sfc'
+       VcoordName='sfc'
        l=1
        call assignnemsiovar(im,jsta,jend,jsta_2l,jend_2u               &
                            ,l,nrec,fldsize,spval,tmp                   &
@@ -3931,7 +3866,7 @@
       do K = 1, nbin_oc
        if ( K == 1) VarName='oc1wtl'
        if ( K == 2) VarName='oc2wtl'
-       VcoordName='atmos sfc'
+       VcoordName='sfc'
        l=1
        call assignnemsiovar(im,jsta,jend,jsta_2l,jend_2u               &
                            ,l,nrec,fldsize,spval,tmp                   &
@@ -3943,7 +3878,7 @@
       do K = 1, nbin_oc
        if ( K == 1) VarName='oc1wtc'
        if ( K == 2) VarName='oc2wtc'
-       VcoordName='atmos sfc'
+       VcoordName='sfc'
        l=1
        call assignnemsiovar(im,jsta,jend,jsta_2l,jend_2u               &
                            ,l,nrec,fldsize,spval,tmp                   &
@@ -3960,55 +3895,11 @@
                            ,recname,reclevtyp,reclev,VarName,VcoordName&
                            ,maod(1,jsta_2l))
 
-
+       endif
 ! done with flux file, close it for now
       call nemsio_close(ffile,iret=status)
       deallocate(tmp,recname,reclevtyp,reclev)
       
-!lzhang
-!! retrieve sfc mass concentration
-!      VarName='DUSMASS'
-!      VcoordName='atmos col'
-!      l=1
-!      call assignnemsiovar(im,jsta,jend,jsta_2l,jend_2u                &
-!                          ,l,nrec,fldsize,spval,tmp                    &
-!                          ,recname,reclevtyp,reclev,VarName,VcoordName &
-!                          ,dusmass)
-!     if(debugprint)print*,'sample ',VarName,' = ',dusmass(isa,jsa)
-
-!lzhang
-!! retrieve col mass density
-!      VarName='DUCMASS'
-!      VcoordName='atmos col'
-!      l=1
-!      call assignnemsiovar(im,jsta,jend,jsta_2l,jend_2u                &
-!                          ,l,nrec,fldsize,spval,tmp                    &
-!                          ,recname,reclevtyp,reclev,VarName,VcoordName &
-!                          ,ducmass)
-!!     if(debugprint)print*,'sample ',VarName,' = ',ducmass(isa,jsa)
-
-!lzhang
-!! retrieve sfc mass concentration (pm2.5)
-!      VarName='DUSMASS25'
-!      VcoordName='atmos col'
-!      l=1
-!      call assignnemsiovar(im,jsta,jend,jsta_2l,jend_2u                &
-!                          ,l,nrec,fldsize,spval,tmp                    &
-!                          ,recname,reclevtyp,reclev,VarName,VcoordName &
-!                          ,dusmass25)
-!     if(debugprint)print*,'sample ',VarName,' = ',dusmass25(isa,jsa)
-
-!lzhang
-!! retrieve col mass density (pm2.5)
-!      VarName='DUCMASS25'
-!      VcoordName='atmos col'
-!      l=1
-!      call assignnemsiovar(im,jsta,jend,jsta_2l,jend_2u                &
-!                          ,l,nrec,fldsize,spval,tmp                    &
-!                          ,recname,reclevtyp,reclev,VarName,VcoordName &
-!                          ,ducmass25)
-!     if(debugprint)print*,'sample ',VarName,' = ',ducmass25(isa,jsa)
-
 ! pos east
        call collect_loc(gdlat,dummy)
        if(me == 0)then

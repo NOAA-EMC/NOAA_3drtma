@@ -9,7 +9,10 @@
 !> 2000-01-06 | Jim Tuccillo | Initial
 !> 2001-10-25 | H Chuang     | Modified to process hybrid model output
 !> 2002-06-19 | Mike Baldwin | WRF version
-!>
+!> 2022-11-08 | Kai Wang     | Replace aqfcmaq_on with aqf_on
+!> 2023-03-22 | WM Lewis     | Add effective radius arrays
+!> !> 2023-04-04 |Li(Kate Zhang)  |Add namelist optoin for CCPP-Chem
+!(UFS-Chem) and 2D diag. output (d2d_chem) for GEFS-Aerosols and CCPP-Chem model.
 !> @author Jim Tuccillo IBM @date 2000-01-06
       SUBROUTINE DE_ALLOCATE
 
@@ -53,6 +56,7 @@
 !      deallocate(rainw(im,jsta_2l:jend_2u,lm))
       deallocate(q2)
       deallocate(omga)
+      deallocate(dpres)
       deallocate(T_ADJ)
       deallocate(ttnd)
       deallocate(rswtt)
@@ -82,6 +86,9 @@
       deallocate(EXTCOF55)
       deallocate(QC_BL)
       deallocate(CFR)
+      deallocate(EFFRI)
+      deallocate(EFFRL)
+      deallocate(EFFRS)
       deallocate(CFR_RAW)
       deallocate(DBZ)
       deallocate(DBZR)
@@ -137,6 +144,9 @@
       deallocate(stc)
       deallocate(sh2o)
       deallocate(SLDPTH)
+      deallocate(CAPE)
+      deallocate(CIN)
+      deallocate(IFI_APCP)
       deallocate(RTDPTH)
       deallocate(SLLEVEL)
 !
@@ -196,10 +206,13 @@
       deallocate(swddnic)
       deallocate(swddifc)
       deallocate(swupt)
-      deallocate(int_smoke)
       deallocate(mean_frp)
-      deallocate(int_aod)
+      deallocate(ebb)
+      deallocate(hwp)
+      deallocate(aodtot)
       deallocate(smoke)
+      deallocate(fv3dust)
+      deallocate(coarsepm)
       deallocate(taod5502d)
       deallocate(aerasy2d)
       deallocate(aerssa2d)
@@ -354,6 +367,7 @@
       deallocate(avgetrans)
       deallocate(avgesnow)
       deallocate(avgpotevp)
+      deallocate(aod550)
       deallocate(ti)
       deallocate(du_aod550)
       deallocate(ss_aod550)
@@ -380,6 +394,9 @@
       deallocate(snow_bucket1)
       deallocate(graup_bucket)
       deallocate(graup_bucket1)
+      deallocate(frzrn_bucket)
+      deallocate(snow_acm)
+      deallocate(snow_bkt)
       deallocate(qrmax)
       deallocate(tmax)
       deallocate(snownc)
@@ -461,7 +478,7 @@
       deallocate(gtg)
 
 !
-      if (gocart_on) then
+      if (gocart_on .or. gccpp_on .or. nasa_on) then
 ! Deallocate GOCART fields
 ! vrbls4d
         deallocate(dust)
@@ -469,6 +486,10 @@
         deallocate(soot)
         deallocate(waso)
         deallocate(suso)
+      if (nasa_on) then
+        deallocate(no3)
+        deallocate(nh4)
+      endif
         deallocate(pp25)
         deallocate(pp10)
 ! vrbls3d
@@ -476,6 +497,7 @@
         deallocate(asy)
         deallocate(ssa)
         deallocate(sca)
+       if (d2d_chem) then
         deallocate(duem)
         deallocate(dusd)
         deallocate(dudp)
@@ -500,7 +522,7 @@
         deallocate(ssdp)
         deallocate(sswt)
         deallocate(sssv)
-        deallocate(dpres)
+       endif
         deallocate(rhomid)
 ! vrbls2d
         deallocate(dusmass)
@@ -530,6 +552,10 @@
         deallocate(pp25cb)
         deallocate(pp10cb)
         deallocate(sscb)
+        if (nasa_on) then
+        deallocate(no3cb)
+        deallocate(nh4cb)
+        endif
         deallocate(dustallcb)
         deallocate(ssallcb)
         deallocate(dustpm)
@@ -548,9 +574,10 @@
       deallocate(uuavg)
 
 ! AQF
-      if (aqfcmaq_on) then
-        deallocate(ozcon)
-        deallocate(pmtf)
+      if (aqf_on) then
+        deallocate(avgozcon)
+        deallocate(avgpmtf)
+        deallocate(aqm_aod550)
       endif
 
       end

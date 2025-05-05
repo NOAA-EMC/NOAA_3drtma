@@ -30,13 +30,19 @@
 !> 2021-03-11 | B Cui           | Change local arrays to dimension (im,jsta:jend)
 !> 2021-04-01 | J Meng          | Computation on defined points only
 !> 2021-07-07 | J MENG          | 2D DECOMPOSITION
+!> 2022-05-25 | Y Mao           | Add WAFS icing/turbulence
+!> 2022-08-03 | W Meng          | Modify total cloud fraction(331) 
+!> 2022-09-22 | L Zhang         | Remove DUSTSL
+!> 2022-11-16 | E James         | Adding dust from RRFS
+!> 2022-12-21 | J Meng          ! Adding snow density SDEN      
+!> 2023-02-23 | E James         | Adding coarse PM from RRFS
 !>
 !> @author T Black W/NP2 @date 1999-09-23
       SUBROUTINE MDL2P(iostatusD3D)
 
 !
 !
-      use vrbls4d, only: DUST, SMOKE
+      use vrbls4d, only: DUST, SMOKE, FV3DUST, COARSEPM
       use vrbls3d, only: PINT, O3, PMID, T, Q, UH, VH, WH, OMGA, Q2, CWM,      &
                          QQW, QQI, QQR, QQS, QQG, DBZ, F_RIMEF, TTND, CFR,     &
                          RLWTT, RSWTT, VDIFFTT, TCUCN, TCUCNS,     &
@@ -45,7 +51,7 @@
                          ZGDRAG, CNVCTVMMIXING, VDIFFMACCE, MGDRAG,            &
                          CNVCTUMMIXING, NCNVCTCFRAC, CNVCTUMFLX, CNVCTDETMFLX, &
                          CNVCTZGDRAG, CNVCTMGDRAG, ZMID, ZINT, PMIDV,          &
-                         CNVCTDMFLX
+                         CNVCTDMFLX, ICING_GFIP, ICING_GFIS,GTG,CAT=>CATEDR,MWT
       use vrbls2d, only: T500,T700,W_UP_MAX,W_DN_MAX,W_MEAN,PSLP,FIS,Z1000,Z700,&
                          Z500
       use masks,   only: LMH, SM
@@ -56,11 +62,13 @@
       use ctlblk_mod, only: MODELNAME, LP1, ME, JSTA, JEND, LM, SPVAL, SPL,    &
                             ALSL, JEND_M, SMFLAG, GRIB, CFLD, FLD_INFO, DATAPD,&
                             TD3D, IFHR, IFMIN, IM, JM, NBIN_DU, JSTA_2L,       &
-                            JEND_2U, LSM, d3d_on, gocart_on, ioform, NBIN_SM,  &
-                            imp_physics, ISTA, IEND, ISTA_M, IEND_M, ISTA_2L, IEND_2U
+                            JEND_2U, LSM, d3d_on, ioform, NBIN_SM,  &
+                            imp_physics, ISTA, IEND, ISTA_M, IEND_M, ISTA_2L,  &
+                            IEND_2U, slrutah_on
       use rqstfld_mod, only: IGET, LVLS, ID, IAVBLFLD, LVLSXML
       use gridspec_mod, only: GRIDTYPE, MAPTYPE, DXVAL
-      use upp_physics, only: FPVSNEW, CALRH, CALVOR
+      use upp_physics, only: FPVSNEW, CALRH, CALVOR, CALSLR_ROEBBER, CALSLR_UUTAH
+
 !- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 !
       implicit none
@@ -81,13 +89,16 @@
      &,                                      Q2SL,  WSL,   CFRSL, O3SL, TDSL   &
      &,                                      EGRID1,  EGRID2                   &
      &,                                      FSL_OLD, USL_OLD, VSL_OLD         &
-     &,                                      OSL_OLD, OSL995
-!     REAL D3DSL(IM,JM,27),DUSTSL(IM,JM,NBIN_DU)
-      REAL, allocatable  ::  D3DSL(:,:,:), DUSTSL(:,:,:), SMOKESL(:,:,:)
+     &,                                      OSL_OLD, OSL995                   &
+     &,                                      ICINGFSL, ICINGVSL                &
+     &,                                      GTGSL,CATSL,MWTSL
+      REAL, allocatable  ::  D3DSL(:,:,:),  SMOKESL(:,:,:),  FV3DUSTSL(:,:,:)      &
+     &,                                      COARSEPMSL(:,:,:)
 !
       integer,intent(in) :: iostatusD3D
       INTEGER, dimension(ista_2l:iend_2u,jsta_2l:jend_2u)  :: NL1X, NL1XF
       real, dimension(ISTA_2L:IEND_2U,JSTA_2L:JEND_2U,LSM) :: TPRS, QPRS, FPRS
+      real, dimension(ISTA_2L:IEND_2U,JSTA_2L:JEND_2U,LSM) :: RHPRS
 !
       INTEGER K, NSMOOTH
 !
@@ -137,23 +148,30 @@
           enddo
         enddo
       endif
-      if (gocart_on) then
-        if (.not. allocated(dustsl)) allocate(dustsl(im,jm,nbin_du))
-!$omp parallel do private(i,j,l)
-        do l=1,nbin_du
-          do j=1,jm
-            do i=1,im
-               DUSTSL(i,j,l)  = SPVAL
-            enddo
-          enddo
-        enddo
-      endif
       if (.not. allocated(smokesl)) allocate(smokesl(im,jm,nbin_sm))
 !$omp parallel do private(i,j,l)
       do l=1,nbin_sm
         do j=1,jm
           do i=1,im
              SMOKESL(i,j,l)  = SPVAL
+          enddo
+        enddo
+      enddo
+      if (.not. allocated(fv3dustsl)) allocate(fv3dustsl(im,jm,nbin_sm))
+!$omp parallel do private(i,j,l)
+      do l=1,nbin_sm
+        do j=1,jm
+          do i=1,im
+             FV3DUSTSL(i,j,l)  = SPVAL
+          enddo
+        enddo
+      enddo
+      if (.not. allocated(coarsepmsl)) allocate(coarsepmsl(im,jm,nbin_sm))
+!$omp parallel do private(i,j,l)
+      do l=1,nbin_sm
+        do j=1,jm
+          do i=1,im
+             COARSEPMSL(i,j,l)  = SPVAL
           enddo
         enddo
       enddo
@@ -197,11 +215,14 @@
          (IGET(393) > 0) .OR. (IGET(394) > 0) .OR.      &
          (IGET(395) > 0) .OR. (IGET(379) > 0) .OR.      &
 ! ADD DUST FIELDS
-         (IGET(438) > 0) .OR. (IGET(439) > 0) .OR.      &
-         (IGET(440) > 0) .OR. (IGET(441) > 0) .OR.      &
-         (IGET(442) > 0) .OR. (IGET(455) > 0) .OR.      &
+         (IGET(455) > 0) .OR.      &
+! Add WAFS hazard fields: Icing and GTG turbulence
+         (IGET(464) > 0) .OR. (IGET(465) > 0) .OR.      &
+         (IGET(466) > 0) .OR. (IGET(450) > 0) .OR.      &
+         (IGET(480) > 0) .OR.                           &
 ! ADD SMOKE FIELDS
-         (IGET(738) > 0) .OR. (MODELNAME == 'RAPR') .OR.&
+         (IGET(738) > 0) .OR. (IGET(743) > 0) .OR.      &
+         (MODELNAME == 'RAPR') .OR.&
 ! LIFTED INDEX needs 500 mb T
          (IGET(030)>0) .OR. (IGET(031)>0) .OR. (IGET(075)>0)) THEN
 !
@@ -247,6 +268,11 @@
               RAD(I,J)      = SPVAL
               O3SL(I,J)     = SPVAL
               CFRSL(I,J)    = SPVAL
+              ICINGFSL(I,J) = SPVAL
+              ICINGVSL(I,J) = SPVAL
+              GTGSL(I,J)    = SPVAL
+              CATSL(I,J)    = SPVAL
+              MWTSL(I,J)    = SPVAL
 !
 !***  LOCATE VERTICAL INDEX OF MODEL MIDLAYER JUST BELOW
 !***  THE PRESSURE LEVEL TO WHICH WE ARE INTERPOLATING.
@@ -337,14 +363,17 @@
                  IF(TTND(I,J,1)    < SPVAL) RAD(I,J)   = TTND(I,J,1)
                  IF(O3(I,J,1)      < SPVAL) O3SL(I,J)  = O3(I,J,1)
                  IF(CFR(I,J,1)     < SPVAL) CFRSL(I,J) = CFR(I,J,1)
-! DUST
-                 if (gocart_on) then
-                   DO K = 1, NBIN_DU
-                     IF(DUST(I,J,1,K) < SPVAL) DUSTSL(I,J,K) = DUST(I,J,1,K)
-                   ENDDO
-                 endif
+!GFIP
+                 IF(ICING_GFIP(I,J,1) < SPVAL) ICINGFSL(I,J) = ICING_GFIP(I,J,1) 
+                 IF(ICING_GFIS(I,J,1) < SPVAL) ICINGVSL(I,J) = ICING_GFIS(I,J,1)
+!GTG
+                 IF(GTG(I,J,1) < SPVAL) GTGSL(I,J) = GTG(I,J,1)
+                 IF(CAT(I,J,1) < SPVAL) CATSL(I,J) = CAT(I,J,1)
+                 IF(MWT(I,J,1) < SPVAL) MWTSL(I,J) = MWT(I,J,1)
                  DO K = 1, NBIN_SM
                    IF(SMOKE(I,J,1,K) < SPVAL) SMOKESL(I,J,K)=SMOKE(I,J,1,K)
+                   IF(FV3DUST(I,J,1,K) < SPVAL) FV3DUSTSL(I,J,K)=FV3DUST(I,J,1,K)
+                   IF(COARSEPM(I,J,1,K) < SPVAL) COARSEPMSL(I,J,K)=COARSEPM(I,J,1,K)
                  ENDDO
 
 ! only interpolate GFS d3d fields when  reqested
@@ -499,16 +528,55 @@
 
                  IF(CFR(I,J,LL) < SPVAL .AND. CFR(I,J,LL-1) < SPVAL)          &
                    CFRSL(I,J) = CFR(I,J,LL) + (CFR(I,J,LL)-CFR(I,J,LL-1))*FACT 
-! DUST
-                 if (gocart_on) then
-                   DO K = 1, NBIN_DU
-                     IF(DUST(I,J,LL,K) < SPVAL .AND. DUST(I,J,LL-1,K) < SPVAL)   &
-                     DUSTSL(I,J,K) = DUST(I,J,LL,K) + (DUST(I,J,LL,K)-DUST(I,J,LL-1,K))*FACT
-                   ENDDO
-                 endif
+!GFIP
+                 IF(ICING_GFIP(I,J,LL) < SPVAL .AND. ICING_GFIP(I,J,LL-1) < SPVAL)          &
+                   ICINGFSL(I,J) = ICING_GFIP(I,J,LL) + (ICING_GFIP(I,J,LL)-ICING_GFIP(I,J,LL-1))*FACT
+                   ICINGFSL(I,J) = max(0.0, ICINGFSL(I,J))
+                   ICINGFSL(I,J) = min(1.0, ICINGFSL(I,J))
+                 IF(ICING_GFIS(I,J,LL) < SPVAL .AND.  ICING_GFIS(I,J,LL-1) < SPVAL)          &
+                   ICINGVSL(I,J) = ICING_GFIS(I,J,LL) + (ICING_GFIS(I,J,LL)-ICING_GFIS(I,J,LL-1))*FACT
+!                    Icing severity categories
+!                    0 = none (0, 0.08)
+!                    1 = trace [0.08, 0.21]
+!                    2 = light (0.21, 0.37]
+!                    3 = moderate (0.37, 0.67]
+!                    4 = severe (0.67, 1]
+!                    https://www.nco.ncep.noaa.gov/pmb/docs/grib2/grib2_doc/grib2_table4-228.shtml
+                   if (ICINGVSL(I,J) < 0.08) then
+                      ICINGVSL(I,J) = 0.0
+                   elseif (ICINGVSL(I,J) <= 0.21) then
+                      ICINGVSL(I,J) = 1.
+                   else if(ICINGVSL(I,J) <= 0.37) then
+                      ICINGVSL(I,J) = 2.0
+                   else if(ICINGVSL(I,J) <= 0.67) then
+                      ICINGVSL(I,J) = 3.0
+                   else
+                      ICINGVSL(I,J) = 4.0
+                   endif
+                   if(ICINGFSL(I,J)< 0.001) ICINGVSL(I,J) = 0.
+! GTG
+                 IF(GTG(I,J,LL) < SPVAL .AND. GTG(I,J,LL-1) < SPVAL) THEN
+                   GTGSL(I,J) = GTG(I,J,LL) + (GTG(I,J,LL)-GTG(I,J,LL-1))*FACT 
+                   GTGSL(I,J) = max(0.0, GTGSL(I,J))
+                   GTGSL(I,J) = min(1.0, GTGSL(I,J))
+                 ENDIF
+                 IF(CAT(I,J,LL) < SPVAL .AND. CAT(I,J,LL-1) < SPVAL) THEN
+                   CATSL(I,J) = CAT(I,J,LL) + (CAT(I,J,LL)-CAT(I,J,LL-1))*FACT 
+                   CATSL(I,J) = max(0.0, CATSL(I,J))
+                   CATSL(I,J) = min(1.0, CATSL(I,J))
+                 ENDIF
+                 IF(MWT(I,J,LL) < SPVAL .AND. MWT(I,J,LL-1) < SPVAL) THEN
+                   MWTSL(I,J) = MWT(I,J,LL) + (MWT(I,J,LL)-MWT(I,J,LL-1))*FACT 
+                   MWTSL(I,J) = max(0.0, MWTSL(I,J))
+                   MWTSL(I,J) = min(1.0, MWTSL(I,J))
+                ENDIF
                  DO K = 1, NBIN_SM
                    IF(SMOKE(I,J,LL,K) < SPVAL .AND. SMOKE(I,J,LL-1,K) < SPVAL)   &
                    SMOKESL(I,J,K)=SMOKE(I,J,LL,K)+(SMOKE(I,J,LL,K)-SMOKE(I,J,LL-1,K))*FACT
+                   IF(FV3DUST(I,J,LL,K) < SPVAL .AND. FV3DUST(I,J,LL-1,K) < SPVAL)  &
+                   FV3DUSTSL(I,J,K)=FV3DUST(I,J,LL,K)+(FV3DUST(I,J,LL,K)-FV3DUST(I,J,LL-1,K))*FACT
+                   IF(COARSEPM(I,J,LL,K) < SPVAL .AND. COARSEPM(I,J,LL-1,K) < SPVAL)  &
+                   COARSEPMSL(I,J,K)=COARSEPM(I,J,LL,K)+(COARSEPM(I,J,LL,K)-COARSEPM(I,J,LL-1,K))*FACT
                  ENDDO
 
 ! only interpolate GFS d3d fields when  == ested
@@ -718,7 +786,7 @@
                  FRIME(I,J) = 1.
                  RAD(I,J)   = 0.
                  O3SL(I,J)  = O3(I,J,LLMH)
-                 CFRSL(I,J) = 0.
+                 IF(CFR(I,J,1)<SPVAL)CFRSL(I,J) = 0.
                END IF
 ! Compute heights by interpolating from heights on interface for NAM but
 ! hydrostaticJ integration for GFS
@@ -1246,7 +1314,7 @@
 !***  RELATIVE HUMIDITY.
 !
      
-        IF(IGET(017) > 0 .OR. IGET(257) > 0)THEN
+        IF(IGET(017) > 0 .OR. IGET(257) > 0 .OR. IGET(1006) > 0)THEN
 !         if ( me == 0)  print *,'IGET(17)=',IGET(017),'LP=',LP,IGET(257),  &
 !             'LVLS=',LVLS(1,4)
           log1=.false.
@@ -1256,7 +1324,7 @@
           IF(IGET(257) > 0) then
              if(LVLS(LP,IGET(257)) > 0 ) log1=.true.
           endif
-          if ( log1 ) then
+
 !$omp  parallel do private(i,j)
             DO J=JSTA,JEND
               DO I=ISTA,IEND
@@ -1284,6 +1352,8 @@
                 CALL SMOOTH(GRID1,SDUMMY,IM,JM,0.5)
               end do
             ENDIF
+            
+          if ( log1 ) then
             if(grib == 'grib2')then
               cfld = cfld + 1
               fld_info(cfld)%ifld=IAVBLFLD(IGET(017))
@@ -1302,10 +1372,16 @@
             DO J=JSTA,JEND
               DO I=ISTA,IEND
                 SAVRH(I,J) = GRID1(I,J)
-              ENDDO
-            ENDDO
+                ENDDO
+            ENDDO            
+          ENDIF !if (log1 )
 
-          ENDIF
+!$omp  parallel do private(i,j)
+            DO J=JSTA,JEND
+              DO I=ISTA,IEND
+                RHPRS(I,J,LP) = GRID1(I,J)
+              ENDDO
+            ENDDO                            
         ENDIF
 !     
 !***  CLOUD FRACTION.
@@ -1316,9 +1392,10 @@
             DO J=JSTA,JEND
               DO I=ISTA,IEND
                 GRID1(I,J) = SPVAL
-                CFRSL(I,J) = MIN(MAX(0.0,CFRSL(I,J)),1.0)
-                IF(abs(CFRSL(I,J)-SPVAL) > SMALL)                   &    
-                      GRID1(I,J) = CFRSL(I,J)*H100
+                IF(abs(CFRSL(I,J)-SPVAL) > SMALL) THEN  
+                  CFRSL(I,J) = MIN(MAX(0.0,CFRSL(I,J)),1.0)
+                  GRID1(I,J) = CFRSL(I,J)*H100
+                ENDIF
               ENDDO 
             ENDDO
             if(grib == 'grib2')then
@@ -1992,6 +2069,127 @@
         end if    
 !     
  
+!---  GFIP IN-FLIGHT ICING POTENTIAL: ADDED BY H CHUANG
+        IF(IGET(450) > 0)THEN
+          IF(LVLS(LP,IGET(450)) > 0)THEN                                  
+!$omp  parallel do private(i,j)
+             DO J=JSTA,JEND
+               DO I=ISTA,IEND
+                 GRID1(I,J) = ICINGFSL(I,J)
+               ENDDO
+             ENDDO
+            if(grib == 'grib2') then
+              cfld = cfld + 1
+              fld_info(cfld)%ifld=IAVBLFLD(IGET(450))
+              fld_info(cfld)%lvl=LVLSXML(LP,IGET(450))
+!$omp parallel do private(i,j,jj)
+              do j=1,jend-jsta+1
+                jj = jsta+j-1
+                do i=1,iend-ista+1
+                  ii=ista+i-1
+                  datapd(i,j,cfld) = GRID1(ii,jj)
+                enddo
+              enddo
+            endif
+          ENDIF
+        ENDIF
+!---  GFIP IN-FLIGHT ICING SEVERITY: ADDED BY Y MAO
+        IF(IGET(480) >  0) THEN
+          IF(LVLS(LP,IGET(480)) > 0) THEN
+!$omp  parallel do private(i,j)
+             DO J=JSTA,JEND
+               DO I=ISTA,IEND
+                 GRID1(I,J) = ICINGVSL(I,J)
+               ENDDO
+             ENDDO
+             if(grib == 'grib2') then
+              cfld = cfld+1
+              fld_info(cfld)%ifld=IAVBLFLD(IGET(480))
+              fld_info(cfld)%lvl=LVLSXML(LP,IGET(480))
+!$omp parallel do private(i,j,jj)
+              do j=1,jend-jsta+1
+                jj = jsta+j-1
+                do i=1,iend-ista+1
+                  ii=ista+i-1
+                  datapd(i,j,cfld) = GRID1(ii,jj)
+                enddo
+              enddo
+            endif
+          ENDIF
+        ENDIF
+!---  GTG EDR turbulence: ADDED BY Y. MAO
+        IF(IGET(464) >  0) THEN
+          IF(LVLS(LP,IGET(464)) > 0) THEN
+!$omp  parallel do private(i,j)
+             DO J=JSTA,JEND
+               DO I=ISTA,IEND
+                 GRID1(I,J) = GTGSL(I,J)
+               ENDDO
+             ENDDO
+             if(grib == 'grib2') then
+              cfld = cfld+1
+              fld_info(cfld)%ifld=IAVBLFLD(IGET(464))
+              fld_info(cfld)%lvl=LVLSXML(LP,IGET(464))
+!$omp parallel do private(i,j,jj)
+              do j=1,jend-jsta+1
+                jj = jsta+j-1
+                do i=1,iend-ista+1
+                  ii=ista+i-1
+                  datapd(i,j,cfld) = GRID1(ii,jj)
+                enddo
+              enddo
+            endif
+          ENDIF
+        ENDIF
+!---  GTG CAT turbulence: ADDED BY Y. MAO
+        IF(IGET(465) >  0) THEN
+          IF(LVLS(LP,IGET(465)) > 0) THEN
+!$omp  parallel do private(i,j)
+             DO J=JSTA,JEND
+               DO I=ISTA,IEND
+                 GRID1(I,J) = CATSL(I,J)
+               ENDDO
+             ENDDO
+             if(grib == 'grib2') then
+              cfld = cfld+1
+              fld_info(cfld)%ifld=IAVBLFLD(IGET(465))
+              fld_info(cfld)%lvl=LVLSXML(LP,IGET(465))
+!$omp parallel do private(i,j,jj)
+              do j=1,jend-jsta+1
+                jj = jsta+j-1
+                do i=1,iend-ista+1
+                  ii=ista+i-1
+                  datapd(i,j,cfld) = GRID1(ii,jj)
+                enddo
+              enddo
+            endif
+          ENDIF
+        ENDIF
+!---  GTG MWT turbulence: ADDED BY Y. MAO
+        IF(IGET(466) >  0) THEN
+          IF(LVLS(LP,IGET(466)) > 0) THEN
+!$omp  parallel do private(i,j)
+             DO J=JSTA,JEND
+               DO I=ISTA,IEND
+                 GRID1(I,J) = MWTSL(I,J)
+               ENDDO
+             ENDDO
+             if(grib == 'grib2') then
+              cfld = cfld+1
+              fld_info(cfld)%ifld=IAVBLFLD(IGET(466))
+              fld_info(cfld)%lvl=LVLSXML(LP,IGET(466))
+!$omp parallel do private(i,j,jj)
+              do j=1,jend-jsta+1
+                jj = jsta+j-1
+                do i=1,iend-ista+1
+                  ii=ista+i-1
+                  datapd(i,j,cfld) = GRID1(ii,jj)
+                enddo
+              enddo
+            endif
+          ENDIF
+       ENDIF
+
 !$omp  parallel do private(i,j)
         DO J=JSTA_2L,JEND_2U
           DO I=ISTA_2L,IEND_2U
@@ -2039,7 +2237,7 @@
              DO J=JSTA,JEND
                DO I=ISTA,IEND
                IF(SMOKESL(I,J,1)<SPVAL.and.SPL(LP)<SPVAL.and.TSL(I,J)<SPVAL)THEN
-                 GRID1(I,J) = (1./RD)*SMOKESL(I,J,1)*(SPL(LP)/TSL(I,J))
+                 GRID1(I,J) = (1./RD)*SMOKESL(I,J,1)*(SPL(LP)/(TSL(I,J)*(1E9)))
                ELSE
                  GRID1(I,J) = SPVAL
                ENDIF
@@ -2060,20 +2258,23 @@
              endif
           ENDIF
          ENDIF
-         if (gocart_on) then
-!--- DUST 
-         IF (IGET(438) > 0) THEN
-          IF (LVLS(LP,IGET(438)) > 0) THEN
+! E. James - 14 Sep 2022: DUST from RRFS
+        IF (IGET(743) > 0) THEN
+          IF (LVLS(LP,IGET(743)) > 0) THEN
 !$omp  parallel do private(i,j)
              DO J=JSTA,JEND
                DO I=ISTA,IEND
-                 GRID1(I,J) = DUSTSL(I,J,1)
+               IF(FV3DUSTSL(I,J,1)<SPVAL.and.SPL(LP)<SPVAL.and.TSL(I,J)<SPVAL)THEN
+                 GRID1(I,J) = (1./RD)*FV3DUSTSL(I,J,1)*(SPL(LP)/(TSL(I,J)*(1E9)))
+               ELSE
+                 GRID1(I,J) = SPVAL
+               ENDIF
                ENDDO
              ENDDO
              if(grib == 'grib2')then
                cfld = cfld + 1
-               fld_info(cfld)%ifld=IAVBLFLD(IGET(438))
-               fld_info(cfld)%lvl=LVLSXML(LP,IGET(438))
+               fld_info(cfld)%ifld=IAVBLFLD(IGET(743))
+               fld_info(cfld)%lvl=LVLSXML(LP,IGET(743))
 !$omp parallel do private(i,j,ii,jj)
                do j=1,jend-jsta+1
                  jj = jsta+j-1
@@ -2085,19 +2286,23 @@
              endif
           ENDIF
          ENDIF
-
-         IF (IGET(439) > 0) THEN
-          IF (LVLS(LP,IGET(439)) > 0) THEN
+! E. James - 23 Feb 2023: COARSEPM from RRFS
+        IF (IGET(1013) > 0) THEN
+          IF (LVLS(LP,IGET(1013)) > 0) THEN
 !$omp  parallel do private(i,j)
              DO J=JSTA,JEND
                DO I=ISTA,IEND
-                 GRID1(I,J) = DUSTSL(I,J,2)
+               IF(COARSEPMSL(I,J,1)<SPVAL.and.SPL(LP)<SPVAL.and.TSL(I,J)<SPVAL)THEN
+                 GRID1(I,J) = (1./RD)*COARSEPMSL(I,J,1)*(SPL(LP)/(TSL(I,J)*(1E9)))
+               ELSE
+                 GRID1(I,J) = SPVAL
+               ENDIF
                ENDDO
              ENDDO
              if(grib == 'grib2')then
                cfld = cfld + 1
-               fld_info(cfld)%ifld=IAVBLFLD(IGET(439))
-               fld_info(cfld)%lvl=LVLSXML(LP,IGET(439))
+               fld_info(cfld)%ifld=IAVBLFLD(IGET(1013))
+               fld_info(cfld)%lvl=LVLSXML(LP,IGET(1013))
 !$omp parallel do private(i,j,ii,jj)
                do j=1,jend-jsta+1
                  jj = jsta+j-1
@@ -2109,81 +2314,7 @@
              endif
           ENDIF
          ENDIF
-
-         IF (IGET(440) > 0) THEN
-          IF (LVLS(LP,IGET(440)) > 0) THEN
-!$omp  parallel do private(i,j)
-             DO J=JSTA,JEND
-               DO I=ISTA,IEND
-                 GRID1(I,J) = DUSTSL(I,J,3)
-               ENDDO
-             ENDDO
-             if(grib == 'grib2')then
-               cfld = cfld + 1
-               fld_info(cfld)%ifld=IAVBLFLD(IGET(440))
-               fld_info(cfld)%lvl=LVLSXML(LP,IGET(440))
-!$omp parallel do private(i,j,ii,jj)
-               do j=1,jend-jsta+1
-                 jj = jsta+j-1
-                 do i=1,iend-ista+1
-                  ii=ista+i-1
-                   datapd(i,j,cfld) = GRID1(ii,jj)
-                 enddo
-               enddo
-             endif
-          ENDIF
-         ENDIF
-
-         IF (IGET(441) > 0) THEN
-          IF (LVLS(LP,IGET(441)) > 0) THEN
-!$omp  parallel do private(i,j)
-             DO J=JSTA,JEND
-               DO I=ISTA,IEND
-                 GRID1(I,J) = DUSTSL(I,J,4)
-               ENDDO
-             ENDDO
-             if(grib == 'grib2')then
-               cfld = cfld + 1
-               fld_info(cfld)%ifld=IAVBLFLD(IGET(441))
-               fld_info(cfld)%lvl=LVLSXML(LP,IGET(441))
-!$omp parallel do private(i,j,ii,jj)
-               do j=1,jend-jsta+1
-                 jj = jsta+j-1
-                 do i=1,iend-ista+1
-                  ii=ista+i-1
-                   datapd(i,j,cfld) = GRID1(ii,jj)
-                 enddo
-               enddo
-             endif
-          ENDIF
-         ENDIF
-
-         IF (IGET(442) > 0) THEN
-          IF (LVLS(LP,IGET(442)) > 0) THEN
-!$omp  parallel do private(i,j)
-             DO J=JSTA,JEND
-               DO I=ISTA,IEND
-                 GRID1(I,J) = DUSTSL(I,J,5)
-               ENDDO
-             ENDDO
-             if(grib == 'grib2')then
-               cfld = cfld + 1
-               fld_info(cfld)%ifld=IAVBLFLD(IGET(442))
-               fld_info(cfld)%lvl=LVLSXML(LP,IGET(442))
-!$omp parallel do private(i,j,ii,jj)
-               do j=1,jend-jsta+1
-                 jj = jsta+j-1
-                 do i=1,iend-ista+1
-                  ii=ista+i-1
-                   datapd(i,j,cfld) = GRID1(ii,jj)
-                 enddo
-               enddo
-             endif
-          ENDIF
-         ENDIF
-         endif  ! if gocart_on
-
-
+         
          if(iostatusD3D==0 .and. d3d_on) then
 !---  longwave tendency
            IF (IGET(355) > 0) THEN
@@ -3946,10 +4077,48 @@
           END DO
         ENDIF  
       ENDIF
+
+! SNOW DESITY SOLID-LIQUID-RATION SLR
+      IF ( IGET(1006)>0 ) THEN
+         if(me==0)PRINT*,'CALLING SLR'
+         egrid1=spval
+         if(slrutah_on) then
+            call calslr_uutah(EGRID1)
+         else
+            call calslr_roebber(TPRS,RHPRS,EGRID1)
+         endif
+!$omp parallel do private(i,j) 
+         do j=jsta,jend
+         do i=ista,iend
+            grid1(i,j)=spval
+            if(egrid1(i,j) < spval) then
+              if(egrid1(i,j)>=1.) then
+                 grid1(i,j)=1000./egrid1(i,j)
+              else
+                 grid1(i,j)=spval
+              endif
+            endif
+         enddo
+         enddo
+         if(grib=='grib2') then
+            cfld=cfld+1
+            fld_info(cfld)%ifld=IAVBLFLD(IGET(1006))
+!$omp parallel do private(i,j,ii,jj) 
+            do j=1,jend-jsta+1 
+              jj = jsta+j-1
+              do i=1,iend-ista+1
+              ii=ista+i-1
+                datapd(i,j,cfld) = GRID1(ii,jj) 
+              enddo
+            enddo
+         endif
+      ENDIF
 !
 if(allocated(d3dsl))   deallocate(d3dsl)
-if(allocated(dustsl))  deallocate(dustsl)
 if(allocated(smokesl)) deallocate(smokesl)
+if(allocated(fv3dustsl)) deallocate(fv3dustsl)
+if(allocated(coarsepmsl)) deallocate(coarsepmsl)
+      if(me==0)PRINT*,'MDL2P completed'
 !     END OF ROUTINE.
 !
       RETURN

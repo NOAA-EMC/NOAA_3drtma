@@ -39,19 +39,19 @@
 !> 2002-01-15 | Mike Baldwin | WRF version           
 !> 2011-12-14 | Sarah Lu     | Add GOCART aerosol AERFD
 !> 2021-10-15 | JESSE MENG   | 2D DECOMPOSITION
+!> 2022-09-22 | Li(Kate) Zhang   | Remove Dust=> AERFD
 !>
 !> @author Russ Treadon W/NP2 @date 1992-12-22
-      SUBROUTINE FDLVL(ITYPE,TFD,QFD,UFD,VFD,PFD,ICINGFD,AERFD)
+      SUBROUTINE FDLVL(ITYPE,TFD,QFD,UFD,VFD,PFD,ICINGFD)
 
 !     
 !
-      use vrbls4d,    only: DUST
       use vrbls3d,    only: ZMID, T, Q, PMID, ICING_GFIP, UH, VH
       use vrbls2d,    only: FIS
       use masks,      only: LMH
       use params_mod, only: GI, G
       use ctlblk_mod, only: JSTA, JEND, SPVAL, JSTA_2L, JEND_2U, LM, JSTA_M, &
-                            JEND_M, HTFD, NFD, IM, JM, NBIN_DU, gocart_on,   &
+                            JEND_M, HTFD, NFD, IM, JM, NBIN_DU,    &
                             MODELNAME, ISTA, IEND, ISTA_2L, IEND_2U, ISTA_M, IEND_M
       use gridspec_mod, only: GRIDTYPE
 !- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -65,7 +65,6 @@
       integer,intent(in) ::  ITYPE(NFD)
 !jw      real,intent(in) :: HTFD(NFD)
       real,dimension(ISTA:IEND,JSTA:JEND,NFD),intent(out) :: TFD,QFD,UFD,VFD,PFD,ICINGFD
-      real,dimension(ISTA:IEND,JSTA:JEND,NFD,NBIN_DU),intent(out) :: AERFD
 !
       INTEGER LVL(NFD),LHL(NFD)
       INTEGER IVE(JM),IVW(JM)
@@ -98,17 +97,6 @@
           ENDDO
         ENDDO
       ENDDO
-      if (gocart_on) then
-        DO N = 1, NBIN_DU
-          DO IFD = 1,NFD
-            DO J=JSTA,JEND
-              DO I=ISTA,IEND
-                AERFD(I,J,IFD,N) = SPVAL
-              ENDDO
-            ENDDO
-          ENDDO
-        ENDDO
-      endif
 
       IF(gridtype == 'E') THEN
         JVN =  1
@@ -224,22 +212,11 @@
                 PFD(I,J,IFD) = PMID(I,J,L) - (PMID(I,J,L)-PMID(I,J,L+1))*RDZ*DZABH(IFD)
                 ICINGFD(I,J,IFD) = ICING_GFIP(I,J,L) - &
                  (ICING_GFIP(I,J,L)-ICING_GFIP(I,J,L+1))*RDZ*DZABH(IFD)
-                if (gocart_on) then
-                  DO N = 1, NBIN_DU
-                    AERFD(I,J,IFD,N) = DUST(I,J,L,N) - &
-                        (DUST(I,J,L,N)-DUST(I,J,L+1,N))*RDZ*DZABH(IFD)
-                  ENDDO
-                endif
               ELSEIF (L == LM) THEN
                 TFD(I,J,IFD) = T(I,J,L)
                 QFD(I,J,IFD) = Q(I,J,L)
                 PFD(I,J,IFD) = PMID(I,J,L)
                 ICINGFD(I,J,IFD) = ICING_GFIP(I,J,L)
-                if (gocart_on) then
-                  DO N = 1, NBIN_DU
-                    AERFD(I,J,IFD,N) = DUST(I,J,L,N)
-                  ENDDO
-                endif
               ENDIF
     
               L = LVL(IFD)
@@ -364,22 +341,11 @@
                  PFD(I,J,IFD) = PMID(I,J,L) - (PMID(I,J,L)-PMID(I,J,L+1))*RDZ*DZABH(IFD)
                  ICINGFD(I,J,IFD) = ICING_GFIP(I,J,L) - &
                    (ICING_GFIP(I,J,L)-ICING_GFIP(I,J,L+1))*RDZ*DZABH(IFD)
-                 if (gocart_on) then
-                   DO N = 1, NBIN_DU
-                     AERFD(I,J,IFD,N) = DUST(I,J,L,N) - &
-                    (DUST(I,J,L,N)-DUST(I,J,L+1,N))*RDZ*DZABH(IFD)
-                   ENDDO
-                 endif
                ELSE
                  TFD(I,J,IFD) = T(I,J,L)
                  QFD(I,J,IFD) = Q(I,J,L)
                  PFD(I,J,IFD) = PMID(I,J,L)
                  ICINGFD(I,J,IFD) = ICING_GFIP(I,J,L)
-                 if (gocart_on) then
-                   DO N = 1, NBIN_DU
-                     AERFD(I,J,IFD,N) = DUST(I,J,L,N)
-                   ENDDO
-                 endif
                ENDIF
 
                L = LVL(IFD)
@@ -812,6 +778,7 @@
 !> 2017-06-01 | Y Mao        | Add FD levels for GTG(EDPARM CATEDR MWTURB) and allow levels input from control file
 !> 2019-09-25 | Y Mao        | Seperate mass from UV allow array of mass input to interpolate multiple fields with the same levels at one time. Dust=> AERFD can be processed when NIN=NBIN_DU
 !> 2020-11-10 | Jesse Meng   | Use UPP_PHYSICS module
+!> 2022-05-25 | Y Mao        | Remove interpolation of w/omega/Hydrometeor fields on FD levels
 !>
 !> @author Russ Treadon W/NP2 @date 1992-12-22
       SUBROUTINE FDLVL_MASS(ITYPE,NFD,PTFD,HTFD,NIN,QIN,QTYPE,QFD)
@@ -1010,9 +977,7 @@
                       endif
                    END IF       ! endif loop for deducing T and Q differently for GFS  
 
-                   if(QTYPE(N) == "W") QFD(I,J,IFD,N)=QIN(I,J,LM,N) ! W OMGA
                    if(QTYPE(N) == "K") QFD(I,J,IFD,N)= max(0.0,0.5*(QIN(I,J,LM,N)+QIN(I,J,LM-1,N))) ! TKE
-                   if(QTYPE(N) == "C") QFD(I,J,IFD,N)=0.0 ! Hydrometeor fields
                  END DO
 
               ENDIF ! Underground

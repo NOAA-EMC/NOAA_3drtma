@@ -10,6 +10,12 @@
 !  2011-12-14 SARAH LU  - ADD AER FILENAME
 !  2011-12-23 SARAH LU  - ADD NBIN FOR DU, SS, OC, BC, SU
 !  2021-09-30 JESSE MENG- 2D DECOMPOSITION
+!  2022-09-22 Li(Kate) Zhang- Add option for NASA GOCART as "nasa_on", add NBIN for NO3 and NH4
+!  2022-11-08 Kai Wang  - Replace aqfcmaq_on with aqf_on
+!  2023-01-24 Sam Trahan - IFI flight levels, runtime of IFI, and record of the bucket time
+!  2023-03-21 Jesse Meng - Add slrutah_on option to use U Utah SLR
+!  2023-04-04 Li(Kate Zhang) Add namelist optoin for CCPP-Chem (UFS-Chem) 
+!         and 2D diag. output (d2d_chem) for GEFS-Aerosols and CCPP-Chem model.
 !-----------------------------------------------------------------------
 !
   implicit none
@@ -42,7 +48,7 @@
   real*8 :: gdsdegr
   real,allocatable :: datapd(:,:,:)
 !
-  logical :: gocart_on, d3d_on, hyb_sigp, rdaod, aqfcmaq_on
+  logical :: gocart_on, gccpp_on, nasa_on, d3d_on, hyb_sigp, rdaod, d2d_chem, aqf_on, slrutah_on
   logical :: SIGMA,RUN,FIRST,RESTRT
   logical :: global
   logical :: SMFLAG
@@ -83,7 +89,8 @@
   real(kind=8) :: ETAFLD2_tim=0.,ETA2P_tim=0.,SURFCE2_tim=0.,          &
                   CLDRAD_tim=0.,MISCLN_tim=0.,FIXED_tim=0.,            &
                   MDL2SIGMA_tim=0.,READxml_tim=0.,MDL2AGL_tim=0.,      &
-                  MDL2STD_tim=0.,MDL2THANDPV_tim=0.,CALRAD_WCLOUD_tim=0.!comm tim_info
+                  MDL2STD_tim=0.,MDL2THANDPV_tim=0.,                   &
+                  CALRAD_WCLOUD_tim=0.,RUN_IFI_TIM=0.     !comm tim_info
 !
   real(kind=8) :: time_output=0., time_e2out=0.           !comm jjt
 !
@@ -103,6 +110,8 @@
   integer, parameter :: nbin_oc = 2   		! organic carbon
   integer, parameter :: nbin_bc = 2   		! black carbon
   integer, parameter :: nbin_su = 1   		! sulfate
+  integer, parameter :: nbin_no3 = 3   		! nitrate
+  integer, parameter :: nbin_nh4 = 1   		! NH4
   integer, parameter :: nbin_sm = 1             ! smoke
 !
 !     SET FD LEVEL HEIGHTS IN GEOPOTENTAL METERS.
@@ -114,5 +123,12 @@
       DATA SIGBND / 0.985,0.955,0.925,0.895,0.865,0.835 /
       DATA PETABND / 15.,45.,75.,105.,135.,165./
 !
+!     Precipitation bucket time
+      real :: ITPREC=-1
+!
+!     Flight levels in feet, provided by libIFI
+      integer :: ifi_nflight = 0
+      real, allocatable :: ifi_flight_levels(:) ! units are FEET
+!     
 !-----------------------------------------------------------------------
   end module CTLBLK_mod

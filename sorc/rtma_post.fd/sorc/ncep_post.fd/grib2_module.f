@@ -12,6 +12,7 @@
 !                              with parameter marshalling
 !   July,  2021    Jesse Meng 2D decomsition
 !   June,  2022    Lin Zhu change the dx/dy to reading in from calculating for latlon grid
+!   January, 2023  Sam Trahan    foot&meter Unit conversions for IFI
 !------------------------------------------------------------------------
   use xml_perl_data, only: param_t,paramset_t
 !
@@ -225,6 +226,7 @@
     logical, parameter :: debugprint = .false.
 !
     character(1), dimension(:), allocatable :: cgrib
+    real :: level_unit_conversion
 !
 !
 !---------------- code starts here --------------------------
@@ -324,10 +326,14 @@
                                       '  category ',icatg,             &
                                       '  parameter ',iparm,            &
                                       ' for var ',trim(pset%param(nprm)%pname)
-
+            if(index(pset%param(nprm)%shortname,'IFI_FLIGHT_LEVEL')>0) then
+              level_unit_conversion=0.3048 ! convert feet->meters
+            else
+              level_unit_conversion=1
+            endif
             call gengrb2msg(idisc,icatg, iparm,nprm,nlvl,fldlvl1,fldlvl2,     &
                 fld_info(i)%ntrange,fld_info(i)%tinvstat,datafld(:,i),       &
-                cgrib,clength)
+                cgrib,clength,level_unit_conversion)
 !            print *,'finished gengrb2msg field=',i,'ntlfld=',ntlfld,'clength=',clength
             call wryte(lunout, clength, cgrib)
            else
@@ -419,8 +425,14 @@
 !
 !--- generate grib2 message ---
 !
+         if(index(pset%param(nprm)%shortname,'IFI_FLIGHT_LEVEL')>0) then
+           level_unit_conversion=0.3048 ! convert feet->meters
+         else
+           level_unit_conversion=1
+         endif
          call gengrb2msg(idisc,icatg, iparm,nprm,nlvl,fldlvl1,fldlvl2,ntrange,  &
-                       leng_time_range_stat,datafld(:,i),cgrib(cstart),clength)
+                       leng_time_range_stat,datafld(:,i),cgrib(cstart),clength, &
+                       level_unit_conversion)
          cstart=cstart+clength
 !
        else
@@ -479,7 +491,7 @@
 !----------------------------------------------------------------------------------------
 !
   subroutine gengrb2msg(idisc,icatg, iparm,nprm,nlvl,fldlvl1,fldlvl2,ntrange,tinvstat,  &
-     datafld1,cgrib,lengrib)
+     datafld1,cgrib,lengrib,level_unit_conversion)
 !
 !----------------------------------------------------------------------------------------
 !
@@ -498,6 +510,7 @@
     real,dimension(:),intent(in) :: datafld1
     character(1),intent(inout) :: cgrib(max_bytes)
     integer, intent(inout) :: lengrib
+    real, intent(in) :: level_unit_conversion
 !
     integer, parameter :: igdsmaxlen=200
 !
@@ -732,6 +745,14 @@
          scale_fct_fixed_sfc2=pset%param(nprm)%scale_fact_fixed_sfc2(1)
        else
          scale_fct_fixed_sfc2=0
+       endif
+
+       if(abs(level_unit_conversion-1)>1e-4) then
+!         print *,'apply level unit conversion ',level_unit_conversion
+!         print *,'scaled_val_fixed_sfc1 was ',scaled_val_fixed_sfc1
+         scaled_val_fixed_sfc1=nint(scaled_val_fixed_sfc1*real(level_unit_conversion,kind=8))
+         scaled_val_fixed_sfc2=nint(scaled_val_fixed_sfc2*real(level_unit_conversion,kind=8))
+!         print *,'scaled_val_fixed_sfc1 now ',scaled_val_fixed_sfc1
        endif
 
        ihr_start = ifhr-tinvstat 
@@ -1182,7 +1203,7 @@
     integer :: grib_edition
     integer :: itot
     integer :: nx,ny
-    real    :: dx,dy,lat1,lon1,rtnum
+    real    :: dx,dy,lat1,lon1,rtnum, nlat
     real    :: ref_value,bin_scale_fac,dec_scale_fac,bit_number,field_type
     real    :: bit_map
     real    :: scale_factor,scale_factor2
@@ -1306,7 +1327,15 @@
 !                write(*,*) 'bit_number=',bit_number
 !                write(*,*) 'field_type=',field_type
 !                write(*,*) 'bit map indicator=',bit_map
-             else
+             else if (gfld%igdtnum.eq.40) then ! Gaussian Grid (GFS)
+                nx = gfld%igdtmpl(8)
+                ny = gfld%igdtmpl(9)
+                lat1 = gfld%igdtmpl(12)/scale_factor
+                lon1 = gfld%igdtmpl(13)/scale_factor
+                dx = gfld%igdtmpl(17)/scale_factor
+                nlat = gfld%igdtmpl(18)
+                write(*,*) gfld%igdtnum, nx, ny, lat1, lon1, dx, nlat
+        else
                 write(*,*) 'unknown projection'
                 stop 1235
              endif
@@ -1461,7 +1490,7 @@
         ENDIF
       ENDIF
 
-!     write(0,*)' GMIN=',GMIN,' GMAX=',GMAX
+!     write(*,*)' GMIN=',GMIN,' GMAX=',GMAX
 ! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 !  COMPUTE NUMBER OF BITS
       icnt = 0
@@ -1496,7 +1525,7 @@
           rng2 = range * 2. ** (-ibs)
           nbits = INT ( ALOG ( rng2 ) / rln2 ) + 1
       END IF
-!     write(0,*)'in g2getnits,ibs=',ibs,'ids=',ids,'nbits=',nbits,'range=',range
+!     write(*,*)'in g2getnits,ibs=',ibs,'ids=',ids,'nbits=',nbits,'range=',range
 !*
       IF(nbits <= 0) THEN
         nbits = 0
@@ -1509,7 +1538,7 @@
         ENDIF
       ENDIF
       nbits = min(nbits,MXBIT)
-!     write(0,*)'in g2getnits ibs=',ibs,'ids=',ids,'nbits=',nbits
+!     write(*,*)'in g2getnits ibs=',ibs,'ids=',ids,'nbits=',nbits
 !
       IF ( scl > 0.0 ) THEN 
         s=10.0 ** ids
@@ -1553,7 +1582,7 @@
         endif
 !
       endif
-!     write(0,*)'in g2getnits,2ibs=',ibs,'ids=',ids,'nbits=',nbits,'range=',& 
+!     write(*,*)'in g2getnits,2ibs=',ibs,'ids=',ids,'nbits=',nbits,'range=',& 
 !                range, 'scl=',scl,'data=',maxval(g),minval(g)
 ! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
       RETURN
@@ -1797,7 +1826,7 @@
 
      ENDIF
 
-!    write(0,*)'igds=',igds,'igdstempl=',ifield3(1:ifield3len)
+!    write(*,*)'igds=',igds,'igdstempl=',ifield3(1:ifield3len)
      end subroutine getgds
 !
 !-------------------------------------------------------------------------------------

@@ -13,7 +13,7 @@
 !> 'non-classic' hodographs (such as Northwest-flow events) and do as well or 
 !> better than the old method in more classic situations.
 !>     
-!> @param[in] DPTH Depth in meters over whcih helicity should be computed; allows one to distinguish 0-3 km and 0-1 km values.
+!> @param[in] DEPTH Depth in meters over whcih helicity should be computed; allows one to distinguish 0-3 km and 0-1 km values.
 !> @param[out] UST Estimated U Component (m/s) Of Storm motion.
 !> @param[out] VST Estimated V Component (m/s) Of Storm motion.
 !> @param[out] HELI Storm-relative heliciry (m**2/s**2).
@@ -37,6 +37,7 @@
 !> 2005-07-07 | Binbin Zhou     | Add RSM for A grid  
 !> 2019-10-30 | Bo Cui          | Remove "goto" statement
 !> 2021-09-02 | Bo Cui          | Decompose UPP in X direction          
+!> 2022-10-07 | Tracy Hertneky  | Add left mover for storm motion in SH
 !>   
 !> @author Michael Baldwin W/NP2 @date 1994-08-22
       SUBROUTINE CALHEL(DEPTH,UST,VST,HELI,USHR1,VSHR1,USHR6,VSHR6)
@@ -44,7 +45,7 @@
 !
       use vrbls3d,    only: zmid, uh, vh, u, v, zint
       use vrbls2d,    only: fis, u10, v10
-      use masks,      only: lmv
+      use masks,      only: lmv, gdlat
       use params_mod, only: g
       use lookup_mod, only: ITB,JTB,ITBQ,JTBQ
       use ctlblk_mod, only: jsta, jend, jsta_m, jend_m, jsta_2l, jend_2u, &
@@ -308,8 +309,13 @@
 
             DENOM = USHR6(I,J)*USHR6(I,J)+VSHR6(I,J)*VSHR6(I,J)
             IF (DENOM /= 0.0) THEN
-              UST(I,J) = UMEAN6 + (7.5*VSHR6(I,J)/SQRT(DENOM))
-              VST(I,J) = VMEAN6 - (7.5*USHR6(I,J)/SQRT(DENOM))
+              IF (GDLAT(I,J) >= 0) THEN
+                UST(I,J) = UMEAN6 + (7.5*VSHR6(I,J)/SQRT(DENOM))
+                VST(I,J) = VMEAN6 - (7.5*USHR6(I,J)/SQRT(DENOM))
+              ELSE IF (GDLAT(I,J) < 0) THEN
+                UST(I,J) = UMEAN6 - (7.5*VSHR6(I,J)/SQRT(DENOM))
+                VST(I,J) = VMEAN6 + (7.5*USHR6(I,J)/SQRT(DENOM))
+              ENDIF
             ELSE
               UST(I,J) = 0
               VST(I,J) = 0
