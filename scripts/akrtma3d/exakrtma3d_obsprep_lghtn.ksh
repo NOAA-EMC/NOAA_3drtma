@@ -138,11 +138,11 @@ msg="JOB $job FOR $NET HAS COMPLETED NORMALLY"
 postmsg "$jlogfile" "$msg"
 
 chgrp rstprod ${DATA}/${NET}.t${cyc}z.lghtng.tm00.bufr_d
-chmod 750 ${DATA}/${NET}.t${cyc}z.lghtng.tm00.bufr_d
+chmod 640 ${DATA}/${NET}.t${cyc}z.lghtng.tm00.bufr_d
 cpreq ${DATA}/${NET}.t${cyc}z.lghtng.tm00.bufr_d ${COMINobsproc_rtma3d}
 cpreq ${DATA}/lightning_bufr.namelist ${COMINobsproc_rtma3d}
 chgrp rstprod ${DATA}/LightningInGSI.bufr
-chmod 750 ${DATA}/LightningInGSI.bufr
+chmod 640 ${DATA}/LightningInGSI.bufr
 cpreq  ${DATA}/LightningInGSI.bufr ${DATA}/LightningInGSI_bufr.bufr
 lghtng_bufr="LightningInGSI_bufr.bufr"
 if [ -f ${DATA}/${lghtng_bufr} ] ; then
