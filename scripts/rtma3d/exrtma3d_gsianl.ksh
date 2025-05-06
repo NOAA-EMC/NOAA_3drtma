@@ -98,8 +98,6 @@ else
 fi
 
 if [ -r "${OBS_DIR}/${RUN}.t${cyc}z.LightningInGSI_bufr.bufr" ]; then
-   chgrp rstprod ${OBS_DIR}/${RUN}.t${cyc}z.LightningInGSI_bufr.bufr
-   chmod 750 ${OBS_DIR}/${RUN}.t${cyc}z.LightningInGSI_bufr.bufr
   ${LN} -sf ${OBS_DIR}/${RUN}.t${cyc}z.LightningInGSI_bufr.bufr ./lghtInGSI
 else
   ${ECHO} "Warning: ${OBS_DIR}: LightningInGSI.bufr does not exist!"
