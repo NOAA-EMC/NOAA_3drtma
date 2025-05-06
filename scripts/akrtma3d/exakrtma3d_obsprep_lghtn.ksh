@@ -136,6 +136,8 @@ export err=$?; err_chk
 
 msg="JOB $job FOR $NET HAS COMPLETED NORMALLY"
 postmsg "$jlogfile" "$msg"
+cpreq ${DATA}/${NET}.t${cyc}z.lghtng.tm00.bufr_d ${COMINobsproc_rtma3d}
+cpreq ${DATA}/lightning_bufr.namelist ${COMINobsproc_rtma3d}
 cpreq  ${DATA}/LightningInGSI.bufr ${DATA}/LightningInGSI_bufr.bufr
 lghtng_bufr="LightningInGSI_bufr.bufr"
 if [ -f ${DATA}/${lghtng_bufr} ] ; then

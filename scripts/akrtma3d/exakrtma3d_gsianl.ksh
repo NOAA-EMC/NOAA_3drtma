@@ -92,6 +92,8 @@ RUN_GUST="FALSE"
 
 # Link to the prepbufr data
 if [ -r ${OBS_DIR}/${NET}.t${cyc}z.prepbufr.tm00 ]; then
+   chgrp rstprod ${OBS_DIR}/${NET}.t${HH}z.prepbufr.tm00
+   chmod 750 ${OBS_DIR}/${NET}.t${HH}z.prepbufr.tm00
   ${LN} -sf ${OBS_DIR}/${NET}.t${cyc}z.prepbufr.tm00 ./prepbufr
 fi
 
@@ -102,6 +104,8 @@ else
 fi
 
 if [ -r "${OBS_DIR}/${RUN}.t${cyc}z.LightningInGSI_bufr.bufr" ]; then
+  chgrp rstprod ${OBS_DIR}/${RUN}.t${cyc}z.LightningInGSI_bufr.bufr
+  chmod 750 ${OBS_DIR}/${RUN}.t${cyc}z.LightningInGSI_bufr.bufr  
   ${LN} -sf ${OBS_DIR}/${RUN}.t${cyc}z.LightningInGSI_bufr.bufr ./lghtInGSI
 else
   ${ECHO} "Warning: ${OBS_DIR}: LightningInGSI.bufr does not exist!"
