@@ -90,7 +90,7 @@ if [ ${obsprep_lghtn} -eq 1 ] ; then
 
 #${LN} -sf ${NET}.t${cyc}z.lghtng.tm00.bufr_d  lghtngbufr
 
-cpreq -p ${COMINPREP}/${NET}.${YYYYMMDD}/${NET}.t${HH}z.lghtng.tm00.bufr_d ./${NET}.t${cyc}z.lghtng.tm00.bufr_d
+cpreq -p ${COMINPREP}/${NET}.${YYYYMMDD}/${NET}.t${cyc}z.lghtng.tm00.bufr_d ./${NET}.t${cyc}z.lghtng.tm00.bufr_d
 cpreq -p ${NET}.t${cyc}z.lghtng.tm00.bufr_d  lghtngbufr
 
   echo ${PDY}${cyc} > ./lightning_cycle_date
