@@ -86,7 +86,7 @@ if [ ${obsprep_lghtn} -eq 1 ] ; then
 
 # find lightning bufr file
 
-#${LN} -sf ${COMINPREP}/${NET}.${YYYYMMDD}/${NET}.t${HH}z.lghtng.tm00.bufr_d ./${NET}.t${cyc}z.lghtng.tm00.bufr_d
+#${LN} -sf ${COMINPREP}/${NET}.${YYYYMMDD}/${NET}.t${cyc}z.lghtng.tm00.bufr_d ./${NET}.t${cyc}z.lghtng.tm00.bufr_d
 
 #${LN} -sf ${NET}.t${cyc}z.lghtng.tm00.bufr_d  lghtngbufr
 
