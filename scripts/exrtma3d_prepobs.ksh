@@ -94,7 +94,7 @@ msg="***********************************************************"
 postmsg "$jlogfile" "$msg"
 
 if [ -f ${COMINPREP}/${NET}.${YYYYMMDD}/${NET}.t${HH}z.prepbufr.tm00 ]; then
-   cpreq  ${COMINPREP}/${NET}.${YYYYMMDD}/${NET}.t${HH}z.prepbufr.tm00 ${COMINobsproc_rtma3d}/${NET}.t${HH}z.prepbufr.tm00
+   cpreq -p ${COMINPREP}/${NET}.${YYYYMMDD}/${NET}.t${HH}z.prepbufr.tm00 ${COMINobsproc_rtma3d}/${NET}.t${HH}z.prepbufr.tm00
    ${LN} -sf ${COMINobsproc_rtma3d}/${NET}.t${HH}z.prepbufr.tm00 ${DATA}/${NET}.t${HH}z.prepbufr.tm00
 else
    ${ECHO} "Warning: /${NET}.${YYYYMMDD}/${NET}.t${HH}z.prepbufr.tm00 does NOT exist!"
