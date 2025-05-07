@@ -123,6 +123,8 @@ if [ -s filelist_mrms ]; then
    mv filelist_mrms filelist_mrms_org
    ls MergedReflectivityQC_*_${YYYY}${MM}${DD}-${HH}????.grib2 > filelist_mrms
    numgrib2=`more filelist_mrms | wc -l`
+   cpreq MergedReflectivityQC_*_${YYYY}${MM}${DD}-${HH}????.grib2 ${COMINobsproc_rtma3d}
+   gzip  ${COMINobsproc_rtma3d}/MergedReflectivityQC_*_${YYYY}${MM}${DD}-${HH}????.grib2
    echo "Using radar data from: `head -1 filelist_mrms | cut -c10-15`"
    echo "NSSL grib2 file levels = $numgrib2"
 else
@@ -157,7 +159,8 @@ export err=$?; err_chk
 
 msg="JOB $job FOR $RUN HAS COMPLETED NORMALLY"
 postmsg "$jlogfile" "$msg"
-
+cpreq ${DATA}/filelist_mrms ${COMINobsproc_rtma3d}
+cpreq ${DATA}/mosaic.namelist ${COMINobsproc_rtma3d}
 targetfile="NSSLRefInGSI.bufr"
 if [ -f ${DATA}/${targetfile} ] ; then
   cpreq ${DATA}/${targetfile} ${COMINobsproc_rtma3d}/${NET}.t${cyc}z.${targetfile}

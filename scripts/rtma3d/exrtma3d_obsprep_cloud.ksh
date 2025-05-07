@@ -73,7 +73,8 @@ export err=$?; err_chk
 
 msg="JOB $job FOR $NET HAS COMPLETED NORMALLY"
 postmsg "$jlogfile" "$msg"
-
+cpreq ${DATA}/namelist_nasalarc ${COMINobsproc_rtma3d}
+cpreq ${DATA}/${NET}.t${cyc}z.lgycld.tm00.bufr_d ${COMINobsproc_rtma3d} 
 targetfile="NASALaRCCloudInGSI.bufr"
 if [ -f ${DATA}/${targetfile} ] ; then
   cpreq ${DATA}/${targetfile} ${COMINobsproc_rtma3d}/${RUN}.t${cyc}z.${targetfile}
