@@ -86,9 +86,12 @@ if [ ${obsprep_lghtn} -eq 1 ] ; then
 
 # find lightning bufr file
 
-${LN} -sf ${COMINPREP}/${NET}.${YYYYMMDD}/${NET}.t${HH}z.lghtng.tm00.bufr_d ./${NET}.t${cyc}z.lghtng.tm00.bufr_d
+#${LN} -sf ${COMINPREP}/${NET}.${YYYYMMDD}/${NET}.t${HH}z.lghtng.tm00.bufr_d ./${NET}.t${cyc}z.lghtng.tm00.bufr_d
 
-${LN} -sf ${NET}.t${cyc}z.lghtng.tm00.bufr_d  lghtngbufr
+#${LN} -sf ${NET}.t${cyc}z.lghtng.tm00.bufr_d  lghtngbufr
+
+cpreq -p ${COMINPREP}/${NET}.${YYYYMMDD}/${NET}.t${HH}z.lghtng.tm00.bufr_d ./${NET}.t${cyc}z.lghtng.tm00.bufr_d
+cpreq -p ${NET}.t${cyc}z.lghtng.tm00.bufr_d  lghtngbufr
 
   echo ${PDY}${cyc} > ./lightning_cycle_date
 
@@ -136,16 +139,14 @@ export err=$?; err_chk
 
 msg="JOB $job FOR $NET HAS COMPLETED NORMALLY"
 postmsg "$jlogfile" "$msg"
-chgrp rstprod ${DATA}/${NET}.t${cyc}z.lghtng.tm00.bufr_d
-chmod 640 ${DATA}/${NET}.t${cyc}z.lghtng.tm00.bufr_d
-cpreq ${DATA}/${NET}.t${cyc}z.lghtng.tm00.bufr_d ${COMINobsproc_rtma3d}
-cpreq ${DATA}/lightning_bufr.namelist ${COMINobsproc_rtma3d}
-chgrp rstprod ${DATA}/LightningInGSI.bufr
-chmod 640 ${DATA}/LightningInGSI.bufr
-cpreq  ${DATA}/LightningInGSI.bufr ${DATA}/LightningInGSI_bufr.bufr
+cpreq -p ${NET}.t${cyc}z.lghtng.tm00.bufr_d ${COMINobsproc_rtma3d}
+cpreq lightning_bufr.namelist ${COMINobsproc_rtma3d}
+chgrp rstprod LightningInGSI.bufr
+chmod 640 LightningInGSI.bufr
+cpreq -p LightningInGSI.bufr LightningInGSI_bufr.bufr
 lghtng_bufr="LightningInGSI_bufr.bufr"
 if [ -f ${DATA}/${lghtng_bufr} ] ; then
-  cpreq ${DATA}/${lghtng_bufr} ${COMINobsproc_rtma3d}/${RUN}.t${cyc}z.${lghtng_bufr}
+  cpreq -p ${DATA}/${lghtng_bufr} ${COMINobsproc_rtma3d}/${RUN}.t${cyc}z.${lghtng_bufr}
 else
   msg="WARNING $pgm terminated normally but ${DATA}/${lghtng_bufr} does NOT exist."
   ${ECHO} "$msg"
