@@ -38,8 +38,8 @@ yrmoday=`echo $PDYn1$cyc | cut -c 1-8`
 rhcyc=`echo $PDY$cyc | cut -c 9-10`
 rhcycle=t${rhcyc}z
 
-hpssdir2=${HPSSOUT}/2year/rh${year}/${yearmo}/$yrmoday
-hpssdir0=${HPSSOUT}/rh${year}/${yearmo}/$yrmoday
+hpssdir2=${HPSSOUT_2yr}/rh${year}/${yearmo}/$yrmoday
+hpssdir0=${HPSSOUT_5yr}/rh${year}/${yearmo}/$yrmoday
 
 
    #Redefine cyclist to save single analysis files MPondeca/30Jul2017
