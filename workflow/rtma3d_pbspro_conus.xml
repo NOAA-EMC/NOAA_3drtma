@@ -42,7 +42,8 @@
 <!ENTITY COMINPREP      "/lfs/h2/emc/ptmp/ashley.stanfield/CRON/rtma3d/com/obsproc/v1.3">
 <!ENTITY OBS_DIR	"/scratch4/NCEPDEV/fv3-cam/save/Gang.Zhao/Data/GSD_GSI_Case/obs">
 <!ENTITY HRRR_DIR	"/scratch4/NCEPDEV/fv3-cam/save/Gang.Zhao/Data/GSD_GSI_Case/fgs">
-<!ENTITY HPSSOUT        "/NCEPDEV/emc-meso/5year/&USER;/rtma3d">
+<!ENTITY HPSSOUT_5yr    "/NCEPDEV/emc-meso/5year/&USER;/rtma3d">
+<!ENTITY HPSSOUT_2yr    "/NCEPDEV/emc-meso/2year/&USER;/rtma3d">
 <!--  -->
 
 <!ENTITY DATAROOT	"&ptmp_base;/data">
@@ -937,8 +938,12 @@
        <value>&DATABASE_DIR;</value>
       </envar>
       <envar>
-       <name>HPSSOUT</name>
-       <value>&HPSSOUT;</value>
+       <name>HPSSOUT_5yr</name>
+       <value>&HPSSOUT_5yr;</value>
+      </envar>
+      <envar>
+       <name>HPSSOUT_2yr</name>
+       <value>&HPSSOUT_2yr;</value>
       </envar>
       <envar>
        <name>exSCR_RHIST</name>
