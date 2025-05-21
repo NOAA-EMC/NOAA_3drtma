@@ -1,0 +1,1 @@
+In the stage of development of 3DRTMA pacakge, every time when building the package, GSI is cloned remotely from GSI repository on git (from either the official EMC GSI or developer's fork of GSI on github). So the "rtma_gsi.fd/" is empty. When the 3DRTMA package is ready for release, a final "frozen" version of GSI would be saved under this "rtma_gsi.fd/". 
