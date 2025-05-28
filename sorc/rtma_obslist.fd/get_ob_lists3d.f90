@@ -205,7 +205,8 @@
                             otype(2:3)=='uv' .or. &
                             otype(1:3)=='spd'.or. &
                             otype(1:3)=='gst'.or. &
-                            otype(1:3)=='hwv'
+                            otype(1:3)=='hwv'.or. &
+                            otype(1:3)=='vis'        !GZ: read provider info for visibility
             
               if (allocated(cdiagbuf)) deallocate(cdiagbuf) ; allocate(cdiagbuf(ii0))
               if (allocated(cprvstg))  deallocate(cprvstg)  ; allocate(cprvstg(ii0))

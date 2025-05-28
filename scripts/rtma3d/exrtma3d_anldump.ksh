@@ -24,7 +24,7 @@ check_dirs_exist() { #usage: check_dirs_exist "var1_name" "var2_name" ...
   check_if_defined "COMOUTgsi_rtma3d"
   check_dirs_exist "COMOUTgsi_rtma3d"
   check_if_defined "ANLrtma3d_FNAME"
-#  checking the directory where firstguess file (grib2) of howv and gust is saved
+#  checking the directory where firstguess file (grib2) of howv/gust/vis is saved
   check_if_defined "COMOUT"
   check_dirs_exist "COMOUT"
 
@@ -78,7 +78,7 @@ export pgm=${NET}_anldump
 startmsg
 msg="***********************************************************"
 postmsg "$jlogfile" "$msg"
-msg="  retrieveing the analysis fields of howv/gust from analysis file (netcdf), and dumped out to grib2 file and save."
+msg="  retrieveing the analysis fields of howv/gust/vis from analysis file (netcdf), and dumped out to grib2 file and save."
 postmsg "$jlogfile" "$msg"
 msg="***********************************************************"
 postmsg "$jlogfile" "$msg"
@@ -95,7 +95,7 @@ postmsg "$jlogfile" "$msg"
   grid_specs_hrrr="lambert:-97.5:38.5:38.5 -122.719528:1799:3000.0 21.138123:1059:3000.0"
   grid_specs=$grid_specs_hrrr
 
-#   checking if howv/gust exists in the analysis file (netcdf)
+#   checking if howv/gust/vis exists in the analysis file (netcdf)
   i_found_howv=0
   RUN_HOWV="FALSE"
 # i_found_howv=$($NCDUMP -h ${ncf_anl} | grep -i "HOWV" | wc -l)  #-->multiple lines are found
@@ -110,8 +110,15 @@ postmsg "$jlogfile" "$msg"
   if [[ "${i_found_gust}" -eq 1 ]] ; then       # found unique variable GUST
     RUN_GUST="TRUE"
   fi
+  i_found_vis=0
+  RUN_VIS="FALSE"
+# i_found_vis=$($NCDUMP -h ${ncf_anl} | grep -i "vis" | wc -l)  #-->multiple lines are found
+  i_found_vis=$(ncdump  -h ${ncf_anl} | grep -i " VIS(" | wc -l) 
+  if [[ "${i_found_vis}" -eq 1 ]] ; then       # found unique variable VIS
+    RUN_VIS="TRUE"
+  fi
 
-  rm -f ${COMOUT}/${NET}.t${HH}z.anl.howvgust.grib2
+# rm -f ${COMOUT}/${NET}.t${HH}z.anl.DirectAnl2Ds.grib2
 
 #   Wave Height (howv)
   if [[ "${RUN_HOWV}" == "TRUE" ]] ; then
@@ -143,6 +150,7 @@ postmsg "$jlogfile" "$msg"
         # 1. netcdf --> binary (ncks)
         rm -f ./anl_${varname}_bin.dat ./tmp_${varname}.nc
         ncks -C -O -v ${varname_ncf} -b ./anl_${varname}_bin.dat -p ./ ./analysis_wrf_inout_${varname}.nc ./tmp_${varname}.nc
+        export err=$? ; err_chk
 
         # convert real8 to real4 in binary file (if the binary write-out of ncks is in real-8, but wgrib2 only handles real-4)
 
@@ -151,6 +159,7 @@ postmsg "$jlogfile" "$msg"
         rm -f ./${grib2_fname}
         # wgrib2 ./grb2_tmplate_${varname}.grib2 -import_bin ./anl_${varname}_bin.dat -no_header -set_var ${varname_grb} -set_ftime "anl" -set_date ${ADATEymdh} -undefine_val ${undefval}  -set_lev "${level_info}" -set_grib_type $grib_type ${scaling_set} -grib_out ./${grib2_fname}
         wgrib2 ./grb2_tmplate_${varname}.grib2 -import_bin ./anl_${varname}_bin.dat -no_header -set_var ${varname_grb} -set_ftime "anl" -set_date ${ADATEymdh} -set_lev "${level_info}" -grib_out ./${grib2_fname}
+        export err=$? ; err_chk
 
         if [[ -f $FIXgsi/hrrr_conus_3km_slmask_nolakes.grib2 ]] ; then
           echo "Sea-Land no-lakes mask file --> $FIXgsi/hrrr_conus_3km_slmask_nolakes.grib2"
@@ -237,8 +246,8 @@ postmsg "$jlogfile" "$msg"
 #          cp -p ./${grib2_fname}     ${COMOUT}/${NET}.t${HH}z.anl.${varname}.grib2     
            cp -p tmpout.grib2tmp     ${COMOUT}/${NET}.t${HH}z.anl.${varname}.grib2
            # appending to a single grib2 file
-#          wgrib2 ${grib2_fname}      -append -grib ${COMOUT}/${NET}.t${HH}z.anl.howvgust.grib2
-           wgrib2 tmpout.grib2tmp      -append -grib ${COMOUT}/${NET}.t${HH}z.anl.howvgust.grib2
+#          wgrib2 ${grib2_fname}      -append -grib ${COMOUT}/${NET}.t${HH}z.anl.DirectAnl2Ds.grib2
+#          wgrib2 tmpout.grib2tmp      -append -grib ${COMOUT}/${NET}.t${HH}z.anl.DirectAnl2Ds.grib2
         else
            echo "conversion of ${varname} in analysis from netcdf to grib2 failed."
         fi
@@ -277,6 +286,7 @@ postmsg "$jlogfile" "$msg"
         # 1. netcdf --> binary (ncks)
         rm -f ./anl_${varname}_bin.dat ./tmp_${varname}.nc
         ncks -C -O -v ${varname_ncf} -b ./anl_${varname}_bin.dat -p ./ ./analysis_wrf_inout_${varname}.nc ./tmp_${varname}.nc
+        export err=$? ; err_chk
 
         # convert real8 to real4 in binary file (if the binary write-out of ncks is in real-8, but wgrib2 only handles real-4)
 
@@ -291,7 +301,61 @@ postmsg "$jlogfile" "$msg"
            # save the analysis file (grib2) to $COMOUT
            cp -p ./${grib2_fname}     ${COMOUT}/${NET}.t${HH}z.anl.${varname}.grib2     
            # appending to a single grib2 file
-           wgrib2 ${grib2_fname}      -append -grib ${COMOUT}/${NET}.t${HH}z.anl.howvgust.grib2
+#          wgrib2 ${grib2_fname}      -append -grib ${COMOUT}/${NET}.t${HH}z.anl.DirectAnl2Ds.grib2
+        else
+           echo "conversion of ${varname} in analysis from netcdf to grib2 failed."
+        fi
+     else
+        echo "missing grib2-template ${grib2_tmplt_file}, cannot convert ${varname} in analysis to grib2 file"
+     fi
+  fi
+
+#   Surface Visibility (vis)
+  if [[ "${RUN_VIS}" == "TRUE" ]] ; then
+     varname="vis"
+     varname_ncf="VIS"
+     varname_grb="VIS"
+     varname_long="surface visibility"
+     undefval="90000.0"       # 90000.0
+     level_info="surface"
+     grib_type="c3"
+     scaling_set=" -set_scaling 0 -4"
+
+     grib2_tmplt_path=${COMOUT}
+     grib2_tmplt_file=${grib2_tmplt_path}/${NET}.t${HH}z.fgs.${varname}.grib2
+
+     grib2_fname="anl_${varname}.grib2"
+
+     echo "    --> dump out ${varname_ncf} from ${ncf_anl} and then write to ${grib2_fname}"
+
+     cd ${workdir}
+
+     if [[ -f ${grib2_tmplt_file} ]] ; then
+        echo "         found ${varname_long} firstguess grib2 file (as grib2 template) "
+        echo "              ncks==> netcdf to binary"
+        rm -f ./grb2_tmplate_${varname}.grib2
+        ln -sf ${grib2_tmplt_file}      ./grb2_tmplate_${varname}.grib2
+        rm -f ./analysis_wrf_inout_${varname}.nc
+        ln -sf ${ncf_anl}               ./analysis_wrf_inout_${varname}.nc
+        # 1. netcdf --> binary (ncks)
+        rm -f ./anl_${varname}_bin.dat ./tmp_${varname}.nc
+        ncks -C -O -v ${varname_ncf} -b ./anl_${varname}_bin.dat -p ./ ./analysis_wrf_inout_${varname}.nc ./tmp_${varname}.nc
+        export err=$? ; err_chk
+
+        # convert real8 to real4 in binary file (if the binary write-out of ncks is in real-8, but wgrib2 only handles real-4)
+
+        # 2. binary --> grib2 (wgrib2)
+        echo "              wgrib2 ==> binary to grib2"
+        rm -f ./${grib2_fname}
+        # wgrib2 ./grb2_tmplate_${varname}.grib2 -import_bin ./anl_${varname}_bin.dat -no_header -set_var ${varname_grb} -set_ftime "anl" -set_date ${ADATEymdh} -undefine_val ${undefval}  -set_lev "${level_info}" -set_grib_type $grib_type ${scaling_set} -grib_out ./${grib2_fname}
+        wgrib2 ./grb2_tmplate_${varname}.grib2 -import_bin ./anl_${varname}_bin.dat -no_header -set_var ${varname_grb} -set_ftime "anl" -set_date ${ADATEymdh} -set_lev "${level_info}" -grib_out ./${grib2_fname}
+        export err=$?
+        if [ $err -eq 0 ] ; then
+           echo "           Successfully convert netcdf file to grib2 file for ${varname}."
+           # save the analysis file (grib2) to $COMOUT
+           cp -p ./${grib2_fname}     ${COMOUT}/${NET}.t${HH}z.anl.${varname}.grib2     
+           # appending to a single grib2 file
+#          wgrib2 ${grib2_fname}      -append -grib ${COMOUT}/${NET}.t${HH}z.anl.DirectAnl2Ds.grib2
         else
            echo "conversion of ${varname} in analysis from netcdf to grib2 failed."
         fi

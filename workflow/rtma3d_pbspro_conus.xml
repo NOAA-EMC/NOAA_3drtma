@@ -22,7 +22,6 @@
 <!ENTITY HRRRDAS_CUTOFF  "32">
 <!ENTITY READIN_LOCALIZATION     "TRUE">
 
-
 <!ENTITY MACHINE	"cray">
 <!ENTITY machine	"&MACHINE;">
 
@@ -33,15 +32,13 @@
 <!ENTITY ptmp_base	"/lfs/h2/emc/ptmp/&USER;/rtma3d/conus">
 <!ENTITY COMINRAP       "/lfs/h1/ops/prod/com/obsproc/v1.2">
 <!ENTITY COMINHRRR      "/lfs/h1/ops/prod/com/hrrr/v4.1">
-<!ENTITY COMINRADAR      "/lfs/h1/ops/prod/dcom/ldmdata/obs/upperair/mrms/conus">
+<!ENTITY COMINRADAR     "/lfs/h1/ops/prod/dcom/ldmdata/obs/upperair/mrms/conus">
 <!ENTITY GESINHRRR      "/lfs/h1/ops/prod/com/hrrr/v4.1/nwges/hrrrges_sfc/conus">
 <!ENTITY COMINHRRRDAS   "/lfs/h1/ops/prod/com/hrrr/v4.1/nwges/hrrrdasges">
 <!ENTITY COMINGDAS      "/lfs/h1/ops/prod/com/gfs/v16.3">
 <!ENTITY NWROOT		"/lfs/h2/emc/da/noscrub/&USER;/packages/rtma3d.&rtma3d_ver;">
 <!ENTITY PACKAGEROOT    "&NWROOT;">
 <!ENTITY COMINPREP      "/lfs/h2/emc/ptmp/ashley.stanfield/CRON/rtma3d/com/obsproc/v1.3">
-<!ENTITY OBS_DIR	"/scratch4/NCEPDEV/fv3-cam/save/Gang.Zhao/Data/GSD_GSI_Case/obs">
-<!ENTITY HRRR_DIR	"/scratch4/NCEPDEV/fv3-cam/save/Gang.Zhao/Data/GSD_GSI_Case/fgs">
 <!ENTITY HPSSOUT_5yr    "/NCEPDEV/emc-meso/5year/&USER;/rtma3d">
 <!ENTITY HPSSOUT_2yr    "/NCEPDEV/emc-meso/2year/&USER;/rtma3d">
 <!--  -->
@@ -62,7 +59,6 @@
 <!ENTITY EXECrtma3d	"&NWROOT;/exec">
 <!ENTITY PARMrtma3d	"&NWROOT;/parm">
 <!ENTITY FIXrtma3d	"&NWROOT;/fix">
-<!ENTITY FIXminmax      "&FIXrtma3d;/minmax">
 
 <!-- Specific Definition for static data -->
 <!ENTITY FIXcrtm        "&NWROOT;/fix/crtm">
@@ -71,6 +67,7 @@
 <!ENTITY FIXwps         "&NWROOT;/fix/wps">
 <!ENTITY FIXwrf         "&NWROOT;/fix/wrf">
 <!ENTITY FIXwrfbufr     "&NWROOT;/fix/wrfbufr">
+<!ENTITY FIXminmax      "&FIXrtma3d;/minmax">
 <!ENTITY OBS_USELIST    "/lfs/h2/emc/da/noscrub/matthew.t.morris/FixData/obsuselist">
 <!ENTITY AIRCRAFT_REJECT  "/lfs/h2/emc/da/noscrub/matthew.t.morris/FixData/obsuselist/amdar_reject_lists">
 <!ENTITY SFCOBS_USELIST   "/lfs/h2/emc/da/noscrub/matthew.t.morris/FixData/obsuselist/mesonet_uselists">
@@ -86,8 +83,8 @@
 <!ENTITY LOG_PGMOUT     "&LOG_DIR;/pgmout">
 <!ENTITY jlogfile       "&LOG_JJOB;/jlogfile_pbspro.@Y@m@d@H">
 <!ENTITY obsname_conus  "MergedReflectivityQC">
-<!ENTITY obsname_alaska  "MergedReflectivityQC">
-<!ENTITY numlim_conus  "MergedReflectivityQC">
+<!ENTITY obsname_alaska "MergedReflectivityQC">
+<!ENTITY numlim_conus   "MergedReflectivityQC">
 <!ENTITY numlim_alaska  "MergedReflectivityQC">
 
 
@@ -139,6 +136,8 @@
 <!ENTITY maxtries	"3">
 <!ENTITY KEEPDATA	"YES">
 <!ENTITY SENDCOM	"YES">
+<!ENTITY RUN_RHIST	"YES">
+<!ENTITY RUN_HOWV	"No">
 
 <!-- for various observations used in RTMA3D -->
 
@@ -239,8 +238,8 @@
 
 <!ENTITY GSI_PROC "14">
 <!ENTITY GSI_THREADS "8">
-<!ENTITY GSI_OMP_STACKSIZE "512M">
-<!ENTITY GSI_RESOURCES '<walltime>00:40:00</walltime>'> 
+<!ENTITY GSI_OMP_STACKSIZE "1024M">
+<!ENTITY GSI_RESOURCES '<walltime>00:30:00</walltime>'> 
 <!ENTITY GSI_RESERVATION '<nodes>30:ppn=15:tpp=8</nodes><native>-l place=vscatter:excl,select=30:ncpus=120</native><queue>&QUEUE;</queue><account>&ACCOUNT;</account>'>
 
 <!ENTITY GSI_START_TIME "00:40:00">
@@ -283,12 +282,14 @@
 <!ENTITY POST_RESERVATION '<nodes>1:ppn=128:mem=200GB</nodes><native>-l place=scatter</native><queue>&QUEUE;</queue><account>&ACCOUNT;</account>'>
 
 <!ENTITY PRDGEN_PROC "1">
-<!ENTITY PRDGEN_RESOURCES '<walltime>00:30:00</walltime>'> 
+<!ENTITY PRDGEN_RESOURCES '<walltime>00:30:00</walltime>'>
 <!ENTITY PRDGEN_RESERVATION '<nodes>1:ppn=128:mem=48GB</nodes><native>-l place=scatter</native><queue>&QUEUE;</queue><account>&ACCOUNT;</account>'>
 
 <!-- Variables in Namelist -->
 <!ENTITY GSI_grid_ratio_in_var       "1">
 <!ENTITY GSI_grid_ratio_in_cldanl    "1">
+<!ENTITY i_gsdsfc_uselist            "2">
+<!ENTITY VERBOSE_GSI                 ".false.">
 
 <!ENTITY NCKS '/apps/prod/nco/4.7.9/cce/11.0.2/bin/ncks'>
 <!-- Block of Variables passed to workflow and tasks -->
@@ -331,14 +332,6 @@
         <value>&model;</value>
    </envar>
    <envar>
-        <name>OBS_DIR</name>
-        <value>&OBS_DIR;</value>
-   </envar>
-   <envar>
-        <name>HRRR_DIR</name>
-        <value>&HRRR_DIR;</value>
-   </envar>
-   <envar>
         <name>ptmp_base</name>
         <value>&ptmp_base;</value>
    </envar>
@@ -377,10 +370,6 @@
    <envar>
         <name>PACKAGEROOT</name>
         <value>&PACKAGEROOT;</value>
-   </envar>
-   <envar>
-        <name>FIXminmax</name>
-        <value>&FIXminmax;</value>
    </envar>
    <envar>
         <name>DATAROOT</name>
@@ -441,6 +430,10 @@
    <envar>
         <name>FIXwrf</name>
         <value>&FIXwrf;</value>
+   </envar>
+   <envar>
+        <name>FIXminmax</name>
+        <value>&FIXminmax;</value>
    </envar>
    <envar>
         <name>PARMwrf</name>
@@ -730,10 +723,6 @@
       <value>&DATABASE_DIR;</value>
     </envar>
     <envar>
-      <name>DATA_GES</name>
-      <value>&HRRR_DIR;/<cyclestr offset="-1:00:00">@Y@m@d@H</cyclestr>/wrfprd</value>
-    </envar>
-    <envar>
       <name>GSI_grid_ratio_in_var</name>
       <value>&GSI_grid_ratio_in_var;</value>
     </envar>
@@ -748,6 +737,14 @@
     <envar>
       <name>JJOB_GSIANL</name>
       <value>&JJOB_GSIANL;</value>
+    </envar>
+    <envar>
+      <name>VERBOSE_GSI</name>
+      <value>&VERBOSE_GSI;</value>
+    </envar>
+    <envar>
+      <name>i_gsdsfc_uselist</name>
+      <value>&i_gsdsfc_uselist;</value>
     </envar>
     <envar>
       <name>AIRCRAFT_REJECT</name>
@@ -787,6 +784,10 @@
     <envar>
       <name>SUBH_TIME</name>
        <value><cyclestr>@M</cyclestr></value>
+    </envar>
+    <envar>
+      <name>RUN_HOWV</name>
+      <value>&RUN_HOWV;</value>
     </envar>
     <envar>
       <name>DATABASE_DIR</name>
@@ -928,32 +929,8 @@
        <name>exSCR_MAXRH</name>
        <value>&exSCR_MAXRH;</value>
     </envar>'>
- <!ENTITY ENVARS_RHIST
-     '<envar>
-       <name>START_TIME</name>
-       <value><cyclestr>@Y@m@d@H</cyclestr></value>
-      </envar>
-      <envar>
-       <name>DATABASE_DIR</name>
-       <value>&DATABASE_DIR;</value>
-      </envar>
-      <envar>
-       <name>HPSSOUT_5yr</name>
-       <value>&HPSSOUT_5yr;</value>
-      </envar>
-      <envar>
-       <name>HPSSOUT_2yr</name>
-       <value>&HPSSOUT_2yr;</value>
-      </envar>
-      <envar>
-       <name>exSCR_RHIST</name>
-       <value>&exSCR_RHIST;</value>
-      </envar>
-      <envar>
-       <name>JJOB_RHIST</name>
-       <value>&JJOB_RHIST;</value>
-     </envar>'>
- <!ENTITY ENVARS_HRRRDAS
+
+<!ENTITY ENVARS_RHIST
     '<envar>
       <name>START_TIME</name>
       <value><cyclestr>@Y@m@d@H</cyclestr></value>
@@ -963,8 +940,38 @@
       <value>&DATABASE_DIR;</value>
     </envar>
     <envar>
-     <name>exSCR_RHIST</name>
-     <value>&exSCR_RHIST;</value>
+      <name>HPSSOUT_5yr</name>
+      <value>&HPSSOUT_5yr;</value>
+    </envar>
+    <envar>
+      <name>HPSSOUT_2yr</name>
+      <value>&HPSSOUT_2yr;</value>
+    </envar>
+    <envar>
+      <name>RUN_RHIST</name>
+      <value>&RUN_RHIST;</value>
+    </envar>
+    <envar>
+      <name>exSCR_RHIST</name>
+      <value>&exSCR_RHIST;</value>
+    </envar>
+    <envar>
+      <name>JJOB_RHIST</name>
+      <value>&JJOB_RHIST;</value>
+    </envar>'>
+
+<!ENTITY ENVARS_HRRRDAS
+    '<envar>
+      <name>START_TIME</name>
+      <value><cyclestr>@Y@m@d@H</cyclestr></value>
+    </envar>
+    <envar>
+      <name>DATABASE_DIR</name>
+      <value>&DATABASE_DIR;</value>
+    </envar>
+    <envar>
+     <name>exSCR_HRRRDAS</name>
+     <value>&exSCR_HRRRDAS;</value>
     </envar>
     <envar>
       <name>JJOB_HRRRDAS</name>

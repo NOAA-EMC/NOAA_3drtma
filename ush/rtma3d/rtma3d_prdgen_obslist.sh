@@ -45,7 +45,9 @@ for item in $list ; do
   cp $fixdir/${RUN}/${RUN}_non_viable_stnlocation_list_${item}.dat non_viable_stnlocation_list_${item}.dat
 done
 
-tar -xvf $COMIN/gsiprd.t${cyc}z/diag_${CDATE}${cyc}.tgz
+##GZ:==> using the uncompressed tarball of obs-diag files with suffix tar (instead of tgz)
+# tar -xzvf $COMIN/gsiprd.t${cyc}z/diag_${CDATE}${cyc}.tgz      # compressed tarball (tgz)
+  tar -xvf  $COMIN/gsiprd.t${cyc}z/diag_${CDATE}${cyc}.tar      # uncompressed tarball (tar)
 cp diag_conv_ges.${CDATE}${cyc} diag_conv_ges.dat
 cp diag_conv_02.${CDATE}${cyc} diag_conv_02.dat
 cp diag_conv_anl.${CDATE}${cyc} diag_conv_anl.dat
@@ -100,6 +102,12 @@ cat << EOF > faa_related_input
 EOF
 
 mpiexec -n 1 -ppn 1 $EXECdir/rtma_obslist >>$pgmout 2>errfile
+##GZ:==> adding error-trap of the running of rtma_obslist
+export err=$?
+if [ ${err} -ne 0 ] ; then
+   echo "rtma_obslist (in rtma3d_prdgen_obslist.sh) failed, abort ..."
+   exit ${err}       # return the non-zero code to upper-level script
+fi
 
 # Copy files to $COMOUT 
 

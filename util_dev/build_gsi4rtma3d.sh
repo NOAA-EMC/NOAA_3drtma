@@ -55,6 +55,6 @@ mkdir -p $BUILD_DIR && cd $BUILD_DIR
 # Configure, build, install
 cmake $CMAKE_OPTS $DIR_ROOT 2>&1 | tee log.cmake
 make -j ${BUILD_JOBS:-8} VERBOSE=${BUILD_VERBOSE:-1} 2>&1 | tee log.make
-make install
+make install 2>&1 | tee log.install
 
 exit
