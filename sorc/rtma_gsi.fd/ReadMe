@@ -1,0 +1,3 @@
+In development stage, the GSI which is used in 3DRTMA pacakge would be cloned from GSI repo on github, either from official EMC GSI, or developer's fork of GSI.
+
+When 3DRTMA package is ready for release, there would be a frozen version of GSI under this rtma_gsi.fd directory.
