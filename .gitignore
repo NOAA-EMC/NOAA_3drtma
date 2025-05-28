@@ -49,7 +49,7 @@ sorc/**/*.mod
 #
 #  # ignore directory of gsi and post(upp) source code ('sorc/rtma_gsi.fd, sorc/rtma_post.fd')
 #
-sorc/rtma_gsi.fd
+#sorc/rtma_gsi.fd/
 parm
 !sorc/rtma_post.fd/parm
 fix

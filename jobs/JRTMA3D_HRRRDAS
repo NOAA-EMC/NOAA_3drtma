@@ -90,7 +90,7 @@ fi
 
 export COM_IN=${COM_IN:-$COMROOT/${NET}/${envir}}
 
-${exSCR_POST:-$HOMErtma3d/scripts/${RUN}/ex${RUN}_hrrrdas.ksh}
+${exSCR_HRRRDAS:-$HOMErtma3d/scripts/${RUN}/ex${RUN}_hrrrdas.ksh}
 export err=$?; err_chk
 
 msg="$0 of $job completed normally"
