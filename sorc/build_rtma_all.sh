@@ -35,14 +35,18 @@ fi
 
 if [ $BUILD_rtma_links = yes ] ; then
 
-mkdir $BASE/../parm
+[[ -d $BASE/../parm ]] || mkdir $BASE/../parm
 cd $BASE/../parm
+rm -rf ./wrf ./upp ./gsi ./rtma3d ./akrtma3d
 cp -r /lfs/h2/emc/da/noscrub/edward.colon/FixData/parm/wrf wrf
 cp -r /lfs/h2/emc/da/noscrub/edward.colon/FixData/parm/upp_new upp
+cp -r /lfs/h2/emc/da/noscrub/edward.colon/FixData/parm/rtma3d rtma3d
+cp -r /lfs/h2/emc/da/noscrub/edward.colon/FixData/parm/akrtma3d akrtma3d
 cp -r /lfs/h2/emc/da/noscrub/edward.colon/FixData/parm/gsi gsi
 
-mkdir $BASE/../fix
+[[ -d $BASE/../fix ]] || mkdir $BASE/../fix
 cd $BASE/../fix
+rm -rf ./obsuselist ./upp ./crtm ./gsi ./minmax ./wps ./wrf ./wrfbufr ./rtma3d ./akrtma3d
 cp -r /lfs/h2/emc/da/noscrub/edward.colon/FixData/obsuselist obsuselist
 cp -r /lfs/h2/emc/da/noscrub/edward.colon/FixData/UPP-fix upp
 cp -r /lfs/h2/emc/da/noscrub/edward.colon/FixData/CRTM-fix crtm
@@ -51,6 +55,8 @@ cp -r /lfs/h2/emc/da/noscrub/edward.colon/FixData/minmaxtrh minmax
 cp -r /lfs/h2/emc/da/noscrub/edward.colon/FixData/wps wps
 cp -r /lfs/h2/emc/da/noscrub/edward.colon/FixData/wrf wrf
 cp -r /lfs/h2/emc/da/noscrub/edward.colon/FixData/wrfbufr wrfbufr
+cp -r /lfs/h2/emc/da/noscrub/edward.colon/FixData/rtma3d rtma3d
+cp -r /lfs/h2/emc/da/noscrub/edward.colon/FixData/akrtma3d akrtma3d
 fi
 
 cd $BASE
@@ -64,12 +70,18 @@ $BASE/build_rtma_post.sh > $logs_dir/build_rtma_post.log 2>&1
 
 fi
 
+##############################
 
 if [ $BUILD_rtma_gsi = yes ] ; then
 
-echo " .... Building rtma_gsi .... "
-$BASE/build_rtma_gsi.sh > $logs_dir/build_rtma_gsi.log 2>&1
-cp  /lfs/h2/emc/da/noscrub/edward.colon/NOAA_3drtma_new/exec/ncdiag_cat_serial.x ../exec
+   unset GSI_SOURCE
+   export GSI_SOURCE="emcgsi"       # emc-gsi/emc_gsi/emcgsi: using official EMC GSI
+                                    # auto-qc/auto_qc/autoqc: using Matthew Morris's fork of GSI
+                                    # if not defined, using official GSI (as default for now)
+   echo " .... Building rtma_gsi with GSI_SOURCE=${GSI_SOURCE} .... "
+   $BASE/build_rtma_gsi.sh > $logs_dir/build_rtma_gsi.log 2>&1
+   cp  /lfs/h2/emc/da/noscrub/edward.colon/NOAA_3drtma_new/exec/ncdiag_cat_serial.x ../exec
+   unset GSI_SOURCE
 
 fi
 
@@ -187,7 +199,6 @@ echo " .... Building rtma_minmax .... "
 $BASE/build_rtma_minmax.sh > $logs_dir/build_minmax.log 2>&1
 
 fi
-
 
 ##############################
 
