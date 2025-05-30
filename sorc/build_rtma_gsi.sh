@@ -29,7 +29,7 @@ cd ${BASE}
 [[ -d ./rtma_gsi.fd ]] && rm -rf ./rtma_gsi.fd
 
 # get the gsi source code package from repository on github
-GSI_SOURCE=${GSI_SOURCE:-""}
+GSI_SOURCE=${GSI_SOURCE:-"autoqc"}       # autoqc as default if no pre-defined GSI_SOURCE
 shopt -s extglob
 case "${GSI_SOURCE}" in
     emc?([-_])gsi|EMC?([-_])GSI )
@@ -48,12 +48,12 @@ case "${GSI_SOURCE}" in
         git checkout rtma3d_autoqc
         ;;
     *)
-#       If no GSI_SOURCE is specified, check out official EMC GSI as default
-        echo "git clone https://github.com/NOAA-EMC/GSI.git  ./rtma_gsi.fd  # <== Default GSI Source"
-        git clone https://github.com/NOAA-EMC/GSI.git  ./rtma_gsi.fd
+#       If no GSI_SOURCE is specified, check out Matthew Morris's fork of GSI as default
+        echo "git clone https://github.com/MatthewMorris-NOAA/GSI.git ./rtma_gsi.fd  # <== Default GSI SOURCE"
+        git clone https://github.com/MatthewMorris-NOAA/GSI.git ./rtma_gsi.fd
         cd ${BASE}/rtma_gsi.fd
-        echo "git checkout develop"
-        git checkout develop       # <--- checking out the latest commit of develop branch
+        echo "git checkout rtma3d_autoqc"
+        git checkout rtma3d_autoqc
         ;;
 esac
 shopt -u extglob

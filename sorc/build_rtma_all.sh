@@ -75,9 +75,9 @@ fi
 if [ $BUILD_rtma_gsi = yes ] ; then
 
    unset GSI_SOURCE
-   export GSI_SOURCE="emcgsi"       # emc-gsi/emc_gsi/emcgsi: using official EMC GSI
-                                    # auto-qc/auto_qc/autoqc: using Matthew Morris's fork of GSI
-                                    # if not defined, using official GSI (as default for now)
+   export GSI_SOURCE="autoqc"       # autoqc: using Matthew Morris's fork of GSI (as default for now)
+                                    # emcgsi: using official EMC GSI
+                                    # others: using Matthew Morris's fork of GSI
    echo " .... Building rtma_gsi with GSI_SOURCE=${GSI_SOURCE} .... "
    $BASE/build_rtma_gsi.sh > $logs_dir/build_rtma_gsi.log 2>&1
    cp  /lfs/h2/emc/da/noscrub/edward.colon/NOAA_3drtma_new/exec/ncdiag_cat_serial.x ../exec
