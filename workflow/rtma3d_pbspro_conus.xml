@@ -1026,7 +1026,7 @@
     </envar>
     <envar>
      <name>exSCR_CLEAN</name>
-     <value>&exSCR_RHIST;</value>
+     <value>&exSCR_CLEAN;</value>
     </envar>
     <envar>
       <name>JJOB_CLEAN</name>
