@@ -198,7 +198,7 @@
 <!ENTITY JJOB_HRRRDAS   "&JJOB_DIR;/J&CAP_RUN;_HRRRDAS">
 <!ENTITY exSCR_HRRRDAS  "&SCRIPT_DIR;/&RUN;/ex&RUN;_hrrrdas.ksh">
 <!ENTITY JJOB_CLEAN     "&JJOB_DIR;/J&CAP_RUN;_CLEAN">
-<!ENTITY exSCR_CLEAN    "&SCRIPT_DIR;/&RUN;/ex&RUN;_clean.ksh">
+<!ENTITY exSCR_CLEAN    "&SCRIPT_DIR;/ex&RUN;_clean.ksh">
 
 <!-- Resources -->
 
