@@ -79,7 +79,7 @@ if [ ! -d "${COMOUT}" ] ; then
 fi
 export COM_IN=${COM_IN:-$COMROOT/${NET}/${envir}}
 
-${exSCR_POST:-$HOMErtma3d/scripts/ex${NET}_clean.ksh}
+${exSCR_CLEAN:-$HOMErtma3d/scripts/ex${NET}_clean.ksh}
 export err=$?; err_chk
 
 msg="$0 of $job completed normally"
