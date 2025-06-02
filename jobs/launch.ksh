@@ -122,10 +122,27 @@ elif [ "${machine}" = "cray" ] ; then
     *POST*)
       modulefile_build=${modulefile_build:-"${MODULEFILES}/${machine}/build/modulefile.build.post.${machine}"}
       source $modulefile_build
+      module load wgrib2/2.0.8_wmo       # --> wgrib2
       ;;
     *GSIANL*)
       modulefile_build=${modulefile_build:-"${MODULEFILES}/${machine}/build/modulefile.build.gsi.${machine}"}
       source $modulefile_build
+      ;;
+    *AUTOQC*)
+      modulefile_build=${modulefile_build:-"${MODULEFILES}/${machine}/build/modulefile.build.gsi.${machine}"}
+      source $modulefile_build
+      module load python/3.8.6           # --> python used in autoqc
+      module use  /lfs/h1/mdl/nbm/save/apps/modulefiles
+      module load python-modules/3.8.6   # --> python modules used in autoqc python script
+#     module load proj/7.1.0
+#     module load geos/3.8.1
+#     module load libjpeg-turbo/2.1.0
+      ;;
+    *PRDGEN*)
+      modulefile_build=${modulefile_build:-"${MODULEFILES}/${machine}/build/modulefile.build.gsi.${machine}"}
+      source $modulefile_build
+      module load libjpeg/9c
+      module load grib_util/1.2.4        # --> grb2index
       ;;
     *)
       modulefile_build=${modulefile_build:-"${MODULEFILES}/${machine}/build/modulefile.build.gsi.${machine}"}

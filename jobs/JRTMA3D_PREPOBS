@@ -86,7 +86,6 @@ export COMOUT=${COMOUT:-${COMROOT}/${NET}/${envir}/${NET}.${PDY}}
 export COMINrap=${COMINRAP}/rtma.${PDY}
 export COMINhrrr=${COMINHRRR}/hrrr.${PDY}/${NET}
 export COMINobsproc_rtma3d=${COMINobsproc_rtma3d:-"${COMIN}/obsprd.${cycle}"}
-# export OBS_DIR_CYCLE=${OBS_DIR}/${PDY}${cyc}
 
 if [ ! -d "${COMOUT}" ] ; then
    mkdir -p $COMOUT

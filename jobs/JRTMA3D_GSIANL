@@ -147,15 +147,21 @@ if [ "${envir}" != "esrl" ]; then #WCOSS
         mkdir -p ${DATA_RUNDIR}
     fi
     export DATAHOME=${DATA_RUNDIR}/gsiprd
-#    ${RM} -rf ${DATAHOME}
+    if [ -L "${DATAHOME}" ] && [ -d "${DATAHOME}" ] ; then
+        ${RM} -rf ${DATAHOME}
+    fi
     ${LN} -s  ${DATA}  ${DATAHOME}
 
     export DATAOBSHOME=${DATA_RUNDIR}/obsprd
-#    ${RM} -rf ${DATAOBSHOME}
+    if [ -L "${DATAOBSHOME}" ] && [ -d "${DATAOBSHOME}" ] ; then
+        ${RM} -rf ${DATAOBSHOME}
+    fi
     ${LN} -s  ${COMINobsproc_rtma3d}  ${DATAOBSHOME}
 
     export DATAHOME_BK=${DATA_RUNDIR}/fgsprd
-#    ${RM} -rf ${DATAHOME_BK}
+    if [ -L "${DATAHOME_BK}" ] && [ -d "${DATAHOME_BK}" ] ; then
+        ${RM} -rf ${DATAHOME_BK}
+    fi
     ${LN} -s  ${GESINhrrr_rtma3d}  ${DATAHOME_BK}
 fi
 
