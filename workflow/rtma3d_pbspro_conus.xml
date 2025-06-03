@@ -300,7 +300,7 @@
 
 <!-- COM and DATA retention time (hours) -->
 
-<!ENTITY CLEAN_OLDCOM_HRS            "72">
+<!ENTITY CLEAN_OLDCOM_HRS            "120">
 <!ENTITY CLEAN_OLDRUN_HRS            "72">
 
 
