@@ -291,7 +291,7 @@
 
 <!--Retention time for COM and DATA directories-->
 
-<!ENTITY CLEAN_OLDCOM_HRS            "72">
+<!ENTITY CLEAN_OLDCOM_HRS            "120">
 <!ENTITY CLEAN_OLDRUN_HRS            "72">
 
 <!ENTITY NCKS '/apps/prod/nco/4.7.9/cce/11.0.2/bin/ncks'>
