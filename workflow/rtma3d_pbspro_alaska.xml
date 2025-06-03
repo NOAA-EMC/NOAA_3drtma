@@ -280,7 +280,7 @@
 
 <!ENTITY CLEAN_PROC "1">
 <!ENTITY CLEAN_RESOURCES '<walltime>00:30:00</walltime>'> 
-<!ENTITY CLEAN_RESERVATION '<nodes>1:ppn=128:mem=48GB</nodes><native>-l place=scatter</native><queue>&QUEUE;</queue><account>&ACCOUNT;</account>'>
+<!ENTITY CLEAN_RESERVATION '<nodes>1:ppn=1:vntype=cray_compute:mem=4GB</nodes><native>-l place=scatter</native><queue>&QUEUE;</queue><account>&ACCOUNT;</account>'>
 
 
 <!-- Variables in Namelist -->
