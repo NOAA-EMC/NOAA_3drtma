@@ -36,11 +36,12 @@ done
 #-----------------------------------------------------------------------
 # Delete stmp directories
 #-----------------------------------------------------------------------
-deletetime=$(date +%Y%m%d%H -d "${currentime} ${CLEAN_OLDRUN_HRS} hours ago")
+deletetime=$(date +%Y%m%d%H%M -d "${currentime} ${CLEAN_OLDRUN_HRS} hours ago")
 echo "Deleting stmp directories before ${deletetime}..."
 cd ${DATAROOT}/pbspro
 set -A XX $(ls -d ${NET}.20* | sort -r)
-for onetime in ${XX[*]};do
+for dir in ${XX[*]};do
+  onetime=$(echo $dir | cut -d'.' -f2)
   if [[ ${onetime} =~ ^[0-9]+$ ]] && [[ ${onetime} -le ${deletetime} ]]; then
     rm -rf ${DATAROOT}/pbspro/${NET}.${onetime}
     echo "Deleted ${DATAROOT}/pbspro/${NET}.${onetime}"
