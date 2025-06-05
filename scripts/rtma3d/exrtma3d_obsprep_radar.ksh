@@ -1,12 +1,6 @@
 #!/bin/ksh 
 set -x
 
-# make sure executable exists
-if [ ! -f ${EXECrtma3d}/${exefile_name_radar} ] ; then
-  ${ECHO} "ERROR: mosaic radar obs prcoessing executable '${EXECrtma3d}/${exefile_name_radar}' does not exist!"
-  exit 1
-fi
-
 if [ ! "${COMINradar}" ]; then
   ${ECHO} "ERROR: \$COMINradar is not defined!"
   exit 1
@@ -142,7 +136,7 @@ cat << EOF > mosaic.namelist
 EOF
 
 # Run obs processor
-export pgm="rtma_process_mosaic"
+export pgm="${NET}_process_mosaic"
 . prep_step
 startmsg
 msg="***********************************************************"
@@ -151,9 +145,8 @@ msg="  begin processing MRMS MOSAIC RADAR Reflectivity Obs DATA"
 postmsg "$jlogfile" "$msg"
 msg="***********************************************************"
 postmsg "$jlogfile" "$msg"
-${CP_LN} ${EXECrtma3d}/${exefile_name_radar} ${pgm}
 APRUN="mpiexec -n 36 -ppn 36 --cpu-bind core --depth 1"
-${APRUN} ./${pgm} > ${pgmout} 2>errfile
+${APRUN} ${EXECrtma3d}/${pgm} >> ${pgmout} 2>errfile
 #${MPIRUN} ./${pgm} > ${pgmout} 2>errfile
 export err=$?; err_chk
 

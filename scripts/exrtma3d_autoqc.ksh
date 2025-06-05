@@ -71,7 +71,8 @@ for ftype in ges anl; do
   fi
   gunzip ${diagfile}.gz
   ln -sf ${diagfile} diag_conv.dat
-  ${READDIAG} diag_conv.dat
+# ${READDIAG} diag_conv.dat
+  ${EXECrtma3d}/${NET}_read_diag diag_conv.dat
   mv diag_results ${diagfile}
   rm diag_conv.dat
 

@@ -246,7 +246,7 @@ DATAsmartinit=${DATA}/prdgen_smartinit
 mkdir -p $DATAsmartinit
 USHrrfs=$USHdir/prdgen
 export fhr=00
-${USHrtma3d}/${RUN}/${RUN}_prdgen_smartinit.sh $cyc $PDY $DATAsmartinit ${COMOUT} ${COMIN} ${USHrtma3d} $RUN $EXECrtma3d $FIXrtma3d $PARMrtma3d >> stdout 2>&1
+${USHrtma3d}/${RUN}/${RUN}_prdgen_smartinit.sh $cyc $PDY $DATAsmartinit ${COMOUT} ${COMIN} ${USHrtma3d} $RUN $EXECrtma3d $FIXrtma3d $PARMrtma3d ${NET} >> stdout 2>&1
 date
 
 smart_fields=':(TMP|DPT|SPFH):2 m above ground:anl:|:(UGRD|VGRD|WIND|WDIR|GUST):10 m above ground:anl:|:(GUST|PRES|HGT|VIS|HTSGW):surface:|:TCDC:entire atmosphere|HGT:cloud ceiling:'
@@ -262,7 +262,7 @@ echo "run the obslist code"
 DATAobslist=${DATA}/prdgen_obslist
 mkdir -p $DATA/prdgen_obslist
 USHrrfs=$USHdir/prdgen
-${USHrtma3d}/${RUN}/${RUN}_prdgen_obslist.sh $cyc $PDY $DATAobslist ${COMOUT} ${COMIN} ${USHrtma3d} $RUN $EXECrtma3d $FIXrtma3d $PARMrtma3d >> stdout 2>&1
+${USHrtma3d}/${RUN}/${RUN}_prdgen_obslist.sh $cyc $PDY $DATAobslist ${COMOUT} ${COMIN} ${USHrtma3d} $RUN $EXECrtma3d $FIXrtma3d $PARMrtma3d ${NET} >> stdout 2>&1
 date
 
 exit

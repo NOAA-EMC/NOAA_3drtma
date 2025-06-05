@@ -55,7 +55,9 @@ ln -sf sndp.parm    fort.11
 ln -sf hrrr_bufr.tbl fort.32
 ln -sf profilm.c1.${tmmark} fort.66
 ln -sf class1.bufr fort.78
-${EXECrtma3d}/rtma_sndp < hrrr_modtop.parm  > sndp.out
+export pgm="${NET}_sndp"
+#${EXECrtma3d}/rtma_sndp < hrrr_modtop.parm  > sndp.out
+${EXECrtma3d}/${pgm} < hrrr_modtop.parm  > sndp.out
 export err=$?; err_chk
 
 #need to manipulate the file to get it to be compatible
@@ -84,7 +86,7 @@ EOF
    ln -sf class1.bufr fort.20
    export DIRD=bufr.${cycle}/bufr
 
-  pgm=rtma_stnmlist
+  export pgm=${NET}_stnmlist
   startmsg
   ${EXECrtma3d}/${pgm} < stnmlist_input >> $pgmout 2> errfile
   err=$?;export err ;err_chk

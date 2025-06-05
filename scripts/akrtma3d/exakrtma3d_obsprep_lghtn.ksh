@@ -2,11 +2,6 @@
 ############################################################################
 
 set -x
-# make sure executable exists
-if [ ! -f ${EXECrtma3d}/${exefile_name_lightning} ] ; then
-  ${ECHO} "ERROR: lightning obs prcoessing executable '${EXECrtma3d}/${exefile_name_lightning}' does not exist!"
-  exit 1
-fi
 
 # working directory
 workdir=${DATA}
@@ -112,7 +107,7 @@ EOF
 fi
 
 # Run process lightning
-pgm=${NET}_lghtn
+export pgm=${NET}_process_lightning
 . prep_step
 
 startmsg
@@ -125,16 +120,13 @@ postmsg "$jlogfile" "$msg"
 msg="***********************************************************"
 postmsg "$jlogfile" "$msg"
 
-# Run Processing lightning
-# copy the excutable file of processing RAP BUFR format lightning data
-${CP} ${EXECrtma3d}/${exefile_name_lightning}  ./rtma3d_process_lightning
-
-runline="${MPIRUN}             ./rtma3d_process_lightning"
-if [ ${obsprep_lghtn} -eq 1 ] ; then
-  $runline  > ${pgmout} 2>errfile
-else
-  $runline < lightning.namelist > ${pgmout} 2>errfile
-fi
+#runline="${MPIRUN}             ./rtma3d_process_lightning"
+#if [ ${obsprep_lghtn} -eq 1 ] ; then
+#  $runline  > ${pgmout} 2>errfile
+#else
+#  $runline < lightning.namelist > ${pgmout} 2>errfile
+#fi
+mpiexec $EXECrtma3d/${pgm} >> ${pgmout} 2>errfile
 export err=$?; err_chk
 
 msg="JOB $job FOR $NET HAS COMPLETED NORMALLY"

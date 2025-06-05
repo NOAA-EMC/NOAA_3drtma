@@ -17,11 +17,6 @@ check_dirs_exist() { #usage: check_dirs_exist "var1_name" "var2_name" ...
   done
 }
 
-# make sure executable exists
-if [ ! -f ${EXECrtma3d}/${exefile_name_gsi} ]; then
-  ${ECHO} "ERROR: GSI Analysis executable '${EXECrtma3d}/${exefile_name_gsi}' does not exist!"
-  exit 1
-fi
 if [ "${envir}" == "lsf" ] || [ "${envir}" == "pbspro" ]; then
 OBS_DIR=${DATAOBSHOME}
 BKG_DIR=${DATAHOME_BK}
@@ -525,7 +520,7 @@ ${CP} ${FIXgsi}/rap_satbias_starting_file.txt ./satbias_in
 ${CP} ${FIXgsi}/rap_satbias_pc_starting_file.txt ./satbias_pc
 
 # Run GSI
-export pgm="rtma3d_gsi"
+export pgm="${NET}_gsi"
 . prep_step
 startmsg
 msg="***********************************************************"
@@ -540,7 +535,7 @@ msg="***********************************************************"
 postmsg "$jlogfile" "$msg"
 
 CP_LN=${CP}
-${CP_LN} ${EXECrtma3d}/${exefile_name_gsi} ${pgm}
+#${CP_LN} ${EXECrtma3d}/${exefile_name_gsi} ${pgm}
 if [ "${envir}" == "lsf" ] || [ "${envir}" == "pbspro" ];  then
 #module purge
 #module use /lfs/h2/emc/lam/noscrub/Ming.Hu/rrfs/testD/ufs-srweather-app/env
@@ -550,9 +545,10 @@ if [ "${envir}" == "lsf" ] || [ "${envir}" == "pbspro" ];  then
   export FI_OFI_RXM_SAR_LIMIT=3145728
   export OMP_STACKSIZE=${OMP_STACKSIZE:-"512M"}
   export OMP_NUM_THREADS=${OMP_NUM_THREADS:-8}
-  rm ${DATA}/rtma_gsi
-  cpreq ${EXECrtma3d}/rtma_gsi ${DATA}
-  $APRUN ${DATA}/rtma_gsi < ${DATA}/gsiparm.anl > stdout 2>&1
+# rm ${DATA}/rtma_gsi
+# cpreq ${EXECrtma3d}/rtma_gsi ${DATA}
+# $APRUN ${DATA}/rtma_gsi < ${DATA}/gsiparm.anl > stdout 2>&1
+  $APRUN ${EXECrtma3d}/${pgm} < ${DATA}/gsiparm.anl > stdout 2>&1
   export err=$?
   err_chk
 fi

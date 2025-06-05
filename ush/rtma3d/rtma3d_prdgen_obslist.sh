@@ -25,6 +25,7 @@ RUN=$7      #rtma or urma
 EXECdir=$8
 fixdir=$9
 parmdir=${10}
+NET=${11}
 
 cd $DATAobslist
 
@@ -99,7 +100,7 @@ cat << EOF > faa_related_input
 /
 EOF
 
-mpiexec -n 1 -ppn 1 $EXECdir/rtma_obslist >>$pgmout 2>errfile
+mpiexec -n 1 -ppn 1 $EXECdir/${NET}_obslist >>$pgmout 2>errfile
 
 # Copy files to $COMOUT 
 
