@@ -133,7 +133,7 @@
 <!ENTITY maxtries	"3">
 <!ENTITY KEEPDATA	"YES">
 <!ENTITY SENDCOM	"YES">
-<!ENTITY RUN_RHIST	"YES">
+<!ENTITY RUN_RHIST	"No">
 <!ENTITY RUN_HOWV	"No">
 
 <!-- for various observations used in RTMA3D -->

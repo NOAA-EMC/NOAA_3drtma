@@ -292,8 +292,15 @@ fi
 #   bftab_sst= bufr table for sst ONLY needed for sst retrieval (retrieval=.true.)
 
 anavinfo=${FIXgsi}/rtma3d_anavinfo_arw_netcdf
-BERROR=${FIXgsi}/3drtma_berror_stats_hz01
-#BERROR=${FIXgsi}/rap_berror_stats_global_RAP_tune
+
+# Setting if (as default) using the berror file in which the De-correlation Length Scales (DLS) 
+#     had been tuned and hard-wired to 1/8 of original values from the original berror of HRRRDAS 
+  BERROR_DLS_TUNED_to_8th=${BERROR_DLS_TUNED_to_8th:-"Yes"}
+  BERROR=${FIXgsi}/3drtma_berror_stats_hz01                  # DLS tuned to 1/8 and hardwired inside
+  if [[ ${BERROR_DLS_TUNED_to_8th} =~ [NnFf] ]] ; then
+     BERROR=${FIXgsi}/rap_berror_stats_global_RAP_tune       # original berror of RAP/HRRR
+  fi
+
 SATANGL=${FIXgsi}/global_satangbias.txt
 SATINFO=${FIXgsi}/global_satinfo.txt
 CONVINFO=${FIXgsi}/rtma3d_convinfo_v1.0.txt
@@ -513,12 +520,12 @@ fi
 #====  set GSI namelist options for analysis of HOWV/GUST/VIS ====#
 #  setup for howv
   corp_howv0=0.42          # static BE of howv (0.42 is tuned for pure 3DVar, needs to be changed in hyrid run)
-  hwllp_howv=170000.0      # static BE de-correlation length scale of howv (if<0, using default preset value in GSI code --> hwllp of q at level 1, which is too short)
+  hwllp_howv=100000.0      # static BE de-correlation length scale of howv (if<0, using default preset value in GSI code --> hwllp of q at level 1, which is too short)
 
 #  setup for gust
   oerr_gust=1.0            # Obs Err of gust (if<0, use preset value 1.0 defined in read_prepbufr.f90)
   corp_gust0=3.0           # static BE of gust (if<0, use preset 3.0 defined in gsi code)
-  hwllp_gust=170000.0      # static BE de-correlation length scale of gust (if <0, using default preset value in GSI)
+  hwllp_gust=100000.0      # static BE de-correlation length scale of gust (if <0, using default preset value in GSI)
 
 #  setup for visibility following 2DRTMA
   pvis=0.2                 # power index used in nonlinear transform
@@ -526,7 +533,7 @@ fi
   vis_thres=16000.0        # upper-bound set for visibility (16 km, ~10 miles)
   scale_cv=1.0             # scaling factor used in nonlinear transform
   corp_vis0=3.0            # static BE of vis (in transofrmed g-space, not in physical space)
-  hwllp_vis=170000.0       # static BE de-correlation length scale of vis (if <0, using default preset value in GSI)
+  hwllp_vis=100000.0       # static BE de-correlation length scale of vis (if <0, using default preset value in GSI)
 #  changing the static BE and OE for howv and gust in 3DRTMA hybrid EnVar run
    if [[ "${ifhyb}" == ".false." ]] || [[ "${ifhyb}" == ".FALSE." ]] ; then
       export corp_howv=${corp_howv0}
@@ -554,6 +561,27 @@ fi
 # Running GSI with more print-out information for debugging
 # (for operational run, set to .false. for less print-out to reduce wall-clock time)
   export VERBOSE_GSI=${VERBOSE_GSI:-".false."}
+
+# Setting for the factors applied to horizontal and vertical de-correlation length scales (DLS) in berror
+# if using the berror file in which the De-correlation Length Scales (DLS) had been tuned
+#    to 1/8 of the values in original berror file of RAP/HRRR, then using the 
+#    same values of hzscl & vs as used in RAP/HRRR
+  vs=1.0                      # used in RAP/HRRR
+  hzscl1=0.373                # used in RAP/HRRR
+  hzscl2=0.746                # used in RAP/HRRR
+  hzscl3=1.500                # used in RAP/HRRR
+# if DLS in berror file are not reduced to 1/8, instead the orignal berror of HRRR is used, then
+#    hzscl and vs have to be reduced to 1/8 of original values of hzscl & vs used in HRRR
+  if [[ ${BERROR_DLS_TUNED_to_8th} =~ [NnFf] ]] ; then
+#    vs=$( echo "scale=6; ${vs} * 1.0 / 8.0 " | bc )
+#    hzscl1=$( echo "scale=6; ${hzscl1} * 1.0 / 8.0 " | bc )
+#    hzscl2=$( echo "scale=6; ${hzscl2} * 1.0 / 8.0 " | bc )
+#    hzscl3=$( echo "scale=6; ${hzscl3} * 1.0 / 8.0 " | bc )
+     vs=0.125                 # 1.0   * 1/8
+     hzscl1=0.046625          # 0.373 * 1/8
+     hzscl2=0.09325           # 0.746 * 1/8
+     hzscl3=0.1875            # 1.500 * 1/8
+  fi
 
 # Build the GSI namelist on-the-fly
 [[ -f ./gsiparm.anl.sh ]] && rm -f ./gsiparm.anl.sh

@@ -91,6 +91,8 @@ PROGRAM read_diag_conv
       read(11,iosetup)
      close(11)
   endif
+  write(6,*) ' *** writing out the namelist options for check-up *** '
+  write(6,iosetup)
 !
   open(42, file=trim(outfilename),IOSTAT=ios)
   if(ios > 0 ) then
@@ -126,6 +128,8 @@ PROGRAM read_diag_conv
               var(1:3)=='hwv' .or. var(1:3)=='vis')                          &
               read(17, ERR=999, end=110) cprvstg, csprvstg
           do i=1,ii
+             isubtype = -999        ! initialising isubtype & isubtype0 before processing every obs
+             isubtype0= -999
              cprovider=cprvstg(i)
              csubprovider=csprvstg(i)
              itype=rdiagbuf(1,i)    ! observation type
@@ -266,7 +270,7 @@ PROGRAM read_diag_conv
                    var,stationID,cprovider,csubprovider,itype,rdhr,rlat,rlon,rprs,rhgt,iuse,robs1,ddiff,robs2,rdpt2,rerr,iusev
              endif
 
-          enddo   ! i  end for one station
+          enddo   ! i loop end for one station (do i=1,ii)
 
           deallocate(cdiagbuf,rdiagbuf)
           deallocate(cprvstg,csprvstg)
