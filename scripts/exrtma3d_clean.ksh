@@ -17,12 +17,9 @@ for dir in ${XX[*]};do
     if [ -d ${COMROOT}/${NET}/pbspro/${NET}.${onetime} ]; then
       rm -rf ${COMROOT}/${NET}/pbspro/${NET}.${onetime}/*t${cyc}*
       echo "Deleted t${cyc}z files in ${COMROOT}/${NET}/pbspro/${NET}.${onetime}"
-      if [ ${cyc} == 23 ]; then
-            rm -rf ${COMROOT}/${NET}/pbspro/${NET}.${onetime}
-            echo "Deleted ${COMROOT}/${NET}/pbspro/${NET}.${onetime}"
-      fi
     else
-      echo "Nothing to delete."
+      echo "Nothing to delete in ${COMROOT}/${NET}/pbspro/${NET}.${onetime} for cycle t${cyc}z."
+      echo "Files already scrubbed or parallel has not run long enough."
     fi
 done
 
@@ -38,8 +35,10 @@ for dir in ${XX[*]};do
   if [[ ${onetime} =~ ^[0-9]+$ ]] && [[ ${onetime} -le ${deletetime} ]]; then
     if [ -d ${DATAROOT}/pbspro/${NET}.${onetime} ]; then
       rm -rf ${DATAROOT}/pbspro/${NET}.${onetime}
-      echo "Deleted ${DATAROOT}/pbspro/${NET}.${onetime}"
+      echo "Deleted ${DATAROOT}/pbspro/${NET}.${onetime} for cycle t${cyc}z."
     else
+      echo "Nothing to delete in ${DATAROOT}/pbspro/${NET}.${onetime} for cycle t${cyc}z.
+      echo "Files already scrubbed or parallel has not run long enough."
       echo "Nothing to delete."
     fi
   fi
