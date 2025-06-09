@@ -17,6 +17,10 @@ for dir in ${XX[*]};do
     if [ -d ${COMROOT}/${NET}/pbspro/${NET}.${onetime} ]; then
       rm -rf ${COMROOT}/${NET}/pbspro/${NET}.${onetime}/*t${cyc}*
       echo "Deleted t${cyc}z files in ${COMROOT}/${NET}/pbspro/${NET}.${onetime}"
+      if [ ${cyc} == 23 ] ; then
+              rm -rf ${COMROOT}/${NET}/pbspro/${NET}.${onetime}
+              echo "Directory ${COMROOT}/${NET}/pbspro/${NET}.${onetime} deleted."
+      fi
     else
       echo "Nothing to delete in ${COMROOT}/${NET}/pbspro/${NET}.${onetime} for cycle t${cyc}z."
       echo "Files already scrubbed or parallel has not run long enough."
