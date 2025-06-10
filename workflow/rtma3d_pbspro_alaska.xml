@@ -38,9 +38,7 @@
 <!ENTITY NWROOT		"/lfs/h2/emc/da/noscrub/&USER;/packages/rtma3d.&rtma3d_ver;">
 <!ENTITY PACKAGEROOT    "&NWROOT;">
 <!ENTITY COMINPREP      "/lfs/h2/emc/ptmp/ashley.stanfield/CRON/rtma3d/com/obsproc/v1.3">
-<!ENTITY OBS_DIR	"/scratch4/NCEPDEV/fv3-cam/save/Gang.Zhao/Data/GSD_GSI_Case/obs">
-<!ENTITY HRRR_DIR	"/scratch4/NCEPDEV/fv3-cam/save/Gang.Zhao/Data/GSD_GSI_Case/fgs">
-<!ENTITY HPSSOUT_5yr    "/NCEPDEV/emc-meso/5year/&USER;/rtma3d"> 
+<!ENTITY HPSSOUT_5yr    "/NCEPDEV/emc-meso/5year/&USER;/rtma3d">
 <!ENTITY HPSSOUT_2yr    "/NCEPDEV/emc-meso/2year/&USER;/rtma3d">
 <!--  -->
 
@@ -135,6 +133,8 @@
 <!ENTITY maxtries	"3">
 <!ENTITY KEEPDATA	"YES">
 <!ENTITY SENDCOM	"YES">
+<!ENTITY RUN_RHIST	"YES">
+<!ENTITY RUN_HOWV	"No">
 
 <!-- for various observations used in RTMA3D -->
 
@@ -161,6 +161,8 @@
 <!ENTITY exSCR_AUTOQC    "&SCRIPT_DIR;/ex&NET;_autoqc.ksh">
 <!ENTITY JJOB_MINT       "&JJOB_DIR;/J&CAP_RUN;_MINT_PREP">
 <!ENTITY JJOB_MAXT       "&JJOB_DIR;/J&CAP_RUN;_MAXT_PREP">
+<!ENTITY JJOB_MINTOBS       "&JJOB_DIR;/J&CAP_RUN;_MINT_OBS">
+<!ENTITY JJOB_MAXTOBS       "&JJOB_DIR;/J&CAP_RUN;_MAXT_OBS">
 <!ENTITY exSCR_MAXTBG    "&SCRIPT_DIR;/ex&NET;_maxtbg.ksh">
 <!ENTITY exefile_name_maxtbg      "rtma_maxtbg">
 <!ENTITY exSCR_MAXTOBS   "&SCRIPT_DIR;/ex&NET;_maxtobs.ksh">
@@ -190,7 +192,8 @@
 <!ENTITY JJOB_PRDGEN     "&JJOB_DIR;/J&CAP_RUN;_PRDGEN">
 <!ENTITY JJOB_RHIST   "&JJOB_DIR;/J&CAP_RUN;_RHIST">
 <!ENTITY exSCR_RHIST  "&SCRIPT_DIR;/&RUN;/ex&RUN;_rhist.ksh">
-
+<!ENTITY JJOB_CLEAN     "&JJOB_DIR;/J&CAP_RUN;_CLEAN">
+<!ENTITY exSCR_CLEAN    "&SCRIPT_DIR;/ex&NET;_clean.ksh">
 
 <!-- Resources -->
 
@@ -233,7 +236,7 @@
 <!ENTITY GSI_PROC "14">
 <!ENTITY GSI_THREADS "4">
 <!ENTITY GSI_OMP_STACKSIZE "512M">
-<!ENTITY GSI_RESOURCES '<walltime>00:40:00</walltime>'>
+<!ENTITY GSI_RESOURCES '<walltime>00:30:00</walltime>'>
 <!ENTITY GSI_RESERVATION '<nodes>12:ppn=30:tpp=4</nodes><native>-l place=vscatter:excl,select=12:ncpus=120</native><queue>&QUEUE;</queue><account>&ACCOUNT;</account>'>
 
 <!ENTITY GSI_START_TIME "00:40:00">
@@ -253,10 +256,6 @@
 <!ENTITY AUTOQC_PROC "1">
 <!ENTITY AUTOQC_RESOURCES '<walltime>00:30:00</walltime>'>
 <!ENTITY AUTOQC_RESERVATION '<nodes>1:ppn=1:vntype=cray_compute:mem=4000MB</nodes><native>-l place=scatter</native><queue>&QUEUE;</queue><account>&ACCOUNT;</account>'>
-
-<!ENTITY MINMAX_PROC "1">
-<!ENTITY MINMAX_RESOURCES '<walltime>00:10:00</walltime>'>
-<!ENTITY MINMAX_RESERVATION '<nodes>1:ppn=1:vntype=cray_compute:mem=500GB</nodes><native>-l place=scatter</native><queue>&QUEUE;</queue><account>&ACCOUNT;</account>'>
 
 <!ENTITY UPDATEVARS_PROC "14">
 <!ENTITY UPDATEVARS_THREADS "1">
@@ -279,9 +278,21 @@
 <!ENTITY PRDGEN_RESOURCES '<walltime>00:30:00</walltime>'>
 <!ENTITY PRDGEN_RESERVATION '<nodes>1:ppn=128:mem=256GB</nodes><native>-l place=scatter</native><queue>&QUEUE;</queue><account>&ACCOUNT;</account>'>
 
+<!ENTITY CLEAN_PROC "1">
+<!ENTITY CLEAN_RESOURCES '<walltime>00:30:00</walltime>'> 
+<!ENTITY CLEAN_RESERVATION '<nodes>1:ppn=1:vntype=cray_compute:mem=4GB</nodes><native>-l place=scatter</native><queue>&QUEUE;</queue><account>&ACCOUNT;</account>'>
+
+
 <!-- Variables in Namelist -->
 <!ENTITY GSI_grid_ratio_in_var       "1">
 <!ENTITY GSI_grid_ratio_in_cldanl    "1">
+<!ENTITY i_gsdsfc_uselist            "2">
+<!ENTITY VERBOSE_GSI                 ".false.">
+
+<!--Retention time for COM and DATA directories-->
+
+<!ENTITY CLEAN_OLDCOM_HRS            "120">
+<!ENTITY CLEAN_OLDRUN_HRS            "72">
 
 <!ENTITY NCKS '/apps/prod/nco/4.7.9/cce/11.0.2/bin/ncks'>
 <!-- Block of Variables passed to workflow and tasks -->
@@ -324,14 +335,6 @@
         <value>&model;</value>
    </envar>
    <envar>
-        <name>OBS_DIR</name>
-        <value>&OBS_DIR;</value>
-   </envar>
-   <envar>
-        <name>HRRR_DIR</name>
-        <value>&HRRR_DIR;</value>
-   </envar>
-   <envar>
         <name>ptmp_base</name>
         <value>&ptmp_base;</value>
    </envar>
@@ -342,6 +345,10 @@
    <envar>
         <name>COMINHRRR</name>
         <value>&COMINHRRR;</value>
+   </envar>
+   <envar>
+        <name>COMINPREP</name>
+        <value>&COMINPREP;</value>
    </envar>
    <envar>
         <name>COMINRADAR</name>
@@ -360,12 +367,12 @@
         <value>&GESINHRRR;</value>
    </envar>
    <envar>
-        <name>PACKAGEROOT</name>
-        <value>&PACKAGEROOT;</value>
-   </envar>
-   <envar>
         <name>NWROOT</name>
         <value>&NWROOT;</value>
+   </envar>
+   <envar>
+        <name>PACKAGEROOT</name>
+        <value>&PACKAGEROOT;</value>
    </envar>
    <envar>
         <name>DATAROOT</name>
@@ -699,10 +706,6 @@
       <value>&DATABASE_DIR;</value>
     </envar>
     <envar>
-      <name>DATA_GES</name>
-      <value>&HRRR_DIR;/<cyclestr offset="-1:00:00">@Y@m@d@H</cyclestr>/wrfprd</value>
-    </envar>
-    <envar>
       <name>GSI_grid_ratio_in_var</name>
       <value>&GSI_grid_ratio_in_var;</value>
     </envar>
@@ -717,6 +720,14 @@
     <envar>
       <name>JJOB_GSIANL</name>
       <value>&JJOB_GSIANL;</value>
+    </envar>
+    <envar>
+      <name>VERBOSE_GSI</name>
+      <value>&VERBOSE_GSI;</value>
+    </envar>
+    <envar>
+      <name>i_gsdsfc_uselist</name>
+      <value>&i_gsdsfc_uselist;</value>
     </envar>
     <envar>
       <name>AIRCRAFT_REJECT</name>
@@ -756,6 +767,10 @@
     <envar>
       <name>SUBH_TIME</name>
        <value><cyclestr>@M</cyclestr></value>
+    </envar>
+    <envar>
+      <name>RUN_HOWV</name>
+      <value>&RUN_HOWV;</value>
     </envar>
     <envar>
       <name>DATABASE_DIR</name>
@@ -842,72 +857,6 @@
       <value>&JJOB_PRDGEN;</value>
     </envar>'>
 
-<!ENTITY ENVARS_RHIST
-    '<envar>
-      <name>START_TIME</name>
-      <value><cyclestr>@Y@m@d@H</cyclestr></value>
-    </envar>
-    <envar>
-      <name>DATABASE_DIR</name>
-      <value>&DATABASE_DIR;</value>
-    </envar>
-    <envar>
-      <name>HPSSOUT_5yr</name>
-      <value>&HPSSOUT_5yr;</value>
-    </envar>
-    <envar>
-      <name>HPSSOUT_2yr</name>
-      <value>&HPSSOUT_2yr;</value>
-    </envar>
-    <envar>
-      <name>exSCR_RHIST</name>
-      <value>&exSCR_RHIST;</value>
-    </envar>
-    <envar>
-      <name>JJOB_RHIST</name>
-      <value>&JJOB_RHIST;</value>
-    </envar>'>
-
-<!ENTITY ENVARS_MINMAX
-    '<envar>
-      <name>START_TIME</name>
-      <value><cyclestr>@Y@m@d@H</cyclestr></value>
-    </envar>
-    <envar>
-       <name>JJOB_MINT</name>
-       <value>&JJOB_MINT;</value>
-    </envar>
-    <envar>
-       <name>JJOB_MAXT</name>
-       <value>&JJOB_MAXT;</value>
-    </envar>
-    <envar>
-       <name>exSCR_MAXTBG</name>
-       <value>&exSCR_MAXTBG;</value>
-    </envar>
-    <envar>
-       <name>exSCR_MAXTOBS</name>
-       <value>&exSCR_MAXTOBS;</value>
-    </envar>
-    <envar>
-       <name>exSCR_MINTOBS</name>
-       <value>&exSCR_MINTOBS;</value>
-    </envar>
-    <envar>
-       <name>exSCR_MINTBG</name>
-       <value>&exSCR_MINTBG;</value>
-    </envar>
-    <envar>
-       <name>exSCR_MINRH</name>
-       <value>&exSCR_MINRH;</value>
-    </envar>
-    <envar>
-       <name>exSCR_MAXRH</name>
-       <value>&exSCR_MAXRH;</value>
-    </envar>'>
-
-
-
 <!ENTITY ENVARS_AUTOQC
     '<envar>
       <name>START_TIME</name>
@@ -926,7 +875,6 @@
       <value>&JJOB_AUTOQC;</value>
     </envar>'>
 
-
 <!ENTITY ENVARS_MINMAX
     '<envar>
       <name>START_TIME</name>
@@ -965,7 +913,35 @@
        <value>&exSCR_MAXRH;</value>
     </envar>'>
 
-
+<!ENTITY ENVARS_RHIST
+    '<envar>
+      <name>START_TIME</name>
+      <value><cyclestr>@Y@m@d@H</cyclestr></value>
+    </envar>
+    <envar>
+      <name>DATABASE_DIR</name>
+      <value>&DATABASE_DIR;</value>
+    </envar>
+    <envar>
+      <name>HPSSOUT_5yr</name>
+      <value>&HPSSOUT_5yr;</value>
+    </envar>
+    <envar>
+      <name>HPSSOUT_2yr</name>
+      <value>&HPSSOUT_2yr;</value>
+    </envar>
+    <envar>
+      <name>RUN_RHIST</name>
+      <value>&RUN_RHIST;</value>
+    </envar>
+    <envar>
+      <name>exSCR_RHIST</name>
+      <value>&exSCR_RHIST;</value>
+    </envar>
+    <envar>
+      <name>JJOB_RHIST</name>
+      <value>&JJOB_RHIST;</value>
+    </envar>'>
 
 <!ENTITY ENVARS_UPDATEVARS
     '<envar>
@@ -993,6 +969,23 @@
       <value>&FCST_LENGTH;</value>
     </envar>'>
 
+ <!ENTITY ENVARS_CLEAN
+    '<envar>
+      <name>CLEAN_OLDRUN_HRS</name>
+      <value>&CLEAN_OLDRUN_HRS;</value>
+    </envar>
+    <envar>
+      <name>CLEAN_OLDCOM_HRS</name>  
+      <value>&CLEAN_OLDCOM_HRS;</value>
+    </envar>
+    <envar>
+     <name>exSCR_CLEAN</name>
+     <value>&exSCR_CLEAN;</value>
+    </envar>
+    <envar>
+      <name>JJOB_CLEAN</name>
+     <value>&JJOB_CLEAN;</value>
+    </envar>'>
 
 ]>
 
@@ -1015,6 +1008,20 @@
   <cycledef group="rap">0 0,12 * 01-12 2022-2025 *</cycledef>
 
   <cycledef group="3hours">0 */3 * 01-12 2022-2025 *</cycledef>
+
+
+  <task name="&RUN;_clean_task" cycledefs="hourly" maxtries="&maxtries;">
+      
+    &ENVARS;
+    
+    <command>&JJOB_DIR;/launch.ksh &JJOB_CLEAN;</command>
+    <jobname><cyclestr>&RUN;_clean_job_@Y@m@d@H@M</cyclestr></jobname>
+    <join><cyclestr>&LOG_SCHDLR;/&RUN;_&envir;_clean_@Y@m@d@H.log</cyclestr></join>
+    
+    &CLEAN_RESOURCES;
+    &CLEAN_RESERVATION;
+    &ENVARS_CLEAN;
+  </task>
 
   <task name="&RUN;_obsprep_lghtn_task" cycledefs="hourly" maxtries="&maxtries;">
 

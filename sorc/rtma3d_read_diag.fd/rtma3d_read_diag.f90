@@ -121,8 +121,10 @@ PROGRAM read_diag_conv
           read(17,ERR=999,end=110) cdiagbuf, rdiagbuf
           cprvstg='XXXXXXXX' 
           csprvstg='XXXXXXXX'
-          if (var(1:3)=='  t' .or. var(1:3)=='  q' .or. var(2:3)=='ps' .or. &
-              var(2:3)=='uv'  .or. var(1:3)=='spd' .or. var(1:3)=='gst' .or. var(1:3)=='hwv') read(17)cprvstg,csprvstg
+          if (var(1:3)=='  t' .or. var(1:3)=='  q' .or. var(2:3)=='ps'  .or. &
+              var(2:3)=='uv'  .or. var(1:3)=='spd' .or. var(1:3)=='gst' .or. &
+              var(1:3)=='hwv' .or. var(1:3)=='vis')                          &
+              read(17, ERR=999, end=110) cprvstg, csprvstg
           do i=1,ii
              cprovider=cprvstg(i)
              csubprovider=csprvstg(i)
@@ -241,16 +243,18 @@ PROGRAM read_diag_conv
 !
 !  write out result for one variable on one pitch
              if (var .ne. " uv" .and. isubtype0 >=0) then
-                !write (42,'(A3," @ ",A8," : ",I3,F10.2,F8.2,F8.2,F8.2,I5,2F10.2)') &
-                !   var,stationID,itype,rdhr,rlat,rlon,rprs,iuse,robs1,ddiff
-                write (42,'(A3,1x,A8,1x,A8,1x,A8,1x,I3,1x,F10.2,F8.2,F8.2,2F20.5,I5,2E15.5,1x,"  NaN  NaN   ",E15.5,F10.3,1x,"  NaN")') &
-                   var,stationID,cprovider,csubprovider,itype,rdhr,rlat,rlon,rprs,rhgt,iuse,robs1,ddiff,rerr,iusev
 
-             else if (trim(adjustl(var)) .eq. "q" .and. l_tdry) then
-                ! / ** when the data is q and tdry is available ** /
-                rtdry=rdiagbuf(22,i)  ! dry-bulb temperature
-                write (42,'(A3,1x,A8,1x,A8,1x,A8,1x,I3,1x,F10.2,F8.2,F8.2,2F20.5,I5,2E15.5,1x,"  NaN  NaN   ",E15.5,F10.3,1x,E15.5)') &
-                   var,stationID,cprovider,csubprovider,itype,rdhr,rlat,rlon,rprs,rhgt,iuse,robs1,ddiff,rerr,iusev,rtdry
+               if (trim(adjustl(var)) .eq. "q" .and. l_tdry) then
+                  ! / ** when the data is q and tdry is available ** /
+                  rtdry=rdiagbuf(22,i)  ! dry-bulb temperature
+                  write (42,'(A3,1x,A8,1x,A8,1x,A8,1x,I3,1x,F10.2,F8.2,F8.2,2F20.5,I5,2E15.5,1x,"  NaN  NaN   ",E15.5,F10.3,1x,E15.5)') &
+                     var,stationID,cprovider,csubprovider,itype,rdhr,rlat,rlon,rprs,rhgt,iuse,robs1,ddiff,rerr,iusev,rtdry
+               else
+                  !write (42,'(A3," @ ",A8," : ",I3,F10.2,F8.2,F8.2,F8.2,I5,2F10.2)') &
+                  !   var,stationID,itype,rdhr,rlat,rlon,rprs,iuse,robs1,ddiff
+                  write (42,'(A3,1x,A8,1x,A8,1x,A8,1x,I3,1x,F10.2,F8.2,F8.2,2F20.5,I5,2E15.5,1x,"  NaN  NaN   ",E15.5,F10.3,1x,"  NaN")') &
+                     var,stationID,cprovider,csubprovider,itype,rdhr,rlat,rlon,rprs,rhgt,iuse,robs1,ddiff,rerr,iusev
+               end if
 
              else if (var .eq. " uv" .and. isubtype0 >=0 ) then
 !  ** When the data is uv, additional output is needed **/
@@ -261,8 +265,6 @@ PROGRAM read_diag_conv
                 write (42,'(A3,1x,A8,1x,A8,1x,A8,1x,I3,1x,F10.2,F8.2,F8.2,2F20.5,I5,4E15.5,1x,E15.5,F10.3,1x,"  NaN")') &
                    var,stationID,cprovider,csubprovider,itype,rdhr,rlat,rlon,rprs,rhgt,iuse,robs1,ddiff,robs2,rdpt2,rerr,iusev
              endif
-
-
 
           enddo   ! i  end for one station
 
@@ -280,6 +282,7 @@ PROGRAM read_diag_conv
   STOP 9999
 
 999    PRINT *,'error read in diag file'
-      stop 1234
+! stop 1234
+  call exit(1234)          !GZ: exit with non-zero return code if code crashed
 
 END PROGRAM read_diag_conv
