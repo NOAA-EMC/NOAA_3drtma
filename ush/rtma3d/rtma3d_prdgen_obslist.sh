@@ -103,7 +103,7 @@ mpiexec -n 1 -ppn 1 $EXECdir/rtma_obslist >>$pgmout 2>errfile
 
 # Copy files to $COMOUT 
 
-list="ps t q u v w spd gust howv"
+list="ps t q u v w spd gust howv vis"
   for type in $list
   do
     cp ${type}_obs.listing_iter_ges $COMOUT/${RUN}.t${cyc}z.${type}_obs.listing_iter_01
