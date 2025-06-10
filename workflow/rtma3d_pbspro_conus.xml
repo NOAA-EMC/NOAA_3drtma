@@ -110,6 +110,7 @@
 <!ENTITY DATA_POSTSND   "&DATA_RUNDIR;/wrfbufr">
 <!ENTITY DATA_RHIST     "&DATA_RUNDIR;/rhist">
 <!ENTITY DATA_HRRRDAS   "&DATA_RUNDIR;/hrrrdas">
+<!ENTITY DATA_NCDIAG    "&DATA_RUNDIR;/ncdiagprd">
 
 <!ENTITY hpsspath0      "/NCEPDEV/emc-meso/5year/&USER;/pbspro_rtma3d">
 <!ENTITY hpsspath1      "/NCEPPROD/hpssprod/runhistory">
@@ -138,6 +139,7 @@
 <!ENTITY SENDCOM	"YES">
 <!ENTITY RUN_RHIST	"No">
 <!ENTITY RUN_HOWV	"No">
+<!ENTITY RUN_NCDIAG	"Yes">
 
 <!-- for various observations used in RTMA3D -->
 
@@ -193,10 +195,12 @@
 <!ENTITY JJOB_POST4FGS   "&JJOB_DIR;/J&CAP_RUN;_POST4FGS">
 <!ENTITY exSCR_POST4FGS  "&SCRIPT_DIR;/ex&RUN;_post4fgs.ksh">
 <!ENTITY JJOB_PRDGEN     "&JJOB_DIR;/J&CAP_RUN;_PRDGEN">
-<!ENTITY JJOB_RHIST   "&JJOB_DIR;/J&CAP_RUN;_RHIST">
-<!ENTITY exSCR_RHIST  "&SCRIPT_DIR;/&RUN;/ex&RUN;_rhist.ksh">
-<!ENTITY JJOB_HRRRDAS   "&JJOB_DIR;/J&CAP_RUN;_HRRRDAS">
-<!ENTITY exSCR_HRRRDAS  "&SCRIPT_DIR;/&RUN;/ex&RUN;_hrrrdas.ksh">
+<!ENTITY JJOB_RHIST      "&JJOB_DIR;/J&CAP_RUN;_RHIST">
+<!ENTITY exSCR_RHIST     "&SCRIPT_DIR;/&RUN;/ex&RUN;_rhist.ksh">
+<!ENTITY JJOB_HRRRDAS    "&JJOB_DIR;/J&CAP_RUN;_HRRRDAS">
+<!ENTITY exSCR_HRRRDAS   "&SCRIPT_DIR;/&RUN;/ex&RUN;_hrrrdas.ksh">
+<!ENTITY JJOB_NCDIAG     "&JJOB_DIR;/J&CAP_RUN;_NCDIAG">
+<!ENTITY exSCR_NCDIAG    "&SCRIPT_DIR;/ex&NET;_ncdiag.ksh">
 
 <!-- Resources -->
 
@@ -284,6 +288,10 @@
 <!ENTITY PRDGEN_PROC "1">
 <!ENTITY PRDGEN_RESOURCES '<walltime>00:30:00</walltime>'>
 <!ENTITY PRDGEN_RESERVATION '<nodes>1:ppn=128:mem=48GB</nodes><native>-l place=scatter</native><queue>&QUEUE;</queue><account>&ACCOUNT;</account>'>
+
+<!ENTITY NCDIAG_PROC "1">
+<!ENTITY NCDIAG_RESOURCES '<walltime>00:30:00</walltime>'>
+<!ENTITY NCDIAG_RESERVATION '<nodes>1:ppn=6:mem=96GB</nodes><native>-l place=vscatter:shared:prepost=true</native><queue>&QUEUE;</queue><account>&ACCOUNT;</account>'>
 
 <!-- Variables in Namelist -->
 <!ENTITY GSI_grid_ratio_in_var       "1">
@@ -568,6 +576,10 @@
       <value><cyclestr>&DATA_PRDGEN;</cyclestr></value>
    </envar>
    <envar>
+      <name>DATA_NCDIAG</name>
+      <value><cyclestr>&DATA_NCDIAG;</cyclestr></value>
+   </envar>
+   <envar>
       <name>DATA_AUTOQC</name>
       <value><cyclestr>&DATA_AUTOQC;</cyclestr></value>
    </envar>
@@ -743,6 +755,10 @@
       <value>&VERBOSE_GSI;</value>
     </envar>
     <envar>
+      <name>RUN_NCDIAG</name>
+      <value>&RUN_NCDIAG;</value>
+    </envar>
+    <envar>
       <name>i_gsdsfc_uselist</name>
       <value>&i_gsdsfc_uselist;</value>
     </envar>
@@ -872,6 +888,24 @@
     <envar>
       <name>JJOB_PRDGEN</name>
       <value>&JJOB_PRDGEN;</value>
+    </envar>'>
+
+<!ENTITY ENVARS_NCDIAG
+    '<envar>
+      <name>START_TIME</name>
+      <value><cyclestr>@Y@m@d@H</cyclestr></value>
+    </envar>
+    <envar>
+      <name>RUN_NCDIAG</name>
+      <value>&RUN_NCDIAG;</value>
+    </envar>
+    <envar>
+      <name>JJOB_NCDIAG</name>
+      <value>&JJOB_NCDIAG;</value>
+    </envar>
+    <envar>
+      <name>exSCR_NCDIAG</name>
+      <value>&exSCR_NCDIAG;</value>
     </envar>'>
 
 <!ENTITY ENVARS_AUTOQC
@@ -1232,6 +1266,27 @@
       </and>
      </dependency>
   </task>
+
+  <task name="&NET;_ncdiag_task" cycledefs="hourly" maxtries="&maxtries;">
+       
+    &ENVARS;
+    &NCDIAG_RESOURCES;
+    &NCDIAG_RESERVATION;
+    <envar>
+       <name>rundir_task</name>
+       <value><cyclestr>&DATA_NCDIAG;</cyclestr></value>
+    </envar>
+
+    <command>&JJOB_DIR;/launch.ksh &JJOB_NCDIAG;</command>
+    <jobname><cyclestr>&RUN;_ncdiag_job_@Y@m@d@H@M</cyclestr></jobname>
+    <join><cyclestr>&LOG_SCHDLR;/&RUN;_&envir;_ncdiag_@Y@m@d@H.log</cyclestr></join>
+
+    &ENVARS_NCDIAG;
+
+    <dependency>
+          <taskdep task="&RUN;_gsianl_task"/>
+    </dependency>
+    </task>
 
  <task name="&RUN;_hrrrdas_task" cycledefs="hourly" maxtries="&maxtries;">
        &ENVARS;
