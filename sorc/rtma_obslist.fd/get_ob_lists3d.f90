@@ -6,13 +6,14 @@
 !            the diagnostic files for 3drtma
 !
 !  to compile:
-!  ifort -free -convert big_endian get_ob_lists3d.f90
+!  ifort -free -convert big_endian -c get_ob_lists3d.f90
 !  
 !  AUTHOR: 
 !  Manuel Pondeca        date: 2022-03-18
 ! 
 !  2024-03-20 pondeca - add subtype output
 !  2025-02-03 pondeca - add gust and howv
+!  2025-06-02 pondeca/gang - add vis
 !
 !  REVISION HISTORY
 !  2022-03-18 Manuel Pondeca
@@ -23,7 +24,7 @@
          real(4),parameter:: spval=-9999.
          real(4),parameter:: spval2=-99.
 
-         integer(4),parameter::nflds=9 !t,q,ps,u,v,w,spd,gust,howv
+         integer(4),parameter::nflds=10 !t,q,ps,u,v,w,spd,gust,howv,vis
 
          integer(4),parameter::lun0=7
          integer(4),parameter::lun_t=10
@@ -35,6 +36,7 @@
          integer(4),parameter::lun_spd=16
          integer(4),parameter::lun_gust=17
          integer(4),parameter::lun_howv=18
+         integer(4),parameter::lun_vis=19
          integer(4),parameter::nmplower=-10000
          integer(4),parameter::nmpupper=+100
 
@@ -60,6 +62,7 @@
          integer(4) idate,nchar,nreal,i,ii0,mypegsi,lun,n,m,k,naux,n1
          integer(4) itype,isubtype
          integer(4) ntrjs,nqrjs,nprjs,nwrjs
+         integer(4) nspdrjs,ngustrjs,nhowvrjs,nvisrjs
          integer(4) nrjsmax,nrjs0 
 
          integer(4) ntot(nflds),nmp(nmplower:nmpupper,0:3,nflds)
@@ -87,8 +90,13 @@
          character(90),allocatable,dimension(:):: q_rjlist
          character(90),allocatable,dimension(:):: p_rjlist
          character(90),allocatable,dimension(:):: w_rjlist
+         character(90),allocatable,dimension(:):: spd_rjlist
+         character(90),allocatable,dimension(:):: gust_rjlist
+         character(90),allocatable,dimension(:):: howv_rjlist
+         character(90),allocatable,dimension(:):: vis_rjlist
          character(90),allocatable,dimension(:):: rjlist0
          logical tlistexist,qlistexist,plistexist,wlistexist
+         logical spdlistexist,gustlistexist,howvlistexist,vislistexist
          logical sfctype,near_sfcob
          logical lprvinfoexist
          logical lrjlistapplicable
@@ -133,7 +141,39 @@
          endif
          print*,'in get_ob_lists3d: wlistexist,nwrjs=',wlistexist,nwrjs
 
-         nrjsmax=max(ntrjs,nqrjs,nprjs,nwrjs)
+         filename='spd_rejectlist'
+         call rjlist_obcount(filename,spdlistexist,nspdrjs)
+         allocate(spd_rjlist(max(nspdrjs,1)))
+         if (spdlistexist .and. nspdrjs > 0) then
+            call readin_rjlist(filename,spd_rjlist,nspdrjs)
+         endif
+         print*,'in get_ob_lists3d: spdlistexist,nspdrjs=',spdlistexist,nspdrjs
+
+         filename='gust_rejectlist'
+         call rjlist_obcount(filename,gustlistexist,ngustrjs)
+         allocate(gust_rjlist(max(ngustrjs,1)))
+         if (gustlistexist .and. ngustrjs > 0) then
+            call readin_rjlist(filename,gust_rjlist,ngustrjs)
+         endif
+         print*,'in get_ob_lists3d: gustlistexist,ngustrjs=',gustlistexist,ngustrjs
+
+         filename='howv_rejectlist'
+         call rjlist_obcount(filename,howvlistexist,nhowvrjs)
+         allocate(howv_rjlist(max(nhowvrjs,1)))
+         if (howvlistexist .and. nhowvrjs > 0) then
+            call readin_rjlist(filename,howv_rjlist,nhowvrjs)
+         endif
+         print*,'in get_ob_lists3d: howvlistexist,nhowvrjs=',howvlistexist,nhowvrjs
+
+         filename='vis_rejectlist'
+         call rjlist_obcount(filename,vislistexist,nvisrjs)
+         allocate(vis_rjlist(max(nvisrjs,1)))
+         if (vislistexist .and. nvisrjs > 0) then
+            call readin_rjlist(filename,vis_rjlist,nvisrjs)
+         endif
+         print*,'in get_ob_lists3d: vislistexist,nvisrjs=',vislistexist,nvisrjs
+
+         nrjsmax=max(ntrjs,nqrjs,nprjs,nwrjs,nspdrjs,ngustrjs,nhowvrjs,nvisrjs)
          allocate(rjlist0(max(nrjsmax,1)))
          !----------------------------------------------------------------------------------
          !==> get number of gsi outer loops
@@ -182,6 +222,7 @@
             call open_and_header_V2 (lun_spd,     'spd',     clun3)
             call open_and_header_V2 (lun_gust,    'gust',    clun3)
             call open_and_header_V2 (lun_howv,    'howv',    clun3)
+            call open_and_header_V2 (lun_vis,     'vis',     clun3)
 
             !----------------------------------------------------------------------------------
 
@@ -206,7 +247,7 @@
                             otype(1:3)=='spd'.or. &
                             otype(1:3)=='gst'.or. &
                             otype(1:3)=='hwv'.or. &
-                            otype(1:3)=='vis'        !GZ: read provider info for visibility
+                            otype(1:3)=='vis'
             
               if (allocated(cdiagbuf)) deallocate(cdiagbuf) ; allocate(cdiagbuf(ii0))
               if (allocated(cprvstg))  deallocate(cprvstg)  ; allocate(cprvstg(ii0))
@@ -226,16 +267,19 @@
                 elseif (otype(1:3)=='  q') then ; lun=lun_q  ; n1=size(q_rjlist) ; rjlist0(1:n1)=q_rjlist(1:n1) ; nrjs0=nqrjs ; ifld=2
                 elseif (otype(2:3)=='ps' ) then ; lun=lun_ps ; n1=size(p_rjlist) ; rjlist0(1:n1)=p_rjlist(1:n1) ; nrjs0=nprjs ; ifld=3
                 elseif (otype(2:3)=='uv' ) then ; lun=lun_u  ; n1=size(w_rjlist) ; rjlist0(1:n1)=w_rjlist(1:n1) ; nrjs0=nwrjs ; ifld=4
-                elseif (otype(1:3)=='spd') then ; lun=lun_spd                                                                 ; ifld=7
-                elseif (otype(1:3)=='gst') then ; lun=lun_gust;n1=size(w_rjlist) ; rjlist0(1:n1)=w_rjlist(1:n1) ; nrjs0=nwrjs ; ifld=8
-                elseif (otype(1:3)=='hwv') then ; lun=lun_howv                                                                ; ifld=9
+                elseif (otype(1:3)=='spd') then ; lun=lun_spd  ; n1=size(spd_rjlist)  ; rjlist0(1:n1)=spd_rjlist(1:n1)  ; nrjs0=nspdrjs  ; ifld=7
+                elseif (otype(1:3)=='gst') then ; lun=lun_gust ; n1=size(gust_rjlist) ; rjlist0(1:n1)=gust_rjlist(1:n1) ; nrjs0=ngustrjs ; ifld=8
+                elseif (otype(1:3)=='hwv') then ; lun=lun_howv ; n1=size(howv_rjlist) ; rjlist0(1:n1)=howv_rjlist(1:n1) ; nrjs0=nhowvrjs ; ifld=9
+                elseif (otype(1:3)=='vis') then ; lun=lun_vis  ; n1=size(vis_rjlist)  ; rjlist0(1:n1)=vis_rjlist(1:n1)  ; nrjs0=nvisrjs  ; ifld=10
               endif
 
               lrjlistapplicable=otype(1:3)=='  t'.or. & 
                                 otype(1:3)=='  q'.or. & 
                                 otype(2:3)=='ps' .or. & 
                                 otype(2:3)=='uv' .or. &
-                                otype(1:3)=='gst'
+                                otype(1:3)=='gst' .or. &
+                                otype(1:3)=='hwv' .or. &
+                                otype(1:3)=='vis'
 
               do i=1,ii0
                  cstation=cdiagbuf(i)
@@ -308,7 +352,7 @@
                        write(lun,125)   cstation,itype,isubtype,rlat,rlon,dtime,oberr2,uob,uob_model,rmuse,clistorig,rfactor
                        write(lun_v,125) cstation,itype,isubtype,rlat,rlon,dtime,oberr2,vob,vob_model,rmuse,clistorig,rfactor
                        write(lun_w,125) cstation,itype,isubtype,rlat,rlon,dtime,oberr2,wob,wob_model,rmuse,clistorig,rfactor
-                    else if (otype(1:3)=='gst') then
+                    else if (otype(1:3)=='spd' .or. otype(1:3)=='gst' ) then
                        rfactor=rdiagbuf(20,i)
                        write(lun,125) cstation,itype,isubtype,rlat,rlon,dtime,oberr2,ob,ob_model,rmuse,clistorig,rfactor
                     else
@@ -351,6 +395,7 @@
                elseif ( n==7 ) then ; lun=lun_spd
                elseif ( n==8 ) then ; lun=lun_gust
                elseif ( n==9 ) then ; lun=lun_howv
+               elseif ( n==10) then ; lun=lun_vis
              endif
 
               write (lun,'(a)') '=================================================================================================='
@@ -416,6 +461,7 @@
            close(lun_spd)   ; close(lun_spd*10)
            close(lun_gust)  ; close(lun_gust*10)
            close(lun_howv)  ; close(lun_howv*10)
+           close(lun_vis)   ; close(lun_vis*10)
 
            close(lun0)
 5000     continue
@@ -423,6 +469,10 @@
          deallocate(q_rjlist)
          deallocate(p_rjlist)
          deallocate(w_rjlist)
+         deallocate(spd_rjlist)
+         deallocate(gust_rjlist)
+         deallocate(howv_rjlist)
+         deallocate(vis_rjlist)
          deallocate(rjlist0)
 
          end subroutine get_ob_lists3d
@@ -607,6 +657,7 @@
          cnames(7)='WIND SPEED'
          cnames(8)='WIND GUST'
          cnames(9)='SIGNIFICANT WAVE HGHT'
+         cnames(10)='VISIBILITY'
 
          cheader_1='shgt0 ==> station height'
          cheader_2='hgt0  ==> observation elevation'
@@ -790,6 +841,26 @@
             write(lun,'(a)')   '            (iv) dynamic (dyn). Note that the ob can be in more than one reject list'
             write(lun,'(a)')   '                              '
             write(lun,'(a)')   trim(cheader)//' rejectlist'
+
+         elseif (trim(cvar)=='vis') then
+            n=10
+            cname0='RTMA '//trim(cnames(n))//' OBS'
+            write(lun,'(a)')   trim(cname0)
+            write(lun,'(a)')   'UNITS of  oberr, ob, and guess is m. Ob is used only if rmuse=+1.0 or +2.0'
+            write(lun,'(a)')   'rmuse=-100. ==> user chose to monitor this ob and see how well it agrees with the guess'
+            write(lun,'(a)')   'rmuse=-150. ==> ob is being monitored. Internally selected based on MADIS QC flag values'
+            write(lun,'(a)')   'rmuse=-5000.==> this non-mesonet wind was was in the reject list'
+            write(lun,'(a)')   'rmuse=-6000.==> this mesonet wind did not belong to any of the GSD uselists, and neither was it'
+            write(lun,'(a)')   '                in the reject list'
+            write(lun,'(a)')   'rmuse=-6100.==> this mesonet wind was in the reject list and on at least one of the GSD uselists'
+            write(lun,'(a)')   'rmuse=-6200.==> this mesonet wind was in the reject list and on neither one of the GSD uselists'
+            write(lun,'(a)')   'dtime is the hour relative to the valid analysis time. For example, dtime=-0.1'
+            write(lun,'(a)')   '       means 0.1h (i.e. 6 minutes) before the valid analysis time'
+            write(lun,'(a)')   'rejectlist: list of sub-standard obs where ob was found. It can be (i) static (sta),'
+            write(lun,'(a)')   '            (ii) from weather forecast office (wfo), (iii) global based on MADIS QC stats (glb), or'
+            write(lun,'(a)')   '            (iv) dynamic (dyn). Note that the ob can be in more than one reject list'
+            write(lun,'(a)')   '                              '
+            write(lun,'(a)')   cheader//' rejectlist'
          endif
 
 
