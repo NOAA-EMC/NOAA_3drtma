@@ -11,8 +11,8 @@ git clone -b 3DRTMAv1 https://github.com/NOAA-EMC/NOAA_3drtma rtma3d.v1.0.0
 2. Copy the fix and parm files:
 
 cd rtma3d.v1.0.0
-cp -r /lfs/h2/emc/da/noscrub/annette.gibbs/FIX_RTMA3D/fix/* fix/
-cp -r /lfs/h2/emc/da/noscrub/annette.gibbs/FIX_RTMA3D/parm .
+cp -r /lfs/h2/emc/da/noscrub/matthew.t.morris/packages/rtma3d.v1.0.0/fix/* fix/
+cp -r /lfs/h2/emc/da/noscrub/matthew.t.morris/packages/rtma3d.v1.0.0/parm/* parm/
 
 3. Move to the sorc directory:
 
