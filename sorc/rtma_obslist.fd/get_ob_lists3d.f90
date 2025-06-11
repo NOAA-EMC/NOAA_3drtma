@@ -261,7 +261,7 @@
               print*,'in get_ob_lists, otype,nchar,nreal,ii0,mypegsi=', & 
                          otype,nchar,nreal,ii0,mypegsi
 
-              if (.not.lprvinfoexist) cycle loop_read_obs  !WHY THIS?????????????????? / MPondeca
+              if (.not.lprvinfoexist) cycle loop_read_obs
 
               if       (otype(1:3)=='  t') then ; lun=lun_t  ; n1=size(t_rjlist) ; rjlist0(1:n1)=t_rjlist(1:n1) ; nrjs0=ntrjs ; ifld=1
                 elseif (otype(1:3)=='  q') then ; lun=lun_q  ; n1=size(q_rjlist) ; rjlist0(1:n1)=q_rjlist(1:n1) ; nrjs0=nqrjs ; ifld=2
