@@ -25,6 +25,7 @@ for dir in ${XX[*]};do
       echo "Nothing to delete in ${COMROOT}/${NET}/pbspro/${NET}.${onetime} for cycle t${cyc}z."
       echo "Files already scrubbed or parallel has not run long enough."
     fi
+  fi
 done
 
 #-----------------------------------------------------------------------
@@ -41,7 +42,7 @@ for dir in ${XX[*]};do
       rm -rf ${DATAROOT}/pbspro/${NET}.${onetime}
       echo "Deleted ${DATAROOT}/pbspro/${NET}.${onetime} for cycle t${cyc}z."
     else
-      echo "Nothing to delete in ${DATAROOT}/pbspro/${NET}.${onetime} for cycle t${cyc}z.
+      echo "Nothing to delete in ${DATAROOT}/pbspro/${NET}.${onetime} for cycle t${cyc}z."
       echo "Files already scrubbed or parallel has not run long enough."
       echo "Nothing to delete."
     fi
