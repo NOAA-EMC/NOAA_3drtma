@@ -22,7 +22,7 @@ OBS_DIR=${DATAOBSHOME}
 BKG_DIR=${DATAHOME_BK}
 COMINhrrrdas=${COMINHRRRDAS}
 fi
-#START_TIME=`${DATE} -d "${PDY} ${cyc} ${SUBH_TIME} minutes"`
+subcyc=${subcyc:-"00"}
 START_TIME=`${DATE} -d "${PDY} ${cyc} ${subcyc} minutes"`
 if [ ${HRRRDAS_BEC} -eq 0 ]; then
 EnsWgt=0.5
@@ -64,26 +64,22 @@ else
   exit 1
 fi
 
-# options for ocean wave height (howv) and 10-m wind gust (gust)
-#   detecting HOWV and GUST in firstguess
+#  Detecting the existence of Ocean Significant Wave Height (HOWV) in firstguess
 i_found_howv=0
-RUN_HOWV="FALSE"
+RUN_HOWV="No"
 #if [ "$NCDUMP" ] ; then
 # i_found_howv=$($NCDUMP -h ./wrf_inout | grep -i "HOWV" | wc -l)  #-->multiple lines are found
   i_found_howv=$(ncdump  -h ./wrf_inout | grep -i " HOWV(" | wc -l) 
   if [[ "${i_found_howv}" -eq 1 ]] ; then       # found unique variable HOWV
-    RUN_HOWV="TRUE"
+    RUN_HOWV="Yes"
+  else
+    RUN_HOWV="No"
   fi
 #fi
-i_found_gust=0
-RUN_GUST="FALSE"
-#if [ "$NCDUMP" ] ; then
-# i_found_gust=$($NCDUMP -h ./wrf_inout | grep -i "GUST" | wc -l)  #-->multiple lines are found
-  i_found_gust=$(ncdump  -h ./wrf_inout | grep -i " GUST(" | wc -l) 
-  if [[ "${i_found_gust}" -eq 1 ]] ; then       # found unique variable GUST
-    RUN_GUST="TRUE"
-  fi
-#fi
+# Note: if RUN_HOWV=TRUE/Yes, then DO analysis of wave height.
+#       If no matter HOWV is available in firstguess, user DOES NOT want to analyz wave height,
+#       please reset RUN_HOWV="No".
+# RUN_HOWV="No"
 
 # Link to the prepbufr data
 if [ -r ${OBS_DIR}/${NET}.t${cyc}z.prepbufr.tm00 ]; then
@@ -127,7 +123,9 @@ else
   ${ECHO} "Warning: ${OBS_DIR}: satmar does not exist!"
 fi
 
-if [ "${envir}" = "lsf" ] || [ "${envir}" = "pbspro" ] && [ ${HRRRDAS_BEC} -eq 0 ] ; then #WCOSS
+# Searching GDAS ensemble forecast for hybrid 3DEnVar analysis
+rm -f filelist03
+#if [ "${envir}" = "lsf" ] || [ "${envir}" = "pbspro" ] && [ ${HRRRDAS_BEC} -eq 0 ] ; then #WCOSS
   # Set runtime and save directories
   export endianness=Big_Endian
 
@@ -162,29 +160,22 @@ if [ "${envir}" = "lsf" ] || [ "${envir}" = "pbspro" ] && [ ${HRRRDAS_BEC} -eq 0
   #   if not, set ifhyb=false
       cpreq ${UTILrtma3d_dev}/convert.sh .
   fi
-fi
+#fi
+${TOUCH} filelist03 #so as to avoid "no such file" error message
 
-
+# Searching HRRRDAS ensemble 
 if [ ${HRRRDAS_BEC} -eq 1 ]; then
   ${ECHO} "\$HRRRDAS_BEC=${HRRRDAS_BEC}, so HRRRDAS will be used if available"
   #----------------------------------------------------
   # generate list of HRRRDAS members for ensemble covariances
   # Use 1-hr forecasts from the HRRRDAS cycling
+  rm -f ./filelist.hrrrdas
   c=1
   while [[ $c -le 36 ]]; do
-   if [ $c -lt 10 ]; then
-    cc="0"$c
-   else
-    cc=$c
-   fi
-   if [ "${envir}" == "lsf" ] || [ "${envir}" = "pbspro" ]; then #WCOSS
-     hrrre_file=${COMINhrrrdas}/hrrrdas_small_d02_${time_1hour_ago}00f01_mem00${cc}
-     ${LS} ${COMINhrrrdas}/hrrrdas_small_d02_${time_1hour_ago}00f01_mem00${cc} >> filelist.hrrrdas
-   elif [ ${HRRRDAS_SMALL} -eq 1 ]; then
-     hrrre_file=${COMINhrrrdas}/${time_1hour_ago}/wrfprd_mem00${cc}/wrfout_small_d02_${time_str2}
-   else
-     hrrre_file=${COMINhrrrdas}/${time_1hour_ago}/wrfprd_mem00${cc}/wrfout_d02_${time_str2}
-   fi
+   cc=$(printf "%02d" $c)
+   hrrre_file=${COMINhrrrdas}/hrrrdas_small_d02_${time_1hour_ago}00f01_mem00${cc}
+#  ${LS} ${COMINhrrrdas}/hrrrdas_small_d02_${time_1hour_ago}00f01_mem00${cc} >> filelist.hrrrdas
+   ${LS} ${hrrre_file} >> filelist.hrrrdas
    ${LN} -sf ${hrrre_file} wrf_en0${cc}
    ((c = c + 1))
   done
@@ -203,6 +194,7 @@ hrrrmem=`more filelist.hrrrdas | wc -l`
 hrrrmem=$((hrrrmem - 3 ))
 if [[ ${hrrrmem} -gt 30 ]] && [[ ${HRRRDAS_BEC} -eq 1  ]]; then #if HRRRDAS BEC is available, use it as first choice
   echo "Do hybrid with HRRRDAS BEC"
+  EnsWgt=0.9
   nummem=${hrrrmem}
   cpreq filelist.hrrrdas filelist03
   ${CP} ${PARMgsi}/hybens_info_hrrrdas hybens_info
@@ -218,6 +210,7 @@ if [[ ${hrrrmem} -gt 30 ]] && [[ ${HRRRDAS_BEC} -eq 1  ]]; then #if HRRRDAS BEC 
   ${ECHO} " Cycle ${YYYYMMDDHH}: GSI hybrid uses HRRRDAS BEC with n_ens=${nummem}" >> ${pgmout}
 elif [[ ${nummem} -eq 80 ]]; then
   echo "Do hybrid with GDAS directly"
+  EnsWgt=0.5
   ${CP} ${PARMgsi}/hybens_info_hrrrdas hybens_info
   beta1_inv=$(( 1 - $EnsWgt  ))
   ifhyb=.true.
@@ -229,6 +222,15 @@ elif [[ ${nummem} -eq 80 ]]; then
      readin_localization=.true.
   fi
   ${ECHO} " Cycle ${YYYYMMDDHH}: GSI hybrid uses GDAS directly with n_ens=${nummem}" >> ${pgmout}
+else
+  beta1_inv=1.0
+  ifhyb=.false.
+  regional_ensemble_option=1
+  grid_ratio_ens=1
+  i_en_perts_io=0
+  ens_fast_read=.false.
+  readin_localization=.false.
+  ${ECHO} " Cycle ${YYYYMMDDHH}: GSI running pure 3DVar without ensenble covariances." >> ${pgmout}
 fi
 
 # copy the read-in localization file for hybrid envar analysis
@@ -236,6 +238,8 @@ fi
   if [[ "${readin_localization}" == ".true." ]] ; then
      cp -p ${PARMgsi}/${HYBENS_INFO}  hybens_info
      
+     # read in the weight for static background error at the surface level in hybrid envar run
+     # the weight would be used to adjust the background error for howv/gust/vis
      hybens_info_file="hybens_info"
      n=0
      set +x
@@ -269,37 +273,63 @@ fi
 #   bufrtable= text file ONLY needed for single obs test (oneobstest=.true.)
 #   bftab_sst= bufr table for sst ONLY needed for sst retrieval (retrieval=.true.)
 
-anavinfo=${FIXgsi}/anavinfo_arw_netcdf
+anavinfo=${FIXgsi}/rtma3d_anavinfo_arw_netcdf
 BERROR=${FIXgsi}/3drtma_berror_stats_hz01
 #BERROR=${FIXgsi}/rap_berror_stats_global_RAP_tune
 SATANGL=${FIXgsi}/global_satangbias.txt
 SATINFO=${FIXgsi}/global_satinfo.txt
-CONVINFO=${FIXgsi}/3drtma_convinfo_v0.6.5_updated
+CONVINFO=${FIXgsi}/rtma3d_convinfo_v1.0.txt
+#CONVINFO=${FIXgsi}/3drtma_convinfo_v0.6.5_updated
 OZINFO=${FIXgsi}/global_ozinfo.txt
 PCPINFO=${FIXgsi}/global_pcpinfo.txt
 OBERROR=${FIXgsi}/3drtma_errtable_smallSFCerr_ascat
 #OBERROR=${FIXgsi}/nam_errtable.r3dv
 
-# If doing the analysis of wave height (HOWV) and/or wind gust (GUST) in 3DRTMA
-ANAVINFO_HOWVGUST_FN=anavinfo_arw_netcdf_howvgust
-ANAVINFO_HOWV_FN=anavinfo_arw_netcdf_howv
-ANAVINFO_GUST_FN=anavinfo_arw_netcdf_gust
-CONVINFO_HOWVGUST_FN=3drtma_convinfo_v0.6.5_updated_howvgust
-CONVINFO_HOWV_FN=3drtma_convinfo_v0.6.5_updated_howvgust
-CONVINFO_GUST_FN=3drtma_convinfo_v0.6.5_updated_howvgust
-if [[ "${RUN_HOWV}" == "TRUE" ]] && [[ "${RUN_GUST}" == "TRUE" ]]; then
-   anavinfo=${FIXgsi}/${ANAVINFO_HOWVGUST_FN}
-   CONVINFO=${FIXgsi}/${CONVINFO_HOWVGUST_FN}
-elif [[ "${RUN_HOWV}" == "TRUE" ]] && [[ "${RUN_GUST}" == "FALSE" ]]; then
+ANAVINFO_MXTM_FN=rtma3d_anavinfo_arw_netcdf_mxtm
+ANAVINFO_MITM_FN=rtma3d_anavinfo_arw_netcdf_mitm
+ANAVINFO_HOWV_FN=urma3d_anavinfo_arw_netcdf
+ANAVINFO_MXTM_HOWV_FN=urma3d_anavinfo_arw_netcdf_mxtm
+ANAVINFO_MITM_HOWV_FN=urma3d_anavinfo_arw_netcdf_mitm
+CONVINFO_HOWV_FN=urma3d_convinfo_v1.0.txt
+
+#==========================================================================#
+# Note:                                                                    #
+#      If running with analysis of mint/maxt, please comment off the       #
+#      following if-block, use the next if-block for mint/maxt and howv    #
+# If doing the analysis of wave height (HOWV) in 3DRTMA
+if [[ ${RUN_HOWV} =~ [TtYy] ]] ; then
    anavinfo=${FIXgsi}/${ANAVINFO_HOWV_FN}
    CONVINFO=${FIXgsi}/${CONVINFO_HOWV_FN}
-elif [[ "${RUN_HOWV}" == "FALSE" ]] && [[ "${RUN_GUST}" == "TRUE" ]]; then
-   anavinfo=${FIXgsi}/${ANAVINFO_GUST_FN}
-   CONVINFO=${FIXgsi}/${CONVINFO_GUST_FN}
 fi
+#==========================================================================#
 
-## The code in GSI for direct analysis of mint & maxt is not ready yet, 
-##    so do NOT use the anavinfo file with mint or maxt for now.
+#==========================================================================#
+# Note:                                                                    #
+#      The code in GSI for direct analysis of mint/maxt is not ready yet,  #
+#       so do NOT use the anavinfo file with mint or maxt for now.         #
+# if doing the analysis of minT/maxT in 3DRTMA
+# if [[ $cyc == $cyc_mitm ]]  ; then
+#    anavinfo=${FIXgsi}/${ANAVINFO_MITM_FN}
+#    if [[ ${RUN_HOWV} =~ [TtYy] ]] ; then
+#        anavinfo=${FIXgsi}/${ANAVINFO_MITM_HOWV_FN}
+#        CONVINFO=${FIXgsi}/${CONVINFO_HOWV_FN}
+#    fi
+# elif [[ $cyc == $cyc_mxtm ]]  ; then
+#    anavinfo=${FIXgsi}/${ANAVINFO_MXTM_FN}
+#    if [[ ${RUN_HOWV} =~ [TtYy] ]] ; then
+#        anavinfo=${FIXgsi}/${ANAVINFO_MXTM_HOWV_FN}
+#        CONVINFO=${FIXgsi}/${CONVINFO_HOWV_FN}
+#    fi
+# else
+#    anavinfo=${FIXgsi}/anavinfo_arw_netcdf_rtma3d
+#    CONVINFO=${FIXgsi}/rtma3d_convinfo_v1.0.txt
+#    if [[ ${RUN_HOWV} =~ [TtYy] ]] ; then
+#        anavinfo=${FIXgsi}/${ANAVINFO_HOWV_FN}
+#        CONVINFO=${FIXgsi}/${CONVINFO_HOWV_FN}
+#    fi
+# fi
+#==========================================================================#
+
 # Fixed fields
 cpreq $anavinfo anavinfo
 cpreq $BERROR   berror_stats
@@ -340,6 +370,11 @@ for file in `awk '{if($1!~"!"){print $1}}' ./satinfo | sort | uniq` ;do
    ln -s ${FIXcrtm}/${file}.SpcCoeff.bin ./
    ln -s ${FIXcrtm}/${file}.TauCoeff.bin ./
 done
+
+# option to control the usage of gsdsfc_uselist
+# 1: using GSD Surface Obs uselist
+# 2: using surface obs uselist generated by EMC Automated QC package (<== default)
+  i_gsdsfc_uselist=${i_gsdsfc_uselist:-2}
 
 # Get reject/accept lists derived from automated QC package
 found_rjlist=False
@@ -392,7 +427,7 @@ if [[ "$sfcwndob_biasc" = ".true." ]]; then
   fi
 fi
 
-# Get aircraft reject list, mesonet_uselist, sfcobs_provider
+# Get GSD aircraft reject list, mesonet_uselist, sfcobs_provider
 #if [ $cyc = "08" ]; then
 #${MV} ${AIRCRAFT_REJECT}/current_bad_aircraft.txt  ${AIRCRAFT_REJECT}/${PDYm1}_bad_aircraft.txt
 #scpreq Edward.Colon@dtn-jet.boulder.rdhpcs.noaa.gov:/mnt/lfs4/HFIP/hfv3gfs/Edward.Colon/reject_use_lists/current_bad_aircraft.txt ${AIRCRAFT_REJECT}/
@@ -401,8 +436,11 @@ fi
 #${MV} ${SFCOBS_USELIST}/current_mesonet_uselist.txt ${SFCOBS_USELIST}/${PDYm1}_mesonet_uselist.txt
 #scpreq Edward.Colon@dtn-jet.boulder.rdhpcs.noaa.gov:/mnt/lfs4/HFIP/hfv3gfs/Edward.Colon/reject_use_lists/current_mesonet_uselist.txt ${SFCOBS_USELIST}/
 #fi
-#${CP} ${AIRCRAFT_REJECT}/current_bad_aircraft.txt current_bad_aircraft
-#${CP} ${SFCOBS_USELIST}/current_mesonet_uselist.txt gsd_sfcobs_uselist.txt
+if [ "${i_gsdsfc_uselist}" -eq 1 ] ; then
+   ${ECHO} "Using GSD Surface Obs Uselist -- i_gsdsfc_uselist=${i_gsdsfc_uselist}"
+   ${CP} ${AIRCRAFT_REJECT}/current_bad_aircraft.txt current_bad_aircraft
+   ${CP} ${SFCOBS_USELIST}/current_mesonet_uselist.txt gsd_sfcobs_uselist.txt
+fi
 ${CP} ${SFCOBS_PROVIDER}/gsd_sfcobs_provider.txt gsd_sfcobs_provider.txt
 
 bufrtable=${FIXgsi}/prepobs_prep.bufrtable
@@ -451,42 +489,94 @@ if [ "${envir}" == "lsf" ] || [ "${envir}" == "pbspro" ]; then #WCOSS
   echo "HVC option is $hybridcord"
 fi
 
-#====  set GSI namelist options for analysis of HOWV and GUST  ====#
-  oerr_gust="1.0"                #Obs Err of gust (if<0, use preset value 1.0 defined in read_prepbufr.f90)
-  corp_howv0="0.42"        #static BE of howv (0.42 is tuned for pure 3DVar, needs to be changed in hyrid run)
-  corp_gust0="3.0"         #static BE of gust (if<0, use preset 3.0 defined in gsi code)
-  hwllp_howv="170000.0"           #static BE de-correlation length scale of howv (if<0, using default preset value in GSI code --> hwllp of q at level 1, which is too short)
-  hwllp_gust="170000.0"           #static BE de-correlation length scale of gust (if <0, using default preset value in GSI)
+# option for netcdf-format obs diag file
+  L_NCDIAG=${L_NCDIAG:-".false."}     # false: no output of netcdf obsdiag, and do not combine them
+
+#====  set GSI namelist options for analysis of HOWV/GUST/VIS ====#
+#  setup for howv
+  corp_howv0=0.42          # static BE of howv (0.42 is tuned for pure 3DVar, needs to be changed in hyrid run)
+  hwllp_howv=170000.0      # static BE de-correlation length scale of howv (if<0, using default preset value in GSI code --> hwllp of q at level 1, which is too short)
+
+#  setup for gust
+  oerr_gust=1.0            # Obs Err of gust (if<0, use preset value 1.0 defined in read_prepbufr.f90)
+  corp_gust0=3.0           # static BE of gust (if<0, use preset 3.0 defined in gsi code)
+  hwllp_gust=170000.0      # static BE de-correlation length scale of gust (if <0, using default preset value in GSI)
+
+#  setup for visibility following 2DRTMA
+  pvis=0.2                 # power index used in nonlinear transform
+  estvisoe=2.61            # Obs Err of visibility (in transofrmed g-space, not in physical space)
+  vis_thres=16000.0        # upper-bound set for visibility (16 km, ~10 miles)
+  scale_cv=1.0             # scaling factor used in nonlinear transform
+  corp_vis0=3.0            # static BE of vis (in transofrmed g-space, not in physical space)
+  hwllp_vis=170000.0       # static BE de-correlation length scale of vis (if <0, using default preset value in GSI)
 #  changing the static BE and OE for howv and gust in 3DRTMA hybrid EnVar run
    if [[ "${ifhyb}" == ".false." ]] || [[ "${ifhyb}" == ".FALSE." ]] ; then
       export corp_howv=${corp_howv0}
       export corp_gust=${corp_gust0}
+      export corp_vis=${corp_vis0}
    else
-      echo "The weight of static error at bottom level for howv and gust is ${StaticWgt}"
+      echo "The weight of static error at bottom level for howv/gust/vis is ${StaticWgt}"
       tmpvar=$( echo "scale=4; ${corp_howv0} * sqrt(( 1.0 / ${StaticWgt}))" | bc )
-      export corp_howv="${tmpvar}"      #changing static BE of howv if hybrid run with readin_local=False
+      export corp_howv="${tmpvar}"      #changing static BE of howv in hybrid run
       tmpvar=$( echo "scale=4; ${corp_gust0} * sqrt(( 1.0 / ${StaticWgt}))" | bc )
-      export corp_gust="${tmpvar}"      #changing static BE of gust if hybrid run with readin_local=False
+      export corp_gust="${tmpvar}"      #changing static BE of gust in hybrid run
+      tmpvar=$( echo "scale=4; ${corp_vis0} * sqrt(( 1.0 / ${StaticWgt}))" | bc )
+      export corp_vis="${tmpvar}"      #changing static BE of vis(ibility) in hybrid run
    fi
 
+# if reading surface roughtness in firstguess
+# (used in Similarity theory based height adjustment for wind gust)
+  i_sfcrough_fgs=${i_sfcrough_fgs:-1}         # 1(default for 3DRTMA) --> read roughness
+
+# if using height adjustment in surface wind and wind gust analysis
+#    note: scheme based on Similarity therory for rtma and 3drtma 
+  use_similarity_winghgtadj=".true."          # true  (default): using similarity theory
+  neutral_stability_winghgtadj=".false."      # false (default): non-neutral stability
+
+# Running GSI with more print-out information for debugging
+# (for operational run, set to .false. for less print-out to reduce wall-clock time)
+  export VERBOSE_GSI=${VERBOSE_GSI:-".false."}
+
 # Build the GSI namelist on-the-fly
+[[ -f ./gsiparm.anl.sh ]] && rm -f ./gsiparm.anl.sh
+[[ -f ./gsiparm.anl ]] && rm -f ./gsiparm.anl
+
 # ${CP} ${PARMgsi}/hrrr_gsiparm.anl.sh gsiparm.anl.sh
-${CP} ${PARMgsi}/akrtma3d_gsiparm.anl.sh gsiparm.anl.sh
+if [[ ${RUN_HOWV} =~ [TtYy] ]] ; then
+  ${CP} ${PARMgsi}/akurma3d_gsiparm.anl.sh gsiparm.anl.sh      # with setup for howv (wave height)
+else
+  ${CP} ${PARMgsi}/akrtma3d_gsiparm.anl.sh gsiparm.anl.sh
+fi
+
 source ./gsiparm.anl.sh
 cat << EOF > gsiparm.anl
 $gsi_namelist
 EOF
 
-export l_valleygcheck=${l_valleygcheck:-".true."}
+#==== set addtional GSI namelist file specicifally for features inherited from (2D)RTMA/URMA
+# (namelist file: parmcard_input)
+# Running GSI with usage of valley-map data
+# (default: true --> 0.25 added to obs usage index for sfc T/Q obs)
+  export l_valleygcheck=${l_valleygcheck:-".true."}
+
+# Build namelist for usage of valleymap on-the-fly
+[[ -f ./parmcard_input ]] && rm -f ./parmcard_input
 cat << EOF > parmcard_input
 &parmcardreadprepb
     cgrid="akhrrr",
     valleygcheck=${l_valleygcheck},
 /
 EOF
+
+# Copy terrain, slmask and valley_map data files for usage of valley map 
 cp -p ${FIXgsi}/rtma3d_alaska_terrain.dat        ./rtma_terrain.dat
 cp -p ${FIXgsi}/rtma3d_alaska_anl_slmask.dat     ./rtma_slmask.dat
-cp -p ${FIXgsi}/valley_map_akhrrr_ieee.dat     ./valley_map.dat
+# cp -p ${FIXgsi}/valley_map_akhrrr_bin.dat      ./valley_map.dat
+  cp -p ${FIXgsi}/valley_map_akhrrr_ieee.dat     ./valley_map.dat
+
+# Copy MESONET wind observation sensor height list (same as used in 2DRTMA)
+  [[ -f ./provider_windheight ]] && rm ./provider_windheight
+  cp -p ${FIXgsi}/rtma3d_alaska_provider_windheight  ./provider_windheight
 
 ## satellite bias correction
 ${CP} ${FIXgsi}/rap_satbias_starting_file.txt ./satbias_in
@@ -514,24 +604,32 @@ if [ "${envir}" == "lsf" ] || [ "${envir}" == "pbspro" ];  then
 #module use /lfs/h2/emc/lam/noscrub/Ming.Hu/rrfs/testD/ufs-srweather-app/env
 #source /lfs/h2/emc/lam/noscrub/Ming.Hu/rrfs/testD/ufs-srweather-app/env/build_wcoss2_intel.env
 #module list
-  APRUN="mpiexec -n 360 -ppn 30 --cpu-bind core --depth 4"
   export FI_OFI_RXM_SAR_LIMIT=3145728
   export OMP_STACKSIZE=${OMP_STACKSIZE:-"512M"}
+# export OMP_PLACES=cores
   export OMP_NUM_THREADS=${OMP_NUM_THREADS:-4}
-# rm ${DATA}/rtma_gsi
-# cpreq ${EXECrtma3d}/rtma_gsi ${DATA}
-# $APRUN ${DATA}/rtma_gsi < ${DATA}/gsiparm.anl > stdout 2>&1
+  APRUN="mpiexec -n 360 -ppn 30 --cpu-bind core --depth 4"
+ 
   $APRUN ${EXECrtma3d}/${pgm}  < ${DATA}/gsiparm.anl > stdout 2>&1
   export err=$?
-  err_chk
+# err_chk
 fi
-##save some information for possible debugging before err_chk
+# Save some information before err_chk
+#   (eg, gsiparm.anl, stdout, obs-fitting, etc.) for debugging if GSI crashed.
 ${CAT} fort.* >   fits_${cycle_str}.txt
 #${LS} -l > GSI_workdir_list
 ${CAT} stdout >> ${pgmout}
 #${MV} ${pgmout} ${pgmout}.var
 ${CP} -p fits_${cycle_str}.txt ${COMOUTgsi_rtma3d}
-#err_chk
+${CP} -p gsiparm.anl  gsiparm.anl.var_${cycle_str}
+${CP} -p gsiparm.anl.var_${cycle_str}       ${COMOUTgsi_rtma3d}
+if [ -f parmcard_input ] ; then
+   ${CP} -p parmcard_input  parmcard_input.var_${cycle_str}
+   ${CP} -p parmcard_input.var_${cycle_str} ${COMOUTgsi_rtma3d}
+fi
+${CP} -p stdout       stdout.gsi.var_${cycle_str}
+${CP} -p stdout.gsi.var_${cycle_str}        ${COMOUTgsi_rtma3d}
+err_chk
 
 # Loop over first and last outer loops to generate innovation
 # diagnostic files for indicated observation types (groups)
@@ -543,7 +641,6 @@ ${CP} -p fits_${cycle_str}.txt ${COMOUTgsi_rtma3d}
 #        write_diag(1)=.true. turns on creation of o-g
 #        innovation files.
 #
-
 loops="01 02 03"
 for loop in $loops; do
 
@@ -557,6 +654,7 @@ esac
 #  listall="hirs2_n14 msu_n14 sndr_g08 sndr_g11 sndr_g11 sndr_g12 sndr_g13 sndr_g08_prep sndr_g11_prep sndr_g12_prep sndr_g13_prep sndrd1_g11 sndrd2_g11 sndrd3_g11 sndrd4_g11 sndrd1_g12 sndrd2_g12 sndrd3_g12 sndrd4_g12 sndrd1_g13 sndrd2_g13 sndrd3_g13 sndrd4_g13 hirs3_n15 hirs3_n16 hirs3_n17 amsua_n15 amsua_n16 amsua_n17 amsub_n15 amsub_n16 amsub_n17 hsb_aqua airs_aqua amsua_aqua imgr_g08 imgr_g11 imgr_g12 pcp_ssmi_dmsp pcp_tmi_trmm conv sbuv2_n16 sbuv2_n17 sbuv2_n18 omi_aura ssmi_f13 ssmi_f14 ssmi_f15 hirs4_n18 hirs4_metop-a amsua_n18 amsua_metop-a mhs_n18 mhs_metop-a amsre_low_aqua amsre_mid_aqua amsre_hig_aqua ssmis_las_f16 ssmis_uas_f16 ssmis_img_f16 ssmis_env_f16 iasi_metop-a"
 
 
+#  binary format obs diag
    listall_cnv_bin="conv"
    for type in $listall_cnv_bin; do
       count=`ls pe*.${type}_${loop}* | wc -l`
@@ -564,39 +662,39 @@ esac
          `${CAT} pe*.${type}_${loop}* > diag_${type}_${string}.${cycle_str}`
       fi
    done
-   listall_cnv_nc4="uv t q ps"
-   if [[ "${RUN_HOWV}" == "TRUE" ]] ; then
-      listall_cnv_nc4="${listall_cnv_nc4} howv"
+#  netcdf format obs diag
+   if [[ "${L_NCDIAG}" == ".true." ]] || [[ "${L_NCDIAG}" == ".TRUE." ]]  ; then
+      listall_cnv_nc4="uv t q ps gust vis"
+      if [[ ${RUN_HOWV} =~ [TtYy] ]] ; then
+         listall_cnv_nc4="${listall_cnv_nc4} howv"
+      fi
+      for type in $listall_cnv_nc4; do
+        count=`ls pe*.conv_${type}_${loop}.nc4 | wc -l`
+        if [[ $count -gt 0 ]]; then
+           find ${DATA} -type f -name "pe*.conv_${type}_${loop}.nc4" -size 1k -delete
+           $nc_diag_cat -o diag_${type}_${string}.${cycle_str}.HRRR.nc4 pe*.conv_${type}_${loop}.nc4 
+        fi
+      done
    fi
-   if [[ "${RUN_GUST}" == "TRUE" ]] ; then
-      listall_cnv_nc4="${listall_cnv_nc4} gust"
-   fi
-   for type in $listall_cnv_nc4; do
-     count=`ls pe*.conv_${type}_${loop}.nc4 | wc -l`
-     if [[ $count -gt 0 ]]; then
-        find ${DATA} -type f -name "pe*.conv_${type}_${loop}.nc4" -size 1k -delete
-        $nc_diag_cat -o diag_${type}_${string}.${cycle_str}.HRRR.nc4 pe*.conv_${type}_${loop}.nc4 
-     fi
-   done
 done
 
 ## link fort files with user-friendly file name
 if [ "${envir}" == "lsf" ] || [ "${envir}" == "pbspro" ]; then #wcoss
-  ${LN} -sf fort.201    fit_p1.${cycle_str}
-  ${LN} -sf fort.202    fit_w1.${cycle_str}
-  ${LN} -sf fort.203    fit_t1.${cycle_str}
-  ${LN} -sf fort.204    fit_q1.${cycle_str}
-  ${LN} -sf fort.207    fit_rad1.${cycle_str}
-  ${LN} -sf fort.208    fit_pcp.${cycle_str}
-  ${LN} -sf fort.213    fit_sst.${cycle_str}
-  if [[ "${RUN_GUST}" == "TRUE" ]] ; then
-    ${LN} -sf fort.218    fit_gust.${cycle_str}
+  ${LN} -sf fort.201    fit_p1.${cycle_str}          # <-- psfc (mb)
+  ${LN} -sf fort.202    fit_w1.${cycle_str}          # <-- uv-wind (m/s)
+  ${LN} -sf fort.203    fit_t1.${cycle_str}          # <-- temperature (K)
+  ${LN} -sf fort.204    fit_q1.${cycle_str}          # <-- q (%)
+  ${LN} -sf fort.205    fit_pw1.${cycle_str}         # <-- precip. water (mm)
+  ${LN} -sf fort.206    fit_oz1.${cycle_str}         # <-- ozone info (not fitting)
+  ${LN} -sf fort.207    fit_rad1.${cycle_str}        # <-- radiance (not fitting)
+  ${LN} -sf fort.208    fit_pcp.${cycle_str}         # <-- pcp
+  ${LN} -sf fort.213    fit_sst.${cycle_str}         # <-- sst (C)
+  ${LN} -sf fort.218    fit_gust.${cycle_str}        # <-- surface wind gust (m/s)
+  ${LN} -sf fort.219    fit_vis.${cycle_str}         # <-- surface visibility (m)
+  if [[ ${RUN_HOWV} =~ [TtYy] ]] ; then
+    ${LN} -sf fort.228  fit_howv.${cycle_str}        # <-- significant wave height (m)
   fi
-  
-  if [[ "${RUN_HOWV}" == "TRUE" ]] ; then
-    ${LN} -sf fort.228    fit_howv.${cycle_str}
-  fi
-  ${LN} -sf fort.220 minimization_fort220.${cycle_str}
+  ${LN} -sf fort.220    minimization_fort220.${cycle_str}
 fi
 
 ###### second GSI run if needed
@@ -625,36 +723,54 @@ EOF
     ${MPIRUN} ${pgm} < gsiparm.anl >> ${pgmout} 2>errfile
   fi
   export err=$?
+# Saving some information (eg, gsiparm.anl) for debugging before err_chk
   #${LS} -l > GSI_workdir_list
   ${CAT} errfile >> ${pgmout}
   ${ECHO} -e "\n\n -- End of second GSI --\n" >> ${pgmout}
   #${CP} -p ${pgmout} ${COMOUTgsi_rtma3d}/${pgmout}.cloudana #this output should be in $LLOG_PGMOUT
+  ${CP} -p gsiparm.anl    gsiparm.anl.cloudana_${cycle_str}
+  ${CP} -p gsiparm.anl.cloudana_${cycle_str}  ${COMOUTgsi_rtma3d}
+  ${CAT} stdout > stdout.gsi.cloudana_${cycle_str}
+  ${ECHO} -e "=======================================================" >> stdout.gsi.cloudana_${cycle_str}
+  ${ECHO} -e "errfile:" >> stdout.gsi.cloudana_${cycle_str}
+  ${CAT} errfile >> stdout.gsi.cloudana_${cycle_str}
+  ${CP} -p stdout.gsi.cloudana_${cycle_str}   ${COMOUTgsi_rtma3d}
   err_chk
 
 fi ###### second GSI run
 
 # Saving ANALYSIS, DIAG, Obs-Fitting files TO COM2 DIRECTORY AS PRODUCT for archive
-${CP} -p gsiparm.anl  ${COMOUTgsi_rtma3d}/gsiparm.anl_${cycle_str}
-tar -cvf ${COMOUTgsi_rtma3d}/diag_${cycle_str}.tgz diag_*
+  ${CP} -p gsiparm.anl  ${COMOUTgsi_rtma3d}/gsiparm.anl_${cycle_str}
+
+#  ---- Each obs diag file is saved to COM2 and compressed by gzip individually ---- #
+#       these individually gzip-ed diag files will be used in AutoQC step later.
+  ${CP} -p diag_*                              ${COMOUTgsi_rtma3d}
+  gzip ${COMOUTgsi_rtma3d}/diag_*
+
+#  ---- All obs diag files are archived in one tarball under COM2 ---- #
+#       these diag files in tarball will be used in PRDGEN step later.
+  tar -cvf  ${COMOUTgsi_rtma3d}/diag_${cycle_str}.tar diag_*  # *.tar is tarball (no compression)
+                                                              # (using more space, but saving time)
+# tar -czvf ${COMOUTgsi_rtma3d}/diag_${cycle_str}.tgz diag_*  # *.tgz is compressed tarball
+                                                              # (saving space, but costing more time)
 
 if [ "${envir}" == "lsf" ] || [ "${envir}" == "pbspro" ]; then #wcoss
-  ${CP} -p ${DATA}/wrf_inout                  ${COMOUTgsi_rtma3d}/${ANLrtma3d_FNAME}
-  ${CP} -p minimization_fort220.${cycle_str} ${COMOUTgsi_rtma3d}
-  ${CP} -p diag_*                             ${COMOUTgsi_rtma3d}
-  tar -cvf obsfit_fort220.tgz  ./fort.* ./fit_* ./stdout*
-  ${CP} -p  obsfit_fort220.tgz                ${COMOUTgsi_rtma3d}
-  tar -cvf misc_info.tgz  ./*info ./errtable ./prepobs_prep.bufrtable  ./*bias*  \
+  ${CP} -p ${DATA}/wrf_inout                   ${COMOUTgsi_rtma3d}/${ANLrtma3d_FNAME}
+  ${CP} -p minimization_fort220.${cycle_str}   ${COMOUTgsi_rtma3d}
+  tar -cvf obsfit_fort220_${cycle_str}.tar     ./fort.* ./fit_* ./stdout*
+  ${CP} -p  obsfit_fort220_${cycle_str}.tar    ${COMOUTgsi_rtma3d}
+  tar -cvf misc_info_${cycle_str}.tar  ./*info ./errtable ./prepobs_prep.bufrtable  ./*bias*  \
     ./current_bad_aircraft ./gsd_sfcobs_uselist.txt ./gsd_sfcobs_provider.txt ./stdout*
-  ${CP} -p  misc_info.tgz                      ${COMOUTgsi_rtma3d}
-  gzip ${COMOUTgsi_rtma3d}/diag_*
-  ${CP} -p  stdout 			       ${COMOUTgsi_rtma3d}
-  ${CP} -p  OUTPUT*                            ${COMOUTgsi_rtma3d}
+  ${CP} -p  misc_info_${cycle_str}.tar         ${COMOUTgsi_rtma3d}
+  ${CP} -p filelist.hrrrdas 		       ${COMOUTgsi_rtma3d}
+  ${CP} -p filelist03                          ${COMOUTgsi_rtma3d}
+  ${CP} -p hybens_info                         ${COMOUTgsi_rtma3d}
+  ${CP} -p stdout                              ${COMOUTgsi_rtma3d}
+  ${CP} -p OUTPUT*                             ${COMOUTgsi_rtma3d}
   # extra backup (NOT necessary)
   #${LN} -sf ${COMOUTgsi_rtma3d}/${ANLrtma3d_FNAME} ${COMOUT}/${ANLrtma3d_FNAME}
   #${CP} -p ${pgmout_stdout}        ${COMOUT}/${pgmout_stdout}_gsianl.${cycle_str}
   #${CP} -p fits_${cycle_str}.txt  ${COMOUT}/fits_${cycle_str}.txt
-
-
 fi  
 #${RM} -f ${DATA}/sig*
 #${RM} -f ${DATA}/obs*

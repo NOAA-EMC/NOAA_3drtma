@@ -43,11 +43,18 @@ $BASE/build_rtma3d_post.sh > $logs_dir/build_rtma3d_post.log 2>&1
 
 fi
 
+##############################
 
 if [ $BUILD_rtma3d_gsi = yes ] ; then
 
-echo " .... Building rtma3d_gsi .... "
-$BASE/build_rtma3d_gsi.sh > $logs_dir/build_rtma3d_gsi.log 2>&1
+
+   unset GSI_SOURCE
+   export GSI_SOURCE="autoqc"       # autoqc: using Matthew Morris's fork of GSI (as default for now)
+                                    # emcgsi: using official EMC GSI
+                                    # others: using Matthew Morris's fork of GSI
+   echo " .... Building rtma_gsi with GSI_SOURCE=${GSI_SOURCE} .... "
+   $BASE/build_rtma3d_gsi.sh > $logs_dir/build_rtma3d_gsi.log 2>&1
+   unset GSI_SOURCE
 
 fi
 

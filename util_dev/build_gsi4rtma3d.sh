@@ -35,6 +35,11 @@ CONTROLPATH="$DIR_ROOT/../develop/install/bin"
 # Collect BUILD Options
 CMAKE_OPTS+=" -DCMAKE_BUILD_TYPE=$BUILD_TYPE"
 
+# Set bufr flag based on machine
+if [[ $MACHINE_ID == 'ursa' || $MACHINE_ID == 'acorn' || $MACHINE_ID == 'wcoss2' ]]; then
+    CMAKE_OPTS+=" -DUSE_BUFR12=ON"
+fi
+
 # Install destination for built executables, libraries, CMake Package config
 CMAKE_OPTS+=" -DCMAKE_INSTALL_PREFIX=$INSTALL_PREFIX"
 
@@ -55,6 +60,6 @@ mkdir -p $BUILD_DIR && cd $BUILD_DIR
 # Configure, build, install
 cmake $CMAKE_OPTS $DIR_ROOT 2>&1 | tee log.cmake
 make -j ${BUILD_JOBS:-8} VERBOSE=${BUILD_VERBOSE:-1} 2>&1 | tee log.make
-make install
+make install 2>&1 | tee log.install
 
 exit

@@ -763,7 +763,8 @@ subroutine weather_report_status_list()
                           otype(2:3)=='uv' .or. &
                           otype(1:3)=='spd' .or. & 
                           otype(1:3)=='gst' .or. & 
-                          otype(1:3)=='hwv'
+                          otype(1:3)=='hwv' .or. &
+                          otype(1:3)=='vis'           !GZ: read provider info for visibility
 
 
             allocate(cdiagbuf(ii0))

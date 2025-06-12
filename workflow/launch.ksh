@@ -119,20 +119,6 @@ elif [ "${machine}" = "cray" ] ; then
   . /usr/share/lmod/lmod/init/sh >/dev/null # Module Support 
 #  module purge
 # loading modules used when building the code
-# case "$COMMAND" in
-#   *POST*)
-#     modulefile_build=${modulefile_build:-"${MODULEFILES}/${machine}/build/modulefile.build.post.${machine}"}
-#     source $modulefile_build
-#     ;;
-#   *GSIANL*)
-#     modulefile_build=${modulefile_build:-"${MODULEFILES}/${machine}/build/modulefile.build.gsi.${machine}"}
-#     source $modulefile_build
-#     ;;
-#   *)
-#     modulefile_build=${modulefile_build:-"${MODULEFILES}/${machine}/build/modulefile.build.gsi.${machine}"}
-#     source $modulefile_build
-#     ;;
-# esac
 # loading modules for running
 # modulefile_run=${modulefile_run:-"${MODULEFILES}/${machine}/run/modulefile.run.${machine}"}
 # source ${modulefile_run}

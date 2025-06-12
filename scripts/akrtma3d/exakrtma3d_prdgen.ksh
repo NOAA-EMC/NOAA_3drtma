@@ -205,6 +205,7 @@ echo "run the obslist code"
 DATAobslist=${DATA}/prdgen_obslist
 mkdir -p $DATAobslist
 ${USHrtma3d}/${RUN}/${RUN}_prdgen_obslist.sh $cyc $PDY $DATAobslist ${COMOUT} ${COMIN} ${USHrtma3d} $RUN $EXECrtma3d $FIXrtma3d $PARMrtma3d >> stdout 2>&1
+export err=$?; err_chk                       #GZ: ==> exit abnormally if obslisting crashed
 date
 
 exit
