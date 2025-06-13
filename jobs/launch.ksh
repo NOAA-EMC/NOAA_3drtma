@@ -128,6 +128,11 @@ elif [ "${machine}" = "cray" ] ; then
       modulefile_build=${modulefile_build:-"${MODULEFILES}/${machine}/build/modulefile.build.gsi.${machine}"}
       source $modulefile_build
       ;;
+    *NCDIAG*)
+      modulefile_build=${modulefile_build:-"${MODULEFILES}/${machine}/build/modulefile.build.gsi.${machine}"}
+      source $modulefile_build
+      module load ncdiag/1.1.1
+      ;;
     *AUTOQC*)
       modulefile_build=${modulefile_build:-"${MODULEFILES}/${machine}/build/modulefile.build.gsi.${machine}"}
       source $modulefile_build

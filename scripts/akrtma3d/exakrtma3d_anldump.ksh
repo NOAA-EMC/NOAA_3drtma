@@ -159,9 +159,9 @@ postmsg "$jlogfile" "$msg"
         if [ $err -eq 0 ] ; then
            echo "           Successfully convert netcdf file to grib2 file for ${varname}."
            # save the analysis file (grib2) to $COMOUT
-           cp -p ./${grib2_fname}     ${COMOUT}/${NET}.t${HH}z.anl.${varname}.grib2     
+           cp -p ./${grib2_fname}     ${COMOUT}/${RUN}.t${HH}z.anl.${varname}.grib2     
            # appending to a single grib2 file
-#          wgrib2 ${grib2_fname}      -append -grib ${COMOUT}/${NET}.t${HH}z.anl.DirectAnl2Ds.grib2
+#          wgrib2 ${grib2_fname}      -append -grib ${COMOUT}/${RUN}.t${HH}z.anl.DirectAnl2Ds.grib2
         else
            echo "conversion of ${varname} in analysis from netcdf to grib2 failed."
         fi
@@ -213,9 +213,9 @@ postmsg "$jlogfile" "$msg"
         if [ $err -eq 0 ] ; then
            echo "           Successfully convert netcdf file to grib2 file for ${varname}."
            # save the analysis file (grib2) to $COMOUT
-           cp -p ./${grib2_fname}     ${COMOUT}/${NET}.t${HH}z.anl.${varname}.grib2     
+           cp -p ./${grib2_fname}     ${COMOUT}/${RUN}.t${HH}z.anl.${varname}.grib2     
            # appending to a single grib2 file
-#          wgrib2 ${grib2_fname}      -append -grib ${COMOUT}/${NET}.t${HH}z.anl.DirectAnl2Ds.grib2
+#          wgrib2 ${grib2_fname}      -append -grib ${COMOUT}/${RUN}.t${HH}z.anl.DirectAnl2Ds.grib2
         else
            echo "conversion of ${varname} in analysis from netcdf to grib2 failed."
         fi
@@ -267,9 +267,9 @@ postmsg "$jlogfile" "$msg"
         if [ $err -eq 0 ] ; then
            echo "           Successfully convert netcdf file to grib2 file for ${varname}."
            # save the analysis file (grib2) to $COMOUT
-           cp -p ./${grib2_fname}     ${COMOUT}/${NET}.t${HH}z.anl.${varname}.grib2     
+           cp -p ./${grib2_fname}     ${COMOUT}/${RUN}.t${HH}z.anl.${varname}.grib2     
            # appending to a single grib2 file
-#          wgrib2 ${grib2_fname}      -append -grib ${COMOUT}/${NET}.t${HH}z.anl.DirectAnl2Ds.grib2
+#          wgrib2 ${grib2_fname}      -append -grib ${COMOUT}/${RUN}.t${HH}z.anl.DirectAnl2Ds.grib2
         else
            echo "conversion of ${varname} in analysis from netcdf to grib2 failed."
         fi

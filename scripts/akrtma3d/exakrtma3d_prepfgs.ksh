@@ -262,9 +262,9 @@ queried in the above while-do-loop."
    fi
 
    # save the firstguess grib2 file to $COMOUT
-#  cp -p ww3.guess.grib2 $COMOUT/${NET}.t${ww3CC}z.fgs.howv.f${ww3FHH}.grib2       # forecast time saved in name of firstguess file
-   cp -p ww3.guess.grib2 $COMOUT/${NET}.t${HH}z.fgs.howv.grib2                     # analysis time saved in name of firstguess file
-#  wgrib2 ww3.guess.grib2 -append -grib $COMOUT/${NET}.t${HH}z.fgs.DirectAnl2Ds.grib2  # single grib2 file
+#  cp -p ww3.guess.grib2 $COMOUT/${RUN}.t${ww3CC}z.fgs.howv.f${ww3FHH}.grib2       # forecast time saved in name of firstguess file
+   cp -p ww3.guess.grib2 $COMOUT/${RUN}.t${HH}z.fgs.howv.grib2                     # analysis time saved in name of firstguess file
+#  wgrib2 ww3.guess.grib2 -append -grib $COMOUT/${RUN}.t${HH}z.fgs.DirectAnl2Ds.grib2  # single grib2 file
 
 # 3. Appending Wave height (2-D) field to 3D-RTMA firstguess file (netcdf format)
 
@@ -389,9 +389,9 @@ fi     # RUN_HOWV=True/true/Yes/yes, then retrieving fgs of howv
          wgrib2 ./hrrr_guess.grib2 -match "${FHH_string}" -grib ./gust.guess.grib2
          export err=$?; err_chk
          # save the firstguess grib2 file to $COMOUT
-#        cp -p ./gust.guess.grib2 $COMOUT/${NET}.t${PRE_HH}z.fgs.gust.f0${ind}.grib2       # forecast time saved in name of firstguess file
-         cp -p ./gust.guess.grib2 $COMOUT/${NET}.t${HH}z.fgs.gust.grib2                   # analysis time saved in name of firstguess file
-#        wgrib2 gust.guess.grib2 -append -grib $COMOUT/${NET}.t${HH}z.fgs.DirectAnl2Ds.grib2  # single grib2 file
+#        cp -p ./gust.guess.grib2 $COMOUT/${RUN}.t${PRE_HH}z.fgs.gust.f0${ind}.grib2       # forecast time saved in name of firstguess file
+         cp -p ./gust.guess.grib2 $COMOUT/${RUN}.t${HH}z.fgs.gust.grib2                   # analysis time saved in name of firstguess file
+#        wgrib2 gust.guess.grib2 -append -grib $COMOUT/${RUN}.t${HH}z.fgs.DirectAnl2Ds.grib2  # single grib2 file
 
          found_gustges=yes
 
@@ -529,9 +529,9 @@ fi     # RUN_HOWV=True/true/Yes/yes, then retrieving fgs of howv
          wgrib2 ./hrrr_guess.grib2 -match "${FHH_string}" -rpn "16000:min" -grib_out ./vis.guess.grib2
          export err=$?; err_chk
          # save the firstguess grib2 file to $COMOUT
-#        cp -p ./vis.guess.grib2 $COMOUT/${NET}.t${PRE_HH}z.fgs.vis.f0${ind}.grib2       # forecast time saved in name of firstguess file
-         cp -p ./vis.guess.grib2 $COMOUT/${NET}.t${HH}z.fgs.vis.grib2                   # analysis time saved in name of firstguess file
-#        wgrib2  vis.guess.grib2 -append -grib $COMOUT/${NET}.t${HH}z.fgs.DirectAnl2Ds.grib2  # single grib2 file
+#        cp -p ./vis.guess.grib2 $COMOUT/${RUN}.t${PRE_HH}z.fgs.vis.f0${ind}.grib2       # forecast time saved in name of firstguess file
+         cp -p ./vis.guess.grib2 $COMOUT/${RUN}.t${HH}z.fgs.vis.grib2                   # analysis time saved in name of firstguess file
+#        wgrib2  vis.guess.grib2 -append -grib $COMOUT/${RUN}.t${HH}z.fgs.DirectAnl2Ds.grib2  # single grib2 file
 
          found_visges=yes
 

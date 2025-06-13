@@ -19,7 +19,6 @@
 <!--<!ENTITY CAP_RUN_ENVIR	""> -->
 <!ENTITY model		"&RUN;">
 <!ENTITY HRRRDAS_BEC     "0">
-<!ENTITY READIN_LOCALIZATION     "TRUE">
 
 <!ENTITY MACHINE	"cray">
 <!ENTITY machine	"&MACHINE;">
@@ -108,6 +107,8 @@
 <!ENTITY DATA_WRFBUFR   "&DATA_RUNDIR;/wrfbufr">
 <!ENTITY DATA_POSTSND   "&DATA_RUNDIR;/wrfbufr">
 <!ENTITY DATA_RHIST     "&DATA_RUNDIR;/rhist">
+<!ENTITY DATA_NCDIAG    "&DATA_RUNDIR;/ncdiagprd">
+
 <!ENTITY hpsspath0      "/NCEPDEV/emc-meso/5year/&USER;/pbspro_rtma3d">
 <!ENTITY hpsspath1      "/NCEPPROD/hpssprod/runhistory">
 <!ENTITY hpsspath1_1yr  "/NCEPPROD/1year/hpssprod/runhistory">
@@ -133,8 +134,9 @@
 <!ENTITY maxtries	"3">
 <!ENTITY KEEPDATA	"YES">
 <!ENTITY SENDCOM	"YES">
-<!ENTITY RUN_RHIST	"YES">
+<!ENTITY RUN_RHIST	"No">
 <!ENTITY RUN_HOWV	"No">
+<!ENTITY RUN_NCDIAG	"Yes">
 
 <!-- for various observations used in RTMA3D -->
 
@@ -190,8 +192,10 @@
 <!ENTITY JJOB_POST4FGS   "&JJOB_DIR;/J&CAP_RUN;_POST4FGS">
 <!ENTITY exSCR_POST4FGS  "&SCRIPT_DIR;/ex&NET;_post4fgs.ksh">
 <!ENTITY JJOB_PRDGEN     "&JJOB_DIR;/J&CAP_RUN;_PRDGEN">
-<!ENTITY JJOB_RHIST   "&JJOB_DIR;/J&CAP_RUN;_RHIST">
-<!ENTITY exSCR_RHIST  "&SCRIPT_DIR;/&RUN;/ex&RUN;_rhist.ksh">
+<!ENTITY JJOB_RHIST      "&JJOB_DIR;/J&CAP_RUN;_RHIST">
+<!ENTITY exSCR_RHIST     "&SCRIPT_DIR;/&RUN;/ex&RUN;_rhist.ksh">
+<!ENTITY JJOB_NCDIAG     "&JJOB_DIR;/J&CAP_RUN;_NCDIAG">
+<!ENTITY exSCR_NCDIAG    "&SCRIPT_DIR;/ex&NET;_ncdiag.ksh">
 <!ENTITY JJOB_CLEAN     "&JJOB_DIR;/J&CAP_RUN;_CLEAN">
 <!ENTITY exSCR_CLEAN    "&SCRIPT_DIR;/ex&NET;_clean.ksh">
 
@@ -278,19 +282,22 @@
 <!ENTITY PRDGEN_RESOURCES '<walltime>00:30:00</walltime>'>
 <!ENTITY PRDGEN_RESERVATION '<nodes>1:ppn=128:mem=256GB</nodes><native>-l place=scatter</native><queue>&QUEUE;</queue><account>&ACCOUNT;</account>'>
 
+<!ENTITY NCDIAG_PROC "1">
+<!ENTITY NCDIAG_RESOURCES '<walltime>00:15:00</walltime>'>
+<!ENTITY NCDIAG_RESERVATION '<nodes>1:ppn=8:mem=64GB</nodes><native>-l place=scatter:shared,select=1:ncpus=8:mem=64GB:prepost=true</native><queue>&QUEUE;</queue><account>&ACCOUNT;</account>'>
+
 <!ENTITY CLEAN_PROC "1">
 <!ENTITY CLEAN_RESOURCES '<walltime>00:30:00</walltime>'> 
 <!ENTITY CLEAN_RESERVATION '<nodes>1:ppn=1:vntype=cray_compute:mem=4GB</nodes><native>-l place=scatter</native><queue>&QUEUE;</queue><account>&ACCOUNT;</account>'>
-
 
 <!-- Variables in Namelist -->
 <!ENTITY GSI_grid_ratio_in_var       "1">
 <!ENTITY GSI_grid_ratio_in_cldanl    "1">
 <!ENTITY i_gsdsfc_uselist            "2">
 <!ENTITY VERBOSE_GSI                 ".false.">
+<!ENTITY READIN_LOCALIZATION         "TRUE">
 
 <!--Retention time for COM and DATA directories-->
-
 <!ENTITY CLEAN_OLDCOM_HRS            "120">
 <!ENTITY CLEAN_OLDRUN_HRS            "72">
 
@@ -571,8 +578,8 @@
       <value><cyclestr>&DATA_PRDGEN;</cyclestr></value>
    </envar>
    <envar>
-     <name>DATA_RHIST</name>
-     <value><cyclestr>&DATA_RHIST;</cyclestr></value>
+      <name>DATA_NCDIAG</name>
+      <value><cyclestr>&DATA_NCDIAG;</cyclestr></value>
    </envar>
    <envar>
       <name>DATA_AUTOQC</name>
@@ -581,6 +588,10 @@
    <envar>
       <name>DATA_OBSPRD</name>
       <value><cyclestr>&DATA_OBSPRD;</cyclestr></value>
+   </envar>
+   <envar>
+      <name>DATA_RHIST</name>
+      <value><cyclestr>&DATA_RHIST;</cyclestr></value>
    </envar>
    <envar>
       <name>DATA_OBSPREP_LGHTN</name>
@@ -726,6 +737,10 @@
       <value>&VERBOSE_GSI;</value>
     </envar>
     <envar>
+      <name>RUN_NCDIAG</name>
+      <value>&RUN_NCDIAG;</value>
+    </envar>
+    <envar>
       <name>i_gsdsfc_uselist</name>
       <value>&i_gsdsfc_uselist;</value>
     </envar>
@@ -857,6 +872,24 @@
       <value>&JJOB_PRDGEN;</value>
     </envar>'>
 
+<!ENTITY ENVARS_NCDIAG
+    '<envar>
+      <name>START_TIME</name>
+      <value><cyclestr>@Y@m@d@H</cyclestr></value>
+    </envar>
+    <envar>
+      <name>RUN_NCDIAG</name>
+      <value>&RUN_NCDIAG;</value>
+    </envar>
+    <envar>
+      <name>JJOB_NCDIAG</name>
+      <value>&JJOB_NCDIAG;</value>
+    </envar>
+    <envar>
+      <name>exSCR_NCDIAG</name>
+      <value>&exSCR_NCDIAG;</value>
+    </envar>'>
+
 <!ENTITY ENVARS_AUTOQC
     '<envar>
       <name>START_TIME</name>
@@ -975,7 +1008,7 @@
       <value>&CLEAN_OLDRUN_HRS;</value>
     </envar>
     <envar>
-      <name>CLEAN_OLDCOM_HRS</name>  
+      <name>CLEAN_OLDCOM_HRS</name>
       <value>&CLEAN_OLDCOM_HRS;</value>
     </envar>
     <envar>
@@ -1099,7 +1132,6 @@
     &OBSPREP_RADAR_RESOURCES;
     &OBSPREP_RADAR_RESERVATION;
     &ENVARS_PREPJOB;
-
 
     <dependency>
       <or>
@@ -1225,7 +1257,6 @@
        <value><cyclestr>&DATA_GSIANL;</cyclestr></value>
     </envar>
 
-
     <command>&JJOB_DIR;/launch.ksh &JJOB_GSIANL;</command>
     <jobname><cyclestr>&RUN;_gsianl_job_@Y@m@d@H@M</cyclestr></jobname>
     <join><cyclestr>&LOG_SCHDLR;/&RUN;_&envir;_gsianl_@Y@m@d@H.log</cyclestr></join>
@@ -1243,6 +1274,27 @@
       </and>
      </dependency>
   </task>
+
+  <task name="&RUN;_ncdiag_task" cycledefs="hourly" maxtries="&maxtries;">
+       
+    &ENVARS;
+    &NCDIAG_RESOURCES;
+    &NCDIAG_RESERVATION;
+    <envar>
+       <name>rundir_task</name>
+       <value><cyclestr>&DATA_NCDIAG;</cyclestr></value>
+    </envar>
+
+    <command>&JJOB_DIR;/launch.ksh &JJOB_NCDIAG;</command>
+    <jobname><cyclestr>&RUN;_ncdiag_job_@Y@m@d@H@M</cyclestr></jobname>
+    <join><cyclestr>&LOG_SCHDLR;/&RUN;_&envir;_ncdiag_@Y@m@d@H.log</cyclestr></join>
+
+    &ENVARS_NCDIAG;
+
+    <dependency>
+          <taskdep task="&RUN;_gsianl_task"/>
+    </dependency>
+    </task>
 
   <task name="&RUN;_anldump_task" cycledefs="hourly" maxtries="&maxtries;">
     &ENVARS;
@@ -1326,7 +1378,6 @@
       </and>
     </dependency>
   </task>
-
 
   <task name="&RUN;_updatevars_task" cycledefs="hourly" maxtries="&maxtries;">
 
