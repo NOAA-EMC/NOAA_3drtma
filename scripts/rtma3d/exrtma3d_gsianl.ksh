@@ -215,7 +215,7 @@ if [[ ${hrrrmem} -gt 30 ]] && [[ ${HRRRDAS_BEC} -eq 1  ]]; then #if HRRRDAS BEC 
   EnsWgt=0.9
   nummem=${hrrrmem}
   cpreq filelist.hrrrdas filelist03
-  ${CP} ${PARMgsi}/hybens_info_hrrrdas hybens_info
+  rm -f ./hybens_info
   beta1_inv=$(( 1 - $EnsWgt  ))
   ifhyb=.true.
   regional_ensemble_option=3
@@ -224,12 +224,14 @@ if [[ ${hrrrmem} -gt 30 ]] && [[ ${HRRRDAS_BEC} -eq 1  ]]; then #if HRRRDAS BEC 
   ens_fast_read=.true. 
   if [[ "${READIN_LOCALIZATION}" == "TRUE" ]] || [[ "${READIN_LOCALIZATION}" == "true" ]] ; then
      readin_localization=.true.
+     HYBENS_INFO=${PARMgsi}/hybens_info_hrrrdas
+     ${CP} ${PARMgsi}/hybens_info_hrrrdas hybens_info
   fi
   ${ECHO} " Cycle ${YYYYMMDDHH}: GSI hybrid uses HRRRDAS BEC with n_ens=${nummem}" >> ${pgmout}
 elif [[ ${nummem} -eq 80 ]]; then
   echo "Do hybrid with GDAS directly"
+  rm -f ./hybens_info
   EnsWgt=0.5
-  ${CP} ${PARMgsi}/hybens_info_hrrrdas hybens_info
   beta1_inv=$(( 1 - $EnsWgt  ))
   ifhyb=.true.
   regional_ensemble_option=1
@@ -238,6 +240,8 @@ elif [[ ${nummem} -eq 80 ]]; then
   ens_fast_read=.false. 
   if [[ "${READIN_LOCALIZATION}" == "TRUE" ]] || [[ "${READIN_LOCALIZATION}" == "true" ]] ; then
      readin_localization=.true.
+     HYBENS_INFO=${PARMgsi}/hybens_info
+     ${CP} ${PARMgsi}/hybens_info hybens_info
   fi
   ${ECHO} " Cycle ${YYYYMMDDHH}: GSI hybrid uses GDAS directly with n_ens=${nummem}" >> ${pgmout}
 else
@@ -252,13 +256,10 @@ else
 fi
 
 # copy the read-in localization file for hybrid envar analysis
-  HYBENS_INFO="hybens_info"
   if [[ "${readin_localization}" == ".true." ]] ; then
-     cp -p ${PARMgsi}/${HYBENS_INFO}  hybens_info
      
      # read in the weight for static background error at the surface level in hybrid envar run
      # the weight would be used to adjust the background error for howv/gust/vis
-     hybens_info_file="hybens_info"
      n=0
      set +x
      while read line_str
@@ -269,7 +270,7 @@ fi
            echo "Weight of static background error at level $n  --> $StaticWgt"
         fi
         let "n=n+1"
-     done < "$hybens_info_file"
+     done < ./hybens_info
      set -x
   else
      StaticWgt=${beta1_inv}

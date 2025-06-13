@@ -202,7 +202,7 @@ if [[ ${hrrrmem} -gt 30 ]] && [[ ${HRRRDAS_BEC} -eq 1  ]]; then #if HRRRDAS BEC 
   EnsWgt=0.9
   nummem=${hrrrmem}
   cpreq filelist.hrrrdas filelist03
-  ${CP} ${PARMgsi}/hybens_info_hrrrdas hybens_info
+  rm -f ./hybens_info
   beta1_inv=$(( 1 - $EnsWgt  ))
   ifhyb=.true.
   regional_ensemble_option=3
@@ -211,12 +211,14 @@ if [[ ${hrrrmem} -gt 30 ]] && [[ ${HRRRDAS_BEC} -eq 1  ]]; then #if HRRRDAS BEC 
   ens_fast_read=.true. 
   if [[ "${READIN_LOCALIZATION}" == "TRUE" ]] || [[ "${READIN_LOCALIZATION}" == "true" ]] ; then
      readin_localization=.true.
+     HYBENS_INFO=${PARMgsi}/hybens_info_hrrrdas
+     ${CP} ${PARMgsi}/hybens_info_hrrrdas hybens_info
   fi
   ${ECHO} " Cycle ${YYYYMMDDHH}: GSI hybrid uses HRRRDAS BEC with n_ens=${nummem}" >> ${pgmout}
 elif [[ ${nummem} -eq 80 ]]; then
   echo "Do hybrid with GDAS directly"
+  rm -f ./hybens_info
   EnsWgt=0.5
-  ${CP} ${PARMgsi}/hybens_info_hrrrdas hybens_info
   beta1_inv=$(( 1 - $EnsWgt  ))
   ifhyb=.true.
   regional_ensemble_option=1
@@ -225,6 +227,8 @@ elif [[ ${nummem} -eq 80 ]]; then
   ens_fast_read=.false. 
   if [[ "${READIN_LOCALIZATION}" == "TRUE" ]] || [[ "${READIN_LOCALIZATION}" == "true" ]] ; then
      readin_localization=.true.
+     HYBENS_INFO=${PARMgsi}/hybens_info
+     ${CP} ${PARMgsi}/hybens_info hybens_info
   fi
   ${ECHO} " Cycle ${YYYYMMDDHH}: GSI hybrid uses GDAS directly with n_ens=${nummem}" >> ${pgmout}
 else
@@ -239,13 +243,10 @@ else
 fi
 
 # copy the read-in localization file for hybrid envar analysis
-  HYBENS_INFO="hybens_info"
   if [[ "${readin_localization}" == ".true." ]] ; then
-     cp -p ${PARMgsi}/${HYBENS_INFO}  hybens_info
      
      # read in the weight for static background error at the surface level in hybrid envar run
      # the weight would be used to adjust the background error for howv/gust/vis
-     hybens_info_file="hybens_info"
      n=0
      set +x
      while read line_str
@@ -256,7 +257,7 @@ fi
            echo "Weight of static background error at level $n  --> $StaticWgt"
         fi
         let "n=n+1"
-     done < "$hybens_info_file"
+     done < ./hybens_info
      set -x
   else
      StaticWgt=${beta1_inv}
@@ -502,7 +503,12 @@ if [ "${envir}" == "lsf" ] || [ "${envir}" == "pbspro" ]; then #WCOSS
 fi
 
 # option for netcdf-format obs diag file
-  L_NCDIAG=${L_NCDIAG:-".false."}     # false: no output of netcdf obsdiag, and do not combine them
+  RUN_NCDIAG=${RUN_NCDIAG:-"Yes"} # netcdf format obs-diag file (default: Yes)
+  if [[ ${RUN_NCDIAG} =~ [TtYy] ]] ; then
+     L_NCDIAG=".true."            # gsi dumps out netcdf obsdiag, run ncdiag to combine them
+  else
+     L_NCDIAG=".false."
+  fi
 
 #====  set GSI namelist options for analysis of HOWV/GUST/VIS ====#
 #  setup for howv
@@ -688,7 +694,6 @@ esac
 #  Collect diagnostic files for obs types (groups) below
 #  listall="hirs2_n14 msu_n14 sndr_g08 sndr_g11 sndr_g11 sndr_g12 sndr_g13 sndr_g08_prep sndr_g11_prep sndr_g12_prep sndr_g13_prep sndrd1_g11 sndrd2_g11 sndrd3_g11 sndrd4_g11 sndrd1_g12 sndrd2_g12 sndrd3_g12 sndrd4_g12 sndrd1_g13 sndrd2_g13 sndrd3_g13 sndrd4_g13 hirs3_n15 hirs3_n16 hirs3_n17 amsua_n15 amsua_n16 amsua_n17 amsub_n15 amsub_n16 amsub_n17 hsb_aqua airs_aqua amsua_aqua imgr_g08 imgr_g11 imgr_g12 pcp_ssmi_dmsp pcp_tmi_trmm conv sbuv2_n16 sbuv2_n17 sbuv2_n18 omi_aura ssmi_f13 ssmi_f14 ssmi_f15 hirs4_n18 hirs4_metop-a amsua_n18 amsua_metop-a mhs_n18 mhs_metop-a amsre_low_aqua amsre_mid_aqua amsre_hig_aqua ssmis_las_f16 ssmis_uas_f16 ssmis_img_f16 ssmis_env_f16 iasi_metop-a"
 
-
 #  binary format obs diag
    listall_cnv_bin="conv"
    for type in $listall_cnv_bin; do
@@ -697,20 +702,26 @@ esac
          `${CAT} pe*.${type}_${loop}* > diag_${type}_${string}.${cycle_str}`
       fi
    done
+
+#========================================================================================#
 #  netcdf format obs diag
-   if [[ "${L_NCDIAG}" == ".true." ]] || [[ "${L_NCDIAG}" == ".TRUE." ]]  ; then
-      listall_cnv_nc4="uv t q ps gust vis"
-      if [[ ${RUN_HOWV} =~ [TtYy] ]] ; then
-         listall_cnv_nc4="${listall_cnv_nc4} howv"
-      fi
-      for type in $listall_cnv_nc4; do
-        count=`ls pe*.conv_${type}_${loop}.nc4 | wc -l`
-        if [[ $count -gt 0 ]]; then
-           find ${DATA} -type f -name "pe*.conv_${type}_${loop}.nc4" -size 1k -delete
-           $nc_diag_cat -o diag_${type}_${string}.${cycle_str}.HRRR.nc4 pe*.conv_${type}_${loop}.nc4 
-        fi
-      done
-   fi
+#    the following lines to concatenate nc4 obs-diag takes too much time, 
+#    they were taken out and put into a separate step (see scripts/exrtma3d_ncdiag.ksh)
+#  if [[ "${RUN_NCDIAG}" =~ [YyTt] ]] ; then
+#     listall_cnv_nc4="uv t q ps gust vis"
+#     if [[ ${RUN_HOWV} =~ [TtYy] ]] ; then
+#        listall_cnv_nc4="${listall_cnv_nc4} howv"
+#     fi
+#     for type in $listall_cnv_nc4; do
+#        count=`ls pe*.conv_${type}_${loop}.nc4 | wc -l`
+#        if [[ $count -gt 0 ]]; then
+#           find ${DATA}/ -type f -name "pe*.conv_${type}_${loop}.nc4" -size 1k -delete
+#           $nc_diag_cat -o diag_${type}_${string}.${cycle_str}.${RUN}.nc4 pe*.conv_${type}_${loop}.nc4 
+#        fi
+#     done
+#  fi
+#========================================================================================#
+
 done
 
 ## link fort files with user-friendly file name

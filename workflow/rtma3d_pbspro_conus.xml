@@ -20,7 +20,6 @@
 <!ENTITY model		"&RUN;">
 <!ENTITY HRRRDAS_BEC     "1">
 <!ENTITY HRRRDAS_CUTOFF  "32">
-<!ENTITY READIN_LOCALIZATION     "TRUE">
 
 <!ENTITY MACHINE	"cray">
 <!ENTITY machine	"&MACHINE;">
@@ -131,9 +130,7 @@
 <!ENTITY HOMEBASE_DIR	"&NWROOT;">
 <!ENTITY DATABASE_DIR	"&ptmp_base;">
 
-
 <!-- for workflow -->
-
 <!ENTITY maxtries	"3">
 <!ENTITY KEEPDATA	"YES">
 <!ENTITY SENDCOM	"YES">
@@ -293,7 +290,7 @@
 
 <!ENTITY NCDIAG_PROC "1">
 <!ENTITY NCDIAG_RESOURCES '<walltime>00:30:00</walltime>'>
-<!ENTITY NCDIAG_RESERVATION '<nodes>1:ppn=6:mem=96GB</nodes><native>-l place=vscatter:shared:prepost=true</native><queue>&QUEUE;</queue><account>&ACCOUNT;</account>'>
+<!ENTITY NCDIAG_RESERVATION '<nodes>1:ppn=8:mem=64GB</nodes><native>-l place=scatter:shared,select=1:ncpus=8:mem=64GB:prepost=true</native><queue>&QUEUE;</queue><account>&ACCOUNT;</account>'>
 
 <!ENTITY CLEAN_PROC "1">
 <!ENTITY CLEAN_RESOURCES '<walltime>00:30:00</walltime>'> 
@@ -304,13 +301,11 @@
 <!ENTITY GSI_grid_ratio_in_cldanl    "1">
 <!ENTITY i_gsdsfc_uselist            "2">
 <!ENTITY VERBOSE_GSI                 ".false.">
+<!ENTITY READIN_LOCALIZATION         "TRUE">
 
 <!-- COM and DATA retention time (hours) -->
-
 <!ENTITY CLEAN_OLDCOM_HRS            "120">
 <!ENTITY CLEAN_OLDRUN_HRS            "72">
-
-
 
 <!ENTITY NCKS '/apps/prod/nco/4.7.9/cce/11.0.2/bin/ncks'>
 <!-- Block of Variables passed to workflow and tasks -->
@@ -1050,7 +1045,7 @@
       <value>&FCST_LENGTH;</value>
     </envar>'>
 
-    <!ENTITY ENVARS_CLEAN
+<!ENTITY ENVARS_CLEAN
     '<envar>
       <name>CLEAN_OLDRUN_HRS</name>
       <value>&CLEAN_OLDRUN_HRS;</value>
@@ -1084,7 +1079,7 @@
   <cycledef group="rap_e">0 01-11,13-23 * 01-12 2022-2025 *</cycledef>
 
   <cycledef group="rap">0 0,12 * 01-12 2022-2025 *</cycledef>
-  
+
   <cycledef group="3hours">0 */3 * 01-12 2022-2025 *</cycledef>
 
   <task name="&RUN;_clean_task" cycledefs="hourly" maxtries="&maxtries;">
@@ -1094,7 +1089,7 @@
     <command>&JJOB_DIR;/launch.ksh &JJOB_CLEAN;</command>
     <jobname><cyclestr>&RUN;_clean_job_@Y@m@d@H@M</cyclestr></jobname>
     <join><cyclestr>&LOG_SCHDLR;/&RUN;_&envir;_clean_@Y@m@d@H.log</cyclestr></join>
-     
+    
     &CLEAN_RESOURCES;
     &CLEAN_RESERVATION;
     &ENVARS_CLEAN;
@@ -1310,7 +1305,7 @@
      </dependency>
   </task>
 
-  <task name="&NET;_ncdiag_task" cycledefs="hourly" maxtries="&maxtries;">
+  <task name="&RUN;_ncdiag_task" cycledefs="hourly" maxtries="&maxtries;">
        
     &ENVARS;
     &NCDIAG_RESOURCES;
@@ -1349,6 +1344,7 @@
         <taskdep task="&RUN;_gsianl_task"/>
        </dependency>
   </task>
+
   <task name="&RUN;_anldump_task" cycledefs="hourly" maxtries="&maxtries;">
     &ENVARS;
     <envar>
@@ -1432,7 +1428,7 @@
     </dependency>
   </task>
 
- <task name="&RUN;_updatevars_task" cycledefs="hourly" maxtries="&maxtries;">
+  <task name="&RUN;_updatevars_task" cycledefs="hourly" maxtries="&maxtries;">
 
     &ENVARS;
     &UPDATEVARS_RESOURCES;
@@ -1476,7 +1472,6 @@
 
     &ENVARS_POST;
 
-
     <dependency> 
           <taskdep task="&RUN;_updatevars_task"/>
     </dependency>
@@ -1501,7 +1496,7 @@
     <dependency> 
           <taskdep task="&RUN;_updatevars_task"/>
     </dependency>
-    </task> 
+  </task>
 
   <task name="&NET;_prdgen_task" cycledefs="hourly" maxtries="&maxtries;">
        

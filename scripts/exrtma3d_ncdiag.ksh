@@ -24,7 +24,7 @@ if [ "${envir}" == "lsf" ] || [ "${envir}" == "pbspro" ]; then
 
 # make sure executable exists
   if [ -n ${ncdiag_VERSION} ] && [ -d ${ncdiag_ROOT} ] ; then  # module ncdiag was loaded successfully on wcoss2
-    PATH_to_NCDIAG="{ncdiag_ROOT}/bin"                         # path to ncdiag exe already added into $PATH
+    PATH_to_NCDIAG="${ncdiag_ROOT}/bin"                        # path to ncdiag exe already added into $PATH
     nc_diag_cat=${PATH_to_NCDIAG}/${exefile_name_ncdiag}
     echo "using ${nc_diag_cat} to concatenate nc4 obs-diag files ..."
   elif [ -f ${EXECrtma3d}/ncdiag_cat_serial.x ] ; then
@@ -51,6 +51,7 @@ fi
 #----- enter working directory -------
   cd ${DATA}
   ${ECHO} "enter working directory:${DATA}"
+  rm -rf ${DATA}/*
 
 # option for netcdf-format obs diag file
   RUN_NCDIAG=${RUN_NCDIAG:-"Yes"} # netcdf format obs-diag file (default: Yes)
@@ -67,7 +68,7 @@ fi
      do
         ima2=`printf %02d $imax`
         n_found=0
-#       n_found=`find ${DATAGSI} -type f -name "pe*.conv_t_${ima2}.nc4" | wc -l`
+#       n_found=`find ${DATAGSI}/ -type f -name "pe*.conv_t_${ima2}.nc4" | wc -l`
         n_found=`ls ${DATAGSI}/pe*.conv_t_${ima2}.nc4 | wc -l`
         if [[ "${n_found}" -gt 0 ]] ; then
            loops="$loops $ima2"
@@ -100,11 +101,12 @@ fi
      nvar=0
      for ivar in ${listall_conv}
      do
-#       n_ivar=`find ${DATAGSI} -type f -name "pe*.conv_${ivar}_01.nc4" | wc -l`
+#       n_ivar=`find ${DATAGSI}/ -type f -name "pe*.conv_${ivar}_01.nc4" | wc -l`
         n_ivar=`ls ${DATAGSI}/pe*.conv_${ivar}_01.nc4 | wc -l`
         if [[ ${n_ivar} -gt 0 ]] ; then
            listall_conv_nc4="${listall_conv_nc4} ${ivar}"
-           nvar=$nvar+1
+#          let "nvar=nvar+1"
+           nvar=$((nvar + 1 ))
         fi
      done
      echo "nc4 obs-diag files are avaible for $nvar obs ==> ${listall_conv_nc4}"
@@ -146,9 +148,13 @@ fi
         for type in $listall_conv_nc4; do
            count=`ls ${DATAGSI}/pe*.conv_${type}_${loop}.nc4 | wc -l`
            if [[ $count -gt 0 ]]; then
-              find ${DATAGSI} -type f -name "pe*.conv_${type}_${loop}.nc4" -size 1k -delete
+#              take out the small size files (<1k, no data inside) and remove them
+#               Then no warning message when running ncdiag_cat. 
+#               But even running with the small files, the results are same.
+              find ${DATAGSI}/ -type f -name "pe*.conv_${type}_${loop}.nc4" -size 1k -delete
               echo "$nc_diag_cat -o ${DATA}/diag_${type}_${string}.${cycle_str}.${RUN}.nc4 ${DATAGSI}/pe*.conv_${type}_${loop}.nc4" >> ${DATA}/ncdiag_cmdfile
-              icount=$icount+1
+#             let "icount=icount+1"
+              icount=$((icount + 1))
            fi
         done
      done
@@ -156,15 +162,19 @@ fi
 #    Execute the command file with CFP
      export exeName=cfp
      export CMDFILE=${DATA}/ncdiag_cmdfile
-     command="mpiexec -np 6 --cpu-bind verbose,core ${exeName} $CMDFILE >>$pgmout 2>errfile"
+#    command="mpiexec -np 6 --cpu-bind verbose,core ${exeName} $CMDFILE >>$pgmout 2>errfile"
+     command="mpiexec -np ${nvar} --cpu-bind verbose,core ${exeName} $CMDFILE >>$pgmout 2>errfile"
      echo $command
      $command
      export err=$?; err_chk
      echo "using $exeName to run ncdiag COMPLETED"
   
-#    Saving combined nc4 obs-daig files to COM2
-     ${CP} -p ${DATA}/diag_*.${RUN}.nc4 ${COMOUTgsi_rtma3d}  
-     gzip ${COMOUTgsi_rtma3d}/diag_*.${RUN}.nc4
+#    Saving combined nc4 obs-daig files to COM2 and compressing thme with gzip to save space
+     for type in $listall_conv_nc4; do
+        ${CP} -p ${DATA}/diag_${type}_*.${cycle_str}.${RUN}.nc4      ${COMOUTgsi_rtma3d}
+        rm -f ${COMOUTgsi_rtma3d}/diag_${type}_*.${cycle_str}.${RUN}.nc4.gz
+        gzip  ${COMOUTgsi_rtma3d}/diag_${type}_*.${cycle_str}.${RUN}.nc4
+     done
 
   else
 
