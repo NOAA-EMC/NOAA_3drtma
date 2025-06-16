@@ -134,12 +134,14 @@ if [ "${envir}" != "esrl" ]; then #WCOSS
 #    ${LN} -s  ${DATA}  ${DATAHOME}
 
     export DATAOBSHOME=${DATA_RUNDIR}/obsprd
+
 #    ${RM} -rf ${DATAOBSHOME}
-    ${LN} -s  ${COMINobsproc_rtma3d}  ${DATAOBSHOME}
+#    ${LN} -s  ${COMINobsproc_rtma3d}  ${DATAOBSHOME}
 
     export DATAHOME_BK=${DATA_RUNDIR}/fgsprd
 #    ${RM} -rf ${DATAHOME_BK}
-    ${LN} -s  ${GESINhrrr_rtma3d}  ${DATAHOME_BK}
+#    ${LN} -s  ${GESINhrrr_rtma3d}  ${DATAHOME_BK}
+
 fi
 
 #   Set the path to the GSI static files
