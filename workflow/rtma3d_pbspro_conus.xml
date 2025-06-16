@@ -20,7 +20,6 @@
 <!ENTITY model		"&RUN;">
 <!ENTITY HRRRDAS_BEC     "1">
 <!ENTITY HRRRDAS_CUTOFF  "32">
-<!ENTITY READIN_LOCALIZATION     "TRUE">
 
 <!ENTITY MACHINE	"cray">
 <!ENTITY machine	"&MACHINE;">
@@ -111,6 +110,7 @@
 <!ENTITY DATA_POSTSND   "&DATA_RUNDIR;/wrfbufr">
 <!ENTITY DATA_RHIST     "&DATA_RUNDIR;/rhist">
 <!ENTITY DATA_HRRRDAS   "&DATA_RUNDIR;/hrrrdas">
+<!ENTITY DATA_NCDIAG    "&DATA_RUNDIR;/ncdiagprd">
 
 <!ENTITY hpsspath0      "/NCEPDEV/emc-meso/5year/&USER;/pbspro_rtma3d">
 <!ENTITY hpsspath1      "/NCEPPROD/hpssprod/runhistory">
@@ -130,14 +130,13 @@
 <!ENTITY HOMEBASE_DIR	"&NWROOT;">
 <!ENTITY DATABASE_DIR	"&ptmp_base;">
 
-
 <!-- for workflow -->
-
 <!ENTITY maxtries	"3">
 <!ENTITY KEEPDATA	"YES">
 <!ENTITY SENDCOM	"YES">
-<!ENTITY RUN_RHIST	"YES">
+<!ENTITY RUN_RHIST	"No">
 <!ENTITY RUN_HOWV	"No">
+<!ENTITY RUN_NCDIAG	"Yes">
 
 <!-- for various observations used in RTMA3D -->
 
@@ -179,13 +178,14 @@
 <!ENTITY JJOB_POST4FGS   "&JJOB_DIR;/J&CAP_RUN;_POST4FGS">
 <!ENTITY exSCR_POST4FGS  "&SCRIPT_DIR;/ex&RUN;_post4fgs.ksh">
 <!ENTITY JJOB_PRDGEN     "&JJOB_DIR;/J&CAP_RUN;_PRDGEN">
-<!ENTITY JJOB_RHIST   "&JJOB_DIR;/J&CAP_RUN;_RHIST">
-<!ENTITY exSCR_RHIST  "&SCRIPT_DIR;/&RUN;/ex&RUN;_rhist.ksh">
-<!ENTITY JJOB_HRRRDAS   "&JJOB_DIR;/J&CAP_RUN;_HRRRDAS">
-<!ENTITY exSCR_HRRRDAS  "&SCRIPT_DIR;/&RUN;/ex&RUN;_hrrrdas.ksh">
+<!ENTITY JJOB_RHIST      "&JJOB_DIR;/J&CAP_RUN;_RHIST">
+<!ENTITY exSCR_RHIST     "&SCRIPT_DIR;/&RUN;/ex&RUN;_rhist.ksh">
+<!ENTITY JJOB_HRRRDAS    "&JJOB_DIR;/J&CAP_RUN;_HRRRDAS">
+<!ENTITY exSCR_HRRRDAS   "&SCRIPT_DIR;/&RUN;/ex&RUN;_hrrrdas.ksh">
+<!ENTITY JJOB_NCDIAG     "&JJOB_DIR;/J&CAP_RUN;_NCDIAG">
+<!ENTITY exSCR_NCDIAG    "&SCRIPT_DIR;/ex&NET;_ncdiag.ksh">
 <!ENTITY JJOB_CLEAN     "&JJOB_DIR;/J&CAP_RUN;_CLEAN">
 <!ENTITY exSCR_CLEAN    "&SCRIPT_DIR;/ex&RUN;_clean.ksh">
-
 
 <!-- Resources -->
 
@@ -274,6 +274,10 @@
 <!ENTITY PRDGEN_RESOURCES '<walltime>00:30:00</walltime>'>
 <!ENTITY PRDGEN_RESERVATION '<nodes>1:ppn=128:mem=48GB</nodes><native>-l place=scatter</native><queue>&QUEUE;</queue><account>&ACCOUNT;</account>'>
 
+<!ENTITY NCDIAG_PROC "1">
+<!ENTITY NCDIAG_RESOURCES '<walltime>00:30:00</walltime>'>
+<!ENTITY NCDIAG_RESERVATION '<nodes>1:ppn=8:mem=64GB</nodes><native>-l place=scatter:shared,select=1:ncpus=8:mem=64GB:prepost=true</native><queue>&QUEUE;</queue><account>&ACCOUNT;</account>'>
+
 <!ENTITY CLEAN_PROC "1">
 <!ENTITY CLEAN_RESOURCES '<walltime>00:30:00</walltime>'> 
 <!ENTITY CLEAN_RESERVATION '<nodes>1:ppn=1:vntype=cray_compute:mem=4GB</nodes><native>-l place=scatter</native><queue>&QUEUE;</queue><account>&ACCOUNT;</account>'>
@@ -283,13 +287,11 @@
 <!ENTITY GSI_grid_ratio_in_cldanl    "1">
 <!ENTITY i_gsdsfc_uselist            "2">
 <!ENTITY VERBOSE_GSI                 ".false.">
+<!ENTITY READIN_LOCALIZATION         "TRUE">
 
 <!-- COM and DATA retention time (hours) -->
-
 <!ENTITY CLEAN_OLDCOM_HRS            "120">
 <!ENTITY CLEAN_OLDRUN_HRS            "72">
-
-
 
 <!ENTITY NCKS '/apps/prod/nco/4.7.9/cce/11.0.2/bin/ncks'>
 <!-- Block of Variables passed to workflow and tasks -->
@@ -568,6 +570,10 @@
       <value><cyclestr>&DATA_PRDGEN;</cyclestr></value>
    </envar>
    <envar>
+      <name>DATA_NCDIAG</name>
+      <value><cyclestr>&DATA_NCDIAG;</cyclestr></value>
+   </envar>
+   <envar>
       <name>DATA_AUTOQC</name>
       <value><cyclestr>&DATA_AUTOQC;</cyclestr></value>
    </envar>
@@ -685,6 +691,10 @@
     <envar>
       <name>VERBOSE_GSI</name>
       <value>&VERBOSE_GSI;</value>
+    </envar>
+    <envar>
+      <name>RUN_NCDIAG</name>
+      <value>&RUN_NCDIAG;</value>
     </envar>
     <envar>
       <name>i_gsdsfc_uselist</name>
@@ -818,6 +828,24 @@
       <value>&JJOB_PRDGEN;</value>
     </envar>'>
 
+<!ENTITY ENVARS_NCDIAG
+    '<envar>
+      <name>START_TIME</name>
+      <value><cyclestr>@Y@m@d@H</cyclestr></value>
+    </envar>
+    <envar>
+      <name>RUN_NCDIAG</name>
+      <value>&RUN_NCDIAG;</value>
+    </envar>
+    <envar>
+      <name>JJOB_NCDIAG</name>
+      <value>&JJOB_NCDIAG;</value>
+    </envar>
+    <envar>
+      <name>exSCR_NCDIAG</name>
+      <value>&exSCR_NCDIAG;</value>
+    </envar>'>
+
 <!ENTITY ENVARS_AUTOQC
     '<envar>
       <name>START_TIME</name>
@@ -943,8 +971,7 @@
       <value>&FCST_LENGTH;</value>
     </envar>'>
 
-
-    <!ENTITY ENVARS_CLEAN
+<!ENTITY ENVARS_CLEAN
     '<envar>
       <name>CLEAN_OLDRUN_HRS</name>
       <value>&CLEAN_OLDRUN_HRS;</value>
@@ -978,7 +1005,7 @@
   <cycledef group="rap_e">0 01-11,13-23 * 01-12 2022-2025 *</cycledef>
 
   <cycledef group="rap">0 0,12 * 01-12 2022-2025 *</cycledef>
-  
+
   <cycledef group="3hours">0 */3 * 01-12 2022-2025 *</cycledef>
 
   <task name="&RUN;_clean_task" cycledefs="hourly" maxtries="&maxtries;">
@@ -988,7 +1015,7 @@
     <command>&WORKFLOW_DIR;/launch.ksh &JJOB_CLEAN;</command>
     <jobname><cyclestr>&RUN;_clean_job_@Y@m@d@H@M</cyclestr></jobname>
     <join><cyclestr>&LOG_SCHDLR;/&RUN;_&envir;_clean_@Y@m@d@H.log</cyclestr></join>
-     
+    
     &CLEAN_RESOURCES;
     &CLEAN_RESERVATION;
     &ENVARS_CLEAN;
@@ -1204,6 +1231,27 @@
      </dependency>
   </task>
 
+  <task name="&RUN;_ncdiag_task" cycledefs="hourly" maxtries="&maxtries;">
+       
+    &ENVARS;
+    &NCDIAG_RESOURCES;
+    &NCDIAG_RESERVATION;
+    <envar>
+       <name>rundir_task</name>
+       <value><cyclestr>&DATA_NCDIAG;</cyclestr></value>
+    </envar>
+
+    <command>&JJOB_DIR;/launch.ksh &JJOB_NCDIAG;</command>
+    <jobname><cyclestr>&RUN;_ncdiag_job_@Y@m@d@H@M</cyclestr></jobname>
+    <join><cyclestr>&LOG_SCHDLR;/&RUN;_&envir;_ncdiag_@Y@m@d@H.log</cyclestr></join>
+
+    &ENVARS_NCDIAG;
+
+    <dependency>
+          <taskdep task="&RUN;_gsianl_task"/>
+    </dependency>
+    </task>
+
  <task name="&RUN;_hrrrdas_task" cycledefs="hourly" maxtries="&maxtries;">
        &ENVARS;
        <envar>
@@ -1222,6 +1270,7 @@
         <taskdep task="&RUN;_gsianl_task"/>
        </dependency>
   </task>
+
   <task name="&RUN;_anldump_task" cycledefs="hourly" maxtries="&maxtries;">
     &ENVARS;
     <envar>
@@ -1305,7 +1354,7 @@
     </dependency>
   </task>
 
- <task name="&RUN;_updatevars_task" cycledefs="hourly" maxtries="&maxtries;">
+  <task name="&RUN;_updatevars_task" cycledefs="hourly" maxtries="&maxtries;">
 
     &ENVARS;
     &UPDATEVARS_RESOURCES;
@@ -1349,7 +1398,6 @@
 
     &ENVARS_POST;
 
-
     <dependency> 
           <taskdep task="&RUN;_updatevars_task"/>
     </dependency>
@@ -1374,7 +1422,7 @@
     <dependency> 
           <taskdep task="&RUN;_updatevars_task"/>
     </dependency>
-    </task> 
+  </task>
 
   <task name="&NET;_prdgen_task" cycledefs="hourly" maxtries="&maxtries;">
        

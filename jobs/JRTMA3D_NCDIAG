@@ -29,6 +29,19 @@ export jobid=${jobid:-"${outid}.o$$"}
 export MPIRUN=${MPIRUN:-"mpirun"}
 
 export CNVGRIB=${CNVGRIB:-cnvgrib}
+export PDYm1=`$NDATE -24 ${PDY}${cyc} | cut -c 1-8`
+##########################################################
+# make temp/running directories
+##########################################################
+export DATA=${DATA:-$DATAROOT/${jobid:?}} #jobid ($job.$LSB_JOBID MUST BE DEFINED IN TERMS OF $RUN IN UPPER LEVEL SCRIPT /MPondeca, 26Jul2015
+if [ -d $DATA ] ; then
+   ${ECHO} "$DATA exists, remove its content"
+   ${RM} -rf $DATA/*
+else
+   ${ECHO} "$DATA does not exist, create it"
+   ${MKDIR} -p $DATA
+fi
+cd $DATA
 
 #####################################################
 # Run setpdy and initialize PDY variables
@@ -39,8 +52,6 @@ export CNVGRIB=${CNVGRIB:-cnvgrib}
 #. ${DATA}/PDY
   export cycle=${cycle:-t${cyc}z}
   export pgmout=${pgmout:-"OUTPUT.${PDY}${cyc}.${jobid}"}
-  export COMINmosaic=${COMINmosaic:-"${COMIN}/radar.${PDY}"}
-
 
 ####################################
 # Determine Job Output Name on System
@@ -55,10 +66,10 @@ if [ ! -d ${LOG_PGMOUT} ] ; then
 fi
 
 # specify the file head for the file names of the archived data files
-export PROD_HEAD=${PROD_HEAD:-"${NET}.${cycle}"}
+export PROD_HEAD=${PROD_HEAD:-"${NET}.t${cyc}z"}
 
 # Specify Execution Areas
-export HOMErtma3d=${HOMErtma3d:-$NWROOT/rtma.${rtma_ver}}
+export HOMErtma3d=${HOMErtma3d:-$NWROOT/${NET}.${rtma_ver}}
 export EXECrtma3d=${EXECrtma3d:-$HOMErtma3d/exec}
 export FIXrtma3d=${FIXrtma3d:-$HOMErtma3d/fix/${NET}}
 export PARMrtma3d=${PARMrtma3d:-$HOMErtma3d/parm/${NET}}
@@ -77,20 +88,6 @@ export FGS_OPT=${FGS_OPT:-1}
 export COMIN=${COMIN:-${COMROOT}/${NET}/${envir}/${NET}.${PDY}}
 export COMOUT=${COMOUT:-${COMROOT}/${NET}/${envir}/${NET}.${PDY}}
 
-### Processed Observations ready to be used by RTMA3D_gsi
-export COMINobsproc_rtma3d=${COMINobsproc_rtma3d:-"${COMIN}/obsprd.${cycle}"}
-if [ ! -d "${COMINobsproc_rtma3d}" ] ; then
-  echo " Directory of obs data does NOT exist. Job abort!"
-  err_exit
-fi
-
-### Firstguess Products/Input for the RTMA3D (netcdf files) 
-export GESINhrrr_rtma3d=${GESINhrrr_rtma3d:-"${COMIN}/fgsprd.${cycle}"}
-if [ ! -d "${GESINhrrr_rtma3d}" ] ; then
-  echo " Directory of HRRRs fgs data does NOT exist. Job abort!"
-  err_exit
-fi
-
 ### 3DRTMA GSIANL Products (netcdf)
 export COMOUTgsi_rtma3d=${COMOUTgsi_rtma3d:-"${COMOUT}/gsiprd.${cycle}"}
 
@@ -106,64 +103,44 @@ fi
 
 ###########################################################
 #
-# The following variables are used in exrtma3d_updatevars.ksh
+# The following variables are used in exrtma3d_ncdiag.ksh
 #
 ###########################################################
-#   Set the name to the executable
-    export exefile_name_updatevars=${exefile_name_updatevars_wrf:-"rtma3d_updatevars_wrf"}
-    export exefile_name_update_ncfields=${exefile_name_updatevars_ncfields:-"rtma3d_updatevars_ncfields"}
 
 if [ "${envir}" != "esrl" ]; then #WCOSS
-#   set the file name of the final analysis file for archive
-    if [ ! "${PROD_HEAD}" ] ; then
-        tz_str=t${cyc}z
-      export ANLrtma3d_FNAME="${NET}.${tz_str}.wrf_inout.nc"
-      export FGSrtma3d_FNAME="${NET}.${tz_str}.firstguess.nc"
-    else
-      export ANLrtma3d_FNAME="${PROD_HEAD}.wrf_inout.nc"
-      export FGSrtma3d_FNAME="${PROD_HEAD}.firstguess.nc"
-    fi
 
-#   Set the path to the working/obs/ges directories
+#   Set the path to the top running/working directory for this analysis cycle:
     export DATA_RUNDIR=${DATA_RUNDIR:-"${DATAROOT}/${envir}/${NET}.${PDY}${cyc}"}
     if [ ! -d "${DATA_RUNDIR}" ] ; then
         mkdir -p ${DATA_RUNDIR}
     fi
-    export DATAHOME=${DATA_RUNDIR}/gsiprd
-#    ${RM} -rf ${DATAHOME}
-#    ${LN} -s  ${DATA}  ${DATAHOME}
 
-    export DATAOBSHOME=${DATA_RUNDIR}/obsprd
+#   Set the path (DATAGSIHOME) to gsi running directory
+#       where the original netcdf format obs-diag files (not combined yet) are generated in GSI run
+    export DATAGSIHOME=${DATA_RUNDIR}/gsiprd
+    if [ ! -d "${DATAGSIHOME}" ] ; then
+       echo " Directory of GSI running data does NOT exist. Job abort!"
+       err_exit
+    fi
 
-#    ${RM} -rf ${DATAOBSHOME}
-#    ${LN} -s  ${COMINobsproc_rtma3d}  ${DATAOBSHOME}
-
-    export DATAHOME_BK=${DATA_RUNDIR}/fgsprd
-#    ${RM} -rf ${DATAHOME_BK}
-#    ${LN} -s  ${GESINhrrr_rtma3d}  ${DATAHOME_BK}
+    export DATAHOME=${DATA_RUNDIR}/ncdiagprd
+    if [ -L "${DATAHOME}" ] && [ -d "${DATAHOME}" ] ; then
+        ${RM} -rf ${DATAHOME}
+    fi
+    ${LN} -s  ${DATA}  ${DATAHOME}
 
 fi
 
 #   Set the path to the GSI static files
     export FIXgsi=${FIXgsi:-"${FIXrtma3d}/gsi"}
-    export FIXcrtm=${FIXcrtm:-"${FIXrtma3d}/crtm"}
-    export FIXwrf=${FIXwrf:-"${FIXrtma3d}/wrf"}
-
     export PARMgsi=${PARMgsi:-"${PARMrtma3d}/gsi"}
-    export PARMupp=${PARMupp:-"${PARMrtma3d}/upp"}
-    export PARMwrf=${PARMwrf:-"${PARMrtma3d}/wrf"}
-
-    export OBS_USELIST=${OBS_USELIST:-"${FIXrtma3d}/gsi"}
-    export SFCOBS_USELIST=${SFCOBS_USELIST:-"${FIXrtma3d}/gsi"}
-    export AIRCRAFT_REJECT=${AIRCRAFT_REJECT:-"${FIXrtma3d}/gsi"}
-    export SFCOBS_PROVIDER=${SFCOBS_PROVIDER:-"${FIXrtma3d}/gsi"}
 
 ##########################################################
 
 ######################
 # Execute the script.
 ######################
-${exSCR_UPDATEVARS:-$HOMErtma3d/scripts/$RUN/ex${RUN}_updatevars.ksh}
+${exSCR_NCDIAG:-$HOMErtma3d/scripts/ex${NET}_ncdiag.ksh}
 export err=$?; err_chk
 
 msg="$0 of $job completed normally"

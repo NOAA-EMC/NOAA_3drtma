@@ -71,10 +71,19 @@ for ftype in ges anl; do
   fi
   gunzip ${diagfile}.gz
   ln -sf ${diagfile} diag_conv.dat
-# ${READDIAG} diag_conv.dat
+
+  # namelist file for running READDIAG (=> rtma3d_read_diag.exe)
+  [[ -f ./namelist.conv ]] && rm -f ./namelist.conv
+cat << EOF > ./namelist.conv
+&iosetup
+    dump_pseudo_obs_too=.true.,
+/
+EOF
+
   ${EXECrtma3d}/${NET}_read_diag diag_conv.dat
   mv diag_results ${diagfile}
   rm diag_conv.dat
+  [[ -f ./namelist.conv ]] && mv ./namelist.conv ./namelist.conv.readdiag.${ftype}  # saving namelist for check
 
 done
 

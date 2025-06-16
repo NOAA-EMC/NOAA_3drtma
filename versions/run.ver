@@ -28,6 +28,7 @@ export sigio_ver="2.3.2"
 export gfsio_ver="1.4.1"
 export libpng_ver="1.6.37"
 export python_ver="3.8.6"
+export ncdiag_ver="1.1.1"
 
 # Loading nceplibs modules
 export gempak_ver=7.14.1
