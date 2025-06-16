@@ -25,6 +25,7 @@ RUN=$7      #rtma or urma
 EXECdir=$8
 fixdir=$9
 parmdir=${10}
+NET=${11}
 fhr=00
 
 cd $DATAsmartinit
@@ -111,7 +112,7 @@ date
 
     echo "DATE  "${CDATE}"00WASHINGTON" >DATE
 
-    export pgm=rtma_smartinit
+    export pgm=${NET}_smartinit
     . prep_step
 
     ln -sf ${RUN}.NDFD${ndfdstring}     fort.11
@@ -131,7 +132,7 @@ $fhr
 $cyc
 EOF
 
-    mpiexec -n 1 -ppn 1 $EXECdir/rtma_smartinit < smart.nml >>$pgmout 2>errfile
+    mpiexec -n 1 -ppn 1 $EXECdir/${pgm} < smart.nml >>$pgmout 2>errfile
     export err=$?; err_chk
 
     cat ../tmpout.grib2tmp >> ${RUN}${ndfdstring}.tm00
