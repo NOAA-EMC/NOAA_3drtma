@@ -27,6 +27,7 @@ logs
 loghistory
 run/
 save4later
+workflow/*.log
 #
 #  
 #
@@ -37,19 +38,20 @@ save4later
 #  # ignore object/executable/lib/module file ('*.o, *.x, *.exei, *.a, *.mod')
 #
 *.o
+!sorc/rtma_wrfbufr_conus.fd/wrflibs/*.o
+!sorc/rtma_wrfbufr_alaska.fd/wrflibs/*.o
+*.a
+!sorc/rtma_wrfbufr_conus.fd/wrflibs/*.a
+!sorc/rtma_wrfbufr_alaska.fd/wrflibs/*.a
 *.x
 *.exe
-*.a
 sorc/**/*.mod
 #
 #  # ignore directory of gsi and post(upp) source code ('sorc/rtma_gsi.fd, sorc/rtma_post.fd')
 #
-**/rtma_gsi.fd/
-#
-**/rtma_post.fd/
-#
-**/build_gsi/
-#
+sorc/rtma_gsi.fd
+parm
+!sorc/rtma_post.fd/parm
 fix
 #
 #  # ignore the link files under directory modulefiles
@@ -66,17 +68,9 @@ modulefiles/*/build/build_ncep_post.*
 #
 #  # special ignoring rules for workflow/
 #
-workflow/*.sh
-#
-workflow/*.ksh
-#
-workflow/*.xml
 #
 workflow/*.db
 #
-!workflow/prep_*.sh
-#
-!workflow/prep_*.ksh
 #
 #  # exceptional pattern is led by sign "!"
 #

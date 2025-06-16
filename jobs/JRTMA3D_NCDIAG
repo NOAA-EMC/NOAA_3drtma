@@ -1,0 +1,161 @@
+#!/bin/ksh
+
+# --- for debug --- #
+date
+export PS4=' $SECONDS + ' 
+set -x
+
+#######################################################
+# The following variable could be defined in the 
+# submission script (the ecf script *.sms, or ROCOTO *.xml),
+# if not, they will take the default values which is set 
+# for the NCO running enviroment
+#######################################################
+
+export RUN_ENVIR=${RUN_ENVIR:-nco}
+
+###################################
+# Specify NET and RUN Name and model
+####################################
+export NET=${NET:-rtma3d}
+export RUN=${RUN:-rtma3d}
+export model=${model:-rtma3d}
+
+##########################################################
+# obtain unique process id (pid)
+##########################################################
+export job=${job:-"${outid}.o$$"}
+export jobid=${jobid:-"${outid}.o$$"}
+export MPIRUN=${MPIRUN:-"mpirun"}
+
+export CNVGRIB=${CNVGRIB:-cnvgrib}
+export PDYm1=`$NDATE -24 ${PDY}${cyc} | cut -c 1-8`
+##########################################################
+# make temp/running directories
+##########################################################
+export DATA=${DATA:-$DATAROOT/${jobid:?}} #jobid ($job.$LSB_JOBID MUST BE DEFINED IN TERMS OF $RUN IN UPPER LEVEL SCRIPT /MPondeca, 26Jul2015
+if [ -d $DATA ] ; then
+   ${ECHO} "$DATA exists, remove its content"
+   ${RM} -rf $DATA/*
+else
+   ${ECHO} "$DATA does not exist, create it"
+   ${MKDIR} -p $DATA
+fi
+cd $DATA
+
+#####################################################
+# Run setpdy and initialize PDY variables
+#    setpdy.sh needs the variables 
+#    $PDY and $cyc already defined in advance
+#####################################################
+#setpdy.sh
+#. ${DATA}/PDY
+  export cycle=${cycle:-t${cyc}z}
+  export pgmout=${pgmout:-"OUTPUT.${PDY}${cyc}.${jobid}"}
+
+####################################
+# Determine Job Output Name on System
+####################################
+export LOG_JJOB=${LOG_JJOB:-$COMROOT/logs/jlogfiles}
+export jlogfile=${jlogfile:-$LOG_JJOB/jlogfile.${jobid}}
+if [ ! -d ${LOG_JJOB} ] ; then
+   mkdir -p ${LOG_JJOB}
+fi
+if [ ! -d ${LOG_PGMOUT} ] ; then
+   mkdir -p ${LOG_PGMOUT}
+fi
+
+# specify the file head for the file names of the archived data files
+export PROD_HEAD=${PROD_HEAD:-"${NET}.t${cyc}z"}
+
+# Specify Execution Areas
+export HOMErtma3d=${HOMErtma3d:-$NWROOT/${NET}.${rtma_ver}}
+export EXECrtma3d=${EXECrtma3d:-$HOMErtma3d/exec}
+export FIXrtma3d=${FIXrtma3d:-$HOMErtma3d/fix/${NET}}
+export PARMrtma3d=${PARMrtma3d:-$HOMErtma3d/parm/${NET}}
+export USHrtma3d=${USHrtma3d:-$HOMErtma3d/ush/${NET}}
+export UTILrtma3d=${UTILrtma3d:-$HOMErtma3d/util/${NET}}
+
+# date and time for previous and next cycle
+export PDYHH="${PDY}${cyc}"
+export PDYHH_cycm1=$($NDATE -01  "${PDYHH}")
+export PDYHH_cycp1=$($NDATE +01  "${PDYHH}")
+export FGS_OPT=${FGS_OPT:-1}
+
+#################################################
+# Set up the INPUT and OUTPUT directories
+#################################################
+export COMIN=${COMIN:-${COMROOT}/${NET}/${envir}/${NET}.${PDY}}
+export COMOUT=${COMOUT:-${COMROOT}/${NET}/${envir}/${NET}.${PDY}}
+
+### 3DRTMA GSIANL Products (netcdf)
+export COMOUTgsi_rtma3d=${COMOUTgsi_rtma3d:-"${COMOUT}/gsiprd.${cycle}"}
+
+if [ ! -d "${COMIN}" ] ; then
+   mkdir -p $COMIN
+fi
+if [ ! -d "${COMOUT}" ] ; then
+   mkdir -p $COMOUT
+fi
+if [ ! -d "${COMOUTgsi_rtma3d}" ] ; then
+  ${MKDIR} -p ${COMOUTgsi_rtma3d}
+fi
+
+###########################################################
+#
+# The following variables are used in exrtma3d_ncdiag.ksh
+#
+###########################################################
+
+if [ "${envir}" != "esrl" ]; then #WCOSS
+
+#   Set the path to the top running/working directory for this analysis cycle:
+    export DATA_RUNDIR=${DATA_RUNDIR:-"${DATAROOT}/${envir}/${NET}.${PDY}${cyc}"}
+    if [ ! -d "${DATA_RUNDIR}" ] ; then
+        mkdir -p ${DATA_RUNDIR}
+    fi
+
+#   Set the path (DATAGSIHOME) to gsi running directory
+#       where the original netcdf format obs-diag files (not combined yet) are generated in GSI run
+    export DATAGSIHOME=${DATA_RUNDIR}/gsiprd
+    if [ ! -d "${DATAGSIHOME}" ] ; then
+       echo " Directory of GSI running data does NOT exist. Job abort!"
+       err_exit
+    fi
+
+    export DATAHOME=${DATA_RUNDIR}/ncdiagprd
+    if [ -L "${DATAHOME}" ] && [ -d "${DATAHOME}" ] ; then
+        ${RM} -rf ${DATAHOME}
+    fi
+    ${LN} -s  ${DATA}  ${DATAHOME}
+
+fi
+
+#   Set the path to the GSI static files
+    export FIXgsi=${FIXgsi:-"${FIXrtma3d}/gsi"}
+    export PARMgsi=${PARMgsi:-"${PARMrtma3d}/gsi"}
+
+##########################################################
+
+######################
+# Execute the script.
+######################
+${exSCR_NCDIAG:-$HOMErtma3d/scripts/ex${NET}_ncdiag.ksh}
+export err=$?; err_chk
+
+msg="$0 of $job completed normally"
+postmsg $jlogfile "$msg"
+
+if [ -e "${pgmout}" ] ; then
+   cat $pgmout
+   cpreq -p $pgmout ${LOG_PGMOUT}
+fi
+
+##############################
+# Remove the Temporary working directory
+##############################
+if [ "${KEEPDATA}" != YES ]; then
+   rm -rf $DATA
+fi
+
+date

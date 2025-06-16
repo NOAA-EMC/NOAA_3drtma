@@ -36,11 +36,7 @@ export CNVGRIB=${CNVGRIB:-cnvgrib}
 export DATA=${DATA:-$DATAROOT/${jobid:?}} #jobid ($job.$LSB_JOBID MUST BE DEFINED IN TERMS OF $RUN IN UPPER LEVEL SCRIPT /MPondeca, 26Jul2015
 if [ -d $DATA ] ; then
    ${ECHO} "$DATA exists, remove its content"
-   if [ "${envir}" == "esrl" ]; then #Jet
-     ${RM} -rf $DATA/wrf*.grib2
-   else
      ${RM} -rf $DATA/*
-   fi
 else
    ${ECHO} "$DATA does not exist, create it"
    ${MKDIR} -p $DATA
@@ -54,16 +50,8 @@ cd $DATA
 #####################################################
 #setpdy.sh
 #. ${DATA}/PDY
-if [[ "${subcyc}" == "-1" ]]; then #it's hourly run
   export cycle=${cycle:-t${cyc}z}
   export pgmout=${pgmout:-"OUTPUT.${PDY}${cyc}.${jobid}"}
-else
-  export cycle=${cycle:-t${cyc}${subcyc}z}
-  export pgmout=${pgmout:-"OUTPUT.${PDY}${cyc}${subcyc}.${jobid}"}
-fi
-
-export subcyc=${subcyc} #Note: Must define subcyc in upper level script. Can be 00, 15, 30, or 45 /MPondeca, 30Jun2017
-                         #only used for rurtma2p5
 ####################################
 # Determine Job Output Name on System
 ####################################
@@ -77,15 +65,15 @@ if [ ! -d ${LOG_PGMOUT} ] ; then
 fi
 
 # specify the file head for the file names of the archived data files
-export PROD_HEAD=${PROD_HEAD:-"${RUN}.${cycle}"}
+export PROD_HEAD=${PROD_HEAD:-"${NET}.${cycle}"}
 
 # Specify Execution Areas
 export HOMErtma3d=${HOMErtma3d:-$NWROOT/rtma.${rtma_ver}}
 export EXECrtma3d=${EXECrtma3d:-$HOMErtma3d/exec}
-export FIXrtma3d=${FIXrtma3d:-$HOMErtma3d/fix/${RUN}}
-export PARMrtma3d=${PARMrtma3d:-$HOMErtma3d/parm/${RUN}}
-export USHrtma3d=${USHrtma3d:-$HOMErtma3d/ush/${RUN}}
-export UTILrtma3d=${UTILrtma3d:-$HOMErtma3d/util/${RUN}}
+export FIXrtma3d=${FIXrtma3d:-$HOMErtma3d/fix/${NET}}
+export PARMrtma3d=${PARMrtma3d:-$HOMErtma3d/parm/${NET}}
+export USHrtma3d=${USHrtma3d:-$HOMErtma3d/ush/${NET}}
+export UTILrtma3d=${UTILrtma3d:-$HOMErtma3d/util/${NET}}
 
 # date and time for previous and next cycle
 export PDYHH="${PDY}${cyc}"
@@ -96,8 +84,8 @@ export FGS_OPT=${FGS_OPT:-1}
 #################################################
 # Set up the INPUT and OUTPUT directories
 #################################################
-export COMIN=${COMIN:-${COMROOT}/${NET}/${envir}/${RUN}.${PDY}}
-export COMOUT=${COMOUT:-${COMROOT}/${NET}/${envir}/${RUN}.${PDY}}
+export COMIN=${COMIN:-${COMROOT}/${NET}/${envir}/${NET}.${PDY}}
+export COMOUT=${COMOUT:-${COMROOT}/${NET}/${envir}/${NET}.${PDY}}
 
 ### Observations Products/Input for the RTMA3D (prepbufr files) 
 export COMINobsproc_rtma3d=${COMINobsproc_rtma3d:-"${COMIN}/obsprd.${cycle}"}
@@ -131,8 +119,8 @@ fi
 ###########################################################
 #   set the file name of the final analysis file for archive
 if [ ! "${PROD_HEAD}" ] ; then
-  export ANLrtma3d_FNAME="${RUN}.${cycle}.wrf_inout.nc"
-  export FGSrtma3d_FNAME="${RUN}.${cycle}.firstguess.nc"
+  export ANLrtma3d_FNAME="${NET}.${cycle}.wrf_inout.nc"
+  export FGSrtma3d_FNAME="${NET}.${cycle}.firstguess.nc"
 else
   export ANLrtma3d_FNAME="${PROD_HEAD}.wrf_inout.nc"
   export FGSrtma3d_FNAME="${PROD_HEAD}.firstguess.nc"
@@ -159,7 +147,7 @@ export SFCOBS_PROVIDER=${SFCOBS_PROVIDER:-"${FIXrtma3d}/gsi"}
 if [ "${envir}" != "esrl" ]; then #WCOSS
 #   Link the path to the working UPP directory #tmp.debug do we need this?
 
-    export DATA_RUNDIR=${DATA_RUNDIR:-"${DATAROOT}/${envir}/${RUN}.${PDY}${cyc}${subcyc}"}
+    export DATA_RUNDIR=${DATA_RUNDIR:-"${DATAROOT}/${envir}/${NET}.${PDY}${cyc}"}
     if [ ! -d "${DATA_RUNDIR}" ] ; then
         mkdir -p ${DATA_RUNDIR}
     fi
@@ -171,7 +159,7 @@ fi
 ######################
 # Execute the script.
 ######################
-${exSCR_POST:-$HOMErtma3d/scripts/ex${RUN}_post.ksh}
+${exSCR_POST:-$HOMErtma3d/scripts/ex${NET}_post.ksh}
 export err=$?; err_chk
 
 msg="$0 of $job completed normally"
@@ -179,7 +167,7 @@ postmsg $jlogfile "$msg"
 
 if [ -e "${pgmout}" ] ; then
    cat $pgmout
-   cp -p $pgmout ${LOG_PGMOUT}
+   cpreq -p $pgmout ${LOG_PGMOUT}
 fi
 
 ##############################

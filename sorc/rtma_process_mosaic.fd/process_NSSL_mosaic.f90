@@ -132,6 +132,7 @@ program process_NSSL_mosaic
   INTEGER(i_kind)  ::  numlvl,numref
   integer :: status
   REAL ::  rthresh_ref,rthresh_miss
+  integer :: maxcores
 
 !**********************************************************************
 !
@@ -146,10 +147,33 @@ program process_NSSL_mosaic
   open(15, file='mosaic.namelist')
     read(15,setup)
   close(15)
-
+!
+!  safty check for cores used in this run
+!
   read(analysis_time,'(I10)') idate
   if(mype==0) write(6,*) 'cycle time is :', idate
 
+  if( tversion == 8 .or. tversion == 14) then
+     maxcores=8
+  elseif( tversion == 81 ) then
+     maxcores=8
+  elseif( tversion == 4 ) then
+     maxcores=4
+  elseif( tversion == 1 ) then
+     maxcores=33
+  else
+     write(*,*) 'unknow tversion !'
+     stop 1234
+  endif
+
+  write(6,*) 'total cores for this run is ',npe
+  if(npe < maxcores) then
+     write(6,*) 'ERROR, this run must use ',maxcores,' or more cores !!!'
+     call MPI_FINALIZE(ierror)
+     stop 1234
+  endif
+!
+!
   if( tversion == 8 .or. tversion == 14) then
      maxlvl = 31
      rthresh_ref=-500.0
@@ -551,6 +575,8 @@ program process_NSSL_mosaic
     write(*,*) 'Start write_bufr_nsslref'
     call write_bufr_nsslref(maxlvl,nlon,nlat,numref,ref3d_column,idate)
   endif
+
+  if(mype==0)  write(6,*) "=== RAPHRRR PREPROCCESS SUCCESS ==="
 
   call MPI_FINALIZE(ierror)
 !
