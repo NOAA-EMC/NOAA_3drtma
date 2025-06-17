@@ -4,7 +4,7 @@
 
 <!-- Key variables -->
 <!-- date/time of cases or cycles -->
-<!ENTITY USER           "annette.gibbs">
+<!ENTITY USER           "user.name">
 <!ENTITY rtma3d_ver     "v1.0.0">
 <!ENTITY startCDATE     "201907121400">
 <!ENTITY endCDATE       "201907121400">
@@ -27,14 +27,14 @@
 
 <!-- Variables Defined by absolute paths -->
 
-<!ENTITY ptmp_base	"/lfs/h2/emc/ptmp/&USER;/rtma3d_nco/alaska">
+<!ENTITY ptmp_base	"/lfs/h2/emc/ptmp/&USER;/rtma3d/alaska">
 <!ENTITY COMINRAP       "/lfs/h1/ops/prod/com/obsproc/v1.2">
 <!ENTITY COMINHRRR      "/lfs/h1/ops/prod/com/hrrr/v4.1">
 <!ENTITY COMINRADAR     "/lfs/h1/ops/dev/dcom/ldmdata/obs/upperair/mrms/alaska">
 <!ENTITY GESINHRRR      "/lfs/h1/ops/prod/com/hrrr/v4.1/nwges/hrrrges_sfc/alaska">
 <!ENTITY COMINHRRRDAS   "/lfs/h1/ops/prod/com/hrrr/v4.1/nwges/hrrrdasges">
 <!ENTITY COMINGDAS      "/lfs/h1/ops/prod/com/gfs/v16.3">
-<!ENTITY NWROOT		"/lfs/h2/emc/da/noscrub/&USER;/packages/rtma3d.&rtma3d_ver;_nco">
+<!ENTITY NWROOT		"/lfs/h2/emc/da/noscrub/&USER;/packages/rtma3d.&rtma3d_ver;">
 <!ENTITY PACKAGEROOT    "&NWROOT;">
 <!ENTITY COMINPREP      "/lfs/h2/emc/ptmp/ashley.stanfield/CRON/rtma3d/com/obsproc/v1.3">
 <!ENTITY HPSSOUT_5yr    "/NCEPDEV/emc-meso/5year/&USER;/rtma3d">
@@ -47,7 +47,7 @@
 <!ENTITY GESROOT	"&ptmp_base;/nwges2/&NET;">
 
 <!ENTITY HOMErtma3d	"&NWROOT;">
-<!ENTITY LOG_DIR	"/lfs/h2/emc/ptmp/&USER;/rtma3d_nco_logs/alaska">
+<!ENTITY LOG_DIR	"/lfs/h2/emc/ptmp/&USER;/rtma3d_logs/alaska">
 <!ENTITY JJOB_DIR	"&HOMErtma3d;/jobs">
 <!ENTITY WORKFLOW_DIR   "&HOMErtma3d;/workflow">
 <!ENTITY SCRIPT_DIR	"&HOMErtma3d;/scripts">
@@ -134,8 +134,8 @@
 <!ENTITY maxtries	"3">
 <!ENTITY KEEPDATA	"YES">
 <!ENTITY SENDCOM	"YES">
-<!ENTITY RUN_RHIST	"No">
-<!ENTITY RUN_HOWV	"No">
+<!ENTITY RUN_RHIST	"Yes">
+<!ENTITY RUN_HOWV	"Yes">
 <!ENTITY RUN_NCDIAG	"Yes">
 
 <!-- for various observations used in RTMA3D -->

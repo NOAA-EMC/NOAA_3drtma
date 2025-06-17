@@ -22,5 +22,9 @@ cd sorc
 
 ./build_rtma3d_all.sh
 
+5. Install the executables
+
+./install_rtma3d_all.sh
+
 5. Change user.name in the workflow/*xml files
 

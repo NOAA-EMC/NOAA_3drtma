@@ -170,6 +170,7 @@ module load python-modules/${python_ver}
 #module load prod_envir/${prod_envir_ver}
 module load prod_util/${prod_util_ver}
 #module load w3nco/2.4.1
+module load ncdiag/${ncdiag_ver}
 
 module list
 
