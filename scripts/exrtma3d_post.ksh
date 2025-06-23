@@ -67,10 +67,10 @@ export DATAWRFFILE=${ANLrtma3d_FNAME:-"${NET}.t${cyc}z.anl.wrf_inout.nc"}
 ##########################################################################
 
 # Check to make sure the post executable exists
-if [ ! -x ${EXECrtma3d}/${exefile_name_post} ]; then
-  ${ECHO} "ERROR: ${EXECrtma3d}/${exefile_name_post} does not exist, or is not executable"
-  exit 1
-fi
+#if [ ! -x ${EXECrtma3d}/${exefile_name_post} ]; then
+#  ${ECHO} "ERROR: ${EXECrtma3d}/${exefile_name_post} does not exist, or is not executable"
+#  exit 1
+#fi
 
 # Check to make sure that the DATAHOME exists
 if [ ! ${DATAHOME} ]; then
@@ -147,7 +147,7 @@ ${CP_LN} ${FIXcrtm}/* .
 #
 # Run unipost
 #
-pgm=${NET}_post
+export pgm=${NET}_upp
 . prep_step
 
 startmsg
@@ -160,9 +160,9 @@ postmsg "$jlogfile" "$msg"
 
 
 #copy executable to running directory
-${CP} ${EXECrtma3d}/${exefile_name_post} ./rtma3d_wrfpost
+#${CP} ${EXECrtma3d}/${exefile_name_post} ./rtma3d_wrfpost
 export APRUN="mpiexec -l -n 128 -ppn 128"
-runline="${APRUN} ./rtma3d_wrfpost"
+runline="${APRUN} ${EXECrtma3d}/${pgm}"
 $runline < itag > ${pgmout} 2>errfile
 export err=$? ; err_chk
 

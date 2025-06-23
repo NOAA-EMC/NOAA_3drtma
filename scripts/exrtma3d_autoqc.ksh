@@ -80,7 +80,7 @@ cat << EOF > ./namelist.conv
 /
 EOF
 
-  ${READDIAG} diag_conv.dat
+  ${EXECrtma3d}/${NET}_read_diag diag_conv.dat
   mv diag_results ${diagfile}
   rm diag_conv.dat
   [[ -f ./namelist.conv ]] && mv ./namelist.conv ./namelist.conv.readdiag.${ftype}  # saving namelist for check

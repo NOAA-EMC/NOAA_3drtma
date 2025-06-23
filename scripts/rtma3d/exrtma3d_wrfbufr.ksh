@@ -129,8 +129,9 @@ datestr=`date`
 echo about to run program at $datestr
 
 #startmsg
-cp ${EXECrtma3d}/rtma_wrfbufr_conus hrrr_wrfbufr
-runline="mpiexec -n 1 -ppn 1 ./hrrr_wrfbufr"
+export pgm="${NET}_wrfbufr_conus"
+#cp ${EXECrtma3d}/rtma_wrfbufr_conus hrrr_wrfbufr
+runline="mpiexec -n 1 -ppn 1 $EXECrtma3d/${pgm}"
 $runline
 export err=$?; err_chk
 

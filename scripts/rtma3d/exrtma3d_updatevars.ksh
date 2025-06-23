@@ -187,7 +187,7 @@ fi
 
 
 # Run WRF to update reflectivity fields
-export pgm="rtma3d_updatevars"
+export pgm="${NET}_wrfarw_fcst"
 . prep_step
 startmsg
 msg="***********************************************************"
@@ -198,10 +198,10 @@ msg="***********************************************************"
 postmsg "$jlogfile" "$msg"
 
 CP_LN=${CP}
-${CP_LN} ${EXECrtma3d}/${exefile_name_updatevars} ${pgm}
+#${CP_LN} ${EXECrtma3d}/${exefile_name_updatevars} ${pgm}
 now=`${DATE} +%Y%m%d%H%M%S`
 export APRUN="mpiexec -n 384 -ppn 64 --cpu-bind core "
-$APRUN ./${pgm}
+$APRUN ${EXECrtma3d}/${pgm}
 export err=$?; err_chk
 # Save a copy of the RSL files
 rsldir=rsl.wrf.${now}

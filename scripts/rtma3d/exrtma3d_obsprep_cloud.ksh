@@ -1,11 +1,6 @@
 #!/bin/ksh 
 set -x
 
-# make sure executable exists
-if [ ! -f ${EXECrtma3d}/${exefile_name_cloud} ] ; then
-  ${ECHO} "ERROR: NASA cloud obs prcoessing executable '${EXECrtma3d}/${exefile_name_cloud}' does not exist!"
-  exit 1
-fi
 START_TIME=`${DATE} -d "${PDY} ${cyc} ${SUBH_TIME} minutes"`
 
 # Compute date & time components for the analysis time
@@ -56,7 +51,7 @@ ioption = 2,
 EOF
 
 # Run obs processor
-export pgm="rtma_process_cloud"
+export pgm="${NET}_process_cloud"
 . prep_step
 startmsg
 msg="***********************************************************"
@@ -67,8 +62,8 @@ msg="***********************************************************"
 postmsg "$jlogfile" "$msg"
 
 CP_LN=${CP}
-${CP_LN} ${EXECrtma3d}/${exefile_name_cloud} ${pgm}
-${MPIRUN} ./${pgm} > ${pgmout} 2>errfile
+#${MPIRUN} ./${pgm} > ${pgmout} 2>errfile
+mpiexec $EXECrtma3d/${pgm} >> ${pgmout} 2>errfile
 export err=$?; err_chk
 
 msg="JOB $job FOR $NET HAS COMPLETED NORMALLY"

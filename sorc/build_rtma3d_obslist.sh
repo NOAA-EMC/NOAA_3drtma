@@ -11,8 +11,8 @@ source ../versions/build.ver
 module load RTMA3D/${rtma3d_ver}.lua
 module list
 
-cd ${BASE}/rtma3d_read_diag.fd
+cd ${BASE}/rtma3d_obslist.fd
 make clean
-make
+make all
 
 ##############################
