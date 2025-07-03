@@ -38,12 +38,11 @@ cp -p ${BASE}/rtma3d_gsi.fd/build/src/gsi/gsi.x ../exec/rtma3d_gsi
 
 fi
 
-if [ $INSTALL_rtma3d_sndp = yes ] ; then
+if [ $INSTALL_rtma3d_process_cloud = yes ] ; then
 
-cp -p ${BASE}/rtma3d_sndp.fd/rtma3d_sndp ../exec/rtma3d_sndp
+cp -p ${BASE}/rtma3d_process_cloud.fd/rtma3d_process_cloud ../exec/rtma3d_process_cloud
 
 fi
-
 
 if [ $INSTALL_rtma3d_process_mosaic = yes ] ; then
 
@@ -54,6 +53,12 @@ fi
 if [ $INSTALL_rtma3d_process_lightning = yes ] ; then
 
 cp -p ${BASE}/rtma3d_process_lightning.fd/rtma3d_process_lightning ../exec/rtma3d_process_lightning
+
+fi
+
+if [ $INSTALL_rtma3d_sndp = yes ] ; then
+
+cp -p ${BASE}/rtma3d_sndp.fd/rtma3d_sndp ../exec/rtma3d_sndp
 
 fi
 
@@ -93,13 +98,6 @@ cp -p ${BASE}/rtma3d_read_diag.fd/rtma3d_read_diag.exe ../exec/rtma3d_read_diag
 
 fi
 
-if [ $INSTALL_rtma3d_process_cloud = yes ] ; then
-
-cp -p ${BASE}/rtma3d_process_cloud.fd/rtma3d_process_cloud ../exec/rtma3d_process_cloud
-
-fi
-
-
 if [ $INSTALL_rtma3d_minmax = yes ] ; then
 
 cp -p ${BASE}/rtma3d_maxtbg.fd/rtma3d_maxtbg ../exec/rtma3d_maxtbg
@@ -111,10 +109,3 @@ cp -p ${BASE}/rtma3d_maxrh.fd/rtma3d_maxrh ../exec/rtma3d_maxrh
 cp -p ${BASE}/rtma3d_minrh.fd/rtma3d_minrh ../exec/rtma3d_minrh
 
 fi
-
-if [ $INSTALL_rtma3d_process_cloud = yes ] ; then
-
-cp -p ${BASE}/rtma3d_process_cloud.fd/rtma3d_process_cloud ../exec/rtma3d_process_cloud
-
-fi
-

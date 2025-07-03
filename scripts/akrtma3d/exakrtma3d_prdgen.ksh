@@ -160,7 +160,7 @@ fi
 
 # interpolate the howv field to the 3 km NDFD grid
 
-wgrib2 ${COMIN}/${NET}.t${cyc}z.anl.howv.grib2 -set_bitmap 1 -set_grib_type c3 -new_grid_winds grid \
+wgrib2 ${COMIN}/${RUN}.t${cyc}z.anl.howv.grib2 -set_bitmap 1 -set_grib_type c3 -new_grid_winds grid \
  -new_grid_interpolation bilinear \
  -new_grid ${grid_specs} ${RUN}.t${cyc}z.anl.howv_ndfd.grib2
 
@@ -192,7 +192,7 @@ export fhr=00
 ${USHrtma3d}/${RUN}/${RUN}_prdgen_smartinit.sh $cyc $PDY $DATAsmartinit ${COMOUT} ${COMIN} ${USHrtma3d} $RUN $EXECrtma3d $FIXrtma3d $PARMrtma3d ${NET} >> stdout 2>&1
 date
 
-smart_fields=':(TMP|DPT|SPFH):2 m above ground:anl:|:(UGRD|VGRD|WIND|WDIR|GUST):10 m above ground:anl:|:(GUST|PRES|HGT|VIS|HTSGW):surface:|:TCDC:entire atmosphere|HGT:cloud ceiling:'
+smart_fields=':(TMP|DPT|SPFH):2 m above ground:anl:|:(UGRD|VGRD|WIND|WDIR|GUST):10 m above ground:anl:|:(GUST|PRES|HGT|HTSGW):surface:|:TCDC:entire atmosphere|HGT:cloud ceiling:|VIS'
 wgrib2 ${RUN}.t${cyc}z.anl_${leveltype}_ndfd.grib2 -not_if "$smart_fields" -grib ${RUN}.t${cyc}z.anl_${leveltype}_ndfd.grib2_no_smart
 cat ${RUN}.t${cyc}z.anl_${leveltype}_ndfd.grib2_no_smart $COMIN/${RUN}.t${cyc}z.smart.alaska.grib2 > ${RUN}.t${cyc}z.anl_${leveltype}_ndfd.grib2
 

@@ -128,7 +128,7 @@ postmsg "$jlogfile" "$msg"
      scaling_set=" -set_scaling 0 -4"
 
      grib2_tmplt_path=${COMOUT}
-     grib2_tmplt_file=${grib2_tmplt_path}/${NET}.t${HH}z.fgs.${varname}.grib2
+     grib2_tmplt_file=${grib2_tmplt_path}/${RUN}.t${HH}z.fgs.${varname}.grib2
 
      grib2_fname="anl_${varname}.grib2"
 
@@ -182,7 +182,7 @@ postmsg "$jlogfile" "$msg"
      scaling_set=" -set_scaling 0 -4"
 
      grib2_tmplt_path=${COMOUT}
-     grib2_tmplt_file=${grib2_tmplt_path}/${NET}.t${HH}z.fgs.${varname}.grib2
+     grib2_tmplt_file=${grib2_tmplt_path}/${RUN}.t${HH}z.fgs.${varname}.grib2
 
      grib2_fname="anl_${varname}.grib2"
 
@@ -236,7 +236,7 @@ postmsg "$jlogfile" "$msg"
      scaling_set=" -set_scaling 0 -4"
 
      grib2_tmplt_path=${COMOUT}
-     grib2_tmplt_file=${grib2_tmplt_path}/${NET}.t${HH}z.fgs.${varname}.grib2
+     grib2_tmplt_file=${grib2_tmplt_path}/${RUN}.t${HH}z.fgs.${varname}.grib2
 
      grib2_fname="anl_${varname}.grib2"
 
