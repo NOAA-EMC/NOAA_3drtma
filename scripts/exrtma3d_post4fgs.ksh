@@ -223,17 +223,25 @@ if [ ! -s "${workdir}/wrfsubhnat_fgs.grib2" ]; then
 fi
 
 # transfer the output grib2 files to $COMOUTpost_rtma3d
-# add gust and howv (wave height) to the prslev and natlev files
+# add gust, visibility, and howv (wave height) to the prslev and natlev files
 # change name from surface gust to 10-m gust
 
 # Note: NET should be RUN - AMG
-${WGRIB2} -V ${COMOUT}/${NET}.t${cyc}z.fgs.gust.grib2 -set_lev "10 m above ground" -grib tmpgust.grib2
+# Change derived visibility (VIS:surface) to 2m visibility (VIS:2 m above ground)
+wgrib2 ${workdir}/wrfsubhprs_fgs.grib2 -match "VIS" -if "VIS:surface" -set_lev "2 m above ground" -grib ${workdir}/vis2mprs.grib2 -fi
+wgrib2 ${workdir}/wrfsubhnat_fgs.grib2 -match "VIS" -if "VIS:surface" -set_lev "2 m above ground" -grib ${workdir}/vis2mnat.grib2 -fi
+# Change analyzed gust from GUST:surface to GUST:10 m above ground
+${WGRIB2} -V ${COMOUT}/${RUN}.t${cyc}z.fgs.gust.grib2 -set_lev "10 m above ground" -grib tmpgust.grib2
+# Remove surface visibility from grib2 files
+wgrib2 ${workdir}/wrfsubhprs_fgs.grib2 -not_if "VIS:surface" -grib ${workdir}/wrfsubhprs_fgs.grib2_no_sfcvis
+wgrib2 ${workdir}/wrfsubhnat_fgs.grib2 -not_if "VIS:surface" -grib ${workdir}/wrfsubhnat_fgs.grib2_no_sfcvis
+# Overwrite wrfsubhprs and wrfsubhnat with renamed derived vis, analyzed vis, analyzed gust and analyzed wave height
 if [ "${RUN}" == "rtma3d" ]; then
-  cat tmpgust.grib2 ${COMOUT}/${NET}.t${cyc}z.fgs.howv.grib2 >> ${workdir}/wrfsubhprs_fgs.grib2
-  cat tmpgust.grib2 ${COMOUT}/${NET}.t${cyc}z.fgs.howv.grib2 >> ${workdir}/wrfsubhnat_fgs.grib2
+  cat ${workdir}/wrfsubhprs_fgs.grib2_no_sfcvis ${workdir}/vis2mprs.grib2 tmpgust.grib2 ${COMOUT}/${RUN}.t${cyc}z.fgs.vis.grib2 ${COMOUT}/${RUN}.t${cyc}z.fgs.howv.grib2 > ${workdir}/wrfsubhprs_fgs.grib2
+  cat ${workdir}/wrfsubhnat_fgs.grib2_no_sfcvis ${workdir}/vis2mnat.grib2 tmpgust.grib2 ${COMOUT}/${RUN}.t${cyc}z.fgs.vis.grib2 ${COMOUT}/${RUN}.t${cyc}z.fgs.howv.grib2 > ${workdir}/wrfsubhnat_fgs.grib2
 else
-  cat tmpgust.grib2  >> ${workdir}/wrfsubhprs_fgs.grib2
-  cat tmpgust.grib2  >> ${workdir}/wrfsubhnat_fgs.grib2
+  cat ${workdir}/wrfsubhprs_fgs.grib2_no_sfcvis ${workdir}/vis2mprs.grib2 tmpgust.grib2 ${COMOUT}/${RUN}.t${cyc}z.fgs.vis.grib2 > ${workdir}/wrfsubhprs_fgs.grib2
+  cat ${workdir}/wrfsubhnat_fgs.grib2_no_sfcvis ${workdir}/vis2mnat.grib2 tmpgust.grib2 ${COMOUT}/${RUN}.t${cyc}z.fgs.vis.grib2 > ${workdir}/wrfsubhnat_fgs.grib2
 fi
 
 ${WGRIB2} ${workdir}/wrfsubhprs_fgs.grib2 -set center 7 -grib ${COMOUTpost_rtma3d}/${PROD_HEAD2}.wrfsubhprs_fgs.grib2
@@ -249,12 +257,12 @@ cp ${RUN}.t${cyc}z.fgs_natlev.grib2.idx $COMOUT/
 
 # parallel processing
 
-  wgrib2 ${COMIN}/${RUN}.t${cyc}z.fgs_prslev.grib2 -not_if ":GUST:surface:" -grib ${RUN}.t${cyc}z.fgs_prslev.grib2_no_sfcgust
+  wgrib2 ${COMIN}/${RUN}.t${cyc}z.fgs_prslev.grib2 -not_if ":GUST:surface:|:VIS:2 m above ground" -grib ${RUN}.t${cyc}z.fgs_prslev.grib2_no_sfcgustvis
 # Note: NET should be RUN - AMG 
   if [ "${RUN}" == "akrtma3d" ]; then
-    cat ${COMOUT}/${NET}.t${cyc}z.fgs.howv.grib2 >> ${RUN}.t${cyc}z.fgs_prslev.grib2_no_sfcgust 
+    cat ${COMOUT}/${RUN}.t${cyc}z.fgs.howv.grib2 >> ${RUN}.t${cyc}z.fgs_prslev.grib2_no_sfcgustvis 
   fi
-  infile_prslev=${workdir}/${RUN}.t${cyc}z.fgs_prslev.grib2_no_sfcgust
+  infile_prslev=${workdir}/${RUN}.t${cyc}z.fgs_prslev.grib2_no_sfcgustvis
 # infile_prslev=${DATA}/${RUN}.t${cyc}z.fgs_prslev.grib2
 ##infile_prslev=${COMIN}/${RUN}.t${cyc}z.fgs_prslev.grib2
   wgrib2 ${infile_prslev} > prslev.txt

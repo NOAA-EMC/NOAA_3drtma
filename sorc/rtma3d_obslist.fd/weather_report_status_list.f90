@@ -200,7 +200,7 @@ subroutine weather_report_status_list()
        data cfldname(2) /'2mT'/       ; data vars(2) /':TMP:2 m above ground:'/   ; data varsshort(2) /'TMP'/
        data cfldname(3) /'2mTD'/      ; data vars(3) /':DPT:2 m above ground:'/   ; data varsshort(3) /'DPT'/
        data cfldname(4) /'10mW'/      ; data vars(4) /':WIND:10 m above ground:'/ ; data varsshort(4) /'WIND'/
-       data cfldname(5) /'10mGUST'/   ; data vars(5) /':GUST:surface:'/           ; data varsshort(5) /'GUST'/ !I suppose this is in reality 10 m gust / MPondeca 
+       data cfldname(5) /'10mGUST'/   ; data vars(5) /':GUST:10 m above ground:'/ ; data varsshort(5) /'GUST'/ !I suppose this is in reality 10 m gust / MPondeca 
        data cfldname(6) /'VIS'/       ; data vars(6) /':VIS:surface:'/            ; data varsshort(6) /'VIS'/
        data cfldname(7) /'CLDCH'/     ; data vars(7) /':HGT:cloud ceiling:'/     ; data varsshort(7) /'CEIL'/
                                              var_u=':UGRD:10 m above ground:'  
