@@ -46,6 +46,16 @@ workflow/*.log
 *.x
 *.exe
 sorc/**/*.mod
+sorc/rtma3d_obslist.fd/rtma3d_obslist
+sorc/rtma3d_process_cloud.fd/rtma3d_process_cloud
+sorc/rtma3d_process_lightning.fd/rtma3d_process_lightning
+sorc/rtma3d_process_mosaic.fd/rtma3d_process_mosaic
+sorc/rtma3d_process_mosaic.fd/rtma3d_process_mosaic_enkf
+sorc/rtma3d_smartinit.fd/rtma3d_smartinit
+sorc/rtma3d_sndp.fd/rtma3d_sndp
+sorc/rtma3d_stnmlist.fd/rtma3d_stnmlist
+sorc/rtma3d_wrfbufr_alaska.fd/rtma3d_wrfbufr_alaska
+sorc/rtma3d_wrfbufr_conus.fd/rtma3d_wrfbufr_conus
 #
 #  # ignore directory of gsi and post(upp) source code ('sorc/rtma_gsi.fd, sorc/rtma_post.fd')
 #

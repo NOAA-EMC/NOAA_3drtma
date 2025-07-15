@@ -37,8 +37,15 @@ case "${GSI_SOURCE}" in
         git clone https://github.com/NOAA-EMC/GSI.git  ./rtma3d_gsi.fd
         cd ${BASE}/rtma3d_gsi.fd
         echo "git checkout develop"
-        git checkout develop       # <--- checking out the latest commit of develop branch
-#       git checkout 0ef8d87       # <--- specifying the commit
+#       git checkout develop       # <--- checking out the latest commit of develop branch
+        git checkout 964bcc3       # <--- specifying the commit
+                                   # commit 964bcc3 is the old commit which still works with netcdf 4.7.r42
+                                   # and does not need to load hdf5 lib when building and running GSI.
+                                   # After this commit (from commit 2ddc1ac), GSI, by default,
+                                   # uses bufr v12, netcdf 4.9.2 (require loading hdf5 lib), IP lib 5.x.
+                                   # So need to update the module files when building and running 3DRTMA package.
+                                   # After further testing with new GSI, the new modules would be updated
+                                   # in 3DRTMA pacakge.
         ;;
     auto?([-_])qc|Auto?([-_])QC )
         echo "git clone https://github.com/MatthewMorris-NOAA/GSI.git ./rtma3d_gsi.fd  # GSI_SOURCE=${GSI_SOURCE}"

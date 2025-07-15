@@ -111,7 +111,7 @@ else
 fi
 
 if [ -r "${OBS_DIR}/${NET}.t${cyc}z.nexrad.tm00.bufr_d" ]; then
-  ${LN} -sf ${OBS_DIR}/${NET}.t${cyc}z.nexrad.tm00.bufr_d ./nexradbufr
+  ${LN} -sf ${OBS_DIR}/${NET}.t${cyc}z.nexrad.tm00.bufr_d ./l2rwbufr
 else
   ${ECHO} "Warning: ${OBS_DIR}: nexrad does not exist!"
 fi

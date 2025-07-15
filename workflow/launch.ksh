@@ -192,6 +192,7 @@ export BC=/usr/bin/bc
 export WHICH=/usr/bin/which
 export GREP=/usr/bin/grep
 export UNZIP=/bin/unzip
+export TOUCH=/usr/bin/touch
 
 else
   echo "modulefile has not set up for this unknow machine. Job abort!"
