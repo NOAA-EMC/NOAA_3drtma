@@ -75,19 +75,17 @@ exit 0
 fi
 
 mem_varlist="T,P_TOP,MU,MUB,U,V,QVAPOR,ZNW,Times,TH2,Q2,U10,V10"
-c=1
+c=0
 while IFS= read -r line
 do
-  while [[ $c -le 36 ]]; do
-    if [ $c -lt 10 ]; then
-       cc="0"$c
-    else
-       cc=$c
-    fi
-  ncks -A -v ${mem_varlist} $line $DATA/hrrrdas_small_d02_${PDYHH_cycm1}00f01_mem00${cc}_thinned 
-  cp $DATA/hrrrdas_small_d02_${PDYHH_cycm1}00f01_mem00${cc}_thinned ${COMOUThrrrdas_rtma3d}
-  c=$(($c + 01 ))
-  done
+  let "c=c+1"
+  cc=`printf "%02d" $c`
+  fname_thinned="hrrrdas_small_d02_${PDYHH_cycm1}00f01_mem00${cc}_thinned"
+  echo "for member $cc original ensemble file: $line "
+  rm -f $DATA/${fname_thinned}
+# ncks -A -v ${mem_varlist} $line $DATA/${fname_thinned}        # -A: append, but miss Global Attributes. Datasets are the same.
+  ncks    -v ${mem_varlist} $line $DATA/${fname_thinned}
+  cp -p $DATA/${fname_thinned}    ${COMOUThrrrdas_rtma3d}
 done < "$filename"
 
 exit 0

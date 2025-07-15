@@ -106,7 +106,8 @@ else
 fi
 
 if [ -r "${OBS_DIR}/${NET}.t${cyc}z.nexrad.tm00.bufr_d" ]; then
-  ${LN} -sf ${OBS_DIR}/${NET}.t${cyc}z.nexrad.tm00.bufr_d ./nexradbufr
+# ${LN} -sf ${OBS_DIR}/${NET}.t${cyc}z.nexrad.tm00.bufr_d ./nexradbufr         #<--- wrong fname
+  ${LN} -sf ${OBS_DIR}/${NET}.t${cyc}z.nexrad.tm00.bufr_d ./l2rwbufr           #<--- correct fname
 else
   ${ECHO} "Warning: ${OBS_DIR}: nexrad does not exist!"
 fi
@@ -192,6 +193,21 @@ if [ ${HRRRDAS_BEC} -eq 1 ]; then
    ${LN} -sf ${hrrre_file} wrf_en0${cc}
    ((c = c + 1))
   done
+elif [ ${HRRRDAS_BEC} -eq 2 ]; then
+  ${ECHO} "\$HRRRDAS_BEC=${HRRRDAS_BEC}, so the thinned-HRRRDAS will be used if available"
+  #----------------------------------------------------
+  # generate list of HRRRDAS members for ensemble covariances
+  # Use 1-hr forecasts from the HRRRDAS cycling
+  rm -f ./filelist.hrrrdas
+  c=1
+  while [[ $c -le 36 ]]; do
+   cc=$(printf "%02d" $c)
+#  hrrre_file=${COMINhrrrdas}/hrrrdas_small_d02_${time_1hour_ago}00f01_mem00${cc}
+   hrrre_file=${COMOUT}/hrrrdas.t${cyc}z/hrrrdas_small_d02_${time_1hour_ago}00f01_mem00${cc}_thinned
+   ${LS} ${hrrre_file} >> filelist.hrrrdas
+   ${LN} -sf ${hrrre_file} wrf_en0${cc}
+   ((c = c + 1))
+  done
 else
   ${ECHO} "\$HRRRDAS_BEC=${HRRRDAS_BEC}, so HRRRDAS will NOT be used"
   ${TOUCH} filelist.hrrrdas #so as to avoid "no such file" error message
@@ -205,7 +221,7 @@ nummem=`more filelist03 | wc -l`
 nummem=$((nummem - 3 ))
 hrrrmem=`more filelist.hrrrdas | wc -l`
 hrrrmem=$((hrrrmem - 3 ))
-if [[ ${hrrrmem} -gt 30 ]] && [[ ${HRRRDAS_BEC} -eq 1  ]]; then #if HRRRDAS BEC is available, use it as first choice
+if [[ ${hrrrmem} -gt 30 ]] && [[ ${HRRRDAS_BEC} -ge 1  ]]; then #if HRRRDAS BEC is available, use it as first choice
   echo "Do hybrid with HRRRDAS BEC"
   EnsWgt=0.9
   nummem=${hrrrmem}
