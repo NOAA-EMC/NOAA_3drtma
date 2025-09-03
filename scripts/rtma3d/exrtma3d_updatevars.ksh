@@ -94,7 +94,15 @@ cd ${DATAHOME}
 ${ECHO} "enter working directory:${DATAHOME}"
 
 export WRF_NAMELIST=${DATAHOME}/namelist.input
-${CP} ${PARMwrf}/hrrr_conus.nl ${WRF_NAMELIST} 
+
+export L_WRFARW_NOFCST=${L_WRFARW_NOFCST:-"Yes"}         # using the modified model than does not do the integral (do not use quilt in namelist)
+if [[ ${L_WRFARW_NOFCST} =~ [TtYy] ]] ; then
+  echo "DO NOT USE QUILT in model run (with modifiied WRF model no actual foreast)"
+  ${CP} ${PARMwrf}/hrrr_conus.noQuilt.nl ${WRF_NAMELIST} 
+else
+  echo "USE QUILT in model run (with original WRF model doing forecast)"
+  ${CP} ${PARMwrf}/hrrr_conus.Quilt.nl   ${WRF_NAMELIST} 
+fi
 
 # Check to make sure the wrfinput_d01 file exists
 #if [ -r ${COMOUTgsi_rtma3d}/${ANLrtma3d_FNAME} ]; then
@@ -187,7 +195,15 @@ fi
 
 
 # Run WRF to update reflectivity fields
-export pgm="${NET}_wrfarw_fcst"
+# export pgm="${NET}_wrfarw_fcst"
+if [[ ${L_WRFARW_NOFCST} =~ [TtYy] ]] ; then
+  echo "run with modified WRF model that does not actually foreast)"
+  export pgm="${NET}_wrfarw_fcst_nofcst"              # using the modified WRF which does not integral
+else
+  echo "run with original WRF model that does foreast)"
+  export pgm="${NET}_wrfarw_fcst_orig"                # using the original WRF which does integral
+fi
+
 . prep_step
 startmsg
 msg="***********************************************************"

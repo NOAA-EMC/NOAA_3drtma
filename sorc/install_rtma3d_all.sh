@@ -28,7 +28,9 @@ fi
 
 if [ $INSTALL_rtma3d_wrfarw = yes ] ; then
 
-cp -p ${BASE}/rtma3d_wrfarw.fd/WRFV3.9/main/wrf.exe ../exec/rtma3d_wrfarw_fcst
+# cp -p ${BASE}/rtma3d_wrfarw.fd/WRFV3.9/main/wrf.exe ../exec/rtma3d_wrfarw_fcst
+cp -p ${BASE}/rtma3d_wrfarw.fd/WRFV3.9/main/wrf_nofcst.exe ../exec/rtma3d_wrfarw_fcst_nofcst
+cp -p ${BASE}/rtma3d_wrfarw.fd/WRFV3.9/main/wrf_orig.exe   ../exec/rtma3d_wrfarw_fcst_orig
 
 fi
 
