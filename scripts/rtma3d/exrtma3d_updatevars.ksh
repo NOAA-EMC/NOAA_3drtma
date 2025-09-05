@@ -89,18 +89,23 @@ time_str=`${DATE} "+%Y-%m-%d_%H_%M_%S" -d "${START_TIME}"`
 time_str2=`${DATE} "+%Y-%m-%d_%H_00_00" -d "${START_TIME}"`
 END_TIME=`${DATE} -d "${START_TIME}  ${FCST_LENGTH} seconds"`
 
+# Choose to use the modified model that does not do the integral (default: to avoid model crash)
+#     or to use the original model (export L_WRFARW_NOFCST = "False", or "No")
+export L_WRFARW_NOFCST=${L_WRFARW_NOFCST:-"True"}   # default: using the modified model to 
+                                                    #   avoid possible model crash, and must
+                                                    #   turn off IO-quilting in namelist.
+
 #----- enter working directory -------
 cd ${DATAHOME}
 ${ECHO} "enter working directory:${DATAHOME}"
 
 export WRF_NAMELIST=${DATAHOME}/namelist.input
-
-export L_WRFARW_NOFCST=${L_WRFARW_NOFCST:-"Yes"}         # using the modified model than does not do the integral (do not use quilt in namelist)
+# ${CP} ${PARMwrf}/hrrr_conus.nl ${WRF_NAMELIST}
 if [[ ${L_WRFARW_NOFCST} =~ [TtYy] ]] ; then
-  echo "DO NOT USE QUILT in model run (with modifiied WRF model no actual foreast)"
+  echo "DO NOT USE IO-QUILTING in model run (with modified WRF model that does no actual foreast)"
   ${CP} ${PARMwrf}/hrrr_conus.noQuilt.nl ${WRF_NAMELIST} 
 else
-  echo "USE QUILT in model run (with original WRF model doing forecast)"
+  echo "USE IO-QUILTING in model run (with original WRF model doing forecast)"
   ${CP} ${PARMwrf}/hrrr_conus.Quilt.nl   ${WRF_NAMELIST} 
 fi
 
@@ -197,10 +202,10 @@ fi
 # Run WRF to update reflectivity fields
 # export pgm="${NET}_wrfarw_fcst"
 if [[ ${L_WRFARW_NOFCST} =~ [TtYy] ]] ; then
-  echo "run with modified WRF model that does not actually foreast)"
+  echo "run with modified WRF model that does not actually foreast"
   export pgm="${NET}_wrfarw_fcst_nofcst"              # using the modified WRF which does not integral
 else
-  echo "run with original WRF model that does foreast)"
+  echo "run with original WRF model that does foreast"
   export pgm="${NET}_wrfarw_fcst_orig"                # using the original WRF which does integral
 fi
 
