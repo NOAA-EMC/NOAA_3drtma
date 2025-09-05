@@ -26,7 +26,7 @@ cd ${BASE}/rtma3d_wrfarw.fd/WRFV3.9
 #==== Remember to compile only one WRF exe when delivering the released version to NCO ====#
 # 1. compiling with original dyn_em/solve_em.orig.F (as a backup)
 cp -p configure.wrf.useme configure.wrf
-cp -p dyn_em/ dyn_em/solve_em.orig.F dyn_em/solve_em.F
+cp -p dyn_em/solve_em.orig.F dyn_em/solve_em.F
 
 export PNETCDF_QUILT=1
 export WRFIO_NCD_LARGE_FILE_SUPPORT=1

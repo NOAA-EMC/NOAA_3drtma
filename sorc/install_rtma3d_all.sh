@@ -30,8 +30,8 @@ if [ $INSTALL_rtma3d_wrfarw = yes ] ; then
 
 #==== Remember to keep only one wrf exe file when delivering the released 3DRTMA to NCO ====#
 # cp -p ${BASE}/rtma3d_wrfarw.fd/WRFV3.9/main/wrf.exe ../exec/rtma3d_wrfarw_fcst
-cp -p ${BASE}/rtma3d_wrfarw.fd/WRFV3.9/main/wrf_nofcst.exe ../exec/rtma3d_wrfarw_fcst_nofcst
-cp -p ${BASE}/rtma3d_wrfarw.fd/WRFV3.9/main/wrf_orig.exe   ../exec/rtma3d_wrfarw_fcst_orig
+cp -p ${BASE}/rtma3d_wrfarw.fd/WRFV3.9/main/wrf_nofcst.exe ../exec/rtma3d_wrfarw_nofcst
+cp -p ${BASE}/rtma3d_wrfarw.fd/WRFV3.9/main/wrf_orig.exe   ../exec/rtma3d_wrfarw_fcst
 
 fi
 

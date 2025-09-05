@@ -194,10 +194,10 @@ fi
 # export pgm="${NET}_wrfarw_fcst"
 if [[ ${L_WRFARW_NOFCST} =~ [TtYy] ]] ; then
   echo "run with modified WRF model that does not actually foreast"
-  export pgm="${NET}_wrfarw_fcst_nofcst"              # using the modified WRF which does not integral
+  export pgm="${NET}_wrfarw_nofcst"              # using the modified WRF which does not integral
 else
   echo "run with original WRF model that does foreast"
-  export pgm="${NET}_wrfarw_fcst_orig"                # using the original WRF which does integral
+  export pgm="${NET}_wrfarw_fcst"                # using the original WRF which does integral
 fi
 
 . prep_step
