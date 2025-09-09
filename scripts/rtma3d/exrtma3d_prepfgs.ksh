@@ -100,11 +100,13 @@ CDATE=$PDY$cyc
      hrrrCC=`echo $hrrrCYCLE |cut -c9-10`
 
 #    probe_hrrr_guess_nc=$GESINhrrr/conus/hrrr_${hrrrCYCLE}f0${hrrrFHH}
-     probe_hrrr_guess_nc=$GESINhrrr/hrrr_${hrrrCYCLE}f0${hrrrFHH}
-     if [ -s $probe_hrrr_guess_nc ]; then
+#    probe_hrrr_guess_nc=$GESINhrrr/hrrr_${hrrrCYCLE}f0${hrrrFHH}
+     export probe_hrrr_guess_nc=hrrr_${hrrrCYCLE}f0${hrrrFHH}
+     if [ -s $GESINhrrr/$probe_hrrr_guess_nc ]; then
          found_hrrrges=yes
 #        cpreq ${probe_hrrr_guess_nc} $COMOUT/${RUN}.t${cyc}z.hrrr_${hrrrCYCLE}f0${hrrrFHH}
-         cpreq ${probe_hrrr_guess_nc} ${DATA}/${FGSrtma3d_FNAME}
+         cpreq $GESINhrrr/${probe_hrrr_guess_nc} ${DATA}/
+         cpreq $GESINhrrr/${probe_hrrr_guess_nc} ${DATA}/${FGSrtma3d_FNAME}
         break
      else
         let "ic=ic+1"
@@ -636,6 +638,7 @@ fi     # RUN_HOWV=True/true/Yes/yes, then retrieving fgs of howv
     if [ -r ${DATA}/${FGSrtma3d_FNAME} ] ; then
 #      ${LN} -sf ${GESINhrrr_rtma3d}/${FGSrtma3d_FNAME}     ${DATA}/${FGSrtma3d_FNAME}
        ${ECHO} "PREPFGS: Saving the Firstguess of Cycle ${YYYYMMDDHH} --> ${GESINhrrr_rtma3d}/${FGSrtma3d_FNAME} "
+       cp -p ${DATA}/${probe_hrrr_guess_nc} ${GESINhrrr_rtma3d}/
        cp -p ${DATA}/${FGSrtma3d_FNAME}     ${GESINhrrr_rtma3d}/${FGSrtma3d_FNAME}    
 
 #      to save the disck space, removing the firstguess file under working directry (fgsprd), 
