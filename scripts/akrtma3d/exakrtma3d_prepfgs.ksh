@@ -96,10 +96,12 @@ CDATE=$PDY$cyc
      if [[ $hrrrCC == "00" || $hrrrCC == "03" || $hrrrCC == "06" \
         || $hrrrCC == "09" || $hrrrCC == "12" || $hrrrCC == "15" || $hrrrCC == "18" || $hrrrCC == "21" ]] ; then
 #       probe_hrrr_guess_nc=$GESINhrrr/alaska/hrrrak_${hrrrCYCLE}f0${hrrrFHH}
-        probe_hrrr_guess_nc=$GESINhrrr/hrrrak_${hrrrCYCLE}f0${hrrrFHH}
-        if [ -s $probe_hrrr_guess_nc ]; then
+#       probe_hrrr_guess_nc=$GESINhrrr/hrrrak_${hrrrCYCLE}f0${hrrrFHH}
+        export probe_hrrr_guess_nc=hrrrak_${hrrrCYCLE}f0${hrrrFHH}
+        if [ -s $GESINhrrr/$probe_hrrr_guess_nc ]; then
 #           cpreq $probe_hrrr_guess_nc $COMOUT/${RUN}.t${cyc}z.hrrrak_${hrrrCYCLE}f0${hrrrFHH}
-            cpreq $probe_hrrr_guess_nc ${DATA}/${FGSrtma3d_FNAME}
+            cpreq $GESINhrrr/$probe_hrrr_guess_nc ${DATA}/
+            cpreq $GESINhrrr/$probe_hrrr_guess_nc ${DATA}/${FGSrtma3d_FNAME}
             ind=$ic
             PDYHH_AK=$hrrrCYCLE
             found_hrrrges=yes
@@ -642,6 +644,7 @@ fi     # RUN_HOWV=True/true/Yes/yes, then retrieving fgs of howv
     if [ -r ${DATA}/${FGSrtma3d_FNAME} ] ; then
 #      ${LN} -sf ${GESINhrrr_rtma3d}/${FGSrtma3d_FNAME}     ${DATA}/${FGSrtma3d_FNAME}
        ${ECHO} "PREPFGS: Saving the Firstguess of Cycle ${YYYYMMDDHH} --> ${GESINhrrr_rtma3d}/${FGSrtma3d_FNAME} "
+       cp -p ${DATA}/${probe_hrrr_guess_nc} ${GESINhrrr_rtma3d}/
        cp -p ${DATA}/${FGSrtma3d_FNAME}     ${GESINhrrr_rtma3d}/${FGSrtma3d_FNAME}    
 
 #      to save the disck space, removing the firstguess file under working directry (fgsprd), 

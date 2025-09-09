@@ -105,7 +105,9 @@ ls -1r */*/* | awk '
             /wrf_inout/ { print "./"$0 > "perm" ; next }
 
            /stn_analysis/ { print "./"$0 > "perm" ; next }
-	    
+
+            /hrrrak_/ { print "./"$0 > "perm" ; next }
+
             /firstguess.nc/ { print "./"$0 > "perm" ; next } 
  
            /.stat/ { print "./"$0 > "perm" ; next }
