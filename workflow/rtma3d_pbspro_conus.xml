@@ -288,6 +288,7 @@
 <!ENTITY i_gsdsfc_uselist            "2">
 <!ENTITY VERBOSE_GSI                 ".false.">
 <!ENTITY READIN_LOCALIZATION         "TRUE">
+<!ENTITY L_WRFARW_NOFCST             "TRUE">
 
 <!-- COM and DATA retention time (hours) -->
 <!ENTITY CLEAN_OLDCOM_HRS            "120">
@@ -965,6 +966,10 @@
     <envar>
       <name>NCKS</name>
       <value>&NCKS;</value>
+    </envar>
+    <envar>
+      <name>L_WRFARW_NOFCST</name>
+      <value>&L_WRFARW_NOFCST;</value>
     </envar>
     <envar>
       <name>FCST_LENGTH</name>
