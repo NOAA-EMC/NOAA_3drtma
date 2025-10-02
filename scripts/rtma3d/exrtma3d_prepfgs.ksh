@@ -92,7 +92,12 @@ CDATE=$PDY$cyc
 
    found_hrrrges=no
    ic=1
-   while [ $ic -le 9 ] ; do
+   ic_max=9                                 # max hours to search back for hrrr forecast file
+   targetsize_hrrr=16057259932              # HRRRv4 on WCOSS2 (forecast/restart history file)
+   ics_max=15                               # max times to check the filesize of hrrr forecast
+   sleep_time=60
+#  loop of searching for firstguess in HRRR forecast file
+   while [ $ic -le ${ic_max} ] ; do
      hrrrFHH=$ic
      hrrrFHH=`printf %02d $hrrrFHH`
      hrrrCYCLE=`$NDATE -$hrrrFHH $CDATE`
@@ -102,19 +107,49 @@ CDATE=$PDY$cyc
 #    probe_hrrr_guess_nc=$GESINhrrr/conus/hrrr_${hrrrCYCLE}f0${hrrrFHH}
 #    probe_hrrr_guess_nc=$GESINhrrr/hrrr_${hrrrCYCLE}f0${hrrrFHH}
      export probe_hrrr_guess_nc=hrrr_${hrrrCYCLE}f0${hrrrFHH}
+     size_match=no
+     found_hrrrges=no
      if [ -s $GESINhrrr/$probe_hrrr_guess_nc ]; then
          found_hrrrges=yes
-#        cpreq ${probe_hrrr_guess_nc} $COMOUT/${RUN}.t${cyc}z.hrrr_${hrrrCYCLE}f0${hrrrFHH}
-         cpreq $GESINhrrr/${probe_hrrr_guess_nc} ${DATA}/
-         cpreq $GESINhrrr/${probe_hrrr_guess_nc} ${DATA}/${FGSrtma3d_FNAME}
-        break
-     else
-        let "ic=ic+1"
-      fi
-   done
-   echo "found_hrrrges: "$found_hrrrges
 
-   if [[ ${found_hrrrges} = no ]] ; then
+         ics=1
+#        loop of checking the filesize of hrrr forecast
+         while [ $ics -le ${ics_max} ] ; do
+             filesize=$(stat -c %s $GESINhrrr/$probe_hrrr_guess_nc)
+             if [[ ${filesize} -eq ${targetsize_hrrr} ]] ; then
+                 size_match="yes"
+#                cpreq ${probe_hrrr_guess_nc} $COMOUT/${RUN}.t${cyc}z.hrrr_${hrrrCYCLE}f0${hrrrFHH}
+#                cpreq $GESINhrrr/${probe_hrrr_guess_nc} ${DATA}/${FGSrtma3d_FNAME}
+                 break  # breaking out the loop of checking file size
+             else
+                 size_match="no"
+                 msg="${probe_hrrr_guess_nc} filesize (${filesize}) does not match the standard size (${targetsize_hrrr}). Sleep for 60 seconds and check again ..."
+                 ${ECHO} "${msg}"
+                 sleep ${sleep_time}
+             fi
+             let "ics=ics+1"
+         done
+
+         if [[ ${size_match} =~ [yYtT] ]] ; then
+             cpreq $GESINhrrr/${probe_hrrr_guess_nc} ${DATA}/${FGSrtma3d_FNAME}
+             break      # breaking out the loop of searching for firstguess in HRRR forecast
+         else
+             msg="hrrr ${ic}-hour forecast file ${probe_hrrr_guess_nc} exists, but its filesize (${filesize}) does not match the standard size (${targetsize_hrrr}) even after waiting for ${ics_max} minutes. Trying to search in the earlier hrrr forecast files ..."
+             ${ECHO} "${msg}"
+             cpreq $GESINhrrr/${probe_hrrr_guess_nc} ${DATA}/${probe_hrrr_guess_nc}."wrongfsize"  # save this problematic file for investigation later 
+#            cpreq $GESINhrrr/${probe_hrrr_guess_nc} ${DATA}/${FGSrtma3d_FNAME}                   # do not copy the problematic file as fgs for analysis
+         fi
+     else
+         msg="HRRR ${ic}-hour forecat file ${probe_hrrr_guess_nc} is not available. Try with earlier HRRR foreast file ... "
+         ${ECHO} "${msg}"
+     fi
+
+     let "ic=ic+1"
+
+   done
+   echo "found_hrrrges: "$found_hrrrges  "  size_match: ${size_match}"
+
+   if [[ ${found_hrrrges} =~ [NnFf] ]] ; then
        err_exit "No HRRR guess available. The missing files in the above while-do loop are of the form GESINhrrr/conus/hrrr_${hrrrCYCLE}f0${hrrrFHH}. The script must be able to find at least one file out of the 9 files that it queries"
    fi
 
