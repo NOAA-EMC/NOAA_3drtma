@@ -163,6 +163,12 @@ if [ "${envir}" != "esrl" ]; then #WCOSS
         ${RM} -rf ${DATAHOME_BK}
     fi
     ${LN} -s  ${GESINhrrr_rtma3d}  ${DATAHOME_BK}
+
+#   DATA_SHARED: the sub-directory to share the data
+    export DATA_SHARED=${DATA_SHARED:-"${DATA_RUNDIR}/sharedprd"}
+    if [ ! -d "${DATA_SHARED}" ] ; then
+        mkdir -p ${DATA_SHARED}
+    fi
 fi
 
 #   Set the path to the GSI static files

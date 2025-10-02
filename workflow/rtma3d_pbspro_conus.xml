@@ -111,6 +111,8 @@
 <!ENTITY DATA_RHIST     "&DATA_RUNDIR;/rhist">
 <!ENTITY DATA_HRRRDAS   "&DATA_RUNDIR;/hrrrdas">
 <!ENTITY DATA_NCDIAG    "&DATA_RUNDIR;/ncdiagprd">
+<!ENTITY DATA_SHARED    "&DATA_RUNDIR;/sharedprd">
+<!ENTITY DATA_WRFPRD    "&DATA_RUNDIR;/wrfprd">
 
 <!ENTITY hpsspath0      "/NCEPDEV/emc-meso/5year/&USER;/pbspro_rtma3d">
 <!ENTITY hpsspath1      "/NCEPPROD/hpssprod/runhistory">
@@ -621,6 +623,14 @@
    <envar>
       <name>DATA_ANLDUMP</name>
       <value><cyclestr>&DATA_ANLDUMP;</cyclestr></value>
+   </envar>
+   <envar>
+      <name>DATA_SHARED</name>
+      <value><cyclestr>&DATA_SHARED;</cyclestr></value>
+   </envar>
+   <envar>
+      <name>DATA_WRFPRD</name>
+      <value><cyclestr>&DATA_WRFPRD;</cyclestr></value>
    </envar>
 
    <envar>

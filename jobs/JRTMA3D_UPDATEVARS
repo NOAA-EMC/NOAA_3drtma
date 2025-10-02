@@ -129,18 +129,22 @@ if [ "${envir}" != "esrl" ]; then #WCOSS
     if [ ! -d "${DATA_RUNDIR}" ] ; then
         mkdir -p ${DATA_RUNDIR}
     fi
-    export DATAHOME=${DATA_RUNDIR}/gsiprd
-#    ${RM} -rf ${DATAHOME}
-#    ${LN} -s  ${DATA}  ${DATAHOME}
+
+#    wrfprd : the updatevars working directory (model 1-step forecast) 
+    export DATAHOME=${DATA_WRFPRD:-"${DATA_RUNDIR}/wrfprd"}
+    if [ -L "${DATAHOME}" ] && [ -d "${DATAHOME}" ] ; then
+        ${RM} -rf ${DATAHOME}
+    fi
+    ${LN} -s  ${DATA}  ${DATAHOME}
+
+    export DATAHOME_ANL=${DATA_RUNDIR}/gsiprd
 
     export DATAOBSHOME=${DATA_RUNDIR}/obsprd
 
-#    ${RM} -rf ${DATAOBSHOME}
-#    ${LN} -s  ${COMINobsproc_rtma3d}  ${DATAOBSHOME}
-
     export DATAHOME_BK=${DATA_RUNDIR}/fgsprd
-#    ${RM} -rf ${DATAHOME_BK}
-#    ${LN} -s  ${GESINhrrr_rtma3d}  ${DATAHOME_BK}
+
+#   DATA_SHARED: the sub-directory to share the data
+    export DATA_SHARED=${DATA_SHARED:-"${DATA_RUNDIR}/sharedprd"}
 
 fi
 

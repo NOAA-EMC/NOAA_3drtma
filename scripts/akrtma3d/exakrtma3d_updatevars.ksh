@@ -23,8 +23,8 @@ export OMP_NUM_THREADS=1
 
 
 # Check to make sure required directory defined and existed
-check_if_defined "FCST_LENGTH" "DATA_GSIANL" "FIXwrf" "PDY" "cyc" 
-check_dirs_exist "DATA_GSIANL" "FIXwrf"
+check_if_defined "FCST_LENGTH" "DATA_SHARED" "FIXwrf" "PDY" "cyc" 
+check_dirs_exist "DATA_SHARED" "FIXwrf"
 
 # Initialize an array of WRF input dat files that need to be linked
 set -A WRF_DAT_FILES ${FIXwrf}/run/LANDUSE.TBL          \
@@ -99,22 +99,15 @@ cd ${DATAHOME}
 ${ECHO} "enter working directory:${DATAHOME}"
 
 export WRF_NAMELIST=${DATAHOME}/namelist.input
-# ${CP} ${PARMwrf}/hrrr_alaska.nl ${WRF_NAMELIST}
-if [[ ${L_WRFARW_NOFCST} =~ [TtYy] ]] ; then
-  echo "DO NOT USE IO-QUILTING in model run (with modified WRF model that does no actual foreast)"
-  ${CP} ${PARMwrf}/hrrr_alaska.noQuilt.nl ${WRF_NAMELIST} 
-else
-  echo "USE IO-QUILTING in model run (with original WRF model doing forecast)"
-  ${CP} ${PARMwrf}/hrrr_alaska.Quilt.nl   ${WRF_NAMELIST} 
-fi
+${CP} ${PARMwrf}/hrrr_alaska.nl ${WRF_NAMELIST}      # No IO-Quilting in wrf namelist as default
 
-
-if [ -r ${DATAHOME}/wrf_inout ]; then
-${ECHO} " Initial condition ${DATAHOME}/wrf_inout "
-${LN} -s ${DATAHOME}/wrf_inout wrfinput_d01
-#${LN} -s /gpfs/dell2/emc/modeling/noscrub/Edward.Colon/wrf_inout wrfinput_d01
+# Check to make sure the ICs file (wrfinput_d01) file exists
+if [ -r ${DATA_SHARED}/wrf_inout ]; then
+  ${ECHO} " Initial condition ==> ${DATA_SHARED}/wrf_inout "
+  ${CP} ${DATA_SHARED}/wrf_inout ${DATAHOME}/wrf_inout
+  ${LN} -s ${DATAHOME}/wrf_inout wrfinput_d01
 else
-  ${ECHO} "ERROR: ${DATAHOME}/wrf_inout does not exist, or is not readable"
+  ${ECHO} "ERROR: ${DATA_SHARED}/wrf_inout does not exist, or is not readable"
   exit 1
 fi
 
@@ -189,7 +182,6 @@ else
 fi
 
 
-
 # Run WRF to update reflectivity fields
 # export pgm="${NET}_wrfarw_fcst"
 if [[ ${L_WRFARW_NOFCST} =~ [TtYy] ]] ; then
@@ -234,12 +226,18 @@ ${ECHO} "Assemble Reflectivity fields back into wrf_inout"
 
 ${NCKS} -A -v REFL_10CM,COMPOSITE_REFL_10CM,REFL_10CM_1KM,REFL_10CM_4KM wrfout_d01 wrf_inout
 
-if [ -f ${COMOUTgsi_rtma3d}/${ANLrtma3d_FNAME} ]; then
-  ${ECHO} "Erasing the GSI generated analysis file to be replaced by modified analysis."
-  ${MV} ${COMOUTgsi_rtma3d}/${ANLrtma3d_FNAME} ${COMOUTgsi_rtma3d}/old_analysis
-fi
+## skipping the following if-block which saves the old analysis file 
+#   (since only reflectivity fields are updated, and the original reflectivity are available
+#     in the firstguess file which is saved.)
+# if [ -f ${COMOUTgsi_rtma3d}/${ANLrtma3d_FNAME} ]; then
+#   ${ECHO} "Erasing the GSI generated analysis file to be replaced by modified analysis."
+#   ${MV} ${COMOUTgsi_rtma3d}/${ANLrtma3d_FNAME} ${COMOUTgsi_rtma3d}/old_analysis
+# fi
 
-${CP_LN} -p wrf_inout ${COMOUTgsi_rtma3d}/${ANLrtma3d_FNAME}
+# coping the final updated analysis file wrf_inout to COM2, and saving it under shared directory as backup.
+${CP} -p wrf_inout ${COMOUTgsi_rtma3d}/${ANLrtma3d_FNAME}
+${MV} -p wrf_inout ${DATA_SHARED}/wrf_inout
+${LN} -sf ${DATA_SHARED}/wrf_inout     ./wrf_inout       # linking back as a back-up
 
 ${ECHO} "update_vars.ksh completed successfully at `${DATE}`"
 
