@@ -87,7 +87,12 @@ CDATE=$PDY$cyc
 ###################################################################################
    found_hrrrges=no
    ic=1
-   while [ $ic -le 9 ] ; do
+   ic_max=9                           # max hours to search back for hrrr forecast file
+   targetsize_hrrr=9092419248         # HRRRv4 on Alaska on WCOSS2 (forecast/restart history file)
+   ics_max=15                         # max times to check the filesize of hrrr forecast
+   sleep_time=60
+#  loop of searching for firstguess in HRRR forecast file
+   while [ $ic -le ${ic_max} ] ; do
      hrrrFHH=$ic
      hrrrFHH=`printf %02d $hrrrFHH`
      hrrrCYCLE=`$NDATE -$hrrrFHH $CDATE`
@@ -98,19 +103,47 @@ CDATE=$PDY$cyc
 #       probe_hrrr_guess_nc=$GESINhrrr/alaska/hrrrak_${hrrrCYCLE}f0${hrrrFHH}
 #       probe_hrrr_guess_nc=$GESINhrrr/hrrrak_${hrrrCYCLE}f0${hrrrFHH}
         export probe_hrrr_guess_nc=hrrrak_${hrrrCYCLE}f0${hrrrFHH}
+        size_match=no
+        found_hrrrges=no
         if [ -s $GESINhrrr/$probe_hrrr_guess_nc ]; then
-#           cpreq $probe_hrrr_guess_nc $COMOUT/${RUN}.t${cyc}z.hrrrak_${hrrrCYCLE}f0${hrrrFHH}
-            cpreq $GESINhrrr/$probe_hrrr_guess_nc ${DATA}/
-            cpreq $GESINhrrr/$probe_hrrr_guess_nc ${DATA}/${FGSrtma3d_FNAME}
-            ind=$ic
-            PDYHH_AK=$hrrrCYCLE
             found_hrrrges=yes
-           break
+
+            ics=1
+#           loop of checking the filesize of hrrr forecast
+            while [ $ics -le ${ics_max} ] ; do
+                filesize=$(stat -c %s $GESINhrrr/$probe_hrrr_guess_nc)
+                if [[ ${filesize} -eq ${targetsize_hrrr} ]] ; then
+                    size_match="yes"
+#                   cpreq $probe_hrrr_guess_nc $COMOUT/${RUN}.t${cyc}z.hrrrak_${hrrrCYCLE}f0${hrrrFHH}
+#                   cpreq $GESINhrrr/$probe_hrrr_guess_nc ${DATA}/
+                    break  # breaking out the loop of checking file size
+                else
+                    size_match="no"
+                    msg="${probe_hrrr_guess_nc} filesize (${filesize}) does not match the standard size (${targetsize_hrrr}). Sleep for 60 seconds and check again ..."
+                    ${ECHO} "${msg}"
+                    sleep ${sleep_time}
+                fi
+                let "ics=ics+1"
+            done
+
+            if [[ ${size_match} =~ [yYtT] ]] ; then
+                cpreq $GESINhrrr/$probe_hrrr_guess_nc ${DATA}/${FGSrtma3d_FNAME}
+                ind=$ic
+                PDYHH_AK=$hrrrCYCLE
+                break      # breaking out the loop of searching for firstguess in HRRR forecast
+            else
+                msg="hrrr ${ic}-hour forecast file ${probe_hrrr_guess_nc} exists, but its filesize (${filesize}) does not match the standard size (${targetsize_hrrr}) even after waiting for ${ics_max} minutes. Trying to search in the earlier hrrr forecast files ..."
+                ${ECHO} "${msg}"
+#               cpreq $GESINhrrr/$probe_hrrr_guess_nc ${DATA}/${probe_hrrr_guess_nc}.wrongfsize  # saving this problematic file for investigation later
+                cpreq $GESINhrrr/$probe_hrrr_guess_nc ${GESINhrrr_rtma3d}/${probe_hrrr_guess_nc}.wrongfsize  # saving this problematic file for investigation later
+            fi
          fi
      fi
+
      let "ic=ic+1"
+
    done
-   echo "found_hrrrges: "$found_hrrrges
+   echo "found_hrrrges: "$found_hrrrges  "  size_match: ${size_match}"
 
    if [[ ${found_hrrrges} = no ]] ; then
        err_exit "No HRRR guess available. The missing files are GESINhrrr/alaska/hrrrak__${hrrrCYCLE}f0${hrrrFHH}. The script must be able to find at least one file in the above querying do-while loop"
@@ -644,7 +677,7 @@ fi     # RUN_HOWV=True/true/Yes/yes, then retrieving fgs of howv
     if [ -r ${DATA}/${FGSrtma3d_FNAME} ] ; then
 #      ${LN} -sf ${GESINhrrr_rtma3d}/${FGSrtma3d_FNAME}     ${DATA}/${FGSrtma3d_FNAME}
        ${ECHO} "PREPFGS: Saving the Firstguess of Cycle ${YYYYMMDDHH} --> ${GESINhrrr_rtma3d}/${FGSrtma3d_FNAME} "
-       cp -p ${DATA}/${probe_hrrr_guess_nc} ${GESINhrrr_rtma3d}/
+#      cp -p ${DATA}/${probe_hrrr_guess_nc} ${GESINhrrr_rtma3d}/     # ${DATA}/${probe_hrrr_guess_nc} does not exist
        cp -p ${DATA}/${FGSrtma3d_FNAME}     ${GESINhrrr_rtma3d}/${FGSrtma3d_FNAME}    
 
 #      to save the disck space, removing the firstguess file under working directry (fgsprd), 
@@ -661,5 +694,7 @@ fi     # RUN_HOWV=True/true/Yes/yes, then retrieving fgs of howv
 export err=$? ; err_chk
 
 ls -l ${GESINhrrr_rtma3d} > ${GESINhrrr_rtma3d}/fgs_data_${PDY}_${cyc}.list
+${ECHO} "===========================" >> ${GESINhrrr_rtma3d}/fgs_data_${PDY}_${cyc}.list
+${ECHO} "${GESINhrrr_rtma3d}/${FGSrtma3d_FNAME} comes originally from ${GESINhrrr}/${probe_hrrr_guess_nc}" >> ${GESINhrrr_rtma3d}/fgs_data_${PDY}_${cyc}.list
 
 exit 0

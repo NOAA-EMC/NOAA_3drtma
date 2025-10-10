@@ -30,6 +30,19 @@ export MPIRUN=${MPIRUN:-"mpirun"}
 
 export CNVGRIB=${CNVGRIB:-cnvgrib}
 
+##########################################################
+# make temp/running directories
+##########################################################
+export DATA=${DATA:-$DATAROOT/${jobid:?}} #jobid ($job.$LSB_JOBID MUST BE DEFINED IN TERMS OF $RUN IN UPPER LEVEL SCRIPT /MPondeca, 26Jul2015
+if [ -d $DATA ] ; then
+   ${ECHO} "$DATA exists, remove its content"
+     ${RM} -rf $DATA/*
+else
+   ${ECHO} "$DATA does not exist, create it"
+   ${MKDIR} -p $DATA
+fi
+cd $DATA
+
 #####################################################
 # Run setpdy and initialize PDY variables
 #    setpdy.sh needs the variables 
@@ -124,7 +137,7 @@ if [ "${envir}" != "esrl" ]; then #WCOSS
       export FGSrtma3d_FNAME="${PROD_HEAD}.firstguess.nc"
     fi
 
-#   Set the path to the working/obs/ges directories
+#   Define the symbolic link path to the working/obs/ges directories
     export DATA_RUNDIR=${DATA_RUNDIR:-"${DATAROOT}/${envir}/${NET}.${PDY}${cyc}"}
     if [ ! -d "${DATA_RUNDIR}" ] ; then
         mkdir -p ${DATA_RUNDIR}

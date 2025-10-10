@@ -49,7 +49,7 @@
 <!ENTITY HOMErtma3d	"&NWROOT;">
 <!ENTITY LOG_DIR	"/lfs/h2/emc/ptmp/&USER;/rtma3d_logs/alaska">
 <!ENTITY JJOB_DIR	"&HOMErtma3d;/jobs">
-<!ENTITY WORKFLOW_DIR   "&HOMErtma3d;/workflow">
+<!ENTITY WORKFLOW_DIR	"&HOMErtma3d;/workflow">
 <!ENTITY SCRIPT_DIR	"&HOMErtma3d;/scripts">
 <!ENTITY USHrtma3d	"&HOMErtma3d;/ush">
 <!ENTITY UTILrtma3d	"&HOMErtma3d;/util">
@@ -220,7 +220,7 @@
 <!ENTITY PREPOBS_RESERVATION '<nodes>1:ppn=1:vntype=cray_compute:mem=4000MB</nodes><native>-l place=scatter</native><queue>&QUEUE;</queue><account>&ACCOUNT;</account>'>
 
 <!ENTITY PREPFGS_PROC "1">
-<!ENTITY PREPFGS_RESOURCES '<walltime>00:15:00</walltime>'>
+<!ENTITY PREPFGS_RESOURCES '<walltime>00:30:00</walltime>'>
 <!ENTITY PREPFGS_RESERVATION '<nodes>1:ppn=1:vntype=cray_compute:mem=20GB</nodes><native>-l place=scatter</native><queue>&QUEUE;</queue><account>&ACCOUNT;</account>'>
 
 <!ENTITY GSI_PROC "14">
@@ -1323,6 +1323,10 @@
     &ENVARS;
     &UPDATEVARS_RESOURCES;
     &UPDATEVARS_RESERVATION;
+    <envar>
+       <name>rundir_task</name>
+       <value><cyclestr>&DATA_WRFPRD;</cyclestr></value>
+    </envar>
 
     <command>&WORKFLOW_DIR;/launch.ksh &JJOB_UPDATEVARS;</command>
     <jobname><cyclestr>&RUN;_updatevars_job_@Y@m@d@H@M</cyclestr></jobname>

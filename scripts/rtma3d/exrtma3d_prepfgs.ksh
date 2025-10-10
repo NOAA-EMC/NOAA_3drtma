@@ -92,9 +92,9 @@ CDATE=$PDY$cyc
 
    found_hrrrges=no
    ic=1
-   ic_max=9                                 # max hours to search back for hrrr forecast file
-   targetsize_hrrr=16057259932              # HRRRv4 on WCOSS2 (forecast/restart history file)
-   ics_max=15                               # max times to check the filesize of hrrr forecast
+   ic_max=9                         # max hours to search back for hrrr forecast file
+   targetsize_hrrr=16057259932      # HRRRv4 on CONUS on WCOSS2 (forecast/restart history file)
+   ics_max=15                       # max times to check the filesize of hrrr forecast
    sleep_time=60
 #  loop of searching for firstguess in HRRR forecast file
    while [ $ic -le ${ic_max} ] ; do
@@ -119,7 +119,6 @@ CDATE=$PDY$cyc
              if [[ ${filesize} -eq ${targetsize_hrrr} ]] ; then
                  size_match="yes"
 #                cpreq ${probe_hrrr_guess_nc} $COMOUT/${RUN}.t${cyc}z.hrrr_${hrrrCYCLE}f0${hrrrFHH}
-#                cpreq $GESINhrrr/${probe_hrrr_guess_nc} ${DATA}/${FGSrtma3d_FNAME}
                  break  # breaking out the loop of checking file size
              else
                  size_match="no"
@@ -136,8 +135,8 @@ CDATE=$PDY$cyc
          else
              msg="hrrr ${ic}-hour forecast file ${probe_hrrr_guess_nc} exists, but its filesize (${filesize}) does not match the standard size (${targetsize_hrrr}) even after waiting for ${ics_max} minutes. Trying to search in the earlier hrrr forecast files ..."
              ${ECHO} "${msg}"
-             cpreq $GESINhrrr/${probe_hrrr_guess_nc} ${DATA}/${probe_hrrr_guess_nc}."wrongfsize"  # save this problematic file for investigation later 
-#            cpreq $GESINhrrr/${probe_hrrr_guess_nc} ${DATA}/${FGSrtma3d_FNAME}                   # do not copy the problematic file as fgs for analysis
+#            cpreq $GESINhrrr/${probe_hrrr_guess_nc} ${DATA}/${probe_hrrr_guess_nc}.wrongfsize  # saving this problematic file for investigation later 
+             cpreq $GESINhrrr/${probe_hrrr_guess_nc} ${GESINhrrr_rtma3d}/${probe_hrrr_guess_nc}.wrongfsize  # saving this problematic file for investigation later 
          fi
      else
          msg="HRRR ${ic}-hour forecat file ${probe_hrrr_guess_nc} is not available. Try with earlier HRRR foreast file ... "
@@ -673,7 +672,7 @@ fi     # RUN_HOWV=True/true/Yes/yes, then retrieving fgs of howv
     if [ -r ${DATA}/${FGSrtma3d_FNAME} ] ; then
 #      ${LN} -sf ${GESINhrrr_rtma3d}/${FGSrtma3d_FNAME}     ${DATA}/${FGSrtma3d_FNAME}
        ${ECHO} "PREPFGS: Saving the Firstguess of Cycle ${YYYYMMDDHH} --> ${GESINhrrr_rtma3d}/${FGSrtma3d_FNAME} "
-       cp -p ${DATA}/${probe_hrrr_guess_nc} ${GESINhrrr_rtma3d}/
+#      cp -p ${DATA}/${probe_hrrr_guess_nc} ${GESINhrrr_rtma3d}/     # ${DATA}/${probe_hrrr_guess_nc} does not exist
        cp -p ${DATA}/${FGSrtma3d_FNAME}     ${GESINhrrr_rtma3d}/${FGSrtma3d_FNAME}    
 
 #      to save the disck space, removing the firstguess file under working directry (fgsprd), 
@@ -690,5 +689,7 @@ fi     # RUN_HOWV=True/true/Yes/yes, then retrieving fgs of howv
 export err=$? ; err_chk
 
 ls -l ${GESINhrrr_rtma3d} > ${GESINhrrr_rtma3d}/fgs_data_${PDY}_${cyc}.list
+${ECHO} "===========================" >> ${GESINhrrr_rtma3d}/fgs_data_${PDY}_${cyc}.list
+${ECHO} "${GESINhrrr_rtma3d}/${FGSrtma3d_FNAME} comes originally from ${GESINhrrr}/${probe_hrrr_guess_nc}" >> ${GESINhrrr_rtma3d}/fgs_data_${PDY}_${cyc}.list
 
 exit 0
