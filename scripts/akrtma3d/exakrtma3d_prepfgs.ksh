@@ -111,7 +111,12 @@ CDATE=$PDY$cyc
             ics=1
 #           loop of checking the filesize of hrrr forecast
             while [ $ics -le ${ics_max} ] ; do
-                filesize=$(stat -c %s $GESINhrrr/$probe_hrrr_guess_nc)
+                if [ -L "$GESINhrrr/$probe_hrrr_guess_nc" ] ; then
+                    realfgsfile=$(readlink -f $GESINhrrr/$probe_hrrr_guess_nc)
+                else
+                    realfgsfile="$GESINhrrr/$probe_hrrr_guess_nc"
+                fi
+                filesize=$(stat -c %s ${realfgsfile})
                 if [[ ${filesize} -eq ${targetsize_hrrr} ]] ; then
                     size_match="yes"
 #                   cpreq $probe_hrrr_guess_nc $COMOUT/${RUN}.t${cyc}z.hrrrak_${hrrrCYCLE}f0${hrrrFHH}
@@ -130,14 +135,30 @@ CDATE=$PDY$cyc
                 cpreq $GESINhrrr/$probe_hrrr_guess_nc ${DATA}/${FGSrtma3d_FNAME}
                 ind=$ic
                 PDYHH_AK=$hrrrCYCLE
+                msg="HRRR-AK ${ic}-hour forecast file ${probe_hrrr_guess_nc} is used as the firstguess for analysis cycle at ${PDY} ${cyc}Z"
+                ${ECHO} "${msg}"
+                postmsg "$jlogfile" "$msg"
                 break      # breaking out the loop of searching for firstguess in HRRR forecast
             else
-                msg="hrrr ${ic}-hour forecast file ${probe_hrrr_guess_nc} exists, but its filesize (${filesize}) does not match the standard size (${targetsize_hrrr}) even after waiting for ${ics_max} minutes. Trying to search in the earlier hrrr forecast files ..."
-                ${ECHO} "${msg}"
 #               cpreq $GESINhrrr/$probe_hrrr_guess_nc ${DATA}/${probe_hrrr_guess_nc}.wrongfsize  # saving this problematic file for investigation later
                 cpreq $GESINhrrr/$probe_hrrr_guess_nc ${GESINhrrr_rtma3d}/${probe_hrrr_guess_nc}.wrongfsize  # saving this problematic file for investigation later
+                msg="HRRR-AK ${ic}-hour forecast file ${probe_hrrr_guess_nc} exists for analysis cycle at ${PDY} ${cyc}Z, but its filesize (${filesize}) does not match the standard size (${targetsize_hrrr}) even after waiting for ${ics_max} minutes. Try to search in the earlier HRRR-AK forecast files ..."
+                ${ECHO} "${msg}"
+                postmsg "$jlogfile" "$msg"
+                SUBJECT=" ${NET} ${RUN} Warning Email: File Size of Firstguess Does Not Match for analysis cycle at ${PDY} ${cyc}Z"
+                MESSAGE="WARNING: ${msg}"
+                ${ECHO} "${MESSAGE}" | ${MAILX} -s "$SUBJECT" -c "${CC_RECIPIENTS}"  "${TO_RECIPIENTS}"
+#               ${ECHO} "${MESSAGE}" | mail.py   #<-- using this line only when system is delivered to NCO
             fi
-         fi
+        else
+            msg="HRRR-AK ${ic}-hour forecat file ${probe_hrrr_guess_nc} is not available for analysis cycle at ${PDY} ${cyc}Z. Try to search in the earlier HRRR-AK foreast files ... "
+            ${ECHO} "${msg}"
+            postmsg "$jlogfile" "$msg"
+            SUBJECT=" ${NET} ${RUN} Warning Email: Missing Firstguess File for analysis cycle at ${PDY} ${cyc}Z"
+            MESSAGE="WARNING: ${msg}"
+            ${ECHO} "${MESSAGE}" | ${MAILX} -s "$SUBJECT" -c "${CC_RECIPIENTS}"  "${TO_RECIPIENTS}"
+#           ${ECHO} "${MESSAGE}" | mail.py   #<-- using this line only when system is delivered to NCO
+        fi
      fi
 
      let "ic=ic+1"
@@ -179,7 +200,9 @@ if [[ ${RUN_HOWV} =~ [TtYy] ]] ; then
   grid_specs=${grid_specs_hrrrak}
 #
 # 1.2  fix dir (for slmask.grib2 file)
-  print_info_msg "$VERBOSE" "FIXgsi is $FIXgsi"
+# print_info_msg "$VERBOSE" "FIXgsi is $FIXgsi"   (print_info_msg is only available in RRFS worklfow)
+  info_msg="FIXgsi is $FIXgsi"
+  echo "${info_msg}"
 #
 #  Sea-Land Mask for the correct interpolation of the howv Background.
   rm -f ./slmask.grib2
@@ -195,7 +218,8 @@ if [[ ${RUN_HOWV} =~ [TtYy] ]] ; then
 #    then dumping out to grib2 file
 # 2.1 Wave Background at Great Lakes
 #
-  print_info_msg "$VERBOSE" "COMINww3GL is $COMINww3GL (Wave background from Great Lakes model)"
+  info_msg="COMINww3GL is $COMINww3GL (Wave background from Great Lakes model)"
+  echo "${info_msg}"
 
    found_ww3gesGL=no
    ic=0
@@ -210,7 +234,8 @@ if [[ ${RUN_HOWV} =~ [TtYy] ]] ; then
 #
       if [ -s $probe_ww3_GL_guess_grb2 ]; then
 
-         print_info_msg "$VERBOSE" "found wave background for Great Lakes: $probe_ww3_GL_guess_grb2"
+         info_msg="found wave background for Great Lakes: $probe_ww3_GL_guess_grb2"
+         echo "${info_msg}"
          cpreq $probe_ww3_GL_guess_grb2 ww3.guess5.grib2
 #        cp -p $probe_ww3_GL_guess_grb2 ww3.guess5.grib2
          cp -p $probe_ww3_GL_guess_grb2 $COMOUT/glwu.grlr_500m.t${ww3CC_GL}z.grib2     # save for retro run
@@ -238,7 +263,8 @@ if [[ ${RUN_HOWV} =~ [TtYy] ]] ; then
    fi
 #
 # 2.2 Ocean Waves Background
-  print_info_msg "$VERBOSE" "COMINww3 is $COMINww3 (Wave background from WW3 Ocean Wave model)"
+   info_msg="COMINww3 is $COMINww3 (Wave background from WW3 Ocean Wave model)"
+   echo "${info_msg}"
    found_ww3ges=no
    ic=0
    while [ $ic -le 24 ] ; do
@@ -263,8 +289,10 @@ if [[ ${RUN_HOWV} =~ [TtYy] ]] ; then
       if [ -s "${probe_ww3_guess_grb2[0]}" ] && \
          [ -s "${probe_ww3_guess_grb2[1]}" ]    ; then
 
-         print_info_msg "$VERBOSE" "found wave background for Arctic: ${probe_ww3_guess_grb2[0]}"
-         print_info_msg "$VERBOSE" "found wave background for Global: ${probe_ww3_guess_grb2[1]}"
+         info_msg="found wave background for Arctic: ${probe_ww3_guess_grb2[0]}"
+         echo "${info_msg}"
+         info_msg="found wave background for Global: ${probe_ww3_guess_grb2[1]}"
+         echo "${info_msg}"
          cpreq ${probe_ww3_guess_grb2[0]} ww3.guess0.grib2
 #        cp -p ${probe_ww3_guess_grb2[0]} ww3.guess0.grib2
          cpreq ${probe_ww3_guess_grb2[1]} ww3.guess1.grib2
@@ -411,7 +439,8 @@ fi     # RUN_HOWV=True/true/Yes/yes, then retrieving fgs of howv
       hrrr_guess_grb2=${COMINHRRR}/hrrr.${PRE_YYYYMMDD}/alaska/hrrr.t${PRE_HH}z.wrfprsf0${ind}.ak.grib2    # wrfprs; wrfnat; wrfsfc;
 
       if [[ -f ${hrrr_guess_grb2} ]] ; then 
-         print_info_msg "VERBOSE" "found HRRR-AK ${ind} hour forecast (from ${PRE_YYYYMMDD}_${PRE_HH}Z) grib2 file ${hrrr_guess_grb2} and retrieve 10-m Wind Gust from it: "
+         info_msg="found HRRR-AK ${ind} hour forecast (from ${PRE_YYYYMMDD}_${PRE_HH}Z) grib2 file ${hrrr_guess_grb2} and retrieve 10-m Wind Gust from it: "
+         echo "${info_msg}"
          rm -f ./hrrr_guess.grib2
          ln -sf ${hrrr_guess_grb2}   ./hrrr_guess.grib2
          if [ $ind == 0 ]; then
@@ -550,7 +579,8 @@ fi     # RUN_HOWV=True/true/Yes/yes, then retrieving fgs of howv
       hrrr_guess_grb2=${COMINHRRR}/hrrr.${PRE_YYYYMMDD}/alaska/hrrr.t${PRE_HH}z.wrfprsf0${ind}.ak.grib2    # wrfprs; wrfnat; wrfsfc;
 
       if [[ -f ${hrrr_guess_grb2} ]] ; then 
-         print_info_msg "VERBOSE" "found HRRR-AK ${ind} hour forecast (from ${PRE_YYYYMMDD}_${PRE_HH}Z) grib2 file ${hrrr_guess_grb2} and retrieve Surface Visibility from it: "
+         info_msg="found HRRR-AK ${ind} hour forecast (from ${PRE_YYYYMMDD}_${PRE_HH}Z) grib2 file ${hrrr_guess_grb2} and retrieve Surface Visibility from it: "
+         echo "${info_msg}"
          rm -f ./hrrr_guess.grib2
          ln -sf ${hrrr_guess_grb2}   ./hrrr_guess.grib2
          if [ $ind == 0 ]; then
