@@ -93,6 +93,10 @@ export COMINsice=${COMINsice:-$(compath.py prod/seaice_analysis/${seaice_analysi
 ### 3DRTMA GSIANL Products (netcdf)
 export COMOUTgsi_rtma3d=${COMOUTgsi_rtma3d:-"${COMOUT}/gsiprd.${cycle}"}
 
+#   DATA_SHARED: the sub-directory to share the data
+#     (where the GSI analysis file, wrf_inout, is saved)
+export DATA_SHARED=${DATA_SHARED:-"${DATA_RUNDIR}/sharedprd"}
+
 # Directory to store the firstguess as input for the RTMA3D (NETCDF?) 
 
 export GESINhrrr_rtma3d=${GESINhrrr_rtma3d:-"${COMIN}/fgsprd.${cycle}"}

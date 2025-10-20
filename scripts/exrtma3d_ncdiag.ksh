@@ -37,9 +37,9 @@ if [ "${envir}" == "lsf" ] || [ "${envir}" == "pbspro" ]; then
 
 fi
 
-# Directory where the original not-comnbined nc4 obs-diag files are saved
-#           (default ==> GSI RUNING/WORKING directory)
-  DATAGSI=${DATAGSIHOME:-"../gsiprd"}
+# Directory where the original split obs-diag files (netcdf4) are saved
+#           (default ==> the shared directory)
+  DATAGSI=${DATAGSI:-"${DATA_SHARED}"}
 
 # Compute date & time components for the analysis time
   subcyc=${subcyc:-"00"}

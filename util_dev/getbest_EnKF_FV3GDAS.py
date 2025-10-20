@@ -108,9 +108,10 @@ def write_filelist(fname,comenkf,fsave,svdate,retro,path,suf,o3fname,getmean,gfs
             en=path+'/sfg_'+svcdate+'_fhr'+str(fsave).zfill(2)+'s_mem'+mem+suf
         if is_non_zero_file(en):
             f.write(en+'\n')
-            # Also sym link the file to working directory'
-            linkname='ens_mem'+mem
-            force_symlink(en,linkname)
+            # Also sym link the file to working directory
+            # (No linking to GDAS ensemble here! It is done in analysis script.)
+            # linkname='ens_mem'+mem
+            # force_symlink(en,linkname)
         else:
             havefile=False
             n=n-1   # Remove the erroneously added member

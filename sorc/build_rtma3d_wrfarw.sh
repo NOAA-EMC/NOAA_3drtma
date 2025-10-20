@@ -19,6 +19,7 @@ module list
 sleep 1
 
 cd ${BASE}/rtma3d_wrfarw.fd/WRFV3.9
+mkdir ./run                      # avoiding the error message at the end of building wrfarw
 ./clean -aa
 ./clean -a
 ./clean
