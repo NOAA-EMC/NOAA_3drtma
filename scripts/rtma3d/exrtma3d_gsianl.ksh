@@ -254,6 +254,18 @@ elif [[ ${nummem} -eq 80 ]]; then
      HYBENS_INFO=${PARMgsi}/hybens_info
      ${CP} ${PARMgsi}/hybens_info hybens_info
   fi
+  # link GDAS ensemble members to the analysis working directory
+  # read gdas ensemble file names (with full path name) in filelist03
+  c=0
+  while read line_mem
+  do
+     let "c=c+1"
+     ccc=$(printf "%03d" $c)
+     en_linkname="ens_mem${ccc}"
+     [[ -f ./${en_linkname} ]] && rm -f ./${en_linkname}
+     echo "linking ${en_linkname}: --> ${line_mem}"
+     ${LN} -sf ${line_mem} ./${en_linkname}
+  done < ./filelist03
   ${ECHO} " Cycle ${YYYYMMDDHH}: GSI hybrid uses GDAS directly with n_ens=${nummem}" >> ${pgmout}
 else
   beta1_inv=1.0
@@ -823,22 +835,60 @@ fi ###### second GSI run
                                                               # (saving space, but costing more time)
 
 if [ "${envir}" == "lsf" ] || [ "${envir}" == "pbspro" ]; then #wcoss
-  ${CP} -p ${DATA}/wrf_inout                   ${COMOUTgsi_rtma3d}/${ANLrtma3d_FNAME}
-  ${CP} -p minimization_fort220.${cycle_str}   ${COMOUTgsi_rtma3d}
-  tar -cvf obsfit_fort220_${cycle_str}.tar     ./fort.* ./fit_* ./stdout*
-  ${CP} -p  obsfit_fort220_${cycle_str}.tar    ${COMOUTgsi_rtma3d}
+
+#  Some variables (reflectivity, etc.) in analysis file (wrf_inout) would be updated in the
+#    follow-up updatevars step, this analysis file is only copied to the Shared directory (sharedprd).
+#    The final file wrf_inout would be copied to COM2 at the end of updatevars step after it is finalized.
+# ${CP} -p ${DATA}/wrf_inout                   ${COMOUTgsi_rtma3d}/${ANLrtma3d_FNAME}
+  ${CP} -p ${DATA}/wrf_inout                   ${DATA_SHARED}/wrf_inout # copying big file takes time
+#    if need to save the wall-clock time of this scipt, use the following two lines (moving instead of copying)
+# ${MV}    ${DATA}/wrf_inout                   ${DATA_SHARED}/wrf_inout # using "mv" to save time
+# ${LN} -sf ${DATA_SHARED}/wrf_inout           ${DATA}/wrf_inout        # linking wrf_inout back to analysis directory (as a back-up)
+
+  tar -cvf obsfit_fort220_${cycle_str}.tar     ./fort.* ./fit_* ./stdout* ./minimization_fort220.${cycle_str}
+  ${CP} -p obsfit_fort220_${cycle_str}.tar     ${COMOUTgsi_rtma3d}
   tar -cvf misc_info_${cycle_str}.tar  ./*info ./errtable ./prepobs_prep.bufrtable  ./*bias*  \
-    ./current_bad_aircraft ./gsd_sfcobs_uselist.txt ./gsd_sfcobs_provider.txt ./stdout*
-  ${CP} -p  misc_info_${cycle_str}.tar         ${COMOUTgsi_rtma3d}
+    ./current_bad_aircraft ./*sfcobs_uselist* ./gsd_sfcobs_provider.txt ./stdout* ./filelist* \
+    ./OUTPUT*
+  ${CP} -p misc_info_${cycle_str}.tar          ${COMOUTgsi_rtma3d}
+
+  ${CP} -p minimization_fort220.${cycle_str}   ${COMOUTgsi_rtma3d}
   ${CP} -p filelist.hrrrdas 		       ${COMOUTgsi_rtma3d}
   ${CP} -p filelist03                          ${COMOUTgsi_rtma3d}
   ${CP} -p hybens_info                         ${COMOUTgsi_rtma3d}
   ${CP} -p stdout                              ${COMOUTgsi_rtma3d}
   ${CP} -p OUTPUT*                             ${COMOUTgsi_rtma3d}
-  # extra backup (NOT necessary)
-  #${LN} -sf ${COMOUTgsi_rtma3d}/${ANLrtma3d_FNAME} ${COMOUT}/${ANLrtma3d_FNAME}
-  #${CP} -p ${pgmout_stdout}        ${COMOUT}/${pgmout_stdout}_gsianl.${cycle_str}
-  #${CP} -p fits_${cycle_str}.txt  ${COMOUT}/fits_${cycle_str}.txt
+#   extra backup (NOT necessary)
+# ${LN} -sf ${COMOUTgsi_rtma3d}/${ANLrtma3d_FNAME} ${COMOUT}/${ANLrtma3d_FNAME}
+# ${CP} -p ${pgmout_stdout}        ${COMOUT}/${pgmout_stdout}_gsianl.${cycle_str}
+# ${CP} -p fits_${cycle_str}.txt  ${COMOUT}/fits_${cycle_str}.txt
+
+#   Copy the split obs-diag files (nc4) to shared directory (for the follow-up ncdiag step)
+# ${MV}    {DATA}/pe*.nc4                      ${DATA_SHARED}           # moving  saves time
+# ${CP} -p {DATA}/pe*.nc4                      ${DATA_SHARED}           # copying thousand small files takes time (6~10 mins)
+#   using cfp command to copy files to save time
+  ncdiag_list=$(ls pe*.nc4)
+  n_files=$(echo ${ncdiag_list} | wc -w)
+  rm -f cp_cfp_cmdfile.txt
+  ic4=0
+  date
+  for f in ${ncdiag_list}
+  do
+    echo "cp -p ${DATA}/${f}  ${DATA_SHARED}/${f}" >> cp_cfp_cmdfile.txt
+    ic4=$((ic4+1))
+  done
+  echo $ic4  ${n_files}
+  echo "========  before copy pe*.nc4 ========================================================="
+  date
+  export exename=cfp
+  export CMDFILE=cp_cfp_cmdfile.txt
+  export nvar=60
+  command="mpiexec -np ${nvar} --cpu-bind verbose,core ${exename} $CMDFILE >> cp_cfp.stdout 2>&1"
+  echo $command
+  $command
+  date
+  echo "========  after  copy pe*.nc4 ========================================================="
+
 fi  
 #${RM} -f ${DATA}/sig*
 #${RM} -f ${DATA}/obs*

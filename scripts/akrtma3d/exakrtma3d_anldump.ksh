@@ -24,11 +24,14 @@ check_dirs_exist() { #usage: check_dirs_exist "var1_name" "var2_name" ...
   check_if_defined "COMOUTgsi_rtma3d"
   check_dirs_exist "COMOUTgsi_rtma3d"
   check_if_defined "ANLrtma3d_FNAME"
+  check_if_defined "DATA_SHARED"
+  check_dirs_exist "DATA_SHARED"
 #  checking the directory where firstguess file (grib2) of howv/gust/vis is saved
   check_if_defined "COMOUT"
   check_dirs_exist "COMOUT"
 
-  ncf_anl=${COMOUTgsi_rtma3d}/${ANLrtma3d_FNAME}
+# ncf_anl=${COMOUTgsi_rtma3d}/${ANLrtma3d_FNAME}
+  ncf_anl=${DATA_SHARED}/wrf_inout
 
 #############################################################################
 # Make sure START_TIME is defined and in the correct format

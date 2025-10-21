@@ -45,6 +45,19 @@ export HOMErtma3d=${HOMErtma3d:-$NWROOT/rtma.${rtma_ver}}
 # date and time for previous and next cycle
 export PDYHH="${PDY}${cyc}"
 
+# creating a sub-directory under top running directory to share the data among various steps
+#   DATA_RUNDIR: the top running directory
+export DATA_RUNDIR=${DATA_RUNDIR:-"${DATAROOT}/${envir}/${NET}.${PDY}${cyc}"}
+if [ ! -d "${DATA_RUNDIR}" ] ; then
+    mkdir -p ${DATA_RUNDIR}
+fi
+#   DATA_SHARED: the sub-directory to share the data
+export DATA_SHARED=${DATA_SHARED:-"${DATA_RUNDIR}/sharedprd"}
+if [ ! -d "${DATA_SHARED}" ] ; then
+    mkdir -p ${DATA_SHARED}
+fi
+
+# running the executable script
 ${exSCR_CLEAN:-$HOMErtma3d/scripts/ex${NET}_clean.ksh}
 export err=$?; err_chk
 

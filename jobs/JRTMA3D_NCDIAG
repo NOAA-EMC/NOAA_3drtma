@@ -118,8 +118,14 @@ if [ "${envir}" != "esrl" ]; then #WCOSS
 #   Set the path (DATAGSIHOME) to gsi running directory
 #       where the original netcdf format obs-diag files (not combined yet) are generated in GSI run
     export DATAGSIHOME=${DATA_RUNDIR}/gsiprd
-    if [ ! -d "${DATAGSIHOME}" ] ; then
-       echo " Directory of GSI running data does NOT exist. Job abort!"
+
+#   DATA_SHARED: the sub-directory to share the data
+    export DATA_SHARED=${DATA_SHARED:-"${DATA_RUNDIR}/sharedprd"}
+
+#   DATAGSI: the directory where the split obs-diag nc4 files are saved
+    export DATAGSI=${DATA_SHARED:-"${DATAGSIHOME}"}
+    if [ ! -d "${DATAGSI}" ] ; then
+       echo " Directory(where the gsi obs-diag nc4 files are saved) does not exist. Job abort!"
        err_exit
     fi
 

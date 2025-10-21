@@ -194,6 +194,12 @@ export GREP=/usr/bin/grep
 export UNZIP=/bin/unzip
 export TOUCH=/usr/bin/touch
 
+# for mail
+  export MAILX=/usr/bin/mailx       # env variable MAIL is used by linux system
+  export TO_RECIPIENTS="${USER}@noaa.gov"
+  export CC_RECIPIENTS="annette.gibbs@noaa.gov,matthew.t.morris@noaa.gov,manuel.pondeca@noaa.gov,gang.zhao@noaa.gov"
+# export BCC_RECIPIENTS=""
+
 else
   echo "modulefile has not set up for this unknow machine. Job abort!"
   exit 1
