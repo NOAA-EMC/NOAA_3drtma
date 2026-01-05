@@ -6,8 +6,6 @@
 <!-- date/time of cases or cycles -->
 <!ENTITY USER           "user.name">
 <!ENTITY rtma3d_ver     "v1.0.0">
-<!ENTITY startCDATE     "202503060000">
-<!ENTITY endCDATE       "202503072300">
 <!ENTITY realtime       "T">
 <!ENTITY NET		"rtma3d">
 <!ENTITY RUN		"&NET;">
@@ -1013,15 +1011,15 @@
   </log>
 
 
-  <!--  <cycledef group="02-11hr">*/15 02-11,14-23 * 01-12 2022-2025 *</cycledef> -->
+  <!--  <cycledef group="02-11hr">*/15 02-11,14-23 * 01-12 2022-2028 *</cycledef> -->
   
-  <cycledef group="hourly">0 * * 01-12 2022-2025 *</cycledef>
+  <cycledef group="hourly">0 * * 01-12 2022-2028 *</cycledef>
   
-  <cycledef group="rap_e">0 01-11,13-23 * 01-12 2022-2025 *</cycledef>
+  <cycledef group="rap_e">0 01-11,13-23 * 01-12 2022-2028 *</cycledef>
 
-  <cycledef group="rap">0 0,12 * 01-12 2022-2025 *</cycledef>
+  <cycledef group="rap">0 0,12 * 01-12 2022-2028 *</cycledef>
 
-  <cycledef group="3hours">0 */3 * 01-12 2022-2025 *</cycledef>
+  <cycledef group="3hours">0 */3 * 01-12 2022-2028 *</cycledef>
 
   <task name="&RUN;_clean_task" cycledefs="hourly" maxtries="&maxtries;">
     
