@@ -922,15 +922,15 @@
   </log>
 
 
-  <!--  <cycledef group="02-11hr">*/15 02-11,14-23 * 01-12 2022-2026 *</cycledef> -->
+  <!--  <cycledef group="02-11hr">*/15 02-11,14-23 * 01-12 2022-2028 *</cycledef> -->
   
-  <cycledef group="hourly">0 * * 01-12 2022-2026 *</cycledef>
+  <cycledef group="hourly">0 * * 01-12 2022-2028 *</cycledef>
   
-  <cycledef group="rap_e">0 01-11,13-23 * 01-12 2022-2026 *</cycledef>
+  <cycledef group="rap_e">0 01-11,13-23 * 01-12 2022-2028 *</cycledef>
 
-  <cycledef group="rap">0 0,12 * 01-12 2022-2026 *</cycledef>
+  <cycledef group="rap">0 0,12 * 01-12 2022-2028 *</cycledef>
 
-  <cycledef group="3hours">0 */3 * 01-12 2022-2026 *</cycledef>
+  <cycledef group="3hours">0 */3 * 01-12 2022-2028 *</cycledef>
 
   <task name="&RUN;_clean_task" cycledefs="hourly" maxtries="&maxtries;">
     
@@ -1131,7 +1131,6 @@
 
   </task>
 
-
   <task name="&RUN;_ncdiag_task" cycledefs="hourly" maxtries="&maxtries;">
        
     &ENVARS;
@@ -1193,26 +1192,26 @@
    </task>
 
   <task name="&RUN;_autoqc_task" cycledefs="hourly" maxtries="&maxtries;">
-   
+
     &ENVARS;
-    &AUTOQC_RESOURCES;  
+    &AUTOQC_RESOURCES;
     &AUTOQC_RESERVATION;
-      
+
     <envar>
        <name>rundir_task</name>
        <value><cyclestr>&DATA_AUTOQC;</cyclestr></value>
     </envar>
-      
+
     <command>&WORKFLOW_DIR;/launch.ksh &JJOB_AUTOQC;</command>
     <jobname><cyclestr>&RUN;_autoqc_job_@Y@m@d@H@M</cyclestr></jobname>
     <join><cyclestr>&LOG_SCHDLR;/&RUN;_&envir;_autoqc_@Y@m@d@H.log</cyclestr></join>
-      
+
     &ENVARS_AUTOQC;
-    
+
     <dependency>
           <taskdep task="&RUN;_gsianl_task"/>
     </dependency>
-      
+
   </task>
 
     <task name="&RUN;_wrfbufr" cycledefs="hourly" maxtries="&maxtries;">
@@ -1233,6 +1232,7 @@
     </dependency>
 
   </task>
+
   <task name="&RUN;_postsnd" cycledefs="hourly" maxtries="&maxtries;">
     &ENVARS;
     <envar>
