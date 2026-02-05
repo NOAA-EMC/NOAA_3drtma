@@ -34,7 +34,7 @@ cd $DATAsmartinit
 date
 # extract the output fields for Smartinit
 smartinit_fields_fn=${RUN}_natlev_smartinit.params
-$WGRIB2 ${COMIN}/postprd.t${cyc}z/${RUN}.t${cyc}z.wrfsubhnat.grib2 | grep -F -f ${parmdir}/${RUN}/${smartinit_fields_fn} | $WGRIB2 -i -grib ${RUN}_natgrd.tm00 ${COMIN}/postprd.t${cyc}z/${RUN}.t${cyc}z.wrfsubhnat.grib2
+$WGRIB2 ${COMIN}/postprd.t${cyc}z/${RUN}.t${cyc}z.wrfsubhnat.grib2 | grep -F -f ${parmdir}/${smartinit_fields_fn} | $WGRIB2 -i -grib ${RUN}_natgrd.tm00 ${COMIN}/postprd.t${cyc}z/${RUN}.t${cyc}z.wrfsubhnat.grib2
 
 # Define the CONUS 2.5 km NDFD grid
 export wgrib2def_ndfd="lambert:265:25.0:25.0 238.445999:2145:2539.703 20.191999:1377:2539.703"
@@ -47,8 +47,8 @@ for ndfdstring in ${ndfdstrings[@]}
     date
     case $ndfdstring in
       CS) domain=ndfd
-          cp ${fixdir}/${RUN}/${RUN}_terrain_consensus.gb2 TOPONDFDCS
-          cp ${fixdir}/${RUN}/${RUN}_smartmask_consensus.gb2 LANDNDFDCS
+          cp ${fixdir}/${RUN}_terrain_consensus.gb2 TOPONDFDCS
+          cp ${fixdir}/${RUN}_smartmask_consensus.gb2 LANDNDFDCS
           grb2index TOPONDFDCS TOPONDFDCSI
           grb2index LANDNDFDCS LANDNDFDCSI
           export wgrib2def=${wgrib2def_ndfd} ;;
@@ -60,7 +60,7 @@ do_parallel_smart="true"
 
 if [ "${do_parallel_smart}" = "true" ]; then
 
-  cp ${parmdir}/${RUN}/${smartinit_fields_fn} natlev.txt
+  cp ${parmdir}/${smartinit_fields_fn} natlev.txt
 
   sed -n -e '1,18p' natlev.txt > conus_natlev_1.txt
   sed -n -e '19,36p' natlev.txt > conus_natlev_2.txt
@@ -79,7 +79,7 @@ if [ "${do_parallel_smart}" = "true" ]; then
   for task in $(seq ${tasks[count]})
   do
     mkdir -p $DATAsmartinit/prdgen_${domain}_${leveltype}_${task}
-    echo "$USHrtma3d/${RUN}/${RUN}_prdgen_subpiece.sh $cyc $task $domain ${infile} ${DATAsmartinit} ${COMOUT} ${leveltype} " >> $DATAsmartinit/poescript
+    echo "$USHrtma3d/${RUN}_prdgen_subpiece.sh $cyc $task $domain ${infile} ${DATAsmartinit} ${COMOUT} ${leveltype} " >> $DATAsmartinit/poescript
   done
 
   chmod 755 ${DATAsmartinit}/poescript

@@ -53,13 +53,13 @@ fi
 
 cd $DATA
 
-cp $COMINm1/rtma3d.${cyclem1}.* $DATA/$PDYm1/prdgen.${cyclem1}
-cp $COMINm2/rtma3d.${cyclem2}.* $DATA/$PDYm2/prdgen.${cyclem2}
-cp $COMINm3/rtma3d.${cyclem3}.* $DATA/$PDYm3/prdgen.${cyclem3}
+cpreq -p $COMINm1/rtma3d.${cyclem1}.* $DATA/$PDYm1/prdgen.${cyclem1}
+cpreq -p $COMINm2/rtma3d.${cyclem2}.* $DATA/$PDYm2/prdgen.${cyclem2}
+cpreq -p $COMINm3/rtma3d.${cyclem3}.* $DATA/$PDYm3/prdgen.${cyclem3}
 
-ln -sf  $COMINobsproc_rtma3dm1 $DATA/$PDYm1
-ln -sf  $COMINobsproc_rtma3dm2 $DATA/$PDYm2
-ln -sf  $COMINobsproc_rtma3dm3 $DATA/$PDYm3
+#ln -sf  $COMINobsproc_rtma3dm1 $DATA/$PDYm1
+#ln -sf  $COMINobsproc_rtma3dm2 $DATA/$PDYm2
+#ln -sf  $COMINobsproc_rtma3dm3 $DATA/$PDYm3
 
 ln -sf  $GESINhrrr_rtma3dm1 $DATA/$PDYm1
 ln -sf  $GESINhrrr_rtma3dm2 $DATA/$PDYm2
@@ -172,7 +172,9 @@ do
    #
    #  Restrict tar file, if it contains restricted data.
    #
-       ${UTILrtma3d_dev}/rhist_restrict.sh ${hpssdir}/$tarfile htar
+   # No need to restrict the entire tarball.  Only need to restrict the actual files.
+   #
+   #    ${UTILrtma3d_dev}/rhist_restrict.sh ${hpssdir}/$tarfile htar
  
 
 #rm  ${DATA}/$file                     #MPondeca 30Jul2017

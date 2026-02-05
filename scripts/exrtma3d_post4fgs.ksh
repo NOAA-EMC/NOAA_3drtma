@@ -236,7 +236,7 @@ ${WGRIB2} -V ${COMOUT}/${RUN}.t${cyc}z.fgs.gust.grib2 -set_lev "10 m above groun
 wgrib2 ${workdir}/wrfsubhprs_fgs.grib2 -not_if "VIS:surface" -grib ${workdir}/wrfsubhprs_fgs.grib2_no_sfcvis
 wgrib2 ${workdir}/wrfsubhnat_fgs.grib2 -not_if "VIS:surface" -grib ${workdir}/wrfsubhnat_fgs.grib2_no_sfcvis
 # Overwrite wrfsubhprs and wrfsubhnat with renamed derived vis, analyzed vis, analyzed gust and analyzed wave height
-if [ "${RUN}" == "rtma3d" ]; then
+if [ "${dom}" == "conus" ]; then
   cat ${workdir}/wrfsubhprs_fgs.grib2_no_sfcvis ${workdir}/vis2mprs.grib2 tmpgust.grib2 ${COMOUT}/${RUN}.t${cyc}z.fgs.vis.grib2 ${COMOUT}/${RUN}.t${cyc}z.fgs.howv.grib2 > ${workdir}/wrfsubhprs_fgs.grib2
   cat ${workdir}/wrfsubhnat_fgs.grib2_no_sfcvis ${workdir}/vis2mnat.grib2 tmpgust.grib2 ${COMOUT}/${RUN}.t${cyc}z.fgs.vis.grib2 ${COMOUT}/${RUN}.t${cyc}z.fgs.howv.grib2 > ${workdir}/wrfsubhnat_fgs.grib2
 else
@@ -259,7 +259,7 @@ cp ${RUN}.t${cyc}z.fgs_natlev.grib2.idx $COMOUT/
 
   wgrib2 ${COMIN}/${RUN}.t${cyc}z.fgs_prslev.grib2 -not_if ":GUST:surface:|:VIS:2 m above ground" -grib ${RUN}.t${cyc}z.fgs_prslev.grib2_no_sfcgustvis
 # Note: NET should be RUN - AMG 
-  if [ "${RUN}" == "akrtma3d" ]; then
+  if [ "${dom}" == "conus" ]; then
     cat ${COMOUT}/${RUN}.t${cyc}z.fgs.howv.grib2 >> ${RUN}.t${cyc}z.fgs_prslev.grib2_no_sfcgustvis 
   fi
   infile_prslev=${workdir}/${RUN}.t${cyc}z.fgs_prslev.grib2_no_sfcgustvis
@@ -267,7 +267,7 @@ cp ${RUN}.t${cyc}z.fgs_natlev.grib2.idx $COMOUT/
 ##infile_prslev=${COMIN}/${RUN}.t${cyc}z.fgs_prslev.grib2
   wgrib2 ${infile_prslev} > prslev.txt
 
-  if [ "${RUN}" == "rtma3d" ]; then
+  if [ "${dom}" == "conus" ]; then
     domain="conus"
   else
     domain="alaska"
@@ -339,7 +339,7 @@ cp ${RUN}.t${cyc}z.fgs_natlev.grib2.idx $COMOUT/
         infile=${infile_natlev}
       fi
       mkdir -p ${workdir}/prdgen_${domain}_${leveltype}_${task}
-      echo "$USHrtma3d/${RUN}/${RUN}_prdgen_subpiece.sh $cyc $task $domain ${infile} ${workdir} ${COMOUT} ${leveltype} " >> ${workdir}/poescript
+      echo "$USHrtma3d//${RUN}_prdgen_subpiece.sh $cyc $task $domain ${infile} ${workdir} ${COMOUT} ${leveltype} " >> ${workdir}/poescript
     done
     count=$count+1
   done

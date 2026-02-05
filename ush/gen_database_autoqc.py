@@ -286,7 +286,7 @@ def gen_accept_lists(dat_var,eps,geps,rjrmse):
   itercyc=datetime.strptime(probecyc_long,'%Y%m%d%H')
   probeday_long = itercyc.strftime('%Y%m%d')
   probeHH_long = itercyc.strftime('%H')
-  COMprev_long = os.path.abspath(os.path.join(os.path.dirname(COM), '../'+'/'+NET+'.'+probeday_long+'/autoqcprd.t'+probeHH_long+'z')) # MTM - revert NET to thisRUN
+  COMprev_long = os.path.abspath(os.path.join(os.path.dirname(COM), '../../'+'/'+NET+'.'+probeday_long+'/'+dom+'/autoqcprd.t'+probeHH_long+'z')) # MTM - revert NET to thisRUN
 
   if np.float(cycle_HH)%num_cycs==num_cycs-1 and dat_var.shape[0]>0:
     cyc_delim=datetime.strptime(cyclestr,'%Y%m%d%H')+timedelta(hours=-num_cycs)
@@ -432,11 +432,11 @@ def gen_accept_lists(dat_var,eps,geps,rjrmse):
         probecyc = itercyc.strftime('%Y%m%d%H')
         probeday = itercyc.strftime('%Y%m%d')
         probeHH = itercyc.strftime('%H')
-        COMprior = os.path.abspath(os.path.join(os.path.dirname(COM), '../'+'/'+NET+'.'+probeday+'/autoqcprd.t'+probeHH+'z')) # MTM - revert NET to thisRUN
+        COMprior = os.path.abspath(os.path.join(os.path.dirname(COM), '../../'+'/'+NET+'.'+probeday+'/'+dom+'/autoqcprd.t'+probeHH+'z')) # MTM - revert NET to thisRUN
         print('COMPRIOR = ',COMprior)
         probecyc_m1 = datetime.strftime(datetime.strptime(probecyc,'%Y%m%d%H')-timedelta(hours=num_cycs),'%Y%m%d%H')
         probeHH_m1 = datetime.strftime(datetime.strptime(probecyc,'%Y%m%d%H')-timedelta(hours=num_cycs),'%H')
-        COMprior_m1 = os.path.abspath(os.path.join(os.path.dirname(COM), '../'+'/'+NET+'.'+probecyc_m1[0:8]+'/autoqcprd.t'+probecyc_m1[8:10]+'z')) # MTM - revert NET to thisRUN
+        COMprior_m1 = os.path.abspath(os.path.join(os.path.dirname(COM), '../../'+'/'+NET+'.'+probecyc_m1[0:8]+'/'+dom+'/autoqcprd.t'+probecyc_m1[8:10]+'z')) # MTM - revert NET to thisRUN
         print('COMprior_m1 =',COMprior_m1)
         break
       itercyc = itercyc - delta
@@ -638,6 +638,7 @@ if __name__ == "__main__":
   cyclestr_m1=sys.argv[6]
   probecyc_long=sys.argv[7]
   tinf=np.float64(sys.argv[8]) # Constant timescale associated with an observation
+  dom=sys.argv[9]
 
   exp='para'
   NET='rtma3d' # MTM - remove after RUN is defined correctly

@@ -20,7 +20,7 @@ check_dirs_exist() { #usage: check_dirs_exist "var1_name" "var2_name" ...
 # Set the name to the executable of ncdiag (default: using serial code)
   export exefile_name_ncdiag=${exefile_name_ncdiag:-"ncdiag_cat_serial.x"}
 
-if [ "${envir}" == "lsf" ] || [ "${envir}" == "pbspro" ]; then
+#if [ "${envir}" == "lsf" ] || [ "${envir}" == "pbspro" ]; then
 
 # make sure executable exists
   if [ -n ${ncdiag_VERSION} ] && [ -d ${ncdiag_ROOT} ] ; then  # module ncdiag was loaded successfully on wcoss2
@@ -35,7 +35,7 @@ if [ "${envir}" == "lsf" ] || [ "${envir}" == "pbspro" ]; then
     err_exit
   fi
 
-fi
+#fi
 
 # Directory where the original split obs-diag files (netcdf4) are saved
 #           (default ==> the shared directory)
@@ -174,6 +174,7 @@ fi
         ${CP} -p ${DATA}/diag_${type}_*.${cycle_str}.${RUN}.nc4      ${COMOUTgsi_rtma3d}
         rm -f ${COMOUTgsi_rtma3d}/diag_${type}_*.${cycle_str}.${RUN}.nc4.gz
         gzip  ${COMOUTgsi_rtma3d}/diag_${type}_*.${cycle_str}.${RUN}.nc4
+        chgrp rstprod ${COMOUTgsi_rtma3d}/diag_${type}_*.${cycle_str}.${RUN}.nc4.gz
      done
 
   else

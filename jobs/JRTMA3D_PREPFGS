@@ -19,26 +19,13 @@ export RUN_ENVIR=${RUN_ENVIR:-nco}
 ####################################
 export NET=${NET:-rtma3d}
 export RUN=${RUN:-rtma3d}
-export model=${model:-rtma3d}
 
 ##########################################################
-# obtain unique process id (pid)
+# Define data and shared directories
 ##########################################################
-export job=${job:-"${outid}.o$$"}
-export jobid=${jobid:-"${outid}.o$$"}
-export MPIRUN=${MPIRUN:-"mpirun"}
-
-export CNVGRIB=${CNVGRIB:-cnvgrib}
-
-##########################################################
-# make temp/running directories
-##########################################################
-export DATA=${DATA:-$DATAROOT/${jobid:?}} #jobid ($job.$LSB_JOBID MUST BE DEFINED IN TERMS OF $RUN IN UPPER LEVEL SCRIPT /MPondeca, 26Jul2015
-if [ -d $DATA ] ; then
-   rm  -rf $DATA/*
-else
-   mkdir -p $DATA
-fi
+export DATA=${DATA:-$DATAROOT/${jobid:?}}
+export DATA_SHARED=${DATA_SHARED:-${DATAROOT}/sharedprd}
+mkdir -p $DATA $DATA_SHARED
 cd $DATA
 
 #####################################################
@@ -50,49 +37,31 @@ export cycle=${cycle:-t${cyc}z}
 setpdy.sh
 . ./PDY
 
+export CDATE="${PDY}${cyc}"
 export PDYHH="${PDY}${cyc}"
 PDYm1=`$NDATE -24 ${PDY}${cyc} | cut -c 1-8`
 
-####################################
-# Determine Job Output Name on System
-####################################
-export LOG_JJOB=${LOG_JJOB:-$COMROOT/logs/jlogfiles}
-export jlogfile=${jlogfile:-$LOG_JJOB/jlogfile.${jobid}}
-# export pgmout=${pgmout:-"OUTPUT.$$"}
-export pgmout=${pgmout:-"OUTPUT.${PDY}${cyc}.${jobid}"}
-if [ ! -d ${LOG_JJOB} ] ; then
-   mkdir -p ${LOG_JJOB}
-fi
-if [ ! -d ${LOG_PGMOUT} ] ; then
-   mkdir -p ${LOG_PGMOUT}
-fi
+export pgmout=${pgmout:-"OUTPUT.$$"}
 
 # specify the file head for the file names of the archived data files
 export PROD_HEAD=${PROD_HEAD:-${NET}.t${cyc}z}
 
 # Specify Execution Areas
-export HOMErtma3d=${HOMErtma3d:-$NWROOT/rtma.${rtma_ver}}
+export HOMErtma3d=${HOMErtma3d:-$PACKAGEROOT/${NET}.${rtma3d_ver}}
 export EXECrtma3d=${EXECrtma3d:-$HOMErtma3d/exec}
-export FIXrtma3d=${FIXrtma3d:-$HOMErtma3d/fix/${NET}}
-export PARMrtma3d=${PARMrtma3d:-$HOMErtma3d/parm/${NET}}
-export USHrtma3d=${USHrtma3d:-$HOMErtma3d/ush/${NET}}
-export UTILrtma3d=${UTILrtma3d:-$HOMErtma3d/util/${NET}}
-
-# Set the path to the GSI static files
-export FIXgsi=${FIXgsi:-"${FIXrtma3d}/gsi"}
+export FIXrtma3d=${FIXrtma3d:-$HOMErtma3d/fix/${dom}}
+export PARMrtma3d=${PARMrtma3d:-$HOMErtma3d/parm/${dom}}
+export USHrtma3d=${USHrtma3d:-$HOMErtma3d/ush/${dom}}
 
 #################################################
 # Set up the INPUT and OUTPUT directories
 #################################################
-export COMIN=${COMIN:-${COMROOT}/${NET}/${envir}/${NET}.${PDY}}
-export COMOUT=${COMOUT:-${COMROOT}/${NET}/${envir}/${NET}.${PDY}}
+export COMIN=${COMIN:-$(compath.py  ${envir}/${NET}/${rtma3d_ver})/${RUN}.${PDY}/${dom}}
+export COMOUT=${COMOUT:-$(compath.py -o  ${envir}/${NET}/${rtma3d_ver})/${RUN}.${PDY}/${dom}}
 
 # Directory to store the firstguess as input for the RTMA3D (NETCDF?) 
 
-export COMINrap=${COMINRAP}/rap.${PDY}
-export COMINhrrr=${COMINHRRR}/hrrr.${PDY}/${NET}
 export GESINhrrr=${GESINHRRR}
-export GESINhrrrm1=${GESINHRRR}
 
 export GESINhrrr_rtma3d=${GESINhrrr_rtma3d:-"${COMIN}/fgsprd.${cycle}"}
 export PDYHH_cycm1=$($NDATE -01  "${PDYHH}")
@@ -143,7 +112,7 @@ fi
 ######################
 # Execute the script.
 ######################
-${exSCR_PREPFGS:-$HOMErtma3d/scripts/$RUN/ex${RUN}_prepfgs.ksh}
+$HOMErtma3d/scripts/${dom}/ex${RUN}_prepfgs.ksh
 export err=$?; err_chk
 
 msg="$0 of $job completed normally"

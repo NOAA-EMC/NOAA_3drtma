@@ -74,9 +74,9 @@ export PROD_HEAD=${PROD_HEAD:-${NET}.t${cyc}z}
 # Specify Execution Areas
 export HOMErtma3d=${HOMErtma3d:-$NWROOT/rtma.${rtma_ver}}
 export EXECrtma3d=${EXECrtma3d:-$HOMErtma3d/exec}
-export FIXrtma3d=${FIXrtma3d:-$HOMErtma3d/fix/${NET}}
-export PARMrtma3d=${PARMrtma3d:-$HOMErtma3d/parm/${NET}}
-export USHrtma3d=${USHrtma3d:-$HOMErtma3d/ush/${NET}}
+export FIXrtma3d=${FIXrtma3d:-$HOMErtma3d/fix/${dom}}
+export PARMrtma3d=${PARMrtma3d:-$HOMErtma3d/parm/${dom}}
+export USHrtma3d=${USHrtma3d:-$HOMErtma3d/ush/${dom}}
 export UTILrtma3d=${UTILrtma3d:-$HOMErtma3d/util/${NET}}
 
 # Set the path to the GSI static files
@@ -85,8 +85,8 @@ export FIXgsi=${FIXgsi:-"${FIXrtma3d}/gsi"}
 #################################################
 # Set up the INPUT and OUTPUT directories
 #################################################
-export COMIN=${COMIN:-${COMROOT}/${NET}/${envir}/${NET}.${PDY}}
-export COMOUT=${COMOUT:-${COMROOT}/${NET}/${envir}/${NET}.${PDY}}
+export COMIN=${COMIN:-$(compath.py  ${envir}/${NET}/${rtma3d_ver})/${RUN}.${PDY}/${dom}}
+export COMOUT=${COMOUT:-$(compath.py -o  ${envir}/${NET}/${rtma3d_ver})/${RUN}.${PDY}/${dom}}
 export seaice_analysis_ver=v4.5
 export COMINsice=${COMINsice:-$(compath.py prod/seaice_analysis/${seaice_analysis_ver})}
 
@@ -127,7 +127,7 @@ fi
 ######################
 # Execute the script.
 ######################
-${exSCR_ANLDUMP:-$HOMErtma3d/scripts/$RUN/ex${RUN}_anldump.ksh}
+${exSCR_ANLDUMP:-$HOMErtma3d/scripts/$dom/ex${RUN}_anldump.ksh}
 export err=$?; err_chk
 
 msg="$0 of $job completed normally"

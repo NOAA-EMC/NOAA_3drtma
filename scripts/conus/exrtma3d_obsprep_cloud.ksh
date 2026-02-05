@@ -1,0 +1,45 @@
+#!/bin/ksh 
+
+set -x
+
+postmsg "$0 of $job has begun"
+
+cd ${DATA}
+
+# BUFR Table
+cpreq -p ${PARMrtma3d}/${RUN}_prepobs_prep.bufrtable prepobs_prep.bufrtable
+# WPS GEO_GRID Data
+cpreq ${FIXrtma3d}/${RUN}_geo_em.d01.nc geo_em.d01.nc
+
+# Link to the NASA LaRC cloud data
+cpreq ${COMINobsproc}/${NET}.t${cyc}z.lgycld.tm00.bufr_d ${NET}.t${cyc}z.lgycld.tm00.bufr_d
+cpreq ${NET}.t${cyc}z.lgycld.tm00.bufr_d NASA_LaRC_cloud.bufr
+
+# Build the namelist on-the-fly
+cat << EOF > namelist_nasalarc
+&SETUP
+analysis_time = ${CDATE},
+bufrfile='NASALaRCCloudInGSI.bufr',
+npts_rad=3,
+ioption = 2,
+/
+EOF
+
+# Run obs processor
+export pgm="${NET}_process_cloud"
+. prep_step
+
+startmsg
+
+mpiexec $EXECrtma3d/${pgm} >> ${pgmout} 2>errfile
+export err=$?; err_chk
+
+cpreq ${DATA}/${NET}.t${cyc}z.lgycld.tm00.bufr_d ${COMOUT}/${NET}.t${cyc}z.lgycld.tm00.${dom}.bufr_d
+targetfile="NASALaRCCloudInGSI.bufr"
+if [ -f ${DATA}/${targetfile} ] ; then
+  cpreq ${DATA}/${targetfile} ${COMOUT}/${RUN}.t${cyc}z.NASALaRCCloudInGSI.${dom}.bufr
+else
+  msg="WARNING $pgm terminated normally but ${DATA}/${targetfile} does NOT exist."
+fi
+
+postmsg "$0 of $job completed normally"

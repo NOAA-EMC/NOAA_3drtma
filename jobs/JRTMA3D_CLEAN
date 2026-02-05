@@ -40,7 +40,7 @@ if [ ! -d ${LOG_PGMOUT} ] ; then
 fi
 
 # Specify Execution Areas
-export HOMErtma3d=${HOMErtma3d:-$NWROOT/rtma.${rtma_ver}}
+export HOMErtma3d=${HOMErtma3d:-$PACKAGEROOT/${NET}.${rtma3d_ver}}
 
 # date and time for previous and next cycle
 export PDYHH="${PDY}${cyc}"
