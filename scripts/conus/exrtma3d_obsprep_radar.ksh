@@ -41,13 +41,13 @@ do
   s=0
   while [[ $s -le 59 ]]; do
     ss=$(printf %2.2i ${s})
-    radarfilez=${COMINradar}/conus/${obsname}/${obsname}_00.50_${YYYY}${MM}${DD}-${HH}${min}${ss}.grib2.gz
+    radarfilez=${COMINradar}/${dom}/${obsname}/${obsname}_00.50_${YYYY}${MM}${DD}-${HH}${min}${ss}.grib2.gz
     if [ -s $radarfilez ]; then
       echo 'Found '${radarfilez}
-      numgrib2=`ls ${COMINradar}/conus/${obsname}/${obsname}_*_${YYYY}${MM}${DD}-${HH}${min}*.grib2.gz | wc -l`
+      numgrib2=`ls ${COMINradar}/${dom}/${obsname}/${obsname}_*_${YYYY}${MM}${DD}-${HH}${min}*.grib2.gz | wc -l`
       echo 'Number of GRIB-2 files: '${numgrib2}
       if [ ${numgrib2} -ge 1 ] && [ ! -e filelist_mrms ]; then
-        cpreq ${COMINradar}/conus/${obsname}/${obsname}_*_${YYYY}${MM}${DD}-${HH}${min}*.grib2.gz .
+        cpreq ${COMINradar}/${dom}/${obsname}/${obsname}_*_${YYYY}${MM}${DD}-${HH}${min}*.grib2.gz .
         gzip -d ${obsname}_*_${YYYY}${MM}${DD}-${HH}${min}*.grib2.gz
         ls ${obsname}_*_${YYYY}${MM}${DD}-${HH}${min}*.grib2 > filelist_mrms
 # store information needed for retrospective runs in rerun_info.txt

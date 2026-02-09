@@ -18,10 +18,11 @@ echo " processing NCEP BUFR Lightning Data"
 
 # find lightning bufr file
 
-cpreq -p ${COMINobsproc}/${NET}.t${cyc}z.lghtng.tm00.bufr_d ${NET}.t${cyc}z.lghtng.tm00.bufr_d
-cpreq -p ${NET}.t${cyc}z.lghtng.tm00.bufr_d  lghtngbufr
-
-echo ${CDATE} > ./lightning_cycle_date
+if [ -s "${COMINobsproc}/${NET}.t${cyc}z.lghtng.tm00.bufr_d" ]; then
+  cpreq -p ${COMINobsproc}/${NET}.t${cyc}z.lghtng.tm00.bufr_d lghtngbufr
+else
+  echo "WARNING: ${COMINobsproc}/${NET}.t${cyc}z.lghtng.tm00.bufr_d is not available ..."
+fi
 
 # Build the namelist on-the-fly
 cat << EOF > lightning_bufr.namelist
@@ -43,10 +44,10 @@ startmsg
 mpiexec $EXECrtma3d/${pgm} >> ${pgmout} 2>errfile
 export err=$?; err_chk
 
-cpreq -p ${RUN}.t${cyc}z.lghtng.tm00.bufr_d ${COMOUT}/${RUN}.t${cyc}z.lghtng.tm00.${dom}.bufr_d
+cpreq -p lghtngbufr ${COMOUT}/${RUN}.t${cyc}z.lghtng.tm00.${dom}.bufr_d
+
 chgrp rstprod LightningInGSI.bufr
-cpreq -p LightningInGSI.bufr LightningInGSI_bufr.bufr
-lghtng_bufr="LightningInGSI_bufr.bufr"
+lghtng_bufr="LightningInGSI.bufr"
 if [ -f ${DATA}/${lghtng_bufr} ] ; then
   cpreq -p ${DATA}/${lghtng_bufr} ${COMOUT}/${RUN}.t${cyc}z.LightningInGSI_bufr.${dom}.bufr
 else

@@ -11,9 +11,12 @@ cpreq -p ${PARMrtma3d}/${RUN}ak_prepobs_prep.bufrtable prepobs_prep.bufrtable
 # WPS GEO_GRID Data
 cpreq ${FIXrtma3d}/${RUN}ak_geo_em.d01.nc geo_em.d01.nc
 
-# Link to the NASA LaRC cloud data
-cpreq ${COMINobsproc}/${NET}.t${cyc}z.lgycld.tm00.bufr_d ${NET}.t${cyc}z.lgycld.tm00.bufr_d
-cpreq ${NET}.t${cyc}z.lgycld.tm00.bufr_d NASA_LaRC_cloud.bufr
+# Copy the NASA LaRC cloud data
+if [ -s "${COMINobsproc}/${NET}.t${cyc}z.lgycld.tm00.bufr_d" ]; then
+  cpreq ${COMINobsproc}/${NET}.t${cyc}z.lgycld.tm00.bufr_d NASA_LaRC_cloud.bufr
+else
+  echo "WARNING: ${COMINobsproc}/${NET}.t${cyc}z.lgycld.tm00.bufr_d is not available ..."
+fi
 
 # Build the namelist on-the-fly
 cat << EOF > namelist_nasalarc
@@ -34,7 +37,8 @@ startmsg
 mpiexec $EXECrtma3d/${pgm} >> ${pgmout} 2>errfile
 export err=$?; err_chk
 
-cpreq ${DATA}/${NET}.t${cyc}z.lgycld.tm00.bufr_d ${COMOUT}/${NET}.t${cyc}z.lgycld.tm00.${dom}.bufr_d
+cpreq NASA_LaRC_cloud.bufr ${COMOUT}/${NET}.t${cyc}z.lgycld.tm00.${dom}.bufr_d
+
 targetfile="NASALaRCCloudInGSI.bufr"
 if [ -f ${DATA}/${targetfile} ] ; then
   cpreq ${DATA}/${targetfile} ${COMOUT}/${RUN}.t${cyc}z.NASALaRCCloudInGSI.${dom}.bufr
