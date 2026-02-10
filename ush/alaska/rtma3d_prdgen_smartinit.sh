@@ -2,8 +2,8 @@
 ################################################################################
 ####  UNIX Script Documentation Block
 #                      .                                             .
-# Script name:         rtma_prdgen_smartinit.sh
-# Script description:  Run RTMA "smartinit" product generation job
+# Script name:         akrtma3d_prdgen_smartinit.sh
+# Script description:  Run RTMA "obslist" product generation job
 #
 # Author: Annette Gibbs  Org: NOAA/EMC         Date: 2024-10-18
 #
@@ -33,25 +33,24 @@ cd $DATAsmartinit
 # Run Smartinit
 date
 # extract the output fields for Smartinit
-smartinit_fields_fn=${RUN}_natlev_smartinit.params
-$WGRIB2 ${COMIN}/postprd.t${cyc}z/${RUN}.t${cyc}z.wrfsubhnat.grib2 | grep -F -f ${parmdir}/${RUN}/${smartinit_fields_fn} | $WGRIB2 -i -grib ${RUN}_natgrd.tm00 ${COMIN}/postprd.t${cyc}z/${RUN}.t${cyc}z.wrfsubhnat.grib2
+smartinit_fields_fn=${RUN}ak_natlev_smartinit.params
+$WGRIB2 ${COMIN}/postprd.t${cyc}z/${RUN}.t${cyc}z.wrfsubhnat.grib2 | grep -F -f ${parmdir}/${smartinit_fields_fn} | $WGRIB2 -i -grib ${RUN}_natgrd.tm00 ${COMIN}/postprd.t${cyc}z/${RUN}.t${cyc}z.wrfsubhnat.grib2
 
-# Define the CONUS 2.5 km NDFD grid
-export wgrib2def_ndfd="lambert:265:25.0:25.0 238.445999:2145:2539.703 20.191999:1377:2539.703"
-export wgrib2def_nwrfc="lambert:265:25:25 234.042704:709:2539.703 37.979684:795:2539.703"
+# Define the Alaska 3 km NDFD grid
+export wgrib2def_ak="nps:210:60 181.429:1649:2976.563 40.530101:1105:2976.563"
 
-ndfdstrings=(CS)
+ndfdstrings=(AK)
 
 for ndfdstring in ${ndfdstrings[@]}
   do
     date
     case $ndfdstring in
-      CS) domain=ndfd
-          cp ${fixdir}/${RUN}/${RUN}_terrain_consensus.gb2 TOPONDFDCS
-          cp ${fixdir}/${RUN}/${RUN}_smartmask_consensus.gb2 LANDNDFDCS
-          grb2index TOPONDFDCS TOPONDFDCSI
-          grb2index LANDNDFDCS LANDNDFDCSI
-          export wgrib2def=${wgrib2def_ndfd} ;;
+      AK) domain=ak
+          cp ${fixdir}/${RUN}ak_smarttopoak3.grb2 TOPONDFDAK
+          cp ${fixdir}/${RUN}ak_smartmaskak3.grb2 LANDNDFDAK
+          grb2index TOPONDFDAK TOPONDFDAKI
+          grb2index LANDNDFDAK LANDNDFDAKI
+          export wgrib2def=${wgrib2def_ak} ;;
     esac
 
 # Do we set radius like we do for HRRR? AMG
@@ -60,26 +59,26 @@ do_parallel_smart="true"
 
 if [ "${do_parallel_smart}" = "true" ]; then
 
-  cp ${parmdir}/${RUN}/${smartinit_fields_fn} natlev.txt
+  cp ${parmdir}/${smartinit_fields_fn} natlev.txt
 
-  sed -n -e '1,18p' natlev.txt > conus_natlev_1.txt
-  sed -n -e '19,36p' natlev.txt > conus_natlev_2.txt
-  sed -n -e '37,54p' natlev.txt > conus_natlev_3.txt
-  sed -n -e '55,72p' natlev.txt > conus_natlev_4.txt
-  sed -n -e '73,90p' natlev.txt > conus_natlev_5.txt
-  sed -n -e '91,108p' natlev.txt > conus_natlev_6.txt
-  sed -n -e '109,126p' natlev.txt > conus_natlev_7.txt
-  sed -n -e '127,$p' natlev.txt > conus_natlev_8.txt
+  sed -n -e '1,18p' natlev.txt > alaska_natlev_1.txt
+  sed -n -e '19,36p' natlev.txt > alaska_natlev_2.txt
+  sed -n -e '37,54p' natlev.txt > alaska_natlev_3.txt
+  sed -n -e '55,72p' natlev.txt > alaska_natlev_4.txt
+  sed -n -e '73,90p' natlev.txt > alaska_natlev_5.txt
+  sed -n -e '91,108p' natlev.txt > alaska_natlev_6.txt
+  sed -n -e '109,126p' natlev.txt > alaska_natlev_7.txt
+  sed -n -e '127,$p' natlev.txt > alaska_natlev_8.txt
 
   tasks=(8)
   leveltype=natlev
-  domain=conus
+  domain=alaska
   infile=${DATAsmartinit}/${RUN}_natgrd.tm00
 
   for task in $(seq ${tasks[count]})
   do
     mkdir -p $DATAsmartinit/prdgen_${domain}_${leveltype}_${task}
-    echo "$USHrtma3d/${RUN}/${RUN}_prdgen_subpiece.sh $cyc $task $domain ${infile} ${DATAsmartinit} ${COMOUT} ${leveltype} " >> $DATAsmartinit/poescript
+    echo "$USHrtma3d/${RUN}_prdgen_subpiece.sh $cyc $task $domain ${infile} ${DATAsmartinit} ${COMOUT} ${leveltype} " >> $DATAsmartinit/poescript
   done
 
   chmod 755 ${DATAsmartinit}/poescript
@@ -92,7 +91,7 @@ if [ "${do_parallel_smart}" = "true" ]; then
 # reassemble the output
 
   tasks=(8)
-  domain=conus
+  domain=alaska
   count=0
   for task in $(seq ${tasks[count]})
   do
@@ -101,7 +100,6 @@ if [ "${do_parallel_smart}" = "true" ]; then
 
 else
 
-date
     $WGRIB2 ${RUN}_natgrd.tm00 -set_grib_type c3 -set_bitmap 1 -new_grid_winds grid \
            -new_grid_interpolation bilinear \
            -if ":(SFCR|LAND|VGTYP|CEIL|VIS):" -new_grid_interpolation neighbor -fi \
@@ -134,10 +132,8 @@ $fhr
 $cyc
 EOF
 
-date
     mpiexec -n 1 -ppn 1 $EXECdir/${pgm} < smart.nml >>$pgmout 2>errfile
     export err=$?; err_chk
-date
 
     cat ../tmpout.grib2tmp >> ${RUN}${ndfdstring}.tm00
     cp ${RUN}${ndfdstring}.tm00 ${COMOUT}/${RUN}.t${cyc}z.smart.${domain}.grib2

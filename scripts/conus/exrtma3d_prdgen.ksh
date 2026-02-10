@@ -103,7 +103,7 @@ if [ "${do_parallel_prdgen}" = "true" ]; then
         infile=${infile_natlev}
       fi
       mkdir -p $DATA/prdgen_${domain}_${leveltype}_${task}
-      echo "$USHrtma3d/${RUN}/${RUN}_prdgen_subpiece.sh $cyc $task $domain ${infile} ${DATA} ${COMOUT} ${leveltype} " >> $DATA/poescript
+      echo "$USHrtma3d/${RUN}_prdgen_subpiece.sh $cyc $task $domain ${infile} ${DATA} ${COMOUT} ${leveltype} " >> $DATA/poescript
     done 
     count=$count+1
   done
@@ -168,7 +168,7 @@ wgrib2 ${COMIN}/${RUN}.t${cyc}z.anl.howv.grib2 -set_bitmap 1 -set_grib_type c3 -
    -new_grid_interpolation bilinear \
    -new_grid ${grid_specs} ${RUN}.t${cyc}z.anl.howv_ndfd.grib2
 
-cp ${FIXrtma3d}/${RUN}/${RUN}_slmask_howv_HR.grb2 slmask.grb2
+cp ${FIXrtma3d}/${RUN}_slmask_howv_HR.grb2 slmask.grb2
 
 CDATE=$PDY$cyc
 echo $CDATE
@@ -246,7 +246,7 @@ DATAsmartinit=${DATA}/prdgen_smartinit
 mkdir -p $DATAsmartinit
 USHrrfs=$USHdir/prdgen
 export fhr=00
-${USHrtma3d}/${RUN}/${RUN}_prdgen_smartinit.sh $cyc $PDY $DATAsmartinit ${COMOUT} ${COMIN} ${USHrtma3d} $RUN $EXECrtma3d $FIXrtma3d $PARMrtma3d ${NET} >> stdout 2>&1
+${USHrtma3d}/${RUN}_prdgen_smartinit.sh $cyc $PDY $DATAsmartinit ${COMOUT} ${COMIN} ${USHrtma3d} $RUN $EXECrtma3d $FIXrtma3d $PARMrtma3d ${NET} >> stdout 2>&1
 date
 
 smart_fields=':(TMP|DPT|SPFH):2 m above ground:anl:|:(UGRD|VGRD|WIND|WDIR|GUST):10 m above ground:anl:|:(GUST|PRES|HGT|HTSGW):surface:|:TCDC:entire atmosphere|HGT:cloud ceiling:|VIS'
@@ -262,7 +262,7 @@ echo "run the obslist code"
 DATAobslist=${DATA}/prdgen_obslist
 mkdir -p $DATA/prdgen_obslist
 USHrrfs=$USHdir/prdgen
-${USHrtma3d}/${RUN}/${RUN}_prdgen_obslist.sh $cyc $PDY $DATAobslist ${COMOUT} ${COMIN} ${USHrtma3d} $RUN $EXECrtma3d $FIXrtma3d $PARMrtma3d ${NET} >> stdout 2>&1
+${USHrtma3d}/${RUN}_prdgen_obslist.sh $cyc $PDY $DATAobslist ${COMOUT} ${COMIN} ${USHrtma3d} $RUN $EXECrtma3d $FIXrtma3d $PARMrtma3d ${NET} >> stdout 2>&1
 export err=$?; err_chk                       #GZ: ==> exit abnormally if obslisting crashed
 date
 

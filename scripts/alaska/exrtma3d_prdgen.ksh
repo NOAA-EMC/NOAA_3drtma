@@ -103,7 +103,7 @@ if [ "${do_parallel_prdgen}" = "true" ]; then
         infile=${infile_natlev}
       fi
       mkdir -p $DATA/prdgen_${domain}_${leveltype}_${task}
-      echo "$USHrtma3d/${RUN}/${RUN}_prdgen_subpiece.sh $cyc $task $domain ${infile} ${DATA} ${COMOUT} ${leveltype} " >> $DATA/poescript
+      echo "$USHrtma3d/${RUN}_prdgen_subpiece.sh $cyc $task $domain ${infile} ${DATA} ${COMOUT} ${leveltype} " >> $DATA/poescript
     done 
     count=$count+1
   done
@@ -168,7 +168,7 @@ field=':HTSGW:surface:'
 mask=':LAND:surface:anl:'
 leveltype=prslev
 
-cp ${FIXrtma3d}/${RUN}/${RUN}_slmask_nolakes.grb2 tmpmask.grib2tmp
+cp ${FIXrtma3d}/${RUN}ak_slmask_nolakes.grb2 tmpmask.grib2tmp
 cat ${RUN}.t${cyc}z.anl.howv_ndfd.grib2 >> tmpmask.grib2tmp
 wgrib2 tmpmask.grib2tmp \
   -if '^1:' \
@@ -189,7 +189,7 @@ echo "run the smartinit code"
 DATAsmartinit=${DATA}/prdgen_smartinit
 mkdir -p $DATAsmartinit
 export fhr=00
-${USHrtma3d}/${RUN}/${RUN}_prdgen_smartinit.sh $cyc $PDY $DATAsmartinit ${COMOUT} ${COMIN} ${USHrtma3d} $RUN $EXECrtma3d $FIXrtma3d $PARMrtma3d ${NET} >> stdout 2>&1
+${USHrtma3d}/${RUN}_prdgen_smartinit.sh $cyc $PDY $DATAsmartinit ${COMOUT} ${COMIN} ${USHrtma3d} $RUN $EXECrtma3d $FIXrtma3d $PARMrtma3d ${NET} >> stdout 2>&1
 date
 
 smart_fields=':(TMP|DPT|SPFH):2 m above ground:anl:|:(UGRD|VGRD|WIND|WDIR|GUST):10 m above ground:anl:|:(GUST|PRES|HGT|HTSGW):surface:|:TCDC:entire atmosphere|HGT:cloud ceiling:|VIS'
@@ -204,7 +204,7 @@ cpreq ${RUN}.t${cyc}z.anl_${leveltype}_ndfd.grib2.idx ${COMOUT}/${RUN}.t${cyc}z.
 echo "run the obslist code"
 DATAobslist=${DATA}/prdgen_obslist
 mkdir -p $DATAobslist
-${USHrtma3d}/${RUN}/${RUN}_prdgen_obslist.sh $cyc $PDY $DATAobslist ${COMOUT} ${COMIN} ${USHrtma3d} $RUN $EXECrtma3d $FIXrtma3d $PARMrtma3d ${NET} >> stdout 2>&1
+${USHrtma3d}/${RUN}_prdgen_obslist.sh $cyc $PDY $DATAobslist ${COMOUT} ${COMIN} ${USHrtma3d} $RUN $EXECrtma3d $FIXrtma3d $PARMrtma3d ${NET} >> stdout 2>&1
 export err=$?; err_chk                       #GZ: ==> exit abnormally if obslisting crashed
 date
 

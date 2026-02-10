@@ -17,13 +17,18 @@ check_dirs_exist() { #usage: check_dirs_exist "var1_name" "var2_name" ...
   done
 }
 
-if [ "${envir}" == "lsf" ] || [ "${envir}" == "pbspro" ]; then
+#if [ "${envir}" == "lsf" ] || [ "${envir}" == "pbspro" ]; then
 OBS_DIR=${DATAOBSHOME}
 BKG_DIR=${DATAHOME_BK}
 COMINhrrrdas=${COMINHRRRDAS}
-fi
+#fi
 subcyc=${subcyc:-"00"}
 START_TIME=`${DATE} -d "${PDY} ${cyc} ${subcyc} minutes"`
+if [ ${HRRRDAS_BEC} -eq 0 ]; then
+EnsWgt=0.5
+else
+EnsWgt=0.9
+fi
 # Compute date & time components for the analysis time
 YYYYMMDDHH=`${DATE} +"%Y%m%d%H" -d "${START_TIME}"`
 YYYYMMDDHHMM=`${DATE} +"%Y%m%d%H%M" -d "${START_TIME}"`
@@ -45,9 +50,9 @@ ifsoilnudge=.true.
 
 cycle_str=${PDY}${cyc}
 # Look for background field for GSI analysis
-if [ "${envir}" == "lsf" ] || [ "${envir}" == "pbspro" ]; then #wcoss expr runs
+#if [ "${envir}" == "lsf" ] || [ "${envir}" == "pbspro" ]; then #wcoss expr runs
   GSIbackground=${BKG_DIR}/${FGSrtma3d_FNAME}
-fi
+#fi
 
 if [ -r ${GSIbackground} ]; then
   cpfs ${GSIbackground} ./wrf_inout
@@ -76,65 +81,50 @@ RUN_HOWV="No"
 #       please reset RUN_HOWV="No".
 # RUN_HOWV="No"
 
-# Link to the prepbufr data
-if [ -r ${OBS_DIR}/${NET}.t${cyc}z.prepbufr.tm00 ]; then
-  ${LN} -sf ${OBS_DIR}/${NET}.t${cyc}z.prepbufr.tm00 ./prepbufr
-fi
-
-if [ -r "${OBS_DIR}/${NET}.t${cyc}z.NSSLRefInGSI.bufr" ]; then
-  ${LN} -sf ${OBS_DIR}/${NET}.t${cyc}z.NSSLRefInGSI.bufr ./refInGSI
+if [ -s ${COMINobsproc}/${NET}.t${cyc}z.prepbufr.tm00 ]; then
+  cpreq -p ${COMINobsproc}/${NET}.t${cyc}z.prepbufr.tm00 ./prepbufr
+  cpreq -p ${COMINobsproc}/${NET}.t${cyc}z.prepbufr.tm00 ${COMOUT}/${RUN}.t${cyc}z.prepbufr.tm00
 else
-  ${ECHO} "Warning: ${OBS_DIR}: NSSLRefInGSI.bufr does not exist!"
+  err_exit "prepbufr file $COMINobsproc/${NET}.t${cyc}z.prepbufr.tm00 not found"
 fi
 
-if [ -r "${OBS_DIR}/${RUN}.t${cyc}z.LightningInGSI_bufr.bufr" ]; then
-  ${LN} -sf ${OBS_DIR}/${RUN}.t${cyc}z.LightningInGSI_bufr.bufr ./lghtInGSI
+if [ -s ${COMOUT}/${RUN}.t${cyc}z.NSSLRefInGSI.${dom}.bufr ]; then
+  cpreq -p ${COMOUT}/${RUN}.t${cyc}z.NSSLRefInGSI.${dom}.bufr ./refInGSI
 else
-  ${ECHO} "Warning: ${OBS_DIR}: LightningInGSI.bufr does not exist!"
+  echo "WARNING: ${RUN}.t${cyc}z.NSSLRefInGSI.${dom}.bufr is not available ..."
 fi
 
-if [ -r "${OBS_DIR}/${RUN}.t${cyc}z.NASALaRCCloudInGSI.bufr" ]; then
-  ${LN} -sf ${OBS_DIR}/${RUN}.t${cyc}z.NASALaRCCloudInGSI.bufr ./larcInGSI
+if [ -s ${COMOUT}/${RUN}.t${cyc}z.LightningInGSI_bufr.${dom}.bufr ]; then
+  cpreq -p ${COMOUT}/${RUN}.t${cyc}z.LightningInGSI_bufr.${dom}.bufr ./lghtInGSI
 else
-  ${ECHO} "Warning: ${OBS_DIR}: NASALaRCCloudInGSI.bufr does not exist!"
+  echo "WARNING: ${RUN}.t${cyc}z.LightningInGSI_bufr.${dom}.bufr is not available ..."
 fi
 
-if [ -r "${OBS_DIR}/${NET}.t${cyc}z.satwnd.tm00.bufr_d" ]; then
-  ${LN} -sf ${OBS_DIR}/${NET}.t${cyc}z.satwnd.tm00.bufr_d ./satwndbufr
+if [ -s ${COMOUT}/${RUN}.t${cyc}z.NASALaRCCloudInGSI.${dom}.bufr ]; then
+  cpreq -p ${COMOUT}/${RUN}.t${cyc}z.NASALaRCCloudInGSI.${dom}.bufr ./larcInGSI
 else
-  ${ECHO} "Warning: ${OBS_DIR}: satwnd does not exist!"
+  echo "WARNING: ${RUN}.t${cyc}z.NASALaRCCloudInGSI.${dom}.bufr is not available ..."
 fi
 
-if [ -r "${OBS_DIR}/${NET}.t${cyc}z.nexrad.tm00.bufr_d" ]; then
-# ${LN} -sf ${OBS_DIR}/${NET}.t${cyc}z.nexrad.tm00.bufr_d ./nexradbufr         #<--- wrong fname
-  ${LN} -sf ${OBS_DIR}/${NET}.t${cyc}z.nexrad.tm00.bufr_d ./l2rwbufr           #<--- correct fname
+if [ -s ${COMINobsproc}/${NET}.t${cyc}z.satwnd.tm00.bufr_d ]; then
+  cpreq -p ${COMINobsproc}/${NET}.t${cyc}z.satwnd.tm00.bufr_d ./satwndbufr
+  cpreq -p ${COMINobsproc}/${NET}.t${cyc}z.satwnd.tm00.bufr_d ${COMOUT}
 else
-  ${ECHO} "Warning: ${OBS_DIR}: nexrad does not exist!"
+  echo "WARNING: ${NET}.t${cyc}z.satwnd.tm00.bufr_d is not available ..."
 fi
 
-if [[ $cyc == $cyc_mitm ]]  ; then
-    if [ -s ${DATA_OBSPRDm1}/rtma.${PDY}.mintobs.dat ] #use only if conventional data also available
-       then
-        cpreq ${DATA_OBSPRDm1}/rtma.${PDY}.mintobs.dat mitmdat
-        echo `ls -l mitmdat`
-    else
-        echo "* WARNING: minT observation file $COM_IN/${NET}.${PDY}/${NET}.${PDY}.mintobs.dat is not available ..."
-    fi
-fi
-if [[ $cyc == $cyc_mxtm ]]  ; then
-      if [ -s  ${DATA_OBSPRDm1}/rtma.${PDYm1}.maxtobs.dat ] #use only if conventional data also available
-        then
-          cpreq  ${DATA_OBSPRDm1}/rtma.${PDYm1}.maxtobs.dat mxtmdat
-          echo `ls -l mxtmdat`
-       else
-         echo "* WARNING: maxT observation file $COM_IN/${NET}.${PDYm1}/${NET}.${PDYm1}.maxtobs.dat is not available ..."
-      fi
-fi
-
-if [ -r "${OBS_DIR}/${NET}.t${cyc}z.satmar.tm00.bufr_d" ]; then
-  ${LN} -sf ${OBS_DIR}/${NET}.t${cyc}z.satmar.tm00.bufr_d ./satmar
+if [ -s ${COMINobsproc}/${NET}.t${cyc}z.nexrad.tm00.bufr_d ]; then
+  cpreq -p ${COMINobsproc}/${NET}.t${cyc}z.nexrad.tm00.bufr_d ./l2rwbufr
+  cpreq -p ${COMINobsproc}/${NET}.t${cyc}z.nexrad.tm00.bufr_d ${COMOUT}
 else
-  ${ECHO} "Warning: ${OBS_DIR}: satmar does not exist!"
+  echo "WARNING: ${NET}.t${cyc}z.nexrad.tm00.bufr_d is not available ..."
+fi
+
+if [ -s ${COMINobsproc}/${NET}.t${cyc}z.satmar.tm00.bufr_d ]; then
+  cpreq -p ${COMINobsproc}/${NET}.t${cyc}z.satmar.tm00.bufr_d ./satmar
+  cpreq -p ${COMINobsproc}/${NET}.t${cyc}z.satmar.tm00.bufr_d ${COMOUT}
+else
+  echo "WARNING: ${NET}.t${cyc}z.satmar.tm00.bufr_d is not available ..."
 fi
 
 # Searching GDAS ensemble forecast for hybrid 3DEnVar analysis
@@ -189,21 +179,6 @@ if [ ${HRRRDAS_BEC} -eq 1 ]; then
    cc=$(printf "%02d" $c)
    hrrre_file=${COMINhrrrdas}/hrrrdas_small_d02_${time_1hour_ago}00f01_mem00${cc}
 #  ${LS} ${COMINhrrrdas}/hrrrdas_small_d02_${time_1hour_ago}00f01_mem00${cc} >> filelist.hrrrdas
-   ${LS} ${hrrre_file} >> filelist.hrrrdas
-   ${LN} -sf ${hrrre_file} wrf_en0${cc}
-   ((c = c + 1))
-  done
-elif [ ${HRRRDAS_BEC} -eq 2 ]; then
-  ${ECHO} "\$HRRRDAS_BEC=${HRRRDAS_BEC}, so the thinned-HRRRDAS will be used if available"
-  #----------------------------------------------------
-  # generate list of HRRRDAS members for ensemble covariances
-  # Use 1-hr forecasts from the HRRRDAS cycling
-  rm -f ./filelist.hrrrdas
-  c=1
-  while [[ $c -le 36 ]]; do
-   cc=$(printf "%02d" $c)
-#  hrrre_file=${COMINhrrrdas}/hrrrdas_small_d02_${time_1hour_ago}00f01_mem00${cc}
-   hrrre_file=${COMOUT}/hrrrdas.t${cyc}z/hrrrdas_small_d02_${time_1hour_ago}00f01_mem00${cc}_thinned
    ${LS} ${hrrre_file} >> filelist.hrrrdas
    ${LN} -sf ${hrrre_file} wrf_en0${cc}
    ((c = c + 1))
@@ -434,7 +409,7 @@ while [ ${i} -lt ${max_cycs} ]; do
   export probe_cyc=`${NDATE} -${i} ${YYYYMMDDHH}`
   probe_YYYYMMDD=`echo $probe_cyc | cut -c 1-8`
   export probe_HH=`echo $probe_cyc | cut -c 9-10`
-  probe_dir=${COMOUTautoqc_base}/${NET}.${probe_YYYYMMDD}/autoqcprd.t${probe_HH}z # MTM - revert NET to RUN
+  probe_dir=${COMOUTautoqc_base}/${RUN}.${probe_YYYYMMDD}/${dom}/autoqcprd.t${probe_HH}z # MTM - revert NET to RUN
   if [ -s ${probe_dir}/${RUN}.t${probe_HH}z.accept_merged_${probe_cyc}.txt ]; then
     export PDYprev_dir=${probe_dir}
     found_rjlist=True
@@ -460,7 +435,7 @@ if [[ "$sfcwndob_biasc" = ".true." ]]; then
     export probe_cyc=`${NDATE} -${i} ${YYYYMMDDHH}`
     probe_YYYYMMDD=`echo $probe_cyc | cut -c 1-8`
     export probe_HH=`echo $probe_cyc | cut -c 9-10`
-    probe_dir=${COMOUTautoqc_base}/${NET}.${probe_YYYYMMDD}/autoqcprd.t${probe_HH}z # MTM - revert NET to RUN
+    probe_dir=${COMOUTautoqc_base}/${RUN}.${probe_YYYYMMDD}/${dom}/autoqcprd.t${probe_HH}z # MTM - revert NET to RUN
     if [ -s ${probe_dir}/${RUN}.t${probe_HH}z.windbias_${probe_cyc}.txt ]; then
       export PDYprev_dir=${probe_dir}
       found_prevcyc=True
@@ -517,7 +492,7 @@ else
 fi
 
 # option for hybrid vertical coordinate (HVC) in WRF-ARW
-if [ "${envir}" == "lsf" ] || [ "${envir}" == "pbspro" ]; then #WCOSS
+#if [ "${envir}" == "lsf" ] || [ "${envir}" == "pbspro" ]; then #WCOSS
   if [ "$NCDUMP" ] ; then
     n_c3f=`$NCDUMP -h ./wrf_inout | grep -i "C3F:" | wc -l`
     n_c4f=`$NCDUMP -h ./wrf_inout | grep -i "C4F:" | wc -l`
@@ -536,7 +511,7 @@ if [ "${envir}" == "lsf" ] || [ "${envir}" == "pbspro" ]; then #WCOSS
     fi
   fi
   echo "HVC option is $hybridcord"
-fi
+#fi
 
 # option for netcdf-format obs diag file
   RUN_NCDIAG=${RUN_NCDIAG:-"Yes"} # netcdf format obs-diag file (default: Yes)
@@ -618,9 +593,9 @@ fi
 
 # ${CP} ${PARMgsi}/hrrr_gsiparm.anl.sh gsiparm.anl.sh
 if [[ ${RUN_HOWV} =~ [TtYy] ]] ; then
-  ${CP} ${PARMgsi}/urma3d_gsiparm.anl.sh gsiparm.anl.sh      # with setup for howv (wave height)
+  ${CP} ${PARMgsi}/akurma3d_gsiparm.anl.sh gsiparm.anl.sh      # with setup for howv (wave height)
 else
-  ${CP} ${PARMgsi}/rtma3d_gsiparm.anl.sh gsiparm.anl.sh
+  ${CP} ${PARMgsi}/akrtma3d_gsiparm.anl.sh gsiparm.anl.sh
 fi
 
 source ./gsiparm.anl.sh
@@ -638,20 +613,20 @@ EOF
 [[ -f ./parmcard_input ]] && rm -f ./parmcard_input
 cat << EOF > parmcard_input
 &parmcardreadprepb
-    cgrid="hrrr",
+    cgrid="akhrrr",
     valleygcheck=${l_valleygcheck},
 /
 EOF
 
 # Copy terrain, slmask and valley_map data files for usage of valley map 
-cp -p ${FIXgsi}/rtma3d_conus_terrain.dat          ./rtma_terrain.dat
-cp -p ${FIXgsi}/rtma3d_conus_anl_slmask.dat       ./rtma_slmask.dat
-# cp -p ${FIXgsi}/valley_map_hrrr_conus_bin.dat   ./valley_map.dat
-  cp -p ${FIXgsi}/valley_map_hrrr_conus_ieee.dat  ./valley_map.dat
+cpreq -p ${FIXgsi}/rtma3d_alaska_terrain.dat        ./rtma_terrain.dat
+cpreq -p ${FIXgsi}/rtma3d_alaska_anl_slmask.dat     ./rtma_slmask.dat
+# cp -p ${FIXgsi}/valley_map_akhrrr_bin.dat      ./valley_map.dat
+  cpreq -p ${FIXgsi}/valley_map_akhrrr_ieee.dat     ./valley_map.dat
 
 # Copy MESONET wind observation sensor height list (same as used in 2DRTMA)
   [[ -f ./provider_windheight ]] && rm ./provider_windheight
-  cp -p ${FIXgsi}/rtma3d_conus_provider_windheight  ./provider_windheight
+  cpreq -p ${FIXgsi}/rtma3d_alaska_provider_windheight  ./provider_windheight
 
 ## satellite bias correction
 ${CP} ${FIXgsi}/rap_satbias_starting_file.txt ./satbias_in
@@ -674,7 +649,7 @@ postmsg "$jlogfile" "$msg"
 
 CP_LN=${CP}
 #${CP_LN} ${EXECrtma3d}/${exefile_name_gsi} ${pgm}
-if [ "${envir}" == "lsf" ] || [ "${envir}" == "pbspro" ];  then
+#if [ "${envir}" == "lsf" ] || [ "${envir}" == "pbspro" ];  then
 #module purge
 #module use /lfs/h2/emc/lam/noscrub/Ming.Hu/rrfs/testD/ufs-srweather-app/env
 #source /lfs/h2/emc/lam/noscrub/Ming.Hu/rrfs/testD/ufs-srweather-app/env/build_wcoss2_intel.env
@@ -682,13 +657,13 @@ if [ "${envir}" == "lsf" ] || [ "${envir}" == "pbspro" ];  then
   export FI_OFI_RXM_SAR_LIMIT=3145728
   export OMP_STACKSIZE=${OMP_STACKSIZE:-"512M"}
 # export OMP_PLACES=cores
-  export OMP_NUM_THREADS=${OMP_NUM_THREADS:-8}
-  APRUN="mpiexec -n 450 -ppn 15 --cpu-bind core --depth 8"
-
-  $APRUN ${EXECrtma3d}/${pgm} < ${DATA}/gsiparm.anl > stdout 2>&1
+  export OMP_NUM_THREADS=${OMP_NUM_THREADS:-4}
+  APRUN="mpiexec -n 360 -ppn 30 --cpu-bind core --depth 4"
+ 
+  $APRUN ${EXECrtma3d}/${pgm}  < ${DATA}/gsiparm.anl > stdout 2>&1
   export err=$?
 # err_chk
-fi
+#fi
 # Save some information before err_chk
 #   (eg, gsiparm.anl, stdout, obs-fitting, etc.) for debugging if GSI crashed.
 ${CAT} fort.* >   fits_${cycle_str}.txt
@@ -747,11 +722,11 @@ esac
 #        listall_cnv_nc4="${listall_cnv_nc4} howv"
 #     fi
 #     for type in $listall_cnv_nc4; do
-#       count=`ls pe*.conv_${type}_${loop}.nc4 | wc -l`
-#       if [[ $count -gt 0 ]]; then
-#          find ${DATA} -type f -name "pe*.conv_${type}_${loop}.nc4" -size 1k -delete
-#          $nc_diag_cat -o diag_${type}_${string}.${cycle_str}.HRRR.nc4 pe*.conv_${type}_${loop}.nc4 
-#       fi
+#        count=`ls pe*.conv_${type}_${loop}.nc4 | wc -l`
+#        if [[ $count -gt 0 ]]; then
+#           find ${DATA}/ -type f -name "pe*.conv_${type}_${loop}.nc4" -size 1k -delete
+#           $nc_diag_cat -o diag_${type}_${string}.${cycle_str}.${RUN}.nc4 pe*.conv_${type}_${loop}.nc4 
+#        fi
 #     done
 #  fi
 #========================================================================================#
@@ -759,7 +734,7 @@ esac
 done
 
 ## link fort files with user-friendly file name
-if [ "${envir}" == "lsf" ] || [ "${envir}" == "pbspro" ]; then #wcoss
+#if [ "${envir}" == "lsf" ] || [ "${envir}" == "pbspro" ]; then #wcoss
   ${LN} -sf fort.201    fit_p1.${cycle_str}          # <-- psfc (mb)
   ${LN} -sf fort.202    fit_w1.${cycle_str}          # <-- uv-wind (m/s)
   ${LN} -sf fort.203    fit_t1.${cycle_str}          # <-- temperature (K)
@@ -775,7 +750,7 @@ if [ "${envir}" == "lsf" ] || [ "${envir}" == "pbspro" ]; then #wcoss
     ${LN} -sf fort.228  fit_howv.${cycle_str}        # <-- significant wave height (m)
   fi
   ${LN} -sf fort.220    minimization_fort220.${cycle_str}
-fi
+#fi
 
 ###### second GSI run if needed
 if [ "${run_gsi_2times}" == "YES" ];  then
@@ -799,9 +774,9 @@ EOF
   msg="***********************************************************"
   postmsg "$jlogfile" "$msg"
   ${ECHO} -e "\n\n@@@@@@@@@ second GSI run standard output\n" >> ${pgmout}
-  if [ "${envir}" == "lsf" ] || [ "${envir}" == "pbspro" ];  then
+# if [ "${envir}" == "lsf" ] || [ "${envir}" == "pbspro" ];  then
     ${MPIRUN} ${pgm} < gsiparm.anl >> ${pgmout} 2>errfile
-  fi
+# fi
   export err=$?
 # Saving some information (eg, gsiparm.anl) for debugging before err_chk
   #${LS} -l > GSI_workdir_list
@@ -834,7 +809,7 @@ fi ###### second GSI run
 # tar -czvf ${COMOUTgsi_rtma3d}/diag_${cycle_str}.tgz diag_*  # *.tgz is compressed tarball
                                                               # (saving space, but costing more time)
 
-if [ "${envir}" == "lsf" ] || [ "${envir}" == "pbspro" ]; then #wcoss
+#if [ "${envir}" == "lsf" ] || [ "${envir}" == "pbspro" ]; then #wcoss
 
 #  Some variables (reflectivity, etc.) in analysis file (wrf_inout) would be updated in the
 #    follow-up updatevars step, this analysis file is only copied to the Shared directory (sharedprd).
@@ -874,7 +849,7 @@ if [ "${envir}" == "lsf" ] || [ "${envir}" == "pbspro" ]; then #wcoss
   date
   for f in ${ncdiag_list}
   do
-    echo "cp -p ${DATA}/${f}  ${DATA_SHARED}/${f}" >> cp_cfp_cmdfile.txt
+    echo "cpreq -p ${DATA}/${f}  ${DATA_SHARED}/${f}" >> cp_cfp_cmdfile.txt
     ic4=$((ic4+1))
   done
   echo $ic4  ${n_files}
@@ -889,7 +864,7 @@ if [ "${envir}" == "lsf" ] || [ "${envir}" == "pbspro" ]; then #wcoss
   date
   echo "========  after  copy pe*.nc4 ========================================================="
 
-fi  
+#fi  
 #${RM} -f ${DATA}/sig*
 #${RM} -f ${DATA}/obs*
 #${RM} -f ${DATA}/pe*

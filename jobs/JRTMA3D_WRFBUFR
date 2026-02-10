@@ -47,15 +47,19 @@ date
 ####################################
 # obtain unique process id (pid) and make temp directory
 ####################################
-export DATATMP=${DATATMP:-${DATAROOT}/pbspro/${NET}.${PDY}${cyc}00/bufrsnd}
+export DATATMP=${DATATMP:-${DATAROOT}/${envir}/${NET}.${PDY}${cyc}/bufrsnd}
 if [ -d $DATATMP ] ; then
-   ${ECHO} "$DATATMP exists, remove its content"
-     ${RM} -rf $DATATMP/*
+  ${ECHO} "$DATATMP exists, remove its content"
+    ${RM} -rf $DATATMP/*
 else
-   ${ECHO} "$DATATMP does not exist, create it"
-   ${MKDIR} -p $DATATMP
+  ${ECHO} "$DATATMP does not exist, create it"
+  ${MKDIR} -p $DATATMP
 fi 
 cd $DATATMP
+#export DATA=${DATA:-$DATAROOT/${jobid:?}}
+#export DATA_SHARED=${DATA_SHARED:-${DATAROOT}/sharedprd}
+#mkdir -p $DATA $DATA_SHARED
+#cd $DATA
 
 export cycle=t${cyc}z
 
@@ -88,9 +92,9 @@ PDYm1=`echo ${PDYHH_cycm1} | cut -c 1-8`
 
 export HOMErtma3d=${HOMErtma3d:-$NWROOT/rtma.${rtma_ver}}
 export EXECrtma3d=${EXECrtma3d:-$HOMErtma3d/exec}
-export FIXrtma3d=${FIXrtma3d:-$HOMErtma3d/fix/${NET}}
-export PARMrtma3d=${PARMrtma3d:-$HOMErtma3d/parm/${NET}}
-export USHrtma3d=${USHrtma3d:-$HOMErtma3d/ush/${NET}}
+export FIXrtma3d=${FIXrtma3d:-$HOMErtma3d/fix/${dom}}
+export PARMrtma3d=${PARMrtma3d:-$HOMErtma3d/parm/${dom}}
+export USHrtma3d=${USHrtma3d:-$HOMErtma3d/ush/${dom}}
 export UTILrtma3d=${UTILrtma3d:-$HOMErtma3d/util/${NET}}
 
 
@@ -99,9 +103,9 @@ export UTILrtma3d=${UTILrtma3d:-$HOMErtma3d/util/${NET}}
 ##############################################
 
 # for WCOSS2 ops
-export COMIN=${COMIN:-${COMROOT}/${NET}/${envir}/${NET}.${PDY}}
 export COMINm1=${COMINm1:-${COMROOT}/${NET}/${envir}/${NET}.${PDYm1}}
-export COMOUT=${COMOUT:-${COMROOT}/${NET}/${envir}/${NET}.${PDY}}
+export COMIN=${COMIN:-$(compath.py  ${envir}/${NET}/${rtma3d_ver})/${RUN}.${PDY}/${dom}}
+export COMOUT=${COMOUT:-$(compath.py -o  ${envir}/${NET}/${rtma3d_ver})/${RUN}.${PDY}/${dom}}
 export COMOUTm1=${COMOUTm1:-${COMROOT}/${NET}/${envir}/${NET}.${PDYm1}}
 ### Observations Products/Input for the RTMA3D (prepbufr files) 
 export COMINobsproc_rtma3d=${COMINobsproc_rtma3d:-"${COMIN}/obsprd.${cycle}"}
@@ -112,7 +116,7 @@ export GESINhrrr_rtma3d=${GESINhrrr_rtma3d:-"${COMIN}/fgsprd.${cycle}"}
 
 ### 3DRTMA GSIANL Products (netcdf)
 export COMOUTgsi_rtma3d=${COMOUTgsi_rtma3d:-"${COMOUT}/gsiprd.${cycle}"}
-export COMOUTgsi_rtma3dm1=${COMOUTgsi_rtma3dm1:-"${COMOUTm1}/gsiprd.${cyclem1}"}
+export COMOUTgsi_rtma3dm1=${COMOUTgsi_rtma3dm1:-"${COMOUTm1}/${dom}/gsiprd.${cyclem1}"}
 
 
 ### 3DRTMA UNI-POST Products (grib2)
@@ -133,7 +137,7 @@ env
 
 ########################################################
 # Execute the script.
-${HRRR_WRFBUFRSH:-$HOMErtma3d/scripts/${RUN}/ex${RUN}_wrfbufr.ksh}
+${HRRR_WRFBUFRSH:-$HOMErtma3d/scripts/${dom}/ex${RUN}_wrfbufr.ksh}
 ########################################################
 
 cat $pgmout
