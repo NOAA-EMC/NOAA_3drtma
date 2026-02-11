@@ -6,14 +6,14 @@
 <!-- date/time of cases or cycles -->
 <!ENTITY USER           "matthew.t.morris">
 <!ENTITY rtma3d_ver     "v1.0.0">
-<!ENTITY realtime       "T">
+<!ENTITY exp "">
 <!ENTITY NET		"rtma3d">
-<!ENTITY RUN		"akrtma3d">
-<!ENTITY envir		"pbspro">
+<!ENTITY RUN		"&NET;">
+<!ENTITY envir		"v1.0">
+<!ENTITY dom            "alaska">
 <!---<!ENTITY RUN_ENVIR	"dev"> -->
 <!ENTITY CAP_NET	"RTMA3D">
 <!ENTITY CAP_RUN	"RTMA3D">
-<!ENTITY CAP_ENVIR	"PBSPRO">
 <!--<!ENTITY CAP_RUN_ENVIR	""> -->
 <!ENTITY model		"&RUN;">
 <!ENTITY HRRRDAS_BEC     "0">
@@ -25,37 +25,33 @@
 
 <!-- Variables Defined by absolute paths -->
 
-<!ENTITY ptmp_base	"/lfs/h2/emc/ptmp/&USER;/rtma3d_aircraft/alaska">
+<!ENTITY ptmp_base	"/lfs/h2/emc/ptmp/&USER;/rtma3d&exp;">
 <!ENTITY COMINRAP       "/lfs/h1/ops/prod/com/obsproc/v1.2">
 <!ENTITY COMINHRRR      "/lfs/h1/ops/prod/com/hrrr/v4.1">
-<!ENTITY COMINRADAR     "/lfs/h1/ops/dev/dcom/ldmdata/obs/upperair/mrms/alaska">
+<!ENTITY COMINradar     "/lfs/h1/ops/dev/dcom/ldmdata/obs/upperair/mrms">
 <!ENTITY GESINHRRR      "/lfs/h1/ops/prod/com/hrrr/v4.1/nwges/hrrrges_sfc/alaska">
 <!ENTITY COMINHRRRDAS   "/lfs/h1/ops/prod/com/hrrr/v4.1/nwges/hrrrdasges">
 <!ENTITY COMINGDAS      "/lfs/h1/ops/prod/com/gfs/v16.3">
-<!ENTITY NWROOT		"/lfs/h2/emc/da/noscrub/&USER;/packages/rtma3d.&rtma3d_ver;_aircraft">
+<!ENTITY NWROOT		"/lfs/h2/emc/da/noscrub/&USER;/packages/rtma3d.&rtma3d_ver;&exp;">
 <!ENTITY PACKAGEROOT    "&NWROOT;">
 <!ENTITY COMINPREP      "/lfs/h2/emc/ptmp/ashley.stanfield/CRON/rtma3d/com/obsproc/v1.3">
 <!ENTITY HPSSOUT_5yr    "/NCEPDEV/emc-meso/5year/&USER;/rtma3d">
 <!ENTITY HPSSOUT_2yr    "/NCEPDEV/emc-meso/2year/&USER;/rtma3d">
 <!--  -->
 
-<!ENTITY DATAROOT	"&ptmp_base;/data">
-<!ENTITY COMROOT	"&ptmp_base;/com2">
-<!ENTITY DCOMROOT	"&ptmp_base;/dcom">
+<!ENTITY DATAROOT	"&ptmp_base;/data/&dom;">
+<!ENTITY COMROOT	"&ptmp_base;/com">
 <!ENTITY GESROOT	"&ptmp_base;/nwges2/&NET;">
 
 <!ENTITY HOMErtma3d	"&NWROOT;">
-<!ENTITY LOG_DIR	"/lfs/h2/emc/ptmp/&USER;/rtma3d_aircraft_logs/alaska">
+<!ENTITY LOG_DIR	"&ptmp_base;/logs/&dom;">
 <!ENTITY JJOB_DIR	"&HOMErtma3d;/jobs">
 <!ENTITY WORKFLOW_DIR	"&HOMErtma3d;/workflow">
 <!ENTITY SCRIPT_DIR	"&HOMErtma3d;/scripts">
-<!ENTITY USHrtma3d	"&HOMErtma3d;/ush">
 <!ENTITY UTILrtma3d	"&HOMErtma3d;/util">
 <!ENTITY UTILrtma3d_dev	"&HOMErtma3d;/util_dev">
 <!ENTITY MODULEFILES	"&HOMErtma3d;/modulefiles">
 <!ENTITY EXECrtma3d	"&NWROOT;/exec">
-<!ENTITY PARMrtma3d	"&NWROOT;/parm">
-<!ENTITY FIXrtma3d	"&NWROOT;/fix">
 
 <!-- Specific Definition for static data -->
 <!ENTITY FIXcrtm        "&NWROOT;/fix/crtm">
@@ -64,7 +60,6 @@
 <!ENTITY FIXwps         "&NWROOT;/fix/wps">
 <!ENTITY FIXwrf         "&NWROOT;/fix/wrf">
 <!ENTITY FIXwrfbufr     "&NWROOT;/fix/wrfbufr">
-<!ENTITY FIXminmax      "&FIXrtma3d;/minmax">
 <!ENTITY OBS_USELIST    "/lfs/h2/emc/da/noscrub/matthew.t.morris/FixData/obsuselist">
 <!ENTITY AIRCRAFT_REJECT  "/lfs/h2/emc/da/noscrub/matthew.t.morris/FixData/obsuselist/amdar_reject_lists">
 <!ENTITY SFCOBS_USELIST   "/lfs/h2/emc/da/noscrub/matthew.t.morris/FixData/obsuselist/mesonet_uselists">
@@ -79,14 +74,9 @@
 <!ENTITY LOG_SCHDLR	"&LOG_DIR;">
 <!ENTITY LOG_PGMOUT     "&LOG_DIR;/pgmout">
 <!ENTITY jlogfile       "&LOG_JJOB;/jlogfile_pbspro.@Y@m@d@H">
-<!ENTITY obsname_conus  "MergedReflectivityQC">
-<!ENTITY obsname_alaska "MergedReflectivityQC">
-<!ENTITY numlim_conus   "MergedReflectivityQC">
-<!ENTITY numlim_alaska  "MergedReflectivityQC">
-
 
 <!-- definition of name of the top running directory for all tasks -->
-<!ENTITY DATA_RUNDIR    "&DATAROOT;/&envir;/&NET;.@Y@m@d@H@M">
+<!ENTITY DATA_RUNDIR    "&DATAROOT;/&envir;/&NET;.@Y@m@d@H">
 <!--               names of the running directory for each task -->
 <!-- Note: -->
 <!--      these directories are just links pointing to real running directories -->
@@ -119,9 +109,6 @@
 <!ENTITY FGS_OPT        "1">
 
 <!-- for obs pre-processing -->
-<!ENTITY obsprep_radar  "1">
-<!ENTITY obsprep_lghtn  "1">
-<!ENTITY obsprep_cloud  "1">
 <!ENTITY obsprep_satwnd  "1">
 
 <!-- Variables used in GSD scripts -->
@@ -140,48 +127,26 @@
 
 <!-- ex-shell and J-job script name -->
 <!ENTITY JJOB_OBSPREP_RADAR    "&JJOB_DIR;/J&CAP_RUN;_OBSPREP_RADAR">
-<!ENTITY exSCR_OBSPREP_RADAR   "&SCRIPT_DIR;/&RUN;/ex&RUN;_obsprep_radar.ksh">
 <!ENTITY JJOB_OBSPREP_LGHTN    "&JJOB_DIR;/J&CAP_RUN;_OBSPREP_LGHTN">
-<!ENTITY exSCR_OBSPREP_LGHTN   "&SCRIPT_DIR;/&RUN;/ex&RUN;_obsprep_lghtn.ksh">
 <!ENTITY JJOB_OBSPREP_CLOUD    "&JJOB_DIR;/J&CAP_RUN;_OBSPREP_CLOUD">
-<!ENTITY exSCR_OBSPREP_CLOUD   "&SCRIPT_DIR;/&RUN;/ex&RUN;_obsprep_cloud.ksh">
 <!ENTITY JJOB_PREPOBS    "&JJOB_DIR;/J&CAP_RUN;_PREPOBS">
-<!ENTITY exSCR_PREPOBS   "&SCRIPT_DIR;/ex&NET;_prepobs.ksh">
 <!ENTITY JJOB_PREPFGS    "&JJOB_DIR;/J&CAP_RUN;_PREPFGS">
-<!ENTITY exSCR_PREPFGS   "&SCRIPT_DIR;/&RUN;/ex&RUN;_prepfgs.ksh">
 <!ENTITY JJOB_GSIANL	 "&JJOB_DIR;/J&CAP_RUN;_GSIANL">
-<!ENTITY exSCR_GSIANL	 "&SCRIPT_DIR;/&RUN;/ex&RUN;_gsianl.ksh">
 <!ENTITY JJOB_ANLDUMP    "&JJOB_DIR;/J&CAP_RUN;_ANLDUMP">
-<!ENTITY exSCR_ANLDUMP   "&SCRIPT_DIR;/&RUN;/ex&RUN;_anldump.ksh">
 <!ENTITY JJOB_AUTOQC     "&JJOB_DIR;/J&CAP_RUN;_AUTOQC">
-<!ENTITY exSCR_AUTOQC    "&SCRIPT_DIR;/ex&NET;_autoqc.ksh">
 <!ENTITY JJOB_MINT       "&JJOB_DIR;/J&CAP_RUN;_MINT_PREP">
 <!ENTITY JJOB_MAXT       "&JJOB_DIR;/J&CAP_RUN;_MAXT_PREP">
 <!ENTITY JJOB_MINTOBS       "&JJOB_DIR;/J&CAP_RUN;_MINT_OBS">
 <!ENTITY JJOB_MAXTOBS       "&JJOB_DIR;/J&CAP_RUN;_MAXT_OBS">
-<!ENTITY exSCR_MAXTBG    "&SCRIPT_DIR;/ex&NET;_maxtbg.ksh">
-<!ENTITY exSCR_MAXTOBS   "&SCRIPT_DIR;/ex&NET;_maxtobs.ksh">
-<!ENTITY exSCR_MINTOBS   "&SCRIPT_DIR;/ex&NET;_mintobs.ksh">
-<!ENTITY exSCR_MINTBG   "&SCRIPT_DIR;/ex&NET;_mintbg.ksh">
-<!ENTITY exSCR_MINRH   "&SCRIPT_DIR;/ex&NET;_minrh.ksh"> 
-<!ENTITY exSCR_MAXRH   "&SCRIPT_DIR;/ex&NET;_maxrh.ksh"> 
 <!ENTITY JJOB_UPDATEVARS     "&JJOB_DIR;/J&CAP_RUN;_UPDATEVARS">
-<!ENTITY exSCR_UPDATEVARS    "&SCRIPT_DIR;/&RUN;/ex&RUN;_updatevars.ksh">
 <!ENTITY JJOB_WRFBUFR     "&JJOB_DIR;/J&CAP_RUN;_WRFBUFR">
-<!ENTITY exSCR_WRFBUFR    "&SCRIPT_DIR;/&RUN;/ex&RUN;_wrfbufr.ksh">
 <!ENTITY JJOB_POSTSND     "&JJOB_DIR;/J&CAP_RUN;_POSTSND">
-<!ENTITY exSCR_POSTSND    "&SCRIPT_DIR;/&RUN;/ex&RUN;_postsnd.ksh">
 <!ENTITY JJOB_POST  	 "&JJOB_DIR;/J&CAP_RUN;_POST">
-<!ENTITY exSCR_POST      "&SCRIPT_DIR;/ex&NET;_post.ksh">
 <!ENTITY JJOB_POST4FGS   "&JJOB_DIR;/J&CAP_RUN;_POST4FGS">
-<!ENTITY exSCR_POST4FGS  "&SCRIPT_DIR;/ex&NET;_post4fgs.ksh">
 <!ENTITY JJOB_PRDGEN     "&JJOB_DIR;/J&CAP_RUN;_PRDGEN">
 <!ENTITY JJOB_RHIST      "&JJOB_DIR;/J&CAP_RUN;_RHIST">
-<!ENTITY exSCR_RHIST     "&SCRIPT_DIR;/&RUN;/ex&RUN;_rhist.ksh">
 <!ENTITY JJOB_NCDIAG     "&JJOB_DIR;/J&CAP_RUN;_NCDIAG">
-<!ENTITY exSCR_NCDIAG    "&SCRIPT_DIR;/ex&NET;_ncdiag.ksh">
 <!ENTITY JJOB_CLEAN     "&JJOB_DIR;/J&CAP_RUN;_CLEAN">
-<!ENTITY exSCR_CLEAN    "&SCRIPT_DIR;/ex&NET;_clean.ksh">
 
 <!-- Resources -->
 
@@ -199,9 +164,6 @@
 <!ENTITY time_int  "1hr">
 <!ENTITY time_int_ex "01:00:00">
 
-<!ENTITY OBSPREP_RADAR_PROC "17">
-<!ENTITY RADAR_THREADS "1">
-<!ENTITY RADAR_OMP_STACKSIZE "512M">
 <!ENTITY OBSPREP_RADAR_RESOURCES '<walltime>00:10:00</walltime>'>
 <!ENTITY OBSPREP_RADAR_RESERVATION '<nodes>1:ppn=36:vntype=cray_compute:mem=28GB</nodes><native>-l place=scatter</native><queue>&QUEUE;</queue><account>&ACCOUNT;</account>'>
 
@@ -294,10 +256,6 @@
         <name>envir</name>
         <value>&envir;</value>
    </envar>
-   <envar>
-        <name>realtime</name>
-        <value>&realtime;</value>
-   </envar>
 <!--   <envar>
         <name>RUN_ENVIR</name>
         <value>&RUN_ENVIR;</value>
@@ -323,6 +281,10 @@
         <value>&RUN;</value>
    </envar>
    <envar>
+        <name>dom</name>
+        <value>&dom;</value>
+   </envar>
+   <envar>
         <name>model</name>
         <value>&model;</value>
    </envar>
@@ -343,8 +305,12 @@
         <value>&COMINPREP;</value>
    </envar>
    <envar>
-        <name>COMINRADAR</name>
-        <value>&COMINRADAR;</value>
+        <name>COMINobsproc</name>
+        <value><cyclestr>&COMINPREP;/&NET;.@Y@m@d</cyclestr></value>
+   </envar>
+   <envar>
+        <name>COMINradar</name>
+        <value>&COMINradar;</value>
    </envar>
    <envar>
         <name>COMINGDAS</name>
@@ -375,10 +341,6 @@
         <value>&COMROOT;</value>
    </envar>
    <envar>
-        <name>DCOMROOT</name>
-        <value>&DCOMROOT;</value>
-   </envar>
-   <envar>
         <name>HOMErtma3d</name>
         <value>&HOMErtma3d;</value>
    </envar>
@@ -387,24 +349,12 @@
         <value>&EXECrtma3d;</value>
    </envar>
    <envar>
-        <name>FIXrtma3d</name>
-        <value>&FIXrtma3d;</value>
-   </envar>
-   <envar>
-        <name>USHrtma3d</name>
-        <value>&USHrtma3d;</value>
-   </envar>
-   <envar>
         <name>UTILrtma3d</name>
         <value>&UTILrtma3d;</value>
    </envar>
    <envar>
         <name>UTILrtma3d_dev</name>
         <value>&UTILrtma3d_dev;</value>
-   </envar>
-   <envar>
-        <name>PARMrtma3d</name>
-        <value>&PARMrtma3d;</value>
    </envar>
    <envar>
         <name>FIXcrtm</name>
@@ -425,10 +375,6 @@
    <envar>
         <name>FIXwrf</name>
         <value>&FIXwrf;</value>
-   </envar>
-   <envar>
-        <name>FIXminmax</name>
-        <value>&FIXminmax;</value>
    </envar>
    <envar>
         <name>PARMwrf</name>
@@ -491,24 +437,8 @@
         <value>&CAP_RUN;</value>
    </envar>
    <envar>
-        <name>CAP_ENVIR</name>
-        <value>&CAP_ENVIR;</value>
-   </envar>
-   <envar>
         <name>FGS_OPT</name>
         <value>&FGS_OPT;</value>
-   </envar>
-   <envar>
-        <name>obsprep_radar</name>
-        <value>&obsprep_radar;</value>
-   </envar>
-   <envar>
-        <name>obsprep_lghtn</name>
-        <value>&obsprep_lghtn;</value>
-   </envar>
-   <envar>
-        <name>obsprep_cloud</name>
-        <value>&obsprep_cloud;</value>
    </envar>
    <envar>
         <name>obsprep_satwnd</name>
@@ -517,6 +447,14 @@
    <envar>
         <name>PDY</name>
         <value><cyclestr>@Y@m@d</cyclestr></value>
+   </envar>
+   <envar>
+        <name>COMOUT</name>
+        <value><cyclestr>&COMROOT;/&NET;/&envir;/&RUN;.@Y@m@d/&dom;</cyclestr></value>
+   </envar>
+   <envar>
+        <name>COMIN</name>
+        <value><cyclestr>&COMROOT;/&NET;/&envir;/&RUN;.@Y@m@d/&dom;</cyclestr></value>
    </envar>
    <envar>
         <name>cyc</name>
@@ -619,6 +557,10 @@
      <name>outid</name>
      <value><cyclestr>&RUN;_@Y@m@d@H@M</cyclestr></value>
    </envar>
+    <envar>
+      <name>CDATE</name>
+      <value><cyclestr>@Y@m@d@H</cyclestr></value>
+    </envar>
    <envar>
         <name>remove_wrkdirs</name>
         <value>no</value>
@@ -660,10 +602,6 @@
     <envar>
       <name>GSI_grid_ratio_in_cldanl</name>
       <value>&GSI_grid_ratio_in_cldanl;</value>
-    </envar>
-    <envar>
-      <name>exSCR_GSIANL</name>
-      <value>&exSCR_GSIANL;</value>
     </envar>
     <envar>
       <name>JJOB_GSIANL</name>
@@ -729,40 +667,20 @@
       <value>&DATABASE_DIR;</value>
     </envar>
     <envar>
-      <name>exSCR_OBSPREP_RADAR</name>
-      <value>&exSCR_OBSPREP_RADAR;</value>
-    </envar>
-    <envar>
       <name>JJOB_OBSPREP_RADAR</name>
       <value>&JJOB_OBSPREP_RADAR;</value>
-    </envar>
-    <envar>
-      <name>exSCR_OBSPREP_LGHTN</name>
-      <value>&exSCR_OBSPREP_LGHTN;</value>
     </envar>
     <envar>
       <name>JJOB_OBSPREP_LGHTN</name>
       <value>&JJOB_OBSPREP_LGHTN;</value>
     </envar>
     <envar>
-      <name>exSCR_OBSPREP_CLOUD</name>
-      <value>&exSCR_OBSPREP_CLOUD;</value>
-    </envar>
-    <envar>
       <name>JJOB_OBSPREP_CLOUD</name>
       <value>&JJOB_OBSPREP_CLOUD;</value>
     </envar>
     <envar>
-      <name>exSCR_PREPOBS</name>
-      <value>&exSCR_PREPOBS;</value>
-    </envar>
-    <envar>
       <name>JJOB_PREPOBS</name>
       <value>&JJOB_PREPOBS;</value>
-    </envar>
-    <envar>
-      <name>exSCR_PREPFGS</name>
-      <value>&exSCR_PREPFGS;</value>
     </envar>
     <envar>
       <name>COMINPREP</name>
@@ -783,16 +701,8 @@
       <value>&DATABASE_DIR;</value>
     </envar>
     <envar>
-      <name>exSCR_POST4FGS</name>
-      <value>&exSCR_POST4FGS;</value>
-    </envar>
-    <envar>
       <name>JJOB_POST4FGS</name>
       <value>&JJOB_POST4FGS;</value>
-    </envar>
-    <envar>
-      <name>exSCR_POST</name>
-      <value>&exSCR_POST;</value>
     </envar>
     <envar>
       <name>JJOB_POST</name>
@@ -821,20 +731,12 @@
     <envar>
       <name>JJOB_NCDIAG</name>
       <value>&JJOB_NCDIAG;</value>
-    </envar>
-    <envar>
-      <name>exSCR_NCDIAG</name>
-      <value>&exSCR_NCDIAG;</value>
     </envar>'>
 
 <!ENTITY ENVARS_AUTOQC
     '<envar>
       <name>START_TIME</name>
       <value><cyclestr>@Y@m@d@H</cyclestr></value>
-    </envar>
-    <envar>
-      <name>exSCR_AUTOQC</name>
-      <value>&exSCR_AUTOQC;</value>
     </envar>
     <envar>
       <name>JJOB_AUTOQC</name>
@@ -853,30 +755,6 @@
     <envar>
        <name>JJOB_MAXT</name>
        <value>&JJOB_MAXT;</value>
-    </envar>
-    <envar>
-       <name>exSCR_MAXTBG</name>
-       <value>&exSCR_MAXTBG;</value>
-    </envar>
-    <envar>
-       <name>exSCR_MAXTOBS</name>
-       <value>&exSCR_MAXTOBS;</value>
-    </envar>
-    <envar>
-       <name>exSCR_MINTOBS</name>
-       <value>&exSCR_MINTOBS;</value>
-    </envar>
-    <envar>
-       <name>exSCR_MINTBG</name>
-       <value>&exSCR_MINTBG;</value>
-    </envar>
-    <envar>
-       <name>exSCR_MINRH</name>
-       <value>&exSCR_MINRH;</value>
-    </envar>
-    <envar>
-       <name>exSCR_MAXRH</name>
-       <value>&exSCR_MAXRH;</value>
     </envar>'>
 
 <!ENTITY ENVARS_RHIST
@@ -901,10 +779,6 @@
       <value>&RUN_RHIST;</value>
     </envar>
     <envar>
-      <name>exSCR_RHIST</name>
-      <value>&exSCR_RHIST;</value>
-    </envar>
-    <envar>
       <name>JJOB_RHIST</name>
       <value>&JJOB_RHIST;</value>
     </envar>'>
@@ -917,10 +791,6 @@
     <envar>
       <name>DATABASE_DIR</name>
       <value>&DATABASE_DIR;</value>
-    </envar>
-    <envar>
-      <name>exSCR_UPDATEVARS</name>
-      <value>&exSCR_UPDATEVARS;</value>
     </envar>
     <envar>
       <name>JJOB_UPDATEVARS</name>
@@ -947,10 +817,6 @@
     <envar>
       <name>CLEAN_OLDCOM_HRS</name>
       <value>&CLEAN_OLDCOM_HRS;</value>
-    </envar>
-    <envar>
-     <name>exSCR_CLEAN</name>
-     <value>&exSCR_CLEAN;</value>
     </envar>
     <envar>
       <name>JJOB_CLEAN</name>
@@ -1040,27 +906,10 @@
   <task name="&RUN;_obsprep_radar_task" cycledefs="hourly" maxtries="&maxtries;">
 
     &ENVARS;
-   <envar>
-        <name>OMP_NUM_THREADS</name>
-        <value>&RADAR_THREADS;</value>
-    </envar>
-    <envar>
-        <name>OMP_STACKSIZE</name>
-        <value>&RADAR_OMP_STACKSIZE;</value>
-    </envar>
     <envar>
        <name>rundir_task</name>
        <value><cyclestr>&DATA_OBSPREP_RADAR;</cyclestr></value>
     </envar>
-    <envar>
-        <name>obsname</name>
-        <value>&obsname_alaska;</value>
-    </envar>
-    <envar>
-        <name>numlim</name>
-        <value>&numlim_alaska;</value>
-    </envar>
-
 
     <command>&WORKFLOW_DIR;/launch.ksh &JJOB_OBSPREP_RADAR;</command>
     <jobname><cyclestr>&RUN;_obsprep_radar_job_@Y@m@d@H@M</cyclestr></jobname>
@@ -1070,51 +919,16 @@
     &OBSPREP_RADAR_RESERVATION;
     &ENVARS_PREPJOB;
 
+    <envar><name>ntasks</name><value>36</value></envar>
+    <envar><name>ppn</name><value>36</value></envar>
+
     <dependency>
       <or>
         <timedep><cyclestr offset="&START_TIME_RADAR;">@Y@m@d@H@M00</cyclestr></timedep>
-        <rb><cyclestr offset="00:04:00">!Dir.glob('&COMINRADAR;/MergedReflectivityQC/MergedReflectivityQC_19.00_@Y@m@d-@H@M*.grib2.gz').empty?</cyclestr></rb>
+        <rb><cyclestr offset="00:04:00">!Dir.glob('&COMINradar;/&dom;/MergedReflectivityQC/MergedReflectivityQC_19.00_@Y@m@d-@H@M*.grib2.gz').empty?</cyclestr></rb>
       </or>
    </dependency>
   </task>
-
-    <task name="&RUN;_prepobs_task" cycledefs="hourly" maxtries="&maxtries;">
-
-    &ENVARS;
-    <envar>
-       <name>rundir_task</name>
-       <value><cyclestr>&DATA_OBSPRD;</cyclestr></value>
-    </envar>
-
-    <command>&WORKFLOW_DIR;/launch.ksh &JJOB_PREPOBS;</command>
-    <jobname><cyclestr>&RUN;_prepobs_job_@Y@m@d@H@M</cyclestr></jobname>
-    <join><cyclestr>&LOG_SCHDLR;/&RUN;_&envir;_prepobs_@Y@m@d@H.log</cyclestr></join>
-
-    &PREPOBS_RESOURCES;
-    &PREPOBS_RESERVATION;
-    &ENVARS_PREPJOB;
-
-   <dependency>
-       <and>
-       <datadep age="2"><cyclestr>&COMINPREP;/&NET;.@Y@m@d/&NET;.t@Hz.prepbufr.tm00</cyclestr></datadep>
-       <datadep age="2"><cyclestr>&COMINPREP;/&NET;.@Y@m@d/&NET;.t@Hz.satwnd.tm00.bufr_d</cyclestr></datadep>
-       <datadep age="2"><cyclestr>&COMINPREP;/&NET;.@Y@m@d/&NET;.t@Hz.nexrad.tm00.bufr_d</cyclestr></datadep>
-       <and>
-       <or>
-       <taskdep task="&RUN;_obsprep_lghtn_task"/>
-       </or>
-       <or>
-       <taskdep task="&RUN;_obsprep_cloud_task"/>
-       </or>
-       <or>
-       <taskdep task="&RUN;_obsprep_radar_task"/>
-       </or>
-       </and>
-       </and>   
-   </dependency>
-
-  </task>
-
 
   <task name="&RUN;_prepfgs_ind1_task" cycledefs="ind1" maxtries="&maxtries;">
 
@@ -1207,7 +1021,12 @@
 		  <taskdep task="&RUN;_prepfgs_ind2_task"/>
 		  <taskdep task="&RUN;_prepfgs_ind3_task"/>
 	  </or>	  
-          <taskdep task="&RUN;_prepobs_task"/>
+          <taskdep task="&RUN;_obsprep_lghtn_task"/>
+          <taskdep task="&RUN;_obsprep_cloud_task"/>
+          <taskdep task="&RUN;_obsprep_radar_task"/>
+          <datadep age="2"><cyclestr>&COMINPREP;/&NET;.@Y@m@d/&NET;.t@Hz.prepbufr.tm00</cyclestr></datadep>
+          <datadep age="2"><cyclestr>&COMINPREP;/&NET;.@Y@m@d/&NET;.t@Hz.satwnd.tm00.bufr_d</cyclestr></datadep>
+          <datadep age="2"><cyclestr>&COMINPREP;/&NET;.@Y@m@d/&NET;.t@Hz.nexrad.tm00.bufr_d</cyclestr></datadep>
       </and>
      </dependency>
   </task>
@@ -1310,7 +1129,7 @@
 
     <command>&WORKFLOW_DIR;/launch.ksh &JJOB_WRFBUFR;</command>
     <jobname>&NET;_wrfbufr</jobname>
-    <join><cyclestr>&LOG_DIR;/&RUN;_wrfbufr_@Y@m@d@H@M.log</cyclestr></join>
+    <join><cyclestr>&LOG_DIR;/&RUN;_wrfbufr_@Y@m@d@H.log</cyclestr></join>
     <dependency>
       <taskdep task="&RUN;_updatevars_task"/>
     </dependency>
@@ -1329,7 +1148,7 @@
 
     <command>&WORKFLOW_DIR;/launch.ksh &JJOB_POSTSND;</command>
     <jobname>&NET;_postsnd</jobname>
-    <join><cyclestr>&LOG_DIR;/&RUN;_postsnd_@Y@m@d@H@M.log</cyclestr></join>
+    <join><cyclestr>&LOG_DIR;/&RUN;_postsnd_@Y@m@d@H.log</cyclestr></join>
     <dependency>
       <and>
       <taskdep task="&RUN;_gsianl_task"/>

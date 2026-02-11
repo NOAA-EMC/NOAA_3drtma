@@ -44,7 +44,7 @@ cd $DATA
 #setpdy.sh
 #. ./PDY
 
-export cycle=t${cyc}z}
+export cycle=t${cyc}z
 
 ####################################
 # Determine Job Output Name on System
@@ -67,19 +67,16 @@ fi
 export HOMErtma3d=${HOMErtma3d:-${PACKAGEROOT}/${NET}.${rtma3d_ver}}
 export HOMEscript=${HOMEscript:-${HOMErtma3d}/scripts}
 export EXECrtma3d=${EXECrtma3d:-$HOMErtma3d/exec}
-#export FIXrtma3d=${FIXrtma3d:-$HOMErtma3d/fix/${RUN}}
-export FIXrtma3d=${FIXrtma3d:-$HOMErtma3d/fix/${NET}}
-export PARMrtma3d=${PARMrtma3d:-$HOMErtma3d/parm}
-export USHrtma3d=${USHrtma3d:-$HOMErtma3d/ush}
+export FIXrtma3d=${FIXrtma3d:-$HOMErtma3d/fix/${dom}}
+export PARMrtma3d=${PARMrtma3d:-$HOMErtma3d/parm/${dom}}
+export USHrtma3d=${USHrtma3d:-$HOMErtma3d/ush/${dom}}
 
 #################################################
 # Set up the INPUT and OUTPUT directories
 # Set up paths for input model data
 #################################################
-#export COMIN=${COMIN:-$(compath.py  ${envir}/${NET}/${rtma3d_ver})/${RUN}.${PDY}}
-#export COMOUT=${COMOUT:-$(compath.py -o  ${envir}/${NET}/${rtma3d_ver})/${RUN}.${PDY}}
-export COMIN=${COMOUT:-${COMROOT}/${NET}/${envir}/${NET}.${PDY}}
-export COMOUT=${COMOUT:-${COMROOT}/${NET}/${envir}/${NET}.${PDY}}
+export COMIN=${COMIN:-$(compath.py  ${envir}/${NET}/${rtma3d_ver})/${RUN}.${PDY}/${dom}}
+export COMOUT=${COMOUT:-$(compath.py -o  ${envir}/${NET}/${rtma3d_ver})/${RUN}.${PDY}/${dom}}
 export seaice_analysis_ver=v4.5
 export COMINsice=${COMINsice:-$(compath.py prod/seaice_analysis/${seaice_analysis_ver})}
 
@@ -91,7 +88,7 @@ env
 # Execute the script.
 ######################
 #$HOMErtma3d/scripts/${RUN}/ex${RUN}_prdgen.sh
-$HOMErtma3d/scripts/${RUN}/ex${RUN}_prdgen.ksh
+$HOMErtma3d/scripts/${dom}/ex${RUN}_prdgen.ksh
 export err=$?; err_chk
 
 msg="$0 of $job completed normally"

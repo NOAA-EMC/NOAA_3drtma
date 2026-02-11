@@ -1,7 +1,7 @@
 #!/bin/ksh 
 set -x
 
-if [ "${envir}" == "lsf" ] || [ "${envir}" == "pbspro" ]; then
+#if [ "${envir}" == "lsf" ] || [ "${envir}" == "pbspro" ]; then
 
 export OMP_NUM_THREADS=1
 
@@ -33,7 +33,7 @@ else
     exit 1
   fi
   START_TIME=`${DATE} -d "${START_TIME} ${FCST_TIME} minutes"`
-fi
+#fi
 
 ANLS_CYC_TIME=`${DATE} --date="${START_TIME}  0 hour " +"%Y%m%d%H%M"`
 FCST_INI_TIME=`${DATE} --date="${START_TIME} -${FCST_TIME} hour " +"%Y%m%d%H%M"`
@@ -220,7 +220,7 @@ ${WGRIB2} -V ${COMOUT}/${RUN}.t${cyc}z.anl.gust.grib2 -set_lev "10 m above groun
 wgrib2 ${workdir}/wrfsubhprs.grib2 -not_if "VIS:surface" -grib ${workdir}/wrfsubhprs.grib2_no_sfcvis 
 wgrib2 ${workdir}/wrfsubhnat.grib2 -not_if "VIS:surface" -grib ${workdir}/wrfsubhnat.grib2_no_sfcvis
 # Overwrite wrfsubhprs and wrfsubhnat with renamed derived vis, analyzed vis, analyzed gust and analyzed wave height
-if [ "${RUN}" == "rtma3d" ]; then
+if [ "${dom}" == "conus" ]; then
   cat ${workdir}/wrfsubhprs.grib2_no_sfcvis ${workdir}/vis2mprs.grib2 tmpgust.grib2 ${COMOUT}/${RUN}.t${cyc}z.anl.vis.grib2 ${COMOUT}/${RUN}.t${cyc}z.anl.howv.grib2 > ${workdir}/wrfsubhprs.grib2
   cat ${workdir}/wrfsubhnat.grib2_no_sfcvis ${workdir}/vis2mnat.grib2 tmpgust.grib2 ${COMOUT}/${RUN}.t${cyc}z.anl.vis.grib2 ${COMOUT}/${RUN}.t${cyc}z.anl.howv.grib2 > ${workdir}/wrfsubhnat.grib2
 else

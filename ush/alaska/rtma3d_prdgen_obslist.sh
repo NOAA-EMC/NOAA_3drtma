@@ -42,8 +42,8 @@ EOF
 
 list="akhrrr"    #"na_rotated_ll  hrrr conus alaska hawaii prico"
 for item in $list ; do
-  cp $fixdir/${RUN}/${RUN}_select_stnlist_${item}.dat select_stnlist_${item}.dat
-  cp $fixdir/${RUN}/${RUN}_non_viable_stnlocation_list_${item}.dat non_viable_stnlocation_list_${item}.dat
+  cp $fixdir/${RUN}ak_select_stnlist_${item}.dat select_stnlist_${item}.dat
+  cp $fixdir/${RUN}ak_non_viable_stnlocation_list_${item}.dat non_viable_stnlocation_list_${item}.dat
 done
 
 ##GZ:==> using the uncompressed tarball of obs-diag files with suffix tar (instead of tgz)

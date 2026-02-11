@@ -79,11 +79,11 @@ export PROD_HEAD=${PROD_HEAD:-"${NET}.${cycle}"}
 
 
 # Specify Execution Areas
-export HOMErtma3d=${HOMErtma3d:-$NWROOT/rtma.${rtma_ver}}
+export HOMErtma3d=${HOMErtma3d:-$PACKAGEROOT/${NET}.${rtma3d_ver}}
 export EXECrtma3d=${EXECrtma3d:-$HOMErtma3d/exec}
-export FIXrtma3d=${FIXrtma3d:-$HOMErtma3d/fix/${NET}}
-export PARMrtma3d=${PARMrtma3d:-$HOMErtma3d/parm/${NET}}
-export USHrtma3d=${USHrtma3d:-$HOMErtma3d/ush/${NET}}
+export FIXrtma3d=${FIXrtma3d:-$HOMErtma3d/fix/${dom}}
+export PARMrtma3d=${PARMrtma3d:-$HOMErtma3d/parm/${dom}}
+export USHrtma3d=${USHrtma3d:-$HOMErtma3d/ush/${dom}}
 export UTILrtma3d=${UTILrtma3d:-$HOMErtma3d/util/${NET}}
 
 # date and time for previous and next cycle
@@ -100,21 +100,21 @@ export FGS_OPT=${FGS_OPT:-1}
 # Set up the INPUT and OUTPUT directories
 #################################################
 ### COM_IN used to retrieve ges and analysis files from 2p5, ak, gu, hi, and pr
-export COMIN=${COMIN:-${COMROOT}/${NET}/${envir}/${NET}.${PDY}}
-export COMOUT=${COMOUT:-${COMROOT}/${NET}/${envir}/${NET}.${PDY}}
+export COMIN=${COMIN:-$(compath.py  ${envir}/${NET}/${rtma3d_ver})/${RUN}.${PDY}/${dom}}
+export COMOUT=${COMOUT:-$(compath.py -o  ${envir}/${NET}/${rtma3d_ver})/${RUN}.${PDY}/${dom}}
 export COMINobsproc_rtma3d=${COMINobsproc_rtma3d:-"${COMIN}/obsprd.${cycle}"}
 export GESINhrrr_rtma3d=${GESINhrrr_rtma3d:-"${COMIN}/fgsprd.${cycle}"}
 export COMOUTgsi_rtma3d=${COMOUTgsi_rtma3d:-"${COMOUT}/gsiprd.${cycle}"}
 export COMOUTpost_rtma3d=${COMOUTpost_rtma3d:-"${COMOUT}/postprd.${cycle}"}
 export COMOUTbufrsnd_rtma3d=${COMOUTbufrsnd_rtma3d:-"${COMOUT}/bufrsnd.${cycle}"}
-export COMINm1=${COMINm1:-${COMROOT}/${NET}/${envir}/${NET}.${PDYn1}}
-export COMINm2=${COMINm2:-${COMROOT}/${NET}/${envir}/${NET}.${PDYn2}}
-export COMINm3=${COMINm3:-${COMROOT}/${NET}/${envir}/${NET}.${PDYn3}}
+export COMINm1=${COMINm1:-${COMROOT}/${NET}/${envir}/${NET}.${PDYn1}/${dom}}
+export COMINm2=${COMINm2:-${COMROOT}/${NET}/${envir}/${NET}.${PDYn2}/${dom}}
+export COMINm3=${COMINm3:-${COMROOT}/${NET}/${envir}/${NET}.${PDYn3}/${dom}}
 
 
-export COMOUTm1=${COMOUTm1:-${COMROOT}/${NET}/${envir}/${NET}.${PDYn1}}
-export COMOUTm2=${COMOUTm2:-${COMROOT}/${NET}/${envir}/${NET}.${PDYn2}}
-export COMOUTm3=${COMOUTm3:-${COMROOT}/${NET}/${envir}/${NET}.${PDYn3}}
+export COMOUTm1=${COMOUTm1:-${COMROOT}/${NET}/${envir}/${NET}.${PDYn1}/${dom}}
+export COMOUTm2=${COMOUTm2:-${COMROOT}/${NET}/${envir}/${NET}.${PDYn2}/${dom}}
+export COMOUTm3=${COMOUTm3:-${COMROOT}/${NET}/${envir}/${NET}.${PDYn3}/${dom}}
 
 ### Observations Products/Input for the RTMA3D (prepbufr files) 
 export COMINobsproc_rtma3dm1=${COMINobsproc_rtma3dm1:-"${COMINm1}/obsprd.${cyclem1}"}
@@ -176,7 +176,7 @@ if [[ ${RUN_RHIST} =~ [nNfF] ]] ; then
    exit 0
 fi
 
-${exSCR_RHIST:-$HOMErtma3d/scripts/${RUN}/ex${RUN}_rhist.ksh}
+${exSCR_RHIST:-$HOMErtma3d/scripts/${dom}/ex${RUN}_rhist.ksh}
 export err=$?; err_chk
 
 msg="$0 of $job completed normally"

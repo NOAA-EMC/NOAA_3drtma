@@ -15,32 +15,17 @@ set -x
 export RUN_ENVIR=${RUN_ENVIR:-nco}
 
 ###################################
-# Specify NET and RUN Name and model
+# Specify NET and RUN Name
 ####################################
 export NET=${NET:-rtma3d}
 export RUN=${RUN:-rtma3d}
-export model=${model:-rtma3d}
 
 ##########################################################
-# obtain unique process id (pid)
+# Define data and shared directories
 ##########################################################
-export job=${job:-"${outid}.o$$"}
-export jobid=${jobid:-"${outid}.o$$"}
-export MPIRUN=${MPIRUN:-"mpirun"}
-
-export CNVGRIB=${CNVGRIB:-cnvgrib}
-
-##########################################################
-# make temp/running directories
-##########################################################
-export DATA=${DATA:-$DATAROOT/${jobid:?}} #jobid ($job.$LSB_JOBID MUST BE DEFINED IN TERMS OF $RUN IN UPPER LEVEL SCRIPT /MPondeca, 26Jul2015
-if [ -d $DATA ] ; then
-    ${ECHO} "$DATA exists, remove its content"
-    ${RM} -rf $DATA/*
-else
-   ${ECHO} "$DATA does not exist, create it"
-   ${MKDIR} -p $DATA
-fi
+export DATA=${DATA:-$DATAROOT/${jobid:?}}
+export DATA_SHARED=${DATA_SHARED:-${DATAROOT}/sharedprd}
+mkdir -p $DATA $DATA_SHARED
 cd $DATA
 
 #####################################################
@@ -48,92 +33,41 @@ cd $DATA
 #    setpdy.sh needs the variables 
 #    $PDY and $cyc already defined in advance
 #####################################################
-#setpdy.sh
-#. ${DATA}/PDY
-  export cycle=${cycle:-t${cyc}z}
-  export pgmout=${pgmout:-"OUTPUT.${PDY}${cyc}.${jobid}"}
-  export COMINmosaic=${COMINmosaic:-"${COMIN}/radar.${PDY}"}
-  export COMINrap=${COMINRAP}/rtma.${PDY}
+export cycle=${cycle:-t${cyc}z}
+setpdy.sh
+. ./PDY
 
+export CDATE="${PDY}${cyc}"
 
-####################################
-# Determine Job Output Name on System
-####################################
-export LOG_JJOB=${LOG_JJOB:-$COMROOT/logs/jlogfiles}
-export jlogfile=${jlogfile:-$LOG_JJOB/jlogfile.${jobid}}
-if [ ! -d ${LOG_JJOB} ] ; then
-   mkdir -p ${LOG_JJOB}
-fi
-if [ ! -d ${LOG_PGMOUT} ] ; then
-   mkdir -p ${LOG_PGMOUT}
-fi
-
-# specify the file head for the file names of the archived data files
-export PROD_HEAD=${PROD_HEAD:-"${NET}.t${cyc}z"}
+export pgmout=${pgmout:-"OUTPUT.$$"}
 
 # Specify Execution Areas
-export HOMErtma3d=${HOMErtma3d:-$NWROOT/rtma.${rtma_ver}}
+export HOMErtma3d=${HOMErtma3d:-$PACKAGEROOT/${NET}.${rtma3d_ver}}
 export EXECrtma3d=${EXECrtma3d:-$HOMErtma3d/exec}
-export FIXrtma3d=${FIXrtma3d:-$HOMErtma3d/fix/${NET}}
-export PARMrtma3d=${PARMrtma3d:-$HOMErtma3d/parm/${NET}}
-export USHrtma3d=${USHrtma3d:-$HOMErtma3d/ush/${NET}}
-export UTILrtma3d=${UTILrtma3d:-$HOMErtma3d/util/${NET}}
+export FIXrtma3d=${FIXrtma3d:-$HOMErtma3d/fix/${dom}}
+export PARMrtma3d=${PARMrtma3d:-$HOMErtma3d/parm/${dom}}
+export USHrtma3d=${USHrtma3d:-$HOMErtma3d/ush/${dom}}
 
 #################################################
 # Set up the INPUT and OUTPUT directories
 #################################################
-export COMIN=${COMIN:-${COMROOT}/${NET}/${envir}/${NET}.${PDY}}
-export COMOUT=${COMOUT:-${COMROOT}/${NET}/${envir}/${NET}.${PDY}}
+export COMIN=${COMIN:-$(compath.py  ${envir}/${NET}/${rtma3d_ver})/${RUN}.${PDY}/${dom}}
+export COMOUT=${COMOUT:-$(compath.py -o  ${envir}/${NET}/${rtma3d_ver})/${RUN}.${PDY}/${dom}}
+export COMINobsproc=${COMINobsproc:-$(compath.py ${envir}/obsproc/${obsproc_ver})/${NET}.${PDY}}
 
-### Processed Observations ready to be used by RTMA3D_gsi
-export COMINobsproc_rtma3d=${COMINobsproc_rtma3d:-"${COMIN}/obsprd.${cycle}"}
+mkdir -p $COMOUT
 
-if [ ! -d "${COMIN}" ] ; then
-   mkdir -p $COMIN
-fi
-if [ ! -d "${COMOUT}" ] ; then
-   mkdir -p $COMOUT
-fi
-if [ ! -d "${COMINobsproc_rtma3d}" ] ; then
-  ${MKDIR} -p $COMINobsproc_rtma3d
-fi
-
-###########################################################
-#
-# The following variables are used in exrtma3d_obsprep_cloud.ksh
-#
-###########################################################
-#   Set the name to the executable
-    export exefile_name_cloud=${exefile_name_cloud:-"rtma3d_process_cloud"}
-
-#   Set the path to the GSI static files
-    export FIXgsi=${FIXgsi:-"${FIXrtma3d}/gsi"}
-    export FIXcrtm=${FIXcrtm:-"${FIXrtma3d}/crtm"}
-    export FIXwps=${FIXwps:-"${FIXrtma3d}/wps"}
-
-    export PARMupp=${PARMupp:-"${PARMrtma3d}/upp"}
-    export PARMwrf=${PARMwrf:-"${PARMrtma3d}/wrf"}
-
-    export OBS_USELIST=${OBS_USELIST:-"${FIXrtma3d}/gsi"}
-    export SFCOBS_USELIST=${SFCOBS_USELIST:-"${FIXrtma3d}/gsi"}
-    export AIRCRAFT_REJECT=${AIRCRAFT_REJECT:-"${FIXrtma3d}/gsi"}
-    export SFCOBS_PROVIDER=${SFCOBS_PROVIDER:-"${FIXrtma3d}/gsi"}
-
-##########################################################
+env
 
 ######################
 # Execute the script.
 ######################
-${exSCR_OBSPREP_CLOUD:-$HOMErtma3d/scripts/$RUN/ex${RUN}_obsprep_cloud.ksh}
+$HOMErtma3d/scripts/${dom}/ex${RUN}_obsprep_cloud.ksh
 export err=$?; err_chk
 
-msg="$0 of $job completed normally"
-postmsg $jlogfile "$msg"
+cat $pgmout
 
-if [ -e "${pgmout}" ] ; then
-   cat $pgmout
-   cpreq -p $pgmout ${LOG_PGMOUT}
-fi
+postmsg "$0 of $job completed normally"
 
 ##############################
 # Remove the Temporary working directory

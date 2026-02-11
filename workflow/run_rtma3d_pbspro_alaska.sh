@@ -11,5 +11,7 @@
   module use /apps/ops/test/nco/modulefiles/core
   module load rocoto
 
-rocotorun -v 10 -w /lfs/h2/emc/da/noscrub/$USER/packages/rtma3d.v1.0.0_aircraft/workflow/rtma3d_pbspro_alaska.xml -d /lfs/h2/emc/da/noscrub/$USER/packages/rtma3d.v1.0.0_aircraft/workflow/rtma3d_pbspro_alaska.db
+export exp=""
+
+rocotorun -v 10 -w /lfs/h2/emc/da/noscrub/$USER/packages/rtma3d.v1.0.0${exp}/workflow/rtma3d_pbspro_alaska.xml -d /lfs/h2/emc/da/noscrub/$USER/packages/rtma3d.v1.0.0${exp}/workflow/rtma3d_pbspro_alaska.db
 

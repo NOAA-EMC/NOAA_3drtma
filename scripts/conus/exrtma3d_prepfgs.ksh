@@ -202,14 +202,14 @@ if [[ ${RUN_HOWV} =~ [TtYy] ]] ; then
 #
 # 1.2  fix dir (for slmask.grib2 file)
 # print_info_msg "$VERBOSE" "FIXgsi is $FIXgsi"   (print_info_msg is only available in RRFS worklfow)
-  info_msg="FIXgsi is $FIXgsi"
-  echo "$info_msg"
+# info_msg="FIXgsi is $FIXgsi"
+# echo "$info_msg"
 #
 #  Sea-Land Mask for the correct interpolation of the howv Background.
   rm -f ./slmask.grib2
-  if [[ -f $FIXgsi/hrrr_conus_3km_slmask_nolakes.grib2 ]] ; then
-      echo "Sea-Land no-lakes mask file --> $FIXgsi/hrrr_conus_3km_slmask_nolakes.grib2"
-      cp -p $FIXgsi/hrrr_conus_3km_slmask_nolakes.grib2    ./slmask.grib2
+  if [[ -f $FIXrtma3d/${RUN}_hrrr_conus_3km_slmask_nolakes.grib2 ]] ; then
+      echo "Sea-Land no-lakes mask file --> $FIXrtma3/${RuN}_hrrr_conus_3km_slmask_nolakes.grib2"
+      cp -p $FIXrtma3d/${RUN}_hrrr_conus_3km_slmask_nolakes.grib2    ./slmask.grib2
   else
       echo "No Sea-Land no-lakes mask file is used for Wave Height firtguess"
   fi
