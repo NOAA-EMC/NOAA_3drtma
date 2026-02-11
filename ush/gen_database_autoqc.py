@@ -112,10 +112,6 @@ def windbias(dat_var):
   fname = thisRUN+'.t'+cycle_HH+'z.windbias_'+cyclestr+'.txt'
   dat_wbias=dat_wbias.loc[(dat_var['PBUFTYP'].isin(mnet_bctypes))]
   write_wbias(dat_wbias[keep_cols+['a_'+cyclestr]],fname)
-  # Write out text files with the wind bias correction output (values < 0.5 or >= 2.0)
-  fname_extremes = thisRUN+'.t'+cycle_HH+'z.windbias_'+cyclestr+'_extremes.txt'
-  dat_wbias_extremes=dat_wbias.loc[(dat_wbias['a_'+cyclestr]<0.5) | (dat_wbias['a_'+cyclestr]>=2.0)]
-  write_wbias(dat_wbias_extremes[keep_cols+['a_'+cyclestr]],fname_extremes)
 
   # Drop the previous cycle's wind bias information from the SQL database
   columns_wbias=[x + cyclestr_m1 for x in cols_wbias]
@@ -639,7 +635,6 @@ if __name__ == "__main__":
   probecyc_long=sys.argv[7]
   tinf=np.float64(sys.argv[8]) # Constant timescale associated with an observation
 
-  exp='para'
   NET='rtma3d' # MTM - remove after RUN is defined correctly
 
   cyclestr=dateobj

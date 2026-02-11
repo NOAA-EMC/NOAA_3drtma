@@ -19,6 +19,8 @@ MM=`${DATE} +"%m" -d "${START_TIME}"`
 DD=`${DATE} +"%d" -d "${START_TIME}"`
 HH=`${DATE} +"%H" -d "${START_TIME}"`
 
+YYYYMMDDHHm1=`${NDATE} -1 ${YYYYMMDDHH}`
+
 #HH_cycp1=`echo ${PDYHH_cycp1} | cut -c 9-10`
 #HH_cycm1=`echo ${PDYHH_cycm1} | cut -c 9-10`
 #YYYYMMDDHH_m1hr=`echo ${PDYHH_cycm1} | cut -c 1-10`
@@ -26,7 +28,7 @@ HH=`${DATE} +"%H" -d "${START_TIME}"`
 # Find the directory containing the previous database file
 max_cycs=168 # Number of cycles to look back
 i=1
-export PDYprev=${YYYYMMDDHH}
+export PDYprev=${YYYYMMDDHHm1}
 export PDYprev_dir=${COMOUTautoqc_rtma3d}
 while [ ${i} -lt ${max_cycs} ]; do
   probe=`${NDATE} -${i} ${YYYYMMDDHH}`
@@ -46,7 +48,7 @@ done
 # Find the most recent cycle with computed long-term reject lists
 max_cycs=168 # Number of cycles to look back
 i=1
-export probecyc_long=${YYYYMMDDHH}
+export probecyc_long=${YYYYMMDDHHm1}
 while [ ${i} -lt ${max_cycs} ]; do
   probe=`${NDATE} -${i} $YYYYMMDDHH`
   probe_YYYYMMDD=`echo $probe | cut -c 1-8`
@@ -54,6 +56,28 @@ while [ ${i} -lt ${max_cycs} ]; do
   probe_dir=${COMOUTautoqc_base}/${NET}.${probe_YYYYMMDD}/autoqcprd.t${probe_HH}z # MTM - revert NET to RUN
   if [ $probe_HH -eq "23" ] && [ -s ${probe_dir}/${RUN}.t${probe_HH}z.accept_merged_${probe}.txt ]; then
     export probecyc_long=${probe}
+    break
+  else
+    let "i=i+1"
+  fi
+done
+
+# Find the directory containing the most recent aircraft reject lists
+max_cycs=168 # Number of cycles to look back
+i=1
+export PDYprev_aircraft=${YYYYMMDDHHm1}
+export PDYprev_aircraft_dir=${COMOUTautoqc_rtma3d}
+export startcyc_aircraft=${YYYYMMDD}00
+while [ ${i} -lt ${max_cycs} ]; do
+  probe=`${NDATE} -${i} ${YYYYMMDDHH}`
+  probe_YYYYMMDD=`echo $probe | cut -c 1-8`
+  probe_HH=`echo $probe | cut -c 9-10`
+  probe_dir=${COMOUTautoqc_base}/${NET}.${probe_YYYYMMDD}/autoqcprd.t${probe_HH}z # MTM - revert NET to RUN
+  if [ $probe_HH -eq "23" ] && [ -s ${probe_dir}/${RUN}.t${probe_HH}z.aircraft_rjs_merged_${probe}.txt ]; then
+    echo $probe
+    export PDYprev_aircraft=${probe}
+    export PDYprev_aircraft_dir=${probe_dir}
+    export startcyc_aircraft=`${NDATE} +1 ${PDYprev_aircraft}`
     break
   else
     let "i=i+1"
@@ -103,7 +127,18 @@ if [ err -eq 0 ] ; then
 echo "AUTOQC SUCCESS."
 elif [ err -gt 0 ] ; then
 echo "AUTOQC FAILED."
-#mail -s "AUTOQC failed at cycle: $YYYYMMDDHH" Edward.Colon@noaa.gov < /dev/null
+fi
+
+if [ ${HH} -eq 23 ]; then
+  ${ECHO} "Generate aircraft reject lists daily at 23Z."
+  python ${NWROOT}/ush/aircraft_reject_lists.py ${RUN} ${startcyc_aircraft} ${YYYYMMDDHH} ${DATA} ${COMOUTautoqc_rtma3d} ${PDYprev_aircraft_dir} ${PDYprev_aircraft}
+
+  export err=$?; err_chk
+  if [ err -eq 0 ] ; then
+  echo "AUTOQC AIRCRAFT LISTS SUCCESS."
+  elif [ err -gt 0 ] ; then
+  echo "AUTOQC AIRCRAFT LISTS FAILED."
+  fi
 fi
 
 ${CP} -p * ${COMOUTautoqc_rtma3d}
@@ -117,8 +152,6 @@ msg="***********************************************************"
 postmsg "$jlogfile" "$msg"
 
 #export err=$? ; err_chk
-
-#ls -l ${GESINhrrr_rtma3d} > ${GESINhrrr_rtma3d}/fgs_data_${PDY}_${cyc}.list
 
 exit 0
 
