@@ -1,4 +1,4 @@
-#!/bin/ksh
+#!/bin/sh
 
 # --- for debug --- #
 date
@@ -21,13 +21,6 @@ export NET=${NET:-rtma3d}
 export RUN=${RUN:-rtma3d}
 
 ##########################################################
-# obtain unique process id (pid)
-##########################################################
-export job=${job:-"${outid}.o$$"}
-export jobid=${jobid:-"${outid}.o$$"}
-
-export PDYm1=`$NDATE -24 ${PDY}${cyc} | cut -c 1-8`
-##########################################################
 # Define data and shared directories
 ##########################################################
 export DATA=${DATA:-$DATAROOT/${jobid:?}}
@@ -48,16 +41,14 @@ export CDATE="${PDY}${cyc}"
 
 export pgmout=${pgmout:-"OUTPUT.$$"}
 
-export cyc_mxtm=${cyc_mxtm:-08}
-export cyc_mitm=${cyc_mitm:-20}
-
 # Specify Execution Areas
 export HOMErtma3d=${HOMErtma3d:-$PACKAGEROOT/${NET}.${rtma3d_ver}}
 export EXECrtma3d=${EXECrtma3d:-$HOMErtma3d/exec}
 export FIXrtma3d=${FIXrtma3d:-$HOMErtma3d/fix/${dom}}
 export PARMrtma3d=${PARMrtma3d:-$HOMErtma3d/parm/${dom}}
 export USHrtma3d=${USHrtma3d:-$HOMErtma3d/ush/${dom}}
-export UTILrtma3d=${UTILrtma3d:-$HOMErtma3d/util/${NET}} # remove after copying files from util to ush
+
+export FIXcrtm=${FIXcrtm:-${CRTM_FIX:?}}
 
 #################################################
 # Set up the INPUT and OUTPUT directories
@@ -65,101 +56,16 @@ export UTILrtma3d=${UTILrtma3d:-$HOMErtma3d/util/${NET}} # remove after copying 
 export COMIN=${COMIN:-$(compath.py  ${envir}/${NET}/${rtma3d_ver})/${RUN}.${PDY}/${dom}}
 export COMOUT=${COMOUT:-$(compath.py -o  ${envir}/${NET}/${rtma3d_ver})/${RUN}.${PDY}/${dom}}
 export COMINobsproc=${COMINobsproc:-$(compath.py ${envir}/obsproc/${obsproc_ver})/${NET}.${PDY}}
+export GESINhrrrdas=${GESINhrrrdas:-$(compath.py ${envir}/hrrr/${hrrr_ver})/nwges/hrrrdasges}
+export COMINgfs=${COMINgfs:-$(compath.py $envir/gfs/$gfs_ver)}
 
 mkdir -p $COMOUT
-
-### Processed Observations ready to be used by RTMA3D_gsi
-#export COMINobsproc_rtma3d=${COMINobsproc_rtma3d:-"${COMIN}/obsprd.${cycle}"}
-#if [ ! -d "${COMINobsproc_rtma3d}" ] ; then
-#  echo " Directory of obs data does NOT exist. Job abort!"
-#  err_exit
-#fi
-
-### Firstguess Products/Input for the RTMA3D (netcdf files) 
-export GESINhrrr_rtma3d=${GESINhrrr_rtma3d:-"${COMIN}/fgsprd.${cycle}"}
-if [ ! -d "${GESINhrrr_rtma3d}" ] ; then
-  echo " Directory of HRRRs fgs data does NOT exist. Job abort!"
-  err_exit
-fi
-
-### 3DRTMA GSIANL Products (netcdf)
-export COMOUTgsi_rtma3d=${COMOUTgsi_rtma3d:-"${COMOUT}/gsiprd.${cycle}"}
 
 ### 3DRTMA AUTOQC Products
 export COMOUTautoqc_rtma3d=${COMOUTautoqc_rtma3d:-"${COMOUT}/autoqcprd.${cycle}"}
 export COMOUTautoqc_base=${COMOUTautoqc_base:-${COMROOT}/${NET}/${envir}}
 
-if [ ! -d "${COMOUTgsi_rtma3d}" ] ; then
-  mkdir -p ${COMOUTgsi_rtma3d}
-fi
-
-###########################################################
-#
-# The following variables are used in exrtma3d_gsianl.ksh
-#
-###########################################################
-#   Set the name to the executable
-    export exefile_name_gsi=${exefile_name_gsi:-"rtma3d_gsi"}
-
-if [ "${envir}" != "esrl" ]; then #WCOSS
-#   set the file name of the final analysis file for archive
-    if [ ! "${PROD_HEAD}" ] ; then
-        tz_str=t${cyc}z
-      export ANLrtma3d_FNAME="${NET}.${tz_str}.wrf_inout.nc"
-      export FGSrtma3d_FNAME="${NET}.${tz_str}.firstguess.nc"
-    else
-      export ANLrtma3d_FNAME="${PROD_HEAD}.wrf_inout.nc"
-      export FGSrtma3d_FNAME="${PROD_HEAD}.firstguess.nc"
-    fi
-
-#   Set the path to the working/obs/ges directories
-    export DATA_RUNDIR=${DATA_RUNDIR:-"${DATAROOT}/${envir}/${NET}.${PDY}${cyc}"}
-    if [ ! -d "${DATA_RUNDIR}" ] ; then
-        mkdir -p ${DATA_RUNDIR}
-    fi
-    export DATAHOME=${DATA_RUNDIR}/gsiprd
-    if [ -L "${DATAHOME}" ] && [ -d "${DATAHOME}" ] ; then
-        ${RM} -rf ${DATAHOME}
-    fi
-    ${LN} -s  ${DATA}  ${DATAHOME}
-
-    export DATAOBSHOME=${DATA_RUNDIR}/obsprd
-    if [ -L "${DATAOBSHOME}" ] && [ -d "${DATAOBSHOME}" ] ; then
-        ${RM} -rf ${DATAOBSHOME}
-    fi
-    ${LN} -s  ${COMINobsproc_rtma3d}  ${DATAOBSHOME}
-
-    export DATAHOME_BK=${DATA_RUNDIR}/fgsprd
-    if [ -L "${DATAHOME_BK}" ] && [ -d "${DATAHOME_BK}" ] ; then
-        ${RM} -rf ${DATAHOME_BK}
-    fi
-    ${LN} -s  ${GESINhrrr_rtma3d}  ${DATAHOME_BK}
-
-#   DATA_SHARED: the sub-directory to share the data
-#   export DATA_SHARED=${DATA_SHARED:-"${DATA_RUNDIR}/sharedprd"}
-#   if [ ! -d "${DATA_SHARED}" ] ; then
-#       mkdir -p ${DATA_SHARED}
-#   fi
-fi
-
-#   Set the path to the GSI static files
-    export FIXgsi=${FIXgsi:-"${FIXrtma3d}/gsi"}
-    export FIXcrtm=${FIXcrtm:-"${FIXrtma3d}/crtm"}
-    export FIXwps=${FIXwps:-"${FIXrtma3d}/wps"}
-
-    export PARMgsi=${PARMgsi:-"${PARMrtma3d}/gsi"}
-    export PARMupp=${PARMupp:-"${PARMrtma3d}/upp"}
-    export PARMwrf=${PARMwrf:-"${PARMrtma3d}/wrf"}
-
-    export OBS_USELIST=${OBS_USELIST:-"${FIXrtma3d}/gsi"}
-    export SFCOBS_USELIST=${SFCOBS_USELIST:-"${FIXrtma3d}/gsi"}
-    export AIRCRAFT_REJECT=${AIRCRAFT_REJECT:-"${FIXrtma3d}/gsi"}
-    export SFCOBS_PROVIDER=${SFCOBS_PROVIDER:-"${FIXrtma3d}/gsi"}
-
-#   parameters used in GSI analysis
-    export READIN_LOCALIZATION=${READIN_LOCALIZATION:-"TRUE"}
-
-##########################################################
+env
 
 ######################
 # Execute the script.
@@ -167,12 +73,10 @@ fi
 $HOMErtma3d/scripts/${dom}/ex${RUN}_gsianl.ksh
 export err=$?; err_chk
 
-msg="$0 of $job completed normally"
-postmsg $jlogfile "$msg"
+postmsg "$0 of $job completed normally"
 
 if [ -e "${pgmout}" ] ; then
    cat $pgmout
-   cpreq -p $pgmout ${LOG_PGMOUT}
 fi
 
 ##############################

@@ -43,4 +43,6 @@ export wgrib2_ver=2.0.8_wmo #note that pcpanl was only tested with ver=2.0.8
 export hrrr_ver=v4.1
 export obsproc_rtma3d_ver=v1.3
 export seaice_analysis_ver=v4.5
+export gfs_ver=v16.3
+export obsproc_ver=v1.3
 

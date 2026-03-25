@@ -51,7 +51,7 @@ do
         gzip -d ${obsname}_*_${YYYY}${MM}${DD}-${HH}${min}*.grib2.gz
         ls ${obsname}_*_${YYYY}${MM}${DD}-${HH}${min}*.grib2 > filelist_mrms
 # store information needed for retrospective runs in rerun_info.txt
-        echo "export mrms_time=${YYYY}${MM}${DD}-${HH}${min}${ss}" > ${DATA_SHARED}/radar.rerun_info.txt
+        echo "export mrms_time=${YYYY}${MM}${DD}-${HH}${min}${ss}" >> $COMOUT/${RUN}ak.t${cyc}z.rerun_info.txt
         echo 'Creating links for ' ${YYYYMMDDHH}
       fi
     fi
@@ -96,7 +96,7 @@ export err=$?; err_chk
 
 targetfile="NSSLRefInGSI.bufr"
 if [ -f ${DATA}/${targetfile} ] ; then
-  cpreq ${DATA}/${targetfile} ${COMOUT}/${RUN}.t${cyc}z.NSSLRefInGSI.${dom}.bufr
+  cpreq ${DATA}/${targetfile} ${COMOUT}/${RUN}ak.t${cyc}z.NSSLRefInGSI.bufr
 else
   postmsg "WARNING $pgm terminated normally but ${DATA}/${targetfile} does NOT exist."
 fi

@@ -21,8 +21,8 @@ check_dirs_exist() { #usage: check_dirs_exist "var1_name" "var2_name" ...
   check_if_defined "DATA" 
   check_dirs_exist "DATA" 
 #  checking the directory where analysis file is saved, and the definition of analysis file name
-  check_if_defined "COMOUTgsi_rtma3d"
-  check_dirs_exist "COMOUTgsi_rtma3d"
+# check_if_defined "COMOUTgsi_rtma3d"
+# check_dirs_exist "COMOUTgsi_rtma3d"
   check_if_defined "ANLrtma3d_FNAME"
   check_if_defined "DATA_SHARED"
   check_dirs_exist "DATA_SHARED"
@@ -131,7 +131,7 @@ postmsg "$jlogfile" "$msg"
      scaling_set=" -set_scaling 0 -4"
 
      grib2_tmplt_path=${COMOUT}
-     grib2_tmplt_file=${grib2_tmplt_path}/${RUN}.t${HH}z.fgs.${varname}.grib2
+     grib2_tmplt_file=${grib2_tmplt_path}/${RUN}ak.t${HH}z.fgs.${varname}.grib2
 
      grib2_fname="anl_${varname}.grib2"
 
@@ -162,7 +162,7 @@ postmsg "$jlogfile" "$msg"
         if [ $err -eq 0 ] ; then
            echo "           Successfully convert netcdf file to grib2 file for ${varname}."
            # save the analysis file (grib2) to $COMOUT
-           cp -p ./${grib2_fname}     ${COMOUT}/${RUN}.t${HH}z.anl.${varname}.grib2     
+           cp -p ./${grib2_fname}     ${COMOUT}/${RUN}ak.t${HH}z.anl.${varname}.grib2     
            # appending to a single grib2 file
 #          wgrib2 ${grib2_fname}      -append -grib ${COMOUT}/${RUN}.t${HH}z.anl.DirectAnl2Ds.grib2
         else
@@ -185,7 +185,7 @@ postmsg "$jlogfile" "$msg"
      scaling_set=" -set_scaling 0 -4"
 
      grib2_tmplt_path=${COMOUT}
-     grib2_tmplt_file=${grib2_tmplt_path}/${RUN}.t${HH}z.fgs.${varname}.grib2
+     grib2_tmplt_file=${grib2_tmplt_path}/${RUN}ak.t${HH}z.fgs.${varname}.grib2
 
      grib2_fname="anl_${varname}.grib2"
 
@@ -216,7 +216,7 @@ postmsg "$jlogfile" "$msg"
         if [ $err -eq 0 ] ; then
            echo "           Successfully convert netcdf file to grib2 file for ${varname}."
            # save the analysis file (grib2) to $COMOUT
-           cp -p ./${grib2_fname}     ${COMOUT}/${RUN}.t${HH}z.anl.${varname}.grib2     
+           cp -p ./${grib2_fname}     ${COMOUT}/${RUN}ak.t${HH}z.anl.${varname}.grib2     
            # appending to a single grib2 file
 #          wgrib2 ${grib2_fname}      -append -grib ${COMOUT}/${RUN}.t${HH}z.anl.DirectAnl2Ds.grib2
         else
@@ -239,7 +239,7 @@ postmsg "$jlogfile" "$msg"
      scaling_set=" -set_scaling 0 -4"
 
      grib2_tmplt_path=${COMOUT}
-     grib2_tmplt_file=${grib2_tmplt_path}/${RUN}.t${HH}z.fgs.${varname}.grib2
+     grib2_tmplt_file=${grib2_tmplt_path}/${RUN}ak.t${HH}z.fgs.${varname}.grib2
 
      grib2_fname="anl_${varname}.grib2"
 
@@ -270,7 +270,7 @@ postmsg "$jlogfile" "$msg"
         if [ $err -eq 0 ] ; then
            echo "           Successfully convert netcdf file to grib2 file for ${varname}."
            # save the analysis file (grib2) to $COMOUT
-           cp -p ./${grib2_fname}     ${COMOUT}/${RUN}.t${HH}z.anl.${varname}.grib2     
+           cp -p ./${grib2_fname}     ${COMOUT}/${RUN}ak.t${HH}z.anl.${varname}.grib2     
            # appending to a single grib2 file
 #          wgrib2 ${grib2_fname}      -append -grib ${COMOUT}/${RUN}.t${HH}z.anl.DirectAnl2Ds.grib2
         else

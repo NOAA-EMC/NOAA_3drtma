@@ -27,11 +27,12 @@
 
 <!ENTITY ptmp_base	"/lfs/h2/emc/ptmp/&USER;/rtma3d&exp;">
 <!ENTITY COMINRAP       "/lfs/h1/ops/prod/com/obsproc/v1.2">
-<!ENTITY COMINHRRR      "/lfs/h1/ops/prod/com/hrrr/v4.1">
+<!ENTITY COMINhrrr      "/lfs/h1/ops/prod/com/hrrr/v4.1">
 <!ENTITY COMINradar     "/lfs/h1/ops/dev/dcom/ldmdata/obs/upperair/mrms">
-<!ENTITY GESINHRRR      "/lfs/h1/ops/prod/com/hrrr/v4.1/nwges/hrrrges_sfc/alaska">
-<!ENTITY COMINHRRRDAS   "/lfs/h1/ops/prod/com/hrrr/v4.1/nwges/hrrrdasges">
-<!ENTITY COMINGDAS      "/lfs/h1/ops/prod/com/gfs/v16.3">
+<!ENTITY GESINhrrr      "/lfs/h1/ops/prod/com/hrrr/v4.1/nwges/hrrrges_sfc/alaska">
+<!ENTITY COMINgfs       "/lfs/h1/ops/prod/com/gfs/v16.3">
+<!ENTITY COMINww3GL     "/lfs/h1/ops/prod/com/glwu/v2.0">
+<!ENTITY COMINww3       "/lfs/h1/ops/prod/com/gfs/v16.3">
 <!ENTITY NWROOT		"/lfs/h2/emc/da/noscrub/&USER;/packages/rtma3d.&rtma3d_ver;&exp;">
 <!ENTITY PACKAGEROOT    "&NWROOT;">
 <!ENTITY COMINPREP      "/lfs/h2/emc/ptmp/ashley.stanfield/CRON/rtma3d/com/obsproc/v1.3">
@@ -54,7 +55,6 @@
 <!ENTITY EXECrtma3d	"&NWROOT;/exec">
 
 <!-- Specific Definition for static data -->
-<!ENTITY FIXcrtm        "&NWROOT;/fix/crtm">
 <!ENTITY FIXupp         "&NWROOT;/fix/upp">
 <!ENTITY FIXgsi         "&NWROOT;/fix/gsi">
 <!ENTITY FIXwps         "&NWROOT;/fix/wps">
@@ -81,7 +81,6 @@
 <!-- Note: -->
 <!--      these directories are just links pointing to real running directories -->
 <!ENTITY DATA_GSIANL    "&DATA_RUNDIR;/gsiprd">
-<!ENTITY DATA_OBSPRD    "&DATA_RUNDIR;/obsprd">
 <!ENTITY DATA_FGSPRD    "&DATA_RUNDIR;/fgsprd">
 <!ENTITY DATA_ANLDUMP   "&DATA_RUNDIR;/anldump">
 <!ENTITY DATA_POST      "&DATA_RUNDIR;/postprd">
@@ -105,8 +104,6 @@
 <!ENTITY hpsspath1_1yr  "/NCEPPROD/1year/hpssprod/runhistory">
 <!ENTITY hpsspath1_gsd  "/BMC/fdr/Permanent">
 <!ENTITY hpsspath1_AGibbs  "/NCEPDEV/emc-meso/1year/Annette.Gibbs">
-
-<!ENTITY FGS_OPT        "1">
 
 <!-- for obs pre-processing -->
 <!ENTITY obsprep_satwnd  "1">
@@ -192,6 +189,7 @@
 <!ENTITY GSI_START_TIME "00:40:00">
 <!ENTITY GSI_DEADLINE   "01:30:00">
 <!ENTITY START_TIME_RADAR "00:10:00">
+<!ENTITY START_TIME_FGS "00:10:00">
 <!ENTITY GSI_WALL_LIMIT 
    '<deadline><cyclestr offset="&GSI_DEADLINE;">@Y@m@d@H@M</cyclestr></deadline>'>
 
@@ -297,8 +295,8 @@
         <value>&COMINRAP;</value>
    </envar>
    <envar>
-        <name>COMINHRRR</name>
-        <value>&COMINHRRR;</value>
+        <name>COMINhrrr</name>
+        <value>&COMINhrrr;</value>
    </envar>
    <envar>
         <name>COMINPREP</name>
@@ -313,16 +311,20 @@
         <value>&COMINradar;</value>
    </envar>
    <envar>
-        <name>COMINGDAS</name>
-        <value>&COMINGDAS;</value>
+        <name>COMINgfs</name>
+        <value>&COMINgfs;</value>
    </envar>
    <envar>
-        <name>COMINHRRRDAS</name>
-        <value>&COMINHRRRDAS;</value>
+        <name>GESINhrrr</name>
+        <value>&GESINhrrr;</value>
    </envar>
    <envar>
-        <name>GESINHRRR</name>
-        <value>&GESINHRRR;</value>
+        <name>COMINww3GL</name>
+        <value>&COMINww3GL;</value>
+   </envar>
+   <envar>
+        <name>COMINww3</name>
+        <value>&COMINww3;</value>
    </envar>
    <envar>
         <name>NWROOT</name>
@@ -355,10 +357,6 @@
    <envar>
         <name>UTILrtma3d_dev</name>
         <value>&UTILrtma3d_dev;</value>
-   </envar>
-   <envar>
-        <name>FIXcrtm</name>
-        <value>&FIXcrtm;</value>
    </envar>
    <envar>
         <name>FIXupp</name>
@@ -437,10 +435,6 @@
         <value>&CAP_RUN;</value>
    </envar>
    <envar>
-        <name>FGS_OPT</name>
-        <value>&FGS_OPT;</value>
-   </envar>
-   <envar>
         <name>obsprep_satwnd</name>
         <value>&obsprep_satwnd;</value>
    </envar>
@@ -507,10 +501,6 @@
    <envar>
       <name>DATA_AUTOQC</name>
       <value><cyclestr>&DATA_AUTOQC;</cyclestr></value>
-   </envar>
-   <envar>
-      <name>DATA_OBSPRD</name>
-      <value><cyclestr>&DATA_OBSPRD;</cyclestr></value>
    </envar>
    <envar>
       <name>DATA_RHIST</name>
@@ -586,10 +576,6 @@
     <envar>
       <name>READIN_LOCALIZATION</name>
       <value>&READIN_LOCALIZATION;</value>
-    </envar>
-    <envar>
-      <name>GSIANL_RES</name>
-      <value>3km</value>
     </envar>
     <envar>
       <name>DATABASE_DIR</name>
@@ -930,7 +916,7 @@
    </dependency>
   </task>
 
-  <task name="&RUN;_prepfgs_ind1_task" cycledefs="ind1" maxtries="&maxtries;">
+  <task name="&RUN;_prepfgs_task" cycledefs="hourly" maxtries="&maxtries;">
 
     &ENVARS;
     <envar>
@@ -940,60 +926,15 @@
 
 
     <command>&WORKFLOW_DIR;/launch.ksh &JJOB_PREPFGS;</command>
-    <jobname><cyclestr>&RUN;_prepfgs_ind1_job_@Y@m@d@H@M</cyclestr></jobname>
-    <join><cyclestr>&LOG_SCHDLR;/&RUN;_&envir;_prepfgs_ind1_@Y@m@d@H.log</cyclestr></join>
+    <jobname><cyclestr>&RUN;_prepfgs_job_@Y@m@d@H@M</cyclestr></jobname>
+    <join><cyclestr>&LOG_SCHDLR;/&RUN;_&envir;_prepfgs_@Y@m@d@H.log</cyclestr></join>
 
     &PREPFGS_RESOURCES;
     &PREPFGS_RESERVATION;
 
     &ENVARS_PREPJOB;
     <dependency>
-      <datadep age="10"><cyclestr offset="-3600">&GESINHRRR;/hrrrak_@Y@m@d@Hf001</cyclestr></datadep>
-    </dependency>
-  </task>
-
-
-  <task name="&RUN;_prepfgs_ind2_task" cycledefs="ind2" maxtries="&maxtries;">
-
-    &ENVARS;
-    <envar>
-       <name>rundir_task</name>
-       <value><cyclestr>&DATA_FGSPRD;</cyclestr></value>
-    </envar>
-
-
-    <command>&WORKFLOW_DIR;/launch.ksh &JJOB_PREPFGS;</command>
-    <jobname><cyclestr>&RUN;_prepfgs_ind2_job_@Y@m@d@H@M</cyclestr></jobname>
-    <join><cyclestr>&LOG_SCHDLR;/&RUN;_&envir;_prepfgs_ind2_@Y@m@d@H.log</cyclestr></join>
-
-    &PREPFGS_RESOURCES;
-    &PREPFGS_RESERVATION;
-
-    &ENVARS_PREPJOB;
-    <dependency>
-      <datadep age="10"><cyclestr offset="-7200">&GESINHRRR;/hrrrak_@Y@m@d@Hf002</cyclestr></datadep>
-    </dependency>
-  </task>
-
-  <task name="&RUN;_prepfgs_ind3_task" cycledefs="ind3" maxtries="&maxtries;">
-
-    &ENVARS;
-    <envar>
-       <name>rundir_task</name>
-       <value><cyclestr>&DATA_FGSPRD;</cyclestr></value>
-    </envar>
-
-
-    <command>&WORKFLOW_DIR;/launch.ksh &JJOB_PREPFGS;</command>
-    <jobname><cyclestr>&RUN;_prepfgs_ind3_job_@Y@m@d@H@M</cyclestr></jobname>
-    <join><cyclestr>&LOG_SCHDLR;/&RUN;_&envir;_prepfgs_ind3_@Y@m@d@H.log</cyclestr></join>
-
-    &PREPFGS_RESOURCES;
-    &PREPFGS_RESERVATION;
-
-    &ENVARS_PREPJOB;
-    <dependency>
-      <datadep age="10"><cyclestr offset="-10800">&GESINHRRR;/hrrrak_@Y@m@d@Hf003</cyclestr></datadep>
+      <timedep><cyclestr offset="&START_TIME_FGS;">@Y@m@d@H@M00</cyclestr></timedep>
     </dependency>
   </task>
 
@@ -1003,6 +944,11 @@
     &GSI_RESOURCES;
     &GSI_RESERVATION;
     &OPTIMIZATIONS_GSI;
+
+    <envar><name>ntasks</name><value>360</value></envar>
+    <envar><name>ppn</name><value>30</value></envar>
+    <envar><name>threads</name><value>4</value></envar>
+
     <envar>
        <name>rundir_task</name>
        <value><cyclestr>&DATA_GSIANL;</cyclestr></value>
@@ -1017,9 +963,7 @@
     <dependency>
       <and>
           <or>
-		  <taskdep task="&RUN;_prepfgs_ind1_task"/>
-		  <taskdep task="&RUN;_prepfgs_ind2_task"/>
-		  <taskdep task="&RUN;_prepfgs_ind3_task"/>
+		  <taskdep task="&RUN;_prepfgs_task"/>
 	  </or>	  
           <taskdep task="&RUN;_obsprep_lghtn_task"/>
           <taskdep task="&RUN;_obsprep_cloud_task"/>

@@ -65,8 +65,10 @@ ohr=`echo $dateold | cut -c9-10`
 timeform=${wyr}"-"${wmn}"-"${wdy}"_"${whr}"_00_00"
 timeformold=${oyr}"-"${omn}"-"${ody}"_"${ohr}"_00_00"
 
-cp ${COMOUTgsi_rtma3d}/${RUN}.t${fhr}z.wrf_inout.nc wrfoutd01_${timeform}
-cp ${COMOUTgsi_rtma3dm1}/${RUN}.t${ohr}z.wrf_inout.nc wrfoutd01_${timeformold}
+#cp ${COMOUTgsi_rtma3d}/${RUN}.t${fhr}z.wrf_inout.nc wrfoutd01_${timeform}
+#cp ${COMOUTgsi_rtma3dm1}/${RUN}.t${ohr}z.wrf_inout.nc wrfoutd01_${timeformold}
+ cp ${COMOUT}/${RUN}.t${fhr}z.wrf_inout.nc wrfoutd01_${timeform}
+ cp ${COMOUT}/${RUN}.t${ohr}z.wrf_inout.nc wrfoutd01_${timeformold}
 
 #cp ${COMOUTgsi_rtma3d}/wrfout_d01_${timeform}  wrfoutd01_${timeform}
 #if [ $fhr -eq 0 ]; then

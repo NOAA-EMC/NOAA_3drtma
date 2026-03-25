@@ -56,8 +56,13 @@ HH_fcstinit=`${ECHO} ${FCST_INI_TIME} | cut -c9-10 `
 export DATAHOME=$DATA
 export CORE="RAPRRTMA"
 
-export DATAWRFHOME=${GESINhrrr_rtma3d:-"$COMIN"}
-export DATAWRFFILE=${FGSrtma3d_FNAME:-"${NET}.t${cyc}z.firstguess.nc"}
+#export DATAWRFHOME=${GESINhrrr_rtma3d:-"$COMIN"}
+export DATAWRFHOME=${COMOUT:-"$COMIN"}
+if [ $dom == "conus" ]; then
+  DATAWRFFILE="${RUN}.t${cyc}z.firstguess.nc"
+else
+  DATAWRFFILE="${RUN}ak.t${cyc}z.firstguess.nc"
+fi
 export PROD_HEAD2="${PROD_HEAD}"
 
 ##########################################################################
@@ -152,7 +157,26 @@ ${RM} -f WRF???.GrbF??
 ${CP_LN} ${PARMupp}/params_grib2_tbl_new params_grib2_tbl_new
 ${CP_LN} ${PARMupp}/postxconfig-NT-3drtma.txt postxconfig-NT.txt
 ${CP_LN} ${PARMupp}/rap_micro_lookup.dat ./eta_micro_lookup.dat
-${CP_LN} ${FIXcrtm}/* .
+#${CP_LN} ${FIXcrtm}/* .
+
+# get crtm fix files
+for what in "amsre_aqua" "imgr_g11" "imgr_g12" "imgr_g13" \
+    "imgr_g15" "imgr_mt1r" "imgr_mt2" "seviri_m10" \
+    "ssmi_f13" "ssmi_f14" "ssmi_f15" "ssmis_f16" \
+    "ssmis_f17" "ssmis_f18" "ssmis_f19" "ssmis_f20" \
+    "tmi_trmm" "v.seviri_m10" "imgr_insat3d" "abi_gr" \
+    "ahi_himawari8" ; do
+    ln -s "${FIXcrtm}/${what}.TauCoeff.bin" .
+    ln -s "${FIXcrtm}/${what}.SpcCoeff.bin" .
+done
+
+for what in 'Aerosol' 'Cloud' ; do
+    ln -s "${FIXcrtm}/${what}Coeff.bin" .
+done
+
+for what in  ${FIXcrtm}/*Emis* ; do
+   ln -s $what .
+done
 
 
 #=============================================================================#
@@ -231,7 +255,12 @@ fi
 wgrib2 ${workdir}/wrfsubhprs_fgs.grib2 -match "VIS" -if "VIS:surface" -set_lev "2 m above ground" -grib ${workdir}/vis2mprs.grib2 -fi
 wgrib2 ${workdir}/wrfsubhnat_fgs.grib2 -match "VIS" -if "VIS:surface" -set_lev "2 m above ground" -grib ${workdir}/vis2mnat.grib2 -fi
 # Change analyzed gust from GUST:surface to GUST:10 m above ground
-${WGRIB2} -V ${COMOUT}/${RUN}.t${cyc}z.fgs.gust.grib2 -set_lev "10 m above ground" -grib tmpgust.grib2
+# Annette - need to copy, can't read file from COMOUT
+if [ $dom == "conus" ]; then
+  ${WGRIB2} -V ${COMOUT}/${RUN}.t${cyc}z.fgs.gust.grib2 -set_lev "10 m above ground" -grib tmpgust.grib2
+else
+  ${WGRIB2} -V ${COMOUT}/${RUN}ak.t${cyc}z.fgs.gust.grib2 -set_lev "10 m above ground" -grib tmpgust.grib2
+fi
 # Remove surface visibility from grib2 files
 wgrib2 ${workdir}/wrfsubhprs_fgs.grib2 -not_if "VIS:surface" -grib ${workdir}/wrfsubhprs_fgs.grib2_no_sfcvis
 wgrib2 ${workdir}/wrfsubhnat_fgs.grib2 -not_if "VIS:surface" -grib ${workdir}/wrfsubhnat_fgs.grib2_no_sfcvis
@@ -240,8 +269,8 @@ if [ "${dom}" == "conus" ]; then
   cat ${workdir}/wrfsubhprs_fgs.grib2_no_sfcvis ${workdir}/vis2mprs.grib2 tmpgust.grib2 ${COMOUT}/${RUN}.t${cyc}z.fgs.vis.grib2 ${COMOUT}/${RUN}.t${cyc}z.fgs.howv.grib2 > ${workdir}/wrfsubhprs_fgs.grib2
   cat ${workdir}/wrfsubhnat_fgs.grib2_no_sfcvis ${workdir}/vis2mnat.grib2 tmpgust.grib2 ${COMOUT}/${RUN}.t${cyc}z.fgs.vis.grib2 ${COMOUT}/${RUN}.t${cyc}z.fgs.howv.grib2 > ${workdir}/wrfsubhnat_fgs.grib2
 else
-  cat ${workdir}/wrfsubhprs_fgs.grib2_no_sfcvis ${workdir}/vis2mprs.grib2 tmpgust.grib2 ${COMOUT}/${RUN}.t${cyc}z.fgs.vis.grib2 > ${workdir}/wrfsubhprs_fgs.grib2
-  cat ${workdir}/wrfsubhnat_fgs.grib2_no_sfcvis ${workdir}/vis2mnat.grib2 tmpgust.grib2 ${COMOUT}/${RUN}.t${cyc}z.fgs.vis.grib2 > ${workdir}/wrfsubhnat_fgs.grib2
+  cat ${workdir}/wrfsubhprs_fgs.grib2_no_sfcvis ${workdir}/vis2mprs.grib2 tmpgust.grib2 ${COMOUT}/${RUN}ak.t${cyc}z.fgs.vis.grib2 > ${workdir}/wrfsubhprs_fgs.grib2
+  cat ${workdir}/wrfsubhnat_fgs.grib2_no_sfcvis ${workdir}/vis2mnat.grib2 tmpgust.grib2 ${COMOUT}/${RUN}ak.t${cyc}z.fgs.vis.grib2 > ${workdir}/wrfsubhnat_fgs.grib2
 fi
 
 ${WGRIB2} ${workdir}/wrfsubhprs_fgs.grib2 -set center 7 -grib ${COMOUTpost_rtma3d}/${PROD_HEAD2}.wrfsubhprs_fgs.grib2

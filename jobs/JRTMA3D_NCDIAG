@@ -97,9 +97,9 @@ fi
 if [ ! -d "${COMOUT}" ] ; then
    mkdir -p $COMOUT
 fi
-if [ ! -d "${COMOUTgsi_rtma3d}" ] ; then
-  ${MKDIR} -p ${COMOUTgsi_rtma3d}
-fi
+#if [ ! -d "${COMOUTgsi_rtma3d}" ] ; then
+#  ${MKDIR} -p ${COMOUTgsi_rtma3d}
+#fi
 
 ###########################################################
 #

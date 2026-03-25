@@ -67,7 +67,8 @@ postmsg "$jlogfile" "$msg"
 #
 #-----------------------------------------------------------------------
 
-filename=${COMOUTgsi_rtma3d}/filelist.hrrrdas
+#filename=${COMOUTgsi_rtma3d}/filelist.hrrrdas
+filename=${COMOUT}/${RUN}.t${cyc}z.filelist03
 
 if [[ ! -f $filename ]]; then
 echo "$filename does not exist. Exiting."
