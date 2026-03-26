@@ -12,10 +12,10 @@ cpreq -p ${PARMrtma3d}/${RUN}_prepobs_prep.bufrtable prepobs_prep.bufrtable
 cpreq ${FIXrtma3d}/${RUN}_geo_em.d01.nc geo_em.d01.nc
 
 # Copy the NASA LaRC cloud data
-if [ -s "${COMINobsproc}/${NET}.t${cyc}z.lgycld.tm00.bufr_d" ]; then
-  cpreq ${COMINobsproc}/${NET}.t${cyc}z.lgycld.tm00.bufr_d NASA_LaRC_cloud.bufr
+if [ -s "${COMINobsproc}/${RUN}.t${cyc}z.lgycld.tm00.bufr_d" ]; then
+  cpreq ${COMINobsproc}/${RUN}.t${cyc}z.lgycld.tm00.bufr_d NASA_LaRC_cloud.bufr
 else
-  echo "WARNING: ${COMINobsproc}/${NET}.t${cyc}z.lgycld.tm00.bufr_d is not available ..."
+  echo "WARNING: ${COMINobsproc}/${RUN}.t${cyc}z.lgycld.tm00.bufr_d is not available ..."
 fi
 
 # Build the namelist on-the-fly
@@ -37,11 +37,11 @@ startmsg
 mpiexec $EXECrtma3d/${pgm} >> ${pgmout} 2>errfile
 export err=$?; err_chk
 
-cpreq NASA_LaRC_cloud.bufr ${COMOUT}/${NET}.t${cyc}z.lgycld.tm00.${dom}.bufr_d
+cpreq NASA_LaRC_cloud.bufr ${COMOUT}/${RUN}.t${cyc}z.lgycld.tm00.bufr_d
 
 targetfile="NASALaRCCloudInGSI.bufr"
 if [ -f ${DATA}/${targetfile} ] ; then
-  cpreq ${DATA}/${targetfile} ${COMOUT}/${RUN}.t${cyc}z.NASALaRCCloudInGSI.${dom}.bufr
+  cpreq ${DATA}/${targetfile} ${COMOUT}/${RUN}.t${cyc}z.NASALaRCCloudInGSI.bufr
 else
   msg="WARNING $pgm terminated normally but ${DATA}/${targetfile} does NOT exist."
 fi

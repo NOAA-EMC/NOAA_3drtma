@@ -152,7 +152,11 @@ check_dirs_exist() { #usage: check_dirs_exist "var1_name" "var2_name" ...
 #               Then no warning message when running ncdiag_cat. 
 #               But even running with the small files, the results are same.
               find ${DATAGSI}/ -type f -name "pe*.conv_${type}_${loop}.nc4" -size 1k -delete
-              echo "$nc_diag_cat -o ${DATA}/diag_${type}_${string}.${cycle_str}.${RUN}.nc4 ${DATAGSI}/pe*.conv_${type}_${loop}.nc4" >> ${DATA}/ncdiag_cmdfile
+              if [ $dom == "conus" ]; then
+                echo "$nc_diag_cat -o ${DATA}/${RUN}.t${cyc}z.diag_${type}_${string}.nc4 ${DATAGSI}/pe*.conv_${type}_${loop}.nc4" >> ${DATA}/ncdiag_cmdfile
+              else
+                echo "$nc_diag_cat -o ${DATA}/${RUN}ak.t${cyc}z.diag_${type}_${string}.nc4 ${DATAGSI}/pe*.conv_${type}_${loop}.nc4" >> ${DATA}/ncdiag_cmdfile
+              fi
 #             let "icount=icount+1"
               icount=$((icount + 1))
            fi
@@ -170,12 +174,20 @@ check_dirs_exist() { #usage: check_dirs_exist "var1_name" "var2_name" ...
      echo "using $exeName to run ncdiag COMPLETED"
   
 #    Saving combined nc4 obs-daig files to COM2 and compressing thme with gzip to save space
-     for type in $listall_conv_nc4; do
-        ${CP} -p ${DATA}/diag_${type}_*.${cycle_str}.${RUN}.nc4      ${COMOUTgsi_rtma3d}
-        rm -f ${COMOUTgsi_rtma3d}/diag_${type}_*.${cycle_str}.${RUN}.nc4.gz
-        gzip  ${COMOUTgsi_rtma3d}/diag_${type}_*.${cycle_str}.${RUN}.nc4
-        chgrp rstprod ${COMOUTgsi_rtma3d}/diag_${type}_*.${cycle_str}.${RUN}.nc4.gz
-     done
+#    for type in $listall_conv_nc4; do
+#       ${CP} -p ${DATA}/diag_${type}_*.${cycle_str}.${RUN}.nc4      ${COMOUTgsi_rtma3d}
+#       rm -f ${COMOUTgsi_rtma3d}/diag_${type}_*.${cycle_str}.${RUN}.nc4.gz
+#       gzip  ${COMOUTgsi_rtma3d}/diag_${type}_*.${cycle_str}.${RUN}.nc4
+#       chgrp rstprod ${COMOUTgsi_rtma3d}/diag_${type}_*.${cycle_str}.${RUN}.nc4.gz
+#    done
+     chgrp rstprod *diag*nc4
+     if [ $dom == "conus" ]; then
+       tar -czvf ${COMOUT}/${RUN}.t${cyc}z.diag.nc4.tgz *diag*nc4  # compressed tarball
+       chgrp rstprod ${COMOUT}/${RUN}.t${cyc}z.diag.nc4.tgz 
+     else
+       tar -czvf ${COMOUT}/${RUN}ak.t${cyc}z.diag.nc4.tgz *diag*nc4  # compressed tarball
+       chgrp rstprod ${COMOUT}/${RUN}ak.t${cyc}z.diag.nc4.tgz 
+     fi
 
   else
 

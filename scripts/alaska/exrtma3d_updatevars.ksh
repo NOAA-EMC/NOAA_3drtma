@@ -235,8 +235,10 @@ ${NCKS} -A -v REFL_10CM,COMPOSITE_REFL_10CM,REFL_10CM_1KM,REFL_10CM_4KM wrfout_d
 # fi
 
 # coping the final updated analysis file wrf_inout to COM2, and saving it under shared directory as backup.
-${CP} -p wrf_inout ${COMOUTgsi_rtma3d}/${ANLrtma3d_FNAME}
-${MV} -p wrf_inout ${DATA_SHARED}/wrf_inout
+#${CP} -p wrf_inout ${COMOUTgsi_rtma3d}/${ANLrtma3d_FNAME}
+#cp -p wrf_inout ${COMOUT}/${ANLrtma3d_FNAME}
+ cp -p wrf_inout ${COMOUT}/${RUN}ak.t${cyc}z.wrf_inout.nc
+ cp -p wrf_inout ${DATA_SHARED}/wrf_inout
 ${LN} -sf ${DATA_SHARED}/wrf_inout     ./wrf_inout       # linking back as a back-up
 
 ${ECHO} "update_vars.ksh completed successfully at `${DATE}`"

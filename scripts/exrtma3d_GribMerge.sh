@@ -56,7 +56,7 @@ count=0
 for val in "${GridIn[@]}"; do
 	$WGRIB2 ${val} -match ${VarMet} -new_grid_winds earth -new_grid ${GridOpt} ${TEMPGRID}${count}.grib2
    	if [ -f "${Mask}" ]; then 
-   		${HOMEscript}/exrtma3d_filter_land.sh ${TEMPGRID}${count}.grib2 ${Mask} ${TEMPGRID}${count}.grib2
+   		${HOMErtma3d}/scripts/exrtma3d_filter_land.sh ${TEMPGRID}${count}.grib2 ${Mask} ${TEMPGRID}${count}.grib2
 	else
 	  	echo "Warning: The sea land ${Mask} does not exist. The fields will be merged by using \
 		 the sea gridpoints of the first guess. This can create some erroneous values close to \

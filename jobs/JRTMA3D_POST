@@ -131,7 +131,8 @@ export exefile_name_post=${exefile_name_post:-"rtma3d_post"}
 
 #   Set the path to the fix/ and parm/ files
 export FIXgsi=${FIXgsi:-"${FIXrtma3d}/gsi"}
-export FIXcrtm=${FIXcrtm:-"${FIXrtma3d}/crtm"}
+#export FIXcrtm=${FIXcrtm:-"${FIXrtma3d}/crtm"}
+export FIXcrtm=${FIXcrtm:-${CRTM_FIX:?}}
 export FIXwps=${FIXwps:-"${FIXrtma3d}/wps"}
 export FIXupp=${FIXupp:-"${FIXrtma3d}/upp"}
 

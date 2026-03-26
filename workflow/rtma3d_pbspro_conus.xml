@@ -29,11 +29,13 @@
 
 <!ENTITY ptmp_base	"/lfs/h2/emc/ptmp/&USER;/rtma3d&exp;">
 <!ENTITY COMINRAP       "/lfs/h1/ops/prod/com/obsproc/v1.2">
-<!ENTITY COMINHRRR      "/lfs/h1/ops/prod/com/hrrr/v4.1">
+<!ENTITY COMINhrrr      "/lfs/h1/ops/prod/com/hrrr/v4.1">
 <!ENTITY COMINradar     "/lfs/h1/ops/prod/dcom/ldmdata/obs/upperair/mrms">
-<!ENTITY GESINHRRR      "/lfs/h1/ops/prod/com/hrrr/v4.1/nwges/hrrrges_sfc/conus">
-<!ENTITY COMINHRRRDAS   "/lfs/h1/ops/prod/com/hrrr/v4.1/nwges/hrrrdasges">
-<!ENTITY COMINGDAS      "/lfs/h1/ops/prod/com/gfs/v16.3">
+<!ENTITY GESINhrrr      "/lfs/h1/ops/prod/com/hrrr/v4.1/nwges/hrrrges_sfc/conus">
+<!ENTITY GESINhrrrdas   "/lfs/h1/ops/prod/com/hrrr/v4.1/nwges/hrrrdasges">
+<!ENTITY COMINgfs       "/lfs/h1/ops/prod/com/gfs/v16.3">
+<!ENTITY COMINww3GL     "/lfs/h1/ops/prod/com/glwu/v2.0">
+<!ENTITY COMINww3       "/lfs/h1/ops/prod/com/gfs/v16.3">
 <!ENTITY NWROOT		"/lfs/h2/emc/da/noscrub/&USER;/packages/rtma3d.&rtma3d_ver;&exp;">
 <!ENTITY PACKAGEROOT    "&NWROOT;">
 <!ENTITY COMINPREP      "/lfs/h2/emc/ptmp/ashley.stanfield/CRON/rtma3d/com/obsproc/v1.3">
@@ -56,7 +58,6 @@
 <!ENTITY EXECrtma3d	"&NWROOT;/exec">
 
 <!-- Specific Definition for static data -->
-<!ENTITY FIXcrtm        "&NWROOT;/fix/crtm">
 <!ENTITY FIXupp         "&NWROOT;/fix/upp">
 <!ENTITY FIXgsi         "&NWROOT;/fix/gsi">
 <!ENTITY FIXwps         "&NWROOT;/fix/wps">
@@ -83,7 +84,6 @@
 <!-- Note: -->
 <!--      these directories are just links pointing to real running directories -->
 <!ENTITY DATA_GSIANL    "&DATA_RUNDIR;/gsiprd">
-<!ENTITY DATA_OBSPRD    "&DATA_RUNDIR;/obsprd">
 <!ENTITY DATA_FGSPRD    "&DATA_RUNDIR;/fgsprd">
 <!ENTITY DATA_ANLDUMP   "&DATA_RUNDIR;/anldump">
 <!ENTITY DATA_POST      "&DATA_RUNDIR;/postprd">
@@ -109,8 +109,6 @@
 <!ENTITY hpsspath1_gsd  "/BMC/fdr/Permanent">
 <!ENTITY hpsspath1_AGibbs  "/NCEPDEV/emc-meso/1year/Annette.Gibbs">
 
-<!ENTITY FGS_OPT        "1">
-
 <!-- for obs pre-processing -->
 <!ENTITY obsprep_satwnd  "1">
 
@@ -134,7 +132,6 @@
 <!ENTITY JJOB_OBSPREP_CLOUD    "&JJOB_DIR;/J&CAP_RUN;_OBSPREP_CLOUD">
 <!ENTITY JJOB_PREPOBS    "&JJOB_DIR;/J&CAP_RUN;_PREPOBS">
 <!ENTITY JJOB_PREPFGS    "&JJOB_DIR;/J&CAP_RUN;_PREPFGS">
-<!ENTITY exSCR_PREPFGS   "&SCRIPT_DIR;/&RUN;/ex&RUN;_prepfgs.ksh">
 <!ENTITY JJOB_GSIANL	 "&JJOB_DIR;/J&CAP_RUN;_GSIANL">
 <!ENTITY JJOB_ANLDUMP    "&JJOB_DIR;/J&CAP_RUN;_ANLDUMP">
 <!ENTITY JJOB_AUTOQC     "&JJOB_DIR;/J&CAP_RUN;_AUTOQC">
@@ -205,6 +202,7 @@
 <!ENTITY GSI_START_TIME "00:40:00">
 <!ENTITY GSI_DEADLINE   "01:30:00">
 <!ENTITY START_TIME_RADAR "00:10:00">
+<!ENTITY START_TIME_FGS "00:10:00">
 <!ENTITY GSI_WALL_LIMIT 
    '<deadline><cyclestr offset="&GSI_DEADLINE;">@Y@m@d@H@M</cyclestr></deadline>'>
 
@@ -314,8 +312,8 @@
         <value>&COMINRAP;</value>
    </envar>
    <envar>
-        <name>COMINHRRR</name>
-        <value>&COMINHRRR;</value>
+        <name>COMINhrrr</name>
+        <value>&COMINhrrr;</value>
    </envar>
    <envar>
         <name>COMINPREP</name>
@@ -330,16 +328,24 @@
         <value>&COMINradar;</value>
    </envar>
    <envar>
-        <name>COMINGDAS</name>
-        <value>&COMINGDAS;</value>
+        <name>COMINgfs</name>
+        <value>&COMINgfs;</value>
    </envar>
    <envar>
-        <name>COMINHRRRDAS</name>
-        <value>&COMINHRRRDAS;</value>
+        <name>GESINhrrrdas</name>
+        <value>&GESINhrrrdas;</value>
    </envar>
    <envar>
-        <name>GESINHRRR</name>
-        <value>&GESINHRRR;</value>
+        <name>GESINhrrr</name>
+        <value>&GESINhrrr;</value>
+   </envar>
+   <envar>
+        <name>COMINww3GL</name>
+        <value>&COMINww3GL;</value>
+   </envar>
+   <envar>
+        <name>COMINww3</name>
+        <value>&COMINww3;</value>
    </envar>
    <envar>
         <name>NWROOT</name>
@@ -372,10 +378,6 @@
    <envar>
         <name>UTILrtma3d_dev</name>
         <value>&UTILrtma3d_dev;</value>
-   </envar>
-   <envar>
-        <name>FIXcrtm</name>
-        <value>&FIXcrtm;</value>
    </envar>
    <envar>
         <name>FIXupp</name>
@@ -458,10 +460,6 @@
         <value>&CAP_ENVIR;</value>
    </envar>
    <envar>
-        <name>FGS_OPT</name>
-        <value>&FGS_OPT;</value>
-   </envar>
-   <envar>
         <name>obsprep_satwnd</name>
         <value>&obsprep_satwnd;</value>
    </envar>
@@ -528,10 +526,6 @@
    <envar>
       <name>DATA_AUTOQC</name>
       <value><cyclestr>&DATA_AUTOQC;</cyclestr></value>
-   </envar>
-   <envar>
-      <name>DATA_OBSPRD</name>
-      <value><cyclestr>&DATA_OBSPRD;</cyclestr></value>
    </envar>
    <envar>
       <name>DATA_RHIST</name>
@@ -629,10 +623,6 @@
       <value>&READIN_LOCALIZATION;</value>
     </envar>
     <envar>
-      <name>GSIANL_RES</name>
-      <value>3km</value>
-    </envar>
-    <envar>
       <name>DATABASE_DIR</name>
       <value>&DATABASE_DIR;</value>
     </envar>
@@ -722,10 +712,6 @@
     <envar>
       <name>JJOB_PREPOBS</name>
       <value>&JJOB_PREPOBS;</value>
-    </envar>
-    <envar>
-      <name>exSCR_PREPFGS</name>
-      <value>&exSCR_PREPFGS;</value>
     </envar>
     <envar>
       <name>COMINPREP</name>
@@ -1034,7 +1020,7 @@
 
     &ENVARS_PREPJOB;
    <dependency>
-       <datadep age="10" minsize="15000M"><cyclestr offset="-3600">&GESINHRRR;/hrrr_@Y@m@d@Hf001</cyclestr></datadep>
+      <timedep><cyclestr offset="&START_TIME_FGS;">@Y@m@d@H@M00</cyclestr></timedep>
    </dependency>
    </task>
 
@@ -1044,6 +1030,11 @@
     &GSI_RESOURCES;
     &GSI_RESERVATION;
     &OPTIMIZATIONS_GSI;
+
+    <envar><name>ntasks</name><value>450</value></envar>
+    <envar><name>ppn</name><value>15</value></envar>
+    <envar><name>threads</name><value>8</value></envar>
+
     <envar>
        <name>rundir_task</name>
        <value><cyclestr>&DATA_GSIANL;</cyclestr></value>
@@ -1065,42 +1056,42 @@
           <datadep age="2"><cyclestr>&COMINPREP;/&NET;.@Y@m@d/&NET;.t@Hz.prepbufr.tm00</cyclestr></datadep>  
           <datadep age="2"><cyclestr>&COMINPREP;/&NET;.@Y@m@d/&NET;.t@Hz.satwnd.tm00.bufr_d</cyclestr></datadep>
           <datadep age="2"><cyclestr>&COMINPREP;/&NET;.@Y@m@d/&NET;.t@Hz.nexrad.tm00.bufr_d</cyclestr></datadep>
-             <datadep age="10"><cyclestr offset="-3600">&COMINHRRRDAS;/hrrrdas_small_d02_@Y@m@d@H00f01_mem0001</cyclestr></datadep>
-             <datadep age="10"><cyclestr offset="-3600">&COMINHRRRDAS;/hrrrdas_small_d02_@Y@m@d@H00f01_mem0002</cyclestr></datadep>
-             <datadep age="10"><cyclestr offset="-3600">&COMINHRRRDAS;/hrrrdas_small_d02_@Y@m@d@H00f01_mem0003</cyclestr></datadep>
-             <datadep age="10"><cyclestr offset="-3600">&COMINHRRRDAS;/hrrrdas_small_d02_@Y@m@d@H00f01_mem0004</cyclestr></datadep>
-             <datadep age="10"><cyclestr offset="-3600">&COMINHRRRDAS;/hrrrdas_small_d02_@Y@m@d@H00f01_mem0005</cyclestr></datadep>
-             <datadep age="10"><cyclestr offset="-3600">&COMINHRRRDAS;/hrrrdas_small_d02_@Y@m@d@H00f01_mem0006</cyclestr></datadep>
-             <datadep age="10"><cyclestr offset="-3600">&COMINHRRRDAS;/hrrrdas_small_d02_@Y@m@d@H00f01_mem0007</cyclestr></datadep>
-             <datadep age="10"><cyclestr offset="-3600">&COMINHRRRDAS;/hrrrdas_small_d02_@Y@m@d@H00f01_mem0008</cyclestr></datadep>
-             <datadep age="10"><cyclestr offset="-3600">&COMINHRRRDAS;/hrrrdas_small_d02_@Y@m@d@H00f01_mem0009</cyclestr></datadep>
-             <datadep age="10"><cyclestr offset="-3600">&COMINHRRRDAS;/hrrrdas_small_d02_@Y@m@d@H00f01_mem0010</cyclestr></datadep>
-             <datadep age="10"><cyclestr offset="-3600">&COMINHRRRDAS;/hrrrdas_small_d02_@Y@m@d@H00f01_mem0011</cyclestr></datadep>
-             <datadep age="10"><cyclestr offset="-3600">&COMINHRRRDAS;/hrrrdas_small_d02_@Y@m@d@H00f01_mem0012</cyclestr></datadep>
-             <datadep age="10"><cyclestr offset="-3600">&COMINHRRRDAS;/hrrrdas_small_d02_@Y@m@d@H00f01_mem0013</cyclestr></datadep>
-             <datadep age="10"><cyclestr offset="-3600">&COMINHRRRDAS;/hrrrdas_small_d02_@Y@m@d@H00f01_mem0014</cyclestr></datadep>
-             <datadep age="10"><cyclestr offset="-3600">&COMINHRRRDAS;/hrrrdas_small_d02_@Y@m@d@H00f01_mem0015</cyclestr></datadep>
-             <datadep age="10"><cyclestr offset="-3600">&COMINHRRRDAS;/hrrrdas_small_d02_@Y@m@d@H00f01_mem0016</cyclestr></datadep>
-             <datadep age="10"><cyclestr offset="-3600">&COMINHRRRDAS;/hrrrdas_small_d02_@Y@m@d@H00f01_mem0017</cyclestr></datadep>
-             <datadep age="10"><cyclestr offset="-3600">&COMINHRRRDAS;/hrrrdas_small_d02_@Y@m@d@H00f01_mem0018</cyclestr></datadep>
-             <datadep age="10"><cyclestr offset="-3600">&COMINHRRRDAS;/hrrrdas_small_d02_@Y@m@d@H00f01_mem0019</cyclestr></datadep>
-             <datadep age="10"><cyclestr offset="-3600">&COMINHRRRDAS;/hrrrdas_small_d02_@Y@m@d@H00f01_mem0020</cyclestr></datadep>
-             <datadep age="10"><cyclestr offset="-3600">&COMINHRRRDAS;/hrrrdas_small_d02_@Y@m@d@H00f01_mem0021</cyclestr></datadep>
-             <datadep age="10"><cyclestr offset="-3600">&COMINHRRRDAS;/hrrrdas_small_d02_@Y@m@d@H00f01_mem0022</cyclestr></datadep>
-             <datadep age="10"><cyclestr offset="-3600">&COMINHRRRDAS;/hrrrdas_small_d02_@Y@m@d@H00f01_mem0023</cyclestr></datadep>
-             <datadep age="10"><cyclestr offset="-3600">&COMINHRRRDAS;/hrrrdas_small_d02_@Y@m@d@H00f01_mem0024</cyclestr></datadep>
-             <datadep age="10"><cyclestr offset="-3600">&COMINHRRRDAS;/hrrrdas_small_d02_@Y@m@d@H00f01_mem0025</cyclestr></datadep>
-             <datadep age="10"><cyclestr offset="-3600">&COMINHRRRDAS;/hrrrdas_small_d02_@Y@m@d@H00f01_mem0026</cyclestr></datadep>
-             <datadep age="10"><cyclestr offset="-3600">&COMINHRRRDAS;/hrrrdas_small_d02_@Y@m@d@H00f01_mem0027</cyclestr></datadep>
-             <datadep age="10"><cyclestr offset="-3600">&COMINHRRRDAS;/hrrrdas_small_d02_@Y@m@d@H00f01_mem0028</cyclestr></datadep>
-             <datadep age="10"><cyclestr offset="-3600">&COMINHRRRDAS;/hrrrdas_small_d02_@Y@m@d@H00f01_mem0029</cyclestr></datadep>
-             <datadep age="10"><cyclestr offset="-3600">&COMINHRRRDAS;/hrrrdas_small_d02_@Y@m@d@H00f01_mem0030</cyclestr></datadep>
-             <datadep age="10"><cyclestr offset="-3600">&COMINHRRRDAS;/hrrrdas_small_d02_@Y@m@d@H00f01_mem0031</cyclestr></datadep>
-             <datadep age="10"><cyclestr offset="-3600">&COMINHRRRDAS;/hrrrdas_small_d02_@Y@m@d@H00f01_mem0032</cyclestr></datadep>
-             <datadep age="10"><cyclestr offset="-3600">&COMINHRRRDAS;/hrrrdas_small_d02_@Y@m@d@H00f01_mem0033</cyclestr></datadep>
-             <datadep age="10"><cyclestr offset="-3600">&COMINHRRRDAS;/hrrrdas_small_d02_@Y@m@d@H00f01_mem0034</cyclestr></datadep>
-             <datadep age="10"><cyclestr offset="-3600">&COMINHRRRDAS;/hrrrdas_small_d02_@Y@m@d@H00f01_mem0035</cyclestr></datadep>
-             <datadep age="10"><cyclestr offset="-3600">&COMINHRRRDAS;/hrrrdas_small_d02_@Y@m@d@H00f01_mem0036</cyclestr></datadep>
+             <datadep age="10"><cyclestr offset="-3600">&GESINhrrrdas;/hrrrdas_small_d02_@Y@m@d@H00f01_mem0001</cyclestr></datadep>
+             <datadep age="10"><cyclestr offset="-3600">&GESINhrrrdas;/hrrrdas_small_d02_@Y@m@d@H00f01_mem0002</cyclestr></datadep>
+             <datadep age="10"><cyclestr offset="-3600">&GESINhrrrdas;/hrrrdas_small_d02_@Y@m@d@H00f01_mem0003</cyclestr></datadep>
+             <datadep age="10"><cyclestr offset="-3600">&GESINhrrrdas;/hrrrdas_small_d02_@Y@m@d@H00f01_mem0004</cyclestr></datadep>
+             <datadep age="10"><cyclestr offset="-3600">&GESINhrrrdas;/hrrrdas_small_d02_@Y@m@d@H00f01_mem0005</cyclestr></datadep>
+             <datadep age="10"><cyclestr offset="-3600">&GESINhrrrdas;/hrrrdas_small_d02_@Y@m@d@H00f01_mem0006</cyclestr></datadep>
+             <datadep age="10"><cyclestr offset="-3600">&GESINhrrrdas;/hrrrdas_small_d02_@Y@m@d@H00f01_mem0007</cyclestr></datadep>
+             <datadep age="10"><cyclestr offset="-3600">&GESINhrrrdas;/hrrrdas_small_d02_@Y@m@d@H00f01_mem0008</cyclestr></datadep>
+             <datadep age="10"><cyclestr offset="-3600">&GESINhrrrdas;/hrrrdas_small_d02_@Y@m@d@H00f01_mem0009</cyclestr></datadep>
+             <datadep age="10"><cyclestr offset="-3600">&GESINhrrrdas;/hrrrdas_small_d02_@Y@m@d@H00f01_mem0010</cyclestr></datadep>
+             <datadep age="10"><cyclestr offset="-3600">&GESINhrrrdas;/hrrrdas_small_d02_@Y@m@d@H00f01_mem0011</cyclestr></datadep>
+             <datadep age="10"><cyclestr offset="-3600">&GESINhrrrdas;/hrrrdas_small_d02_@Y@m@d@H00f01_mem0012</cyclestr></datadep>
+             <datadep age="10"><cyclestr offset="-3600">&GESINhrrrdas;/hrrrdas_small_d02_@Y@m@d@H00f01_mem0013</cyclestr></datadep>
+             <datadep age="10"><cyclestr offset="-3600">&GESINhrrrdas;/hrrrdas_small_d02_@Y@m@d@H00f01_mem0014</cyclestr></datadep>
+             <datadep age="10"><cyclestr offset="-3600">&GESINhrrrdas;/hrrrdas_small_d02_@Y@m@d@H00f01_mem0015</cyclestr></datadep>
+             <datadep age="10"><cyclestr offset="-3600">&GESINhrrrdas;/hrrrdas_small_d02_@Y@m@d@H00f01_mem0016</cyclestr></datadep>
+             <datadep age="10"><cyclestr offset="-3600">&GESINhrrrdas;/hrrrdas_small_d02_@Y@m@d@H00f01_mem0017</cyclestr></datadep>
+             <datadep age="10"><cyclestr offset="-3600">&GESINhrrrdas;/hrrrdas_small_d02_@Y@m@d@H00f01_mem0018</cyclestr></datadep>
+             <datadep age="10"><cyclestr offset="-3600">&GESINhrrrdas;/hrrrdas_small_d02_@Y@m@d@H00f01_mem0019</cyclestr></datadep>
+             <datadep age="10"><cyclestr offset="-3600">&GESINhrrrdas;/hrrrdas_small_d02_@Y@m@d@H00f01_mem0020</cyclestr></datadep>
+             <datadep age="10"><cyclestr offset="-3600">&GESINhrrrdas;/hrrrdas_small_d02_@Y@m@d@H00f01_mem0021</cyclestr></datadep>
+             <datadep age="10"><cyclestr offset="-3600">&GESINhrrrdas;/hrrrdas_small_d02_@Y@m@d@H00f01_mem0022</cyclestr></datadep>
+             <datadep age="10"><cyclestr offset="-3600">&GESINhrrrdas;/hrrrdas_small_d02_@Y@m@d@H00f01_mem0023</cyclestr></datadep>
+             <datadep age="10"><cyclestr offset="-3600">&GESINhrrrdas;/hrrrdas_small_d02_@Y@m@d@H00f01_mem0024</cyclestr></datadep>
+             <datadep age="10"><cyclestr offset="-3600">&GESINhrrrdas;/hrrrdas_small_d02_@Y@m@d@H00f01_mem0025</cyclestr></datadep>
+             <datadep age="10"><cyclestr offset="-3600">&GESINhrrrdas;/hrrrdas_small_d02_@Y@m@d@H00f01_mem0026</cyclestr></datadep>
+             <datadep age="10"><cyclestr offset="-3600">&GESINhrrrdas;/hrrrdas_small_d02_@Y@m@d@H00f01_mem0027</cyclestr></datadep>
+             <datadep age="10"><cyclestr offset="-3600">&GESINhrrrdas;/hrrrdas_small_d02_@Y@m@d@H00f01_mem0028</cyclestr></datadep>
+             <datadep age="10"><cyclestr offset="-3600">&GESINhrrrdas;/hrrrdas_small_d02_@Y@m@d@H00f01_mem0029</cyclestr></datadep>
+             <datadep age="10"><cyclestr offset="-3600">&GESINhrrrdas;/hrrrdas_small_d02_@Y@m@d@H00f01_mem0030</cyclestr></datadep>
+             <datadep age="10"><cyclestr offset="-3600">&GESINhrrrdas;/hrrrdas_small_d02_@Y@m@d@H00f01_mem0031</cyclestr></datadep>
+             <datadep age="10"><cyclestr offset="-3600">&GESINhrrrdas;/hrrrdas_small_d02_@Y@m@d@H00f01_mem0032</cyclestr></datadep>
+             <datadep age="10"><cyclestr offset="-3600">&GESINhrrrdas;/hrrrdas_small_d02_@Y@m@d@H00f01_mem0033</cyclestr></datadep>
+             <datadep age="10"><cyclestr offset="-3600">&GESINhrrrdas;/hrrrdas_small_d02_@Y@m@d@H00f01_mem0034</cyclestr></datadep>
+             <datadep age="10"><cyclestr offset="-3600">&GESINhrrrdas;/hrrrdas_small_d02_@Y@m@d@H00f01_mem0035</cyclestr></datadep>
+             <datadep age="10"><cyclestr offset="-3600">&GESINhrrrdas;/hrrrdas_small_d02_@Y@m@d@H00f01_mem0036</cyclestr></datadep>
              <or>
 		<timedep><cyclestr offset="&HRRRDAS_CUTOFF;">@Y@m@d@H@M</cyclestr></timedep>
 	     </or>

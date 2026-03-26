@@ -61,8 +61,12 @@ export MODELNAME="RAPR"
 export SUBMODELNAME="RTMA"
 export fileNameFlux="DUMMY"
 export fileNameFlat="DUMMY"
-export DATAWRFHOME=${COMOUTgsi_rtma3d:-"$COMIN"}
-export DATAWRFFILE=${ANLrtma3d_FNAME:-"${NET}.t${cyc}z.anl.wrf_inout.nc"}
+export DATAWRFHOME=${COMOUT:-"$COMIN"}
+if [ $dom == "conus" ]; then
+DATAWRFFILE="${RUN}.t${cyc}z.wrf_inout.nc"
+else
+DATAWRFFILE="${RUN}ak.t${cyc}z.wrf_inout.nc"
+fi
 
 ##########################################################################
 
@@ -140,8 +144,94 @@ ${RM} -f WRF???.GrbF??
 ${CP_LN} ${PARMupp}/params_grib2_tbl_new params_grib2_tbl_new
 ${CP_LN} ${PARMupp}/postxconfig-NT-3drtma.txt postxconfig-NT.txt
 ${CP_LN} ${PARMupp}/rap_micro_lookup.dat ./eta_micro_lookup.dat
-${CP_LN} ${FIXcrtm}/* .
+#${CP_LN} ${FIXcrtm}/* .
+manual_link="false"
+if [ $manual_link == "true" ]; then 
+ln -sf ${FIXcrtm}/imgr_g11.SpcCoeff.bin imgr_g11.SpcCoeff.bin
+ln -sf ${FIXcrtm}/imgr_g12.SpcCoeff.bin imgr_g12.SpcCoeff.bin
+ln -sf ${FIXcrtm}/imgr_g13.SpcCoeff.bin imgr_g13.SpcCoeff.bin
+ln -sf ${FIXcrtm}/imgr_g15.SpcCoeff.bin imgr_g15.SpcCoeff.bin
+ln -sf ${FIXcrtm}/imgr_mt1r.SpcCoeff.bin imgr_mt1r.SpcCoeff.bin
+ln -sf ${FIXcrtm}/imgr_mt2.SpcCoeff.bin imgr_mt2.SpcCoeff.bin
+ln -sf ${FIXcrtm}/amsre_aqua.SpcCoeff.bin amsre_aqua.SpcCoeff.bin
+ln -sf ${FIXcrtm}/tmi_trmm.SpcCoeff.bin tmi_trmm.SpcCoeff.bin
+ln -sf ${FIXcrtm}/ssmi_f13.SpcCoeff.bin ssmi_f13.SpcCoeff.bin
+ln -sf ${FIXcrtm}/ssmi_f14.SpcCoeff.bin ssmi_f14.SpcCoeff.bin
+ln -sf ${FIXcrtm}/ssmi_f15.SpcCoeff.bin ssmi_f15.SpcCoeff.bin
+ln -sf ${FIXcrtm}/ssmis_f16.SpcCoeff.bin ssmis_f16.SpcCoeff.bin
+ln -sf ${FIXcrtm}/ssmis_f17.SpcCoeff.bin ssmis_f17.SpcCoeff.bin
+ln -sf ${FIXcrtm}/ssmis_f18.SpcCoeff.bin ssmis_f18.SpcCoeff.bin
+ln -sf ${FIXcrtm}/ssmis_f19.SpcCoeff.bin ssmis_f19.SpcCoeff.bin
+ln -sf ${FIXcrtm}/ssmis_f20.SpcCoeff.bin ssmis_f20.SpcCoeff.bin
+ln -sf ${FIXcrtm}/seviri_m10.SpcCoeff.bin seviri_m10.SpcCoeff.bin
+ln -sf ${FIXcrtm}/v.seviri_m10.SpcCoeff.bin v.seviri_m10.SpcCoeff.bin
+#ln -sf ${FIXhrrr}/hrrr_imgr_insat3d.SpcCoeff.bin imgr_insat3d.SpcCoeff.bin
+ln -sf ${FIXcrtm}/imgr_insat3d.SpcCoeff.bin imgr_insat3d.SpcCoeff.bin
 
+ln -sf ${FIXcrtm}/imgr_g11.TauCoeff.bin imgr_g11.TauCoeff.bin
+ln -sf ${FIXcrtm}/imgr_g12.TauCoeff.bin imgr_g12.TauCoeff.bin
+ln -sf ${FIXcrtm}/imgr_g13.TauCoeff.bin imgr_g13.TauCoeff.bin
+ln -sf ${FIXcrtm}/imgr_g15.TauCoeff.bin imgr_g15.TauCoeff.bin
+ln -sf ${FIXcrtm}/imgr_mt1r.TauCoeff.bin imgr_mt1r.TauCoeff.bin
+ln -sf ${FIXcrtm}/imgr_mt2.TauCoeff.bin imgr_mt2.TauCoeff.bin
+ln -sf ${FIXcrtm}/amsre_aqua.TauCoeff.bin amsre_aqua.TauCoeff.bin
+ln -sf ${FIXcrtm}/tmi_trmm.TauCoeff.bin tmi_trmm.TauCoeff.bin
+ln -sf ${FIXcrtm}/ssmi_f13.TauCoeff.bin ssmi_f13.TauCoeff.bin
+ln -sf ${FIXcrtm}/ssmi_f14.TauCoeff.bin ssmi_f14.TauCoeff.bin
+ln -sf ${FIXcrtm}/ssmi_f15.TauCoeff.bin ssmi_f15.TauCoeff.bin
+ln -sf ${FIXcrtm}/ssmis_f16.TauCoeff.bin ssmis_f16.TauCoeff.bin
+ln -sf ${FIXcrtm}/ssmis_f17.TauCoeff.bin ssmis_f17.TauCoeff.bin
+ln -sf ${FIXcrtm}/ssmis_f18.TauCoeff.bin ssmis_f18.TauCoeff.bin
+ln -sf ${FIXcrtm}/ssmis_f19.TauCoeff.bin ssmis_f19.TauCoeff.bin
+ln -sf ${FIXcrtm}/ssmis_f20.TauCoeff.bin ssmis_f20.TauCoeff.bin
+ln -sf ${FIXcrtm}/seviri_m10.TauCoeff.bin seviri_m10.TauCoeff.bin
+ln -sf ${FIXcrtm}/seviri_m10.TauCoeff.bin v.seviri_m10.TauCoeff.bin
+#ln -sf ${FIXhrrr}/hrrr_imgr_insat3d.TauCoeff.bin imgr_insat3d.TauCoeff.bin
+ln -sf ${FIXcrtm}/imgr_insat3d.TauCoeff.bin imgr_insat3d.TauCoeff.bin
+
+ln -sf ${FIXcrtm}/NPOESS.IRice.EmisCoeff.bin NPOESS.IRice.EmisCoeff.bin
+ln -sf ${FIXcrtm}/NPOESS.IRland.EmisCoeff.bin NPOESS.IRland.EmisCoeff.bin
+ln -sf ${FIXcrtm}/NPOESS.IRsnow.EmisCoeff.bin NPOESS.IRsnow.EmisCoeff.bin
+ln -sf ${FIXcrtm}/Nalli.IRwater.EmisCoeff.bin Nalli.IRwater.EmisCoeff.bin
+
+ln -sf ${FIXcrtm}/FASTEM6.MWwater.EmisCoeff.bin FASTEM6.MWwater.EmisCoeff.bin
+
+ln -sf ${FIXcrtm}/CloudCoeff.bin CloudCoeff.bin
+ln -sf ${FIXcrtm}/AerosolCoeff.bin AerosolCoeff.bin
+#ln -sf ${FIXcrtm}/Nalli.EK-PDF.W_W-RefInd.EmisCoeff.bin EmisCoeff.bin
+ln -sf ${FIXcrtm}/Nalli.IRwater.EmisCoeff.bin EmisCoeff.bin
+ln -sf ${FIXcrtm}/abi_gr.SpcCoeff.bin abi_gr.SpcCoeff.bin
+ln -sf ${FIXcrtm}/abi_g16.SpcCoeff.bin abi_g16.SpcCoeff.bin
+ln -sf ${FIXcrtm}/abi_g17.SpcCoeff.bin abi_g16.SpcCoeff.bin
+ln -sf ${FIXcrtm}/ahi_himawari8.SpcCoeff.bin ahi_himawari8.SpcCoeff.bin
+ln -sf ${FIXcrtm}/abi_gr.TauCoeff.bin abi_gr.TauCoeff.bin
+ln -sf ${FIXcrtm}/abi_g16.TauCoeff.bin abi_g16.TauCoeff.bin
+ln -sf ${FIXcrtm}/abi_g17.TauCoeff.bin abi_g17.TauCoeff.bin
+ln -sf ${FIXcrtm}/zssmis_f16.TauCoeff.bin zssmis_f16.TauCoeff.bin
+ln -sf ${FIXcrtm}/zssmis_f17.TauCoeff.bin zssmis_f17.TauCoeff.bin
+ln -sf ${FIXcrtm}/zssmis_f18.TauCoeff.bin zssmis_f18.TauCoeff.bin
+ln -sf ${FIXcrtm}/zssmis_f19.TauCoeff.bin zssmis_f19.TauCoeff.bin
+ln -sf ${FIXcrtm}/zssmis_f20.TauCoeff.bin zssmis_f20.TauCoeff.bin
+fi
+
+# get crtm fix files
+for what in "amsre_aqua" "imgr_g11" "imgr_g12" "imgr_g13" \
+    "imgr_g15" "imgr_mt1r" "imgr_mt2" "seviri_m10" \
+    "ssmi_f13" "ssmi_f14" "ssmi_f15" "ssmis_f16" \
+    "ssmis_f17" "ssmis_f18" "ssmis_f19" "ssmis_f20" \
+    "tmi_trmm" "v.seviri_m10" "imgr_insat3d" "abi_gr" \
+    "ahi_himawari8" ; do
+    ln -s "${FIXcrtm}/${what}.TauCoeff.bin" .
+    ln -s "${FIXcrtm}/${what}.SpcCoeff.bin" .
+done
+
+for what in 'Aerosol' 'Cloud' ; do
+    ln -s "${FIXcrtm}/${what}Coeff.bin" .
+done
+
+for what in  ${FIXcrtm}/*Emis* ; do
+   ln -s $what .
+done
 
 #=============================================================================#
 #
@@ -215,7 +305,12 @@ fi
 wgrib2 ${workdir}/wrfsubhprs.grib2 -match "VIS" -if "VIS:surface" -set_lev "2 m above ground" -grib ${workdir}/vis2mprs.grib2 -fi
 wgrib2 ${workdir}/wrfsubhnat.grib2 -match "VIS" -if "VIS:surface" -set_lev "2 m above ground" -grib ${workdir}/vis2mnat.grib2 -fi
 # Change analyzed gust from GUST:surface to GUST:10 m above ground
-${WGRIB2} -V ${COMOUT}/${RUN}.t${cyc}z.anl.gust.grib2 -set_lev "10 m above ground" -grib tmpgust.grib2
+# Annette - need to copy, can't read file from COMOUT
+if [ $dom == "conus" ]; then
+  ${WGRIB2} -V ${COMOUT}/${RUN}.t${cyc}z.anl.gust.grib2 -set_lev "10 m above ground" -grib tmpgust.grib2
+else
+  ${WGRIB2} -V ${COMOUT}/${RUN}ak.t${cyc}z.anl.gust.grib2 -set_lev "10 m above ground" -grib tmpgust.grib2
+fi
 # Remove surface visibility from grib2 files
 wgrib2 ${workdir}/wrfsubhprs.grib2 -not_if "VIS:surface" -grib ${workdir}/wrfsubhprs.grib2_no_sfcvis 
 wgrib2 ${workdir}/wrfsubhnat.grib2 -not_if "VIS:surface" -grib ${workdir}/wrfsubhnat.grib2_no_sfcvis
@@ -224,8 +319,8 @@ if [ "${dom}" == "conus" ]; then
   cat ${workdir}/wrfsubhprs.grib2_no_sfcvis ${workdir}/vis2mprs.grib2 tmpgust.grib2 ${COMOUT}/${RUN}.t${cyc}z.anl.vis.grib2 ${COMOUT}/${RUN}.t${cyc}z.anl.howv.grib2 > ${workdir}/wrfsubhprs.grib2
   cat ${workdir}/wrfsubhnat.grib2_no_sfcvis ${workdir}/vis2mnat.grib2 tmpgust.grib2 ${COMOUT}/${RUN}.t${cyc}z.anl.vis.grib2 ${COMOUT}/${RUN}.t${cyc}z.anl.howv.grib2 > ${workdir}/wrfsubhnat.grib2
 else
-  cat ${workdir}/wrfsubhprs.grib2_no_sfcvis ${workdir}/vis2mprs.grib2 tmpgust.grib2 ${COMOUT}/${RUN}.t${cyc}z.anl.vis.grib2 > ${workdir}/wrfsubhprs.grib2
-  cat ${workdir}/wrfsubhnat.grib2_no_sfcvis ${workdir}/vis2mprs.grib2 tmpgust.grib2 ${COMOUT}/${RUN}.t${cyc}z.anl.vis.grib2 > ${workdir}/wrfsubhnat.grib2
+  cat ${workdir}/wrfsubhprs.grib2_no_sfcvis ${workdir}/vis2mprs.grib2 tmpgust.grib2 ${COMOUT}/${RUN}ak.t${cyc}z.anl.vis.grib2 > ${workdir}/wrfsubhprs.grib2
+  cat ${workdir}/wrfsubhnat.grib2_no_sfcvis ${workdir}/vis2mprs.grib2 tmpgust.grib2 ${COMOUT}/${RUN}ak.t${cyc}z.anl.vis.grib2 > ${workdir}/wrfsubhnat.grib2
 fi
 
 ${WGRIB2} ${workdir}/wrfsubhprs.grib2 -set center 7 -grib ${COMOUTpost_rtma3d}/${PROD_HEAD}.wrfsubhprs.grib2

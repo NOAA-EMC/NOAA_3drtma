@@ -21,8 +21,8 @@ check_dirs_exist() { #usage: check_dirs_exist "var1_name" "var2_name" ...
   check_if_defined "DATA" 
   check_dirs_exist "DATA" 
 #  checking the directory where analysis file is saved, and the definition of analysis file name
-  check_if_defined "COMOUTgsi_rtma3d"
-  check_dirs_exist "COMOUTgsi_rtma3d"
+# check_if_defined "COMOUTgsi_rtma3d"
+# check_dirs_exist "COMOUTgsi_rtma3d"
   check_if_defined "ANLrtma3d_FNAME"
   check_if_defined "DATA_SHARED"
   check_dirs_exist "DATA_SHARED"
@@ -164,9 +164,12 @@ postmsg "$jlogfile" "$msg"
         wgrib2 ./grb2_tmplate_${varname}.grib2 -import_bin ./anl_${varname}_bin.dat -no_header -set_var ${varname_grb} -set_ftime "anl" -set_date ${ADATEymdh} -set_lev "${level_info}" -grib_out ./${grib2_fname}
         export err=$? ; err_chk
 
-        if [[ -f $FIXgsi/hrrr_conus_3km_slmask_nolakes.grib2 ]] ; then
-          echo "Sea-Land no-lakes mask file --> $FIXgsi/hrrr_conus_3km_slmask_nolakes.grib2"
-          cp -p $FIXgsi/hrrr_conus_3km_slmask_nolakes.grib2    ./slmask.grib2
+#       if [[ -f $FIXgsi/hrrr_conus_3km_slmask_nolakes.grib2 ]] ; then
+#         echo "Sea-Land no-lakes mask file --> $FIXgsi/hrrr_conus_3km_slmask_nolakes.grib2"
+#         cp -p $FIXgsi/hrrr_conus_3km_slmask_nolakes.grib2    ./slmask.grib2
+        if [[ -f $FIXrtma3d/${RUN}_hrrr_conus_3km_slmask_nolakes.grib2 ]] ; then
+          echo "Sea-Land no-lakes mask file --> $FIXrtma3d/${RUN}_hrrr_conus_3km_slmask_nolakes.grib2"
+          cp -p $FIXrtma3d/${RUN}_hrrr_conus_3km_slmask_nolakes.grib2    ./slmask.grib2
         else
           echo "No Sea-Land no-lakes mask file is used for Wave Height analysis"
         fi
