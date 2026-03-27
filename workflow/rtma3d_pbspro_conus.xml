@@ -6,7 +6,7 @@
 <!-- date/time of cases or cycles -->
 <!ENTITY USER           "matthew.t.morris">
 <!ENTITY rtma3d_ver     "v1.0.0">
-<!ENTITY exp "">
+<!ENTITY exp            "_aircraft">
 <!ENTITY NET		"rtma3d">
 <!ENTITY RUN		"&NET;">
 <!ENTITY envir		"v1.0">
