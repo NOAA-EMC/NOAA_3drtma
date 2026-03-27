@@ -18,10 +18,10 @@ echo " processing NCEP BUFR Lightning Data"
 
 # find lightning bufr file
 
-if [ -s "${COMINobsproc}/${NET}.t${cyc}z.lghtng.tm00.bufr_d" ]; then
-  cpreq -p ${COMINobsproc}/${NET}.t${cyc}z.lghtng.tm00.bufr_d lghtngbufr
+if [ -s "${COMINobsproc}/${RUN}.t${cyc}z.lghtng.tm00.bufr_d" ]; then
+  cpreq -p ${COMINobsproc}/${RUN}.t${cyc}z.lghtng.tm00.bufr_d lghtngbufr
 else
-  echo "WARNING: ${COMINobsproc}/${NET}.t${cyc}z.lghtng.tm00.bufr_d is not available ..."
+  echo "WARNING: ${COMINobsproc}/${RUN}.t${cyc}z.lghtng.tm00.bufr_d is not available ..."
 fi
 
 # Build the namelist on-the-fly
@@ -44,12 +44,12 @@ startmsg
 mpiexec $EXECrtma3d/${pgm} >> ${pgmout} 2>errfile
 export err=$?; err_chk
 
-cpreq -p lghtngbufr ${COMOUT}/${RUN}.t${cyc}z.lghtng.tm00.${dom}.bufr_d
+cpreq -p lghtngbufr ${COMOUT}/${RUN}.t${cyc}z.lghtng.tm00.bufr_d
 
 chgrp rstprod LightningInGSI.bufr
 lghtng_bufr="LightningInGSI.bufr"
 if [ -f ${DATA}/${lghtng_bufr} ] ; then
-  cpreq -p ${DATA}/${lghtng_bufr} ${COMOUT}/${RUN}.t${cyc}z.LightningInGSI_bufr.${dom}.bufr
+  cpreq -p ${DATA}/${lghtng_bufr} ${COMOUT}/${RUN}.t${cyc}z.LightningInGSI_bufr.bufr
 else
   msg="WARNING $pgm terminated normally but ${DATA}/${lghtng_bufr} does NOT exist."
 fi

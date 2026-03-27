@@ -1,4 +1,4 @@
-#!/bin/ksh
+#!/bin/sh
 
 # --- for debug --- #
 date
@@ -24,8 +24,7 @@ export RUN=${RUN:-rtma3d}
 # Define data and shared directories
 ##########################################################
 export DATA=${DATA:-$DATAROOT/${jobid:?}}
-export DATA_SHARED=${DATA_SHARED:-${DATAROOT}/sharedprd}
-mkdir -p $DATA $DATA_SHARED
+mkdir -p $DATA 
 cd $DATA
 
 #####################################################
@@ -38,13 +37,8 @@ setpdy.sh
 . ./PDY
 
 export CDATE="${PDY}${cyc}"
-export PDYHH="${PDY}${cyc}"
-PDYm1=`$NDATE -24 ${PDY}${cyc} | cut -c 1-8`
 
 export pgmout=${pgmout:-"OUTPUT.$$"}
-
-# specify the file head for the file names of the archived data files
-export PROD_HEAD=${PROD_HEAD:-${NET}.t${cyc}z}
 
 # Specify Execution Areas
 export HOMErtma3d=${HOMErtma3d:-$PACKAGEROOT/${NET}.${rtma3d_ver}}
@@ -58,56 +52,15 @@ export USHrtma3d=${USHrtma3d:-$HOMErtma3d/ush/${dom}}
 #################################################
 export COMIN=${COMIN:-$(compath.py  ${envir}/${NET}/${rtma3d_ver})/${RUN}.${PDY}/${dom}}
 export COMOUT=${COMOUT:-$(compath.py -o  ${envir}/${NET}/${rtma3d_ver})/${RUN}.${PDY}/${dom}}
+export GESINhrrr=${GESINhrrr:-$(compath.py ${envir}/hrrr/${hrrr_ver})/nwges/hrrrges_sfc/${dom}}
 
-# Directory to store the firstguess as input for the RTMA3D (NETCDF?) 
+mkdir -p $COMOUT
 
-export GESINhrrr=${GESINHRRR}
+export COMINhrrr=${COMINhrrr:-$(compath.py ${envir}/hrrr/${hrrr_ver})}
+export COMINww3GL=${COMINww3GL:-$(compath.py ${envir}/glwu/${glwu_ver})}
+export COMINww3=${COMINww3:-$(compath.py ${envir}/gfs/${gfs_ver})}
 
-export GESINhrrr_rtma3d=${GESINhrrr_rtma3d:-"${COMIN}/fgsprd.${cycle}"}
-export PDYHH_cycm1=$($NDATE -01  "${PDYHH}")
-export PDYHH_cycp1=$($NDATE +01  "${PDYHH}")
-
-PDY_cycp1=`echo ${PDYHH_cycp1} | cut -c 1-8`
-
-export COMINhrrr_cycp1=${COMINHRRR}/hrrr.${PDY_cycp1}/${NET}
-
-export FGS_OPT=${FGS_OPT:-1}
-
-# set the file name of the firstguess for rtma3d
-if [ ! "${PROD_HEAD}" ] ; then
-  export ANLrtma3d_FNAME="${NET}.${cycle}.wrf_inout.nc"
-  export FGSrtma3d_FNAME="${NET}.${cycle}.firstguess.nc"
-else
-  export ANLrtma3d_FNAME="${PROD_HEAD}.wrf_inout.nc"
-  export FGSrtma3d_FNAME="${PROD_HEAD}.firstguess.nc"
-fi
- 
-# Define the path to WW3 firstguess for HOWV
-export COMINww3GL=${COMINww3GL:-/lfs/h1/ops/prod/com/glwu/v2.0}                                 # v1.1 is old
-export COMINww3=${COMINww3:-/lfs/h1/ops/prod/com/gfs/v16.3}                                  # v16.2 is old
-
-# path to the scripts
-export HOMEscript=${SCRIPT_DIR}
-
-if [ ! -d "${COMOUT}" ] ; then
-   mkdir -p $COMOUT
-fi
-
-if [ ! -d "${GESINhrrr_rtma3d}" ] ; then
-   mkdir -p $GESINhrrr_rtma3d
-fi
-
-# fgs data from HPSS
-#if [ ! -d "${COMINhrrr}" ] ; then
-#  ${ECHO} "ERROR: ${COMINhrrr} does not exist!"
-#  exit 1
-#fi
-#if [ ! -d "${COMINhrrr_cycp1}" ] ; then
-#  ${ECHO} "ERROR: ${COMINhrrr_cycp1} does not exist!"
-#  exit 1
-#fi
-
-###########################################################
+export SENDCOM=${SENDCOM:-YES}
 
 ######################
 # Execute the script.
@@ -115,13 +68,11 @@ fi
 $HOMErtma3d/scripts/${dom}/ex${RUN}_prepfgs.ksh
 export err=$?; err_chk
 
-msg="$0 of $job completed normally"
-postmsg $jlogfile "$msg"
-
-if [ -e "${pgmout}" ] ; then
-   cat $pgmout
-   cpreq -p $pgmout   ${LOG_PGMOUT}
+if [ -e "$pgmout" ]; then
+  cat $pgmout
 fi
+
+postmsg "$0 of $job completed normally"
 
 ##############################
 # Remove the Temporary working directory

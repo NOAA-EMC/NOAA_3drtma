@@ -91,14 +91,14 @@ export COMIN=${COMIN:-$(compath.py  ${envir}/${NET}/${rtma3d_ver})/${RUN}.${PDY}
 export COMOUT=${COMOUT:-$(compath.py -o  ${envir}/${NET}/${rtma3d_ver})/${RUN}.${PDY}/${dom}}
 
 ### Firstguess Products/Input for the RTMA3D (netcdf files) 
-export GESINhrrr_rtma3d=${GESINhrrr_rtma3d:-"${COMIN}/fgsprd.${cycle}"}
-if [ ! -d "${GESINhrrr_rtma3d}" ] ; then
-  echo " Directory of HRRRs fgs data does NOT exist. Job abort!"
-  err_exit
-fi
+#export GESINhrrr_rtma3d=${GESINhrrr_rtma3d:-"${COMIN}/fgsprd.${cycle}"}
+#if [ ! -d "${GESINhrrr_rtma3d}" ] ; then
+# echo " Directory of HRRRs fgs data does NOT exist. Job abort!"
+# err_exit
+#fi
 
 ### 3DRTMA GSIANL Products (netcdf)
-export COMOUTgsi_rtma3d=${COMOUTgsi_rtma3d:-"${COMOUT}/gsiprd.${cycle}"}
+#export COMOUTgsi_rtma3d=${COMOUTgsi_rtma3d:-"${COMOUT}/gsiprd.${cycle}"}
 
 if [ ! -d "${COMIN}" ] ; then
    mkdir -p $COMIN
@@ -106,9 +106,9 @@ fi
 if [ ! -d "${COMOUT}" ] ; then
    mkdir -p $COMOUT
 fi
-if [ ! -d "${COMOUTgsi_rtma3d}" ] ; then
-  ${MKDIR} -p ${COMOUTgsi_rtma3d}
-fi
+#if [ ! -d "${COMOUTgsi_rtma3d}" ] ; then
+#  ${MKDIR} -p ${COMOUTgsi_rtma3d}
+#fi
 
 ###########################################################
 #

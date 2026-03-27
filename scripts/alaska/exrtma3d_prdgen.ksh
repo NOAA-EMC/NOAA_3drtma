@@ -160,7 +160,7 @@ fi
 
 # interpolate the howv field to the 3 km NDFD grid
 
-wgrib2 ${COMIN}/${RUN}.t${cyc}z.anl.howv.grib2 -set_bitmap 1 -set_grib_type c3 -new_grid_winds grid \
+wgrib2 ${COMIN}/${RUN}ak.t${cyc}z.anl.howv.grib2 -set_bitmap 1 -set_grib_type c3 -new_grid_winds grid \
  -new_grid_interpolation bilinear \
  -new_grid ${grid_specs} ${RUN}.t${cyc}z.anl.howv_ndfd.grib2
 

@@ -48,10 +48,19 @@ done
 
 ##GZ:==> using the uncompressed tarball of obs-diag files with suffix tar (instead of tgz)
 # tar -xzvf $COMIN/gsiprd.t${cyc}z/diag_${CDATE}${cyc}.tgz      # compressed tarball (tgz)
-  tar -xvf  $COMIN/gsiprd.t${cyc}z/diag_${CDATE}${cyc}.tar      # uncompressed tarball (tar)
-cp diag_conv_ges.${CDATE}${cyc} diag_conv_ges.dat
-cp diag_conv_02.${CDATE}${cyc} diag_conv_02.dat
-cp diag_conv_anl.${CDATE}${cyc} diag_conv_anl.dat
+# tar -xvf  $COMIN/gsiprd.t${cyc}z/diag_${CDATE}${cyc}.tar      # uncompressed tarball (tar)
+cp $COMIN/${RUN}.t${cyc}z.diag_conv_ges.gz diag_conv_ges.gz
+cp $COMIN/${RUN}.t${cyc}z.diag_conv_02.gz  diag_conv_02.gz
+cp $COMIN/${RUN}.t${cyc}z.diag_conv_anl.gz diag_conv_anl.gz
+gunzip diag_conv_ges.gz
+gunzip diag_conv_02.gz
+gunzip diag_conv_anl.gz
+mv diag_conv_ges diag_conv_ges.dat
+mv diag_conv_02 diag_conv_02.dat
+mv diag_conv_anl diag_conv_anl.dat
+#cp diag_conv_ges.${CDATE}${cyc} diag_conv_ges.dat
+#cp diag_conv_02.${CDATE}${cyc} diag_conv_02.dat
+#cp diag_conv_anl.${CDATE}${cyc} diag_conv_anl.dat
 cp $COMIN/postprd.t${cyc}z/${RUN}.t${cyc}z.wrfsubhprs.grib2 anlfile_2.grb2
 
 FAA_TIME_START=`$MDATE`

@@ -87,10 +87,18 @@ done
 # Convert the diagnostic files into a readable format
 for ftype in ges anl; do
   if [ ${ftype} == 'ges' ]; then
-    cpreq ${COMOUTgsi_rtma3d}/${GESdiagconv_FNAME}.gz .
+    if [ ${dom} == 'conus' ]; then
+      cpreq ${COMOUT}/${RUN}.t${cyc}z.diag_conv_ges.gz ${GESdiagconv_FNAME}.gz
+    else
+      cpreq ${COMOUT}/${RUN}ak.t${cyc}z.diag_conv_ges.gz ${GESdiagconv_FNAME}.gz
+    fi
     export diagfile=${GESdiagconv_FNAME}
   elif [ ${ftype} == 'anl' ]; then
-    cpreq ${COMOUTgsi_rtma3d}/${ANLdiagconv_FNAME}.gz .
+    if [ ${dom} == 'conus' ]; then
+      cpreq ${COMOUT}/${RUN}.t${cyc}z.diag_conv_anl.gz ${ANLdiagconv_FNAME}.gz
+    else
+      cpreq ${COMOUT}/${RUN}ak.t${cyc}z.diag_conv_anl.gz ${ANLdiagconv_FNAME}.gz
+    fi
     export diagfile=${ANLdiagconv_FNAME}
   fi
   gunzip ${diagfile}.gz
