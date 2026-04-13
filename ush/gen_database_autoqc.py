@@ -106,10 +106,10 @@ def windbias(dat_var):
   cols_wbias=['t_now_','t_bar_','alpha_','a_','alpha_bar_','w_','EFFECTIVE_OB_']
   dat_wbias = dat_var.loc[:, dat_var.columns.str.startswith(tuple(keep_cols+cols_wbias))].copy()
   dat_wbias=dat_wbias[keep_cols+list(filter(lambda x: (datetime.strptime(x.split('_')[-1],'%Y%m%d%H') >= PDYm1),dat_wbias.columns[len(keep_cols):]))]
-  dat_wbias.to_csv(thisRUN+'.t'+cycle_HH+'z.windbias_'+cyclestr+'.csv', index=False)
+  dat_wbias.to_csv(thisRUN+'.t'+cycle_HH+'z.windbias.csv', index=False)
 
   # Generate text files with the wind bias correction output (current cycle ONLY)
-  fname = thisRUN+'.t'+cycle_HH+'z.windbias_'+cyclestr+'.txt'
+  fname = thisRUN+'.t'+cycle_HH+'z.windbias.txt'
   dat_wbias=dat_wbias.loc[(dat_var['PBUFTYP'].isin(mnet_bctypes))]
   write_wbias(dat_wbias[keep_cols+['a_'+cyclestr]],fname)
 
@@ -123,9 +123,9 @@ def windbias(dat_var):
 def gen_database(dat_var,columns,cyc_purge,eps,geps,rjrmse):
 
   # If file exists, merge new dat_var array with data from existing database
-  if os.path.exists(COMm1+'/'+thisRUN+'.t'+HHm1+'z.database_'+vars[var]+'_'+cyclestr_m1+'.db'):
+  if os.path.exists(COMm1+'/'+thisRUN+'.t'+HHm1+'z.database_'+vars[var]+'.db'):
     # Open the connection to the SQLite database
-    cnx = sqlite3.connect(COMm1+'/'+thisRUN+'.t'+HHm1+'z.database_'+vars[var]+'_'+cyclestr_m1+'.db')
+    cnx = sqlite3.connect(COMm1+'/'+thisRUN+'.t'+HHm1+'z.database_'+vars[var]+'.db')
     data = pd.read_sql("SELECT * FROM "+var_str,cnx)
     columns=list(data.columns)
     data=data[keep_cols+list(filter(lambda x: (datetime.strptime(x.split('_')[-1],'%Y%m%d%H') > cyc_purge),columns[len(keep_cols):]))]
@@ -135,9 +135,7 @@ def gen_database(dat_var,columns,cyc_purge,eps,geps,rjrmse):
     cnx.close()
 
   # Open the connection to the SQLite database (will create one if it doesn't exist)
-  cnx = sqlite3.connect(thisRUN+'.t'+cycle_HH+'z.database_'+vars[var]+'_'+cyclestr+'.db')
-
-  #dat_var = duplicates(dat_var)
+  cnx = sqlite3.connect(thisRUN+'.t'+cycle_HH+'z.database_'+vars[var]+'.db')
 
   dat_var = gen_accept_lists(dat_var,eps,geps,rjrmse)
 
@@ -160,40 +158,43 @@ def gen_database(dat_var,columns,cyc_purge,eps,geps,rjrmse):
   else: dat_var_save.replace(np.nan,'NaN|NaN|NaN|NaN|NaN',regex=True,inplace=True)
   dat_var_save.dropna(subset=[column for column in dat_var_save.columns if column.startswith('DAT_')],how='all',inplace=True)
   dat_var_save.to_sql(name=var_str,con=cnx,index=False,if_exists ='replace')
-  dat_var_save.to_csv(thisRUN+'.t'+cycle_HH+'z.database_'+vars[var]+'_'+cyclestr+'.csv', index=False)
+  dat_var_save.to_csv(thisRUN+'.t'+cycle_HH+'z.database_'+vars[var]+'.csv', index=False)
   cnx.close()
 
-  # Generate SQL database with statistics output
+  # Generate SQL database with statistics output - Only computed daily at 23Z
 
-  # If file exists, merge new dat_var array with data from existing database
-  if os.path.exists(COMm1+'/'+thisRUN+'.t'+HHm1+'z.stats_database_'+vars[var]+'_'+cyclestr_m1+'.db'):
-    # Open the connection to the SQLite database
-    cnx = sqlite3.connect(COMm1+'/'+thisRUN+'.t'+HHm1+'z.stats_database_'+vars[var]+'_'+cyclestr_m1+'.db')
-    data = pd.read_sql("SELECT * FROM "+var_str,cnx)
-    stat_cols =  list(data.columns)
-    data=data[keep_cols+list(filter(lambda x: (datetime.strptime(x.split('_')[-1],'%Y%m%d%H') > cyc_purge_stats),stat_cols[len(keep_cols):]))]
+  if cycle_HH==23:
 
-    dfs = [data,dat_var]
-    dat_var = reduce(lambda left,right: pd.merge(left,right,on=keep_cols,how='outer'), dfs)
-    dat_var[['PBUFTYP']]=dat_var[['PBUFTYP']].astype(np.int)
+    # If file exists, merge new dat_var array with data from existing database
+    COMprev_stats = os.path.abspath(os.path.join(os.path.dirname(COM), '../../'+'/'+thisRUN+'.'+probeday_daily+'/'+dom+'/autoqcprd.t'+probeHH_daily+'z'))
+    if os.path.exists(COMprev_stats+'/'+thisRUN+'.t'+cycle_HH+'z.stats_database_'+vars[var]+'.db'):
+      # Open the connection to the SQLite database
+      cnx = sqlite3.connect(COMprev_stats+'/'+thisRUN+'.t'+cycle_HH+'z.stats_database_'+vars[var]+'.db')
+      data = pd.read_sql("SELECT * FROM "+var_str,cnx)
+      stat_cols =  list(data.columns)
+      data=data[keep_cols+list(filter(lambda x: (datetime.strptime(x.split('_')[-1],'%Y%m%d%H') > cyc_purge_stats),stat_cols[len(keep_cols):]))]
+  
+      dfs = [data,dat_var]
+      dat_var = reduce(lambda left,right: pd.merge(left,right,on=keep_cols,how='outer'), dfs)
+      dat_var[['PBUFTYP']]=dat_var[['PBUFTYP']].astype(np.int)
+      cnx.close()
+  
+    # Open the connection to the SQLite database (will create one if it doesn't exist)
+    cnx = sqlite3.connect(thisRUN+'.t'+cycle_HH+'z.stats_database_'+vars[var]+'.db')
+  
+    stats_cols=['counts_','mean_OmFs_','sum_devs_squared','stddev_','SUM_OmFs_','SUM_OmFs2_','RMSE_','Bias_']
+    dat_var_stats = dat_var.loc[:, dat_var.columns.str.startswith(tuple(keep_cols+stats_cols))]
+  
+    # Convert to SQL database and close connection
+    dat_var_stats['COUNT']=dat_var_stats.groupby('SAID')['SAID'].transform('count')
+    dat_var_stats=dat_var_stats[dat_var_stats['COUNT']<max_dups]
+    dat_var_stats.drop(['COUNT'],axis=1,inplace=True)
+    # Drop stations from the database that haven't reported recently (i.e., all values are missing)
+    dat_var_stats.dropna(subset=[column for column in dat_var_stats.columns if column.startswith(tuple(stats_cols[1:]))],how='all',inplace=True)
+    dat_var_stats.to_sql(name=var_str,con=cnx,index=False,if_exists ='replace')
+    dat_var_stats.to_csv(thisRUN+'.t'+cycle_HH+'z.stats_database_'+vars[var]+'.csv', index=False)
     cnx.close()
-
-  # Open the connection to the SQLite database (will create one if it doesn't exist)
-  cnx = sqlite3.connect(thisRUN+'.t'+cycle_HH+'z.stats_database_'+vars[var]+'_'+cyclestr+'.db')
-
-  stats_cols=['counts_','mean_OmFs_','sum_devs_squared','stddev_','SUM_OmFs_','SUM_OmFs2_','RMSE_','Bias_']
-  dat_var_stats = dat_var.loc[:, dat_var.columns.str.startswith(tuple(keep_cols+stats_cols))]
-
-  # Convert to SQL database and close connection
-  dat_var_stats['COUNT']=dat_var_stats.groupby('SAID')['SAID'].transform('count')
-  dat_var_stats=dat_var_stats[dat_var_stats['COUNT']<max_dups]
-  dat_var_stats.drop(['COUNT'],axis=1,inplace=True)
-  # Drop stations from the database that haven't reported recently (i.e., all values are missing)
-  dat_var_stats.dropna(subset=[column for column in dat_var_stats.columns if column.startswith(tuple(stats_cols[1:]))],how='all',inplace=True)
-  dat_var_stats.to_sql(name=var_str,con=cnx,index=False,if_exists ='replace')
-  dat_var_stats.to_csv(thisRUN+'.t'+cycle_HH+'z.stats_database_'+vars[var]+'_'+cyclestr+'.csv', index=False)
-  cnx.close()
-
+  
   dat_var = dat_var.loc[:, ~dat_var.columns.str.startswith(('counts_','SUM_OmFs_','SUM_OmFs2_','RMSE_','Bias_'))]
 
   return(dat_var)
@@ -203,7 +204,7 @@ def gen_accept_lists(dat_var,eps,geps,rjrmse):
   ij = 0
   cyc_unpack = []
   itercyc=datetime.strptime(str(cyclestr),'%Y%m%d%H')
-  while ij < max(num_cycs,num_stuck,num_cycs_long):
+  while ij < max(num_stuck,num_cycs_daily):
     cyc_unpack.append(itercyc.strftime('%Y%m%d%H'))
     itercyc = itercyc - delta
     ij+=1
@@ -257,7 +258,7 @@ def gen_accept_lists(dat_var,eps,geps,rjrmse):
           # Finalize and write to CSV file
           if stuck_inst.shape[0]>0:
             stuck_flag=True
-            stuck_inst[keep_cols+['STUCK']].to_csv(thisRUN+'.t'+cycle_HH+'z.stuck_inst_'+vars[var]+'_'+cyclestr+'.csv', index=False)
+            stuck_inst[keep_cols+['STUCK']].to_csv(thisRUN+'.t'+cycle_HH+'z.stuck_inst_'+vars[var]+'.csv', index=False)
 
   # Run a check for flatlining temperature reports and merge results with the stuck instrument check to be EXCLUDED in
   # the generation of automated accept lists.
@@ -267,7 +268,7 @@ def gen_accept_lists(dat_var,eps,geps,rjrmse):
     flat_inst = flat_inst[keep_cols]
     flat_inst['FLAT']=1.
     if flat_inst.shape[0]>0:
-      flat_inst[keep_cols+['FLAT']].to_csv(thisRUN+'.t'+cycle_HH+'z.flat_inst_'+vars[var]+'_'+cyclestr+'.csv', index=False)
+      flat_inst[keep_cols+['FLAT']].to_csv(thisRUN+'.t'+cycle_HH+'z.flat_inst_'+vars[var]+'.csv', index=False)
       if stuck_flag==True:
         stuck_inst=pd.concat([stuck_inst,flat_inst],sort=False)
       else:
@@ -279,185 +280,84 @@ def gen_accept_lists(dat_var,eps,geps,rjrmse):
   columns=columns[len(keep_cols):]
   columns_obs=[x for x in columns if x.startswith('OB_')]
 
-  itercyc=datetime.strptime(probecyc_long,'%Y%m%d%H')
-  probeday_long = itercyc.strftime('%Y%m%d')
-  probeHH_long = itercyc.strftime('%H')
-  COMprev_long = os.path.abspath(os.path.join(os.path.dirname(COM), '../../'+'/'+NET+'.'+probeday_long+'/'+dom+'/autoqcprd.t'+probeHH_long+'z')) # MTM - revert NET to thisRUN
+  itercyc=datetime.strptime(probecyc_daily,'%Y%m%d%H')
+  probeday_daily = itercyc.strftime('%Y%m%d')
+  probeHH_daily = itercyc.strftime('%H')
+  COMprev_daily = os.path.abspath(os.path.join(os.path.dirname(COM), '../../'+'/'+thisRUN+'.'+probeday_daily+'/'+dom+'/autoqcprd.t'+probeHH_daily+'z'))
 
-  if np.float(cycle_HH)%num_cycs==num_cycs-1 and dat_var.shape[0]>0:
-    cyc_delim=datetime.strptime(cyclestr,'%Y%m%d%H')+timedelta(hours=-num_cycs)
-    dat_var_short=dat_var_sum[list(filter(lambda x: (datetime.strptime(x.split('_')[-1],'%Y%m%d%H') > cyc_delim),columns))]
-    dat_var['counts_'+cyclestr]=dat_var_short.loc[:, [x for x in dat_var_short.columns if x.startswith('INC-GES_')]].count(axis=1)
-    # Determine if there is enough data available to compute short-term lists
-    maxcycs=dat_var['counts_'+cyclestr].max()
-    if comp_partial_flag==True and maxcycs>=num_cycs-num_relax: dump_partial_flag=True
-    else: dump_partial_flag=False
+  if cycle_HH=='23':
+    cyc_delim_daily=datetime.strptime(cyclestr,'%Y%m%d%H')+timedelta(hours=-num_cycs_daily)
+    dat_var_daily=dat_var_sum[list(filter(lambda x: (datetime.strptime(x.split('_')[-1],'%Y%m%d%H') > cyc_delim_daily),columns))]
+    dat_var['counts_daily_'+cyclestr]=dat_var_daily.loc[:, [x for x in dat_var_daily.columns if x.startswith('INC-GES_')]].count(axis=1)
 
-    # Calculate short-term standard deviation (stddev)
-    dat_var['mean_OmFs_'+cyclestr]=dat_var_short.loc[:, [x for x in dat_var_short.columns if x.startswith('INC-GES_')]].abs().sum(axis=1).div(dat_var['counts_'+cyclestr],axis=0)
-    dat_var['sum_devs_squared_'+cyclestr]=dat_var_short.loc[:, [x for x in dat_var_short.columns if x.startswith('INC-GES_')]].abs().sub(dat_var['mean_OmFs_'+cyclestr],axis=0).pow(2).sum(axis=1)
-    dat_var['stddev_'+cyclestr]=np.sqrt(dat_var['sum_devs_squared_'+cyclestr]/dat_var['counts_'+cyclestr])
+    # Calculate long-term standard deviation (stddev)
+    dat_var['mean_OmFs_daily_'+cyclestr]=dat_var_daily.loc[:, [x for x in dat_var_daily.columns if x.startswith('INC-GES_')]].abs().sum(axis=1).div(dat_var['counts_daily_'+cyclestr],axis=0)
+    dat_var['sum_devs_squared_daily_'+cyclestr]=dat_var_daily.loc[:, [x for x in dat_var_daily.columns if x.startswith('INC-GES_')]].abs().sub(dat_var['mean_OmFs_daily_'+cyclestr],axis=0).pow(2).sum(axis=1)
+    dat_var['stddev_daily_'+cyclestr]=np.sqrt(dat_var['sum_devs_squared_daily_'+cyclestr]/dat_var['counts_daily_'+cyclestr])
     # Wind direction
     if vars[var]=='wst':
-      dat_var['mean_OmFs_wdir_'+cyclestr]=dat_var_short.loc[:, [x for x in dat_var_short.columns if x.startswith('WDIR_INC_')]].abs().sum(axis=1).div(dat_var['counts_'+cyclestr],axis=0)
-      dat_var['sum_devs_squared_wdir_'+cyclestr]=dat_var_short.loc[:, [x for x in dat_var_short.columns if x.startswith('WDIR_INC_')]].abs().sub(dat_var['mean_OmFs_wdir_'+cyclestr],axis=0).pow(2).sum(axis=1)
-      dat_var['stddev_wdir_'+cyclestr]=np.sqrt(dat_var['sum_devs_squared_wdir_'+cyclestr]/dat_var['counts_'+cyclestr])
-  
-    # Calculate short-term RMSE and Bias
-    dat_var['SUM_OmFs_'+cyclestr]=dat_var_short.loc[:, [x for x in dat_var_short.columns if x.startswith('INC-GES_')]].sum(axis=1)
-    dat_var['SUM_OmFs2_'+cyclestr]=dat_var_short.loc[:, [x for x in dat_var_short.columns if x.startswith('INC-GES_')]].pow(2).sum(axis=1)
-    dat_var['RMSE_'+cyclestr]=np.sqrt(dat_var['SUM_OmFs2_'+cyclestr]/dat_var['counts_'+cyclestr])
-    dat_var['Bias_'+cyclestr]=dat_var['SUM_OmFs_'+cyclestr]/dat_var['counts_'+cyclestr]
+      dat_var['mean_OmFs_daily_wdir_'+cyclestr]=dat_var_daily.loc[:, [x for x in dat_var_daily.columns if x.startswith('WDIR_INC_')]].abs().sum(axis=1).div(dat_var['counts_daily_'+cyclestr],axis=0)
+      dat_var['sum_devs_squared_daily_wdir_'+cyclestr]=dat_var_daily.loc[:, [x for x in dat_var_daily.columns if x.startswith('WDIR_INC_')]].abs().sub(dat_var['mean_OmFs_daily_wdir_'+cyclestr],axis=0).pow(2).sum(axis=1)
+      dat_var['stddev_daily_wdir_'+cyclestr]=np.sqrt(dat_var['sum_devs_squared_daily_wdir_'+cyclestr]/dat_var['counts_daily_'+cyclestr])
+
+    # Calculate long-term RMSE and Bias
+    dat_var['SUM_OmFs_daily_'+cyclestr]=dat_var_daily.loc[:, [x for x in dat_var_daily.columns if x.startswith('INC-GES_')]].sum(axis=1)
+    dat_var['SUM_OmFs2_daily_'+cyclestr]=dat_var_daily.loc[:, [x for x in dat_var_daily.columns if x.startswith('INC-GES_')]].pow(2).sum(axis=1)
+    dat_var['RMSE_daily_'+cyclestr]=np.sqrt(dat_var['SUM_OmFs2_daily_'+cyclestr]/dat_var['counts_daily_'+cyclestr])
+    dat_var['Bias_daily_'+cyclestr]=dat_var['SUM_OmFs_daily_'+cyclestr]/dat_var['counts_daily_'+cyclestr]
     # Wind direction
     if vars[var]=='wst':
-      dat_var['SUM_OmFs_wdir_'+cyclestr]=dat_var_short.loc[:, [x for x in dat_var_short.columns if x.startswith('WDIR_INC_')]].sum(axis=1)
-      dat_var['Bias_wdir_'+cyclestr]=dat_var['SUM_OmFs_wdir_'+cyclestr]/dat_var['counts_'+cyclestr]
+      dat_var['SUM_OmFs_daily_wdir_'+cyclestr]=dat_var_daily.loc[:, [x for x in dat_var_daily.columns if x.startswith('WDIR_INC_')]].sum(axis=1)
+      dat_var['Bias_daily_wdir_'+cyclestr]=dat_var['SUM_OmFs_daily_wdir_'+cyclestr]/dat_var['counts_daily_'+cyclestr]
 
     # Replace computed values with NaN in cases where the station reports fewer than the required # of observations
-    dat_var.loc[dat_var['counts_'+cyclestr]<num_cycs-num_relax,('stddev_'+cyclestr,'SUM_OmFs_'+cyclestr,'SUM_OmFs2_'+cyclestr,'RMSE_'+cyclestr,'Bias_'+cyclestr)]=np.nan
+    dat_var.loc[dat_var['counts_daily_'+cyclestr]<min_cycs_daily,('stddev_daily_'+cyclestr,'SUM_OmFs_daily_'+cyclestr,'SUM_OmFs2_daily_'+cyclestr,'RMSE_daily_'+cyclestr,'Bias_daily_'+cyclestr)]=np.nan
 
-    dat_var['stddev_'+cyclestr]=dat_var['stddev_'+cyclestr].round(3)
-    dat_var['SUM_OmFs_'+cyclestr]=dat_var['SUM_OmFs_'+cyclestr].round(3)
-    dat_var['SUM_OmFs2_'+cyclestr]=dat_var['SUM_OmFs2_'+cyclestr].round(3)
-    dat_var['RMSE_'+cyclestr]=dat_var['RMSE_'+cyclestr].round(3)
-    dat_var['Bias_'+cyclestr]=dat_var['Bias_'+cyclestr].round(3)
+    if vars[var]=='wst':
+      dat_var.loc[dat_var['counts_daily_'+cyclestr]<min_cycs_daily,('stddev_daily_wdir_'+cyclestr,'SUM_OmFs_daily_wdir_'+cyclestr,'SUM_OmFs2_daily_wdir_'+cyclestr,'RMSE_daily_wdir_'+cyclestr,'Bias_daily_wdir_'+cyclestr)]=np.nan
+
+    dat_var['stddev_daily_'+cyclestr]=dat_var['stddev_daily_'+cyclestr].round(3)
+    dat_var['SUM_OmFs_daily_'+cyclestr]=dat_var['SUM_OmFs_daily_'+cyclestr].round(3)
+    dat_var['SUM_OmFs2_daily_'+cyclestr]=dat_var['SUM_OmFs2_daily_'+cyclestr].round(3)
+    dat_var['RMSE_daily_'+cyclestr]=dat_var['RMSE_daily_'+cyclestr].round(3)
+    dat_var['Bias_daily_'+cyclestr]=dat_var['Bias_daily_'+cyclestr].round(3)
     # Wind direction
     if vars[var]=='wst':
-      dat_var['stddev_wdir_'+cyclestr]=dat_var['stddev_wdir_'+cyclestr].round(3)
-      dat_var['SUM_OmFs_wdir_'+cyclestr]=dat_var['SUM_OmFs_wdir_'+cyclestr].round(3)
-      dat_var['Bias_wdir_'+cyclestr]=dat_var['Bias_wdir_'+cyclestr].round(3)
+      dat_var['stddev_daily_wdir_'+cyclestr]=dat_var['stddev_daily_wdir_'+cyclestr].round(3)
+      dat_var['SUM_OmFs_daily_wdir_'+cyclestr]=dat_var['SUM_OmFs_daily_wdir_'+cyclestr].round(3)
+      dat_var['Bias_daily_wdir_'+cyclestr]=dat_var['Bias_daily_wdir_'+cyclestr].round(3)
 
-    cyc_delim_long=datetime.strptime(cyclestr,'%Y%m%d%H')+timedelta(hours=-num_cycs_long)
-    dat_var_long=dat_var_sum[list(filter(lambda x: (datetime.strptime(x.split('_')[-1],'%Y%m%d%H') > cyc_delim_long),columns))]
+  if vars[var] in ['t','ps','q','wst']:
+    dat_var_accept=dat_var.copy()
     if cycle_HH=='23':
-      dat_var['counts_long_'+cyclestr]=dat_var_long.loc[:, [x for x in dat_var_long.columns if x.startswith('INC-GES_')]].count(axis=1)
-
-      # Calculate long-term standard deviation (stddev)
-      dat_var['mean_OmFs_long_'+cyclestr]=dat_var_long.loc[:, [x for x in dat_var_long.columns if x.startswith('INC-GES_')]].abs().sum(axis=1).div(dat_var['counts_long_'+cyclestr],axis=0)
-      dat_var['sum_devs_squared_long_'+cyclestr]=dat_var_long.loc[:, [x for x in dat_var_long.columns if x.startswith('INC-GES_')]].abs().sub(dat_var['mean_OmFs_long_'+cyclestr],axis=0).pow(2).sum(axis=1)
-      dat_var['stddev_long_'+cyclestr]=np.sqrt(dat_var['sum_devs_squared_long_'+cyclestr]/dat_var['counts_long_'+cyclestr])
-      # Wind direction
-      if vars[var]=='wst':
-        dat_var['mean_OmFs_long_wdir_'+cyclestr]=dat_var_long.loc[:, [x for x in dat_var_long.columns if x.startswith('WDIR_INC_')]].abs().sum(axis=1).div(dat_var['counts_long_'+cyclestr],axis=0)
-        dat_var['sum_devs_squared_long_wdir_'+cyclestr]=dat_var_long.loc[:, [x for x in dat_var_long.columns if x.startswith('WDIR_INC_')]].abs().sub(dat_var['mean_OmFs_long_wdir_'+cyclestr],axis=0).pow(2).sum(axis=1)
-        dat_var['stddev_long_wdir_'+cyclestr]=np.sqrt(dat_var['sum_devs_squared_long_wdir_'+cyclestr]/dat_var['counts_long_'+cyclestr])
-
-      # Calculate long-term RMSE and Bias
-      dat_var['SUM_OmFs_long_'+cyclestr]=dat_var_long.loc[:, [x for x in dat_var_long.columns if x.startswith('INC-GES_')]].sum(axis=1)
-      dat_var['SUM_OmFs2_long_'+cyclestr]=dat_var_long.loc[:, [x for x in dat_var_long.columns if x.startswith('INC-GES_')]].pow(2).sum(axis=1)
-      dat_var['RMSE_long_'+cyclestr]=np.sqrt(dat_var['SUM_OmFs2_long_'+cyclestr]/dat_var['counts_long_'+cyclestr])
-      dat_var['Bias_long_'+cyclestr]=dat_var['SUM_OmFs_long_'+cyclestr]/dat_var['counts_long_'+cyclestr]
-      # Wind direction
-      if vars[var]=='wst':
-        dat_var['SUM_OmFs_long_wdir_'+cyclestr]=dat_var_long.loc[:, [x for x in dat_var_long.columns if x.startswith('WDIR_INC_')]].sum(axis=1)
-        dat_var['Bias_long_wdir_'+cyclestr]=dat_var['SUM_OmFs_long_wdir_'+cyclestr]/dat_var['counts_long_'+cyclestr]
-
-      # Replace computed values with NaN in cases where the station reports fewer than the required # of observations
-      dat_var.loc[dat_var['counts_long_'+cyclestr]<min_cycs_long,('stddev_long_'+cyclestr,'SUM_OmFs_long_'+cyclestr,'SUM_OmFs2_long_'+cyclestr,'RMSE_long_'+cyclestr,'Bias_long_'+cyclestr)]=np.nan
-
-      if vars[var]=='wst':
-        dat_var.loc[dat_var['counts_long_'+cyclestr]<min_cycs_long,('stddev_long_wdir_'+cyclestr,'SUM_OmFs_long_wdir_'+cyclestr,'SUM_OmFs2_long_wdir_'+cyclestr,'RMSE_long_wdir_'+cyclestr,'Bias_long_wdir_'+cyclestr)]=np.nan
-
-      dat_var['stddev_long_'+cyclestr]=dat_var['stddev_long_'+cyclestr].round(3)
-      dat_var['SUM_OmFs_long_'+cyclestr]=dat_var['SUM_OmFs_long_'+cyclestr].round(3)
-      dat_var['SUM_OmFs2_long_'+cyclestr]=dat_var['SUM_OmFs2_long_'+cyclestr].round(3)
-      dat_var['RMSE_long_'+cyclestr]=dat_var['RMSE_long_'+cyclestr].round(3)
-      dat_var['Bias_long_'+cyclestr]=dat_var['Bias_long_'+cyclestr].round(3)
-      # Wind direction
-      if vars[var]=='wst':
-        dat_var['stddev_long_wdir_'+cyclestr]=dat_var['stddev_long_wdir_'+cyclestr].round(3)
-        dat_var['SUM_OmFs_long_wdir_'+cyclestr]=dat_var['SUM_OmFs_long_wdir_'+cyclestr].round(3)
-        dat_var['Bias_long_wdir_'+cyclestr]=dat_var['Bias_long_wdir_'+cyclestr].round(3)
-
-    if vars[var] in ['t','ps','q','wst']:
-      # VMAP currently defined as 1 everywhere
-      if dump_partial_flag==True:
-        dat_var_accept=dat_var.copy()
-        if aclist_type=='std_bias':
-          if vars[var]=='wst':
-            dat_var_accept['AC_SHORT']=np.where((dat_var_accept['stddev_'+cyclestr]<rjrmse*(1.0+(3.0-1.0)*(1-dat_var_accept['VMAP']))) & \
-                                                (dat_var_accept['Bias_'+cyclestr]>(-1.)*rjbias*(1.0+(3.0-1.0)*(1-dat_var_accept['VMAP']))) & \
-                                                (dat_var_accept['Bias_'+cyclestr]<rjbias*(1.0+(3.0-1.0)*(1-dat_var_accept['VMAP']))) & \
-                                                (dat_var_accept['stddev_wdir_'+cyclestr]<rjstd_wdir) & (dat_var_accept['Bias_wdir_'+cyclestr]<rjbias_wdir),1,0)
-          else:
-            dat_var_accept['AC_SHORT']=np.where((dat_var_accept['stddev_'+cyclestr]<rjrmse*(1.0+(3.0-1.0)*(1-dat_var_accept['VMAP']))) & \
-                                                (dat_var_accept['Bias_'+cyclestr]>(-1.)*rjbias*(1.0+(3.0-1.0)*(1-dat_var_accept['VMAP']))) & \
-                                                (dat_var_accept['Bias_'+cyclestr]<rjbias*(1.0+(3.0-1.0)*(1-dat_var_accept['VMAP']))),1,0)
-        elif aclist_type=='rmse':
-          dat_var_accept['AC_SHORT']=np.where(dat_var_accept['RMSE_'+cyclestr]<rjrmse*(1.0+(3.0-1.0)*(1-dat_var_accept['VMAP'])),1,0)
+      #dat_var_accept=dat_var.copy() # MTM - no longer needed?
+      if aclist_type=='std_bias':
+        if vars[var]=='wst':
+          dat_var_accept['AC_DAILY']=np.where((dat_var_accept['stddev_daily_'+cyclestr]<rjrmse*(1.0+(3.0-1.0)*(1-dat_var_accept['VMAP']))) & \
+                                             (dat_var_accept['Bias_daily_'+cyclestr]>(-1.)*rjbias*(1.0+(3.0-1.0)*(1-dat_var_accept['VMAP']))) & \
+                                             (dat_var_accept['Bias_daily_'+cyclestr]<rjbias*(1.0+(3.0-1.0)*(1-dat_var_accept['VMAP']))) & \
+                                             (dat_var_accept['stddev_daily_wdir_'+cyclestr]<rjstd_wdir) & (dat_var_accept['Bias_daily_wdir_'+cyclestr]<rjbias_wdir),1,0)
         else:
-          print('Invalid choice of aclist_type. Exiting...'); exit()
-        dat_var_accept = dat_var_accept.loc[:, dat_var_accept.columns.str.startswith(tuple(keep_cols+['stddev_','Bias_','AC_SHORT']))].copy()
-        dat_var_accept.to_csv(thisRUN+'.t'+cycle_HH+'z.accept_partial_'+vars[var]+'_'+cyclestr+'.csv', index=False)
-      else: dat_var_accept = pd.DataFrame(columns=keep_cols)
-      if cycle_HH=='23':
-        dat_var_accept_long=dat_var.copy()
-        if aclist_type=='std_bias':
-          if vars[var]=='wst':
-            dat_var_accept_long['AC_LONG']=np.where((dat_var_accept_long['stddev_long_'+cyclestr]<rjrmse*(1.0+(3.0-1.0)*(1-dat_var_accept_long['VMAP']))) & \
-                                                    (dat_var_accept_long['Bias_long_'+cyclestr]>(-1.)*rjbias*(1.0+(3.0-1.0)*(1-dat_var_accept_long['VMAP']))) & \
-                                                    (dat_var_accept_long['Bias_long_'+cyclestr]<rjbias*(1.0+(3.0-1.0)*(1-dat_var_accept_long['VMAP']))) & \
-                                                    (dat_var_accept_long['stddev_long_wdir_'+cyclestr]<rjstd_wdir) & (dat_var_accept_long['Bias_long_wdir_'+cyclestr]<rjbias_wdir),1,0)
-          else:
-            dat_var_accept_long['AC_LONG']=np.where((dat_var_accept_long['stddev_long_'+cyclestr]<rjrmse*(1.0+(3.0-1.0)*(1-dat_var_accept_long['VMAP']))) & \
-                                                    (dat_var_accept_long['Bias_long_'+cyclestr]>(-1.)*rjbias*(1.0+(3.0-1.0)*(1-dat_var_accept_long['VMAP']))) & \
-                                                    (dat_var_accept_long['Bias_long_'+cyclestr]<rjbias*(1.0+(3.0-1.0)*(1-dat_var_accept_long['VMAP']))),1,0)
-        elif aclist_type=='rmse':
-          dat_var_accept_long['AC_LONG']=np.where(dat_var_accept_long['RMSE_long_'+cyclestr]<rjrmse*(1.0+(3.0-1.0)*(1-dat_var_accept_long['VMAP'])),1,0)
-        else:
-          print('Invalid choice of aclist_type. Exiting...'); exit()
-        dat_var_accept_long = dat_var_accept_long.loc[:, dat_var_accept_long.columns.str.startswith(tuple(keep_cols+['counts_','stddev_','Bias_','AC_LONG']))].copy()
-        dat_var_accept_long.to_csv(thisRUN+'.t'+cycle_HH+'z.accept_long_'+vars[var]+'_'+cyclestr+'.csv', index=False)
-        dat_var_accept=pd.concat([dat_var_accept_long,dat_var_accept],sort=False)
-      elif cycle_HH!='23' and os.path.exists(COMprev_long+'/'+thisRUN+'.t'+probeHH_long+'z.accept_long_'+vars[var]+'_'+probecyc_long+'.csv'):
-        print('FOUND PRIOR LONG ACCEPT LIST FOR DOMAIN =',thisRUN,'CYCLESTR =',cyclestr,'and VAR =',vars[var])
-        prior_long_aclist = pd.read_csv(COMprev_long+'/'+thisRUN+'.t'+probeHH_long+'z.accept_long_'+vars[var]+'_'+probecyc_long+'.csv')
-        dat_var_accept=pd.concat([prior_long_aclist,dat_var_accept],sort=False)
-      if stuck_flag==True and dat_var_accept.shape[0]>0:
-        dat_var_accept.loc[(dat_var_accept['SAID'].isin(stuck_inst['SAID']) & dat_var_accept['PROVIDER'].isin(stuck_inst['PROVIDER'])),'AC_LONG']=0.
-      fname = thisRUN+'.t'+cycle_HH+'z.accept_'+vars[var]+'_'+cyclestr+'.txt'
-      write_lists(dat_var_accept,fname)
+          dat_var_accept['AC_DAILY']=np.where((dat_var_accept['stddev_daily_'+cyclestr]<rjrmse*(1.0+(3.0-1.0)*(1-dat_var_accept['VMAP']))) & \
+                                             (dat_var_accept['Bias_daily_'+cyclestr]>(-1.)*rjbias*(1.0+(3.0-1.0)*(1-dat_var_accept['VMAP']))) & \
+                                             (dat_var_accept['Bias_daily_'+cyclestr]<rjbias*(1.0+(3.0-1.0)*(1-dat_var_accept['VMAP']))),1,0)
+      elif aclist_type=='rmse':
+        dat_var_accept['AC_DAILY']=np.where(dat_var_accept['RMSE_daily_'+cyclestr]<rjrmse*(1.0+(3.0-1.0)*(1-dat_var_accept['VMAP'])),1,0)
+      else:
+        print('Invalid choice of aclist_type. Exiting...'); exit()
+      dat_var_accept = dat_var_accept.loc[:, dat_var_accept.columns.str.startswith(tuple(keep_cols+['counts_','stddev_','Bias_','AC_DAILY']))].copy()
+      dat_var_accept.to_csv(thisRUN+'.t'+cycle_HH+'z.accept_daily_'+vars[var]+'.csv', index=False)
+    elif cycle_HH!='23' and os.path.exists(COMprev_daily+'/'+thisRUN+'.t'+probeHH_daily+'z.accept_daily_'+vars[var]+'.csv'):
+      print('FOUND PRIOR DAILY ACCEPT LIST FOR DOMAIN =',thisRUN,'CYCLESTR =',cyclestr,'and VAR =',vars[var])
+      prior_daily_aclist = pd.read_csv(COMprev_daily+'/'+thisRUN+'.t'+probeHH_daily+'z.accept_daily_'+vars[var]+'.csv')
+      dat_var_accept = pd.concat([prior_daily_aclist,dat_var_accept],sort=False)
 
-  else:
+    print('DEBUG:',COMprev_daily+'/'+thisRUN+'.t'+probeHH_daily+'z.accept_daily_'+vars[var]+'.csv')
+    if stuck_flag==True and dat_var_accept.shape[0]>0:
+      dat_var_accept.loc[(dat_var_accept['SAID'].isin(stuck_inst['SAID']) & dat_var_accept['PROVIDER'].isin(stuck_inst['PROVIDER'])),'AC_DAILY']=0.
 
-    ij = 0
-    itercyc=datetime.strptime(str(cyclestr),'%Y%m%d%H')
-    while ij < num_cycs:
-      iter_HH = itercyc.strftime('%H')
-      if (num_cycs - np.float64(iter_HH))%num_cycs==1:
-        probecyc = itercyc.strftime('%Y%m%d%H')
-        probeday = itercyc.strftime('%Y%m%d')
-        probeHH = itercyc.strftime('%H')
-        COMprior = os.path.abspath(os.path.join(os.path.dirname(COM), '../../'+'/'+NET+'.'+probeday+'/'+dom+'/autoqcprd.t'+probeHH+'z')) # MTM - revert NET to thisRUN
-        print('COMPRIOR = ',COMprior)
-        probecyc_m1 = datetime.strftime(datetime.strptime(probecyc,'%Y%m%d%H')-timedelta(hours=num_cycs),'%Y%m%d%H')
-        probeHH_m1 = datetime.strftime(datetime.strptime(probecyc,'%Y%m%d%H')-timedelta(hours=num_cycs),'%H')
-        COMprior_m1 = os.path.abspath(os.path.join(os.path.dirname(COM), '../../'+'/'+NET+'.'+probecyc_m1[0:8]+'/'+dom+'/autoqcprd.t'+probecyc_m1[8:10]+'z')) # MTM - revert NET to thisRUN
-        print('COMprior_m1 =',COMprior_m1)
-        break
-      itercyc = itercyc - delta
-      ij+=1
-
-    if vars[var] in ['t','ps','q','wst']:
-      # Probe for previous partial accept list generated with RMSE stats
-      print('SEARCHING FOR:',COMprior+'/'+thisRUN+'.t'+probeHH+'z.accept_partial_'+vars[var]+'_'+probecyc+'.csv')
-      print('SEARCHING FOR:',COMprior_m1+'/'+thisRUN+'.t'+probeHH_m1+'z.accept_partial_'+vars[var]+'_'+probecyc_m1+'.csv')
-      if os.path.exists(COMprior+'/'+thisRUN+'.t'+probeHH+'z.accept_partial_'+vars[var]+'_'+probecyc+'.csv'):
-        dat_var_accept = pd.read_csv(COMprior+'/'+thisRUN+'.t'+probeHH+'z.accept_partial_'+vars[var]+'_'+probecyc+'.csv')
-      elif os.path.exists(COMprior_m1+'/'+thisRUN+'.t'+probeHH_m1+'z.accept_partial_'+vars[var]+'_'+probecyc_m1+'.csv'):
-        dat_var_accept = pd.read_csv(COMprior_m1+'/'+thisRUN+'.t'+probeHH_m1+'z.accept_partial_'+vars[var]+'_'+probecyc_m1+'.csv')
-      else: dat_var_accept=pd.DataFrame(columns=keep_cols)
-
-      if os.path.exists(COMprev_long+'/'+thisRUN+'.t'+probeHH_long+'z.accept_long_'+vars[var]+'_'+probecyc_long+'.csv'):
-        print('FOUND PRIOR LONG ACCEPT LIST FOR DOMAIN =',thisRUN,'CYCLESTR =',cyclestr,'and VAR =',vars[var])
-        prior_long_aclist = pd.read_csv(COMprev_long+'/'+thisRUN+'.t'+probeHH_long+'z.accept_long_'+vars[var]+'_'+probecyc_long+'.csv')
-        dat_var_accept = pd.concat([prior_long_aclist,dat_var_accept],sort=False)
-
-      if stuck_flag==True and dat_var_accept.shape[0]>0:
-        dat_var_accept.loc[(dat_var_accept['SAID'].isin(stuck_inst['SAID']) & dat_var_accept['PROVIDER'].isin(stuck_inst['PROVIDER'])),'AC_LONG']=0.
-
-      fname = thisRUN+'.t'+cycle_HH+'z.accept_'+vars[var]+'_'+cyclestr+'.txt'
-      write_lists(dat_var_accept,fname)
+    fname = thisRUN+'.t'+cycle_HH+'z.accept_'+vars[var]+'.txt'
+    write_lists(dat_var_accept,fname)
 
   return(dat_var)
 
@@ -473,25 +373,22 @@ def write_lists(input_list,fname):
 
   if ltyp=='reject':
     if input_list.shape[0]>0:
-      if 'RJ_SHORT' not in input_list: input_list['RJ_SHORT']=0.
-      if 'RJ_LONG' not in input_list: input_list['RJ_LONG']=0.
+      if 'RJ_DAILY' not in input_list: input_list['RJ_DAILY']=0.
       if 'STUCK' not in input_list: input_list['STUCK']=0.
       if 'FLAT' not in input_list: input_list['FLAT']=0.
-      input_list[['RJ_SHORT','RJ_LONG','STUCK','FLAT']] = input_list[['RJ_SHORT','RJ_LONG','STUCK','FLAT']].fillna(value=0.)
-      input_list[['RJ_SHORT','RJ_LONG','STUCK','FLAT']] = input_list.groupby(keep_cols)[['RJ_SHORT','RJ_LONG','STUCK','FLAT']].transform('sum')
-      input_list['RJ_SHORT'].replace({0.: "---", 1.: "rms"}, inplace=True)
-      input_list['RJ_LONG'].replace({0.: "---", 1.: "RMS"}, inplace=True)
+      input_list[['RJ_DAILY','STUCK','FLAT']] = input_list[['RJ_DAILY','STUCK','FLAT']].fillna(value=0.)
+      input_list[['RJ_DAILY','STUCK','FLAT']] = input_list.groupby(keep_cols)[['RJ_DAILY','STUCK','FLAT']].transform('sum')
+      input_list['RJ_DAILY'].replace({0.: "---", 1.: "RMS"}, inplace=True)
       input_list['STUCK'].replace({0.: "---", 1.: "stk"}, inplace=True)
       input_list['FLAT'].replace({0.: "---", 1.: "flt"}, inplace=True)
-      input_list['rjl_str']=input_list['RJ_SHORT']+input_list['RJ_LONG']+input_list['STUCK']+input_list['FLAT']+'---'
+      input_list['rjl_str']=input_list['RJ_DAILY']+input_list['STUCK']+input_list['FLAT']+'---'
   elif ltyp=='accept':
     if input_list.shape[0]>0:
-      if 'AC_SHORT' not in input_list: input_list['AC_SHORT']=0.
-      if 'AC_LONG' not in input_list: input_list['AC_LONG']=0.
-      input_list[['AC_SHORT','AC_LONG']] = input_list[['AC_SHORT','AC_LONG']].fillna(value=0.)
-      input_list[['AC_SHORT','AC_LONG']] = input_list.groupby(keep_cols)[['AC_SHORT','AC_LONG']].transform('sum')
+      if 'AC_DAILY' not in input_list: input_list['AC_DAILY']=0.
+      input_list[['AC_DAILY']] = input_list[['AC_DAILY']].fillna(value=0.)
+      input_list[['AC_DAILY']] = input_list.groupby(keep_cols)[['AC_DAILY']].transform('sum')
   input_list.drop_duplicates(subset=keep_cols,inplace=True)
-  input_list.to_csv(thisRUN+'.t'+cycle_HH+'z.'+ltyp+'_'+vars[var]+'_'+cyclestr+'.csv', index=False)
+  input_list.to_csv(thisRUN+'.t'+cycle_HH+'z.'+ltyp+'_'+vars[var]+'.csv', index=False)
 
 def write_wbias(input_file,fname):
   with open(fname,'w') as out_file:
@@ -510,10 +407,10 @@ def write_wbias(input_file,fname):
 
 def combine_accept_lists(dat_var):
   # Read in individual accept lists
-  temp_list = pd.read_csv(thisRUN+'.t'+cycle_HH+'z.accept_t_'+cyclestr+'.csv')
-  wind_list = pd.read_csv(thisRUN+'.t'+cycle_HH+'z.accept_wst_'+cyclestr+'.csv')
-  dwpt_list = pd.read_csv(thisRUN+'.t'+cycle_HH+'z.accept_q_'+cyclestr+'.csv')
-  pres_list = pd.read_csv(thisRUN+'.t'+cycle_HH+'z.accept_ps_'+cyclestr+'.csv')
+  temp_list = pd.read_csv(thisRUN+'.t'+cycle_HH+'z.accept_t.csv')
+  wind_list = pd.read_csv(thisRUN+'.t'+cycle_HH+'z.accept_wst.csv')
+  dwpt_list = pd.read_csv(thisRUN+'.t'+cycle_HH+'z.accept_q.csv')
+  pres_list = pd.read_csv(thisRUN+'.t'+cycle_HH+'z.accept_ps.csv')
 
   temp_list.replace({'PBUFTYP': {187:"SFC", 188:"MSO", 287:"SFC", 288:"MSO"}},inplace=True)
   wind_list.replace({'PBUFTYP': {187:"SFC", 188:"MSO", 287:"SFC", 288:"MSO"}},inplace=True)
@@ -521,15 +418,15 @@ def combine_accept_lists(dat_var):
   pres_list.replace({'PBUFTYP': {187:"SFC", 188:"MSO", 287:"SFC", 288:"MSO"}},inplace=True)
 
   # Rename columns
-  temp_list.rename(columns={col:'{}-T'.format(col, j) for col in [col for col in temp_list if col.startswith(tuple(['counts_long','stddev','Bias','AC_LONG','AC_SHORT']))]}, inplace=True)
-  wind_list.rename(columns={col:'{}-W'.format(col, j) for col in [col for col in wind_list if col.startswith(tuple(['counts_long','stddev','Bias','AC_LONG','AC_SHORT']))]}, inplace=True)
-  dwpt_list.rename(columns={col:'{}-Td'.format(col, j) for col in [col for col in dwpt_list if col.startswith(tuple(['counts_long','stddev','Bias','AC_LONG','AC_SHORT']))]}, inplace=True)
-  pres_list.rename(columns={col:'{}-P'.format(col, j) for col in [col for col in pres_list if col.startswith(tuple(['counts_long','stddev','Bias','AC_LONG','AC_SHORT']))]}, inplace=True)
+  temp_list.rename(columns={col:'{}-T'.format(col, j) for col in [col for col in temp_list if col.startswith(tuple(['counts_daily','stddev','Bias','AC_DAILY']))]}, inplace=True)
+  wind_list.rename(columns={col:'{}-W'.format(col, j) for col in [col for col in wind_list if col.startswith(tuple(['counts_daily','stddev','Bias','AC_DAILY']))]}, inplace=True)
+  dwpt_list.rename(columns={col:'{}-Td'.format(col, j) for col in [col for col in dwpt_list if col.startswith(tuple(['counts_daily','stddev','Bias','AC_DAILY']))]}, inplace=True)
+  pres_list.rename(columns={col:'{}-P'.format(col, j) for col in [col for col in pres_list if col.startswith(tuple(['counts_daily','stddev','Bias','AC_DAILY']))]}, inplace=True)
 
-  if 'AC_LONG-T' not in temp_list: temp_list['AC_LONG-T']=0.
-  if 'AC_LONG-W' not in wind_list: wind_list['AC_LONG-W']=0.
-  if 'AC_LONG-Td' not in dwpt_list: dwpt_list['AC_LONG-Td']=0.
-  if 'AC_LONG-P' not in pres_list: pres_list['AC_LONG-P']=0.
+  if 'AC_DAILY-T' not in temp_list: temp_list['AC_DAILY-T']=0.
+  if 'AC_DAILY-W' not in wind_list: wind_list['AC_DAILY-W']=0.
+  if 'AC_DAILY-Td' not in dwpt_list: dwpt_list['AC_DAILY-Td']=0.
+  if 'AC_DAILY-P' not in pres_list: pres_list['AC_DAILY-P']=0.
 
   # Combine lists
   dfs = [temp_list,wind_list,dwpt_list,pres_list]
@@ -537,30 +434,30 @@ def combine_accept_lists(dat_var):
   merged_list = reduce(lambda left,right: pd.merge(left,right,on=combine_cols,how='outer'), dfs)
 
   # Assign flag to reject observations if no data were available
-  merged_list[['AC_LONG-T','AC_LONG-W','AC_LONG-Td','AC_LONG-P']] = merged_list[['AC_LONG-T','AC_LONG-W','AC_LONG-Td','AC_LONG-P']].fillna(value=0.)
+  merged_list[['AC_DAILY-T','AC_DAILY-W','AC_DAILY-Td','AC_DAILY-P']] = merged_list[['AC_DAILY-T','AC_DAILY-W','AC_DAILY-Td','AC_DAILY-P']].fillna(value=0.)
 
   # Create final usage flag
-  merged_list[['AC_LONG-T','AC_LONG-W','AC_LONG-Td','AC_LONG-P']]=merged_list[['AC_LONG-T','AC_LONG-W','AC_LONG-Td','AC_LONG-P']].astype(np.int64)
-  merged_list['W-T-Td-G-P'] = merged_list['AC_LONG-W'].astype(str) + '-' + merged_list['AC_LONG-T'].astype(str) + '-' + merged_list['AC_LONG-Td'].astype(str) + '-' + merged_list['AC_LONG-W'].astype(str) +'-' + merged_list['AC_LONG-P'].astype(str)
+  merged_list[['AC_DAILY-T','AC_DAILY-W','AC_DAILY-Td','AC_DAILY-P']]=merged_list[['AC_DAILY-T','AC_DAILY-W','AC_DAILY-Td','AC_DAILY-P']].astype(np.int64)
+  merged_list['W-T-Td-G-P'] = merged_list['AC_DAILY-W'].astype(str) + '-' + merged_list['AC_DAILY-T'].astype(str) + '-' + merged_list['AC_DAILY-Td'].astype(str) + '-' + merged_list['AC_DAILY-W'].astype(str) +'-' + merged_list['AC_DAILY-P'].astype(str)
 
-  cols_accept=['counts_long','stddev_long','Bias_long','W-T-Td-G-P']
+  cols_accept=['counts_daily','stddev_daily','Bias_daily','W-T-Td-G-P']
   merged_list=merged_list.loc[:, merged_list.columns.str.startswith(tuple(keep_cols+cols_accept))].copy()
 
   if cycle_HH=='23': stats_cycle=cyclestr
-  else: stats_cycle=probecyc_long
+  else: stats_cycle=probecyc_daily
 
-  merged_list.rename(columns={"stddev_long_"+stats_cycle+"-T": "std-T", "Bias_long_"+stats_cycle+"-T": "Bias-T"},inplace=True)
-  merged_list.rename(columns={"stddev_long_"+stats_cycle+"-W": "std-W", "Bias_long_"+stats_cycle+"-W": "Bias-W"},inplace=True)
-  merged_list.rename(columns={"stddev_long_wdir_"+stats_cycle+"-W": "std-Wdir", "Bias_long_wdir_"+stats_cycle+"-W": "Bias-Wdir"},inplace=True)
-  merged_list.rename(columns={"stddev_long_"+stats_cycle+"-Td": "std-Td", "Bias_long_"+stats_cycle+"-Td": "Bias-Td"},inplace=True)
-  merged_list.rename(columns={"stddev_long_"+stats_cycle+"-P": "std-P", "Bias_long_"+stats_cycle+"-P": "Bias-P"},inplace=True)
+  merged_list.rename(columns={"stddev_daily_"+stats_cycle+"-T": "std-T", "Bias_daily_"+stats_cycle+"-T": "Bias-T"},inplace=True)
+  merged_list.rename(columns={"stddev_daily_"+stats_cycle+"-W": "std-W", "Bias_daily_"+stats_cycle+"-W": "Bias-W"},inplace=True)
+  merged_list.rename(columns={"stddev_daily_wdir_"+stats_cycle+"-W": "std-Wdir", "Bias_daily_wdir_"+stats_cycle+"-W": "Bias-Wdir"},inplace=True)
+  merged_list.rename(columns={"stddev_daily_"+stats_cycle+"-Td": "std-Td", "Bias_daily_"+stats_cycle+"-Td": "Bias-Td"},inplace=True)
+  merged_list.rename(columns={"stddev_daily_"+stats_cycle+"-P": "std-P", "Bias_daily_"+stats_cycle+"-P": "Bias-P"},inplace=True)
 
   # Record the # of observations for each variable; set this to 0 if a station doesn't report a variable
-  merged_list.rename(columns={"counts_long_"+stats_cycle+"-T": "N-T","counts_long_"+stats_cycle+"-Td": "N-Td","counts_long_"+stats_cycle+"-W": "N-W","counts_long_"+stats_cycle+"-P": "N-P"},inplace=True)
+  merged_list.rename(columns={"counts_daily_"+stats_cycle+"-T": "N-T","counts_daily_"+stats_cycle+"-Td": "N-Td","counts_daily_"+stats_cycle+"-W": "N-W","counts_daily_"+stats_cycle+"-P": "N-P"},inplace=True)
   try: merged_list[['N-T','N-Td','N-W','N-P']] = merged_list[['N-T','N-Td','N-W','N-P']].fillna(value=0).astype(np.int64)
   except: pass
 
-  fname_merged=thisRUN+'.t'+cycle_HH+'z.accept_merged_'+cyclestr+'.txt'
+  fname_merged=thisRUN+'.t'+cycle_HH+'z.accept_merged.txt'
   with open(fname_merged,'w') as out_file:
     header=';Station Provider Subprov Type Lat   Lon    W-T-Td-G-P N-W  Std-W    Bias-W   Std-DIR  Bias-DIR N-T  Std-T    Bias-T   N-Td Std-Td   Bias-Td N-P  Std-P    Bias-P'+'\n'
     out_file.write(header)
@@ -576,52 +473,6 @@ def combine_accept_lists(dat_var):
         out_file.write(line)
       except: pass
 
-def duplicates(dat_var):
-
-  dat_var_id_duplicates = dat_var[keep_cols+['DAT_'+cyclestr]].copy()
-  dat_var_id_duplicates.dropna(subset=['DAT_'+cyclestr],inplace=True)
-  # Find any duplicates in the newly read-in diagnostic file
-  dat_var_new_duplicates = dat_var_id_duplicates[dat_var_id_duplicates.duplicated(['SAID'],keep=False)]
-  dat_var_new_duplicates['LAST_CYC']=np.int(cyclestr)
-  dat_var_new_duplicates = dat_var_new_duplicates[keep_cols+['LAST_CYC']]
-
-  if os.path.exists(COMm1+'/'+thisRUN+'.t'+HHm1+'z.duplicates_'+vars[var]+'_'+cyclestr_m1+'.csv'):
-    # Duplicates found in previous diagnostic files
-    orig_duplicates = pd.read_csv(COMm1+'/'+thisRUN+'.t'+HHm1+'z.duplicates_'+vars[var]+'_'+cyclestr_m1+'.csv')
-    stations = orig_duplicates['SAID'].str.strip()
-    # Make sure none of the original duplicates show up using a different configuration
-    new_duplicates = dat_var_new_duplicates.loc[dat_var_new_duplicates['SAID'].isin(stations)]
-    new_duplicates = new_duplicates[keep_cols]
-    new_duplicates['LAST_CYC'] = np.int(cyclestr)
-    # Merge together each list of duplicates
-    dfs=[orig_duplicates,new_duplicates,dat_var_new_duplicates]
-    dat_var_duplicates = pd.concat(dfs,sort=True)
-  else:
-    dat_var_duplicates = dat_var_new_duplicates
-
-  unique_stns = []
-  for stn in dat_var_duplicates['SAID'].unique():
-    dat_var_stn = dat_var_duplicates[dat_var_duplicates['SAID']==stn].sort_values(by=['LAT'])
-    dat_var_stn[['LAT','LON']]=dat_var_stn[['LAT','LON']].astype(float)
-    dat_var_stn['DISTANCE'] = gc_dist(dat_var_stn['LAT'], dat_var_stn['LON'],dat_var_stn['LAT'].shift(1), dat_var_stn['LON'].shift(1))
-    dat_var_stn.dropna(subset=['DISTANCE'],inplace=True)
-    if min(dat_var_stn['DISTANCE'].values)>10.0: unique_stns.append(stn)
-  dat_var_duplicates = dat_var_duplicates.loc[~dat_var_duplicates['SAID'].isin(unique_stns)]
-
-  dat_var_duplicates = dat_var_duplicates.sort_values('LAST_CYC')
-  dat_var_duplicates.drop_duplicates(subset=keep_cols,keep='last',inplace=True)
-
-  # Write duplicates to a spreadsheet for reference
-  dat_var_duplicates = dat_var_duplicates[keep_cols+['LAST_CYC']]
-  dat_var_duplicates = dat_var_duplicates[dat_var_duplicates['LAST_CYC']>np.int(cyc_purge_dups.strftime('%Y%m%d%H'))]
-  dat_var_duplicates = dat_var_duplicates[dat_var_duplicates.duplicated(['SAID'],keep=False)]
-  if not dat_var_duplicates.empty: dat_var_duplicates.to_csv(thisRUN+'.t'+cycle_HH+'z.duplicates_'+vars[var]+'_'+cyclestr+'.csv', index=False)
-
-  # Update: Allow the duplicate stations to populate the SQL database
-  #dat_var = dat_var.loc[~dat_var['SAID'].isin(dat_var_duplicates['SAID'].values)]
-
-  return(dat_var)
-
 if __name__ == "__main__":
 
   print('Starting Python program.')
@@ -632,11 +483,9 @@ if __name__ == "__main__":
   COM=sys.argv[4]
   COMm1=sys.argv[5]
   cyclestr_m1=sys.argv[6]
-  probecyc_long=sys.argv[7]
+  probecyc_daily=sys.argv[7]
   tinf=np.float64(sys.argv[8]) # Constant timescale associated with an observation
   dom=sys.argv[9]
-
-  NET='rtma3d' # MTM - remove after RUN is defined correctly
 
   cyclestr=dateobj
   datestr=dateobj[0:8]
@@ -662,29 +511,16 @@ if __name__ == "__main__":
   # Define constants
   mnet_bctypes=[288,295] # PREPBUFR report types for mesonet wind bias correction
   winf=2. # Constant asymptotic weight associated with an observation
-  #tinf=365.24 # Constant timescale associated with an observation
   alpha_0=0. # Effective logarithmic bias correction for an observation without any history
   speed_min=2. # Low cut-off for acceptable windspeeds (GES & ANL)
 
   delta = timedelta(minutes=60)
   aclist_type='std_bias' # Select from std_bias or rmse
-  comp_partial_flag=False # Controls whether the short-term stats & accept lists are computed
-  num_cycs=6 # Number of cycles to compute stats (RMSE, bias) over
   num_stuck=8 # Number of cycles for the "stuck" instrument check
-  num_cycs_long=24*7 # Number of hours to compute long-term RMSE stats
-  min_cycs_long=20 # Minimum # of hours required to compute long-term stats
+  num_cycs_daily=24*7 # Number of hours to compute long-term RMSE stats
+  min_cycs_daily=20 # Minimum # of hours required to compute long-term stats
   num_relax=2 # Number of cycles allowed to be "missing" (stuck instrument and RMSE tests)
   max_dups=5 # Maximum number of entries allowed per unique station ID
-
-  #eps_w=0.001
-  #eps_t=0.001
-  #eps_p=0.001
-  #eps_td=0.001
-
-  #geps_w=0.5
-  #geps_t=0.5
-  #geps_p=0.5
-  #geps_td=0.5
 
   eps_w=0.01
   eps_t=0.01
@@ -712,10 +548,7 @@ if __name__ == "__main__":
   keep_cols=['SAID','PROVIDER','SUBPROVIDER','PBUFTYP','LAT','LON','VMAP']
   columns=keep_cols.copy()
 
-#  ndays_purge = math.ceil((999-len(keep_cols))/((1.+24./num_cycs)*5.))-1. # Account for current day by subtracting 1
-#  cyc_purge_stats=datetime.strptime(cyclestr,'%Y%m%d%H')+timedelta(days=-ndays_purge)
   cyc_purge_stats=datetime.strptime(cyclestr,'%Y%m%d%H')+timedelta(days=-7)
-  cyc_purge_dups=datetime.strptime(cyclestr,'%Y%m%d%H')+timedelta(days=-7)
 
   diagdir=DATA
 
@@ -749,8 +582,6 @@ if __name__ == "__main__":
   dat_anl = dat_anl[(dat_anl['SAID']!='/////') & (dat_anl['SAID']!='SHIP')]
   dat_ges = dat_ges[(dat_ges['SAID']!='/////') & (dat_ges['SAID']!='SHIP')]
   # Filter out observations from stations ending in "__a"
-  #dat_anl = dat_anl[~dat_anl['SAID'].str.endswith('__a')]
-  #dat_ges = dat_ges[~dat_ges['SAID'].str.endswith('__a')]
   # Remove '__a' from end of station IDs to allow match with other reports
   dat_anl['SAID'] = dat_anl['SAID'].str.replace('____a','')
   dat_ges['SAID'] = dat_ges['SAID'].str.replace('____a','')
@@ -837,7 +668,7 @@ if __name__ == "__main__":
       dat_var=dat_merged[dat_merged['OBTYPE']=='q'].copy()
 
       # Note: The computed dewpoint temperature cannot be higher than the observed Tdry
-      dat_var['TDRY'] = dat_var['TDRY']-273.15                                  # Convert from K to C
+      dat_var['TDRY'] = dat_var['TDRY']-273.15                                 # Convert from K to C
 
       # Compute observed dewpoint temperature
       q_obs  = dat_var[dat_var['OBTYPE']=='q']['OB'].values/1000               # Convert from g/kg to kg/kg
@@ -885,16 +716,10 @@ if __name__ == "__main__":
                                  dat_var['IUSE-GES'].map(str) + '|' + dat_var['RUSAGE-GES'].map(str)
       dat_var.rename(columns={col:('{}_'+cyclestr).format(col,dat_var) for col in ('OB','INC-GES','GES','IUSE-GES','RUSAGE-GES')},inplace=True)
 
-#    dat_var=calc_sza(dat_var,dateobj)
-
     dat_var=dat_var[keep_cols+['DAT_'+cyclestr]]
 
     gen_database(dat_var,columns,cyc_purge,eps,geps,rjrmse)
 
   # Once the individual lists are created, merge together to form the final accept list
   combine_accept_lists(dat_var)
-
-  #f_out='done.'+cyclestr
-  #with open(f_out,'w') as out_file:
-  #  out_file.write('AUTOQC step has completed successfully for '+cyclestr)
 

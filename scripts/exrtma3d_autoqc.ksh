@@ -35,7 +35,7 @@ while [ ${i} -lt ${max_cycs} ]; do
   probe_YYYYMMDD=`echo $probe | cut -c 1-8`
   probe_HH=`echo $probe | cut -c 9-10`
   probe_dir=${COMOUTautoqc_base}/${NET}.${probe_YYYYMMDD}/${dom}/autoqcprd.t${probe_HH}z # MTM - revert NET to RUN
-  if [ -s ${probe_dir}/${RUN}.t${probe_HH}z.accept_merged_${probe}.txt ]; then
+  if [ -s ${probe_dir}/${RUN}.t${probe_HH}z.accept_merged.txt ]; then
     echo $probe
     export PDYprev=${probe}
     export PDYprev_dir=${probe_dir}
@@ -54,7 +54,7 @@ while [ ${i} -lt ${max_cycs} ]; do
   probe_YYYYMMDD=`echo $probe | cut -c 1-8`
   probe_HH=`echo $probe | cut -c 9-10`
   probe_dir=${COMOUTautoqc_base}/${NET}.${probe_YYYYMMDD}/${dom}/autoqcprd.t${probe_HH}z # MTM - revert NET to RUN
-  if [ $probe_HH -eq "23" ] && [ -s ${probe_dir}/${RUN}.t${probe_HH}z.accept_merged_${probe}.txt ]; then
+  if [ $probe_HH -eq "23" ] && [ -s ${probe_dir}/${RUN}.t${probe_HH}z.accept_merged.txt ]; then
     export probecyc_long=${probe}
     break
   else
@@ -73,7 +73,7 @@ while [ ${i} -lt ${max_cycs} ]; do
   probe_YYYYMMDD=`echo $probe | cut -c 1-8`
   probe_HH=`echo $probe | cut -c 9-10`
   probe_dir=${COMOUTautoqc_base}/${NET}.${probe_YYYYMMDD}/autoqcprd.t${probe_HH}z # MTM - revert NET to RUN
-  if [ $probe_HH -eq "23" ] && [ -s ${probe_dir}/${RUN}.t${probe_HH}z.aircraft_rjs_merged_${probe}.txt ]; then
+  if [ $probe_HH -eq "23" ] && [ -s ${probe_dir}/${RUN}.t${probe_HH}z.aircraft_rjs_merged.txt ]; then
     echo $probe
     export PDYprev_aircraft=${probe}
     export PDYprev_aircraft_dir=${probe_dir}
@@ -151,9 +151,11 @@ fi
 
 tar -cvf ${RUN}.t${HH}z.autoqc_output.tar ${RUN}.t${HH}z.*.txt ${RUN}.t${HH}z.*.db ${RUN}.t${HH}z.*.csv
 gzip ${RUN}.t${HH}z.autoqc_output.tar
-#${CP} -p ${RUN}.t${HH}z.autoqc_output.tar.gz ${COMOUTautoqc_rtma3d}
-#${CP} -p ${RUN}.t${HH}z.*.txt ${COMOUTautoqc_rtma3d}
-${CP} -p * ${COMOUTautoqc_rtma3d}
+${CP} -p ${RUN}.t${HH}z.autoqc_output.tar.gz ${COMOUTautoqc_rtma3d}
+
+${CP} -p ${RUN}.t${HH}z.*.txt ${COMOUTautoqc_rtma3d}
+${CP} -p ${RUN}.t${HH}z.*database*.db ${COMOUTautoqc_rtma3d}
+${CP} -p ${RUN}.t${HH}z.accept_daily_*.csv ${COMOUTautoqc_rtma3d}
 
 startmsg
 msg="***********************************************************"

@@ -254,7 +254,7 @@ while [ ${i} -lt ${max_cycs} ]; do
   probe_YYYYMMDD=`echo $probe_cyc | cut -c 1-8`
   export probe_HH=`echo $probe_cyc | cut -c 9-10`
   probe_dir=${COMOUTautoqc_base}/${RUN}.${probe_YYYYMMDD}/${dom}/autoqcprd.t${probe_HH}z
-  if [ -s ${probe_dir}/${RUN}.t${probe_HH}z.accept_merged_${probe_cyc}.txt ]; then
+  if [ -s ${probe_dir}/${RUN}.t${probe_HH}z.accept_merged.txt ]; then
     export PDYprev_dir=${probe_dir}
     found_rjlist=True
     break
@@ -265,7 +265,31 @@ done
 echo "PDYprev_dir = " $PDYprev_dir
 
 if [ $found_rjlist == True ]; then
-  cpreq ${PDYprev_dir}/${RUN}.t${probe_HH}z.accept_merged_${probe_cyc}.txt sfcobs_uselist.txt
+  cpreq ${PDYprev_dir}/${RUN}.t${probe_HH}z.accept_merged.txt sfcobs_uselist.txt
+fi
+
+# Get aircraft reject list derived from automated QC package
+found_rjlist=False
+max_cycs=168 # Number of cycles to look back
+i=1
+export PDYprev_dir=${COMOUTautoqc_rtma3d}
+while [ ${i} -lt ${max_cycs} ]; do
+  export probe_cyc=`${NDATE} -${i} ${YYYYMMDDHH}`
+  probe_YYYYMMDD=`echo $probe_cyc | cut -c 1-8`
+  export probe_HH=`echo $probe_cyc | cut -c 9-10`
+  probe_dir=${COMOUTautoqc_base}/${RUN}.${probe_YYYYMMDD}/${dom}/autoqcprd.t${probe_HH}z
+  if [ -s ${probe_dir}/${RUN}.t${probe_HH}z.aircraft_rjs_merged.txt ]; then
+    export PDYprev_dir=${probe_dir}
+    found_rjlist=True
+    break
+  else
+    let "i=i+1"
+  fi
+done
+echo "PDYprev_dir = " $PDYprev_dir
+
+if [ $found_rjlist == True ]; then
+  cpreq ${PDYprev_dir}/${RUN}.t${probe_HH}z.aircraft_rjs_merged.txt current_bad_aircraft
 fi
 
 export sfcwndob_biasc=.true.
@@ -280,7 +304,7 @@ if [[ "$sfcwndob_biasc" = ".true." ]]; then
     probe_YYYYMMDD=`echo $probe_cyc | cut -c 1-8`
     export probe_HH=`echo $probe_cyc | cut -c 9-10`
     probe_dir=${COMOUTautoqc_base}/${RUN}.${probe_YYYYMMDD}/${dom}/autoqcprd.t${probe_HH}z
-    if [ -s ${probe_dir}/${RUN}.t${probe_HH}z.windbias_${probe_cyc}.txt ]; then
+    if [ -s ${probe_dir}/${RUN}.t${probe_HH}z.windbias.txt ]; then
       export PDYprev_dir=${probe_dir}
       found_prevcyc=True
       break
@@ -291,7 +315,7 @@ if [[ "$sfcwndob_biasc" = ".true." ]]; then
   echo "PDYprev_dir = " $PDYprev_dir
 
   if [ $found_prevcyc == True ]; then
-    cpreq ${PDYprev_dir}/${RUN}.t${probe_HH}z.windbias_${probe_cyc}.txt stnwindbiascor
+    cpreq ${PDYprev_dir}/${RUN}.t${probe_HH}z.windbias.txt stnwindbiascor
   fi
 fi
 
