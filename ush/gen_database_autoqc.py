@@ -163,10 +163,14 @@ def gen_database(dat_var,columns,cyc_purge,eps,geps,rjrmse):
 
   # Generate SQL database with statistics output - Only computed daily at 23Z
 
-  if cycle_HH==23:
+  if cycle_HH=='23':
+
+    itercyc=datetime.strptime(probecyc_daily,'%Y%m%d%H')
+    probeday_stats = itercyc.strftime('%Y%m%d')
+    probeHH_stats = itercyc.strftime('%H')
+    COMprev_stats = os.path.abspath(os.path.join(os.path.dirname(COM), '../../'+'/'+thisRUN+'.'+probeday_stats+'/'+dom+'/autoqcprd.t'+probeHH_stats+'z'))
 
     # If file exists, merge new dat_var array with data from existing database
-    COMprev_stats = os.path.abspath(os.path.join(os.path.dirname(COM), '../../'+'/'+thisRUN+'.'+probeday_daily+'/'+dom+'/autoqcprd.t'+probeHH_daily+'z'))
     if os.path.exists(COMprev_stats+'/'+thisRUN+'.t'+cycle_HH+'z.stats_database_'+vars[var]+'.db'):
       # Open the connection to the SQLite database
       cnx = sqlite3.connect(COMprev_stats+'/'+thisRUN+'.t'+cycle_HH+'z.stats_database_'+vars[var]+'.db')
@@ -352,7 +356,6 @@ def gen_accept_lists(dat_var,eps,geps,rjrmse):
       prior_daily_aclist = pd.read_csv(COMprev_daily+'/'+thisRUN+'.t'+probeHH_daily+'z.accept_daily_'+vars[var]+'.csv')
       dat_var_accept = pd.concat([prior_daily_aclist,dat_var_accept],sort=False)
 
-    print('DEBUG:',COMprev_daily+'/'+thisRUN+'.t'+probeHH_daily+'z.accept_daily_'+vars[var]+'.csv')
     if stuck_flag==True and dat_var_accept.shape[0]>0:
       dat_var_accept.loc[(dat_var_accept['SAID'].isin(stuck_inst['SAID']) & dat_var_accept['PROVIDER'].isin(stuck_inst['PROVIDER'])),'AC_DAILY']=0.
 

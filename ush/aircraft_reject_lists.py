@@ -156,6 +156,10 @@ def combine_reject_lists(dat_var):
   if 'RJ_FLAG-W' not in wind_list: wind_list['RJ_FLAG-W']=0.
   if 'RJ_FLAG-RH' not in rhel_list: rhel_list['RJ_FLAG-RH']=0.
 
+  temp_list[['SAID']]=temp_list[['SAID']].astype(str)
+  wind_list[['SAID']]=wind_list[['SAID']].astype(str)
+  rhel_list[['SAID']]=rhel_list[['SAID']].astype(str)
+
   # Combine lists
   dfs = [temp_list,wind_list,rhel_list]
   merged_list = reduce(lambda left,right: pd.merge(left,right,on=keep_cols,how='outer'), dfs)
@@ -245,8 +249,6 @@ if __name__ == "__main__":
   stopHH_aircraft=stopdate[8:10]
   probeHH_aircraft=probecyc_aircraft[8:10]
 
-  NET='rtma3d' # MTM - remove after RUN is defined correctly
-
   #--------------------------------------------------------------------#
   # Parameters for reading the diagnostic files later on.
   #--------------------------------------------------------------------#
@@ -301,25 +303,28 @@ if __name__ == "__main__":
     # Read in data from the analysis (anl) diagnostic file.
     #--------------------------------------------------------------------#
 
-    diagfile_anl=diagdir+'/rtma3d.t'+cycle_HH+'z.diag_conv_anl.gz'  
-    read_diagconv(diagfile_anl)
-    try: dat_anl=pd.read_table('rtma3d.t'+cycle_HH+'z.diag_conv_anl_'+cyclestr,names=my_cols,dtype=dtypedict,encoding='latin1',
+    diagfile_anl=diagdir+'/'+thisRUN+'.t'+cycle_HH+'z.diag_conv_anl.gz'
+    try:
+      read_diagconv(diagfile_anl)
+      dat_anl=pd.read_table(thisRUN+'.t'+cycle_HH+'z.diag_conv_anl_'+cyclestr,names=my_cols,dtype=dtypedict,encoding='latin1',
                  delim_whitespace=True,usecols=usecols,header=None,na_values=['Infinity',bmiss])
-    except: dat_anl = pd.DataFrame(columns=my_cols)
+    except:
+      dat_anl = pd.DataFrame(columns=my_cols)
     dat_anl.dropna(subset=['OB','INC'])
     # Select the aircraft observations only
     dat_anl_filtered=dat_anl[dat_anl['PBUFTYP'].isin(aircraft_pbuftypes)]
-    print('DEBUG: cycle = ',cyclestr,'dat_anl.shape = , dat_anl_filtered.shape = ',dat_anl.shape,dat_anl_filtered.shape)
 
     #--------------------------------------------------------------------#
     # Read in data from the background (ges) diagnostic file.
     #--------------------------------------------------------------------#
 
-    diagfile_ges=diagdir+'/rtma3d.t'+cycle_HH+'z.diag_conv_ges.gz'
-    read_diagconv(diagfile_ges)
-    try: dat_ges=pd.read_table('rtma3d.t'+cycle_HH+'z.diag_conv_ges_'+cyclestr,names=my_cols,dtype=dtypedict,encoding='latin1',
+    diagfile_ges=diagdir+'/'+thisRUN+'.t'+cycle_HH+'z.diag_conv_ges.gz'
+    try:
+      read_diagconv(diagfile_ges)
+      dat_ges=pd.read_table(thisRUN+'.t'+cycle_HH+'z.diag_conv_ges_'+cyclestr,names=my_cols,dtype=dtypedict,encoding='latin1',
                  delim_whitespace=True,usecols=usecols,header=None,na_values=['Infinity',bmiss])
-    except: dat_ges = pd.DataFrame(columns=my_cols)
+    except:
+      dat_ges = pd.DataFrame(columns=my_cols)
     dat_ges.dropna(subset=['OB','INC'])
     # Select the aircraft observations only
     dat_ges_filtered=dat_ges[dat_ges['PBUFTYP'].isin(aircraft_pbuftypes)]

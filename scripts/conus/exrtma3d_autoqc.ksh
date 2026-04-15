@@ -34,7 +34,7 @@ while [ ${i} -lt ${max_cycs} ]; do
   probe=`${NDATE} -${i} ${YYYYMMDDHH}`
   probe_YYYYMMDD=`echo $probe | cut -c 1-8`
   probe_HH=`echo $probe | cut -c 9-10`
-  probe_dir=${COMOUTautoqc_base}/${NET}.${probe_YYYYMMDD}/${dom}/autoqcprd.t${probe_HH}z # MTM - revert NET to RUN
+  probe_dir=${COMOUTautoqc_base}/${RUN}.${probe_YYYYMMDD}/${dom}/autoqcprd.t${probe_HH}z
   if [ -s ${probe_dir}/${RUN}.t${probe_HH}z.accept_merged.txt ]; then
     echo $probe
     export PDYprev=${probe}
@@ -53,7 +53,7 @@ while [ ${i} -lt ${max_cycs} ]; do
   probe=`${NDATE} -${i} $YYYYMMDDHH`
   probe_YYYYMMDD=`echo $probe | cut -c 1-8`
   probe_HH=`echo $probe | cut -c 9-10`
-  probe_dir=${COMOUTautoqc_base}/${NET}.${probe_YYYYMMDD}/${dom}/autoqcprd.t${probe_HH}z # MTM - revert NET to RUN
+  probe_dir=${COMOUTautoqc_base}/${RUN}.${probe_YYYYMMDD}/${dom}/autoqcprd.t${probe_HH}z
   if [ $probe_HH -eq "23" ] && [ -s ${probe_dir}/${RUN}.t${probe_HH}z.accept_merged.txt ]; then
     export probecyc_long=${probe}
     break
@@ -72,7 +72,7 @@ while [ ${i} -lt ${max_cycs} ]; do
   probe=`${NDATE} -${i} ${YYYYMMDDHH}`
   probe_YYYYMMDD=`echo $probe | cut -c 1-8`
   probe_HH=`echo $probe | cut -c 9-10`
-  probe_dir=${COMOUTautoqc_base}/${NET}.${probe_YYYYMMDD}/autoqcprd.t${probe_HH}z # MTM - revert NET to RUN
+  probe_dir=${COMOUTautoqc_base}/${RUN}.${probe_YYYYMMDD}/${dom}/autoqcprd.t${probe_HH}z
   if [ $probe_HH -eq "23" ] && [ -s ${probe_dir}/${RUN}.t${probe_HH}z.aircraft_rjs_merged.txt ]; then
     echo $probe
     export PDYprev_aircraft=${probe}
@@ -87,18 +87,10 @@ done
 # Convert the diagnostic files into a readable format
 for ftype in ges anl; do
   if [ ${ftype} == 'ges' ]; then
-    if [ ${dom} == 'conus' ]; then
-      cpreq ${COMOUT}/${RUN}.t${cyc}z.diag_conv_ges.gz ${GESdiagconv_FNAME}.gz
-    else
-      cpreq ${COMOUT}/${RUN}ak.t${cyc}z.diag_conv_ges.gz ${GESdiagconv_FNAME}.gz
-    fi
+    cpreq ${COMOUT}/${RUN}.t${cyc}z.diag_conv_ges.gz ${GESdiagconv_FNAME}.gz
     export diagfile=${GESdiagconv_FNAME}
   elif [ ${ftype} == 'anl' ]; then
-    if [ ${dom} == 'conus' ]; then
-      cpreq ${COMOUT}/${RUN}.t${cyc}z.diag_conv_anl.gz ${ANLdiagconv_FNAME}.gz
-    else
-      cpreq ${COMOUT}/${RUN}ak.t${cyc}z.diag_conv_anl.gz ${ANLdiagconv_FNAME}.gz
-    fi
+    cpreq ${COMOUT}/${RUN}.t${cyc}z.diag_conv_anl.gz ${ANLdiagconv_FNAME}.gz
     export diagfile=${ANLdiagconv_FNAME}
   fi
   gunzip ${diagfile}.gz
@@ -149,7 +141,7 @@ if [ ${HH} -eq 23 ]; then
   fi
 fi
 
-tar -cvf ${RUN}.t${HH}z.autoqc_output.tar ${RUN}.t${HH}z.*.txt ${RUN}.t${HH}z.*.db ${RUN}.t${HH}z.*.csv
+tar -cvf ${RUN}.t${HH}z.autoqc_output.tar ${RUN}.t${HH}z.*.csv
 gzip ${RUN}.t${HH}z.autoqc_output.tar
 ${CP} -p ${RUN}.t${HH}z.autoqc_output.tar.gz ${COMOUTautoqc_rtma3d}
 
