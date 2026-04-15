@@ -4,9 +4,9 @@
 
 <!-- Key variables -->
 <!-- date/time of cases or cycles -->
-<!ENTITY USER           "matthew.t.morris">
+<!ENTITY USER           "user.name">
 <!ENTITY rtma3d_ver     "v1.0.0">
-<!ENTITY exp            "_aircraft">
+<!ENTITY exp            "">
 <!ENTITY NET		"rtma3d">
 <!ENTITY RUN		"&NET;">
 <!ENTITY envir		"v1.0">
@@ -120,7 +120,7 @@
 <!ENTITY maxtries	"3">
 <!ENTITY KEEPDATA	"YES">
 <!ENTITY SENDCOM	"YES">
-<!ENTITY RUN_RHIST	"No">
+<!ENTITY RUN_RHIST	"Yes">
 <!ENTITY RUN_HOWV	"Yes">
 <!ENTITY RUN_NCDIAG	"Yes">
 

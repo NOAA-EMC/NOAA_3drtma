@@ -18,7 +18,7 @@ def read_diagconv(diagfile):
   shutil.copyfile(diagout,'diag_conv.dat')
 
   # Read diag file and put in ascii format
-  READDIAG='/lfs/h2/emc/da/noscrub/matthew.t.morris/packages/rtma3d.v1.0.0/exec/rtma3d_read_diag'
+  #READDIAG='/lfs/h2/emc/da/noscrub/matthew.t.morris/packages/rtma3d.v1.0.0/exec/rtma3d_read_diag'
   os.system(READDIAG+' '+diagout)
   shutil.copyfile('diag_results', diagout)
 
@@ -244,7 +244,8 @@ if __name__ == "__main__":
   COM=sys.argv[5]
   COMprevday=sys.argv[6]
   probecyc_aircraft=sys.argv[7]
-  dom=sys.argv[8]
+  READDIAG=sys.argv[8]
+  dom=sys.argv[9]
 
   stopHH_aircraft=stopdate[8:10]
   probeHH_aircraft=probecyc_aircraft[8:10]
