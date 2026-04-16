@@ -434,6 +434,7 @@ def combine_accept_lists(dat_var):
   dfs = [temp_list,wind_list,dwpt_list,pres_list]
   combine_cols=['SAID','PROVIDER','SUBPROVIDER','PBUFTYP','LAT','LON']
   merged_list = reduce(lambda left,right: pd.merge(left,right,on=combine_cols,how='outer'), dfs)
+  merged_list.sort_values(by=['SAID','PROVIDER','SUBPROVIDER'],inplace=True)
 
   # Assign flag to reject observations if no data were available
   merged_list[['AC_DAILY-T','AC_DAILY-W','AC_DAILY-Td','AC_DAILY-P']] = merged_list[['AC_DAILY-T','AC_DAILY-W','AC_DAILY-Td','AC_DAILY-P']].fillna(value=0.)
