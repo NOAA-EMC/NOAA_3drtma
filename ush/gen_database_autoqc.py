@@ -168,7 +168,7 @@ def gen_database(dat_var,columns,cyc_purge,eps,geps,rjrmse):
     itercyc=datetime.strptime(probecyc_daily,'%Y%m%d%H')
     probeday_stats = itercyc.strftime('%Y%m%d')
     probeHH_stats = itercyc.strftime('%H')
-    COMprev_stats = os.path.abspath(os.path.join(os.path.dirname(COM), '../../'+'/'+thisRUN+'.'+probeday_stats+'/'+dom+'/autoqcprd.t'+probeHH_stats+'z'))
+    COMprev_stats = os.path.abspath(os.path.join(os.path.dirname(COM), '../../'+'/'+NET+'.'+probeday_stats+'/'+dom+'/autoqcprd.t'+probeHH_stats+'z'))
 
     # If file exists, merge new dat_var array with data from existing database
     if os.path.exists(COMprev_stats+'/'+thisRUN+'.t'+cycle_HH+'z.stats_database_'+vars[var]+'.db'):
@@ -287,7 +287,7 @@ def gen_accept_lists(dat_var,eps,geps,rjrmse):
   itercyc=datetime.strptime(probecyc_daily,'%Y%m%d%H')
   probeday_daily = itercyc.strftime('%Y%m%d')
   probeHH_daily = itercyc.strftime('%H')
-  COMprev_daily = os.path.abspath(os.path.join(os.path.dirname(COM), '../../'+'/'+thisRUN+'.'+probeday_daily+'/'+dom+'/autoqcprd.t'+probeHH_daily+'z'))
+  COMprev_daily = os.path.abspath(os.path.join(os.path.dirname(COM), '../../'+'/'+NET+'.'+probeday_daily+'/'+dom+'/autoqcprd.t'+probeHH_daily+'z'))
 
   if cycle_HH=='23':
     cyc_delim_daily=datetime.strptime(cyclestr,'%Y%m%d%H')+timedelta(hours=-num_cycs_daily)
@@ -334,7 +334,6 @@ def gen_accept_lists(dat_var,eps,geps,rjrmse):
   if vars[var] in ['t','ps','q','wst']:
     dat_var_accept=dat_var.copy()
     if cycle_HH=='23':
-      #dat_var_accept=dat_var.copy() # MTM - no longer needed?
       if aclist_type=='std_bias':
         if vars[var]=='wst':
           dat_var_accept['AC_DAILY']=np.where((dat_var_accept['stddev_daily_'+cyclestr]<rjrmse*(1.0+(3.0-1.0)*(1-dat_var_accept['VMAP']))) & \
@@ -480,15 +479,16 @@ if __name__ == "__main__":
 
   print('Starting Python program.')
 
-  thisRUN=sys.argv[1]
-  dateobj=sys.argv[2]
-  DATA=sys.argv[3]
-  COM=sys.argv[4]
-  COMm1=sys.argv[5]
-  cyclestr_m1=sys.argv[6]
-  probecyc_daily=sys.argv[7]
-  tinf=np.float64(sys.argv[8]) # Constant timescale associated with an observation
-  dom=sys.argv[9]
+  NET=sys.argv[1]
+  thisRUN=sys.argv[2]
+  dateobj=sys.argv[3]
+  DATA=sys.argv[4]
+  COM=sys.argv[5]
+  COMm1=sys.argv[6]
+  cyclestr_m1=sys.argv[7]
+  probecyc_daily=sys.argv[8]
+  tinf=np.float64(sys.argv[9]) # Constant timescale associated with an observation
+  dom=sys.argv[10]
 
   cyclestr=dateobj
   datestr=dateobj[0:8]

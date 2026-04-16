@@ -120,7 +120,7 @@ export pgm="rtma3d_autoqc"
 #cd ${DATA}
 time_str=`${DATE} "+%Y-%m-%d_%H_%M_%S" -d "${START_TIME}"`
 ${ECHO} " time_str = ${time_str}"
-python ${USHrtma3d}/gen_database_autoqc.py ${RUN}ak ${YYYYMMDDHH} ${DATA} ${COMOUTautoqc_rtma3d} ${PDYprev_dir} ${PDYprev} ${probecyc_long} ${tinf} ${dom}
+python ${USHrtma3d}/gen_database_autoqc.py ${NET} ${RUN}ak ${YYYYMMDDHH} ${DATA} ${COMOUTautoqc_rtma3d} ${PDYprev_dir} ${PDYprev} ${probecyc_long} ${tinf} ${dom}
 
 export err=$?; err_chk
 if [ err -eq 0 ] ; then
