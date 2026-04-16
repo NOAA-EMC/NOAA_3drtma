@@ -362,6 +362,10 @@ i_sfcrough_fgs=${i_sfcrough_fgs:-1}         # 1(default for 3DRTMA) --> read rou
 use_similarity_winghgtadj=".true."          # true  (default): using similarity theory
 neutral_stability_winghgtadj=".false."      # false (default): non-neutral stability
 
+# GSD Terrain Match applied to MESONET Observations
+i_gsd_terrain_match_mesonet=1    # 0: do not apply terrain match to mesonet obs <== default
+                                 # 1: apply terrain match to mesonet obs (kx=188), recommended for 3drtma
+
 # Running GSI with more print-out information for debugging
 # (for operational run, set to .false. for less print-out to reduce wall-clock time)
 export VERBOSE_GSI=${VERBOSE_GSI:-".false."}
@@ -471,7 +475,7 @@ mv ${DATA}/wrf_inout                   ${DATA_SHARED}/wrf_inout # copying big fi
 
 tar -cvf misc_info_${CDATE}.tar  ./*info ./errtable ./*bias*  \
     ./current_bad_aircraft ./*sfcobs_uselist* ./gsd_sfcobs_provider.txt ./filelist* \
-    ./OUTPUT*
+    ./OUTPUT* .gsiparm.anl ./parmcard_input
 cpreq -p misc_info_${CDATE}.tar          ${COMOUT}/${RUN}ak.t${cyc}z.misc_info.tar
 
 cpreq -p fort.220   ${COMOUT}/${RUN}ak.t${cyc}z.minimization_info

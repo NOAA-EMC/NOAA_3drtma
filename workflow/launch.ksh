@@ -12,6 +12,7 @@ COMMAND=$1
 #############################################################
 MODULEFILES=${MODULEFILES:-${HOMErtma3d}/modulefiles}
 versionfile=${versionfile:-${HOMErtma3d}/versions/run.ver}
+  MODULEFILES_GSI=${MODULEFILES_GSI:-${HOMErtma3d}/sorc/rtma3d_gsi.fd/modulefiles}
 
 if [ "${machine}" = "theia" ] ; then
   . /etc/profile
@@ -131,6 +132,19 @@ elif [ "${machine}" = "cray" ] ; then
 #   *)
 #     ;;
 # esac
+
+case "$COMMAND" in
+  # loading modules for GSI
+  *GSIANL*)
+    echo "loading modules for running GSI ..."
+    module reset
+    module use ${MODULEFILES_GSI}
+    module load envvar/1.0
+    module load gsi_wcoss2.intel
+    module load cray-pals/1.2.2
+    ;;
+  # loading modules for other tasks
+  *)
 . ${versionfile} 
 
 #module reset
@@ -171,6 +185,8 @@ module load python-modules/${python_ver}
 module load prod_util/${prod_util_ver}
 #module load w3nco/2.4.1
 module load ncdiag/${ncdiag_ver}
+  ;;
+esac
 
 module list
 

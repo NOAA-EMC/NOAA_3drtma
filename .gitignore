@@ -57,9 +57,10 @@ sorc/rtma3d_stnmlist.fd/rtma3d_stnmlist
 sorc/rtma3d_wrfbufr_alaska.fd/rtma3d_wrfbufr_alaska
 sorc/rtma3d_wrfbufr_conus.fd/rtma3d_wrfbufr_conus
 #
-#  # ignore directory of gsi and post(upp) source code ('sorc/rtma_gsi.fd, sorc/rtma_post.fd')
+#  # ignore directory of gsi and post(upp) source code
 #
-sorc/rtma_gsi.fd
+sorc/rtma3d_gsi.fd/**
+sorc/rtma3d_post.fd/**
 parm
 !sorc/rtma_post.fd/parm
 fix

@@ -38,14 +38,16 @@ case "${GSI_SOURCE}" in
         cd ${BASE}/rtma3d_gsi.fd
         echo "git checkout develop"
 #       git checkout develop       # <--- checking out the latest commit of develop branch
-        git checkout 964bcc3       # <--- specifying the commit
-                                   # commit 964bcc3 is the old commit which still works with netcdf 4.7.r42
+#       git checkout 964bcc3       # commit 964bcc3 is the old commit which still works with netcdf 4.7.r42
                                    # and does not need to load hdf5 lib when building and running GSI.
                                    # After this commit (from commit 2ddc1ac), GSI, by default,
                                    # uses bufr v12, netcdf 4.9.2 (require loading hdf5 lib), IP lib 5.x.
                                    # So need to update the module files when building and running 3DRTMA package.
                                    # After further testing with new GSI, the new modules would be updated
                                    # in 3DRTMA pacakge.
+        git checkout 005343a       # commit 005343a requires pnetcdf (v1.12.*), netcdf (v4.9.*), bufr (v12.*)
+                                   # and support the use of gsd_terrain_match to mesonet obs of t (kx=188).
+        BUILD_GSI_SCRIPT="build_gsi4rtma3d.sh"
         ;;
     auto?([-_])qc|Auto?([-_])QC )
         echo "git clone https://github.com/MatthewMorris-NOAA/GSI.git ./rtma3d_gsi.fd  # GSI_SOURCE=${GSI_SOURCE}"
@@ -53,6 +55,7 @@ case "${GSI_SOURCE}" in
         cd ${BASE}/rtma3d_gsi.fd
         echo "git checkout rtma3d_autoqc"
         git checkout rtma3d_autoqc
+        BUILD_GSI_SCRIPT="build_gsi4rtma3d_bufr.sh"
         ;;
     *)
 #       If no GSI_SOURCE is specified, check out Matthew Morris's fork of GSI as default
@@ -61,6 +64,7 @@ case "${GSI_SOURCE}" in
         cd ${BASE}/rtma3d_gsi.fd
         echo "git checkout rtma3d_autoqc"
         git checkout rtma3d_autoqc
+        BUILD_GSI_SCRIPT="build_gsi4rtma3d_bufr.sh"
         ;;
 esac
 shopt -u extglob
@@ -70,11 +74,11 @@ shopt -u extglob
 
   cd ush
 #  use the gsi building script
-  if [[ -f ${BASE}/../util_dev/build_gsi4rtma3d.sh ]] ; then
-     cp -p ${BASE}/../util_dev/build_gsi4rtma3d.sh  ./
-    ./build_gsi4rtma3d.sh
+  if [[ -f ${BASE}/../util_dev/${BUILD_GSI_SCRIPT} ]] ; then
+      cp -p ${BASE}/../util_dev/${BUILD_GSI_SCRIPT}  ./
+      ./${BUILD_GSI_SCRIPT}
   else
-     echo "cannot find the GSI building script build_gsi4rtma3d.sh, abort building GSI ..."
+      echo "cannot find the GSI building script build_gsi4rtma3d.sh, abort building GSI ..."
   fi
 
 #cp -p ${BASE}/rtma3d_gsi.fd/build/src/gsi/gsi.x        ${BASE}/../exec/rtma3d_gsi
