@@ -131,7 +131,7 @@ fi
 
 if [ ${HH} -eq 23 ]; then
   ${ECHO} "Generate aircraft reject lists daily at 23Z."
-  python ${NWROOT}/ush/aircraft_reject_lists.py ${RUN}ak ${startcyc_aircraft} ${YYYYMMDDHH} ${DATA} ${COMOUTautoqc_rtma3d} ${PDYprev_aircraft_dir} ${PDYprev_aircraft} ${EXECrtma3d}/${NET}_read_diag ${dom}
+  python ${NWROOT}/ush/aircraft_reject_lists.py ${NET} ${RUN}ak ${startcyc_aircraft} ${YYYYMMDDHH} ${DATA} ${COMOUTautoqc_rtma3d} ${PDYprev_aircraft_dir} ${PDYprev_aircraft} ${EXECrtma3d}/${NET}_read_diag ${dom}
 
   export err=$?; err_chk
   if [ err -eq 0 ] ; then

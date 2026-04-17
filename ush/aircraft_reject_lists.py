@@ -237,15 +237,16 @@ if __name__ == "__main__":
 
   print('Starting Python program.')
 
-  thisRUN=sys.argv[1]
-  startdate=sys.argv[2]
-  stopdate=sys.argv[3]
-  DATA=sys.argv[4]
-  COM=sys.argv[5]
-  COMprevday=sys.argv[6]
-  probecyc_aircraft=sys.argv[7]
-  READDIAG=sys.argv[8]
-  dom=sys.argv[9]
+  NET=sys.argv[1]
+  thisRUN=sys.argv[2]
+  startdate=sys.argv[3]
+  stopdate=sys.argv[4]
+  DATA=sys.argv[5]
+  COM=sys.argv[6]
+  COMprevday=sys.argv[7]
+  probecyc_aircraft=sys.argv[8]
+  READDIAG=sys.argv[9]
+  dom=sys.argv[10]
 
   stopHH_aircraft=stopdate[8:10]
   probeHH_aircraft=probecyc_aircraft[8:10]
@@ -298,7 +299,7 @@ if __name__ == "__main__":
     cycle_HH=dateobj.strftime("%H")
     cyc_purge=datetime.strptime(cyclestr,'%Y%m%d%H')+timedelta(days=-num_days_stats)
 
-    diagdir=os.path.abspath(os.path.join(os.path.dirname(COM), '../../'+'/'+thisRUN+'.'+datestr+'/'+dom))
+    diagdir=os.path.abspath(os.path.join(os.path.dirname(COM), '../../'+'/'+NET+'.'+datestr+'/'+dom))
 
     #--------------------------------------------------------------------#
     # Read in data from the analysis (anl) diagnostic file.
