@@ -49,7 +49,7 @@ if [ $BUILD_rtma3d_gsi = yes ] ; then
 
 
    unset GSI_SOURCE
-   export GSI_SOURCE="autoqc"       # autoqc: using Matthew Morris's fork of GSI (as default for now)
+   export GSI_SOURCE="emcgsi"       # autoqc: using Matthew Morris's fork of GSI (as default for now)
                                     # emcgsi: using official EMC GSI
                                     # others: using Matthew Morris's fork of GSI
    echo " .... Building rtma_gsi with GSI_SOURCE=${GSI_SOURCE} .... "
