@@ -45,7 +45,7 @@ export pgmout=${pgmout:-"OUTPUT.$$"}
 export HOMErtma3d=${HOMErtma3d:-$PACKAGEROOT/${NET}.${rtma3d_ver}}
 export EXECrtma3d=${EXECrtma3d:-$HOMErtma3d/exec}
 export FIXrtma3d=${FIXrtma3d:-$HOMErtma3d/fix/${dom}}
-export PARMrtma3d=${PARMrtma3d:-$HOMErtma3d/parm/${dom}}
+export PARMrtma3d=${PARMrtma3d:-"$HOMErtma3d/parm/${dom}_old"}
 export USHrtma3d=${USHrtma3d:-$HOMErtma3d/ush/${dom}}
 
 export FIXcrtm=${FIXcrtm:-${CRTM_FIX:?}}

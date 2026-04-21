@@ -134,9 +134,9 @@ export FIXgsi=${FIXgsi:-"${FIXrtma3d}/gsi"}
 #export FIXcrtm=${FIXcrtm:-"${FIXrtma3d}/crtm"}
 export FIXcrtm=${FIXcrtm:-${CRTM_FIX:?}}
 export FIXwps=${FIXwps:-"${FIXrtma3d}/wps"}
-export FIXupp=${FIXupp:-"${FIXrtma3d}/upp"}
+export FIXupp=${FIXupp:-"${FIXrtma3d}/upp_old"}
 
-export PARMupp=${PARMupp:-"${PARMrtma3d}/upp"}
+export PARMupp=${PARMupp:-"${PARMrtma3d}/upp_old"}
 export PARMwrf=${PARMwrf:-"${PARMrtma3d}/wrf"}
 
 export OBS_USELIST=${OBS_USELIST:-"${FIXrtma3d}/gsi"}
