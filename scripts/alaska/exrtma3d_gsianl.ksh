@@ -388,7 +388,7 @@ neutral_stability_winghgtadj=".false."      # false (default): non-neutral stabi
 
 # GSD Terrain Match applied to MESONET Observations
 i_gsd_terrain_match_mesonet=1    # 0: do not apply terrain match to mesonet obs <== default
-                                 # 1: apply terrain match to mesonet obs (kx=188), recommended for 3drtma
+                                 # 1: apply terrain match to mesonet obs (kx=188/192/193/195), recommended for 3drtma
 
 # Running GSI with more print-out information for debugging
 # (for operational run, set to .false. for less print-out to reduce wall-clock time)
