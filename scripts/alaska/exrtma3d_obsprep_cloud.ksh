@@ -25,6 +25,9 @@ analysis_time = ${CDATE},
 bufrfile='NASALaRCCloudInGSI.bufr',
 npts_rad=3,
 ioption = 2,
+boxlat0=60,61,63,66,68
+boxhalfy=4, 6, 8, 10, 12
+boxhalfx=4, 6, 8, 10, 12
 /
 EOF
 

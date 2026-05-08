@@ -301,26 +301,24 @@ fi
 # change name from surface gust to 10-m gust
 
 # Note: NET should be RUN - AMG
-# Change derived visibility (VIS:surface) to 2m visibility (VIS:2 m above ground)
-wgrib2 ${workdir}/wrfsubhprs.grib2 -match "VIS" -if "VIS:surface" -set_lev "2 m above ground" -grib ${workdir}/vis2mprs.grib2 -fi
-wgrib2 ${workdir}/wrfsubhnat.grib2 -match "VIS" -if "VIS:surface" -set_lev "2 m above ground" -grib ${workdir}/vis2mnat.grib2 -fi
 # Change analyzed gust from GUST:surface to GUST:10 m above ground
+# Change analyzed visibility from VIS:surface to VIS:2 m above ground
 # Annette - need to copy, can't read file from COMOUT
 if [ $dom == "conus" ]; then
   ${WGRIB2} -V ${COMOUT}/${RUN}.t${cyc}z.anl.gust.grib2 -set_lev "10 m above ground" -grib tmpgust.grib2
+  ${WGRIB2} -V ${COMOUT}/${RUN}.t${cyc}z.anl.vis.grib2 -set_lev "2 m above ground" -grib tmpvis.grib2
 else
   ${WGRIB2} -V ${COMOUT}/${RUN}ak.t${cyc}z.anl.gust.grib2 -set_lev "10 m above ground" -grib tmpgust.grib2
+  ${WGRIB2} -V ${COMOUT}/${RUN}ak.t${cyc}z.anl.vis.grib2 -set_lev "2 m above ground" -grib tmpvis.grib2
 fi
-# Remove surface visibility from grib2 files
-wgrib2 ${workdir}/wrfsubhprs.grib2 -not_if "VIS:surface" -grib ${workdir}/wrfsubhprs.grib2_no_sfcvis 
-wgrib2 ${workdir}/wrfsubhnat.grib2 -not_if "VIS:surface" -grib ${workdir}/wrfsubhnat.grib2_no_sfcvis
-# Overwrite wrfsubhprs and wrfsubhnat with renamed derived vis, analyzed vis, analyzed gust and analyzed wave height
+# Add analyzed visibility, gust, and wave height to wrfsubhprs and wrfsubhnat grib2 files
+# No analyzed wave height is added to the alaska grib2 files
 if [ "${dom}" == "conus" ]; then
-  cat ${workdir}/wrfsubhprs.grib2_no_sfcvis ${workdir}/vis2mprs.grib2 tmpgust.grib2 ${COMOUT}/${RUN}.t${cyc}z.anl.vis.grib2 ${COMOUT}/${RUN}.t${cyc}z.anl.howv.grib2 > ${workdir}/wrfsubhprs.grib2
-  cat ${workdir}/wrfsubhnat.grib2_no_sfcvis ${workdir}/vis2mnat.grib2 tmpgust.grib2 ${COMOUT}/${RUN}.t${cyc}z.anl.vis.grib2 ${COMOUT}/${RUN}.t${cyc}z.anl.howv.grib2 > ${workdir}/wrfsubhnat.grib2
+  cat tmpvis.grib2 tmpgust.grib2 ${COMOUT}/${RUN}.t${cyc}z.anl.howv.grib2 >> ${workdir}/wrfsubhprs.grib2
+  cat tmpvis.grib2 tmpgust.grib2 ${COMOUT}/${RUN}.t${cyc}z.anl.howv.grib2 >> ${workdir}/wrfsubhnat.grib2
 else
-  cat ${workdir}/wrfsubhprs.grib2_no_sfcvis ${workdir}/vis2mprs.grib2 tmpgust.grib2 ${COMOUT}/${RUN}ak.t${cyc}z.anl.vis.grib2 > ${workdir}/wrfsubhprs.grib2
-  cat ${workdir}/wrfsubhnat.grib2_no_sfcvis ${workdir}/vis2mprs.grib2 tmpgust.grib2 ${COMOUT}/${RUN}ak.t${cyc}z.anl.vis.grib2 > ${workdir}/wrfsubhnat.grib2
+  cat tmpvis.grib2 tmpgust.grib2 >> ${workdir}/wrfsubhprs.grib2
+  cat tmpvis.grib2 tmpgust.grib2 >> ${workdir}/wrfsubhnat.grib2
 fi
 
 ${WGRIB2} ${workdir}/wrfsubhprs.grib2 -set center 7 -grib ${COMOUTpost_rtma3d}/${PROD_HEAD}.wrfsubhprs.grib2
