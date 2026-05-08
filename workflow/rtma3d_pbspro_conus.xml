@@ -120,7 +120,7 @@
 <!ENTITY maxtries	"3">
 <!ENTITY KEEPDATA	"YES">
 <!ENTITY SENDCOM	"YES">
-<!ENTITY RUN_RHIST	"Yes">
+<!ENTITY RUN_RHIST	"No">
 <!ENTITY RUN_HOWV	"Yes">
 <!ENTITY RUN_NCDIAG	"Yes">
 
@@ -216,7 +216,7 @@
 
 <!ENTITY AUTOQC_PROC "1">
 <!ENTITY AUTOQC_RESOURCES '<walltime>00:30:00</walltime>'>
-<!ENTITY AUTOQC_RESERVATION '<nodes>1:ppn=1:vntype=cray_compute:mem=4000MB</nodes><native>-l place=scatter</native><queue>&QUEUE;</queue><account>&ACCOUNT;</account>'>
+<!ENTITY AUTOQC_RESERVATION '<nodes>1:ppn=1:vntype=cray_compute:mem=12GB</nodes><native>-l place=scatter</native><queue>&QUEUE;</queue><account>&ACCOUNT;</account>'>
 
 <!ENTITY UPDATEVARS_PROC "14">
 <!ENTITY UPDATEVARS_THREADS "1">
