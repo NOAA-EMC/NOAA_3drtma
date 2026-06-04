@@ -1,10 +1,6 @@
-#!/bin/ksh
+#!/bin/sh
 
-##########################################################
-# This job...
-# 
-########################################################
-
+# --- for debug --- #
 date
 export PS4=' $SECONDS + ' 
 set -x
@@ -15,95 +11,65 @@ set -x
 # not they will take the default values which is set
 # for the NCO running enviroment
 #######################################################
+
 export RUN_ENVIR=${RUN_ENVIR:-nco}
 
-#################
-# Set NET and RUN
-#################
-export NET=rtma3d
-
-KEEPDATA="YES"
-# Note: grib_util module loaded in submission (lsf or ecFlow) script
+##########################
+# Specify NET and RUN Name
+##########################
+export NET=${NET:-rtma3d}
+export RUN=${RUN:-rtma3d}
 
 ##########################################################
-export jobid=${jobid:-"${outid}.o$$"}
-export DATA=${DATA:-$DATAROOT/${jobid:?}} #jobid ($job.$LSB_JOBID MUST BE DEFINED IN TERMS OF $RUN IN UPPER LEVEL SCRIPT /MPondeca, 26Jul2015
-if [ -d $DATA ] ; then
-   rm  -rf $DATA/*
-else
-   mkdir -p $DATA	 
-fi
+# make temp/running directories
+##########################################################
+export DATA=${DATA:-$DATAROOT/${jobid:?}}
+export DATA_SHARED=${DATA_SHARED:-${DATAROOT}/sharedprd}
+mkdir -p $DATA $DATA_SHARED
 cd $DATA
 
+#####################################################
+# Run setpdy and initialize PDY variables
+#    setpdy.sh needs the variables 
+#    $PDY and $cyc already defined in advance
+#####################################################
 export cycle=${cycle:-t${cyc}z}
-export pgmout=${pgmout:-"OUTPUT.${PDY}${cyc}.${jobid}"}
+setpdy.sh
+. ./PDY
 
+export CDATE="${PDY}${cyc}"
 
-export jlogfile=${jlogfile:-$COMROOT/logs/jlogfiles/jlogfile.$jobid}
-####################################
-# Determine Job Output Name on Sstem
-####################################
-export LOG_JJOB=${LOG_JJOB:-$COMROOT/logs/jlogfiles}
-export jlogfile=${jlogfile:-$LOG_JJOB/jlogfile.${jobid}}
-if [ ! -d ${LOG_JJOB} ] ; then
-   mkdir -p ${LOG_JJOB}
-fi
-if [ ! -d ${LOG_PGMOUT} ] ; then
-   mkdir -p ${LOG_PGMOUT}
-fi
-
-# specify the file head for the file names of the archived data files
-export PROD_HEAD=${PROD_HEAD:-"${NET}.${cycle}"}
-
+export pgmout=${pgmout:-"OUTPUT.$$"}
 
 # Specify Execution Areas
-export HOMErtma3d=${HOMErtma3d:-$NWROOT/rtma.${rtma_ver}}
+export HOMErtma3d=${HOMErtma3d:-$PACKAGEROOT/${NET}.${rtma_ver}}
 export EXECrtma3d=${EXECrtma3d:-$HOMErtma3d/exec}
 export FIXrtma3d=${FIXrtma3d:-$HOMErtma3d/fix/${dom}}
 export PARMrtma3d=${PARMrtma3d:-$HOMErtma3d/parm/${dom}}
 export USHrtma3d=${USHrtma3d:-$HOMErtma3d/ush/${dom}}
-export UTILrtma3d=${UTILrtma3d:-$HOMErtma3d/util/${NET}}
-
-# date and time for previous and next cycle
-export PDYHH="${PDY}${cyc}"
-export PDYHH_cycm1=$($NDATE -01  "${PDYHH}")
-
 
 #################################################
 # Set up the INPUT and OUTPUT directories
 #################################################
-### COM_IN used to retrieve ges and analysis files from 2p5, ak, gu, hi, and pr
 export COMIN=${COMIN:-$(compath.py  ${envir}/${NET}/${rtma3d_ver})/${RUN}.${PDY}/${dom}}
 export COMOUT=${COMOUT:-$(compath.py -o  ${envir}/${NET}/${rtma3d_ver})/${RUN}.${PDY}/${dom}}
-export COMOUTgsi_rtma3d=${COMOUTgsi_rtma3d:-"${COMOUT}/gsiprd.${cycle}"}
-export COMOUThrrrdas_rtma3d=${COMOUThrrrdas_rtma3d:-"${COMOUT}/hrrrdas.${cycle}"}
-if [ ! -d "${COMOUThrrrdas_rtma3d}" ] ; then
-  mkdir -p ${COMOUThrrrdas_rtma3d}
-fi
-if [ ! -d "${COMIN}" ] ; then
-   mkdir -p $COMIN
-fi
-if [ ! -d "${COMOUT}" ] ; then
-   mkdir -p $COMOUT
-fi
 
+mkdir -p $COMOUT
 
-export COM_IN=${COM_IN:-$COMROOT/${NET}/${envir}}
+env
 
-${exSCR_HRRRDAS:-$HOMErtma3d/scripts/${dom}/ex${RUN}_hrrrdas.ksh}
+$HOMErtma3d/scripts/${dom}/ex${RUN}_hrrrdas.ksh
 export err=$?; err_chk
 
-msg="$0 of $job completed normally"
-postmsg $jlogfile "$msg"
-
+postmsg "$0 of $job completed normally"
 
 if [ -e "${pgmout}" ] ; then
    cat $pgmout
-   cpreq -p $pgmout ${LOG_PGMOUT}
 fi
 
-postmsg $jlogfile "$0 of $job completed normally"
-
+##############################
+# Remove the Temporary working directory
+##############################
 if [ "${KEEPDATA}" != YES ]; then
     rm -rf $DATA
 fi

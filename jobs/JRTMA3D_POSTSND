@@ -1,8 +1,12 @@
-#!/bin/ksh 
+#!/bin/sh 
+
+# --- for debug --- #
+date
+export PS4=' $SECONDS + '
 set -xa
 
 ##################################################
-# Generation of HRRR station time-series bufr data 
+# Generation of 3DRTMA station time-series bufr data 
 ##################################################
 
 ######################################################
@@ -16,137 +20,71 @@ export RUN_ENVIR=${RUN_ENVIR:-nco}
 ###################################
 # Specify NET and RUN Name and model
 ####################################
-export NET=${NET:-hrrr}
-export RUN=${RUN:-hrrr}
-export model=${model:-hrrr}
-
-#####################################################################################
-# This block is for Developer's test run:
-# Run config file to get input parameters
-# This config file should define the following variables
-# DATA: Location of working directory, default to ${DATAROOT}
-# SENDECF: If the job is to be running using ECF, default to YES
-# SENDDBN: Set to NO for developers, default to YES
-# COM_IN:  Directory for input files, default to ${COMROOT}/$NET/${envir}
-# COM_OUT: Directory for output file, default to ${COMROOT}/$NET/${envir}
-# gespath: Directory for the guess or restart files, default to ${GESROOT}/${envir}
-#####################################################################################
-#if [ "$RUN_ENVIR" != nco ]      ### For Developers, "group_name" is passed from the ECF script
-#then
-#  group_name=${group_name:-meso}
-#  package_name=${package_name:-hrrr}
-#  . /${group_name}/save/${LOGNAME}/${package_name}${PACKAGEROOThps}/parm/${package_name}_para_config
-#  export userid=${userid:-$LOGNAME}
-#  export DATA=${DATA:-/ptmpd1/$userid}
-#fi
-
-#export DATATMP=${DATATMP:-${DATAROOT}/bufrsnd.t${cyc}z}
-export DATATMP=${DATATMP:-${DATAROOT}/${envir}/${NET}.${PDY}${cyc}/bufrsnd}
-#if [ -d $DATATMP ] ; then
-#   ${ECHO} "$DATATMP exists, remove its content"
-#     ${RM} -rf $DATATMP/*
-#else
-#   ${ECHO} "$DATATMP does not exist, create it#"
-#   ${MKDIR} -p $DATATMP
-#fi
-cd $DATATMP
-
-export PS4='$SECONDS + '
-date
+export NET=${NET:-rtma3d}
+export RUN=${RUN:-rtma3d}
 
 ####################################
-# obtain unique process id (pid) and make temp directory
+# Define data and shared directories
 ####################################
-#export DATA=${DATAROOT}/hrrr_${RUN}_sndp_${envir}_${cyc}
-#mkdir -p $DATA
-#cd $DATA
+export DATA=${DATA:-$DATAROOT/${jobid:?}}
+export DATA_SHARED=${DATA_SHARED:-${DATAROOT}/sharedprd}
+mkdir -p $DATA $DATA_SHARED
+cd $DATA
 
-export cycle=t${cyc}z
+#####################################################
+# Run setpdy and initialize PDY variables
+#    setpdy.sh needs the variables 
+#    $PDY and $cyc already defined in advance
+#####################################################
+export cycle=${cycle:-t${cyc}z}
+setpdy.sh
+. ./PDY
 
-export pgmout="OUTPUT.$$"
+export CDATE="${PDY}${cyc}"
 
-####################################
-# SENDECF  - Flag Events on ECF
-# SENDCOM  - Copy files to /com directory
-####################################
-export SENDECF=${SENDECF:-YES}
-export SENDCOM=${SENDCOM:-YES}
-export SENDDBN=${SENDDBN:-YES}
-export ALERT_EXT=${ALERT_EXT:-}
+export pgmout=${pgmout:-"OUTPUT.$$"}
 
 ####################################
 # Specify Execution Areas
-export HOMErtma3d=${HOMErtma3d:-$NWROOT/rtma.${rtma_ver}}
+####################################
+export HOMErtma3d=${HOMErtma3d:-$PACKAGEROOT/${NET}.${rtma3d_ver}}
 export EXECrtma3d=${EXECrtma3d:-$HOMErtma3d/exec}
 export FIXrtma3d=${FIXrtma3d:-$HOMErtma3d/fix/${dom}}
 export PARMrtma3d=${PARMrtma3d:-$HOMErtma3d/parm/${dom}}
 export USHrtma3d=${USHrtma3d:-$HOMErtma3d/ush/${dom}}
-export UTILrtma3d=${UTILrtma3d:-$HOMErtma3d/util/${NET}}
-export FIXgem=${FIXgem:-${HOMErtma3d}/gempak/fix}
 ####################################
 
-# for WCOSS2 ops
-export COMINm1=${COMINm1:-${COMROOT}/${NET}/${envir}/${NET}.${PDYm1}}
+##############################################
+# Set up the INPUT and OUTPUT directories
+##############################################
 export COMIN=${COMIN:-$(compath.py  ${envir}/${NET}/${rtma3d_ver})/${RUN}.${PDY}/${dom}}
 export COMOUT=${COMOUT:-$(compath.py -o  ${envir}/${NET}/${rtma3d_ver})/${RUN}.${PDY}/${dom}}
 
-### Observations Products/Input for the RTMA3D (prepbufr files) 
-export COMINobsproc_rtma3d=${COMINobsproc_rtma3d:-"${COMIN}/obsprd.${cycle}"}
-export COMINobsproc_rtma3dm1=${COMINobsproc_rtma3dm1:-"${COMINm1}/obsprd.${cycle}"}
-
-### Firstguess Products/Input for the RTMA3D (netcdf) 
-export GESINhrrr_rtma3d=${GESINhrrr_rtma3d:-"${COMIN}/fgsprd.${cycle}"}
-
-### 3DRTMA GSIANL Products (netcdf)
-export COMOUTgsi_rtma3d=${COMOUTgsi_rtma3d:-"${COMOUT}/gsiprd.${cycle}"}
-
-### 3DRTMA UNI-POST Products (grib2)
-export COMOUTpost_rtma3d=${COMOUTpost_rtma3d:-"${COMOUT}/postprd.${cycle}"}
-
-### 3DRTMA BUFR SND (bufr)
-export COMOUTbufrsnd_rtma3d=${COMOUTbufrsnd_rtma3d:-"${COMOUT}/bufrsnd.${cycle}"}
-
-if [ ! -d "${COMIN}" ] ; then
-   mkdir -p $COMIN
-fi
-if [ ! -d "${COMOUT}" ] ; then
-   mkdir -p $COMOUT
-fi
+env
 
 if [ ! -d "${COMOUTbufrsnd_rtma3d}" ] ; then
    mkdir -p ${COMOUTbufrsnd_rtma3d}
 fi
 
-export COM_IN=${COM_IN:-$COMROOT/${NET}/${envir}}
-
-
-##############################################
-# Define COM directories
-##############################################
-
-# for WCOSS2 ops
-
-export COMNAWP=${COMAWP:-${COMOUT}/gempak}
-mkdir -m 775 -p $COMNAWP
-
-export PROFDIR=${DATAROOT}/hrrr_${RUN}_wrfbufr_${envir}_${cyc}
-env
-
 ########################################################
 # Execute the script.
-${HRRR_SNDPSH:-$HOMErtma3d/scripts/${dom}/ex${RUN}_postsnd.ksh}
+$HOMErtma3d/scripts/${dom}/ex${RUN}_postsnd.ksh
+export err=$?; err_chk
 ########################################################
 
-cat $pgmout
+postmsg "$0 of $job completed normally"
 
-msg="ENDED NORMALLY."
-postmsg "$jlogfile" "$msg"
+if [ -e "${pgmout}" ] ; then
+   cat $pgmout
+fi
 
 ##############################
 # Remove the Temporary working directory
 ##############################
-#cd $DATA
-#if [ ${KEEPDATA} = NO ] ; then rm -rf $DATA ; fi
+##############################
+if [ "${KEEPDATA}" != YES ]; then
+   rm -rf $DATA
+fi
 
 date
 

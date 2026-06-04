@@ -60,10 +60,6 @@
 <!ENTITY FIXwps         "&NWROOT;/fix/wps">
 <!ENTITY FIXwrf         "&NWROOT;/fix/wrf">
 <!ENTITY FIXwrfbufr     "&NWROOT;/fix/wrfbufr">
-<!ENTITY OBS_USELIST    "/lfs/h2/emc/da/noscrub/matthew.t.morris/FixData/obsuselist">
-<!ENTITY AIRCRAFT_REJECT  "/lfs/h2/emc/da/noscrub/matthew.t.morris/FixData/obsuselist/amdar_reject_lists">
-<!ENTITY SFCOBS_USELIST   "/lfs/h2/emc/da/noscrub/matthew.t.morris/FixData/obsuselist/mesonet_uselists">
-<!ENTITY SFCOBS_PROVIDER  "&FIXgsi;">
 <!ENTITY PARMwrf        "&NWROOT;/parm/wrf">
 <!ENTITY PARMupp        "&NWROOT;/parm/upp">
 <!ENTITY PARMgsi        "&NWROOT;/parm/gsi">
@@ -210,7 +206,6 @@
 <!ENTITY UPDATEVARS_OMP_STACKSIZE "512M">
 <!ENTITY UPDATEVARS_RESOURCES '<walltime>00:30:00</walltime>'> 
 <!ENTITY UPDATEVARS_RESERVATION '<nodes>6:ppn=64:mem=500GB</nodes><native>-l place=vscatter</native><queue>&QUEUE;</queue><account>&ACCOUNT;</account>'>
-<!ENTITY FCST_LENGTH "20"> <!--20 secconds -->
 
 <!ENTITY RHIST_PROC "1">
 <!ENTITY RHIST_RESOURCES '<walltime>01:20:00</walltime>'>
@@ -228,7 +223,7 @@
 
 <!ENTITY NCDIAG_PROC "1">
 <!ENTITY NCDIAG_RESOURCES '<walltime>00:15:00</walltime>'>
-<!ENTITY NCDIAG_RESERVATION '<nodes>1:ppn=8:mem=64GB</nodes><native>-l place=scatter:shared,select=1:ncpus=8:mem=64GB:prepost=true</native><queue>&QUEUE;</queue><account>&ACCOUNT;</account>'>
+<!ENTITY NCDIAG_RESERVATION '<nodes>1:ppn=21:mem=64GB</nodes><native>-l place=scatter:shared,select=1:ncpus=21:mem=64GB:prepost=true</native><queue>&QUEUE;</queue><account>&ACCOUNT;</account>'>
 
 <!ENTITY CLEAN_PROC "1">
 <!ENTITY CLEAN_RESOURCES '<walltime>00:30:00</walltime>'> 
@@ -395,10 +390,6 @@
         <value>&PARMverf;</value>
    </envar>
    <envar>
-        <name>OBS_USELIST</name>
-        <value>&OBS_USELIST;</value>
-   </envar>
-   <envar>
         <name>LOG_DIR</name>
         <value>&LOG_DIR;</value>
    </envar>
@@ -445,6 +436,10 @@
    <envar>
         <name>COMOUT</name>
         <value><cyclestr>&COMROOT;/&NET;/&envir;/&RUN;.@Y@m@d/&dom;</cyclestr></value>
+   </envar>
+   <envar>
+        <name>COMINm1</name>
+        <value><cyclestr offset="-01:00:00">&COMROOT;/&NET;/&envir;/&RUN;.@Y@m@d/&dom;</cyclestr></value>
    </envar>
    <envar>
         <name>COMIN</name>
@@ -604,18 +599,6 @@
     <envar>
       <name>i_gsdsfc_uselist</name>
       <value>&i_gsdsfc_uselist;</value>
-    </envar>
-    <envar>
-      <name>AIRCRAFT_REJECT</name>
-      <value>&AIRCRAFT_REJECT;</value>
-    </envar>
-    <envar>
-      <name>SFCOBS_USELIST</name>
-      <value>&SFCOBS_USELIST;</value>
-    </envar>
-    <envar>
-      <name>SFCOBS_PROVIDER</name>
-      <value>&SFCOBS_PROVIDER;</value>
     </envar>'>
 
 <!-- BLOCKS for OPTIMIZATIONS FOR GSIANL DA step-->
@@ -789,10 +772,6 @@
     <envar>
       <name>L_WRFARW_NOFCST</name>
       <value>&L_WRFARW_NOFCST;</value>
-    </envar>
-    <envar>
-      <name>FCST_LENGTH</name>
-      <value>&FCST_LENGTH;</value>
     </envar>'>
 
  <!ENTITY ENVARS_CLEAN
@@ -980,6 +959,10 @@
     &ENVARS;
     &UPDATEVARS_RESOURCES;
     &UPDATEVARS_RESERVATION;
+
+    <envar><name>ntasks</name><value>384</value></envar>
+    <envar><name>ppn</name><value>64</value></envar>
+
     <envar>
        <name>rundir_task</name>
        <value><cyclestr>&DATA_WRFPRD;</cyclestr></value>

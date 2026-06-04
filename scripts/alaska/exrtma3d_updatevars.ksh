@@ -1,135 +1,93 @@
 #!/bin/ksh 
 set -x
-CUT=/usr/bin/cut
-check_if_defined() { #usage: check_if_defined "var1_name" "var2_name" ...
-  for str in "$@"; do
-    eval "path=\${$str}"
-    if [ -z "${path}" ]; then
-      ${ECHO} "ERROR: \$${str} is not defined"; exit 1
-    fi
-  done
-}
-check_dirs_exist() { #usage: check_dirs_exist "var1_name" "var2_name" ...
-  for str in "$@"; do
-    eval "path=\${$str}"
-    if [ ! -d ${path} ]; then
-      ${ECHO} "ERROR: ${path}/ does not exist"; exit 1
-    fi
-  done
-}
 
 export OMP_NUM_THREADS=1
 
-
-
-# Check to make sure required directory defined and existed
-check_if_defined "FCST_LENGTH" "DATA_SHARED" "FIXwrf" "PDY" "cyc" 
-check_dirs_exist "DATA_SHARED" "FIXwrf"
-
 # Initialize an array of WRF input dat files that need to be linked
-set -A WRF_DAT_FILES ${FIXwrf}/run/LANDUSE.TBL          \
-                     ${FIXwrf}/run/RRTM_DATA            \
-                     ${FIXwrf}/run/RRTM_DATA_DBL        \
-                     ${FIXwrf}/run/RRTMG_LW_DATA        \
-                     ${FIXwrf}/run/RRTMG_LW_DATA_DBL    \
-                     ${FIXwrf}/run/RRTMG_SW_DATA        \
-                     ${FIXwrf}/run/RRTMG_SW_DATA_DBL    \
-                     ${FIXwrf}/run/VEGPARM.TBL          \
-                     ${FIXwrf}/run/GENPARM.TBL          \
-                     ${FIXwrf}/run/SOILPARM.TBL         \
-                     ${FIXwrf}/run/MPTABLE.TBL          \
-                     ${FIXwrf}/run/URBPARM.TBL          \
-                     ${FIXwrf}/run/URBPARM_UZE.TBL      \
-                     ${FIXwrf}/run/ETAMPNEW_DATA        \
-                     ${FIXwrf}/run/ETAMPNEW_DATA.expanded_rain        \
-                     ${FIXwrf}/run/ETAMPNEW_DATA.expanded_rain_DBL    \
-                     ${FIXwrf}/run/ETAMPNEW_DATA_DBL    \
-                     ${FIXwrf}/run/co2_trans            \
-                     ${FIXwrf}/run/ozone.formatted      \
-                     ${FIXwrf}/run/ozone_lat.formatted  \
-                     ${FIXwrf}/run/ozone_plev.formatted \
-                     ${FIXwrf}/run/bulkdens.asc_s_0_03_0_9 \
-                     ${FIXwrf}/run/bulkradii.asc_s_0_03_0_9  \
-                     ${FIXwrf}/run/capacity.asc         \
-                     ${FIXwrf}/run/CCN_ACTIVATE.BIN     \
-                     ${FIXwrf}/run/coeff_p.asc          \
-                     ${FIXwrf}/run/coeff_q.asc          \
-                     ${FIXwrf}/run/constants.asc        \
-                     ${FIXwrf}/run/kernels.asc_s_0_03_0_9  \
-                     ${FIXwrf}/run/kernels_z.asc           \
-                     ${FIXwrf}/run/masses.asc              \
-                     ${FIXwrf}/run/termvels.asc            \
-                     ${FIXwrf}/run/wind-turbine-1.tbl      \
-                     ${FIXwrf}/run/tr49t85              \
-                     ${FIXwrf}/run/tr49t67              \
-                     ${FIXwrf}/run/tr67t85              \
-                     ${FIXwrf}/run/grib2map.tbl         \
-                     ${FIXwrf}/run/gribmap.txt          \
-                     ${FIXwrf}/run/freezeH2O.dat        \
-                     ${FIXwrf}/run/qr_acr_qg.dat        \
-                     ${FIXwrf}/run/qr_acr_qs.dat        \
-                     ${FIXwrf}/run/eclipse_besselian_elements.dat
+set -A WRF_DAT_FILES ${PARMrtma3d}/${RUN}_run_LANDUSE.TBL          \
+                     ${PARMrtma3d}/${RUN}_run_RRTM_DATA            \
+                     ${PARMrtma3d}/${RUN}_run_RRTM_DATA_DBL        \
+                     ${PARMrtma3d}/${RUN}_run_RRTMG_LW_DATA        \
+                     ${PARMrtma3d}/${RUN}_run_RRTMG_LW_DATA_DBL    \
+                     ${PARMrtma3d}/${RUN}_run_RRTMG_SW_DATA        \
+                     ${PARMrtma3d}/${RUN}_run_RRTMG_SW_DATA_DBL    \
+                     ${PARMrtma3d}/${RUN}_run_VEGPARM.TBL          \
+                     ${PARMrtma3d}/${RUN}_run_GENPARM.TBL          \
+                     ${PARMrtma3d}/${RUN}_run_SOILPARM.TBL         \
+                     ${PARMrtma3d}/${RUN}_run_MPTABLE.TBL          \
+                     ${PARMrtma3d}/${RUN}_run_URBPARM.TBL          \
+                     ${PARMrtma3d}/${RUN}_run_URBPARM_UZE.TBL      \
+                     ${PARMrtma3d}/${RUN}_run_ETAMPNEW_DATA        \
+                     ${PARMrtma3d}/${RUN}_run_ETAMPNEW_DATA.expanded_rain        \
+                     ${PARMrtma3d}/${RUN}_run_ETAMPNEW_DATA.expanded_rain_DBL    \
+                     ${PARMrtma3d}/${RUN}_run_ETAMPNEW_DATA_DBL    \
+                     ${PARMrtma3d}/${RUN}_run_co2_trans            \
+                     ${PARMrtma3d}/${RUN}_run_ozone.formatted      \
+                     ${PARMrtma3d}/${RUN}_run_ozone_lat.formatted  \
+                     ${PARMrtma3d}/${RUN}_run_ozone_plev.formatted \
+                     ${PARMrtma3d}/${RUN}_run_bulkdens.asc_s_0_03_0_9 \
+                     ${PARMrtma3d}/${RUN}_run_bulkradii.asc_s_0_03_0_9  \
+                     ${PARMrtma3d}/${RUN}_run_capacity.asc         \
+                     ${PARMrtma3d}/${RUN}_run_CCN_ACTIVATE.BIN     \
+                     ${PARMrtma3d}/${RUN}_run_coeff_p.asc          \
+                     ${PARMrtma3d}/${RUN}_run_coeff_q.asc          \
+                     ${PARMrtma3d}/${RUN}_run_constants.asc        \
+                     ${PARMrtma3d}/${RUN}_run_kernels.asc_s_0_03_0_9  \
+                     ${PARMrtma3d}/${RUN}_run_kernels_z.asc           \
+                     ${PARMrtma3d}/${RUN}_run_masses.asc              \
+                     ${PARMrtma3d}/${RUN}_run_termvels.asc            \
+                     ${PARMrtma3d}/${RUN}_run_wind-turbine-1.tbl      \
+                     ${PARMrtma3d}/${RUN}_run_tr49t85              \
+                     ${PARMrtma3d}/${RUN}_run_tr49t67              \
+                     ${PARMrtma3d}/${RUN}_run_tr67t85              \
+                     ${PARMrtma3d}/${RUN}_run_grib2map.tbl         \
+                     ${PARMrtma3d}/${RUN}_run_gribmap.txt          \
+                     ${PARMrtma3d}/${RUN}_run_freezeH2O.dat        \
+                     ${PARMrtma3d}/${RUN}_run_qr_acr_qg.dat        \
+                     ${PARMrtma3d}/${RUN}_run_qr_acr_qs.dat        \
+                     ${PARMrtma3d}/${RUN}_run_eclipse_besselian_elements.dat
+
 for file in ${WRF_DAT_FILES[@]}; do
   if [ ! -s ${file} ]; then
-    ${ECHO} "ERROR: ${file} either does not exist or is empty"
-    exit 1
+    echo "FATAL ERROR: ${file} either does not exist or is empty"
+    err_exit
   fi
 done
 
-  SUBH_TIME='00'
-  tz_str=t${cyc}z
-START_TIME=`${DATE} -d "${PDY} ${cyc} ${SUBH_TIME} minutes"`
+export WRF_NAMELIST=namelist.input
+cpreq ${PARMrtma3d}/${RUN}ak_wrf.nl ${WRF_NAMELIST}      # No IO-Quilting in wrf namelist as default
 
-# Compute date & time components for the analysis time
-YYYYMMDDHH=`${DATE} +"%Y%m%d%H" -d "${START_TIME}"`
-YYYYMMDDHHMM=`${DATE} +"%Y%m%d%H%M" -d "${START_TIME}"`
-time_1hour_ago=`${DATE} -d "${START_TIME} 1 hour ago" +%Y%m%d%H`
-time_str=`${DATE} "+%Y-%m-%d_%H_%M_%S" -d "${START_TIME}"`
-time_str2=`${DATE} "+%Y-%m-%d_%H_00_00" -d "${START_TIME}"`
-END_TIME=`${DATE} -d "${START_TIME}  ${FCST_LENGTH} seconds"`
-
-# Choose to use the modified model that does not do the integral (default: to avoid model crash)
-#     or to use the original model (export L_WRFARW_NOFCST = "False" or "No")
-export L_WRFARW_NOFCST=${L_WRFARW_NOFCST:-"True"}   # default: using the modified model to 
-                                                    #   avoid possible model crash, and must
-                                                    #   turn off IO-quilting in namelist.
-
-#----- enter working directory -------
-cd ${DATAHOME}
-${ECHO} "enter working directory:${DATAHOME}"
-
-export WRF_NAMELIST=${DATAHOME}/namelist.input
-${CP} ${PARMwrf}/hrrr_alaska.nl ${WRF_NAMELIST}      # No IO-Quilting in wrf namelist as default
-
-# Check to make sure the ICs file (wrfinput_d01) file exists
 if [ -r ${DATA_SHARED}/wrf_inout ]; then
-  ${ECHO} " Initial condition ==> ${DATA_SHARED}/wrf_inout "
-  ${CP} ${DATA_SHARED}/wrf_inout ${DATAHOME}/wrf_inout
-  ${LN} -s ${DATAHOME}/wrf_inout wrfinput_d01
+  echo " Initial condition ==> ${DATA_SHARED}/wrf_inout "
+  cpreq ${DATA_SHARED}/wrf_inout wrf_inout
+  ln -s wrf_inout wrfinput_d01
 else
-  ${ECHO} "ERROR: ${DATA_SHARED}/wrf_inout does not exist, or is not readable"
-  exit 1
+  err_exit "FATAL ERROR: ${DATA_SHARED}/wrf_inout does not exist, or is not readable"
 fi
 
 
 # Make links to the WRF DAT files
 for file in ${WRF_DAT_FILES[@]}; do
-  ${LN} -sf ${file} .
+  tempfile=`basename ${file}`
+  tempname=`echo ${tempfile} | sed s/${RUN}_run_//`
+  rm -f ${tempname}
+  ln -sf ${file} ${tempname}
 done
 
-# Get the start and end time components
-start_year=`${DATE} +%Y -d "${START_TIME}"`
-start_month=`${DATE} +%m -d "${START_TIME}"`
-start_day=`${DATE} +%d -d "${START_TIME}"`
-start_hour=`${DATE} +%H -d "${START_TIME}"`
-start_minute=`${DATE} +%M -d "${START_TIME}"`
-start_second=`${DATE} +%S -d "${START_TIME}"`
-end_year=`${DATE} +%Y -d "${END_TIME}"`
-end_month=`${DATE} +%m -d "${END_TIME}"`
-end_day=`${DATE} +%d -d "${END_TIME}"`
-end_hour=`${DATE} +%H -d "${END_TIME}"`
-end_minute=`${DATE} +%M -d "${END_TIME}"`
-end_second=`${DATE} +%S -d "${END_TIME}"`
+start_year=${CDATE:0:4}
+start_month=${CDATE:4:2}
+start_day=${CDATE:6:2}
+start_hour=${CDATE:8:2}
+start_minute=00
+start_second=00
+end_year=${CDATE:0:4}
+end_month=${CDATE:4:2}
+end_day=${CDATE:6:2}
+end_hour=${CDATE:8:2}
+end_minute=00
+end_second=20
+
+time_str="${start_year}-${start_month}-${start_day}_${start_hour}_${start_minute}_${start_second}"
 
 # Compute number of days and hours for the run
 (( run_days = 0 ))
@@ -148,7 +106,7 @@ minute=[Mm][Ii][Nn][Uu][Tt][Ee]
 second=[Ss][Ee][Cc][Oo][Nn][Dd]
 
 # Update the run_days,run_hours,start_time,end_time in wrf namelist.input
-${SED} -i "\
+sed -i "\
    s/\(${run}_${day}[Ss]\)${equal}[[:digit:]]\{1,\}/\1 = ${run_days}/;    \
    s/\(${run}_${hour}[Ss]\)${equal}[[:digit:]]\{1,\}/\1 = ${run_hours}/;  \
 \
@@ -167,88 +125,33 @@ ${SED} -i "\
    s/\(${end}_${second}\)${equal}[[:digit:]]\{2\}/\1 = ${end_second}/;    \
 " ${WRF_NAMELIST}
 
-chmod 755 ${WRF_NAMELIST}
-
-# Move existing rsl files to a subdir if there are any
-${ECHO} "Checking for pre-existing rsl files"
-if [ -f "rsl.out.0000" ]; then
-  rsldir=rsl.`${LS} -l --time-style=+%Y%m%d%H%M%S rsl.out.0000 | ${CUT} -d" " -f 7`
-  ${MKDIR} ${rsldir}
-  ${ECHO} "Moving pre-existing rsl files to ${rsldir}"
-  ${MV} rsl.out.* ${rsldir}
-  ${MV} rsl.error.* ${rsldir}
-else
-  ${ECHO} "No pre-existing rsl files were found"
-fi
-
-
 # Run WRF to update reflectivity fields
-# export pgm="${NET}_wrfarw_fcst"
-if [[ ${L_WRFARW_NOFCST} =~ [TtYy] ]] ; then
-  echo "run with modified WRF model that does not actually foreast"
-  export pgm="${NET}_wrfarw_nofcst"              # using the modified WRF which does not integral
-else
-  echo "run with original WRF model that does foreast"
-  export pgm="${NET}_wrfarw_fcst"                # using the original WRF which does integral
-fi
-
+echo "run with modified WRF model that does not actually foreast"
+export pgm="${NET}_wrfarw_nofcst"              # using the modified WRF which does not integrate
 . prep_step
 startmsg
-msg="***********************************************************"
-postmsg "$jlogfile" "$msg"
-msg="  begin updating reflectivity by a one-time_step WRF"
-postmsg "$jlogfile" "$msg"
-msg="***********************************************************"
-postmsg "$jlogfile" "$msg"
 
-CP_LN=${CP}
-#${CP_LN} ${EXECrtma3d}/${exefile_name_updatevars} ${pgm}
-now=`${DATE} +%Y%m%d%H%M%S`
-export APRUN="mpiexec -n 384 -ppn 64 --cpu-bind core "
-$APRUN ${EXECrtma3d}/${pgm}
+echo "  begin updating reflectivity by a one-time_step WRF"
+
+APRUN="mpiexec -n $ntasks -ppn $ppn --cpu-bind core "
+$APRUN ${EXECrtma3d}/${pgm} >>$pgmout 2>errfile
 export err=$?; err_chk
-# Save a copy of the RSL files
-rsldir=rsl.wrf.${now}
-${MKDIR} ${rsldir}
-mv rsl.out.* ${rsldir}
-mv rsl.error.* ${rsldir}
 
 # Check to see if the 0h output is there:
-if [ ! -e "wrfout_d01_${time_str}" ]; then
-  ${ECHO} "WRF failed at the first time step!"
-  exit 1
+if [ -e "wrfout_d01_${time_str}" ]; then
+  ln -s wrfout_d01_${time_str} wrfout_d01
+else
+  err_exit "FATAL ERROR: WRF failed at the first time step!"
 fi 
 
-${LN} -s wrfout_d01_${time_str} wrfout_d01
-
 # Output successful so write status to log
-${ECHO} "Assemble Reflectivity fields back into wrf_inout"
+echo "Assemble Reflectivity fields back into wrf_inout"
 
-${NCKS} -A -v REFL_10CM,COMPOSITE_REFL_10CM,REFL_10CM_1KM,REFL_10CM_4KM wrfout_d01 wrf_inout
+ncks -A -v REFL_10CM,COMPOSITE_REFL_10CM,REFL_10CM_1KM,REFL_10CM_4KM wrfout_d01 wrf_inout
 
-## skipping the following if-block which saves the old analysis file 
-#   (since only reflectivity fields are updated, and the original reflectivity are available
-#     in the firstguess file which is saved.)
-# if [ -f ${COMOUTgsi_rtma3d}/${ANLrtma3d_FNAME} ]; then
-#   ${ECHO} "Erasing the GSI generated analysis file to be replaced by modified analysis."
-#   ${MV} ${COMOUTgsi_rtma3d}/${ANLrtma3d_FNAME} ${COMOUTgsi_rtma3d}/old_analysis
-# fi
+cpreq -p wrf_inout ${COMOUT}/${RUN}ak.t${cyc}z.wrf_inout.nc
+cpreq -p rsl.out.0000 ${COMOUT}/${RUN}ak.t${cyc}z.rslout
+cat rsl.out.0000
 
-# coping the final updated analysis file wrf_inout to COM2, and saving it under shared directory as backup.
-#${CP} -p wrf_inout ${COMOUTgsi_rtma3d}/${ANLrtma3d_FNAME}
-#cp -p wrf_inout ${COMOUT}/${ANLrtma3d_FNAME}
- cp -p wrf_inout ${COMOUT}/${RUN}ak.t${cyc}z.wrf_inout.nc
- cp -p wrf_inout ${DATA_SHARED}/wrf_inout
-${LN} -sf ${DATA_SHARED}/wrf_inout     ./wrf_inout       # linking back as a back-up
-
-${ECHO} "update_vars.ksh completed successfully at `${DATE}`"
-
-# Saving some files
-${CP} -p namelist.input  ${COMOUTwrf_rtma3d}/namelist.input_${cycle_str}
-
-
-msg="JOB $job FOR $NET HAS COMPLETED NORMALLY"
-postmsg "$jlogfile" "$msg"
-
-exit 0
+postmsg "$0 of $job completed normally"
 

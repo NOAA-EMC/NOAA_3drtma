@@ -9,107 +9,64 @@
 # 2014-08-01  G Manikin - new script 
 # 2016-02-05  G Manikin - HRRRv2 (extension to f18)
 # 2018-01-24  B Blake / G Manikin - HRRRv3
+# 2026-05-24  A Gibbs / E Colon - RTMA3Dv1
 ####################################################
 set -x
 
-#cd $DATA
-
 export PS4='SNDP $SECONDS + '
 
-
-cp ${FIXwrfbufr}/hrrrak_bufr.tbl hrrr_bufr.tbl
-cp ${FIXwrfbufr}/hrrrak_modtop.parm hrrr_modtop.parm
-cp ${FIXwrfbufr}/hrrrak_sndp.parm.mono sndp.parm
-#cp ${FIXwrfbufr}/sndp_input .
+cpreq ${PARMrtma3d}/${RUN}ak_bufr.tbl .
+cpreq ${PARMrtma3d}/${RUN}ak_modtop.parm .
+cpreq ${PARMrtma3d}/${RUN}ak_sndp.parm.mono sndp.parm
+cpreq ${PARMrtma3d}/${RUN}_sndp_input sndp_input
 
 fhr=00
-#typeset -Z2 fhr
-#if [ $cyc -eq 00 -o $cyc -eq 06 -o $cyc -eq 12 -o $cyc -eq 18 ]; then
-#  endfhr=48
-#else
-#  endfhr=18
-#fi
 tmmark=tm00
 
-#rm -rf profilm*
-
-# copy in the profilm file from each forecast hour's wrfbufr directory
-#while [ $fhr -le $endfhr ]
-#do
-#   PROFDIR=${DATAROOT}/hrrr_${dom}_wrfbufr_${envir}_${cyc}_f${fhr}
-#   cp ${PROFDIR}/profilm.c1.f${fhr} .
-#   if [ $fhr -ne 0 ]; then
-#     let "fhr1=fhr-1"
-#     typeset -Z2 fhr1
-#     cat profilm_f${fhr1} profilm.c1.f${fhr} > profilm_f${fhr}
-#   else
-#     cp profilm.c1.f${fhr} profilm_f${fhr}
-#   fi
-#   let "fhr=fhr+1"
-#   typeset -Z2 fhr
-#done
-
-mv profilm.c1.f${cyc} profilm.c1.${tmmark}
+cpreq ${DATA_SHARED}/profilm.c1.f${cyc} profilm.c1.${tmmark}
 
 ln -sf sndp.parm    fort.11
-ln -sf hrrr_bufr.tbl fort.32
+ln -sf ${RUN}ak_bufr.tbl fort.32
 ln -sf profilm.c1.${tmmark} fort.66
 ln -sf class1.bufr fort.78
+
 export pgm="${NET}_sndp"
-#${EXECrtma3d}/rtma_sndp < hrrr_modtop.parm  > sndp.out
-${EXECrtma3d}/${pgm} < hrrr_modtop.parm  > sndp.out
+. prep_step
+startmsg
+
+${EXECrtma3d}/${pgm} < ${RUN}ak_modtop.parm  > sndp.out
 export err=$?; err_chk
 
-#need to manipulate the file to get it to be compatible
-#  with gempak on wcoss
-#cwordsh unblk class1.bufr class1.bufr_unblock
-#cwordsh block class1.bufr_unblock class1.bufr_block
+if [ $SENDCOM == "YES" ]; then
+  cpreq class1.bufr ${COMOUT}/${RUN}ak.t${cyc}z.class1.bufr
+  cpreq profilm.c1.${tmmark} ${COMOUT}/${RUN}ak.t${cyc}z.profilm.c1
+fi
 
-#if [ $SENDCOM == "YES" ]; then
-#  cp class1.bufr_block ${COMOUT}/hrrr.t${cyc}z.class1.bufr.${tmmark}
-#fi
-
-#Send bufr file
-#if test "$SENDDBN" = 'YES'
-#  then
-#   $DBNROOT/bin/dbn_alert MODEL HRRR_BUFRSND${ALERT_EXT} $job $COMOUT/hrrr.t${cyc}z.class1.bufr.${tmmark}
-#fi
 ### break out bufr file into individual station files
- cat <<EOF > stnmlist_input
+cat <<EOF > stnmlist_input
 1
 class1.bufr
-bufr.${cycle}/bufr
+bufr.${cyc}/bufr
 EOF
 
-   mkdir -p bufr.${cycle}
+mkdir -p bufr.${cyc}
 
-   ln -sf class1.bufr fort.20
-   export DIRD=bufr.${cycle}/bufr
+ln -sf class1.bufr fort.20
+export DIRD=bufr.${cyc}/bufr
 
-  export pgm=${NET}_stnmlist
-  startmsg
-  ${EXECrtma3d}/${pgm} < stnmlist_input >> $pgmout 2> errfile
-  err=$?;export err ;err_chk
+export pgm=${NET}_stnmlist
+. prep_step
+startmsg
+${EXECrtma3d}/${pgm} < stnmlist_input >> $pgmout 2> errfile
+export err;err_chk
 
-# Tar and gzip the individual bufr files and send them to /com
-cd bufr.${cycle}
-tar -cf - . | /usr/bin/gzip > ../hrrrak.${cycle}.bufrsnd.tar.gz
-cp * ${COMOUTbufrsnd_rtma3d}
+# Tar and gzip the individual bufr files and send them to COM
+mkdir -p ${COMOUT}/bufrsnd.t${cyc}z
+cd bufr.${cyc}
+tar -cf - . | /usr/bin/gzip > ../hrrr.${cyc}.bufrsnd.tar.gz
+cpreq ../hrrr.${cyc}.bufrsnd.tar.gz $COMOUT/${RUN}ak.t${cyc}z.bufrsnd.tar.gz
+cpreq * ${COMOUT}/bufrsnd.t${cyc}z
 
+postmsg "$0 of $job completed normally"
 
-#cd ${DATA}
-#if test "$SENDCOM" = 'YES'
-#then
-#   cp hrrr.${cycle}.bufrsnd.tar.gz ${COMOUT}/hrrr.${cycle}.bufrsnd.tar.gz
-#fi
-
-#Send the alerts
-#if test "$SENDDBN" = 'YES'
-#  then
-#   $DBNROOT/bin/dbn_alert MODEL HRRR_BUFRSND_TAR${ALERT_EXT} $job ${COMOUT}/hrrr.${cycle}.bufrsnd.tar.gz
-#fi
-
-# make gempak files
-#$USHhrrr/hrrr_bfr2gpk.sh
-
-exit
+date
