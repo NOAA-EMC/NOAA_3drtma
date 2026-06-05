@@ -3,7 +3,7 @@ set -x
 
 # option for netcdf-format obs diag file
 RUN_NCDIAG=${RUN_NCDIAG:-"Yes"} # netcdf format obs-diag file (default: Yes)
-if [[ "${RUN_NCDIAG}" =~ [YfTt] ]]  ; then
+if [[ "${RUN_NCDIAG}" =~ [YyTt] ]]  ; then
 
 #========================================================================================#
 #  creating command file for CFP on wcoss2
