@@ -2,115 +2,52 @@
 ################################################################################
 ####  UNIX Script Documentation Block
 #                      .                                             .
-# Script name:         exhrrr_wrfbufr.sh
-# Script description:  Run hrrr wrfbufr jobs
+# Script name:         exrtma3d_wrfbufr.ksh
+# Script description:  Run rtma3d wrfbufr jobs
 #
 # Author:      G Manikin   EMC         Date: 2014-08-01
 #
-# Abstract: This script runs the HRRR wrfbufr jobs for the 18-h HRRR forecast
+# Abstract: This script runs the rtma3d wrfbufr jobs
 #
 # Script history log:
 # 2014-08-01  G Manikin - new script 
 # 2018-01-24  B Blake / G Manikin - HRRRv3
+# 2026-05-24  A Gibbs / E Colon - RTMA3Dv1
 #
 
 set -xa
-#mkdir $DATA
-#cd $DATA 
 
-msg="$job HAS BEGUN"
-postmsg $jlogfile "$msg"
-typeset -Z2 fhrold
-typeset -Z2 fhr
-typeset -Z2 fmin
-typeset  -Z2 INCR
-# fhr is passed from the SMS script
-fhr=${cyc}
-fmin=00
 # Set up some constants
 export XLFRTEOPTS="unit_vars=yes"
 export CORE=RAPR
 export OUTTYP=binarympiio
-DATE=/bin/date
 
-START_TIME=$PDY$cyc
-echo $START_TIME
+cpreq ${FIXrtma3d}/${RUN}ak_hrrrak_profdat .
 
-cp ${FIXwrfbufr}/hrrrak_profdat hrrr_profdat
 OUTTYP=netcdf
 model=RAPR
 NFILE=1
 INCR=01
-CYCLE1=`$NDATE -1 $START_TIME`
-#date=`$NDATE $fhr $START_TIME`
-date=$START_TIME
-wyr=`echo $date | cut -c1-4`
-wmn=`echo $date | cut -c5-6`
-wdy=`echo $date | cut -c7-8`
-whr=`echo $date | cut -c9-10`
+CDATEm1=`$NDATE -1 $CDATE`
+YYYY=`echo $CDATE | cut -c1-4`
+MM=`echo $CDATE | cut -c5-6`
+DD=`echo $CDATE | cut -c7-8`
+fmin=00
 
-echo $wyr $wmn $wdy $whr
-if [ ${fhr} -eq 00 ]; then
-    fhrold=23
-else
-let fhrold="$fhr - 01"
-fi
-#dateold=`$NDATE $fhrold $START_TIME`
-dateold=$CYCLE1
-oyr=`echo $dateold | cut -c1-4`
-omn=`echo $dateold | cut -c5-6`
-ody=`echo $dateold | cut -c7-8`
-ohr=`echo $dateold | cut -c9-10`
+oyr=`echo $CDATEm1 | cut -c1-4`
+omn=`echo $CDATEm1 | cut -c5-6`
+ody=`echo $CDATEm1 | cut -c7-8`
+ohr=`echo $CDATEm1 | cut -c9-10`
 
-timeform=${wyr}"-"${wmn}"-"${wdy}"_"${whr}"_00_00"
+timeform=${YYYY}"-"${MM}"-"${DD}"_"${cyc}"_00_00"
 timeformold=${oyr}"-"${omn}"-"${ody}"_"${ohr}"_00_00"
+START_TIME=${YYYY}'-'${MM}'-'${DD}'_'${cyc}':00:00'
 
-#cp ${COMOUTgsi_rtma3d}/${RUN}.t${fhr}z.wrf_inout.nc wrfoutd01_${timeform}
-#cp ${COMOUTgsi_rtma3dm1}/${RUN}.t${ohr}z.wrf_inout.nc wrfoutd01_${timeformold}
-cp ${COMOUT}/${RUN}ak.t${fhr}z.wrf_inout.nc wrfoutd01_${timeform}
-cp ${COMOUT}/${RUN}ak.t${ohr}z.wrf_inout.nc wrfoutd01_${timeformold}
-
-#cp ${COMOUTgsi_rtma3d}/wrfout_d01_${timeform}  wrfoutd01_${timeform}
-#if [ $fhr -eq 0 ]; then
-# Look back 3 hours for relevant file - if not found, we do not want to
-# utilize information from an old cycle for hourly average fields
-#  counter=1
-#  while [[ $counter -lt 04 ]]; do
-#    counterhr=$counter
-#    typeset -Z2 counterhr
-#    CYC_TIME=`$NDATE -${counter} $dateold` 
-#    if [ -r ${HRRRGES_SFC}/hrrr_${CYC_TIME}f0$counterhr ]; then
-#      echo "Found hrrr_${CYC_TIME}f0$counterhr for $dateold"
-#      cp ${HRRRGES_SFC}/hrrr_${CYC_TIME}f0$counterhr ./wrfoutd01_${timeformold}
-#      break
-#    fi
-#    counter=` expr $counter + 1 `
-#  done
-#  if [ $counter -eq 04 ]; then
-#    echo "No file found for $dateold"
-#  fi
-#else
-#  cp ${COMOUTgsi_rtma3d}/wrfout_d01_${timeformold} wrfoutd01_${timeformold} 
-#fi
+cp ${COMIN}/${RUN}ak.t${cyc}z.wrf_inout.nc wrfoutd01_${timeform}
+cp ${COMINm1}/${RUN}ak.t${ohr}z.wrf_inout.nc wrfoutd01_${timeformold}
 
 OUTFIL=wrfoutd01_${timeform}
 OLDOUTFIL=wrfoutd01_${timeformold}
-
-START_TIME=`echo "${START_TIME}" | sed 's/\([[:digit:]]\{2\}\)$/ \1/'`
-START_TIME=`${DATE} -d "${START_TIME}"`
-#END_TIME=`${DATE} -d "${START_TIME} $fhr hours"`
-END_TIME=`${DATE} -d "${START_TIME} $fmin hours"`
-echo $END_TIME
-
-YYYY=`${DATE} +"%Y" -d "${START_TIME}"`
-MM=`${DATE} +"%m" -d "${START_TIME}"`
-DD=`${DATE} +"%d" -d "${START_TIME}"`
-HH=`${DATE} +"%h" -d "${START_TIME}"`
-
-VALIDTIME=${YYYY}'-'${MM}'-'${DD}'_'${whr}':00:00'
-START_TIME=${YYYY}'-'${MM}'-'${DD}'_'${cyc}':00:00'
-VTIME=${YYYY}${MM}${DD}${whr}
-echo $VTIME 
 
 cat > itag <<EOF
 $OUTFIL
@@ -123,23 +60,20 @@ ${fmin}
 $OLDOUTFIL
 EOF
 
+export pgm="${NET}_wrfbufr_${dom}"
+. prep_step
+startmsg
+
 ln -sf itag              fort.11
-ln -sf hrrr_profdat  fort.19
+ln -sf ${RUN}ak_hrrrak_profdat  fort.19
 ln -sf profilm.c1.tm00 fort.79
 
-datestr=`date`
-echo about to run program at $datestr
-
-#startmsg
-export pgm="${NET}_wrfbufr_alaska"
-#cp ${EXECrtma3d}/rtma_wrfbufr_alaska hrrr_wrfbufr
 runline="mpiexec -n 1 -ppn 1 $EXECrtma3d/${pgm}"
 $runline
 export err=$?; err_chk
 
-mv profilm.c1.tm00 profilm.c1.f${fhr}
+mv profilm.c1.tm00 ${DATA_SHARED}/profilm.c1.f${cyc}
 
-postmsg $jlogfile "HRRR WRFBUFR done for F${fhr}"
+postmsg "$0 of $job completed normally"
 
-echo EXITING $0
-exit
+date

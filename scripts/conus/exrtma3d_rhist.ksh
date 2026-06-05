@@ -57,34 +57,14 @@ cp -p $COMINm1/rtma3d.${cyclem1}.* $DATA/$PDYm1/prdgen.${cyclem1}
 cp -p $COMINm2/rtma3d.${cyclem2}.* $DATA/$PDYm2/prdgen.${cyclem2}
 cp -p $COMINm3/rtma3d.${cyclem3}.* $DATA/$PDYm3/prdgen.${cyclem3}
 
-#ln -sf  $COMINobsproc_rtma3dm1 $DATA/$PDYm1
-#ln -sf  $COMINobsproc_rtma3dm2 $DATA/$PDYm2
-#ln -sf  $COMINobsproc_rtma3dm3 $DATA/$PDYm3
-
-#ln -sf  $GESINhrrr_rtma3dm1 $DATA/$PDYm1
-#ln -sf  $GESINhrrr_rtma3dm2 $DATA/$PDYm2
-#ln -sf  $GESINhrrr_rtma3dm3 $DATA/$PDYm3
-
-#ln -sf  $COMOUTgsi_rtma3dm1 $DATA/$PDYm1
-#ln -sf  $COMOUTgsi_rtma3dm2 $DATA/$PDYm2
-#ln -sf  $COMOUTgsi_rtma3dm3 $DATA/$PDYm3
-
 ln -sf  $COMOUTpost_rtma3dm1 $DATA/$PDYm1
 ln -sf  $COMOUTpost_rtma3dm2 $DATA/$PDYm2
 ln -sf  $COMOUTpost_rtma3dm3 $DATA/$PDYm3
-
-ln -sf  $COMOUTbufrsnd_rtma3dm1 $DATA/$PDYm1
-ln -sf  $COMOUTbufrsnd_rtma3dm2 $DATA/$PDYm2
-ln -sf  $COMOUTbufrsnd_rtma3dm3 $DATA/$PDYm3
 
 ln -sf  $COMOUTautoqc_rtma3dm1 $DATA/$PDYm1
 ln -sf  $COMOUTautoqc_rtma3dm2 $DATA/$PDYm2
 ln -sf  $COMOUTautoqc_rtma3dm3 $DATA/$PDYm3
 
-ln -sf  $COMOUThrrrdas_rtma3dm1 $DATA/$PDYm1
-ln -sf  $COMOUThrrrdas_rtma3dm2 $DATA/$PDYm2
-ln -sf  $COMOUThrrrdas_rtma3dm3 $DATA/$PDYm3
- 
 ls -1r */*/* | awk '
 
             /prepbufr/ { print "./"$0 > "perm" ; next }

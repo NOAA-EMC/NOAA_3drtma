@@ -1,4 +1,4 @@
-#!/bin/ksh
+#!/bin/sh
 
 # --- for debug --- #
 date
@@ -19,26 +19,13 @@ export RUN_ENVIR=${RUN_ENVIR:-nco}
 ####################################
 export NET=${NET:-rtma3d}
 export RUN=${RUN:-rtma3d}
-export model=${model:-rtma3d}
-
-##########################################################
-# obtain unique process id (pid)
-##########################################################
-export job=${job:-"${outid}.o$$"}
-export jobid=${jobid:-"${outid}.o$$"}
-export MPIRUN=${MPIRUN:-"mpirun"}
-
-export CNVGRIB=${CNVGRIB:-cnvgrib}
 
 ##########################################################
 # make temp/running directories
 ##########################################################
-export DATA=${DATA:-$DATAROOT/${jobid:?}} #jobid ($job.$LSB_JOBID MUST BE DEFINED IN TERMS OF $RUN IN UPPER LEVEL SCRIPT /MPondeca, 26Jul2015
-if [ -d $DATA ] ; then
-   rm  -rf $DATA/*
-else
-   mkdir -p $DATA
-fi
+export DATA=${DATA:-$DATAROOT/${jobid:?}}
+export DATA_SHARED=${DATA_SHARED:-${DATAROOT}/sharedprd}
+mkdir -p $DATA $DATA_SHARED
 cd $DATA
 
 #####################################################
@@ -46,97 +33,44 @@ cd $DATA
 #    setpdy.sh needs the variables 
 #    $PDY and $cyc already defined in advance
 #####################################################
-#setpdy.sh
-#. ${DATA}/PDY
-
-
 export cycle=${cycle:-t${cyc}z}
-export PDYHH="${PDY}${cyc}"
-PDYm1=`$NDATE -24 ${PDY}${cyc} | cut -c 1-8`
+setpdy.sh 
+. ./PDY
 
-####################################
-# Determine Job Output Name on System
-####################################
-export LOG_JJOB=${LOG_JJOB:-$COMROOT/logs/jlogfiles}
-export jlogfile=${jlogfile:-$LOG_JJOB/jlogfile.${jobid}}
-# export pgmout=${pgmout:-"OUTPUT.$$"}
-export pgmout=${pgmout:-"OUTPUT.${PDY}${cyc}.${jobid}"}
-if [ ! -d ${LOG_JJOB} ] ; then
-   mkdir -p ${LOG_JJOB}
-fi
-if [ ! -d ${LOG_PGMOUT} ] ; then
-   mkdir -p ${LOG_PGMOUT}
-fi
+export CDATE="${PDY}${cyc}"
 
-# specify the file head for the file names of the archived data files
-export PROD_HEAD=${PROD_HEAD:-${NET}.t${cyc}z}
+export pgmout=${pgmout:-"OUTPUT.$$"}
 
 # Specify Execution Areas
-export HOMErtma3d=${HOMErtma3d:-$NWROOT/rtma.${rtma_ver}}
+export HOMErtma3d=${HOMErtma3d:-$PACKAGEROOT/${NET}.${rtma3d_ver}}
 export EXECrtma3d=${EXECrtma3d:-$HOMErtma3d/exec}
 export FIXrtma3d=${FIXrtma3d:-$HOMErtma3d/fix/${dom}}
 export PARMrtma3d=${PARMrtma3d:-$HOMErtma3d/parm/${dom}}
 export USHrtma3d=${USHrtma3d:-$HOMErtma3d/ush/${dom}}
-export UTILrtma3d=${UTILrtma3d:-$HOMErtma3d/util/${NET}}
-
-# Set the path to the GSI static files
-export FIXgsi=${FIXgsi:-"${FIXrtma3d}/gsi"}
 
 #################################################
 # Set up the INPUT and OUTPUT directories
 #################################################
 export COMIN=${COMIN:-$(compath.py  ${envir}/${NET}/${rtma3d_ver})/${RUN}.${PDY}/${dom}}
 export COMOUT=${COMOUT:-$(compath.py -o  ${envir}/${NET}/${rtma3d_ver})/${RUN}.${PDY}/${dom}}
-export seaice_analysis_ver=v4.5
-export COMINsice=${COMINsice:-$(compath.py prod/seaice_analysis/${seaice_analysis_ver})}
+export COMINsice=${COMINsice:-$(compath.py ${envir}/seaice_analysis/${seaice_analysis_ver})}
 
-### 3DRTMA GSIANL Products (netcdf)
-export COMOUTgsi_rtma3d=${COMOUTgsi_rtma3d:-"${COMOUT}/gsiprd.${cycle}"}
+export SENDCOM=${SENDCOM:-YES}
 
-#   DATA_SHARED: the sub-directory to share the data
-#     (where the GSI analysis file, wrf_inout, is saved)
-export DATA_SHARED=${DATA_SHARED:-"${DATA_RUNDIR}/sharedprd"}
-
-# Directory to store the firstguess as input for the RTMA3D (NETCDF?) 
-
-export GESINhrrr_rtma3d=${GESINhrrr_rtma3d:-"${COMIN}/fgsprd.${cycle}"}
-export PDYHH_cycm1=$($NDATE -01  "${PDYHH}")
-export PDYHH_cycp1=$($NDATE +01  "${PDYHH}")
-
-PDY_cycp1=`echo ${PDYHH_cycp1} | cut -c 1-8`
-
-# set the file name of the firstguess for rtma3d
-if [ ! "${PROD_HEAD}" ] ; then
   export ANLrtma3d_FNAME="${NET}.${cycle}.wrf_inout.nc"
   export FGSrtma3d_FNAME="${NET}.${cycle}.firstguess.nc"
-else
-  export ANLrtma3d_FNAME="${PROD_HEAD}.wrf_inout.nc"
-  export FGSrtma3d_FNAME="${PROD_HEAD}.firstguess.nc"
-fi
  
-# path to the scripts
-export HOMEscript=${SCRIPT_DIR}
-
-if [ ! -d "${COMOUT}" ] ; then
-   echo "ERROR: ${COMOUT} does not exist!"
-   exit 1
-fi
-
-###########################################################
-
 ######################
 # Execute the script.
 ######################
-${exSCR_ANLDUMP:-$HOMErtma3d/scripts/$dom/ex${RUN}_anldump.ksh}
+$HOMErtma3d/scripts/$dom/ex${RUN}_anldump.ksh
 export err=$?; err_chk
 
-msg="$0 of $job completed normally"
-postmsg $jlogfile "$msg"
-
-if [ -e "${pgmout}" ] ; then
-   cat $pgmout
-   cpreq -p $pgmout   ${LOG_PGMOUT}
+if [ -e "$pgmout" ]; then
+  cat $pgmout
 fi
+
+postmsg "$0 of $job completed normally"
 
 ##############################
 # Remove the Temporary working directory
