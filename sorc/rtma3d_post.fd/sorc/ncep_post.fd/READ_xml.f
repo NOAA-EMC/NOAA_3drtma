@@ -1,48 +1,17 @@
 !> @file
-!                .      .    .     
-!> SUBPROGRAM:    READCNTRLgrb2_xml  READS POST xml CONTROL FILE
-!!   PRGRMMR: J. WANG         ORG: NCEP/EMC   DATE: 12-01-27       
-!!     
-!! ABSTRACT:
-!!     THIS ROUTINE READS THE POST AVAILABLE FIELD XML FILE and 
-!!       POST CONTROL XML FILE. EACH SET OF OUTPUT FIELDS GOING TO ONE 
-!!       OUTPUT FILE WILL WILL BE SAVED AND PROCESSED LATER. IN OTHER
-!!       WORDS, POST CONTROL FILE WILL BE READ IN WHOLE ONCE.
-!!     
-!! PROGRAM HISTORY LOG:
-!!   01_27_2012  Jun Wang - INITIAL CODE
-!!   03_10_2015  Lin Gan  - Replace XML file with flat file implementation
-!!                           with parameter marshalling
-!!   07_08_2016 J. Carley - Clean up prints 
-!!     
-!! USAGE:    CALL READ_XML()
-!!   INPUT ARGUMENT LIST:
-!!     NONE
-!!
-!!   OUTPUT ARGUMENT LIST: 
-!!     NONE     - 
-!!     
-!!   OUTPUT FILES:
-!!     NONE
-!!     
-!!   SUBPROGRAMS CALLED:
-!!     UTILITIES:
-!!
-!!     LIBRARY:
-!!       COMMON   - RQSTFLDGRB2
-!!                  CTLBLK
-!!     
-!!   ATTRIBUTES:
-!!     LANGUAGE: FORTRAN
-!!     MACHINE : IBM      
-!!
-      SUBROUTINE READ_xml()
-!
+!> @brief read_postxconfig() reads the post available field XML file and post control XML file. 
+!> Each set of output fields going to one output file will be saved and processed later. 
+!> In other words, post control file will be read in whole once. 
+!> 
+!> ### Program history log:
+!> Date | Programmer | Comments
+!> -----|------------|---------
+!>   2012-01-27 | Jun Wang | INITIAL CODE
+!>   2015-03-10 | Lin Gan  | Replace XML file with flat file implementation with parameter marshalling
+!>   2016-07-08 | J. Carley | Clean up prints 
 
-!
-!     
-!     INCLUDE ETA GRID DIMENSIONS.  SET/DERIVE PARAMETERS.
-!
+      SUBROUTINE READ_xml()
+
        use xml_perl_data,only: post_avblflds,paramset,read_postxconfig
        use grib2_module, only: num_pset
        use rqstfld_mod,only: num_post_afld,MXLVL,lvlsxml
@@ -55,16 +24,11 @@
 !******************************************************************************
 !     START READCNTRL_XML HERE.
 !     
-!     READ post available field table
-      if (me==0) write(*,*)'in readxml,bf readxml,size(post_avblflds%param)=', &
-                            size(post_avblflds%param)
+!> @brief Read post available field table
+
       call read_postxconfig()
       num_post_afld=size(paramset(1)%param)
       num_pset=size(paramset)
-      if (me==0) write(*,*)'in readxml, aft read flat file.xml,num_post_afld=', &
-                            num_post_afld
-      if (me==0) write(*,*)'in readxml, aft read flat file.xml,num_pset=',num_pset
-
 
 ! LinGan below line removed because now we only read one flat file
 !

@@ -75,7 +75,6 @@ list(APPEND LIB_SRC
     MDL2P.f
     MDL2SIGMA2.f
     MDL2SIGMA.f
-    MDL2STD_P.f
     MDL2THANDPV.f
     MDLFLD.f
     MICROINIT.F
@@ -131,7 +130,12 @@ list(APPEND LIB_SRC
 list(APPEND GTG_LIB_SRC
   gtg_algo.F90
   gtg_compute.F90
-  gtg_config.F90
+  gtg_cdf_mod.F90
+  gtg_ReadSetupParams.F90
+  gtg_read_config.F90
+  gtg_mlmodel.F90
+  gtg_prob.F90
+  gtg_interp.F90
   gtg_ctlblk.F90
   gtg_filter.F90
   gtg_indices.F90
@@ -145,14 +149,10 @@ endif()
 list(APPEND LIB_SRC ${GTG_LIB_SRC})
 
 list(APPEND EXE_SRC
-    ASSIGNNEMSIOVAR.f
-    GETNEMSNDSCATTER.f
-    GFSPOSTSIG.F
     INITPOST.F
-    INITPOST_GFS_NEMS_MPIIO.f
-    INITPOST_NEMS.f
+    INITPOST_MPAS.F
     INITPOST_NETCDF.f
-    WRFPOST.f
+    WRFPOST.F
     getIVariableN.f
     getVariable.f
     getlvls.f
@@ -167,11 +167,26 @@ if(NOT wrf_io_FOUND)
     io_int_stubs.f)
 endif()
 
+if(BUILD_WITH_NEMSIO)
+  list(APPEND EXE_SRC
+    ASSIGNNEMSIOVAR.f
+    GETNEMSNDSCATTER.f
+    GFSPOSTSIG.F
+    INITPOST_GFS_NEMS_MPIIO.f
+    INITPOST_NEMS.f)
+endif()
+
 if(CMAKE_Fortran_COMPILER_ID MATCHES "^(Intel)$")
   set(CMAKE_Fortran_FLAGS
       "-g -traceback -fp-model source -free -convert big_endian")
   set(CMAKE_Fortran_FLAGS_RELEASE "-O3")
-  set(CMAKE_Fortran_FLAGS_DEBUG "-O0 -check bounds -check pointers -check shape -check stack -check uninit")
+  set(CMAKE_Fortran_FLAGS_DEBUG "-O0 -ftrapuv -check all -check noarg_temp_created")
+  set_source_files_properties(INITPOST_GFS_NEMS_MPIIO.f INITPOST_NETCDF.f INITPOST_NEMS.f PROPERTIES COMPILE_FLAGS -qoverride-limits)
+elseif(CMAKE_Fortran_COMPILER_ID MATCHES "^(IntelLLVM)$")
+  set(CMAKE_Fortran_FLAGS
+      "-g -traceback -fp-model precise -free -convert big_endian")
+  set(CMAKE_Fortran_FLAGS_RELEASE "-O3")
+  set(CMAKE_Fortran_FLAGS_DEBUG "-O0 -check all -shared-intel -diag-disable=10444 -check noarg_temp_created -ftrapuv")
 elseif(CMAKE_Fortran_COMPILER_ID MATCHES "^(GNU|Clang|AppleClang)$")
   set(CMAKE_Fortran_FLAGS
       "-g -fbacktrace -ffree-form -ffree-line-length-none -fconvert=big-endian")
@@ -227,17 +242,29 @@ endif()
 
 if(BUILD_POSTEXEC)
   add_executable(${EXENAME} ${EXE_SRC})
+  if(ip_FOUND)
+    set(sp_target ip::ip_4)
+    if(ip_VERSION VERSION_GREATER_EQUAL 5.1)
+      target_compile_definitions(${EXENAME} PRIVATE USE_SP_MOD=1)
+    endif()
+  else()
+    set(sp_target sp::sp_4)
+  endif()
   target_link_libraries(${EXENAME} PRIVATE
     ${LIBNAME}
-    nemsio::nemsio
     w3emc::w3emc_4
-    sp::sp_4
-    sfcio::sfcio
-    sigio::sigio)
+    ${sp_target})
   set_target_properties(${EXENAME} PROPERTIES LINKER_LANGUAGE Fortran)
   if(IFI_FOUND)
     target_link_libraries(${EXENAME} PRIVATE IFI)
     target_link_libraries(${EXENAME} PRIVATE tdrp)
+  endif()
+  if(BUILD_WITH_NEMSIO)
+    set_target_properties(nemsio::nemsio PROPERTIES
+      INTERFACE_LINK_LIBRARIES "w3emc::w3emc_4;bacio::bacio_4")
+    target_link_libraries(${EXENAME} PRIVATE
+      nemsio::nemsio sigio::sigio)
+    target_compile_definitions(${EXENAME} PRIVATE BUILD_WITH_NEMSIO)
   endif()
   if(wrf_io_FOUND)
     target_link_libraries(${EXENAME} PRIVATE

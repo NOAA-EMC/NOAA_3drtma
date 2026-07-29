@@ -1,5 +1,5 @@
 !> @file
-!> @brief Subroutine that computes T, Q, U, V on the flight levels (FD).
+!> @brief Subroutine that computes T, Q, U, V, P, and ICING on the flight levels (FD).
 !>
 !> This routine computes temperature, spec. hum, u wind component,
 !> and v wind component on the NFD=6 FD levels. The 
@@ -27,6 +27,8 @@
 !> @param[out] QFD Spec hum on FD levels.
 !> @param[out] UFD U wind (m/s) on FD levels.
 !> @param[out] VFD V wind (m/s) on FD levels.
+!> @param[out] PFD Pressure (Pa) on FD levels.
+!> @param[out] ICINGFD Icing on FD levels (see https://www.nco.ncep.noaa.gov/pmb/docs/grib2/grib2_doc/grib2_table4-207.shtml).
 !>     
 !> ### Program History Log
 !> Date | Programmer | Comments
@@ -40,8 +42,21 @@
 !> 2011-12-14 | Sarah Lu     | Add GOCART aerosol AERFD
 !> 2021-10-15 | JESSE MENG   | 2D DECOMPOSITION
 !> 2022-09-22 | Li(Kate) Zhang   | Remove Dust=> AERFD
+!> 2025-04-30 | Wen Meng     | Add checks for undefined grids or indices in calculation
 !>
 !> @author Russ Treadon W/NP2 @date 1992-12-22
+!--------------------------------------------------------------------------
+!> fdlvl() Subroutine that computes T, Q, U, V, P, ICING on the flight levels (FD).
+!> 
+!> @param[in] ITYPE Flag that determines whether MSL (1) or AGL (2) Levels are used.
+!> @param[out] TFD Temperature (K) on FD levels.
+!> @param[out] QFD Spec hum on FD levels.
+!> @param[out] UFD U wind (m/s) on FD levels.
+!> @param[out] VFD V wind (m/s) on FD levels.
+!> @param[out] PFD Pressure (Pa) on FD levels.
+!> @param[out] ICINGFD Icing on FD levels.
+!--------------------------------------------------------------------------
+
       SUBROUTINE FDLVL(ITYPE,TFD,QFD,UFD,VFD,PFD,ICINGFD)
 
 !     
@@ -98,6 +113,11 @@
         ENDDO
       ENDDO
 
+      DO IFD = 1,NFD
+        LVL(IFD) = 0
+        LHL(IFD) = 0
+      ENDDO
+
       IF(gridtype == 'E') THEN
         JVN =  1
         JVS = -1
@@ -143,6 +163,7 @@
 !        DO 22 IFD = 1, NFD
               DONEH=.FALSE.
               DONEV=.FALSE.
+              IF(ZMID(I,J,LM) == SPVAL)CYCLE
               DO L = LM,1,-1
                 HTT = ZMID(I,J,L)
                 IF(gridtype == 'E') THEN
@@ -201,6 +222,7 @@
 !
 !         DO 40 IFD = 1,NFD
  
+              IF(LHL(IFD) /= 0) THEN
               L = LHL(IFD)
               IF (L < LM) THEN
                 DZ   = ZMID(I,J,L)-ZMID(I,J,L+1)
@@ -218,7 +240,9 @@
                 PFD(I,J,IFD) = PMID(I,J,L)
                 ICINGFD(I,J,IFD) = ICING_GFIP(I,J,L)
               ENDIF
+              ENDIF
     
+              IF(LVL(IFD) /= 0) THEN
               L = LVL(IFD)
               IF (L < LM) THEN
                 IF(gridtype == 'E')THEN
@@ -253,6 +277,7 @@
               ELSEIF (L==LM) THEN
                 UFD(I,J,IFD)=UH(I,J,L)
                 VFD(I,J,IFD)=VH(I,J,L)
+              ENDIF
               ENDIF
 ! 40      CONTINUE
 !     
@@ -294,6 +319,7 @@
 !             DO 222 IFD = 1, NFD
               DONEH=.FALSE.
               DONEV=.FALSE.
+              IF(ZMID(I,J,LLMH) == SPVAL)CYCLE
               DO L = LLMH,1,-1
                 HTABH = ZMID(I,J,L)-HTSFC
 !                if(i==245.and.j==813)print*,'Debug FDL HTABH= ',htabh,zmid(i,j,l),htsfc
@@ -330,6 +356,7 @@
 ! 222     CONTINUE
 !
 !             DO 240 IFD = 1,NFD
+               IF(LHL(IFD) /= 0) THEN
                L = LHL(IFD)
                IF (L<LM) THEN
                  DZ   = ZMID(I,J,L)-ZMID(I,J,L+1)
@@ -347,7 +374,9 @@
                  PFD(I,J,IFD) = PMID(I,J,L)
                  ICINGFD(I,J,IFD) = ICING_GFIP(I,J,L)
                ENDIF
+               ENDIF
 
+               IF(LVL(IFD) /= 0) THEN
                L = LVL(IFD)
                IF (L < LM) THEN
                  IF(gridtype == 'E')THEN
@@ -381,6 +410,7 @@
                ELSE
                  UFD(I,J,IFD) = UH(I,J,L)
                  VFD(I,J,IFD) = VH(I,J,L)
+              ENDIF
               ENDIF
 ! 240     CONTINUE
 !     

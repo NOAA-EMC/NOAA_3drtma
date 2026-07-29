@@ -11,8 +11,12 @@
 !> 2002-06-19 | Mike Baldwin | WRF version
 !> 2022-11-08 | Kai Wang     | Replace aqfcmaq_on with aqf_on
 !> 2023-03-22 | WM Lewis     | Add effective radius arrays
-!> !> 2023-04-04 |Li(Kate Zhang)  |Add namelist optoin for CCPP-Chem
+!> 2023-04-04 |Li(Kate Zhang)| Add namelist optoin for CCPP-Chem
 !(UFS-Chem) and 2D diag. output (d2d_chem) for GEFS-Aerosols and CCPP-Chem model.
+!> 2023-08-16 | Yali Mao     | Add CIT to GTG fields. Add namelist optoin of gtg_on
+!> 2025-01-13 | Jaymes Kenyon| Add graupel number concentration (QQNG)
+!> 2025-01-13 | Jaymes Kenyon| Add HAIL_BUCKET
+
 !> @author Jim Tuccillo IBM @date 2000-01-06
       SUBROUTINE DE_ALLOCATE
 
@@ -76,9 +80,11 @@
       deallocate(QQR)
       deallocate(QQS)
       deallocate(QQG)
+      deallocate(QQH)
       deallocate(QQNW)
       deallocate(QQNI)
       deallocate(QQNR)
+      deallocate(QQNG)
       deallocate(QQNWFA)
       deallocate(QQNIFA)
       deallocate(TAOD5503D)
@@ -154,9 +160,9 @@
 !
       deallocate(u10)
       deallocate(v10)
+      deallocate(f10m)
       deallocate(tshltr)
       deallocate(qshltr)
-      deallocate(mrshltr)
       deallocate(smstav)
       deallocate(ssroff)
       deallocate(bgroff)
@@ -164,6 +170,7 @@
       deallocate(shdmin)
       deallocate(shdmax)
       deallocate(lai)
+      deallocate(xlaixy)
       deallocate(acsnow)
       deallocate(acgraup)
       deallocate(acfrain)
@@ -209,10 +216,12 @@
       deallocate(mean_frp)
       deallocate(ebb)
       deallocate(hwp)
-      deallocate(aodtot)
       deallocate(smoke)
       deallocate(fv3dust)
       deallocate(coarsepm)
+      deallocate(smoke_ave)
+      deallocate(dust_ave)
+      deallocate(coarsepm_ave)
       deallocate(taod5502d)
       deallocate(aerasy2d)
       deallocate(aerssa2d)
@@ -394,6 +403,7 @@
       deallocate(snow_bucket1)
       deallocate(graup_bucket)
       deallocate(graup_bucket1)
+      deallocate(hail_bucket)
       deallocate(frzrn_bucket)
       deallocate(snow_acm)
       deallocate(snow_bkt)
@@ -407,6 +417,10 @@
       deallocate(w_dn_max)
       deallocate(w_mean)
       deallocate(refd_max)
+      deallocate(max_compref)
+      deallocate(max_prate_1min) 
+      deallocate(max_prate_5min)
+      deallocate(max_prate_10min)
       deallocate(prate_max)
       deallocate(fprate_max)
       deallocate(up_heli_max)
@@ -473,10 +487,12 @@
       deallocate(icing_gfis)
 
 ! add GTG turbulence
-      deallocate(catedr)
-      deallocate(mwt)
-      deallocate(gtg)
-
+      if (gtg_on) then
+         deallocate(catedr)
+         deallocate(mwt)
+         deallocate(gtg)
+         deallocate(cit)
+      endif
 !
       if (gocart_on .or. gccpp_on .or. nasa_on) then
 ! Deallocate GOCART fields

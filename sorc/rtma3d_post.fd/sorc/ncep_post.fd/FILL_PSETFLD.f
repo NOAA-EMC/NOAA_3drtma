@@ -5,9 +5,8 @@
 !> as parameter name, level type etc from post available field
 !> table.
 !>
-!> @param[in] param_ofld output field.
+!> @param[inout] param_ofld output field.
 !> @param[in] param_afld available field in post.
-!> @param[out] param_ofld output field.
 !>
 !> ### Program History Log
 !> Date | Programmer | Comments
@@ -17,6 +16,15 @@
 !> 2015-03-10 | Lin Gan  | Using flat file data
 !>
 !> @author J. Wang NCEP/EMC @date 2012-01-27
+!-----------------------------------------------------------------------
+!> fill_psetfld() reads post xml control file.
+!> This routine sets the output field GRIB2 information such    
+!> as parameter name, level type etc from post available field
+!> table.
+!>
+!> @param[inout] param_ofld output field.
+!> @param[in] param_afld available field in post.
+!>
       subroutine fill_psetfld(param_ofld,param_afld)
 !
 
@@ -93,6 +101,10 @@
 ! aerosol type
       if(trim(param_ofld%aerosol_type)==''.and.trim(param_afld%aerosol_type)/='') then
          param_ofld%aerosol_type=param_afld%aerosol_type
+      endif
+! prob type
+      if(trim(param_ofld%prob_type)==''.and.trim(param_afld%prob_type)/='') then
+         param_ofld%prob_type=param_afld%prob_type
       endif
 ! typ_intvl_size
       if(trim(param_ofld%typ_intvl_size)==''.and.trim(param_afld%typ_intvl_size)/='') then

@@ -13,8 +13,14 @@
 !> 2020-11-06 | J Meng   | Use UPP_MATH Module
 !> 2021-10-31 | J Meng   | 2D DECOMPOSITION
 !> 2022-05-12 | E James  | Adding a check for extremely large positive or negative UH values
+!> 2024-06-27 | W Meng   | Restrict undefined grids in calculation
 !>     
 !> @author M Pyle W/NP2 @date 2007-10-22
+!--------------------------------------------------------------------------------------
+!> @brief Subroutine that computes the updraft helicity.
+!> 
+!> @param[out] UPDHEL Updraft helicity (m^2/s^2).
+!--------------------------------------------------------------------------------------
       SUBROUTINE CALUPDHEL(UPDHEL)
 
 !     
@@ -114,7 +120,9 @@
               DVDX   = DDVDX(I,J)
               DUDY   = DDUDY(I,J)
 
-              UPDHEL(I,J)=UPDHEL(I,J)+(DVDX-DUDY)*WH(I,J,L)*DZ
+              IF (DVDX<spval.AND.DUDY<spval.AND. &
+                  WH(I,J,L)<spval.AND.DZ<spval) &
+                UPDHEL(I,J)=UPDHEL(I,J)+(DVDX-DUDY)*WH(I,J,L)*DZ
 
               IF (UPDHEL(I,J) < -9E10 .OR. UPDHEL(I,J) > 9E10) THEN
                  UPDHEL(I,J) = spval

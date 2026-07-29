@@ -1,8 +1,8 @@
 !> @file
-!> @brief mdl2thandpv() vert intrp of model lvls to isentropic and PV.
+!> @brief mdl2thandpv() vertical interpolation of model levels to isentropic and PV levels.
 !>
 !> For most applications this routine is the workhorse
-!> of the post processor.  In a nutshell it interpolates
+!> of the post processor. In a nutshell it interpolates
 !> data from model to THETA and PV surfaces.
 !>
 !> ### Program History Log
@@ -19,6 +19,14 @@
 !> 2021-10-26 | J MENG     | 2D DECOMPOSITION
 !>
 !> @author Chuang W/NP22 @date 2007-03-26
+!-----------------------------------------------------------------------------------------------------
+!> mdl2thandpv() vertical interpolation of model levels to isentropic and potential vorticity levels.
+!>
+!> @param[in] kth integer Number of isentropic levels.
+!> @param[in] kpv integer Number of potential vorticity levels.
+!> @param[in] th real (kth) Isentropic levels (K).
+!> @param[in] pv real (kpv) Potential vorticity (in PV units: 10**-6*K*m**2/kg/s).
+!>
       SUBROUTINE MDL2THANDPV(kth,kpv,th,pv)
 
 !
@@ -72,8 +80,6 @@
 !******************************************************************************
 !
 !     START MDL2TH. 
-!
-      if(me==0) write(*,*) 'MDL2THANDPV starts'     
 !
 !     SET TOTAL NUMBER OF POINTS ON OUTPUT GRID.
 !
@@ -356,30 +362,10 @@
                 END DO
               END IF
   
-
-              IF(I==IM/2 .AND. J==JM/2)then 
-                PRINT*,'SAMPLE PVETC INPUT ',                                 &
-                       'p,dpdx,dpdy,tv,dtdx,dtdy,h,u,v,vort= '
-                DO L=1,LM
-                  print*,pmid(i,j,l),dum1d1(l),dum1d2(l),dum1d5(l)      &
-                        ,dum1d3(l),dum1d4(l),zmid(i,j,l),uh(i,j,l),vh(i,j,l)  &
-                        ,dum1d6(l),L
-                end do
-              end if
-
               CALL PVETC(LM,PMID(I,J,1:LM),DUM1D1,DUM1D2                      &
                         ,DUM1D5,DUM1D3,DUM1D4,ZMID(I,J,1:LM),UH(I,J,1:LM)     &
                         ,VH(I,J,1:LM),DUM1D6                                  &
                         ,DUM1D7,DUM1D8,DUM1D9,DUM1D10,DUM1D11,DUM1D12,DUM1D13)!output
-
-              IF(I==IM/2 .AND. J==JM/2)then 
-                PRINT*,'SAMPLE PVETC OUTPUT '  &
-                       ,'hm,s,bvf2,pvn,theta,sigma,pvu= '
-                DO L=1,LM
-                  print*,dum1d7(l),dum1d8(l),dum1d9(l),dum1d10(l),dum1d11(l) &
-                        ,dum1d12(l),dum1d13(l),L
-                end do
-              end if 
 
               IF((IGET(332) > 0).OR.(IGET(333) > 0).OR.                &
                  (IGET(334) > 0).OR.(IGET(335) > 0).OR.                &
@@ -435,30 +421,10 @@
      &                       + F(I,J)  
                 END DO
 
-              IF(I==IM/2 .AND. J==JM/2)then 
-                PRINT*,'SAMPLE PVETC INPUT for regional ',             &
-                       'p,dpdx,dpdy,tv,dtdx,dtdy,h,u,v,vort ',         &
-                       'JSTA_m,Jend_m, L= '
-                DO L=1,LM
-                  print*,pmid(i,j,l),dum1d1(l),dum1d2(l),dum1d5(l)      &
-                        ,dum1d3(l),dum1d4(l),zmid(i,j,l),uh(i,j,l),vh(i,j,l)  &
-                        ,dum1d6(l),JSTA_m,Jend_m,L
-                end do
-              end if
-
               CALL PVETC(LM,PMID(I,J,1:LM),DUM1D1,DUM1D2                      &
                         ,DUM1D5,DUM1D3,DUM1D4,ZMID(I,J,1:LM),UH(I,J,1:LM)     &
                         ,VH(I,J,1:LM),DUM1D6                                  &
                         ,DUM1D7,DUM1D8,DUM1D9,DUM1D10,DUM1D11,DUM1D12,DUM1D13)!output
-
-              IF(I==IM/2 .AND. J==JM/2)then 
-                PRINT*,'SAMPLE PVETC OUTPUT '  &
-                       ,'hm,s,bvf2,pvn,theta,sigma,pvu,pvort= '
-                DO L=1,LM
-                  print*,dum1d7(l),dum1d8(l),dum1d9(l),dum1d10(l),dum1d11(l) &
-                        ,dum1d12(l),dum1d13(l),DUM1D6(l),L
-                end do
-              end if 
 
               IF((IGET(332) > 0).OR.(IGET(333) > 0).OR.                &
                  (IGET(334) > 0).OR.(IGET(335) > 0).OR.                &
@@ -530,29 +496,11 @@
 
                END DO
 
-!               IF(I==IM/2 .AND. J==JM/2)then
-!                 PRINT*,'SAMPLE PVETC INPUT '                           &
-!                  ,'p,dpdx,dpdy,tv,dtdx,dtdy,h,u,v,vort= '
-!                 DO L=1,LM
-!                   print*,pmid(i,j,l),dum1d1(l),dum1d2(l),dum1d5(l)     &
-!                   ,dum1d3(l),dum1d4(l),zmid(i,j,l),uh(i,j,l),vh(i,j,l) &
-!                   ,dum1d6(l)
-!                 end do
-!              end if
-
               CALL PVETC(LM,PMID(I,J,1:LM),DUM1D1,DUM1D2                &
                   ,DUM1D5,DUM1D3,DUM1D4,ZMID(I,J,1:LM),UH(I,J,1:LM)     &
                   ,VH(I,J,1:LM),DUM1D6                                  &
                   ,DUM1D7,DUM1D8,DUM1D9,DUM1D10,DUM1D11,DUM1D12,DUM1D13)!output
 
-!              IF(I==IM/2 .AND. J==JM/2)then
-!                PRINT*,'SAMPLE PVETC OUTPUT '  &
-!                 ,'hm,s,bvf2,pvn,theta,sigma,pvu= '
-!                DO L=1,LM
-!                  print*,dum1d7(l),dum1d8(l),dum1d9(l),dum1d10(l),dum1d11(l) &
-!                    ,dum1d12(l),dum1d13(l)
-!                end do
-!              end if
               IF((IGET(332)>0).OR.(IGET(333)>0).OR.               &
                  (IGET(334)>0).OR.(IGET(335)>0).OR.               &
                  (IGET(351)>0).OR.(IGET(352)>0).OR.               &
@@ -607,29 +555,11 @@
                 DUM1D6(L)=DVDX-DUDY+F(I,J)+UAVG*TAN(TPHI)/ERAD !vort
               END DO
 
-              IF(I==IM/2 .AND. J==JM/2)then
-                PRINT*,'SAMPLE PVETC INPUT '  &
-                 ,'p,dpdx,dpdy,tv,dtdx,dtdy,h,u,v,vort= '
-                DO L=1,LM
-                  print*,pmid(i,j,l),dum1d1(l),dum1d2(l),dum1d5(l)       &
-                   ,dum1d3(l),dum1d4(l),zmid(i,j,l),uh(i,j,l),vh(i,j,l)  &
-                   ,dum1d6(l)
-                 end do
-              end if
-
               CALL PVETC(LM,PMID(I,J,1:LM),DUM1D1,DUM1D2                &
                   ,DUM1D5,DUM1D3,DUM1D4,ZMID(I,J,1:LM),UH(I,J,1:LM)     &
                   ,VH(I,J,1:LM),DUM1D6                                  &
                   ,DUM1D7,DUM1D8,DUM1D9,DUM1D10,DUM1D11,DUM1D12,DUM1D13)!output
 
-              IF(I==IM/2 .AND. J==JM/2)then
-                PRINT*,'SAMPLE PVETC OUTPUT '  &
-                 ,'hm,s,bvf2,pvn,theta,sigma,pvu= '
-                DO L=1,LM
-                  print*,dum1d7(l),dum1d8(l),dum1d9(l),dum1d10(l),dum1d11(l) &
-                    ,dum1d12(l),dum1d13(l)
-                end do
-              end if
               IF((IGET(332) > 0).OR.(IGET(333) > 0).OR.                 &
                  (IGET(334) > 0).OR.(IGET(335) > 0).OR.                 &
                  (IGET(351) > 0).OR.(IGET(352) > 0).OR.                 &
@@ -1166,7 +1096,6 @@
                     DUM1D14,wrk1, wrk2, wrk3, wrk4, cosl, dum2d)
 
       END IF ! end of selection for isentropic and constant PV fields	
-      if(me==0) write(*,*) 'MDL2THANDPV ends'
 !
 !     
 !     END OF ROUTINE.

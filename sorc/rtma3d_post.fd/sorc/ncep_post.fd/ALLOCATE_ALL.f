@@ -25,6 +25,12 @@
 !! -  23-03-22  WM Lewis - Adding effective radius arrays
 !! -2023-04-04  Li(Kate Zhang) Add namelist optoin for CCPP-Chem(UFS-Chem) 
 !         and 2D diag. output (d2d_chem) for GEFS-Aerosols and CCPP-Chem model.
+!! -  23-08-16  Yali Mao - Add CIT (Convectively-Induced Turbulence) for GTG4
+!! -  23-08-16  Yali Mao - Make it optional to allocate GTG related fields only when gtg_on
+!! -  25-01-13  Jaymes Kenyon - Add graupel number concentration (QQNG)
+!! -  25-05-05  Jaymes Kenyon - Add HAIL_BUCKET
+!! -  25-07-15  Jeff Duda - Add max_compref, max_prate_1min, max_prate_5min, and max_prate_10min
+
 !!   OUTPUT FILES:
 !!   - STDOUT  - RUN TIME STANDARD OUT.
 !!
@@ -149,9 +155,11 @@
       allocate(QQR(ista_2l:iend_2u,jsta_2l:jend_2u,lm))
       allocate(QQS(ista_2l:iend_2u,jsta_2l:jend_2u,lm))
       allocate(QQG(ista_2l:iend_2u,jsta_2l:jend_2u,lm))
+      allocate(QQH(ista_2l:iend_2u,jsta_2l:jend_2u,lm))
       allocate(QQNW(ista_2l:iend_2u,jsta_2l:jend_2u,lm))
       allocate(QQNI(ista_2l:iend_2u,jsta_2l:jend_2u,lm))
       allocate(QQNR(ista_2l:iend_2u,jsta_2l:jend_2u,lm))
+      allocate(QQNG(ista_2l:iend_2u,jsta_2l:jend_2u,lm))
       allocate(QQNWFA(ista_2l:iend_2u,jsta_2l:jend_2u,lm))
       allocate(QQNIFA(ista_2l:iend_2u,jsta_2l:jend_2u,lm))
       allocate(TAOD5503D(ista_2l:iend_2u,jsta_2l:jend_2u,lm))
@@ -184,9 +192,11 @@
             QQR(i,j,l)=spval
             QQS(i,j,l)=spval
             QQG(i,j,l)=spval
+            QQH(i,j,l)=spval
             QQNW(i,j,l)=spval
             QQNI(i,j,l)=spval
             QQNR(i,j,l)=spval
+            QQNG(i,j,l)=spval
             QQNWFA(i,j,l)=spval
             QQNIFA(i,j,l)=spval
             TAOD5503D(i,j,l)=spval
@@ -300,11 +310,6 @@
 ! add GFIP ICING
       allocate(icing_gfip(ista_2l:iend_2u,jsta_2l:jend_2u,lm))        
       allocate(icing_gfis(ista_2l:iend_2u,jsta_2l:jend_2u,lm))        
-!
-! add GTG turbulence
-      allocate(catedr(ista_2l:iend_2u,jsta_2l:jend_2u,lm))
-      allocate(mwt(ista_2l:iend_2u,jsta_2l:jend_2u,lm))
-      allocate(gtg(ista_2l:iend_2u,jsta_2l:jend_2u,lm))
 !Initialization
 !$omp parallel do private(i,j,l)
       do l=1,lm
@@ -314,12 +319,29 @@
             vtm(i,j,l)=spval
             icing_gfip(i,j,l)=spval
             icing_gfis(i,j,l)=spval
-            catedr(i,j,l)=spval
-            mwt(i,j,l)=spval
-            gtg(i,j,l)=spval
           enddo
         enddo
       enddo
+!
+! add GTG turbulence
+      if (gtg_on) then
+         allocate(catedr(ista_2l:iend_2u,jsta_2l:jend_2u,lm))
+         allocate(mwt(ista_2l:iend_2u,jsta_2l:jend_2u,lm))
+         allocate(gtg(ista_2l:iend_2u,jsta_2l:jend_2u,lm))
+         allocate(cit(ista_2l:iend_2u,jsta_2l:jend_2u,lm))
+!Initialization
+!$omp parallel do private(i,j,l)
+         do l=1,lm
+            do j=jsta_2l,jend_2u
+               do i=ista_2l,iend_2u
+                  catedr(i,j,l)=spval
+                  mwt(i,j,l)=spval
+                  gtg(i,j,l)=spval
+                  cit(i,j,l)=spval
+               enddo
+            enddo
+         enddo
+      endif
 !
 !     FROM SOIL
 !
@@ -359,6 +381,9 @@
       allocate(w_mean(ista_2l:iend_2u,jsta_2l:jend_2u))
       allocate(refd_max(ista_2l:iend_2u,jsta_2l:jend_2u))
       allocate(prate_max(ista_2l:iend_2u,jsta_2l:jend_2u))
+      allocate(max_prate_1min(ista_2l:iend_2u,jsta_2l:jend_2u))
+      allocate(max_prate_5min(ista_2l:iend_2u,jsta_2l:jend_2u))
+      allocate(max_prate_10min(ista_2l:iend_2u,jsta_2l:jend_2u))
       allocate(fprate_max(ista_2l:iend_2u,jsta_2l:jend_2u))
       allocate(up_heli_max(ista_2l:iend_2u,jsta_2l:jend_2u))
       allocate(up_heli_max16(ista_2l:iend_2u,jsta_2l:jend_2u))
@@ -380,6 +405,9 @@
           w_dn_max(i,j)=spval
           w_mean(i,j)=spval
           refd_max(i,j)=spval
+          max_prate_1min(i,j)=spval
+          max_prate_5min(i,j)=spval
+          max_prate_10min(i,j)=spval
           prate_max(i,j)=spval
           fprate_max(i,j)=spval
           up_heli_max(i,j)=spval
@@ -452,6 +480,7 @@
           enddo
         enddo
       enddo
+      allocate(MAX_COMPREF(ista_2l:iend_2u,jsta_2l:jend_2u))
       allocate(REFC_10CM(ista_2l:iend_2u,jsta_2l:jend_2u))
       allocate(REF1KM_10CM(ista_2l:iend_2u,jsta_2l:jend_2u))
       allocate(REF4KM_10CM(ista_2l:iend_2u,jsta_2l:jend_2u))
@@ -459,17 +488,18 @@
 !$omp parallel do private(i,j)
       do j=jsta_2l,jend_2u
         do i=ista_2l,iend_2u
+          MAX_COMPREF(i,j)=spval
           REFC_10CM(i,j)=spval
           REF1KM_10CM(i,j)=spval
           REF4KM_10CM(i,j)=spval
         enddo
       enddo
 ! CRA
+      allocate(f10m(ista_2l:iend_2u,jsta_2l:jend_2u))
       allocate(u10(ista_2l:iend_2u,jsta_2l:jend_2u))
       allocate(v10(ista_2l:iend_2u,jsta_2l:jend_2u))
       allocate(tshltr(ista_2l:iend_2u,jsta_2l:jend_2u))
       allocate(qshltr(ista_2l:iend_2u,jsta_2l:jend_2u))
-      allocate(mrshltr(ista_2l:iend_2u,jsta_2l:jend_2u))
       allocate(smstav(ista_2l:iend_2u,jsta_2l:jend_2u))
       allocate(ssroff(ista_2l:iend_2u,jsta_2l:jend_2u))
       allocate(bgroff(ista_2l:iend_2u,jsta_2l:jend_2u))
@@ -477,6 +507,7 @@
       allocate(shdmin(ista_2l:iend_2u,jsta_2l:jend_2u))
       allocate(shdmax(ista_2l:iend_2u,jsta_2l:jend_2u))
       allocate(lai(ista_2l:iend_2u,jsta_2l:jend_2u))
+      allocate(xlaixy(ista_2l:iend_2u,jsta_2l:jend_2u))
       allocate(acsnow(ista_2l:iend_2u,jsta_2l:jend_2u))
       allocate(acgraup(ista_2l:iend_2u,jsta_2l:jend_2u))
       allocate(acfrain(ista_2l:iend_2u,jsta_2l:jend_2u))
@@ -496,11 +527,11 @@
 !$omp parallel do private(i,j)
       do j=jsta_2l,jend_2u
         do i=ista_2l,iend_2u
+          f10m(i,j)=spval
           u10(i,j)=spval
           v10(i,j)=spval
           tshltr(i,j)=spval
           qshltr(i,j)=spval
-          mrshltr(i,j)=spval
           smstav(i,j)=spval
           ssroff(i,j)=spval
           bgroff(i,j)=spval
@@ -508,6 +539,7 @@
           shdmin(i,j)=spval
           shdmax(i,j)=spval
           lai(i,j)=spval
+          xlaixy(i,j)=spval
           acsnow(i,j)=spval
           acgraup(i,j)=spval
           acfrain(i,j)=spval
@@ -599,6 +631,7 @@
       allocate(snow_bucket1(ista_2l:iend_2u,jsta_2l:jend_2u))
       allocate(graup_bucket(ista_2l:iend_2u,jsta_2l:jend_2u))
       allocate(graup_bucket1(ista_2l:iend_2u,jsta_2l:jend_2u))
+      allocate(hail_bucket(ista_2l:iend_2u,jsta_2l:jend_2u))
       allocate(frzrn_bucket(ista_2l:iend_2u,jsta_2l:jend_2u))
       allocate(snow_acm(ista_2l:iend_2u,jsta_2l:jend_2u))
       allocate(snow_bkt(ista_2l:iend_2u,jsta_2l:jend_2u))
@@ -613,9 +646,10 @@
       allocate(snfden(ista_2l:iend_2u,jsta_2l:jend_2u))
       allocate(sndepac(ista_2l:iend_2u,jsta_2l:jend_2u))
       allocate(mean_frp(ista_2l:iend_2u,jsta_2l:jend_2u))
-      allocate(ebb(ista_2l:iend_2u,jsta_2l:jend_2u))
       allocate(hwp(ista_2l:iend_2u,jsta_2l:jend_2u))
-      allocate(aodtot(ista_2l:iend_2u,jsta_2l:jend_2u))
+      allocate(smoke_ave(ista_2l:iend_2u,jsta_2l:jend_2u))
+      allocate(dust_ave(ista_2l:iend_2u,jsta_2l:jend_2u))
+      allocate(coarsepm_ave(ista_2l:iend_2u,jsta_2l:jend_2u))
 !Initialization
 !$omp parallel do private(i,j)
       do j=jsta_2l,jend_2u
@@ -630,6 +664,10 @@
           snow_bucket1(i,j)=spval
           graup_bucket(i,j)=spval
           graup_bucket1(i,j)=spval
+          hail_bucket(i,j)=spval
+          frzrn_bucket(i,j)=spval
+          snow_acm(i,j)=spval
+          snow_bkt(i,j)=spval
           qrmax(i,j)=spval
           tmax(i,j)=spval
           snownc(i,j)=spval
@@ -641,14 +679,16 @@
           snfden(i,j)=spval
           sndepac(i,j)=spval
           mean_frp(i,j)=spval
-          ebb(i,j)=spval
           hwp(i,j)=spval
-          aodtot(i,j)=spval
+          smoke_ave(i,j)=spval
+          dust_ave(i,j)=spval
+          coarsepm_ave(i,j)=spval
         enddo
       enddo
       allocate(smoke(ista_2l:iend_2u,jsta_2l:jend_2u,lm,nbin_sm))
       allocate(fv3dust(ista_2l:iend_2u,jsta_2l:jend_2u,lm,nbin_sm))
       allocate(coarsepm(ista_2l:iend_2u,jsta_2l:jend_2u,lm,nbin_sm))
+      allocate(ebb(ista_2l:iend_2u,jsta_2l:jend_2u,lm,nbin_sm))
 !$omp parallel do private(i,j,l,k)
       do k=1,nbin_sm
         do l=1,lm
@@ -657,6 +697,7 @@
               smoke(i,j,l,k)=spval
               fv3dust(i,j,l,k)=spval
               coarsepm(i,j,l,k)=spval
+              ebb(i,j,l,k)=spval
             enddo
           enddo
         enddo
@@ -736,6 +777,7 @@
           sfclhx(i,j)=spval
           fis(i,j)=spval
           t500(i,j)=spval
+          z500(i,j)=spval
           t700(i,j)=spval
           z700(i,j)=spval
           teql(i,j)=spval
@@ -1082,8 +1124,8 @@
         enddo
       enddo
 
-      if (me == 0) print *,' gocart_on=',gocart_on
-      if (me == 0) print *,' gccpp_on=',gccpp_on
+      !if (me == 0) print *,' gocart_on=',gocart_on
+      !if (me == 0) print *,' gccpp_on=',gccpp_on
       if (gocart_on .or.gccpp_on .or. nasa_on) then
 !  
 ! Add GOCART fields

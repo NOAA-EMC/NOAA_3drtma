@@ -1,110 +1,84 @@
 !> @file
-!
-!> SUBPROGRAM:    MISCLN      POSTS MISCELLANEOUS FIELDS
-!!   PRGRMMR: TREADON         ORG: W/NP2      DATE: 92-12-20
-!!     
-!! ABSTRACT:
-!!     THIS ROUTINE HAS BECOME THE CATCH-ALL FOR MISCELLANEOUS
-!!     OUTPUT FIELDS POSTED BY THE ETA POST PROCESSOR.  
-!!     CURRENTLY THIS ROUTINE POSTS THE FOLLOWING FIELDS:
-!!        (1) TROPOPAUSE LEVEL Z,P, T, U, V, AND VERTICAL WIND SHEAR,
-!!        (2) MAX WIND LEVEL Z, P, U, AND V,
-!!        (3) FD LEVEL T, Q, U, AND V,
-!!        (4) FREEZING LEVEL Z AND RH,
-!!        (5) CONSTANT MASS (BOUNDARY) FIELDS,
-!!        (6) LFM LOOK-ALIKE FIELDS, AND
-!!        (7) NGM LOOK-ALIKE FIELDS.
-!!
-!!     
-!! PROGRAM HISTORY LOG:
-!!   92-12-20  RUSS TREADON
-!!   93-06-19  RUSS TREADON - ADDED TYPE 2 CAPE POSTING.
-!!   94-11-07  MIKE BALDWIN - ADDED HELICITY POSTING.
-!!   96-03-26  MIKE BALDWIN - CHANGE ETA BOUNDARY LAYER LABELS FOR GRIB
-!!   96-11-19  MIKE BALDWIN - BACK OUT PREVIOUS CHANGE 
-!!   97-04-25  MIKE BALDWIN - CHANGE ETA BOUNDARY LAYER LABELS FOR GRIB
-!!   97-04-29  GEOFF MANIKIN - ADDED TROPOPAUSE HEIGHT AND
-!!                             MAX WIND LEVEL FIELDS
-!!   98-06-15  T BLACK       - CONVERSION FROM 1-D TO 2-D
-!!   98-07-17  MIKE BALDWIN - REMOVED LABL84
-!!   00-01-04  JIM TUCCILLO - MPI VERSION
-!!   02-04-23  MIKE BALDWIN - WRF VERSION
-!!   11-02-06  JUN WANG     - ADD GRIB2 OPTION
-!!   11-10-16  SARAH LU     - ADD FD LEVEL DUST/ASH
-!!   12-04-03  Jun Wang     - FIXED LVLSXML for fields at FD height (spec_hgt_lvl_above_grnd)
-!!   13-05-3   Shrinivas Moorthi - Fix some bugs and make more efficient code
-!!   14-02-21  Shrinivas Moorthi - Add more threading
-!!   14-02-26  S Moorthi - threading datapd assignment and some cleanup &
-!!                         bug fix
-!!   15-11-18  S Moorthi - fixed some logical errors in the helicity and
-!!   i                     storm motion part of the code
-!!   17-06-01  Y Mao - ADD FD levels for GTG(EDPARM CATEDR MWTURB) and allow 
-!!                     levels input from control file
-!!   19-09-03  J Meng - ADD CAPE related variables for HRRR
-!!   20-03-24  J Meng - remove grib1
-!!   20-11-10  J Meng - USE UPP_PHYSICS MODULE
-!!   21-03-25  E Colon - 3D-RTMA-specific SPC fields added as output
-!!   21-04-01  J Meng - computation on defined points only
-!!   21-09-01  E Colon - Correction to the effective layer top and
-!!                       bottoma calculation which is only employed 
-!!                       for RTMA usage.
-!!   21-10-14  J MENG - 2D DECOMPOSITION
-!!   22-09-22  L Zhang -  Li(Kate) Zhang - Remove Dust=> AERFD
-!!   22-10-06  W Meng - Generate SPC fields with RRFS input
-!!   23-01-24  Sam Trahan - when IFI is enabled, calculate and store CAPE & CIN. Add allocate_cape_arrays
-!!   23-04-03  E Colon - Added additional array assignments to resolve SPC fields crashes for RRFS input
-!! USAGE:    CALL MISCLN
-!!   INPUT ARGUMENT LIST:
-!!
-!!   OUTPUT ARGUMENT LIST: 
-!!     NONE
-!!     
-!!   SUBPROGRAMS CALLED:
-!!     UTILITIES:
-!!       TRPAUS  - COMPUTE TROPOPAUSE LEVEL FIELDS.
-!!       CALMXW  - COMPUTE MAX WIND LEVEL FIELDS.
-!!       SCLFLD  - SCALE ARRAY ELEMENTS BY CONSTANT.
-!!       GRIBIT  - OUTPUT FIELD TO GRIB FILE.
-!!       CALPOT  - CALCULATE POTENTIAL TEMPERATURE.
-!!       FDLVL   - COMPUTE FD LEVEL DATA (AGL OR MSL).
-!!       FRZLVL  - COMPUTE FREEZING LEVEL DATA.
-!!       BOUND   - BOUND ARRAY ELEMENTS BETWEEN MINIMUM AND MAXIMUM VALUES.
-!!       BNDLYR  - COMPUTE BOUNDARY LAYER FIELDS.
-!!       CALDWP  - CALCULATE DEWPOINT TEMPERATURE.
-!!       OTLFT   - COMPUTE LIFTED INDEX AT 500MB.
-!!       CALLCL  - COMPUTE LCL DATA.
-!!       LFMFLD  - COMPUTE LFM LOOK-ALIKE FIELDS.
-!!       NGMFLD  - COMPUTE NGM LOOK-ALIKE FIELDS.
-!!       CALTHTE - COMPUTE THETA-E.
-!!       CALHEL  - COMPUTE HELICITY AND STORM MOTION.
-!!
-!!     LIBRARY:
-!!       COMMON - RQSTFLD
-!!                CTLBLK
-!!     
-!!   ATTRIBUTES:
-!!     LANGUAGE: FORTRAN
-!!     MACHINE : CRAY C-90
-!!
+!> @brief MISCLN posts miscellaneous fields
+!>     
+!> This routine has become the catch-all for miscellaneous output fields posted by the ETA post-processor. 
+!> Currently this routine posts the following fields:
+!>        -# TROPOPAUSE LEVEL Z,P, T, U, V, AND VERTICAL WIND SHEAR,
+!>        -# MAX WIND LEVEL Z, P, U, AND V,
+!>        -# FD LEVEL T, Q, U, AND V,
+!>        -# FREEZING LEVEL Z AND RH,
+!>        -# CONSTANT MASS (BOUNDARY) FIELDS,
+!>        -# LFM LOOK-ALIKE FIELDS, AND
+!>        -# NGM LOOK-ALIKE FIELDS.
+!>
+!> ### Program history log:
+!> Date | Programmer | Comments
+!> -----|------------|---------
+!!   1992-12-20 | RUSS TREADON | Original file
+!!   1993-06-19 | RUSS TREADON | ADDED TYPE 2 CAPE POSTING.
+!!   1994-11-07 | MIKE BALDWIN | ADDED HELICITY POSTING.
+!!   1996-03-26 | MIKE BALDWIN | CHANGE ETA BOUNDARY LAYER LABELS FOR GRIB
+!!   1996-11-19 | MIKE BALDWIN | BACK OUT PREVIOUS CHANGE 
+!!   1997-04-25 | MIKE BALDWIN | CHANGE ETA BOUNDARY LAYER LABELS FOR GRIB
+!!   1997-04-29 | GEOFF MANIKIN | ADDED TROPOPAUSE HEIGHT AND MAX WIND LEVEL FIELDS
+!!   1998-06-15 | T BLACK       | CONVERSION FROM 1-D TO 2-D
+!!   1998-07-17 | MIKE BALDWIN | REMOVED LABL84
+!!   2000-01-04 | JIM TUCCILLO | MPI VERSION
+!!   2002-04-23 | MIKE BALDWIN | WRF VERSION
+!!   2011-02-06 | JUN WANG     | ADD GRIB2 OPTION
+!!   2011-10-16 | SARAH LU     | ADD FD LEVEL DUST/ASH
+!!   2012-04-03 | Jun Wang     | FIXED LVLSXML for fields at FD height (spec_hgt_lvl_above_grnd)
+!!   2013-05-3  | Shrinivas Moorthi | Fix some bugs and make more efficient code
+!!   2014-02-21 | Shrinivas Moorthi | Add more threading
+!!   2014-02-26 | S Moorthi | threading datapd assignment and some cleanup & bug fix
+!!   2015-11-18 | S Moorthi | fixed some logical errors in the helicity and storm motion part of the code
+!!   2017-06-01 | Y Mao | ADD FD levels for GTG(EDPARM CATEDR MWTURB) and allow levels input from control file
+!!   2019-09-03 | J Meng | ADD CAPE related variables for HRRR
+!!   2020-03-24 | J Meng | remove grib1
+!!   2020-11-10 | J Meng | USE UPP_PHYSICS MODULE
+!!   2021-03-25 | E Colon | 3D-RTMA-specific SPC fields added as output
+!!   2021-04-01 | J Meng | computation on defined points only
+!!   2021-09-01 | E Colon | Correction to the effective layer top and bottoma calculation which is only employed for RTMA usage.
+!!   2021-10-14 | J MENG | 2D DECOMPOSITION
+!!   2022-09-22 | L Zhang |  Li(Kate) Zhang - Remove Dust=> AERFD
+!!   2022-10-06 | W Meng | Generate SPC fields with RRFS input
+!!   2023-01-24 | Sam Trahan | when IFI is enabled, calculate and store CAPE & CIN. Add allocate_cape_arrays
+!!   2023-04-03 | E Colon | Added additional array assignments to resolve SPC fields crashes for RRFS input
+!!   2023-08-16 | Y Mao | Updated interpolation to flight levels for regional GTG fields
+!!   2023-08-24 | Y Mao | Add gtg_on option for GTG interpolation
+!!   2024-01-07 | H LIN | Add CIT output in NCAR GTG turbulence calculation
+!!   2024-01-09 | Y Mao | Correct the height level of EDPARM (ID=467) on 0m to index 52 from the control file, instead of 0.
+!!   2024-04-09 | Y Mao | Change the mnemonics of EDPARM (ID=467) on 0m to MXEDPRM (ID=476) on the entire atmoshpere       
+!!   2025-07-22 | K Halbert / E Colon | Updated mixed-layer CAPE/CINH to include 2m field
+!!   2025-12-16 | B Blake | Add capecin_2m option to calculate CAPE and CIN with 2-m fields
+!!   2026-02-20 | B Blake | Turn on downdraft CAPE for RRFS and 3DRTMA
+!!   2026-03-04 | G Zhao  | Fixed a bug: for ID(585), MU-CIN should be saved in MUCIN array, not in MUCAPE;
+!!                          Comment off "MUQ1D(I,J) = Q1D(I,J)" since Q1D is NOT the moisture of the Most
+!!                          Unstable (MU) parcel, MUQ1D is calculated later with CALTHTE to find MU parcel. 
+!> 
+!> @author RUSS TREADON 
+!> @date 1992-12-20
+!-----------------------------------------------------------------------------------------------------
+!> @brief MISCLN posts miscellaneous fields
       SUBROUTINE MISCLN
 
 !
 !
       use vrbls3d,    only: pmid, uh, vh, t, zmid, zint, pint, alpint, q, omga
-      use vrbls3d,    only: catedr,mwt,gtg
+      use vrbls3d,    only: catedr,mwt,gtg, cit
       use vrbls2d,    only: pblh, cprate, fis, T500, T700, Z500, Z700,&
-                            teql,ieql, cape,cin
+                            teql,ieql, cape,cin,tshltr,pshltr,qshltr
       use masks,      only: lmh
       use params_mod, only: d00, d50, h99999, h100, h1, h1m12, pq0, a2, a3, a4,    &
-                            rhmin, rgamog, tfrz, small, g
+                            rhmin, rgamog, tfrz, small, g, capa, p1000
       use ctlblk_mod, only: grib, cfld, fld_info, datapd, im, jsta, jend, jm, jsta_m, jend_m, &
                             nbnd, nbin_du, lm, htfd, spval, pthresh, nfd, petabnd, me,&
                             jsta_2l, jend_2u, MODELNAME, SUBMODELNAME, &
                             ista, iend, ista_m, iend_M, ista_2l, iend_2u, &
-                            ifi_flight_levels
+                            ifi_flight_levels, gtg_on, capecin_2m
       use rqstfld_mod, only: iget, lvls, id, iavblfld, lvlsxml
       use grib2_module, only: pset
-      use upp_physics, only: FPVSNEW,CALRH_PW,CALCAPE,CALCAPE2,TVIRTUAL
+      use upp_physics, only: FPVSNEW,CALRH_PW,CALCAPE,CALCAPE2
       use gridspec_mod, only: gridtype
 !- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
        implicit none
@@ -146,7 +120,7 @@
                                             UBND,   VBND,   RHBND,     &
                                             WBND,   T7D,    Q7D,       &
                                             U7D,    V6D,    P7D,       &
-                                            ICINGFD,GTGFD,CATFD,MWTFD,MIDCAL
+                                            ICINGFD,MIDCAL
 
       real, dimension(:,:),allocatable ::   QM8510, RH4710, RH8498,    &
                                             RH4796, RH1847, UST, VST,  &
@@ -170,12 +144,8 @@
       real    DPBND,PKL1,PKU1,FAC1,FAC2,PL,TL,QL,QSAT,RHL,TVRL,TVRBLO, &
               ES1,ES2,QS1,QS2,RH1,RH2,ZSF,DEPTH(2),work1,work2,work3, &
               SCINtmp,MUCAPEtmp,MUCINtmp,MLLCLtmp,ESHRtmp,MLCAPEtmp,STP,&
-              FSHRtmp,MLCINtmp,SLCLtmp,LAPSE,SHIP
+              FSHRtmp,MLCINtmp,SLCLtmp,LAPSE,SHIP,t2m,q2m
 
-!     Variables introduced to allow FD levels from control file - Y Mao
-      integer :: N,NFDCTL
-      REAL, allocatable :: HTFDCTL(:)
-      integer, allocatable :: ITYPEFDLVLCTL(:)
       integer IE,IW,JN,JS,IVE(JM),IVW(JM),JVN,JVS
       integer ISTART,ISTOP,JSTART,JSTOP
       real    dummy(ista:iend,jsta:jend)
@@ -200,6 +170,17 @@
       REAL, DIMENSION(:), ALLOCATABLE  :: P_AMB, T_AMB, Q_AMB, ZINT_AMB
       REAL, DIMENSION(:,:,:), ALLOCATABLE  :: TPAR_BASE, TPAR_TOPS
 
+!     Variables introduced to allow FD levels from control file - Y Mao
+      integer :: N,NFDCTL
+      REAL, allocatable :: HTFDCTL(:)
+      integer, allocatable :: ITYPEFDLVLCTL(:)
+      real, allocatable :: QIN(:,:,:,:), QFD(:,:,:,:)
+      character, allocatable :: QTYPE(:)
+
+      integer, parameter :: NFDMAX=10 ! Max number of fields with the same HTFDCTL
+      integer :: IDS(NFDMAX) ! All field IDs with the same HTFDCTL
+      integer :: nFDS ! How many fields with the same HTFDCTL in the control file
+      integer :: iID ! which field with HTFDCTL
 !     
 !****************************************************************************
 !     START MISCLN HERE.
@@ -1191,149 +1172,145 @@
 !
 !     ***BLOCK 3-2:  FD LEVEL (from control file) GTG
 !     
-      IF(IGET(467)>0.or.IGET(468)>0.or.IGET(469)>0) THEN
-         if(IGET(467)>0) THEN          ! GTG
-            N=IAVBLFLD(IGET(467))
-            NFDCTL=size(pset%param(N)%level)
-            if(allocated(ITYPEFDLVLCTL)) deallocate(ITYPEFDLVLCTL)
-            allocate(ITYPEFDLVLCTL(NFDCTL))
-            DO IFD = 1,NFDCTL
-               ITYPEFDLVLCTL(IFD)=LVLS(IFD,IGET(467))
-            enddo
-            if(allocated(HTFDCTL)) deallocate(HTFDCTL)
-            allocate(HTFDCTL(NFDCTL))
-            HTFDCTL=pset%param(N)%level
-!           print *, "GTG 467 levels=",pset%param(N)%level
-            allocate(GTGFD(ISTA:IEND,JSTA:JEND,NFDCTL))
-            call FDLVL_MASS(ITYPEFDLVLCTL,NFDCTL,HTFDCTL,GTG,GTGFD)
-!	    print *, "GTG 467 Done GTGFD=",me,GTGFD(IM/2,jend,1:NFDCTL)
+      IF(gtg_on .and. (IGET(467)>0.or.IGET(468)>0.or.IGET(469)>0.or.IGET(477)>0)) THEN
+         ! MASS FIELDS INTERPOLATION
+         if(allocated(QIN)) deallocate(QIN)
+         if(allocated(QTYPE)) deallocate(QTYPE)
+         ALLOCATE(QIN(ISTA:IEND,JSTA:JEND,LM,NFDMAX))
+         ALLOCATE(QTYPE(NFDMAX))
 
-            ! Regional GTG has a legend of special defination
-            ! 0 m holds the max value of the whole vertical column
-            DO IFD = 1,NFDCTL
-               if(NINT(HTFDCTL(IFD)) == 0) then
-                  N=IFD
-                  exit
-               endif
-            ENDDO
-            DO IFD = 1,NFDCTL
+!        INITIALIZE INPUTS
+         nFDS = 0
+         IF(IGET(467) > 0) THEN
+            nFDS = nFDS + 1
+            IDS(nFDS) = 467
+            QIN(ISTA:IEND,JSTA:JEND,1:LM,nFDS)=gtg(ISTA:IEND,JSTA:JEND,1:LM)
+            QTYPE(nFDS)="O"
+         end if
+         IF(IGET(468) > 0) THEN
+            nFDS = nFDS + 1
+            IDS(nFDS) = 468
+            QIN(ISTA:IEND,JSTA:JEND,1:LM,nFDS)=catedr(ISTA:IEND,JSTA:JEND,1:LM)
+            QTYPE(nFDS)="O"
+         end if
+         IF(IGET(469) > 0) THEN
+            nFDS = nFDS + 1
+            IDS(nFDS) = 469
+            QIN(ISTA:IEND,JSTA:JEND,1:LM,nFDS)=mwt(ISTA:IEND,JSTA:JEND,1:LM)
+            QTYPE(nFDS)="O"
+         end if
+
+         IF(IGET(477) > 0) THEN
+            nFDS = nFDS + 1
+            IDS(nFDS) = 477
+            QIN(ISTA:IEND,JSTA:JEND,1:LM,nFDS)=cit(ISTA:IEND,JSTA:JEND,1:LM)
+            QTYPE(nFDS)="O"
+         end if
+
+
+!        FOR Regional GTG, ALL LEVLES OF DIFFERENT VARIABLES ARE THE SAME
+         iID=467
+         N = IAVBLFLD(IGET(iID))
+         NFDCTL=size(pset%param(N)%level)
+         if(allocated(ITYPEFDLVLCTL)) deallocate(ITYPEFDLVLCTL)
+         allocate(ITYPEFDLVLCTL(NFDCTL))
+         DO IFD = 1,NFDCTL
+            ITYPEFDLVLCTL(IFD)=LVLS(IFD,IGET(iID))
+         ENDDO
+         if(allocated(HTFDCTL)) deallocate(HTFDCTL)
+         allocate(HTFDCTL(NFDCTL))
+         HTFDCTL=pset%param(N)%level
+
+         if(allocated(QFD)) deallocate(QFD)
+         ALLOCATE(QFD(ISTA:IEND,JSTA:JEND,NFDCTL,nFDS))
+         QFD=SPVAL
+
+         ! pset%param(N)%level will not be used in FDLVL_MASS() because QTYPE='O'
+         call FDLVL_MASS(ITYPEFDLVLCTL,NFDCTL,pset%param(N)%level,HTFDCTL,nFDS,QIN,QTYPE,QFD)
+
+!        Adjust values before output
+         DO N=1,nFDS
+            iID=IDS(N)
+            if(iID==467 .or. iID==468 .or. iID==469 .or. iID==477) then
+               DO IFD = 1,NFDCTL
+                  DO J=JSTA,JEND
+                  DO I=ISTA,IEND
+                     if(QFD(I,J,IFD,N) < SPVAL) then
+                        QFD(I,J,IFD,N)=max(0.0,QFD(I,J,IFD,N))
+                        QFD(I,J,IFD,N)=min(1.0,QFD(I,J,IFD,N))
+                     endif
+                  ENDDO
+                  ENDDO
+               ENDDO
+            endif
+         ENDDO
+         
+!        Output
+         DO N=1,nFDS
+            iID=IDS(N)
+            
+!     For regional GTG, output the max value of EDPARM(ID=467) in the whole vertical column
+!     to MXEDPRM(ID=476)
+            if (iID == 467 .and. iget(476) > 0) then
+               EGRID1 = SPVAL
+               DO IFD = 1,NFDCTL
+                  DO J=JSTA,JEND
+                  DO I=ISTA,IEND
+                     work1=QFD(I,J,IFD,N)
+                     if(EGRID1(I,J)>=SPVAL) then
+                        EGRID1(I,J)=work1
+                     elseif(work1<SPVAL) then
+                        if(EGRID1(I,J)<work1) EGRID1(I,J)=work1
+                     endif
+                  ENDDO
+                  ENDDO
+               ENDDO
                DO J=JSTA,JEND
                DO I=ISTA,IEND
-                  work1=GTGFD(I,J,IFD)
-                  if(GTGFD(I,J,N)>=SPVAL) then
-                     GTGFD(I,J,N)=work1
-                  elseif(work1<SPVAL) then
-                     if(GTGFD(I,J,N)<work1) GTGFD(I,J,N)=work1
+                  GRID1(I,J)=EGRID1(I,J)
+               ENDDO
+               ENDDO
+               if(grib=='grib2') then
+                  cfld=cfld+1
+                  fld_info(cfld)%ifld=IAVBLFLD(IGET(476)) ! MXEDPRM ID
+!$omp parallel do private(i,j,ii,jj)
+                  do j=1,jend-jsta+1
+                     jj = jsta+j-1
+                     do i=1,iend-ista+1
+                        ii = ista+i-1
+                        datapd(i,j,cfld) = GRID1(ii,jj)
+                     enddo
+                  enddo
+               endif
+            end if
+            
+            DO IFD = 1,NFDCTL
+               IF (LVLS(IFD,IGET(iID)) > 0) THEN
+!$omp parallel do private(i,j)
+                  DO J=JSTA,JEND
+                  DO I=ISTA,IEND
+                     GRID1(I,J)=QFD(I,J,IFD,N)
+                  ENDDO
+                  ENDDO
+                  if(grib=='grib2') then
+                     cfld=cfld+1
+                     fld_info(cfld)%ifld=IAVBLFLD(IGET(iID))
+                     fld_info(cfld)%lvl=LVLSXML(IFD,IGET(iID))
+!$omp parallel do private(i,j,ii,jj)
+                     do j=1,jend-jsta+1
+                        jj = jsta+j-1
+                        do i=1,iend-ista+1
+                        ii = ista+i-1
+                           datapd(i,j,cfld) = GRID1(ii,jj)
+                        enddo
+                     enddo
                   endif
-               ENDDO
-               ENDDO
+               ENDIF
             ENDDO
+         ENDDO
 
-            DO IFD = 1,NFDCTL
-              IF (LVLS(IFD,IGET(467))>0) THEN
-!$omp parallel do private(i,j)
-                 DO J=JSTA,JEND
-                 DO I=ISTA,IEND
-                    GRID1(I,J)=GTGFD(I,J,IFD)
-                 ENDDO
-                 ENDDO
-                 if(grib=='grib2') then
-                   cfld=cfld+1
-                   fld_info(cfld)%ifld=IAVBLFLD(IGET(467))
-                   fld_info(cfld)%lvl=LVLSXML(IFD,IGET(467))
-!$omp parallel do private(i,j,ii,jj)
-                   do j=1,jend-jsta+1
-                      jj = jsta+j-1
-                      do i=1,iend-ista+1
-                      ii = ista+i-1
-                         datapd(i,j,cfld) = GRID1(ii,jj)
-                      enddo
-                   enddo
-                 endif
-              ENDIF
-            ENDDO
-         endif
-
-         if(IGET(468)>0) THEN          ! CAT
-            N=IAVBLFLD(IGET(468))
-            NFDCTL=size(pset%param(N)%level)
-            if(allocated(ITYPEFDLVLCTL)) deallocate(ITYPEFDLVLCTL)
-            allocate(ITYPEFDLVLCTL(NFDCTL))
-            DO IFD = 1,NFDCTL
-               ITYPEFDLVLCTL(IFD)=LVLS(IFD,IGET(468))
-            enddo
-            if(allocated(HTFDCTL)) deallocate(HTFDCTL)
-            allocate(HTFDCTL(NFDCTL))
-            HTFDCTL=pset%param(N)%level
-            allocate(CATFD(ISTA:IEND,JSTA:JEND,NFDCTL))
-            call FDLVL_MASS(ITYPEFDLVLCTL,NFDCTL,HTFDCTL,catedr,CATFD)
-            DO IFD = 1,NFDCTL
-              IF (LVLS(IFD,IGET(468))>0) THEN
-!$omp parallel do private(i,j)
-                 DO J=JSTA,JEND
-                 DO I=ISTA,IEND
-                    GRID1(I,J)=CATFD(I,J,IFD)
-                 ENDDO
-                 ENDDO
-                 if(grib=='grib2') then
-                   cfld=cfld+1
-                   fld_info(cfld)%ifld=IAVBLFLD(IGET(468))
-                   fld_info(cfld)%lvl=LVLSXML(IFD,IGET(468))
-!$omp parallel do private(i,j,ii,jj)
-                   do j=1,jend-jsta+1
-                      jj = jsta+j-1
-                      do i=1,iend-ista+1
-                      ii = ista+i-1
-                         datapd(i,j,cfld) = GRID1(ii,jj)
-                      enddo
-                   enddo
-                 endif
-              ENDIF
-            ENDDO
-         endif
-
-         if(IGET(469)>0) THEN          ! MWT
-            N=IAVBLFLD(IGET(469))
-            NFDCTL=size(pset%param(N)%level)
-            if(allocated(ITYPEFDLVLCTL)) deallocate(ITYPEFDLVLCTL)
-            allocate(ITYPEFDLVLCTL(NFDCTL))
-            DO IFD = 1,NFDCTL
-               ITYPEFDLVLCTL(IFD)=LVLS(IFD,IGET(469))
-            enddo
-            if(allocated(HTFDCTL)) deallocate(HTFDCTL)
-            allocate(HTFDCTL(NFDCTL))
-            HTFDCTL=pset%param(N)%level
-            allocate(MWTFD(ISTA:IEND,JSTA:JEND,NFDCTL))
-            call FDLVL_MASS(ITYPEFDLVLCTL,NFDCTL,HTFDCTL,MWT,MWTFD)
-            DO IFD = 1,NFDCTL
-              IF (LVLS(IFD,IGET(469))>0) THEN
-!$omp parallel do private(i,j)
-                 DO J=JSTA,JEND
-                 DO I=ISTA,IEND
-                    GRID1(I,J)=MWTFD(I,J,IFD)
-                 ENDDO
-                 ENDDO
-                 if(grib=='grib2') then
-                   cfld=cfld+1
-                   fld_info(cfld)%ifld=IAVBLFLD(IGET(469))
-                   fld_info(cfld)%lvl=LVLSXML(IFD,IGET(469))
-!$omp parallel do private(i,j,ii,jj)
-                   do j=1,jend-jsta+1
-                      jj = jsta+j-1
-                      do i=1,iend-ista+1
-                      ii = ista+i-1
-                         datapd(i,j,cfld) = GRID1(ii,jj)
-                      enddo
-                   enddo
-                 endif
-              ENDIF
-            ENDDO
-         endif
-
-         if(allocated(GTGFD)) deallocate(GTGFD)
-         if(allocated(CATFD)) deallocate(CATFD)
-         if(allocated(MWTFD)) deallocate(MWTFD)
-
+         DEALLOCATE(QIN,QFD)
+         DEALLOCATE(QTYPE)
          if(allocated(ITYPEFDLVLCTL)) deallocate(ITYPEFDLVLCTL)
          if(allocated(HTFDCTL)) deallocate(HTFDCTL)
 
@@ -3122,11 +3099,29 @@
              DO I=ISTA,IEND
                EGRID1(I,J) = -H99999
                EGRID2(I,J) = -H99999
-               LB2(I,J)  = (LVLBND(I,J,1) + LVLBND(I,J,2) +           &
+               LB2(I,J)  = (LVLBND(I,J,1) + LVLBND(I,J,2) +             &
                             LVLBND(I,J,3))/3
-               P1D(I,J)  = (PBND(I,J,1) + PBND(I,J,2) + PBND(I,J,3))/3
-               T1D(I,J)  = (TBND(I,J,1) + TBND(I,J,2) + TBND(I,J,3))/3
-               Q1D(I,J)  = (QBND(I,J,1) + QBND(I,J,2) + QBND(I,J,3))/3
+               P1D(I,J) = spval
+               T1D(I,J) = spval
+               Q1D(I,J) = spval
+               IF (PBND(I,J,1) < spval .and. PBND(I,J,2) < spval .and.  &
+                   PBND(I,J,3) < spval .and. TBND(I,J,1) < spval .and.  &
+                   TBND(I,J,2) < spval .and. TBND(I,J,3) < spval .and.  &
+                   QBND(I,J,1) < spval .and. QBND(I,J,2) < spval .and.  &
+                   QBND(I,J,3) < spval) THEN
+                 IF (capecin_2m) THEN
+                   P1D(I,J)  = (PBND(I,J,1) + PBND(I,J,2) + PBND(I,J,3) + &
+                                PSHLTR(I,J))/4
+                   T1D(I,J)  = (TBND(I,J,1) + TBND(I,J,2) + TBND(I,J,3) + &
+                                TSHLTR(I,J)*(PSHLTR(I,J)/P1000)**CAPA)/4
+                   Q1D(I,J)  = (QBND(I,J,1) + QBND(I,J,2) + QBND(I,J,3) + &
+                                max(0.0,QSHLTR(I,J)))/4
+                 ELSE
+                   P1D(I,J)  = (PBND(I,J,1) + PBND(I,J,2) + PBND(I,J,3))/3
+                   T1D(I,J)  = (TBND(I,J,1) + TBND(I,J,2) + TBND(I,J,3))/3
+                   Q1D(I,J)  = (QBND(I,J,1) + QBND(I,J,2) + QBND(I,J,3))/3
+                 ENDIF
+               ENDIF
              ENDDO
            ENDDO
 !
@@ -3268,6 +3263,7 @@
            DPBND = 300.E2
            CALL CALCAPE(ITYPE,DPBND,P1D,T1D,Q1D,LB2,EGRID1,     &
                         EGRID2,EGRID3,EGRID4,EGRID5)
+           MUCAPE = D00
            IF (IGET(584)>0 .or. NEED_IFI) THEN
 ! dong add missing value to cin
                GRID1 = spval
@@ -3306,23 +3302,24 @@
 
            ENDIF
                 
+           MUCIN = D00
            IF (IGET(585)>0 .or. NEED_IFI) THEN
 ! dong add missing value to cin
                GRID1 = spval
 !$omp parallel do private(i,j)
                DO J=JSTA,JEND
                  DO I=ISTA,IEND
-                   IF(T1D(I,J) < spval) GRID1(I,J) = - EGRID2(I,J)
+                   IF(T1D(I,J) < spval) GRID1(I,J) = - EGRID2(I,J) ! GRID1 >= 0 here
                  ENDDO
                ENDDO
                CALL BOUND(GRID1,D00,H99999)
                DO J=JSTA,JEND
                  DO I=ISTA,IEND
                    IF(T1D(I,J) < spval) THEN 
-                   GRID1(I,J) = - GRID1(I,J)
+                   GRID1(I,J) = - GRID1(I,J)                       ! GRID1 <= 0 here
                        IF (SUBMODELNAME == 'RTMA')THEN 
-                              MUCAPE(I,J) = GRID1(I,J)
-                              MUQ1D(I,J) = Q1D(I,J)
+                              MUCIN(I,J) = GRID1(I,J)              ! MUCIN <= 0 here
+!                             MUQ1D(I,J) = Q1D(I,J)                ! Q1D is NOT Q of MU parcel here
                        ENDIF
                    ENDIF
                  ENDDO
@@ -3588,7 +3585,7 @@
          IF(IGET(951)>0)THEN
            FIELD2=.TRUE.
          ENDIF
-         IF(MODELNAME == "FV3R" .and. SUBMODELNAME == "RTMA") THEN
+         IF(MODELNAME == "RAPR" .and. SUBMODELNAME == 'RTMA') THEN
            FIELD1=.TRUE.
            FIELD2=.TRUE.
          ENDIF
@@ -3617,11 +3614,29 @@
 !          ENDDO
 !          DO J=JSTA,JEND
 !          DO I=ISTA,IEND
-               LB2(I,J)  = (LVLBND(I,J,1) + LVLBND(I,J,2) +           &
+               LB2(I,J)  = (LVLBND(I,J,1) + LVLBND(I,J,2) +             &
                             LVLBND(I,J,3))/3
-               P1D(I,J)  = (PBND(I,J,1) + PBND(I,J,2) + PBND(I,J,3))/3
-               T1D(I,J)  = (TBND(I,J,1) + TBND(I,J,2) + TBND(I,J,3))/3
-               Q1D(I,J)  = (QBND(I,J,1) + QBND(I,J,2) + QBND(I,J,3))/3
+               P1D(I,J) = spval
+               T1D(I,J) = spval
+               Q1D(I,J) = spval
+               IF (PBND(I,J,1) < spval .and. PBND(I,J,2) < spval .and.  &
+                   PBND(I,J,3) < spval .and. TBND(I,J,1) < spval .and.  &
+                   TBND(I,J,2) < spval .and. TBND(I,J,3) < spval .and.  &
+                   QBND(I,J,1) < spval .and. QBND(I,J,2) < spval .and.  &
+                   QBND(I,J,3) < spval) THEN
+                 IF (capecin_2m) THEN
+                   P1D(I,J)  = (PBND(I,J,1) + PBND(I,J,2) + PBND(I,J,3) + &
+                                PSHLTR(I,J))/4
+                   T1D(I,J)  = (TBND(I,J,1) + TBND(I,J,2) + TBND(I,J,3) + &
+                                TSHLTR(I,J)*(PSHLTR(I,J)/P1000)**CAPA)/4
+                   Q1D(I,J)  = (QBND(I,J,1) + QBND(I,J,2) + QBND(I,J,3) + &
+                                max(0.0,QSHLTR(I,J)))/4
+                 ELSE
+                   P1D(I,J)  = (PBND(I,J,1) + PBND(I,J,2) + PBND(I,J,3))/3
+                   T1D(I,J)  = (TBND(I,J,1) + TBND(I,J,2) + TBND(I,J,3))/3
+                   Q1D(I,J)  = (QBND(I,J,1) + QBND(I,J,2) + QBND(I,J,3))/3
+                 ENDIF
+               ENDIF
              ENDDO
            ENDDO
 
@@ -3740,7 +3755,7 @@
        IF (iget1 > 0 .OR. IGET(162) > 0 .OR. IGET(953) > 0) THEN
          DEPTH(1) = 3000.0
          DEPTH(2) = 1000.0
-         IF (SUBMODELNAME == 'RTMA') THEN
+         IF (MODELNAME == 'RAPR' .AND. SUBMODELNAME == 'RTMA') THEN
 !---  IF USSING EL BASE & TOP COMPUTED BY NEW SCHEME FOR THE
 !RELATED VARIABLES
 !$omp parallel do private(i,j)
@@ -3958,8 +3973,8 @@
              endif
             ENDIF
 
-!U inflow based to 50% EL shear vector
-
+! U component of effective layer bulk shear
+! Calculated dynamically from the inflow base up to 50% of EL
             IF (IGET(983)>0) THEN
              GRID1=spval
              DO J=JSTA,JEND
@@ -3985,7 +4000,8 @@
              endif
             ENDIF
 
-!V inflow based to 50% EL shear vector
+! V component of effective layer bulk shear
+! Calculated dynamically from the inflow base up to 50% of EL
             IF (IGET(984)>0) THEN
              GRID1=spval
              DO J=JSTA,JEND
@@ -4011,7 +4027,8 @@
              endif
             ENDIF
 
-!Inflow based (ESFC) to (50%) EL shear magnitude
+! Magnitude of effective layer bulk shear
+! Calculated dynamically from the inflow base up to 50% of EL
             IF (IGET(985)>0) THEN
              GRID1=spval
              DO J=JSTA,JEND
@@ -4250,7 +4267,7 @@
              endif
            ENDIF
 
-!Effective Layer Supercell Parameter
+!Effective Layer Significant Tornado Parameter
             IF (IGET(991)>0) THEN
             DO J=JSTA,JEND
                DO I=ISTA,IEND
@@ -4307,13 +4324,29 @@
                EGRID6(I,J) = -H99999
                EGRID7(I,J) = -H99999
                EGRID8(I,J) = -H99999
-               LB2(I,J)  = (LVLBND(I,J,1) + LVLBND(I,J,2) +           &
+               LB2(I,J)  = (LVLBND(I,J,1) + LVLBND(I,J,2) +             &
                             LVLBND(I,J,3))/3
-               P1D(I,J)  = (PBND(I,J,1) + PBND(I,J,2) + PBND(I,J,3))/3
-               T1D(I,J)  = (TVIRTUAL(TBND(I,J,1),QBND(I,J,1)) +       &
-                            TVIRTUAL(TBND(I,J,2),QBND(I,J,2)) +       &
-                            TVIRTUAL(TBND(I,J,3),QBND(I,J,3)))/3
-               Q1D(I,J)  = (QBND(I,J,1) + QBND(I,J,2) + QBND(I,J,3))/3
+               P1D(I,J) = spval
+               T1D(I,J) = spval
+               Q1D(I,J) = spval
+               IF (PBND(I,J,1) < spval .and. PBND(I,J,2) < spval .and.  &
+                   PBND(I,J,3) < spval .and. TBND(I,J,1) < spval .and.  &
+                   TBND(I,J,2) < spval .and. TBND(I,J,3) < spval .and.  &
+                   QBND(I,J,1) < spval .and. QBND(I,J,2) < spval .and.  &
+                   QBND(I,J,3) < spval) THEN
+                 IF (capecin_2m) THEN
+                   P1D(I,J)  = (PBND(I,J,1) + PBND(I,J,2) + PBND(I,J,3) + &
+                                PSHLTR(I,J))/4
+                   T1D(I,J)  = (TBND(I,J,1) + TBND(I,J,2) + TBND(I,J,3) + &
+                                TSHLTR(I,J)*(PSHLTR(I,J)/P1000)**CAPA)/4
+                   Q1D(I,J)  = (QBND(I,J,1) + QBND(I,J,2) + QBND(I,J,3) + &
+                                max(0.0,QSHLTR(I,J)))/4
+                 ELSE
+                   P1D(I,J)  = (PBND(I,J,1) + PBND(I,J,2) + PBND(I,J,3))/3
+                   T1D(I,J)  = (TBND(I,J,1) + TBND(I,J,2) + TBND(I,J,3))/3
+                   Q1D(I,J)  = (QBND(I,J,1) + QBND(I,J,2) + QBND(I,J,3))/3
+                 ENDIF
+               ENDIF
              ENDDO
            ENDDO
 
@@ -4489,21 +4522,21 @@
 
 !    Downdraft CAPE
 
-!           ITYPE = 1
-!           DO J=JSTA,JEND
-!           DO I=ISTA,IEND
-!               LB2(I,J)  = (LVLBND(I,J,1) + LVLBND(I,J,2) +           &
-!                            LVLBND(I,J,3))/3
-!               P1D(I,J)  = (PBND(I,J,1) + PBND(I,J,2) + PBND(I,J,3))/3
-!               T1D(I,J)  = (TBND(I,J,1) + TBND(I,J,2) + TBND(I,J,3))/3
-!               Q1D(I,J)  = (QBND(I,J,1) + QBND(I,J,2) + QBND(I,J,3))/3
-!             ENDDO
-!           ENDDO
+            ITYPE = 1
+            DO J=JSTA,JEND
+              DO I=ISTA,IEND
+                LB2(I,J)  = (LVLBND(I,J,1) + LVLBND(I,J,2) +           &
+                             LVLBND(I,J,3))/3
+                P1D(I,J)  = (PBND(I,J,1) + PBND(I,J,2) + PBND(I,J,3))/3
+                T1D(I,J)  = (TBND(I,J,1) + TBND(I,J,2) + TBND(I,J,3))/3
+                Q1D(I,J)  = (QBND(I,J,1) + QBND(I,J,2) + QBND(I,J,3))/3
+              ENDDO
+            ENDDO
 
-!           DPBND = 400.E2
-!           CALL CALCAPE2(ITYPE,DPBND,P1D,T1D,Q1D,LB2,            &
-!                         EGRID1,EGRID2,EGRID3,EGRID4,EGRID5,     &
-!                         EGRID6,EGRID7,EGRID8)
+            DPBND = 400.E2
+            CALL CALCAPE2(ITYPE,DPBND,P1D,T1D,Q1D,LB2,            &
+                          EGRID1,EGRID2,EGRID3,EGRID4,EGRID5,     &
+                          EGRID6,EGRID7,EGRID8)
 
            IF (IGET(954)>0) THEN
                GRID1 = spval
@@ -4592,7 +4625,7 @@
 !     
       RETURN
    CONTAINS
-
+!> @brief allocate_cape_arrays - store CAPE in arrays
      subroutine allocate_cape_arrays
        if(.not.allocated(OMGBND))  allocate(OMGBND(ista:iend,jsta:jend,NBND))
        if(.not.allocated(PWTBND))  allocate(PWTBND(ista:iend,jsta:jend,NBND))

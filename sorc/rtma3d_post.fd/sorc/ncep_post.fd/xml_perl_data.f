@@ -1,15 +1,35 @@
         module xml_perl_data
 !------------------------------------------------------------------------
-!
-! This module read in Perl XML processed flat file and 
-!   handle parameter marshalling for existing POST program
-!
-! program log:
-!   March, 2015    Lin Gan    Initial Code
-!   July,  2016    J. Carley  Clean up prints 
-!   
+!> @file 
+!> @brief This module reads in Perl XML processed flat file and 
+!> handles parameter marshalling for existing POST program
+!> 
+!> ### Program history log:
+!> Date | Programmer | Comments
+!> -----|------------|---------
+!> March, 2015 | Lin Gan   | Initial Code
+!> July,  2016 | J. Carley | Clean up prints 
+!> July, 2024  | Wen Meng  | Increase datset length
+!> May, 2025   | Ben Blake | Remove hardcoded value for tprec
+!>
 !------------------------------------------------------------------------
+!> @defgroup xml_perl_data_mod xml_perl_data
+!> Sets parameters that are used to read in 
+!! Perl XML processed flat file and handle parameter marshalling for 
+!! existing POST program.
+!
         implicit none
+!
+!> @ingroup xml_perl_data_mod 
+!> @{ Parameters that are used to read in Perl XML processed flat file 
+!!  and handle parameter marshalling for existing POST program.
+   integer :: NFCST,NBC,LIST,IOUT,NTSTM,                 &
+             NRADS,NRADL,NDDAMP,IDTAD,NBOCO,NSHDE,NCP,IMDLTY
+!> @}
+
+!> @ingroup xml_perl_data_mod 
+!> @{ Parameters that are used to read in Perl XML processed flat file 
+!! and handle parameter marshalling for existing POST program.
 	  type param_t
 	    integer                              :: post_avblfldidx=-9999
 	    character(len=80)                    :: shortname=''
@@ -20,12 +40,13 @@
 	    character(len=10)                    :: table_info=''
 	    character(len=80)                    :: stats_proc=''
 	    character(len=80)                    :: fixed_sfc1_type=''
-            integer, dimension(:), pointer       :: scale_fact_fixed_sfc1 => null()
-	    real, dimension(:), pointer          :: level => null()
-	    character(len=80)                    :: fixed_sfc2_type=''
-	    integer, dimension(:), pointer       :: scale_fact_fixed_sfc2 => null()
-	    real, dimension(:), pointer          :: level2 => null()
-	    character(len=80)                    :: aerosol_type=''
+       integer, dimension(:), pointer       :: scale_fact_fixed_sfc1 => null()
+       real, dimension(:), pointer          :: level => null()
+       character(len=80)                    :: fixed_sfc2_type=''
+       integer, dimension(:), pointer       :: scale_fact_fixed_sfc2 => null() 
+       real, dimension(:), pointer          :: level2 => null()
+       character(len=80)                    :: aerosol_type=''
+       character(len=80)                    :: prob_type=''
 	    character(len=80)                    :: typ_intvl_size=''
  	    integer                              :: scale_fact_1st_size=0
 	    real                                 :: scale_val_1st_size=0.0
@@ -36,7 +57,11 @@
 	    real                                 :: scale_val_1st_wvlen=0.0
 	    integer                              :: scale_fact_2nd_wvlen=0
 	    real                                 :: scale_val_2nd_wvlen=0.0
-	    real, dimension(:), pointer          :: scale => null()
+            integer                              :: scale_fact_lower_limit=0
+            real                                 :: scale_val_lower_limit=0.0
+            integer                              :: scale_fact_upper_limit=0
+            real                                 :: scale_val_upper_limit=0.0
+	    real, dimension(:), pointer          :: scale => null()  
 	    integer                              :: stat_miss_val=0
 	    integer                              :: leng_time_range_prev=0
 	    integer                              :: time_inc_betwn_succ_fld=0
@@ -44,9 +69,13 @@
 	    character(len=20)                    :: stat_unit_time_key_succ=''
 	    character(len=20)                    :: bit_map_flag=''
           end type param_t
+!> @}
 
+!> @ingroup xml_perl_data_mod
+!> @{ Parameters that are used to read in Perl XML processed flat file
+!! and handle parameter marshalling for existing POST program.
           type paramset_t
-	    character(len=6)                     :: datset=''
+	    character(len=20)                     :: datset=''
 	    integer                              :: grid_num=255
 	    character(len=20)                    :: sub_center=''
 	    character(len=20)                    :: version_no=''
@@ -62,19 +91,31 @@
 	    character(len=30)                    :: order_of_sptdiff='1st_ord_sptdiff'
 	    character(len=20)                    :: field_datatype=''
 	    character(len=30)                    :: comprs_type=''
+!> @}
+!> @ingroup xml_perl_data_mod 
+!> @{ Parameters that are used to read in Perl XML processed flat file 
+!! and handle parameter marshalling for existing POST program.
             character(len=50)                    :: type_ens_fcst=''
             character(len=50)                    :: type_derived_fcst=''
             type(param_t), dimension(:), pointer :: param => null()
           end type paramset_t
- 
+!> @}
+!> @ingroup xml_perl_data_mod 
+!> @{ Parameters that are used to read in Perl XML processed flat file 
+!! and handle parameter marshalling for existing POST program. 
           type post_avblfld_t
             type(param_t), dimension(:), pointer :: param => null()
           end type post_avblfld_t
+!> @}
 
+!> @ingroup xml_perl_data_mod 
+!> @{ Parameters that are used to read in Perl XML processed flat file 
+!! and handle parameter marshalling for existing POST program. 
           type (paramset_t), dimension(:), pointer :: paramset
           type (post_avblfld_t),save               :: post_avblflds
-
+!> @}
         contains
+!> @brief Reads in and processes the postxconfig file
         subroutine read_postxconfig()
 
          use rqstfld_mod,only: num_post_afld,MXLVL,lvlsxml
@@ -108,11 +149,33 @@
 ! Take the first line as paramset_count
 	read(22,*)paramset_count
 
-        if(me==0)write(*,*)'xml_perl_data read Post flat file'
+        if(associated(paramset)) then
+          if(size(paramset)>0) then
+            do i=1,size(paramset)
+              if (associated(paramset(i)%param)) then
+                if (size(paramset(i)%param)>0) then
+                  do j=1,size(paramset(i)%param)
+                    if (associated(paramset(i)%param(j)%scale_fact_fixed_sfc1)) &
+                        deallocate(paramset(i)%param(j)%scale_fact_fixed_sfc1)
+                    if (associated(paramset(i)%param(j)%level)) &
+                        deallocate(paramset(i)%param(j)%level)
+                    if (associated(paramset(i)%param(j)%scale_fact_fixed_sfc2)) &
+                        deallocate(paramset(i)%param(j)%scale_fact_fixed_sfc2)
+                    if (associated(paramset(i)%param(j)%level2)) &
+                        deallocate(paramset(i)%param(j)%level2)
+                    if (associated(paramset(i)%param(j)%scale)) &
+                        deallocate(paramset(i)%param(j)%scale)
+                  enddo
+                  deallocate(paramset(i)%param)
+                  nullify(paramset(i)%param)
+                endif
+              endif
+            enddo
+          endif
+          deallocate(paramset)
+        endif
 
 ! Allocate paramset array size
-        if(me==0)write(*,*)'allocate paramset to :', paramset_count
-
         allocate(paramset(paramset_count))
 
 ! Take the second line as param_count (on n..1 down loop)
@@ -123,14 +186,12 @@
 
         do i = paramset_count, 1, -1
           read(22,*)param_count
-          if(me==0)write(*,*)'allocate param to :', param_count
 
           allocate(paramset(i)%param(param_count))
 
 ! LinGan lvlsxml is now a sum of flat file read out
 ! Also allocate lvlsxml for rqstfld_mod
           num_post_afld = num_post_afld + param_count
-          if(me==0)write(*,*)'sum num_post_afld :', num_post_afld
 
         end do
         
@@ -142,7 +203,6 @@
 ! allocate array size from param for current paramset
 ! filter_char_inp is to check if "?" is found 
 !   then replace to empty string because it means no input. 
-
           read(22,*)paramset(i)%datset
           call filter_char_inp(paramset(i)%datset)
 
@@ -163,7 +223,6 @@
             call filter_char_inp(paramset(i)%data_type)
           read(22,*)paramset(i)%gen_proc_type
             call filter_char_inp(paramset(i)%gen_proc_type)
-          if(me==0)print*,'gen_proc_type= ',paramset(i)%gen_proc_type
           read(22,*)paramset(i)%time_range_unit
             call filter_char_inp(paramset(i)%time_range_unit)
           read(22,*)paramset(i)%orig_center
@@ -177,11 +236,9 @@
             call filter_char_inp(paramset(i)%field_datatype)
           read(22,*)paramset(i)%comprs_type
             call filter_char_inp(paramset(i)%comprs_type)
-          if(me==0)print*,'finish reading comprs_type'
           if(paramset(i)%gen_proc_type=='ens_fcst')then
             read(22,*)paramset(i)%type_ens_fcst
             call filter_char_inp(paramset(i)%type_ens_fcst)
-            tprec   = 6  ! always 6 hr bucket for gefs
             tclod   = tprec
             trdlw   = tprec
             trdsw   = tprec
@@ -189,7 +246,6 @@
             tmaxmin = tprec
             td3d    = tprec
           end if          
-          if(me==0)print*,'type_ens_fcst= ',paramset(i)%type_ens_fcst 
 ! Loop param_count (param datas 161) for gfsprs
 	  do j = 1, param_count
 	    read(22,*)paramset(i)%param(j)%post_avblfldidx
@@ -261,6 +317,8 @@
 
             read(22,*)paramset(i)%param(j)%aerosol_type
               call filter_char_inp(paramset(i)%param(j)%aerosol_type)
+            read(22,*)paramset(i)%param(j)%prob_type
+              call filter_char_inp(paramset(i)%param(j)%prob_type)
             read(22,*)paramset(i)%param(j)%typ_intvl_size
               call filter_char_inp(paramset(i)%param(j)%typ_intvl_size)
 
@@ -275,6 +333,10 @@
             read(22,*)paramset(i)%param(j)%scale_val_1st_wvlen
             read(22,*)paramset(i)%param(j)%scale_fact_2nd_wvlen
             read(22,*)paramset(i)%param(j)%scale_val_2nd_wvlen
+            read(22,*)paramset(i)%param(j)%scale_fact_lower_limit
+            read(22,*)paramset(i)%param(j)%scale_val_lower_limit
+            read(22,*)paramset(i)%param(j)%scale_fact_upper_limit
+            read(22,*)paramset(i)%param(j)%scale_val_upper_limit
             read(22,*)scale_array_count
             allocate(paramset(i)%param(j)%scale(1))
             if (scale_array_count > 0) then
@@ -307,7 +369,8 @@
 
         end subroutine read_postxconfig
 
-
+!> @brief Checks parameter set to see whether "?" is found and, if so, replaces it with an empty string because it means no input.
+!> @param[inout] inpchar Input character
         subroutine filter_char_inp (inpchar)
           implicit none
           character, intent(inout)    :: inpchar
@@ -317,4 +380,3 @@
         end subroutine filter_char_inp
 
         end module
-

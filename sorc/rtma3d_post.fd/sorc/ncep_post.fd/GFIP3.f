@@ -1,3 +1,10 @@
+!> @file
+!>
+!> @brief This file contains a collection of UPP modules used to calculate icing probability from the model.
+!> 
+!
+!------------------------------------------------------------------------
+!> @class DerivedFields
 !========================================================================
 ! = = = = = = = = = = = = module DerivedFields  = = = = = = = = = = = =
 !========================================================================
@@ -17,28 +24,48 @@ module DerivedFields
     integer :: OTHER = 3
     integer :: CONVECTION = 4
   end type precipitations_t
+  !> Type of precipitation @memberof DerivedFields
   type(precipitations_t), parameter :: PRECIPS = precipitations_t()  
 
 contains
 
 !-----------------------------------------------------------------------+
+!>
+!> derive_fields() Calculates several derived fields.
+!>
+!> @param[in] imp_physics integer Microphysics option used in the model run.
+!> @param[in] t real Temperature (K).
+!> @param[in] rh real Relative humidity.
+!> @param[in] pres real Pressure (Pa).
+!> @param[in] hgt real Height.
+!> @param[in] totalWater real _____?
+!> @param[in] totalCond real Precipitation Condensate in g/kg.
+!> @param[in] nz integer Number of vertical levels.
+!> @param[in] topoK integer _____?
+!> @param[in] hprcp real Hourly accumulated precipitation.
+!> @param[in] hcprcp real Hourly accumulated convective precipitation.
+!> @param[in] cin real Convective inhibition (CIN).
+!> @param[in] cape real Convective Available Potential Energy (CAPE)
+!> 
+!> 3-D derived data:
+!>     @param[out] ept real Equivalent potential temperature
+!>     @param[out] wbt real Wet bulb temperature
+!>     @param[out] twp real Total water path
+!>
+!> 2-D derived data: (indice for convective icing severity)
+!>     @param[out] kx real k index
+!>     @param[out] lx real Lifted index
+!>     @param[out] tott real Total totals
+!>
+!> 2-D derived data:
+!>     @param[out] pc real Precipitation condensate
+!>     @param[out] prcpType integer Surface precipitation type
+!>
   subroutine derive_fields(imp_physics,t, rh, pres, hgt, totalWater, totalCond,&
                            nz, topoK, hprcp, hcprcp, cin, cape, &
                            ept, wbt, twp, pc, kx, lx, tott, prcpType)
     IMPLICIT NONE
-! 3-D derived data:
-!     ept - equivalent potential temperature
-!     wbt - wet bulb temperature
-!     twp - total water path
-!
-! 2-D derived data: (indice for convective icing severity)
-!     kx   - k index
-!     lx   - lifted index
-!     tott - total totals
-!
-! 2-D derived data:
-!     pc   - precipitation condensate
-!     prcpType - surface precipitation type
+
 
     integer, intent(in) :: imp_physics
     integer, intent(in) :: nz, topoK
@@ -91,7 +118,7 @@ contains
     real vapr, rm
 
     ! actual water vapor presure in pascal
-    ! 611.2 Pa is the saturated vapor presure at 0°C
+    ! 611.2 Pa is the saturated vapor presure at 0Â°C
     ! Pa = (rh/100) * Ps
     vapr = (max(1.0e-6,rh) / 100.0) * getVaporPres(t)
     rm   = log(vapr/611.2)
@@ -131,7 +158,7 @@ contains
 
     real tc
 
-    ! 611.2 Pa is the saturated vapor presure at 0°C
+    ! 611.2 Pa is the saturated vapor presure at 0Â°C
     tc = t-273.15
     getVaporPres = 611.2 * exp( 17.67*tc/(tc+243.5))
 
@@ -151,9 +178,12 @@ contains
   end function get_tLCL
 
 !-----------------------------------------------------------------------+
-! mixing ratio in g/kg = water vapr/dry air
-! td in K
-! pres in Pa
+!> @brief mixing_ratio() Calculates the mixing ratio in g/kg = water vapor/dry air.
+!> 
+!> @param[in] td real dew point temperture (K). 
+!> @param[in] pres real Pressure (Pa).
+!> @return mixing_ratio
+!-----------------------------------------------------------------------+
   elemental real function  mixing_ratio(td, pres)
     IMPLICIT NONE
     real, intent(in) :: td, pres
@@ -229,7 +259,9 @@ contains
   end function getPrecipCond
 
 !-----------------------------------------------------------------------+
-! These 2-D indice are used for convective icing severity
+!>
+!> calc_indice() Calculates 2-D indices that are used for convective icing severity.
+!>
   subroutine calc_indice(t, td, pres, wvm, nz, topoK, &
                          kIndex, liftedIndex, totalTotals)
     IMPLICIT NONE
@@ -576,8 +608,10 @@ contains
 
 end module DerivedFields
 
+!------------------------------------------------------------------------
+!> @class CloudLayers
 !========================================================================
-! = = = = = = = = = = = = = module  CloudLayers = = = = = = = = = = = = =
+! = = = = = = = = = = = = = module CloudLayers = = = = = = = = = = = = =
 !========================================================================
 module CloudLayers
 
@@ -590,22 +624,23 @@ module CloudLayers
   public clouds_t
 
   integer, parameter :: MaxLayers = 30 
-  type :: clouds_t
+  type :: clouds_t    !< _____?
      ! 2-D
-     integer :: nLayers
-     integer :: wmnIdx   ! warm nose index
-     real    :: avv      ! average vertical velocity
+     integer :: nLayers             !< Number of layers
+     integer :: wmnIdx              !< Warm nose index @memberof cloudlayers::clouds_t
+     real    :: avv                 !< Average vertical velocity @memberof cloudlayers::clouds_t
      ! 3-D, on model levels of nz
-     real, allocatable :: layerQ(:)
+     real, allocatable :: layerQ(:) !< array 3-D, of cloud layers @memberof cloudlayers::clouds_t
      ! 3-D, of cloud layers
-     integer :: topIdx(MaxLayers)
-     integer :: baseIdx(MaxLayers)
-     real :: ctt(MaxLayers)
+     integer :: topIdx(MaxLayers)   !< Layer top @memberof cloudlayers::clouds_t
+     integer :: baseIdx(MaxLayers)  !< Layer base @memberof cloudlayers::clouds_t
+     real :: ctt(MaxLayers)         !< Cloud top temperature @memberof cloudlayers::clouds_t
   end type clouds_t
 
 contains
 
 !-----------------------------------------------------------------------+
+!> calc_CloudLayers() @memberof CloudLayers
   subroutine calc_CloudLayers(rh,t,pres,ept,vv, nz, topoK, xlat, xlon,&
        region, clouds)
     IMPLICIT NONE
@@ -914,7 +949,8 @@ contains
 
 end module cloudlayers
 
-
+!------------------------------------------------------------------------
+!> @class IcingPotential
 !========================================================================
 ! = = = = = = = = = = = = module IcingPotential = = = = = = = = = = = = =
 !========================================================================
@@ -933,6 +969,7 @@ module IcingPotential
 contains
 
 !-----------------------------------------------------------------------+
+  !> icing_pot @memberof IcingPotential
   subroutine icing_pot(hgt, rh, t, liqCond, vv, nz, clouds, ice_pot)
     IMPLICIT NONE
     integer, intent(in) :: nz
@@ -1096,7 +1133,8 @@ contains
 
 end module IcingPotential
 
-
+!------------------------------------------------------------------------
+!> @class SeverityMaps
 !========================================================================
 ! = = = = = = = = = = = = module SeverityMaps = = = = = = = = = = = = =
 !========================================================================
@@ -1106,15 +1144,25 @@ module SeverityMaps
   public SCENARIOS
 
   type :: scenarios_t
+     !> NO_PRECIPITAION @memberof SeverityMaps
      integer :: NO_PRECIPITAION = 0
+     !> PRECIPITAION_BELOW_WARMNOSE @memberof SeverityMaps
      integer :: PRECIPITAION_BELOW_WARMNOSE = 1
+     !> PRECIPITAION_ABOVE_WARMNOSE @memberof SeverityMaps
      integer :: PRECIPITAION_ABOVE_WARMNOSE = 2
+     !> ALL_SNOW @memberof SeverityMaps
      integer :: ALL_SNOW = 3
+     !> COLD_RAIN @memberof SeverityMaps
      integer :: COLD_RAIN = 4
+     !> WARM_PRECIPITAION @memberof SeverityMaps
      integer :: WARM_PRECIPITAION = 5
+     !> FREEZING_PRECIPITAION @memberof SeverityMaps
      integer :: FREEZING_PRECIPITAION  = 6
+     !> CONVECTION @memberof SeverityMaps
      integer :: CONVECTION = 7
   end type scenarios_t
+
+  !> Precipitation scenarios @memberof SeverityMaps
   type(scenarios_t), parameter :: SCENARIOS = scenarios_t()
 
 contains
@@ -1122,7 +1170,8 @@ contains
 !-----------------------------------------------------------------------+
 ! scenario dependant
 !-----------------------------------------------------------------------+
-
+!> twp_map() @memberof SeverityMaps
+!> @return twp_map Total water path map
   real function twp_map(v, scenario)
     implicit none
     real, intent(in) :: v
@@ -1153,6 +1202,8 @@ contains
   end function twp_map
 
   ! Only precip below warmnose has a different temperature map
+  !> t_map() @memberof SeverityMaps
+  !> @return t_map Temperature map
   real function t_map(v, scenario)
     implicit none
     real, intent(in) :: v
@@ -1198,6 +1249,8 @@ contains
 
 
   ! Condensates near the surface take place of radar reflectivity in CIP
+  !> prcpcondensate_map() @memberof SeverityMaps
+  !> @return prcpcondensate_map Mapping of condensates near the surface
   real function prcpCondensate_map(v, scenario)
     implicit none
     real, intent(in) :: v
@@ -1238,7 +1291,8 @@ contains
     return
   end function prcpCondensate_map
 
-
+  !> deltaz_map() @memberof SeverityMaps
+  !> @return deltaz_map Mapping of change in Z (geopotential height?) ?
   real function deltaZ_map(v, scenario)
     implicit none
     real, intent(in) :: v
@@ -1289,6 +1343,8 @@ contains
 
   ! 223.15 0.8, 233.15 0.7446, 243.15 0.5784, 253.15 0.3014
   ! 261.15 0.0, 280.15 0.0, 280.151 1.0
+!> ctt_map() @memberof SeverityMaps
+!> @return ctt_map Mapping of cloud top temperature (CTT)?
   real function ctt_map(v)
     implicit none
     real, intent(in) :: v
@@ -1308,6 +1364,8 @@ contains
   end function ctt_map
 
   ! -0.5 1.0, 0.0 0.0
+!> vv_map() @memberof SeverityMaps
+!> @return mapping of vertical velocity
   real function vv_map(v)
     implicit none
     real, intent(in) :: v
@@ -1323,6 +1381,8 @@ contains
 
   ! cloud top distance
   ! 609.6 1.0, 3048.0 0.0
+!> cldTopDist_map() @memberof SeverityMaps
+!> @return cldTopDist_map Cloud top distance map
   real function cldTopDist_map(v)
     implicit none
     real, intent(in) :: v
@@ -1338,6 +1398,8 @@ contains
 
   ! cloud base distance
   ! 304.8 1.0, 1524.0 0.0
+!> cldBaseDist_map() @memberof SeverityMaps
+!> @return cldBaseDist_map Cloud base distance map
   real function cldBaseDist_map(v)
     implicit none
     real, intent(in) :: v
@@ -1350,7 +1412,9 @@ contains
     end if
   end function cldBaseDist_map
 
-  ! 0.0 0.0, 1.0 1.0
+! 0.0 0.0, 1.0 1.0
+!> deltaQ_map() @memberof SeverityMaps
+!> @return deltaQ_map Map of change in specific humidity
   real function deltaQ_map(v)
     implicit none
     real, intent(in) :: v
@@ -1363,6 +1427,8 @@ contains
     end if
   end function deltaQ_map
 
+!> moisture_map_cond() @memberof SeverityMaps
+!> @return moisture_map_cond Condensate moisture map
   real function moisture_map_cond(rh, liqCond, iceCond, pres, t)
     IMPLICIT NONE
     real, intent(in) :: rh, liqCond, iceCond, pres, t
@@ -1377,7 +1443,9 @@ contains
     return
   end function moisture_map_cond
 
-  ! If not identify liquid/ice condensate
+! If not identify liquid/ice condensate
+!> moisture_map_cwat() @memberof SeverityMaps
+!> @return moisture_map_cwat Cloud water moisture map
   real function moisture_map_cwat(rh, cwat, pres, t)
     IMPLICIT NONE
     real, intent(in) :: rh, cwat, pres, t
@@ -1390,8 +1458,10 @@ contains
     return
   end function moisture_map_cwat
 
-  ! only called by moisture_map
-  ! 70.0 0.0, 100.0 1.0
+! only called by moisture_map
+! 70.0 0.0, 100.0 1.0
+!> rh_map() @memberof SeverityMaps
+!> @return rh_map Relative humidity moisture map
   real function rh_map(v)
     implicit none
     real, intent(in) :: v
@@ -1404,8 +1474,10 @@ contains
     end if
   end function rh_map
 
-  ! only called by moisture_map
-  ! 0.00399 0.0, 0.004 0.0, 0.2 1.0
+! only called by moisture_map
+! 0.00399 0.0, 0.004 0.0, 0.2 1.0
+!> condensate_map() @memberof SeverityMaps
+!> @return condensate_map() Condensate map
   real function condensate_map(v)
     implicit none
     real, intent(in) :: v
@@ -1425,6 +1497,8 @@ contains
 
   ! 243.150 0.0, 265.15 1.0, 269.15 1.0, 270.15 0.87
   ! 271.15 0.71, 272.15 0.50, 273.15 0.0
+  !> convect_t_map() @memberof SeverityMaps
+  !> @return convect_t_map Convection and temperature mapping ?
   real function convect_t_map(v)
     implicit none
     real, intent(in) :: v
@@ -1449,6 +1523,8 @@ contains
 
 
    ! 1.0 0.0, 3.0 1.0
+   !> convect_qpf_map() @memberof SeverityMaps
+   !> @return convect_qpf_map Convection and quantitative precipitation forecast (QPF) mapping ?
    real function convect_qpf_map(v)
      implicit none
      real, intent(in) :: v
@@ -1462,6 +1538,8 @@ contains
    end function convect_qpf_map
 
    ! 1000.0 0.0, 2500.0 1.0
+   !> convect_cape_map() @memberof SeverityMaps
+   !> @return convect_cape_map Convection and Convective Available Potential Energy (CAPE) mapping?
    real function convect_cape_map(v)
      implicit none
      real, intent(in) :: v
@@ -1477,6 +1555,8 @@ contains
 
 
    ! -10.0 1.0, 0.0 0.0
+   !> convect_liftedIdx_map() @memberof SeverityMaps
+   !> @return convect_liftedIdx_map Convection and lifted index mapping ?
    real function convect_liftedIdx_map(v)
      implicit none
      real, intent(in) :: v
@@ -1491,6 +1571,8 @@ contains
 
 
    ! 20.0 0.0, 40.0 1.0
+   !> convectkIdx_map() @memberof SeverityMaps
+   !> @return convectkIdx_map Convection and k-index mapping ?
    real function convect_kIdx_map(v)
      implicit none
      real, intent(in) :: v
@@ -1504,6 +1586,8 @@ contains
    end function convect_kIdx_map
 
    ! 20.0 0.0, 55.0 1.0
+   !> convect_totals_map() @memberof SeverityMaps
+   !> @return convect_totals_map _____?
    real function convect_totals_map(v)
      implicit none
      real, intent(in) :: v
@@ -1518,6 +1602,8 @@ contains
 
 end module SeverityMaps
 
+!------------------------------------------------------------------------
+!> @class IcingSeverity
 !========================================================================
 ! = = = = = = = = = = = = module IcingSeverity = = = = = = = = = = = = =
 !========================================================================
@@ -1547,6 +1633,29 @@ module IcingSeverity
 
 contains
 
+!-----------------------------------------------------------------------+
+!> @brief icing_sev() Calculates icing severity.
+!>
+!> @param[in] imp_physics integer Microphysics scheme. 
+!> @param[in] hgt real Geopotential height (m). 
+!> @param[in] rh real Relative humidity.
+!> @param[in] t real Temperature.
+!> @param[in] pres real Pressure.
+!> @param[in] vv real Vertical velocity. 
+!> @param[in] liqCond real 
+!> @param[in] iceCond real 
+!> @param[in] twp real Total water path. 
+!> @param[in] ice_pot real Icing potential. 
+!> @param[in] nz integer Number of vertical levels. 
+!> @param[in] hcprcp real Hourly accumulated convective precipitation.
+!> @param[in] cape real Convective Available Potential Energy (CAPE)
+!> @param[in] lx real Lifted index.
+!> @param[in] kx real k index.
+!> @param[in] tott real Total totals. 
+!> @param[in] pc real Precipitation condensate. 
+!> @param[in] prcpType integer Surface precipitation type.
+!> @param[in] clouds 
+!> @param[out] iseverity real Category of icing severity.
 !-----------------------------------------------------------------------+
   subroutine icing_sev(imp_physics,hgt, rh, t, pres, vv, liqCond, iceCond, twp, &
        ice_pot, nz, hcprcp, cape, lx, kx, tott, pc, prcpType, clouds, &
@@ -2142,7 +2251,7 @@ subroutine icing_algo(i,j,pres,temp,rh,hgt,omega,wh,&
 
   integer, external :: getTopoK
 !---------------------------------------------------------------------
-! The GFIP algorithm computes the probability of icing within a model
+! icing_algo() The GFIP algorithm computes the probability of icing within a model
 !    column given the follow input data
 !
 !
@@ -2329,7 +2438,14 @@ subroutine icing_algo(i,j,pres,temp,rh,hgt,omega,wh,&
   return
 end subroutine icing_algo
 
-!-----------------------------------------------------------------------+
+!-------------------------------------------------------------------------+
+!> getTopoK() Maps the topography height to the model's vertical coordinate
+!>
+!> @param[in] hgt real Geopotential height (m). 
+!> @param[in] alt real Topography height (m). 
+!> @param[in] nz integer Number of vertical levels. 
+!> @return getTopoK Mapping of the topography height to the model's vertical coordinates
+!>
 integer function getTopoK(hgt, alt, nz)
   IMPLICIT NONE
   real, intent(in) :: hgt(nz)

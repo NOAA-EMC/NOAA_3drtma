@@ -10,24 +10,16 @@
 #
 **/build_*/
 #
-sorc/**/log.*
 #
-sorc/**/log_*
+sorc/logs/**
 #
 #
 # # ignore directory of log files ('log/', 'logs/')
 #
-**/log/
 #
-**/logs/
 #
-**/log.*
-log
-logs
-loghistory
-run/
-save4later
 workflow/*.log
+workflow/logs/**
 #
 #  
 #
@@ -57,13 +49,26 @@ sorc/rtma3d_stnmlist.fd/rtma3d_stnmlist
 sorc/rtma3d_wrfbufr_alaska.fd/rtma3d_wrfbufr_alaska
 sorc/rtma3d_wrfbufr_conus.fd/rtma3d_wrfbufr_conus
 #
-#  # ignore directory of gsi and post(upp) source code
-#
-sorc/rtma3d_gsi.fd/**
-sorc/rtma3d_post.fd/**
 parm
-!sorc/rtma_post.fd/parm
 fix
+#  # ignore the sub-directories (build/install/fix) under gsi package
+#  # but track the source code of gsi package
+sorc/rtma3d_gsi.fd/build/
+sorc/rtma3d_gsi.fd/install/
+sorc/rtma3d_gsi.fd/fix/
+sorc/rtma3d_gsi.fd/ush/build_gsi4rtma3d*.sh
+sorc/rtma3d_gsi.fd/.git/
+sorc/rtma3d_gsi.fd/.github/
+#  # ignore the sub-directories (build/install/logs) under post(upp) package
+#  # but track the source code, fix and parm of upp package
+sorc/rtma3d_post.fd/tests/install/
+sorc/rtma3d_post.fd/tests/build/
+sorc/rtma3d_post.fd/tests/logs/
+sorc/rtma3d_post.fd/.git/
+sorc/rtma3d_post.fd/.github/
+!sorc/rtma3d_post.fd/parm/
+!sorc/rtma3d_post.fd/fix/
+!sorc/rtma3d_post.fd/tests/logs/rt.log.*
 #
 #  # ignore the link files under directory modulefiles
 #

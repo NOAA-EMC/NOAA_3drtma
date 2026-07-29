@@ -6,37 +6,79 @@
 
 set -eu
 
+if [[ $(uname -s) == Darwin ]]; then
+  readonly MYDIR=$(cd "$(dirname "$(greadlink -f -n "${BASH_SOURCE[0]}" )" )" && pwd -P)
+else
+  readonly MYDIR=$(cd "$(dirname "$(readlink -f -n "${BASH_SOURCE[0]}" )" )" && pwd -P)
+fi
+PATHTR=${PATHTR:-$( cd ${MYDIR}/.. && pwd )}
+source ${PATHTR}/tests/detect_machine.sh
+
+set_defaults() {
+    delete_exec=YES
+    upp_name="upp.x"
+    load_ifi_module=NO
+    prefix="../install"
+    ifi_opt=" -DBUILD_WITH_IFI=OFF"
+    build_ifi_executables_opt=" "
+    build_ifi_executables=NO
+    gtg_opt=" -DBUILD_WITH_GTG=OFF"
+    nemsio_opt=" -DBUILD_WITH_NEMSIO=ON"
+    wrfio_opt=" -DBUILD_WITH_WRFIO=ON"
+    more=" "
+    verbose_opt=""
+    debug_opt=""
+    compiler="intel"
+}
+
 usage() {
+  set_defaults # restore defaults so usage is correct
   echo
-  echo "Usage: $0 [-p] [-g] [-w] [-v] [-c] [-i] [-d] -h"
+  echo "Usage: $0 [options]"
   echo
-  echo "  -p  installation prefix <prefix>    DEFAULT: ../install"
-  echo "  -g  build with GTG(users with gtg repos. access only)     DEFAULT: OFF"
-  echo "  -I  build with libIFI(users with ifi repos. access only)  DEFAULT: OFF"
+  echo "  -o  exe_name.x   Name of built UPP executable in exec. Default: $upp_name"
+  echo "  -p  installation prefix <prefix>    DEFAULT: $prefix"
+  echo "  -g  build with GTG(users with gtg repos. access only)     DEFAULT: ${gtg_opt#*=}"
   echo "  -i  build with libIFI(users with ifi install access only) DEFAULT: OFF"
-  echo "  -w  build without WRF-IO            DEFAULT: ON"
-  echo "  -v  build with cmake verbose        DEFAULT: NO"
-  echo "  -c  Compiler to use for build       DEFAULT: intel"
+  echo "  -I  build with libIFI (users with ifi repos. access only) DEFAULT: OFF"
+  echo "  -B  build libIFI test programs (only valid with -I)       DEFAULT: OFF"
+  echo "  -n  build with nemsio               DEFAULT: ${nemsio_opt#*=}"
+  echo "  -w  build with WRF-IO               DEFAULT: ${wrfio_opt#*=}"
+  echo "  -v  build with cmake verbose        DEFAULT: OFF"
+  echo "  -c  Compiler to use for build       DEFAULT: $compiler"
   echo "  -d  Debug mode of CMAKE_BUILD_TYPE  DEFAULT: Release"
+  echo "  -a  Skip deletion of exec. Add new executables. DEFAULT: OFF"
+  echo "  -Doption=value   Passes this option to cmake (can use more than once)"
   echo "  -h  display this message and quit"
   echo
   exit 1
 }
 
-prefix="../install"
-ifi_opt=" -DBUILD_WITH_IFI=OFF"
-gtg_opt=" -DBUILD_WITH_GTG=OFF"
-wrfio_opt=" -DBUILD_WITH_WRFIO=ON"
-compiler="intel"
-verbose_opt=""
-debug_opt=""
-while getopts ":p:gwc:vhiId" opt; do
+set_defaults
+
+while getopts ":p:gnwc:vhiIdBD:o:a" opt; do
   case $opt in
+    a)
+      delete_exec=NO
+      ;;
+    o)
+      upp_name="$OPTARG"
+      ;;
+    D)
+      more="$more -$opt$OPTARG"
+      ;;
     p)
       prefix=$OPTARG
       ;;
     g)
       gtg_opt=" -DBUILD_WITH_GTG=ON"
+      ;;
+    B)
+      build_ifi_executables_opt=" -DBUILD_IFI_EXECUTABLES=ON"
+      build_ifi_executables=YES
+      ;;
+    n)
+      nemsio_opt=" -DBUILD_WITH_NEMSIO=OFF"
       ;;
     w)
       wrfio_opt=" -DBUILD_WITH_WRFIO=OFF"
@@ -46,6 +88,7 @@ while getopts ":p:gwc:vhiId" opt; do
       ;;
     i)
       ifi_opt=" -DREQUIRE_IFI=ON"
+      load_ifi_module=YES
       ;;
     c)
       compiler=$OPTARG
@@ -61,29 +104,34 @@ while getopts ":p:gwc:vhiId" opt; do
       ;;
   esac
 done
-cmake_opts=" -DCMAKE_INSTALL_PREFIX=$prefix"${wrfio_opt}${gtg_opt}${ifi_opt}${debug_opt}
 
-source ./detect_machine.sh
-if [[ $(uname -s) == Darwin ]]; then
-  readonly MYDIR=$(cd "$(dirname "$(greadlink -f -n "${BASH_SOURCE[0]}" )" )" && pwd -P)
-else
-  readonly MYDIR=$(cd "$(dirname "$(readlink -f -n "${BASH_SOURCE[0]}" )" )" && pwd -P)
+if [[ ! -z $debug_opt && $ifi_opt =~ INTERNAL.*=ON ]] ; then
+    echo ENABLING IFI DEBUG
+    # When building debug mode with internal IFI, also enable debugging in IFI.
+    # This includes bounds checking in much of the libIFI C++ library.
+    debug_opt="$debug_opt -DIFI_DEBUG=ON"
 fi
-PATHTR=${PATHTR:-$( cd ${MYDIR}/.. && pwd )}
+
+cmake_opts=" -DCMAKE_INSTALL_PREFIX=$prefix"${nemsio_opt}${wrfio_opt}${gtg_opt}${ifi_opt}${debug_opt}${build_ifi_executables_opt}${more}
 
 #Load required modulefiles
 if [[ $MACHINE_ID != "unknown" ]]; then
    if [ $MACHINE_ID == "wcoss2"  -o $MACHINE_ID == "wcoss2_a" ]; then
       module reset
+   elif [ $MACHINE_ID == "container" ]; then
+      source /usr/lmod/lmod/init/bash
+      module purge
+   elif [[ "$MACHINE_ID" =~ gaea* ]] ; then
+       module reset
+       # Unset the read-only variables $PELOCAL_PRGENV and $RCLOCAL_PRGENV
+       gdb -ex 'call (int) unbind_variable("PELOCAL_PRGENV")' \
+           -ex 'call (int) unbind_variable("RCLOCAL_PRGENV")' \
+           --pid=$$ --batch
    else
       module purge
    fi
    module use $PATHTR/modulefiles
-   if [[ $compiler == "intel" ]]; then
-      modulefile=${MACHINE_ID}
-   else
-      modulefile=${MACHINE_ID}_${compiler}
-   fi
+   modulefile=${MACHINE_ID}_${compiler}
    if [ -f "${PATHTR}/modulefiles/${modulefile}" -o -f "${PATHTR}/modulefiles/${modulefile}.lua" ]; then
       echo "Building for machine ${MACHINE_ID}, compiler ${compiler}"
    else
@@ -91,14 +139,36 @@ if [[ $MACHINE_ID != "unknown" ]]; then
       exit 1
    fi
    module load $modulefile
+   if [[ "$load_ifi_module" == YES ]] ; then
+       echo "Loading modulefile for external libIFI library"
+       module load ${modulefile}_external_ifi
+   fi
+   if [[ "$build_ifi_executables" == YES ]] ; then
+       echo "Loading libIFI executables' prerequisites"
+       module load ${modulefile}_ifi_test_prereqs
+   fi
    module list
 fi
 
-rm -rf build install
-mkdir build && cd build
-cmake $cmake_opts ../..
-make -j6 $verbose_opt 
+# Provide host+compiler specific toolchains if available
+CMAKE_TOOLCHAIN_FILE="${PATHTR}/cmake/toolchains/${MACHINE_ID}.${compiler}-toolchain.cmake"
+if [[ -f "${CMAKE_TOOLCHAIN_FILE}" ]]; then
+  cmake_opts="${cmake_opts} -DCMAKE_TOOLCHAIN_FILE=${CMAKE_TOOLCHAIN_FILE}"
+fi
+
+set -x
+BUILD_DIR=${BUILD_DIR:-"build"}
+rm -rf ${BUILD_DIR} install
+mkdir -p ${BUILD_DIR} && cd ${BUILD_DIR}
+cmake $cmake_opts ${PATHTR}
+make -j${BUILD_JOBS:-6} $verbose_opt
 make install
 
-rm -rf $PATHTR/exec && mkdir $PATHTR/exec
-cp $PATHTR/tests/install/bin/upp.x $PATHTR/exec/.
+if [[ "$delete_exec" == YES ]] ; then
+    rm -rf $PATHTR/exec
+fi
+test -d $PATHTR/exec || mkdir -p $PATHTR/exec
+cp $prefix/bin/upp.x $PATHTR/exec/$upp_name
+if [[ "$build_ifi_executables" == YES ]] ; then
+    cp $prefix/bin/fip2-lookalike.x $PATHTR/exec/.
+fi

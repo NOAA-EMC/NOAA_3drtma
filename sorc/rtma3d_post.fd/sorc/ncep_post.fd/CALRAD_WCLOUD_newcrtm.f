@@ -19,8 +19,15 @@
 !> 2022-05-26 | WM Lewis       | added support for GOES-18 ABI IR Channels 7-16
 !> 2022-09-12 | Wen Meng       | Added cloud fraction changes for crtm/2.4.0
 !> 2023-03-22 | WM Lewis       | Added support for using effective radius arrays from RRFS
+!> 2023-10-25 | Eric James     | Bug fix for invalid land category in CRTM
+!> 2025-03-10 | Hua Leighton   | Added channel 12 and 13 in ssmis-f17 
+!> 2025-09-05 | Gillian Petro  | Remove legacy satellite products: amsre (483-86), tim (488-91), and ssmi(s) TB (492-499)
+!> 2026-04-21 | Wen Meng       | Correct solar zenith angle calculation
 !>
-!> @author Chuang @date 2007-01-17       
+!> @author Chuang @date 2007-01-17
+!---------------------------------------------------------------------------
+!> @brief CALRAD_WCLOUD Subroutine that computes model derived brightness temperature. 
+!---------------------------------------------------------------------------
       SUBROUTINE CALRAD_WCLOUD
 
   use vrbls3d, only: o3, pint, pmid, t, q, qqw, qqi, qqr, f_rimef, nlice, nrain, qqs, qqg, &
@@ -111,14 +118,12 @@
   !      integer,parameter::  n_clouds = 4 
   integer,parameter::  n_aerosols = 0
   ! Add your sensors here
-  integer(i_kind),parameter:: n_sensors=23
+  integer(i_kind),parameter:: n_sensors=21
   character(len=20),parameter,dimension(1:n_sensors):: sensorlist= &
       (/'imgr_g15            ', &
         'imgr_g13            ', &
         'imgr_g12            ', &
         'imgr_g11            ', &
-        'amsre_aqua          ', &
-        'tmi_trmm            ', &
         'ssmi_f13            ', &
         'ssmi_f14            ', &
         'ssmi_f15            ', &
@@ -141,8 +146,6 @@
         'goes_img     ', &
         'goes_img     ', &
         'goes_img     ', &
-        'amsre        ', &
-        'tmi          ', &
         'ssmi         ', &
         'ssmi         ', &
         'ssmi         ', &
@@ -216,7 +219,6 @@
   type(crtm_channelinfo_type),allocatable,dimension(:) :: channelinfo
 !     
   integer ii,jj,n_clouds,n,nc
-  integer,external :: iw3jdn
   !
 
   !*****************************************************************************
@@ -249,8 +251,8 @@
       model_to_crtm=(/PINE_FOREST, BROADLEAF_FOREST, PINE_FOREST,       &
            BROADLEAF_FOREST,BROADLEAF_PINE_FOREST, SCRUB, SCRUB_SOIL, &
            BROADLEAF_BRUSH,BROADLEAF_BRUSH, SCRUB, BROADLEAF_BRUSH,   &
-           TILLED_SOIL, URBAN_CONCRETE,TILLED_SOIL, INVALID_LAND,     &
-           COMPACTED_SOIL, INVALID_LAND, TUNDRA,TUNDRA, TUNDRA/)
+           TILLED_SOIL, URBAN_CONCRETE,TILLED_SOIL, URBAN_CONCRETE,     &
+           COMPACTED_SOIL, BROADLEAF_BRUSH, TUNDRA,TUNDRA, TUNDRA/)
    else if(ivegsrc==0)then ! USGS veg type
       allocate(model_to_crtm(novegtype) )
       model_to_crtm=(/URBAN_CONCRETE,       &
@@ -307,12 +309,7 @@
        .or. iget(448) > 0 .or. iget(449) > 0 .or. iget(456) > 0  &
        .or. iget(457) > 0 .or. iget(458) > 0 .or. iget(459) > 0  &
        .or. iget(460) > 0 .or. iget(461) > 0 .or. iget(462) > 0  &
-       .or. iget(463) > 0 .or. iget(483) > 0 .or. iget(484) > 0  &
-       .or. iget(485) > 0 .or. iget(486) > 0 .or. iget(488) > 0  &
-       .or. iget(489) > 0 .or. iget(490) > 0 .or. iget(491) > 0  &
-       .or. iget(492) > 0 .or. iget(493) > 0 .or. iget(494) > 0  &
-       .or. iget(495) > 0 .or. iget(496) > 0 .or. iget(497) > 0  &
-       .or. iget(498) > 0 .or. iget(499) > 0 .or. iget(800) > 0  &
+       .or. iget(463) > 0 .or. iget(800) > 0  &
        .or. iget(801) > 0 .or. iget(802) > 0 .or. iget(803) > 0  &
        .or. iget(804) > 0 .or. iget(805) > 0 .or. iget(806) > 0  &
        .or. iget(807) > 0 .or. iget(809) > 0                     &
@@ -365,8 +362,7 @@
      if (MODELNAME == 'NMM' .OR. MODELNAME == 'NCAR' .OR. MODELNAME == 'RAPR' &
       )o3=0.0
      ! Compute solar zenith angle for GFS, ARW now computes czen in INITPOST
-!     if (MODELNAME == 'GFS')then
-        jdn=iw3jdn(idat(3),idat(1),idat(2))
+        call w3fs13(idat(3),idat(1),idat(2),jdn)
 	do j=jsta,jend
 	   do i=ista,iend
 	      call zensun(jdn,float(idat(4)),gdlat(i,j),gdlon(i,j)       &
@@ -377,7 +373,6 @@
 	end do
         if(jj>=jsta .and. jj<=jend.and.debugprint)                   &
             print*,'sample GFS zenith angle=',acos(czen(ii,jj))*rtd   
-!     end if	       
      ! Initialize CRTM.  Load satellite sensor array.
      ! The optional arguments Process_ID and Output_Process_ID limit
      ! generation of runtime informative output to mpi task
@@ -549,10 +544,6 @@
              (isis=='imgr_g11' .and. (iget(446) > 0 .or. iget(447) > 0 &
              .or. iget(448) > 0 .or. iget(449) > 0 .or. iget(460) > 0   &
              .or. iget(461) > 0 .or. iget(462) > 0 .or. iget(463) > 0)) .OR. &
-             (isis=='amsre_aqua' .and. (iget(483) > 0 .or. iget(484) > 0  &
-             .or. iget(485) > 0 .or. iget(486) > 0)) .OR. &
-             (isis=='tmi_trmm' .and. (iget(488) > 0 .or. iget(489) > 0  &
-             .or. iget(490) > 0 .or. iget(491) > 0)) .OR. &
              (isis=='ssmi_f13' .and. iget(800) > 0 ) .OR. &
              (isis=='ssmi_f14' .and. iget(806) > 0 ) .OR. &
              (isis=='ssmi_f15' .and. iget(812) > 0 ) .OR. &
@@ -729,11 +720,7 @@
                        iget(328)>0 .or. iget(329)>0 .or. iget(330)>0)) .or. &
                        (isis=='imgr_g11' .and. (iget(446)>0 .or. &
                        iget(447)>0 .or. iget(448)>0 .or. iget(449)>0)) .or. &
-                       (isis=='amsre_aqua' .and. (iget(483) > 0 .or. iget(484) > 0  &
-                       .or. iget(485) > 0 .or. iget(486) > 0)) .OR. &
-                       (isis=='tmi_trmm' .and. (iget(488) > 0 .or. iget(489) > 0  &
-                       .or. iget(490) > 0 .or. iget(491) > 0)) .OR. &
-                        (isis=='abi_gr'  .and. post_abigr) )then
+                       (isis=='abi_gr'  .and. post_abigr) )then
 
               do j=jsta,jend
                  loopi1:do i=ista,iend
@@ -1169,43 +1156,6 @@
               !      if (error_status /= success) &
               !     &   print*,'ERROR*** crtm_destroy error_status=',error_status
 
-              if (isis=='amsre_aqua')then  ! writing amsre to grib (37 & 89 GHz)
-                 do ixchan=1,4
-                    ichan=8+ixchan
-                    igot=iget(482+ixchan)
-                    if(igot>0) then
-                       do j=jsta,jend
-                          do i=ista,iend
-                             grid1(i,j)=tb(i,j,ichan)
-                          enddo
-                       enddo
-                       if (grib=="grib2") then
-                          cfld=cfld+1
-                          fld_info(cfld)%ifld=IAVBLFLD(igot)
-                          datapd(1:iend-ista+1,1:jend-jsta+1,cfld)=grid1(ista:iend,jsta:jend)
-                       endif
-                    endif
-                 enddo
-              end if  ! end of outputting amsre
-              if (isis=='tmi_trmm')then  ! writing trmm to grib (37 & 85.5 GHz)
-                 do ixchan=1,4
-                    ichan=5+ixchan
-                    igot=iget(487+ixchan)
-                    if(igot>0) then
-                       do j=jsta,jend
-                          do i=ista,iend
-                             grid1(i,j) = tb(i,j,ichan)
-                          enddo
-                       enddo
-                       if (grib=="grib2") then
-                          cfld=cfld+1
-                          fld_info(cfld)%ifld=IAVBLFLD(igot)
-                          datapd(1:iend-ista+1,1:jend-jsta+1,cfld)=grid1(ista:iend,jsta:jend)
-                       endif
-                    endif
-                 enddo
-              end if  ! end of outputting trmm
-
               if (isis=='imgr_g11')then  ! writing goes 11 to grib
                  do ixchan=1,4
                     ichan=ixchan
@@ -1360,7 +1310,7 @@
                     geometryinfo(1)%sensor_zenith_angle=sat_zenith
 	            geometryinfo(1)%sensor_scan_angle=sat_zenith
 
-                    if(i==ii .and. j==jj) then
+                    if(i==ii .and. j==jj.and.debugprint) then
                        print *,'zenith info: zenith=',sat_zenith,' scan=',sat_zenith, &
                              ' MAX_SENSOR_SCAN_ANGLE=',MAX_SENSOR_SCAN_ANGLE
                     endif
@@ -1370,7 +1320,7 @@
                          .and. geometryinfo(1)%sensor_zenith_angle >= 0.0_r_kind)THEN
                        geometryinfo(1)%source_zenith_angle = acos(czen(i,j))*rtd ! solar zenith angle
                        geometryinfo(1)%sensor_scan_angle   = 0. ! scan angle, assuming nadir
-                       if(i==ii.and.j==jj)print*,'sample geometry ',                   &
+                       if(i==ii.and.j==jj.and.debugprint)print*,'sample geometry ',                   &
                           geometryinfo(1)%sensor_zenith_angle                          &
                           ,geometryinfo(1)%source_zenith_angle                         &
                           ,czen(i,j)*rtd 
@@ -1537,7 +1487,7 @@
                              print*,'bad snow_depth'
                        end if
        
-                       if(i==ii.and.j==jj)print*,'sample surface in CALRAD=',           &
+                       if(i==ii.and.j==jj.and.debugprint)print*,'sample surface in CALRAD=',           &
                              i,j,surface(1)%wind_speed,surface(1)%water_coverage,       &
                              surface(1)%land_coverage,surface(1)%ice_coverage,          &
                              surface(1)%snow_coverage,surface(1)%land_temperature,      &
@@ -1550,7 +1500,7 @@
 
                        !       Load atmosphere profiles into RTM model layers
                        !       CRTM counts from top down just as post does
-                       if(i==ii.and.j==jj)print*,'TOA= ',atmosphere(1)%level_pressure(0)
+                       if(i==ii.and.j==jj.and.debugprint)print*,'TOA= ',atmosphere(1)%level_pressure(0)
                        do k = 1,lm
                           atmosphere(1)%cloud_fraction(k) = min(max(cfr(i,j,k),0.),1.)
                           atmosphere(1)%level_pressure(k) = pint(i,j,k+1)/r100
@@ -1732,7 +1682,7 @@
                           do n=1,channelinfo(sensorindex)%n_channels
                              tb(i,j,n)=rtsolution(n,1)%brightness_temperature
                           end do
-                          if(i==ii.and.j==jj) then
+                          if(i==ii.and.j==jj.and.debugprint) then
                              do n=1,channelinfo(sensorindex)%n_channels
  3303                           format('Sample rtsolution(',I0,',',I0,') in CALRAD = ',F0.3)
 !                               print 3303,n,1,rtsolution(n,1)%brightness_temperature
@@ -1866,6 +1816,23 @@
                        endif
                     endif
                  enddo
+                 do ixchan=1,2
+                  ichan=11+ixchan
+                  igot=iget(828+ixchan)
+                    if(igot>0)then
+                     do j=jsta,jend
+                        do i=ista,iend
+                           grid1(i,j)=tb(i,j,ichan)
+                        enddo
+                     enddo
+                     if(grib=="grib2" )then
+                      cfld=cfld+1
+                      fld_info(cfld)%ifld=IAVBLFLD(igot)
+                      datapd(1:iend-ista+1,1:jend-jsta+1,cfld)=grid1(ista:iend,jsta:jend)
+                     endif
+                  endif
+               enddo
+                                
               endif ! end of outputting ssmis f17
               if (isis=='ssmis_f18')then  ! writing ssmis to grib (183,19,37 &85GHz)
               nc=0
@@ -2198,6 +2165,28 @@
   endif ifactive ! for all iget logical
   return
 end SUBROUTINE CALRAD_WCLOUD
+
+!-------------------------------------------------------------------------------
+!> @brief EFFR Computes effective particle radii channel selection using LVLS from WRF_CNTRL.PARM. 
+!>
+!> @param pmid real Mid-layer pressure.
+!> @param t real Temperature.
+!> @param q real Specific humidity.
+!> @param qqw real Cloud water mixing ratio.
+!> @param qqi real Ice mixing ratio.
+!> @param qqr real Rain mixing ratio.
+!> @param f_rimef real "Rime Factor", ratio of total ice growth to deposition growth.
+!> @param nlice real Time-averaged number concentration of large ice.
+!> @param nrain real Number concentration of rain drops.
+!> @param qqs real Snow mixing ratio.
+!> @param qqg real Graupel mixing ratio.
+!> @param qqnr real Rain number concentration.
+!> @param qqni real Ice number concentration.
+!> @param qqnw real cloud water number concentration.
+!> @param mp_opt integer Microphysics option.
+!> @param species character Particle type (e.g., cloud, rain, graupel, snow, ice).
+!> @return EFFR Effective particle radii channel selection. 
+!-------------------------------------------------------------------------------
 
 REAL FUNCTION EFFR(pmid,t,q,qqw,qqi,qqr,f_rimef, nlice, nrain, &
                    qqs,qqg,qqnr,qqni,qqnw,mp_opt,species)
@@ -2815,6 +2804,13 @@ REAL FUNCTION EFFR(pmid,t,q,qqw,qqi,qqr,f_rimef, nlice, nrain, &
 
 end function EFFR
 
+!-------------------------------------------------------------------------------
+!> @brief GAMMLN
+!>
+!> @param[in] XX
+!> @return GAMMLN Returns the value of LN(GAMMA(XX)) FOR XX > 0.
+!-------------------------------------------------------------------------------
+
       REAL FUNCTION GAMMLN(XX)
 !     --- RETURNS THE VALUE LN(GAMMA(XX)) FOR XX > 0.
       IMPLICIT NONE
@@ -2838,6 +2834,13 @@ end function EFFR
 11    CONTINUE
       GAMMLN=TMP+LOG(STP*SER/X)
       END FUNCTION GAMMLN
+
+!-------------------------------------------------------------------------------
+!> @brief WGAMMA
+!>
+!> @param[in] y
+!> @return WGAMMA
+!-------------------------------------------------------------------------------
 
       REAL FUNCTION WGAMMA(y)
 

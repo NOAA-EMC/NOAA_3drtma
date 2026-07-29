@@ -52,7 +52,28 @@
 !!   23-02-10  E James - Adding an extra IGET value to if statement for NGMSLP calculation
 !!   23-02-23  E James - Adding coarse PM from RRFS
 !!   23-03-03  S Trahan - Avoid out-of-bounds access in U2H & V2H by using USTORE & VSTORE with halo bounds
-!!   23-04-04 |Li(Kate Zhang)  |Add namelist optoin for CCPP-Chem (UFS-Chem) 
+!!   23-04-04 | Li(Kate Zhang)  |Add namelist optoin for CCPP-Chem (UFS-Chem) 
+!!   23-06-26 | W Meng | Output composite radar reflectivity when GFS uses Thompson MP
+!!   23-08-16 | Y Mao  | For gtg_algo, add tke as an input and cit as an output
+!!   23-08-16 | Y Mao  | For GTG, replace iget(ID) with namelist option 'gtg_on'.
+!!   23-10-04 | W Meng | Read 3D radar reflectivity from model when GFS use Thmopson MP
+!!   23-10-17 | E James| Include hail hydrometeors in parm 769 computation when available
+!!   24-01-07 | Y Mao  | Add EDPARM IDs to the condition to call gtg_algo()
+!!   24-01-24 | H Lin  | switching GTG max (gtg) to gtgx3 from gtgx2 per gtg_algo() call
+!!   24-02-20 | J Kenyon | Apply the PBLHGUST-related calculations to RRFS
+!!   24-04-23 | E James| Adding smoke emissions (ebb) from RRFS
+!!   24-10-07 | H Lin  | Change inputs for gtg_algo from averaged (sfcshx, sfclhx) to instantaenous (twbs, qwbs)
+!!   25-01-13 | J Kenyon | Add graupel number concentration (QQNG)
+!!   25-04-22 | J Kenyon | Remove parameter 770 (GSL's reflectivity-derived VIL), since a functionally identical 
+!!            |          | calculation is available via paramater 581.
+!!   25-06-10 | J Kenyon | Adding descriptive comments for parameter 769. This parameter previously had the
+!!                       | shortname "GSD_VIL_ON_ENTIRE_ATMOS" (hydrometeor-based VIL), but is now
+!!                       | "TCOLP_ON_ENTIRE_ATMOS".
+!!   25-06-16 | J Kenyon | Updated calls to CALPBL; these now specify the PBL height formulation to 
+!!                       | apply (RI or THV). Restricted the smoothing of PBL height (for gust calculations) to
+!!                       | RAP/HRRR-era applications only. Additionally, added several descriptive in-code comments.
+!!   25-07-15 | J Duda | Read/process hourly-maximum composite reflectivity
+!!
 !! USAGE:    CALL MDLFLD
 !!   INPUT ARGUMENT LIST:
 !!
@@ -90,25 +111,25 @@
 
 !    
       use vrbls4d, only: dust, salt, suso, waso, soot, no3, nh4, smoke, fv3dust,&
-              coarsepm
+              coarsepm, ebb
       use vrbls3d, only: zmid, t, pmid, q, cwm, f_ice, f_rain, f_rimef, qqw, qqi,&
-              qqr, qqs, cfr, cfr_raw, dbz, dbzr, dbzi, dbzc, qqw, nlice, nrain, qqg, zint, qqni,&
-              qqnr, qqnw, qqnwfa, qqnifa, uh, vh, mcvg, omga, wh, q2, ttnd, rswtt, &
+              qqr, qqs, cfr, cfr_raw, dbz, dbzr, dbzi, dbzc, qqw, nlice, nrain, qqg, qqh, zint,&
+              qqni, qqnr, qqng, qqnw, qqnwfa, qqnifa, uh, vh, mcvg, omga, wh, q2, ttnd, rswtt, &
               rlwtt, train, tcucn, o3, rhomid, dpres, el_pbl, pint, icing_gfip, icing_gfis, &
-              catedr,mwt,gtg, REF_10CM, avgpmtf, avgozcon
+              catedr,mwt,gtg,cit, REF_10CM, avgpmtf, avgozcon
 
-      use vrbls2d, only: slp, hbot, htop, cnvcfr, cprate, cnvcfr, sfcshx,sfclhx,ustar,z0,&
+      use vrbls2d, only: slp, hbot, htop, cnvcfr, cprate, cnvcfr, twbs, qwbs,ustar,z0,&
               sr, prec, vis, czen, pblh, pblhgust, u10, v10, avgprec, avgcprate, &
-              REF1KM_10CM,REF4KM_10CM,REFC_10CM,REFD_MAX
+              REF1KM_10CM,REF4KM_10CM,REFC_10CM,REFD_MAX,max_compref
       use masks, only: lmh, gdlat, gdlon,sm,sice,dx,dy
       use params_mod, only: rd, gi, g, rog, h1, tfrz, d00, dbzmin, d608, small,&
               h100, h1m12, h99999,pi,ERAD
       use pmicrph_mod, only: r1, const1r, qr0, delqr0, const2r, ron, topr, son,&
               tops, dsnow, drain,const_ng1, const_ng2, gon, topg, dgraupel
       use ctlblk_mod, only: jsta_2l, jend_2u, lm, jsta, jend, grib, cfld, datapd,&
-              fld_info, modelname, imp_physics, dtq2, spval, icount_calmict,&
+              fld_info, modelname, submodelname, imp_physics, dtq2, spval, icount_calmict,&
               me, dt, avrain, theat, ifhr, ifmin, avcnvc, lp1, im, jm, &
-      ista, iend, ista_2l, iend_2u, aqf_on, gocart_on, gccpp_on, nasa_on
+      ista, iend, ista_2l, iend_2u, aqf_on, gocart_on, gccpp_on, nasa_on, gtg_on
       use rqstfld_mod, only: iget, id, lvls, iavblfld, lvlsxml
       use gridspec_mod, only: gridtype,maptype,dxval
       use upp_physics, only: CALRH, CALCAPE, CALVOR
@@ -151,8 +172,7 @@
                                              QG1,    refl1km, refl4km, RH, GUST, NRAIN1,Zm10c, &
                                              USTORE, VSTORE
 !                                            T700,   TH700   
-!
-      REAL, ALLOCATABLE :: EL(:,:,:),RICHNO(:,:,:) ,PBLRI(:,:),  PBLREGIME(:,:)
+      REAL, ALLOCATABLE :: EL(:,:,:),RICHNO(:,:,:),PBLRI(:,:),PBLTHV(:,:),PBLREGIME(:,:)
 !
       integer I,J,L,Lctop,LLMH,IICE,LL,II,JJ,IFINCR,ITHEAT,NC,NMOD,LLL  &
              ,iz1km,iz4km, LCOUNT, HCOUNT, ITYPE, item
@@ -217,10 +237,12 @@
       ENDDO check_ref
       if(debugprint .and. me==0)print*,'Did post read in model derived radar ref ',Model_Radar, &
         'MODELNAME=',trim(MODELNAME),' imp_physics=',imp_physics 
+
       ALLOCATE(EL     (ista_2l:iend_2u,JSTA_2L:JEND_2U,LM))     
       ALLOCATE(RICHNO (ista_2l:iend_2u,JSTA_2L:JEND_2U,LM))
-      ALLOCATE(PBLRI  (ista_2l:iend_2u,JSTA_2L:JEND_2U))    
-!     
+      ALLOCATE(PBLRI  (ista_2l:iend_2u,JSTA_2L:JEND_2U))
+      ALLOCATE(PBLTHV (ista_2l:iend_2u,JSTA_2L:JEND_2U))
+ 
 !     SECOND, STANDARD NGM SEA LEVEL PRESSURE.
       IF (IGET(023) > 0 .OR. IGET(105) > 0 .OR. IGET(445) > 0) THEN
         CALL NGMSLP   ! this value is used in some later calculation.
@@ -580,8 +602,11 @@ refl_adj:           IF(REF_10CM(I,J,L)<=DBZmin) THEN
         ENDDO
        END DO  
 
-      ELSE IF(((MODELNAME == 'NMM' .and. GRIDTYPE=='B') .OR. MODELNAME == 'FV3R') &
-        .and. imp_physics==8)THEN !NMMB or FV3R +THOMPSON
+      ELSE IF(((MODELNAME == 'NMM' .and. GRIDTYPE=='B') &
+        .OR. MODELNAME == 'RAPR' & ! (RAPR includes WRF-ARW and MPAS eras)
+        .OR. MODELNAME == 'FV3R' &
+        .OR. MODELNAME == 'GFS') &
+        .and. (imp_physics==8 .or. imp_physics==17 .or. imp_physics==18))THEN !NMMB, RAPR, FV3R or GFS + THOMPSON
        DO L=1,LM
         DO J=JSTA,JEND
          DO I=ista,iend
@@ -605,7 +630,6 @@ refl_adj:           IF(REF_10CM(I,J,L)<=DBZmin) THEN
         ELSE
           IICE = 1
         END IF
-        PRINT*,'IICE= ',IICE
 
 ! Chuang: add convective contribution for all MP schemes
         RDTPHS=3.6E6/DTQ2
@@ -897,7 +921,6 @@ refl_adj:           IF(REF_10CM(I,J,L)<=DBZmin) THEN
        ze_smax = 10.*log10(ze_smax*1.e18)
        ze_gmax = 10.*log10(ze_gmax*1.e18)
 
-       write (6,*) 'dbze_max-r/s/g',ze_rmax,ze_smax,ze_gmax
       ENDIF     !tgs endif for Thompson scheme
 
       END IF
@@ -1189,6 +1212,35 @@ refl_adj:           IF(REF_10CM(I,J,L)<=DBZmin) THEN
                endif
             ENDIF
           ENDIF
+!
+!---  QNGRAUP ON MDL SURFACE 
+!
+          IF (IGET(1023) > 0) THEN
+            IF (LVLS(L,IGET(1023)) > 0)THEN
+               LL=LM-L+1
+!$omp parallel do private(i,j)
+               DO J=JSTA,JEND
+                 DO I=ista,iend
+                   if(QQNG(I,J,LL) < 1.e-8) QQNG(I,J,LL) = 0.
+                   GRID1(I,J) = QQNG(I,J,LL)
+                 ENDDO
+               ENDDO
+               if(grib=="grib2" )then
+                 cfld=cfld+1
+                 fld_info(cfld)%ifld=IAVBLFLD(IGET(1023))
+                 fld_info(cfld)%lvl=LVLSXML(L,IGET(1023))
+!$omp parallel do private(i,j,ii,jj)
+                 do j=1,jend-jsta+1
+                   jj = jsta+j-1
+                   do i=1,iend-ista+1
+                     ii = ista+i-1
+                     datapd(i,j,cfld) = GRID1(ii,jj)
+                   enddo
+                 enddo
+               endif
+            ENDIF
+          ENDIF
+
 ! QNWFA ON MDL SURFACE   --tgs
 !
           IF (IGET(766) > 0) THEN
@@ -1750,7 +1802,6 @@ refl_adj:           IF(REF_10CM(I,J,L)<=DBZmin) THEN
             ENDIF
 !     
 !           MOISTURE CONVERGENCE ON MDL SURFACES.
-!           write(*,*)'iget083=',iget(083),' l=',l
             LLL = 0
             if (IGET(083) > 0) LLL = LVLS(L,IGET(083))
             IF (IGET(083)>0 .OR. IGET(295)>0) THEN
@@ -2440,6 +2491,33 @@ refl_adj:           IF(REF_10CM(I,J,L)<=DBZmin) THEN
              END IF
            ENDIF
 !
+! E. James - 23 Apr 2024: EBB from RRFS
+!
+           IF (IGET(1015)>0) THEN
+             IF (LVLS(L,IGET(1015))>0) THEN
+               LL=LM-L+1
+!$omp parallel do private(i,j)
+               DO J=JSTA,JEND
+               DO I=ista,iend
+                 GRID1(I,J) = EBB(I,J,LL,1)/(1E9)
+               ENDDO
+               ENDDO
+               if(grib=="grib2") then
+                 cfld=cfld+1
+                 fld_info(cfld)%ifld=IAVBLFLD(IGET(1015))
+                 fld_info(cfld)%lvl=LVLSXML(L,IGET(1015))
+!$omp parallel do private(i,j,ii,jj)
+                 do j=1,jend-jsta+1
+                   jj = jsta+j-1
+                   do i=1,iend-ista+1
+                     ii = ista+i-1
+                     datapd(i,j,cfld) = GRID1(ii,jj)
+                   enddo
+                 enddo
+               endif
+             END IF
+           ENDIF
+!
        if ( gocart_on .or. gccpp_on .or. nasa_on ) then
 !          DUST 1
            IF (IGET(629)>0) THEN
@@ -3112,6 +3190,7 @@ refl_adj:           IF(REF_10CM(I,J,L)<=DBZmin) THEN
 !NMMB does not have composite radar ref in model output
            IF(MODELNAME=='NMM' .and. gridtype=='B' .or.  & 
               MODELNAME=='NCAR'.or.  MODELNAME=='FV3R' .or. &
+              MODELNAME=='GFS' .or. &
               MODELNAME=='NMM' .and. gridtype=='E')THEN
 !$omp parallel do private(i,j,l)
               DO J=JSTA,JEND
@@ -3157,7 +3236,7 @@ refl_adj:           IF(REF_10CM(I,J,L)<=DBZmin) THEN
 !
 !     COMPUTE VIL (radar derived vertically integrated liquid water in each column)
 !     Per Mei Xu, VIL is radar derived vertically integrated liquid water based
-!     on emprical conversion factors (0.00344) 
+!     on emprical conversion factors (0.00344).
       IF (IGET(581)>0) THEN
         DO J=JSTA,JEND
           DO I=ista,iend
@@ -3265,6 +3344,37 @@ refl_adj:           IF(REF_10CM(I,J,L)<=DBZmin) THEN
          endif
       ENDIF
 
+!
+!--   MAXIMUM COMPOSITE REFLECTIVITY SINCE LAST OUTPUT TIME
+!
+      IF (IGET(244)>0) THEN
+         if (me==0) write(6,*) "Processing time-maximum composite reflectivity"
+         DO J=JSTA,JEND
+            DO I=ista,iend
+              ! GRID1(I,J)=DBZmin
+               GRID1(I,J)=MAX_COMPREF(I,J)
+            ENDDO
+         ENDDO
+         if(grib=="grib2") then
+           cfld=cfld+1
+           fld_info(cfld)%ifld=IAVBLFLD(IGET(244))
+           if (IFHR > 0) then
+               fld_info(cfld)%tinvstat=1
+           else
+               fld_info(cfld)%tinvstat=0
+           endif
+           fld_info(cfld)%ntrange=1
+!$omp parallel do private(i,j,ii,jj)
+           do j=1,jend-jsta+1
+             jj = jsta+j-1
+             do i=1,iend-ista+1
+               ii = ista+i-1
+               datapd(i,j,cfld) = GRID1(ii,jj)
+             enddo
+           enddo
+         endif
+      ENDIF
+
 ! SRD -- converted to kft
 ! J.Case, ENSCO Inc. (5/26/2008) -- Output Echo Tops (Highest HGT in meters
 ! of the 18-dBZ reflectivity on a model level)
@@ -3360,9 +3470,13 @@ refl_adj:           IF(REF_10CM(I,J,L)<=DBZmin) THEN
          enddo
        endif
       ENDIF
-!
-! Vertically integrated liquid in kg/m^2
-!
+
+! -- Total column-integrated precip (rain, snow, graupel, and hail; kg m-2)
+! J. Kenyon / 10 Jun 2025: Parm 769 was previously associated with the shortname "GSD_VIL_ON_ENTIRE_ATMOS".
+! It is a 'VIL-like' quantity, obtained from integrating the mixing ratios of precip hydrometeors (i.e., 
+! it excludes cloud water, cloud ice, and water vapor).  To help distinguish this field from true 
+! "VIL" (as obtained from reflectivity columns via parm 581), parm 769 is now labeled as "TCOLP".
+
       IF (IGET(769)>0) THEN
          DO J=JSTA,JEND
             DO I=ista,iend
@@ -3371,10 +3485,17 @@ refl_adj:           IF(REF_10CM(I,J,L)<=DBZmin) THEN
                IF(QQR(I,J,L)<spval.and.QQS(I,J,L)<spval.and.QQG(I,J,L)<spval.and.&
                   ZINT(I,J,L)<spval.and.ZINT(I,J,L+1)<spval.and.&
                   PMID(I,J,L)<spval.and.T(I,J,L)<spval.and.Q(I,J,L)<spval)THEN
-                  GRID1(I,J)=GRID1(I,J) + (QQR(I,J,L) +      &
-                               QQS(I,J,L) + QQG(I,J,L))*     &
-                             (ZINT(I,J,L)-ZINT(I,J,L+1))*PMID(I,J,L)/  &
-                             (RD*T(I,J,L)*(Q(I,J,L)*D608+1.0))
+                  IF(QQH(I,J,L)<spval)THEN
+                     GRID1(I,J)=GRID1(I,J) + (QQR(I,J,L) + QQH(I,J,L) + &
+                                  QQS(I,J,L) + QQG(I,J,L))*     &
+                                (ZINT(I,J,L)-ZINT(I,J,L+1))*PMID(I,J,L)/  &
+                                (RD*T(I,J,L)*(Q(I,J,L)*D608+1.0))
+                  ELSE
+                     GRID1(I,J)=GRID1(I,J) + (QQR(I,J,L) +      &
+                                  QQS(I,J,L) + QQG(I,J,L))*     &
+                                (ZINT(I,J,L)-ZINT(I,J,L+1))*PMID(I,J,L)/  &
+                                (RD*T(I,J,L)*(Q(I,J,L)*D608+1.0))
+                  ENDIF
                ELSE
                   GRID1(I,J)=spval
                ENDIF
@@ -3394,52 +3515,6 @@ refl_adj:           IF(REF_10CM(I,J,L)<=DBZmin) THEN
            enddo
          endif
       ENDIF
-!
-! Vertically integrated liquid based on reflectivity factor in kg/m^2
-! Use WRF Thompson reflectivity diagnostic from RAPR model output
-! Use unipost reflectivity diagnostic otherwise
-!
-      IF (IGET(770) > 0) THEN
-        IF(MODELNAME == 'RAPR' .AND. (IMP_PHYSICS == 8 .or. IMP_PHYSICS == 28)) THEN
-          DO J=JSTA,JEND
-            DO I=ista,iend
-              GRID1(I,J) = 0.0
-              DO L=1,NINT(LMH(I,J))
-                IF (REF_10CM(I,J,L) > -10.0 ) THEN
-                  GRID1(I,J) = GRID1(I,J) + 0.00344 *                &
-                             (10.**(REF_10CM(I,J,L)/10.))**0.57143 * &
-                             (ZINT(I,J,L)-ZINT(I,J,L+1))/1000.
-                ENDIF
-              ENDDO
-            ENDDO
-          ENDDO
-        ELSE
-          DO J=JSTA,JEND
-            DO I=ista,iend
-              GRID1(I,J) = 0.0
-              DO L=1,NINT(LMH(I,J))
-                GRID1(I,J) = GRID1(I,J) + 0.00344 *                 &
-                            (10.**(DBZ(I,J,L)/10.))**0.57143 *      &
-                            (ZINT(I,J,L)-ZINT(I,J,L+1))/1000.
-              ENDDO
-            ENDDO
-          ENDDO
-        ENDIF
-        if(grib=="grib2") then
-          cfld=cfld+1
-          fld_info(cfld)%ifld=IAVBLFLD(IGET(770))
-!$omp parallel do private(i,j,ii,jj)
-          do j=1,jend-jsta+1
-            jj = jsta+j-1
-            do i=1,iend-ista+1
-              ii = ista+i-1
-              datapd(i,j,cfld) = GRID1(ii,jj)
-            enddo
-          enddo
-        endif
-      ENDIF
-! CRA
-
 !
 !---   VISIBILITY
 !
@@ -3663,7 +3738,7 @@ refl_adj:           IF(REF_10CM(I,J,L)<=DBZmin) THEN
             GRID1(I,J)=spval
 ! dong handle missing value
             if (slp(i,j) < spval) then
-             GRID1(I,J)=REF_10CM(I,J,Zm10c(I,J))
+             GRID1(I,J)=REF_10CM(I,J,NINT(Zm10c(I,J)))
             end if ! spval
            ENDDO
            ENDDO
@@ -3674,7 +3749,7 @@ refl_adj:           IF(REF_10CM(I,J,L)<=DBZmin) THEN
             GRID1(I,J)=spval
 ! dong handle missing value
             if (slp(i,j) < spval) then
-             GRID1(I,J)=DBZ(I,J,Zm10c(I,J))
+             GRID1(I,J)=DBZ(I,J,NINT(Zm10c(I,J)))
             end if ! spval
            ENDDO
            ENDDO
@@ -3811,21 +3886,44 @@ refl_adj:           IF(REF_10CM(I,J,L)<=DBZmin) THEN
 !
          ENDIF
       ENDIF
-!     
-!           COMPUTE PBL HEIGHT BASED ON RICHARDSON NUMBER
-!     
+     
+!     -- COMPUTE/ASSIGN PBL HEIGHT ARRAY(S) --
+!
+!        J Kenyon (16 Jun 2025):
+!        Note that the PBL heights assigned below are subsequently used for
+!        other diagnostic calculations (e.g., 10-m wind gust, GTG fields).
+!        In some models (e.g., RAPR, FV3R), these PBL heights are only used
+!        internally within UPP, since a separate PBL height (calculated in
+!        the model) is provided in the GRIB2 output. Refer also to comments
+!        in CALPBL.f
+     
             IF ( (IGET(289)>0) .OR. (IGET(389)>0) .OR. (IGET(454)>0)   &
             .OR. (IGET(245)>0)  .or. IGET(464)>0 .or. IGET(467)>0  &
             .or. IGET(470)>0 .or. IGET(476)>0) THEN
-! should only compute pblri if pblh from model is not computed based on Ri 
-! post does not yet read pbl scheme used by model.  Will do this soon
-! For now, compute PBLRI for non GFS models.
+
+              !-- Regardless of model, assign / calculate PBLRI (PBL height based on Richardson number)
               IF(MODELNAME  ==  'GFS')THEN
                 PBLRI=PBLH
               ELSE
-               CALL CALPBL(PBLRI)
+                CALL CALPBL(PBLRI,'RI')
               END IF
-            END IF  
+              
+              !-- Additionally, for RAPR and FV3 only, assign PBLTHV (PBL height based on 
+              !   virtual potential temperature). For these models, PBLTHV is used for the
+              !   wind-gust diagnostic. PBLTHV is assigned as follows:
+              IF((MODELNAME  ==  'RAPR').AND.(SUBMODELNAME /= 'MPAS')) THEN
+                ! For older RAPR applications (with WRF-ARW):
+                ! PBLHGUST is calculated in the associated INITPOST* routine;
+                ! simply pass PBLHGUST to PBLTHV
+                PBLTHV=PBLHGUST
+              ELSE IF ((MODELNAME  ==  'FV3R').OR. &
+                      ((MODELNAME  ==  'RAPR').AND.(SUBMODELNAME == 'MPAS'))) THEN
+                ! For FV3R and newer RAPR applications (with MPAS):
+                ! calculate PBLTHV by calling CALPBL
+                CALL CALPBL(PBLTHV,'THV')
+              END IF
+
+            END IF
 
             IF (IGET(289) > 0) THEN
 !$omp parallel do private(i,j)
@@ -3884,9 +3982,6 @@ refl_adj:           IF(REF_10CM(I,J,L)<=DBZmin) THEN
                        EGRID6(I,J)<spval.and.EGRID7(I,J)<spval.and.&
                        UH(I,J,1)<spval)THEN
                    if (EGRID5(I,J)  <=  EGRID4(I,J)) then
-!       if (I == 50 .and. J == 50) then
-!        write(*,*) 'working with L : ', L
-!       endif
                     HCOUNT      = HCOUNT+1
                     DP          = EGRID6(I,J) - EGRID7(I,J)
                     EGRID1(I,J) = EGRID1(I,J) + UH(I,J,L)*DP
@@ -3971,15 +4066,9 @@ refl_adj:           IF(REF_10CM(I,J,L)<=DBZmin) THEN
                      ELSe
                        EGRID3(I,J) = SPVAL
                      END IF
-
-!         if (mod(I,20) == 0 .and. mod(J,20) == 0) then
-!         write(*,*) 'wind speed ', I,J, EGRID1(I,J)
-!         endif
-
                    ENDDO
                  ENDDO
 
-!        write(*,*) 'min, max of GRID1 (u comp transport wind): ', minval(grid1),maxval(grid1)
                IF(IGET(389) > 0)THEN
                 if(grib=='grib2') then
                   cfld=cfld+1
@@ -4013,7 +4102,6 @@ refl_adj:           IF(REF_10CM(I,J,L)<=DBZmin) THEN
 
             IF ( (IGET(454) > 0) ) THEN
 
-!       write(*,*) 'IM is: ', IM
 !$omp parallel do private(i,j)
                 DO J=JSTA,JEND
                   DO I=ista,iend
@@ -4023,12 +4111,6 @@ refl_adj:           IF(REF_10CM(I,J,L)<=DBZmin) THEN
                     else
                       GRID1(I,J) = 0.
                     ENDIF
-
-!       if ( (I >= 15 .and. I <= 17)  .and. J >= 193 .and. J <= 195) then
-!       write(*,*) 'I,J,EGRID1(I,J) (wind speed): ', I,J, EGRID1(I,J)
-!       write(*,*) 'I,J,PBLH: ', I,J, EGRID4(I,J)
-!       write(*,*) 'I,J,GRID1 (ventilation rate): ', I,J, GRID1(I,J)
-!       endif
 
                   ENDDO
                 ENDDO
@@ -4048,11 +4130,12 @@ refl_adj:           IF(REF_10CM(I,J,L)<=DBZmin) THEN
 
 
             ENDIF
-!	    
-! CALCULATE Gust based on Ri PBL
+
+!     PREPARE FOR OTHER CALCULATIONS THAT REQUIRE PBL HEIGHT (PBLRI or PBLTHV)
       IF (IGET(245)>0 .or. IGET(464)>0 .or. IGET(467)>0.or. IGET(470)>0 .or. IGET(476)>0) THEN
-        IF(MODELNAME=='RAPR') THEN
-!tgs - 24may17 - smooth PBLHGUST 
+
+        IF (MODELNAME=='RAPR' .AND. SUBMODELNAME/='MPAS') THEN
+        ! Early RAPR applications (e.g., RAP/HRRR): smooth PBLTHV prior to wind-gust calculation
            if(MAPTYPE == 6) then
              if(grib=='grib2') then
                 dxm = (DXVAL / 360.)*(ERAD*2.*pi)/1.d6  ! [mm]
@@ -4067,7 +4150,7 @@ refl_adj:           IF(REF_10CM(I,J,L)<=DBZmin) THEN
            NSMOOTH = nint(5.*(13500./dxm))
            do j = jsta_2l, jend_2u
              do i = ista_2l, iend_2u
-               GRID1(i,j)=PBLHGUST(i,j)
+               GRID1(i,j)=PBLTHV(i,j)
              enddo
            enddo
            call AllGETHERV(GRID1)
@@ -4076,11 +4159,12 @@ refl_adj:           IF(REF_10CM(I,J,L)<=DBZmin) THEN
            end do
            do j = jsta_2l, jend_2u
              do i = ista_2l, iend_2u
-               PBLHGUST(i,j)=GRID1(i,j)
+               PBLTHV(i,j)=GRID1(i,j)
              enddo
            enddo
-        ENDIF
+        ENDIF ! end of smoothing of PBLTHV
 
+       !--These J,I loops: prepare arguments for CALGUST call
        DO J=JSTA,JEND
         DO I=ista,iend
          LPBL(I,J)=LM
@@ -4089,13 +4173,19 @@ refl_adj:           IF(REF_10CM(I,J,L)<=DBZmin) THEN
 
          ZSFC=ZINT(I,J,NINT(LMH(I,J))+1)
          loopL:DO L=NINT(LMH(I,J)),1,-1
-          IF(MODELNAME=='RAPR') THEN
+
+          IF (MODELNAME=='RAPR' .OR. MODELNAME=='FV3R') THEN
            HGT=ZMID(I,J,L)
-           PBLHOLD=PBLHGUST(I,J)
+           PBLHOLD=PBLTHV(I,J) ! RAPR and FV3R: use PBLTHV
+           IF(PBLHOLD == spval) THEN
+             LPBL(I,J) = LM
+             EXIT loopL
+           ENDIF
           ELSE
            HGT=ZINT(I,J,L)
-           PBLHOLD=PBLRI(I,J)
+           PBLHOLD=PBLRI(I,J)  ! All other models: use PBLRI
           ENDIF
+
           IF(HGT >  PBLHOLD+ZSFC)THEN
            LPBL(I,J)=L+1
            IF(LPBL(I,J)>=LP1) LPBL(I,J) = LM
@@ -4106,11 +4196,14 @@ refl_adj:           IF(REF_10CM(I,J,L)<=DBZmin) THEN
          else
            LPBL(I,J) = LM
          endif
-         if(lpbl(i,j)<1)print*,'zero lpbl',i,j,pblri(i,j),lpbl(i,j)
+         if(lpbl(i,j)<1)print*,'zero lpbl',i,j,pblri(i,j),pblthv(:,:),lpbl(i,j)
         ENDDO
        ENDDO
-       IF(MODELNAME=='RAPR') THEN
-        CALL CALGUST(LPBL,PBLHGUST,GUST)
+       !--Done preparing arguments for CALGUST call
+
+       !--Now call CALGUST
+       IF (MODELNAME=='RAPR' .OR. MODELNAME=='FV3R') THEN
+        CALL CALGUST(LPBL,PBLTHV,GUST)
        ELSE
         CALL CALGUST(LPBL,PBLRI,GUST)
        END IF
@@ -4210,13 +4303,12 @@ refl_adj:           IF(REF_10CM(I,J,L)<=DBZmin) THEN
 !     
 !
 ! COMPUTE NCAR GTG turbulence
-      IF(IGET(464)>0 .or. IGET(467)>0 .or. IGET(470)>0 .or. IGET(476)>0)THEN
+      IF(gtg_on .and. (IGET(464) > 0 .or. IGET(467) > 0 .or. IGET(470) > 0)) then
         i=(ista+iend)/2
         j=(jsta+jend)/2
 !        if(me == 0) print*,'sending input to GTG i,j,hgt,gust',i,j,ZINT(i,j,LP1),gust(i,j)
 
         ! Use the existing 3D local arrays as cycled variables
-        EL=SPVAL
         RICHNO=SPVAL
 
         call gtg_algo(im,jm,lm,jsta,jend,jsta_2L,jend_2U,&
@@ -4224,13 +4316,14 @@ refl_adj:           IF(REF_10CM(I,J,L)<=DBZmin) THEN
         zmid(ista:iend,:,:),pmid(ista:iend,:,:),t(ista:iend,:,:),&
         q(ista:iend,:,:),qqw(ista:iend,:,:),qqr(ista:iend,:,:),&
         qqs(ista:iend,:,:),qqg(ista:iend,:,:),qqi(ista:iend,:,:),&
-        ZINT(ista:iend,:,LP1),pblh(ista:iend,:),sfcshx(ista:iend,:),&
-        sfclhx(ista:iend,:),ustar(ista:iend,:),&
+        q2(ista:iend,:,:),&
+        ZINT(ista:iend,:,LP1),pblh(ista:iend,:),twbs(ista:iend,:),&
+        qwbs(ista:iend,:),ustar(ista:iend,:),&
         z0(ista:iend,:),gdlat(ista:iend,:),gdlon(ista:iend,:),&
         dx(ista:iend,:),dy(ista:iend,:),u10(ista:iend,:),v10(ista:iend,:),&
         GUST(ista:iend,:),avgprec(ista:iend,:),sm(ista:iend,:),sice(ista:iend,:),&
-        catedr(ista:iend,:,:),mwt(ista:iend,:,:),EL(ista:iend,:,:),&
-        gtg(ista:iend,:,:),RICHNO(ista:iend,:,:),item)
+        catedr(ista:iend,:,:),mwt(ista:iend,:,:),cit(ista:iend,:,:),&
+        RICHNO(ista:iend,:,:),gtg(ista:iend,:,:),item)
 
         i=iend
         j=jend ! 321,541
@@ -4364,7 +4457,7 @@ refl_adj:           IF(REF_10CM(I,J,L)<=DBZmin) THEN
 !	end do  
       ENDIF
 
-      DEALLOCATE(EL, RICHNO, PBLRI)
+      DEALLOCATE(EL, RICHNO, PBLRI, PBLTHV)
       if (allocated(rh3d)) deallocate(rh3d)
 !     
 !     END OF ROUTINE.
