@@ -55,7 +55,7 @@ fix
 #  # but track the source code of gsi package
 sorc/rtma3d_gsi.fd/build/
 sorc/rtma3d_gsi.fd/install/
-sorc/rtma3d_gsi.fd/fix/
+!sorc/rtma3d_gsi.fd/fix/
 sorc/rtma3d_gsi.fd/ush/build_gsi4rtma3d*.sh
 sorc/rtma3d_gsi.fd/.git/
 sorc/rtma3d_gsi.fd/.github/
