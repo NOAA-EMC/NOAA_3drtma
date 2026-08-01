@@ -1,0 +1,66 @@
+met_guess::
+!var     level    crtm_use    desc              orig_name
+  ps        1      -1         surface_pressure     ps
+  z         1      -1         geopotential_height  phis
+  u        40       2         zonal_wind           u
+  v        40       2         meridional_wind      v
+  div      40      -1         zonal_wind           div
+  vor      40      -1         meridional_wind      vor
+  tv       40       2         virtual_temperature  tv
+  q        40       2         specific_humidity    sphu
+  oz       40       2         ozone                ozone
+  cw       40       2         cloud_condensate     cw
+# ql       40      10         cloud_liquid         ql
+# qi       40      10         cloud_ice            qi
+# qr       40      10         rain                 qr
+# qs       40      10         snow                 qs
+# qg       40      10         graupel              qg
+::
+
+state_derivatives::
+!var  level  src
+ ps   1      met_guess
+ u    40     met_guess
+ v    40     met_guess
+ tv   40     met_guess
+ q    40     met_guess
+ oz   40     met_guess
+ cw   40     met_guess
+ prse 41     met_guess
+::
+
+state_tendencies::
+!var  levels  source
+ u    40      met_guess
+ v    40      met_guess
+ tv   40      met_guess
+ q    40      met_guess
+ cw   40      met_guess
+ oz   40      met_guess
+ prse 41      met_guess
+::
+
+state_vector::  
+!var     level  itracer source     funcof
+ u        40      0     met_guess     u
+ v        40      0     met_guess     v
+ tv       40      0     met_guess     tv
+ tsen     40      0     met_guess     tv,q
+ q        40      1     met_guess     q
+ oz       40      1     met_guess     oz
+ cw       40      1     met_guess     cw
+ p3d      41      0     met_guess     p3d
+ ps        1      0     met_guess     p3d
+ sst       1      0     met_guess     sst
+ pm2_5    40      1     chem_guess    pm2_5
+::
+
+control_vector::
+!var     level  itracer as/tsfc_sdv  an_amp0   source  funcof
+ pm2_5    40      1       1.00        -1.0     state    pm2_5
+::
+
+chem_guess::
+!var     level  itracer crtm_use   type    orig_name
+ pm2_5      40      1     10       pm2_5     pm2_5
+::

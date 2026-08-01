@@ -1,0 +1,27 @@
+It has been decided to remove historical files from the fix repository except 
+for this directory which is used for testing the v16.x upgrade only.  The dates
+of the files are a mix of first possible use and implementation dates. 
+
+global_convinfo.txt.2019021900: "Baseline"
+global_convinfo.txt.2019110706: Switch from GOES-15 to GOES-17 AMVs, switch on KOMPSAT-5 AMVs
+global_convinfo.txt.2020040718: Turn on Canadian AMDAR (Winds and Temperature below 850hPa)  
+                                See also prepobs_errtable.global.2020040718
+global_convinfo.txt.2020052612: Turn on COSMIC-2 GPSRO
+global_convinfo.txt.2020082412: Turn on hurricane recon obs (T,q)
+                                See also prepobs_errtable.global.2020082412
+global_convinfo.txt.2020091612: Turn on MetOp-C GRAS (GPSRO)
+global_convinfo.txt.2021031712: GPSRO data buy DO-2 (GeoOptics)
+global_convinfo.txt.2021091612: Refine GPSRO obs errors; GPSRO DO-3 (Spire)
+global_convinfo.txt.2022031612: GPSRO DO-4 (Spire and GeoOptics), uv 224 vadwnd off
+global_ozinfo.txt.2019021900: "Baseline:
+global_ozinfo.txt.2020011600: Turn off S-NPP OMPS Nadir Profiler and Total Column product 
+global_ozinfo.txt.2020011806: Turn on S-NPP OMPS Nadir Profiler and Total Column product again
+global_satinfo.txt.2019021900: "Baseline"
+global_satinfo.txt.2019110706: Turn on Metop-C AMSU-A and MHS
+global_satinfo.txt.2020022012: Turn off MetOp-A MHS
+global_satinfo.txt.2021052118: Turn off S-NPP CrIS
+global_satinfo.txt.2021092206: Turn off Metop-A IASI
+global_satinfo.txt.2021102612: Turn on MetOp-C IASI; Remove Aqua AIRS
+prepobs_errtable.global.2019021900: "Baseline"
+prepobs_errtable.global.2019110706: Double observation error for NESDIS AMVs
+

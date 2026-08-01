@@ -22,3 +22,7 @@
                 originally from EMC HRRR systems
                 github:https://github.com/NOAA-EMC/HRRR.git
 ```
+## Notes:
+```
+		.git, .github are removed from sub-packages and moved here as record, tar-ed into multiple volumes (bytes=45M) of tar ball.
+```

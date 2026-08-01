@@ -1,0 +1,78 @@
+met_guess::
+!var     level    crtm_use    desc              orig_name
+  ps        1      -1         surface_pressure     ps
+  z         1      -1         geopotential_height  phis
+  u        30       2         zonal_wind           u
+  v        30       2         meridional_wind      v
+  div      30      -1         zonal_wind           div
+  vor      30      -1         meridional_wind      vor
+  tv       30       2         virtual_temperature  tv
+  q        30       2         specific_humidity    sphu
+  oz       30       2         ozone                ozone
+  cw       30      10         cloud_condensate     cw
+# ql       30      10         cloud_liquid         ql
+# qi       30      10         cloud_ice            qi
+# qr       30      10         rain                 qr
+# qs       30      10         snow                 qs
+# qg       30      10         graupel              qg
+::
+
+state_derivatives::
+!var  level  src
+ ps   1      met_guess
+ u    30     met_guess
+ v    30     met_guess
+ tv   30     met_guess
+ q    30     met_guess
+ oz   30     met_guess
+ cw   30     met_guess
+ prse 31     met_guess
+::
+
+state_tendencies::
+!var  levels  source
+ u    30      met_guess
+ v    30      met_guess
+ tv   30      met_guess
+ q    30      met_guess
+ cw   30      met_guess
+ oz   30      met_guess
+ prse 31      met_guess
+::
+
+state_vector::  
+!var     level  itracer source     funcof
+ u        30      0     met_guess    u
+ v        30      0     met_guess    v
+ tv       30      0     met_guess    tv
+ tsen     30      0     met_guess    tv,q
+ q        30      1     met_guess    q
+ oz       30      1     met_guess    oz
+ cw       30      1     met_guess    cw
+ prse     31      0     met_guess    prse
+ ps        1      0     met_guess    prse
+ sst       1      0     met_guess    sst
+::
+
+control_vector_enkf::
+!var     level  itracer as/tsfc_sdv  an_amp0   source  funcof
+ u        30      0       1.00        -1.0     state    u,v
+ v        30      0       1.00        -1.0     state    u,v
+ ps        1      0       0.50        -1.0     state    prse
+ tv       30      0       0.70        -1.0     state    tv
+ q        30      1       0.70        -1.0     state    q
+::
+
+control_vector::
+!var     level  itracer as/tsfc_sdv  an_amp0   source  funcof
+ sf       30      0       1.00        -1.0     state    u,v
+ vp       30      0       1.00        -1.0     state    u,v
+ ps        1      0       0.50        -1.0     state    prse
+ t        30      0       0.70        -1.0     state    tv
+ q        30      1       0.70        -1.0     state    q
+ oz       30      1       0.50        -1.0     state    oz
+ sst       1      0       1.00        -1.0     state    sst
+ cw       30      1       1.00        -1.0     state    cw
+ stl       1      0       1.00        -1.0     motley   sst
+ sti       1      0       1.00        -1.0     motley   sst
+::
