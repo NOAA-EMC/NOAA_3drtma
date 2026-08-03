@@ -1,0 +1,15 @@
+# ch 14 used without bias correction (iuse=4)
+# chs 1-3,15 assimilated by NOAA, but not NASA
+# launch date 20000921
+# obs ingested at NCEP starting 2000121212, dumps started 2001011712, SSI started assimilating 2001021312
+n16  20001105 000000  20010109 180000  amsua 15  1 2 3 4 5 6 7 8 9 10 11 12 13 14 15
+n16  20010111 000000  20010111 240000  amsua  0			  		     # amsua: all noisy
+n16  20010112 000000  20020906 240000  amsua 15  1 2 3 4 5 6 7 8 9 10 11 12 13 14 15		 
+n16  20020907 000000  20020907 240000  amsua  5  1 2 3 4 5 6 7 8                  15 # amsua: ch9-14 noisy 
+n16  20020908 000000  20021120 240000  amsua 15  1 2 3 4 5 6 7 8 9 10 11 12 13 14 15
+n16  20021121 000000  20021127 240000  amsua  0					     # amsua: all channels on ecmwf blacklist    
+n16  20021128 000000  20030512 060000  amsua 15  1 2 3 4 5 6 7 8 9 10 11 12 13 14 15
+n16  20030512 120000  20040616 240000  amsua 14  1 2 3 4 5 6 7 8   10 11 12 13 14 15 # amsua: ch9 noisy
+n16  20040617 000000  20050114 240000  amsua 12  1 2 3 4 5 6 7 8         12 13 14 15 # amsua: ch9 & ch10-11 noisy
+n16  20050115 000000  20070129 120000  amsua  9  1 2 3 4 5 6 7 8                  15 # amsua: ch 9-14 noisy 
+n16  20070129 180000  21001231 240000  amsua  0      		                     # amsua: ch4 noisy; QC affected; turn off all 

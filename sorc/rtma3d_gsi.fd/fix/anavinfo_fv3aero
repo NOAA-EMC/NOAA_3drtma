@@ -1,0 +1,142 @@
+met_guess::
+!var     level    crtm_use    desc              orig_name
+  ps        1      -1         surface_pressure     ps
+  z         1      -1         geopotential_height  phis
+  u        64       2         zonal_wind           u
+  v        64       2         meridional_wind      v
+  div      64      -1         zonal_wind           div
+  vor      64      -1         meridional_wind      vor
+  tv       64       2         virtual_temperature  tv
+  q        64       2         specific_humidity    sphu
+  oz       64       2         ozone                ozone
+  cw       64      10         cloud_condensate     cw
+  ql       64      12         cloud_liquid         ql
+  qi       64      12         cloud_ice            qi
+::
+
+state_derivatives::
+!var  level  src
+ ps   1      met_guess
+ u    64     met_guess
+ v    64     met_guess
+ tv   64     met_guess
+ q    64     met_guess
+ oz   64     met_guess
+ cw   64     met_guess
+ prse 65     met_guess
+ sulf     64      chem_guess 
+ bc1      64      chem_guess
+ bc2      64      chem_guess
+ oc1      64      chem_guess
+ oc2      64      chem_guess
+ dust1    64      chem_guess
+ dust2    64      chem_guess
+ dust3    64      chem_guess
+ dust4    64      chem_guess
+ dust5    64      chem_guess
+ seas1    64      chem_guess
+ seas2    64      chem_guess
+ seas3    64      chem_guess
+ seas4    64      chem_guess
+::
+
+state_tendencies::
+!var  levels  source
+ u    64      met_guess
+ v    64      met_guess
+ tv   64      met_guess
+ q    64      met_guess
+ cw   64      met_guess
+ oz   64      met_guess
+ prse 65      met_guess
+ sulf     64      chem_guess 
+ bc1      64      chem_guess
+ bc2      64      chem_guess
+ oc1      64      chem_guess
+ oc2      64      chem_guess
+ dust1    64      chem_guess
+ dust2    64      chem_guess
+ dust3    64      chem_guess
+ dust4    64      chem_guess
+ dust5    64      chem_guess
+ seas1    64      chem_guess
+ seas2    64      chem_guess
+ seas3    64      chem_guess
+ seas4    64      chem_guess
+::
+
+
+state_vector::  
+!var     level  itracer source     funcof
+ u        64      0     met_guess    u
+ v        64      0     met_guess    v
+ tv       64      0     met_guess    tv
+ tsen     64      0     met_guess    tv,q
+ q        64      1     met_guess    q
+ oz       64      1     met_guess    oz
+ ql       64      1     met_guess    ql
+ qi       64      1     met_guess    qi
+ prse     65      0     met_guess    prse
+ ps        1      0     met_guess    prse
+ sst       1      0     met_guess    sst
+ sulf     64      1     chem_guess    so4 
+ bc1      64      1     chem_guess    bcphobic
+ bc2      64      1     chem_guess    bcphilic
+ oc1      64      1     chem_guess    ocphobic
+ oc2      64      1     chem_guess    ocphilic
+ dust1    64      1     chem_guess    du001
+ dust2    64      1     chem_guess    du002
+ dust3    64      1     chem_guess    du003
+ dust4    64      1     chem_guess    du004
+ dust5    64      1     chem_guess    du005
+ seas1    64      1     chem_guess    ss001
+ seas2    64      1     chem_guess    ss002
+ seas3    64      1     chem_guess    ss003
+ seas4    64      1     chem_guess    ss004
+::
+
+control_vector::
+!var     level  itracer as/tsfc_sdv  an_amp0   source  funcof
+!sf       64      0       0.5         -1.0     state    u,v
+!vp       64      0       0.5         -1.0     state    u,v
+!ps        1      0       0.50        -1.0     state    prse
+!t        64      0       0.70        -1.0     state    tv
+ q        64      1       0.40        -1.0     state    q
+!oz       64      1       0.75        -1.0     state    oz
+!sst       1      0       1.00        -1.0     state    sst
+!stl       1      0       1.00        -1.0     motley   sst
+!sti       1      0       1.00        -1.0     motley   sst
+ sulf     64      1       1.00        -1.0     state    so4
+ bc1      64      1       1.00        -1.0     state    bcphobic
+ bc2      64      1       1.00        -1.0     state    bcphilic
+ oc1      64      1       1.00        -1.0     state    ocphobic
+ oc2      64      1       1.00        -1.0     state    ocphilic
+ dust1    64      1       1.00        -1.0     state    du001
+ dust2    64      1       1.00        -1.0     state    du002
+ dust3    64      1       1.00        -1.0     state    du003
+ dust4    64      1       1.00        -1.0     state    du004
+ dust5    64      1       1.00        -1.0     state    du005
+ seas1    64      1       1.00        -1.0     state    ss001+ss002
+ seas2    64      1       1.00        -1.0     state    ss003
+ seas3    64      1       1.00        -1.0     state    ss004
+ seas4    64      1       1.00        -1.0     state    ss005
+::
+
+chem_guess::
+!var     level  itracer crtm_use   type    		orig_name
+ co2      64      1       0        n/a  		co2
+ sulf     64      1       12       sulfate    		so4
+ bc1      64      1       12       dry_black_carbon     bcphobic
+ bc2      64      1       12       wet_black_carbon     bcphilic
+ oc1      64      1       12       dry_organic_carbon	ocphobic
+ oc2      64      1       12       wet_organic_carbon	ocphilic
+ dust1    64      1       12       dust			du001
+ dust2    64      1       12       dust			du002
+ dust3    64      1       12       dust			du003
+ dust4    64      1       12       dust			du004
+ dust5    64      1       12       dust			du005
+ seas1    64      1       12       ssam			ss001+ss002
+ seas2    64      1       12       sscm1		ss003
+ seas3    64      1       12       sscm2		ss004
+ seas4    64      1       12       sscm3		ss005
+::

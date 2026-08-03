@@ -1,0 +1,16 @@
+met_guess::
+!var     level    crtm_use    desc              orig_name
+  ps        1      -1         surface_pressure     ps
+  oz       64       2         ozone                ozone
+::
+
+state_vector::  
+!var     level  itracer source     funcof
+ oz       64      1     met_guess    oz
+::
+
+control_vector::
+!var     level  itracer as/tsfc_sdv  an_amp0   source  funcof
+ oz       64      1       0.75        -1.0     state    oz
+::
+

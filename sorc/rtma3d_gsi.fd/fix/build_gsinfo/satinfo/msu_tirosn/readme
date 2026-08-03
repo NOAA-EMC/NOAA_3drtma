@@ -1,0 +1,3 @@
+* use data until 1979063012, since n06 starts on 1979063018
+tirosn  19781021 000000  19790625 240000  msu    3    2 3 4				# 
+tirosn  19790626 000000  19810227 240000  msu    0  	  		  	        # msu: all msu channels from 19790626 -change behavior 

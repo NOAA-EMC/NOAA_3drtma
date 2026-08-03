@@ -1,0 +1,38 @@
+# LOC = data/preproc/mws_beamwidth.dat
+# WMO Satellite ID
+24
+# Version identifier
+1
+# Sampling distance (deg)
+1.05
+# Number of channels to modify
+24 
+# Channel, beam width, new width, cutoff, nxaverage, nyaverage, QC dist
+# Note: to use FFT technique, set new width and cutoff as required and set 
+# nxaverage and nyaverage to 0. To use simple averaging set new width to 0.0
+# and use nxaverage and nyaverage (e.g. 3 3 for 3x3 averaging).
+# QC Dist gives number of points around missing value to flag as missing.
+ 1 2.5  3.33 0.0 0 0  5
+ 2 2.5  3.33 0.0 0 0  5
+ 3 1.25 3.33 0.0 0 0  5
+ 4 2.0  3.33 0.0 0 0  5
+ 5 1.25 3.33 0.0 0 0  5 
+ 6 1.25 3.33 0.0 0 0  5 
+ 7 1.25 3.33 0.0 0 0  5 
+ 8 1.25 3.33 0.0 0 0  5 
+ 9 1.25 3.33 0.0 0 0  5 
+10 1.25 3.33 0.0 0 0  5 
+11 1.25 3.33 0.0 0 0  5 
+12 1.25 3.33 0.0 0 0  5 
+13 1.25 3.33 0.0 0 0  5 
+14 1.25 3.33 0.0 0 0  5 
+15 1.25 3.33 0.0 0 0  5 
+16 1.25 3.33 0.0 0 0  5 
+17 1.05 3.33 0.0 0 0  5
+18 1.05 3.33 0.0 0 0  5
+19 1.05 3.33 0.0 0 0  5
+20 1.05 3.33 0.0 0 0  5
+21 1.05 3.33 0.0 0 0  5
+22 1.05 3.33 0.0 0 0  5
+23 1.05 3.33 0.0 0 0  5
+24 1.05 3.33 0.0 0 0  5

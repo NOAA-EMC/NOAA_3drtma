@@ -1,0 +1,4 @@
+# NASA settings (netcdf file)
+# aura ozone levels (mls, nrt - gmao)                    count  -- levels --
+aura      20041001 000000  29991231 240000   mls55     29       9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35 36 37
+aura      20041001 000000  29991231 240000   mls55      6   38 39 40 41 42 43 

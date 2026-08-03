@@ -1,0 +1,3 @@
+# from MERRA2 (not assimilated NCEP)
+f13  19950503 000000  20081231 240000  ssmi 2   3 4 
+f13  20090101 000000  21000531 240000  ssmi 0                 # all off per NCEP 

@@ -1,0 +1,119 @@
+met_guess::
+!var     level    crtm_use    desc              orig_name
+  ps        1      -1         surface_pressure     ps
+  z         1      -1         geopotential_height  phis
+  u        -1       2         zonal_wind           u
+  v        -1       2         meridional_wind      v
+  div      -1      -1         zonal_wind           div
+  vor      -1      -1         meridional_wind      vor
+  tv       -1       2         virtual_temperature  tv
+  q        -1       2         specific_humidity    sphu
+  oz       -1       2         ozone                ozone
+  cw       -1      10         cloud_condensate     cw
+  vis       1      -1         visibility           vis
+  gust      1      -1         wind_gust            gust
+  tcamt     1      -1         total cld amount     tcamt
+  wspd10m   1      -1         10m_windspeed        wspd10m
+  mitm      1      -1         overnight min temp   mitm
+  mxtm      1      -1         daytime max temp     mxtm
+  td2m      1      -1         2-m dewpoint         td2m
+  pmsl      1      -1         pressure at msl      pmsl
+  howv      1      -1         significant wave hgt howv
+  cldch     1      -1         cloud_ceiling_height cldch
+  uwnd10m   1      -1         10m_u-wind           uwnd10m
+  vwnd10m   1      -1         10m_v-wind           vwnd10m
+  presgsfc  1      -1         model pressure       presgsfc
+  presgrid1 1      -1         level1_pressure      presgrid1
+  presgrid2 1      -1         level2_pressure      presgrid2
+  tmpgrid1  1      -1         level1_temperatur    tmpgrid1
+  tmpgrid2  1      -1         level2_temperatur    tmpgrid2
+  qgrid1    1      -1         level1_specifich     qgrid1
+  qgrid2    1      -1         level2_specifich     qgrid2
+  ugrid1    1      -1         level1_zonal_wind    ugrid1
+  vgrid1    1      -1         level1_merid_wind    vgrid1
+  hgtgrid1  1      -1         level1_height        hgtgrid1
+!Yanqiu: if this is needed to do gust/vis, please uncomment
+! pblh      1      -1         pbl_height           pblh
+::
+
+state_derivatives::
+!var  level  src
+ ps   1      met_guess
+ u    -1     met_guess
+ v    -1     met_guess
+ tv   -1     met_guess
+ q    -1     met_guess
+ oz   -1     met_guess
+ cw   -1     met_guess
+ prse  2     met_guess
+::
+
+state_tendencies::
+!var  levels  source
+ u    -1      met_guess
+ v    -1      met_guess
+ tv   -1      met_guess
+ q    -1      met_guess
+ cw   -1      met_guess
+ oz   -1      met_guess
+ prse  2      met_guess
+::
+
+state_vector::  
+!var     level  itracer source     funcof
+ u        -1      0     met_guess    u
+ v        -1      0     met_guess    v
+ tv       -1      0     met_guess    tv
+ tsen     -1      0     met_guess    tv,q
+ q        -1      1     met_guess    q
+ oz       -1      1     met_guess    oz
+ cw       -1      1     met_guess    cw
+ prse     -1      0     met_guess    prse
+ ps        1      0     met_guess    prse
+ sst       1      0     met_guess    sst
+ gust      1      0     met_guess    gust
+ vis       1      0     met_guess    vis 
+ tcamt     1      0     met_guess    tcamt
+ wspd10m   1      0     met_guess    wspd10m
+ mitm      1      0     met_guess    mitm
+ mxtm      1      0     met_guess    mxtm
+ td2m      1      0     met_guess    td2m
+ pmsl      1      0     met_guess    pmsl
+ howv      1      0     met_guess    howv
+ cldch     1      0     met_guess    cldch
+ uwnd10m   1      0     met_guess    uwnd10m
+ vwnd10m   1      0     met_guess    vwnd10m
+::
+
+control_vector::
+!var     level  itracer as/tsfc_sdv  an_amp0   source  funcof
+ sf       -1      0       0.35        0.33     state    u,v
+ vp       -1      0       0.35        0.33     state    u,v
+ ps        1      0       0.35        0.33     state    prse
+ t        -1      0       0.50        0.33     state    tv
+ q        -1      1       0.50        0.33     state    q
+ gust      1      0       1.00        0.33     state    gust
+ vis       1      0       1.00        0.33     state    vis 
+ tcamt     1      0       1.00        0.33     state    tcamt
+ sfwter   -1      0       0.35        0.33     state    u,v
+ vpwter   -1      0       0.35        0.33     state    u,v
+ wspd10m   1      0       1.00        0.33     state    wspd10m
+ cldch     1      0       1.00        0.33     state    cldch
+ uwnd10m   1      0       1.00        0.33     state    uwnd10m
+ vwnd10m   1      0       1.00        0.33     state    vwnd10m
+ mitm      1      0       1.00        0.33     state    mitm
+ mxtm      1      0       1.00        0.33     state    mxtm
+ td2m      1      0       1.00        0.33     state    td2m
+ pmsl      1      0       1.00        0.33     state    pmsl
+ howv      1      0       1.00        0.33     state    howv
+ pswter    1      0       1.00        0.33     motley   ps
+ twter     1      0       1.00        0.33     motley   t
+ qwter     1      0       1.00        0.33     motley   q
+ gustwter  1      0       1.00        0.33     motley   gust
+ wspd10mwter   1      0       1.00        0.33     motley    wspd10m
+ uwnd10mwter   1      0       1.00        0.33     motley    uwnd10m
+ vwnd10mwter   1      0       1.00        0.33     motley    vwnd10m
+ td2mwter  1      0       1.00        0.33     motley   td2m
+ mitmwter  1      0       1.00        0.33     motley   mitm
+ mxtmwter  1      0       1.00        0.33     motley   mxtm
+::

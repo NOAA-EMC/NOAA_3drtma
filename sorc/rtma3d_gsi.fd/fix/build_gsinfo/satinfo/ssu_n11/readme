@@ -1,0 +1,6 @@
+n11  19880928 000000  19941231 240000  ssu    3  1 2 3					# 
+n11  19970715 000000  19981031 240000  ssu    3  1 2 3                                  # 
+n11  19981101 000000  19990225 240000  ssu    2  1 2                                    # Ch. 3 disabled to be consistent w/ N14 change
+###                                                                                     #   below.  Disable Ch3 at start of AMSU-A record 
+n11  19990226 000000  20040615 240000  ssu    0                                         # SSU data held passive.  This may be worth reevaluating
+# chan 3 no bias correction (iuse=4) until amsua ch14 available (19981101)

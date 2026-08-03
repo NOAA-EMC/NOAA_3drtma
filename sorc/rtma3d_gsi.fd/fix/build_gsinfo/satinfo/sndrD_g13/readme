@@ -1,0 +1,11 @@
+# from MERRA2, but use all 15 channels as in ncep opns
+# not used in NCEP opns?
+g13  20060630 000000  20100414 240000  sndrD1   0                                              # Passive till Operational GOES-East          
+g13  20060630 000000  20100414 240000  sndrD2   0          
+g13  20060630 000000  20100414 240000  sndrD3   0
+g13  20060630 000000  20100414 240000  sndrD4   0
+
+g13  20100415 000000  20151120 120000  sndrD1  11  1 2 3 4 5 6 7 8   10 11 12                  # GOES-13 became ops GOES-East on 14 Apr 2010
+g13  20100415 000000  20151120 120000  sndrD2  11  1 2 3 4 5 6 7 8   10 11 12                  # start a day later....
+g13  20100415 000000  20151120 120000  sndrD3  11  1 2 3 4 5 6 7 8   10 11 12
+g13  20100415 000000  20151120 120000  sndrD4  11  1 2 3 4 5 6 7 8   10 11 12                  # filter wheel failure ceased operations 20 Nov 2015

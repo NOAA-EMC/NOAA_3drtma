@@ -1,0 +1,126 @@
+correlated_observations::
+! isis          method   kreq   kmult   type    cov_file
+iasi_metop-c      2       0.0     1.0    sea     Rcov_iasicsea
+iasi_metop-b      2       0.0     1.0    sea     Rcov_iasibsea
+iasi_metop-c      2       0.0     1.0    land    Rcov_iasicland
+iasi_metop-b      2       0.0     1.0    land    Rcov_iasibland
+cris-fsr_npp      2       0.0     1.0    sea     Rcov_crisnpp
+cris-fsr_n20      2       0.0     1.0    sea     Rcov_crisn20
+cris-fsr_n21      2       0.0     1.0    sea     Rcov_crisn21
+::
+
+met_guess::
+!var     level    crtm_use    desc              orig_name
+  ps        1      -1         surface_pressure     ps
+  z         1      -1         geopotential_height  phis
+  u        31       2         zonal_wind           u
+  v        31       2         meridional_wind      v
+  div      31      -1         zonal_wind           div
+  vor      31      -1         meridional_wind      vor
+  tv       31       2         virtual_temperature  tv
+  q        31       2         specific_humidity    sphu
+  oz       31       2         ozone                ozone
+  ql       31      12         cloud_liquid         ql 
+  qi       31      12         cloud_ice            qi 
+  qr       31      12         rain                 qr
+  qs       31      12         snow                 qs
+  qg       31      12         graupel              qg
+  ni       31       1         cloud_ice conc       ni
+  nr       31       1         rain conc            nr
+! cf       31       1         cloud amount         cf
+::
+
+state_derivatives::
+!var  level  src
+ ps   1      met_guess
+ u     31    met_guess
+ v     31    met_guess
+ tv    31    met_guess
+ q     31    met_guess
+ oz    31    met_guess
+!cw    31    met_guess
+ prse  32    met_guess
+::
+
+state_tendencies::
+!var  levels  source
+ u     31     met_guess
+ v     31     met_guess
+ tv    31     met_guess
+ q     31     met_guess
+!cw    31     met_guess
+ oz    31     met_guess
+ prse  32     met_guess
+::
+
+state_vector::  
+!var     level  itracer source     funcof
+ u        31      0     met_guess    u
+ v        31      0     met_guess    v
+ tv       31      0     met_guess    tv
+ tsen     31      0     met_guess    tv,q
+ q        31      1     met_guess    q
+ oz       31      1     met_guess    oz
+ ql       31      1     met_guess    ql 
+ qi       31      1     met_guess    qi 
+ qr       31      1     met_guess    qr
+ qs       31      1     met_guess    qs
+ qg       31      1     met_guess    qg
+ prse     32      0     met_guess    prse
+ ps        1      0     met_guess    prse
+ sst       1      0     met_guess    sst
+::
+
+state_vector_efsoi::
+!var     level  itracer source     funcof
+ u        31      0     met_guess    u
+ v        31      0     met_guess    v
+ tv       31      0     met_guess    tv
+ q        31      1     met_guess    q
+ ps        1      0     met_guess    prse
+::
+
+control_vector_enkf::
+!var     level  itracer as/tsfc_sdv  an_amp0   source  funcof
+ u        31      0       1.00        -1.0     state    u,v
+ v        31      0       1.00        -1.0     state    u,v
+ ps        1      0       1.20        -1.0     state    prse
+!pst       1      0       1.20        -1.0     state    prse,u,v
+ tv       31      0       1.50        -1.0     state    tv
+ q        31      1       1.50        -1.0     state    q
+ oz       31      1       2.00        -1.0     state    oz
+!sst       1      0       1.00        -1.0     state    sst
+!cw       31      1       1.00        -1.0     state    cw
+!stl       1      0       3.00        -1.0     motley   sst
+!sti       1      0       3.00        -1.0     motley   sst
+::
+
+control_vector::
+!var     level  itracer as/tsfc_sdv  an_amp0   source  funcof
+ sf       31      0       1.00        -1.0     state    u,v
+ vp       31      0       1.00        -1.0     state    u,v
+ ps        1      0       1.20        -1.0     state    prse
+ t        31      0       1.50        -1.0     state    tv
+ q        31      1       1.50        -1.0     state    q
+ oz       31      1       2.00        -1.0     state    oz
+ sst       1      0       1.00        -1.0     state    sst
+ ql       31      1       1.00        -1.0     state    ql
+ qi       31      1       1.00        -1.0     state    qi
+ qr       31      1       1.00        -1.0     state    qr
+ qs       31      1       1.00        -1.0     state    qs
+ qg       31      1       1.00        -1.0     state    qg
+ stl       1      0       3.00        -1.0     motley   sst
+ sti       1      0       3.00        -1.0     motley   sst
+::
+
+! Following table shows the use of all four prescribed trace gas data.
+! To turn off any one of any combination of trace gas input, add "!"
+! in the first column of that trace gas name.  To use all default
+! trace gas profiles, just delete the following seven lines.
+chem_guess::
+!var     level  itracer crtm_use       type    orig_name
+!ch4      31      1       2             n/a    ch4
+ co2      31      1       0             n/a    co2
+!co       31      1       2             n/a    co
+!n2o      31      1       2             n/a    n2o
+::

@@ -9,7 +9,7 @@ lib/
 lib64/
 
 nohup.out
-log*
+!log*
 build.log*
 install.log*
 

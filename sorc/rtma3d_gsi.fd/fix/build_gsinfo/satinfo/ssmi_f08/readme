@@ -1,0 +1,5 @@
+# f08 85V channel (7) getting very bad mid 1988, unusable after 1/1989
+# f08 85H channel (6) going bad Mar-Nov 1990, unusable after 1/1991
+f08  19870710 000000  19880207 240000  ssmi 2   3 4 
+f08  19880208 000000  19901231 240000  ssmi 2   3 4 
+f08  19910101 000000  19911204 240000  ssmi 2   3 4 
