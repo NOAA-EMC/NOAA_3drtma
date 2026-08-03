@@ -1,0 +1,6 @@
+# launched 20090209, dumps started 20090929, GSI started to use 20091215
+# chan 14 used with no bias correction (iuse=4)
+# chs 1-3,15 assimilated by NOAA, but not NASA
+n19  20090414 000000  20091221 240000  amsua 15 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15
+n19  20091222 000000  20140128 240000  amsua 14 1 2 3 4 5 6 7   9 10 11 12 13 14 15 # ch8 noisy (noise started on 12/21/2009) 
+n19  20140129 000000  21001231 240000  amsua 13 1 2 3 4 5 6     9 10 11 12 13 14 15 #  per NCEP r35918

@@ -1,0 +1,5 @@
+# start date 2017102000 (NCEP ops 2018021212)
+# (data not actually available until 2018011618)
+# NPP out because of mid-wave failure after 2019032518.  LW/SW data returns 2019041618 but mid-wave channels missing 
+# Switch to side-2 electronics after 2019062412 - leave all passive until 2019062600 to adjust to side-2 (?)
+# off after 2021052118, on again 2021100718 for NASA but not here since it is still off in NOAA ops

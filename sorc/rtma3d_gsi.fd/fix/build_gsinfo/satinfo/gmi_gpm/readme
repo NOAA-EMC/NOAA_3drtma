@@ -1,0 +1,4 @@
+starts appearing in dumps 20240307.  Used in ops starting 2025081312.
+nasa gmi_v7 files start 2014030500
+# GPM/GMI: NCEP uses all channels
+gpm      20140401 000000  29991231 240000  gmi     6    5 6 7  10  12 13

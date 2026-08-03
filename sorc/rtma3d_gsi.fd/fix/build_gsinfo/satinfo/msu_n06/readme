@@ -1,0 +1,6 @@
+* note n06 msu becomes available in dumps starting 1979063018
+n06  19790630 000000  19790906 060000  msu    3    2 3 4				# 
+n06  19790906 120000  19790906 120000  msu    0  					# msu: all channels noisy, unknown reason     
+n06  19790906 180000  19830417 240000  msu    3    2 3 4				# 
+n06  19850408 000000  19851031 240000  msu    3    2 3 4                                # 
+n06  19851101 000000  19861117 240000  msu    2    2   4                                # msu: ch3 failure   

@@ -1,0 +1,5 @@
+Instrument disabled from 06 UTC 25 Sept 2016 - 12 UTC 28 Sept 2016 for instrument anomaly.  Data should be unavailable
+use same channel selection in operational satinfo for entire period (116 channels instead of 128 for NASA)
+NASA turns off channel 305 on 20220111
+NCEP dumps end 2020120718 but still turned on in satinfo after that
+

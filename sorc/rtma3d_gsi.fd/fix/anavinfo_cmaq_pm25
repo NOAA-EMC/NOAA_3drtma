@@ -1,0 +1,36 @@
+met_guess::
+!var     level    crtm_use    desc              orig_name
+  ps        1      -1         surface_pressure     ps
+  z         1      -1         geopotential_height  phis
+  u        22       2         zonal_wind           u
+  v        22       2         meridional_wind      v
+  div      22      -1         zonal_wind           div
+  vor      22      -1         meridional_wind      vor
+  tv       22       2         virtual_temperature  tv
+  q        22       2         specific_humidity    sphu
+  oz       22       2         ozone                ozone
+  cw       22      10         cloud_condensate     cw
+::
+
+state_derivatives::
+!var  level  src
+::
+
+state_tendencies::
+!var  levels  source
+::
+
+state_vector::  
+!var     level  itracer source     funcof
+ pm2_5    22      1     chem_guess    pm2_5
+::
+
+control_vector::
+!var     level  itracer as/tsfc_sdv  an_amp0   source  funcof
+ pm2_5    22      1       1.00        -1.0     state    pm2_5
+::
+
+chem_guess::
+!var     level  itracer crtm_use   type    orig_name
+ pm2_5    22      1       -1       pm2_5   pm2_5
+::

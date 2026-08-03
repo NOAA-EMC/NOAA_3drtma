@@ -1,0 +1,9 @@
+# DMSP-17
+# NASA assimilates 3,5-7,23,24 ch 3 turned off 2015080600
+# ncep assimilating 1,5-7 and 24 currently and has been since 2015011412 (also ch 2 earlier in the period)
+f17  20061212 000000  20150806 000000 ssmis   4        3     5  6  7         
+f17  20061212 000000  20150806 000000 ssmis   0
+f17  20061212 000000  20150806 000000 ssmis   2       23 24
+f17  20150806 060000  29991231 240000 ssmis   3              5  6  7         # large bias in ch3
+f17  20150806 060000  29991231 240000 ssmis   0
+f17  20150806 060000  29991231 240000 ssmis   2       23 24

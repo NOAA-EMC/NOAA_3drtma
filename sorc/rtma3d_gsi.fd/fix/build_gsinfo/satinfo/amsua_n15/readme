@@ -1,0 +1,12 @@
+# launched 19980513, dumps started 19981103, SSI assim started 19990308
+# chan 14 no bias correction (iuse=4), unlike NASA, NOAA assimilates 1-3 and 15
+n15  19981101 000000  19990101 000000  amsua 15  1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 # 
+n15  19990101 060000  19990101 060000  amsua  0					     # amsua: all noisy     
+n15  19990101 120000  20001029 240000  amsua 15  1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 # 
+n15  20001030 000000  20020331 240000  amsua 14  1 2 3 4 5 6 7 8 9 10 11 12 13    15 # amsua: bad ch14 (ch11?)
+n15  20020401 000000  20140831 240000  amsua 13  1 2 3 4 5 6 7 8 9 10    12 13    15 # amsua: bad ch11 & ch14 
+n15  20140901 000000  21002131 240000  amsua 12  1 2 3 4 5   7 8 9 10    12 13    15 #
+# don't do this since NCEP is still assimilating chs 1-5 and 15
+#n15  20151009 000000  21001231 240000  amsua  6              7 8 9 10    12 13       # amsua: chs 1-4,15 disabled as their QC is a function
+                                                                                     # of Ch6 - shutoff date should be reevaluated in 
+                                                                                     # future reanalysis, though passive_bc may solve the issue

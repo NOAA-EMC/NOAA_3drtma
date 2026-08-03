@@ -1,0 +1,3 @@
+g10  19970917 120000  20030401 240000  sndr  15  1 2 3 4 5 6 7 8 9 10 11 12 13 14 15  # start - reanalysis start
+g10  20030402 000000  20030410 120000  sndr   0       				      # turned off as in CFSR (no in Merra)
+g10  20030410 180000  20060622 000000  sndr  15  1 2 3 4 5 6 7 8 9 10 11 12 13 14 15  # end as in CFSR and in Merra

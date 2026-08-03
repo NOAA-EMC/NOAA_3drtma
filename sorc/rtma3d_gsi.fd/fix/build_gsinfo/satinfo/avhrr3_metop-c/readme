@@ -1,0 +1,2 @@
+bufr dumps before 2021022118 were missing cloud flag (CLAVR) - see https://github.com/NOAA-EMC/GSI/issues/295
+turned on in NCEP ops 2022112912

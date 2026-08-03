@@ -1,0 +1,3 @@
+[submodule "build_gsinfo"]
+	path = build_gsinfo
+	url = https://github.com/NOAA-PSL/build_gsinfo-fix

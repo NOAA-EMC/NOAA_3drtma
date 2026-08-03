@@ -1,0 +1,3 @@
+# amsub scan motor failed, data no longer processed by NESDIS on 20110328
+n15  19981101 000000  20060216 000000  amsub  5  1 2 3 4 5  # cfsr turned off 2002041100 trough 2002042418
+n15  20060216 060000  21002131 240000  amsub  0             # ch4 noisy, turn off all channels (CFSR used chs 1-3,5 until 20080301)

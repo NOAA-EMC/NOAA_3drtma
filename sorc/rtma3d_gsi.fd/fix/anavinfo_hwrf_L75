@@ -1,0 +1,60 @@
+met_guess::
+!var     level    crtm_use    desc              orig_name
+  ps        1      -1         surface_pressure     ps
+  z         1      -1         geopotential_height  phis
+  u        75       2         zonal_wind           u
+  v        75       2         meridional_wind      v
+  tv       75       2         virtual_temperature  tv
+  q        75       2         specific_humidity    sphu
+  oz       75       2         ozone                ozone
+  pint     76      -1         nmm_pressure         pint
+  pd        1      -1         nmm_del_pressure     pd
+! cw       75      10         cloud_condensate     cw
+::
+
+state_derivatives::
+!var  level  src
+ ps   1      met_guess
+ u    75     met_guess
+ v    75     met_guess
+ tv   75     met_guess
+ q    75     met_guess
+ oz   75     met_guess
+ prse 76     met_guess
+::
+
+state_tendencies::
+!var  levels  source
+ u    75      met_guess
+ v    75      met_guess
+ tv   75      met_guess
+ q    75      met_guess
+ oz   75      met_guess
+ prse 76      met_guess
+::
+
+state_vector::  
+!var     level  itracer source     funcof
+ u        75      0     met_guess    u
+ v        75      0     met_guess    v
+ tv       75      0     met_guess    tv
+ tsen     75      0     met_guess    tv,q
+ q        75      1     met_guess    q
+ oz       75      1     met_guess    oz
+ prse     76      0     met_guess    prse
+ ps        1      0     met_guess    prse
+ sst       1      0     met_guess    sst
+::
+
+control_vector::
+!var     level  itracer as/tsfc_sdv  an_amp0   source  funcof
+ sf       75      0       0.2         -1.0     state    u,v
+ vp       75      0       0.2         -1.0     state    u,v
+ ps        1      0       0.30        -1.0     state    prse
+ t        75      0       0.70        -1.0     state    tv
+ q        75      1       0.20        -1.0     state    q
+ oz       75      1       0.10        -1.0     state    oz
+ sst       1      0       1.00        -1.0     state    sst
+ stl       1      0       1.00        -1.0     motley   sst
+ sti       1      0       1.00        -1.0     motley   sst
+::
