@@ -143,7 +143,8 @@ MODELNAME='RAPR'
 SUBMODELNAME='RTMA'
 /
 &NAMPGB
-KPO=47,PO=2.,5.,7.,10.,20.,30.,50.,70.,75.,100.,125.,150.,175.,200.,225.,250.,275.,300.,325.,350.,375.,400.,425.,450.,475.,500.,525.,550.,575.,600.,625.,650.,675.,700.,725.,750.,775.,800.,825.,850.,875.,900.,925.,950.,975.,1000.,1013.2
+KPO=47,PO=2.,5.,7.,10.,20.,30.,50.,70.,75.,100.,125.,150.,175.,200.,225.,250.,275.,300.,325.,350.,375.,400.,425.,450.,475.,500.,525.,550.,575.,600.,625.,650.,675.,700.,725.,750.,775.,800.,825.,850.,875.,900.,925.,950.,975.,1000.,1013.2,
+synthetic_cfr=.true., capecin_2m=.true.,
 /
 EOF
 
@@ -157,6 +158,7 @@ ${RM} -f WRF???.GrbF??
 ${CP_LN} ${PARMupp}/params_grib2_tbl_new params_grib2_tbl_new
 ${CP_LN} ${PARMupp}/postxconfig-NT-3drtma.txt postxconfig-NT.txt
 ${CP_LN} ${PARMupp}/rap_micro_lookup.dat ./eta_micro_lookup.dat
+#${CP_LN} ${FIXupp}/rap_micro_lookup.dat ./eta_micro_lookup.dat
 #${CP_LN} ${FIXcrtm}/* .
 
 # get crtm fix files

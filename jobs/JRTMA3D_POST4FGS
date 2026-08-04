@@ -135,6 +135,7 @@ fi
 #   export FIXcrtm=${FIXcrtm:-"${FIXrtma3d}/crtm"}
     export FIXcrtm=${FIXcrtm:-${CRTM_FIX:?}}
     export FIXwps=${FIXwps:-"${FIXrtma3d}/wps"}
+    export FIXupp=${FIXupp:-"${FIXrtma3d}/upp"}
 
     export PARMupp=${PARMupp:-"${PARMrtma3d}/upp"}
     export PARMwrf=${PARMwrf:-"${PARMrtma3d}/wrf"}
