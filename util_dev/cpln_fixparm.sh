@@ -5,12 +5,10 @@
   export BASE=`pwd`
   cd $BASE
 
-# PARMDIR_SOURCE='/lfs/h2/emc/da/noscrub/matthew.t.morris/packages/rtma3d.v1.0.0/parm'
-# FIXDIR_SOURCE='/lfs/h2/emc/da/noscrub/matthew.t.morris/packages/rtma3d.v1.0.0/fix'
-# PARMDIR_SOURCE='/lfs/h2/emc/da/noscrub/annette.gibbs/packages/rtma3d.v1.0.0_nco2/parm'
-# FIXDIR_SOURCE='/lfs/h2/emc/da/noscrub/annette.gibbs/packages/rtma3d.v1.0.0_nco2/fix'
-  PARMDIR_SOURCE='/lfs/h2/emc/da/noscrub/annette.gibbs/packages/rtma3d.v1.0.0_nco4/parm'
-  FIXDIR_SOURCE='/lfs/h2/emc/da/noscrub/annette.gibbs/packages/rtma3d.v1.0.0_nco4/fix'
+  PARMDIR_SOURCE='/lfs/h2/emc/da/noscrub/matthew.t.morris/packages/rtma3d.v1.0.0/parm'
+  FIXDIR_SOURCE='/lfs/h2/emc/da/noscrub/matthew.t.morris/packages/rtma3d.v1.0.0/fix'
+# PARMDIR_SOURCE='/lfs/h2/emc/da/noscrub/annette.gibbs/packages/rtma3d.v1.0.0_nco4/parm'
+# FIXDIR_SOURCE='/lfs/h2/emc/da/noscrub/annette.gibbs/packages/rtma3d.v1.0.0_nco4/fix'
 
   GSIPARMDIR_CONUS='/lfs/h2/emc/da/noscrub/gang.zhao/FixData/GSI_rtma3d_mine/parm/conus_new'
   GSIPARMDIR_ALASKA='/lfs/h2/emc/da/noscrub/gang.zhao/FixData/GSI_rtma3d_mine/parm/alaska_new'

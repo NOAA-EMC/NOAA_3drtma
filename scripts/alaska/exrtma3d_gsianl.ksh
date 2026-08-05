@@ -333,9 +333,7 @@ if [ "${i_gsdsfc_uselist}" -eq 1 ] ; then
 #  AIRCRAFT Reject list
    if [[ -f "${FIXrtma3d}/obsuselist/amdar_reject_lists/${DATEm24}_rejects.txt" ]] ; then
        cp -p ${FIXrtma3d}/obsuselist/amdar_reject_lists/${DATEm24}_rejects.txt current_bad_aircraft
-   elif [[ -s "${FIXrtma3d}/obsuselist/amdar_reject_lists/current_bad_aircraft.txt" ]] ; then
-       cp -P ${FIXrtma3d}/obsuselist/amdar_reject_lists/current_bad_aircraft.txt current_bad_aircraft
-   elif [[ -f "${FIXrtma3d}/obsuselist/amdar_reject_lists/current_bad_aircraft.txt" ]] ; then
+   elif [[ -e "${FIXrtma3d}/obsuselist/amdar_reject_lists/current_bad_aircraft.txt" ]] ; then
        cp -p ${FIXrtma3d}/obsuselist/amdar_reject_lists/current_bad_aircraft.txt current_bad_aircraft
    else
        cp ${FIXrtma3d}/${RUN}ak_aircraft_reject_list.txt current_bad_aircraft
@@ -344,9 +342,7 @@ if [ "${i_gsdsfc_uselist}" -eq 1 ] ; then
 #  MESONET Use list
    if [[ -f "${FIXrtma3d}/obsuselist/mesonet_uselists/${YYm24}-${MMm24}-${DDm24}_meso_uselist.txt" ]] ; then
        cp -p ${FIXrtma3d}/obsuselist/mesonet_uselists/${YYm24}-${MMm24}-${DDm24}_meso_uselist.txt gsd_sfcobs_uselist.txt
-   elif [[ -s "${FIXrtma3d}/obsuselist/mesonet_uselists/current_mesonet_uselist.txt" ]] ; then
-       cp -P ${FIXrtma3d}/obsuselist/mesonet_uselists/current_mesonet_uselist.txt gsd_sfcobs_uselist.txt
-   elif [[ -f "${FIXrtma3d}/obsuselist/mesonet_uselists/current_mesonet_uselist.txt" ]] ; then
+   elif [[ -e "${FIXrtma3d}/obsuselist/mesonet_uselists/current_mesonet_uselist.txt" ]] ; then
        cp -p ${FIXrtma3d}/obsuselist/mesonet_uselists/current_mesonet_uselist.txt gsd_sfcobs_uselist.txt
    else
        cp ${FIXrtma3d}/${RUN}ak_mesonet_uselist.txt gsd_sfcobs_uselist.txt
