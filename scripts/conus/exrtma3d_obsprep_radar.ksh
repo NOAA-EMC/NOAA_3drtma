@@ -23,6 +23,18 @@ cd ${DATA}
 echo "enter working directory:${DATA}"
 
 # BUFR Table including the description for HREF
+# Note: the prepbufr table file used here is a special bufr table file, which was created
+#       for RAP/HRRR, and must be specifically used in these RAP/HRRR based observation
+#       preparation (obsprep) step. Because it incldues the special variable names defined for
+#       observations of lightning, satellite observed cloud and MRMS Radar reflectivity, etc.,
+#       which are not necessarily available in a general prepbufr table file.
+#       Typically, this prepbufr table file is orginally named as "prepobs_prep_RAP.bufrtable",
+#       not "prepobs_prep.bufrtable" (which is the general table file).
+#       58080 Apr 22  2019 prepobs_prep_RAP.bufrtable
+#       86751 Apr 22  2019 prepobs_prep.bufrtable
+#       If an inappropriate bufr table file was used in obsprep, the observation data may not 
+#       be encoded into a prepbufr file correctly, then later analysis may fail to find the
+#       expected observation.  
 cpreq ${PARMrtma3d}/${RUN}_prepobs_prep.bufrtable prepobs_prep.bufrtable
 
 # WPS GEO_GRID Data

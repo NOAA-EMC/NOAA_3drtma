@@ -322,8 +322,32 @@ fi
 # Matt please revise with your backup accept list changes.
 if [ "${i_gsdsfc_uselist}" -eq 1 ] ; then
    echo "Using GSD Surface Obs Uselist -- i_gsdsfc_uselist=${i_gsdsfc_uselist}"
-   cp ${FIXrtma3d}/${RUN}ak_aircraft_reject_list.txt current_bad_aircraft
-   cp ${FIXrtma3d}/${RUN}ak_mesonet_uselist.txt gsd_sfcobs_uselist.txt
+
+#  get date of 24 hours ago
+   TIMEm24=`${NDATE} -24 ${YYYYMMDDHH}`
+   DATEm24=`echo ${TIMEm24} | cut -c1-8`
+   YRm24=`echo ${TIMEm24} | cut -c1-4`
+   MMm24=`echo ${TIMEm24} | cut -c5-6`
+   DDm24=`echo ${TIMEm24} | cut -c7-8`
+   
+#  AIRCRAFT Reject list
+   if [[ -f "${FIXrtma3d}/obsuselist/amdar_reject_lists/${DATEm24}_rejects.txt" ]] ; then
+       cp -p ${FIXrtma3d}/obsuselist/amdar_reject_lists/${DATEm24}_rejects.txt current_bad_aircraft
+   elif [[ -e "${FIXrtma3d}/obsuselist/amdar_reject_lists/current_bad_aircraft.txt" ]] ; then
+       cp -p ${FIXrtma3d}/obsuselist/amdar_reject_lists/current_bad_aircraft.txt current_bad_aircraft
+   else
+       cp ${FIXrtma3d}/${RUN}ak_aircraft_reject_list.txt current_bad_aircraft
+   fi
+
+#  MESONET Use list
+   if [[ -f "${FIXrtma3d}/obsuselist/mesonet_uselists/${YYm24}-${MMm24}-${DDm24}_meso_uselist.txt" ]] ; then
+       cp -p ${FIXrtma3d}/obsuselist/mesonet_uselists/${YYm24}-${MMm24}-${DDm24}_meso_uselist.txt gsd_sfcobs_uselist.txt
+   elif [[ -e "${FIXrtma3d}/obsuselist/mesonet_uselists/current_mesonet_uselist.txt" ]] ; then
+       cp -p ${FIXrtma3d}/obsuselist/mesonet_uselists/current_mesonet_uselist.txt gsd_sfcobs_uselist.txt
+   else
+       cp ${FIXrtma3d}/${RUN}ak_mesonet_uselist.txt gsd_sfcobs_uselist.txt
+   fi
+
 fi
 cp ${FIXrtma3d}/${RUN}ak_gsd_sfcobs_provider.txt gsd_sfcobs_provider.txt
 
@@ -377,7 +401,7 @@ else
    export corp_vis="${tmpvar}"      #changing static BE of vis(ibility) in hybrid run
 fi
 
-# if reading surface roughtness in firstguess
+# if reading surface roughness in firstguess
 # (used in Similarity theory based height adjustment for wind gust)
 i_sfcrough_fgs=${i_sfcrough_fgs:-1}         # 1(default for 3DRTMA) --> read roughness
 
@@ -387,8 +411,10 @@ use_similarity_winghgtadj=".true."          # true  (default): using similarity 
 neutral_stability_winghgtadj=".false."      # false (default): non-neutral stability
 
 # GSD Terrain Match applied to MESONET Observations
-i_gsd_terrain_match_mesonet=1    # 0: do not apply terrain match to mesonet obs <== default
-                                 # 1: apply terrain match to mesonet obs (kx=188), recommended for 3drtma
+i_gsd_terrain_match_mesonet=0    # 0: do not apply terrain match to additional types of sfcobs of t (default)
+                                 # 1: apply terrain match to additional types of sfcobs of t (188/192/193/195)
+                                 # (considered but not recommended for 3drtma yet)
+                                 # (lots of mesonet obs of t are rejected, and 2-m q is not adjusted)
 
 # Running GSI with more print-out information for debugging
 # (for operational run, set to .false. for less print-out to reduce wall-clock time)

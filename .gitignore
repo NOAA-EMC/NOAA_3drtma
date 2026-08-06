@@ -48,6 +48,12 @@ sorc/rtma3d_sndp.fd/rtma3d_sndp
 sorc/rtma3d_stnmlist.fd/rtma3d_stnmlist
 sorc/rtma3d_wrfbufr_alaska.fd/rtma3d_wrfbufr_alaska
 sorc/rtma3d_wrfbufr_conus.fd/rtma3d_wrfbufr_conus
+sorc/rtma3d_maxrh.fd/rtma3d_maxrh
+sorc/rtma3d_minrh.fd/rtma3d_minrh
+sorc/rtma3d_maxtbg.fd/rtma3d_maxtbg
+sorc/rtma3d_mintbg.fd/rtma3d_mintbg
+# # ignore sub-directory ('run/') under rtma3d_wrfarw.fd 
+#sorc/rtma3d_wrfarw.fd/WRFV3.9/run/
 #
 parm
 fix
@@ -55,7 +61,7 @@ fix
 #  # but track the source code of gsi package
 sorc/rtma3d_gsi.fd/build/
 sorc/rtma3d_gsi.fd/install/
-!sorc/rtma3d_gsi.fd/fix/
+sorc/rtma3d_gsi.fd/fix/
 sorc/rtma3d_gsi.fd/ush/build_gsi4rtma3d*.sh
 sorc/rtma3d_gsi.fd/.git/
 sorc/rtma3d_gsi.fd/.github/

@@ -13,6 +13,7 @@ COMMAND=$1
 MODULEFILES=${MODULEFILES:-${HOMErtma3d}/modulefiles}
 versionfile=${versionfile:-${HOMErtma3d}/versions/run.ver}
   MODULEFILES_GSI=${MODULEFILES_GSI:-${HOMErtma3d}/sorc/rtma3d_gsi.fd/modulefiles}
+  MODULEFILES_UPP=${MODULEFILES_UPP:-${HOMErtma3d}/sorc/rtma3d_post.fd/modulefiles}
 
 if [ "${machine}" = "theia" ] ; then
   . /etc/profile
@@ -134,14 +135,27 @@ elif [ "${machine}" = "cray" ] ; then
 # esac
 
 case "$COMMAND" in
-  # loading modules for GSI
+  # loading modules for running GSI
   *GSIANL*)
-    echo "loading modules for running GSI ..."
+    echo "loading GSI-specified modules to run GSI ..."
     module reset
     module use ${MODULEFILES_GSI}
     module load envvar/1.0
     module load gsi_wcoss2.intel
     module load cray-pals/1.2.2
+    ;;
+  # loading modules for running UPP
+  *POST*)
+    echo "loading UPP-specified modules to run UPP ..."
+    module reset
+    module use ${MODULEFILES_UPP}
+    module load envvar/1.0
+    module load wcoss2_intel
+    module load cray-pals/1.0.12
+    module load libjpeg/9c
+    module load prod_util/2.0.14
+    module load wgrib2/2.0.8
+    module load cfp/2.0.4
     ;;
   # loading modules for other tasks
   *)

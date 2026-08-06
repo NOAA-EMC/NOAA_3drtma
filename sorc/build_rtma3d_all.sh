@@ -38,8 +38,14 @@ cd $BASE
 
 if [ $BUILD_rtma3d_wrfpost = yes ] ; then
 
-echo " .... Building rtma3d_post .... "
-$BASE/build_rtma3d_post.sh > $logs_dir/build_rtma3d_post.log 2>&1
+   unset  UPP_SOURCE
+   export UPP_SOURCE="local"        # local : using local copy of UPP in 3DRTMA package (default)
+                                    #         (sorc/rtma3d_sorc_info.fd/README_sorc_info.md for version detail)
+                                    # emcupp: using official EMC UPP
+                                    # any other string: using local copy of UPP in 3DRTMA package
+   echo " .... Building rtma3d_post with UPP_SOURCE=${UPP_SOURCE} .... "
+   $BASE/build_rtma3d_post.sh > $logs_dir/build_rtma3d_post.log 2>&1
+   unset  UPP_SOURCE
 
 fi
 
@@ -47,14 +53,15 @@ fi
 
 if [ $BUILD_rtma3d_gsi = yes ] ; then
 
-
-   unset GSI_SOURCE
-   export GSI_SOURCE="emcgsi"       # autoqc: using Matthew Morris's fork of GSI (as default for now)
+   unset  GSI_SOURCE
+   export GSI_SOURCE="local"        # local : using local copy of GSI in 3DRTMA package (default)
+                                    #         (sorc/rtma3d_sorc_info.fd/README_sorc_info.md for version detail)
                                     # emcgsi: using official EMC GSI
-                                    # others: using Matthew Morris's fork of GSI
-   echo " .... Building rtma_gsi with GSI_SOURCE=${GSI_SOURCE} .... "
+                                    # autoqc: using Matthew Morris's fork of GSI (might be outdated)
+                                    # any other string: using local copy of GSI in 3DRTMA package
+   echo " .... Building rtma3d_gsi with GSI_SOURCE=${GSI_SOURCE} .... "
    $BASE/build_rtma3d_gsi.sh > $logs_dir/build_rtma3d_gsi.log 2>&1
-   unset GSI_SOURCE
+   unset  GSI_SOURCE
 
 fi
 
