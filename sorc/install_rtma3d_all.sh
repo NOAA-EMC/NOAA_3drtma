@@ -19,6 +19,7 @@ export INSTALL_rtma3d_smartinit=yes
 export INSTALL_rtma3d_obslist=yes
 export INSTALL_rtma3d_read_diag=yes
 export INSTALL_rtma3d_minmax=yes
+export INSTALL_rtma3d_updateP=yes
 
 if [ $INSTALL_rtma3d_post = yes ] ; then
 
@@ -110,5 +111,11 @@ cp -p ${BASE}/rtma3d_mintbg.fd/rtma3d_mintbg ../exec/rtma3d_mintbg
 cp -p ${BASE}/rtma3d_maxrh.fd/rtma3d_maxrh ../exec/rtma3d_maxrh
 
 cp -p ${BASE}/rtma3d_minrh.fd/rtma3d_minrh ../exec/rtma3d_minrh
+
+fi
+
+if [[ ${INSTALL_rtma3d_updateP:-"YES"} =~ [yYtT] ]] ; then
+
+    cp -p ${BASE}/rtma3d_updateP.fd/rtma3d_updateP ../exec/rtma3d_updateP
 
 fi

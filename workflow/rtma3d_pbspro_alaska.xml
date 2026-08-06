@@ -115,6 +115,7 @@
 <!ENTITY RUN_RHIST	"No">
 <!ENTITY RUN_HOWV	"Yes">
 <!ENTITY RUN_NCDIAG	"Yes">
+<!ENTITY RUN_UPDATEP	"No">
 
 <!-- for various observations used in RTMA3D -->
 
@@ -768,6 +769,10 @@
     <envar>
       <name>NCKS</name>
       <value>&NCKS;</value>
+    </envar>
+    <envar>
+      <name>RUN_UPDATEP</name>
+      <value>&RUN_UPDATEP;</value>
     </envar>
     <envar>
       <name>L_WRFARW_NOFCST</name>

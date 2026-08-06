@@ -149,6 +149,25 @@ echo "Assemble Reflectivity fields back into wrf_inout"
 
 ncks -A -v REFL_10CM,COMPOSITE_REFL_10CM,REFL_10CM_1KM,REFL_10CM_4KM wrfout_d01 wrf_inout
 
+# Updating the pressure fields (including surface pressure) in the analysis file (wrf_inout)
+if [[ ${RUN_UPDATEP:-"No"} =~ [yYtT] ]] ; then
+    echo "Pressure fields in wrf_inout will be updated ... "
+    if [[ -f wrf_inout ]] ; then
+        export OMP_NUM_THREADS=1
+        echo "*****************************************************"
+        echo "******* Updating Pressure Fields in wrf_inout *******"
+#       ${EXECrtma3d}/rtma3d_updateP >>$pgmout 2> errfile
+        ${EXECrtma3d}/rtma3d_updateP
+        echo "******* End of Updating Pressure Fields       *******"
+        export err=$?; err_chk
+        echo "Pressure fields (including Ps) are updated in analysis file (wrf_inout)"
+    else
+        echo "WARNING: Analysis file (wrf_inout) is missing, no rtma3d_updateP will run ..."
+    fi
+else
+    echo "Pressure fields in wrf_inout are NOT be updated by code rtma3d_updateP ... "
+fi
+
 cpreq -p wrf_inout ${COMOUT}/${RUN}ak.t${cyc}z.wrf_inout.nc
 cpreq -p rsl.out.0000 ${COMOUT}/${RUN}ak.t${cyc}z.rslout
 cat rsl.out.0000

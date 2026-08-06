@@ -19,6 +19,7 @@ export BUILD_rtma3d_smartinit=yes
 export BUILD_rtma3d_obslist=yes
 export BUILD_rtma3d_read_diag=yes
 export BUILD_rtma3d_minmax=yes
+export BUILD_rtma3d_updateP=yes
 module reset
 
 if [ ! -d $BASE/logs ]; then
@@ -181,6 +182,14 @@ $BASE/build_rtma3d_minmax.sh > $logs_dir/build_minmax.log 2>&1
 
 fi
 
+##############################
+
+if [[ ${BUILD_rtma3d_updateP:-"YES"} =~ [yYtT] ]] ; then
+
+    echo " .... Building rtma3d_updateP (updating pressure fields) .... "
+    $BASE/build_rtma3d_updateP.sh > $logs_dir/build_updateP.log 2>&1
+
+fi
 
 ##############################
 
