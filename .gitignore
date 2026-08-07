@@ -52,8 +52,9 @@ sorc/rtma3d_maxrh.fd/rtma3d_maxrh
 sorc/rtma3d_minrh.fd/rtma3d_minrh
 sorc/rtma3d_maxtbg.fd/rtma3d_maxtbg
 sorc/rtma3d_mintbg.fd/rtma3d_mintbg
+sorc/rtma3d_updateP.fd/rtma3d_updateP
 # # ignore sub-directory ('run/') under rtma3d_wrfarw.fd 
-#sorc/rtma3d_wrfarw.fd/WRFV3.9/run/
+sorc/rtma3d_wrfarw.fd/WRFV3.9/run/
 #
 parm
 fix

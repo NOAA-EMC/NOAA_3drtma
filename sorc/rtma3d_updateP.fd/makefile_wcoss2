@@ -1,0 +1,45 @@
+# makefile for updateP
+# (similar to the makefile under sorc/rtma3d_process_mosaic.fd)
+#!/bin/sh -v
+
+# Define the fortran compiler and options
+
+FC       = ftn
+CPP      = /lib/cpp -P
+ARCH     =
+
+#FLAGS   = -O3 -fp-model precise -assume byterecl -fpe0 -DLINUX
+FC_FLAGS = -O3 -g -traceback -fp-model strict -fpe0 -assume byterecl -convert big_endian -implicitnone -qopenmp
+FL_FLAGS = -Wl,-rpath,${NetCDF_ROOT}/lib
+
+CPPFLAGS = -DLINUX -Dfunder -DFortranByte=char -DFortranInt=int -DFortranLlong='long long' -D_UNDERSCORE
+NWPLIBS = ${BUFR_LIBd} ${G2TMPL_LIB} ${G2_LIB4} ${JASPER_LIB} ${PNG_LIB} ${Z_LIB} ${BACIO_LIB4} ${W3NCO_LIB4} ${BUFR_LIB4}
+
+#INCLD=  -I${NETCDF_INCLUDE} -I${WRF_IO_INC} -I${G2_INC4} -I${G2TMPL_INC}
+INCLD=  -I./ -I${NETCDF_INCLUDES}
+
+#LIB_NETCDF =  ${NetCDF}/lib/libnetcdf.so ${NetCDF}/lib/libnetcdff.so -L${NETCDF}/lib -lnetcdf -lnetcdff 
+LIB_NETCDF =  ${NetCDF_ROOT}/lib/libnetcdff.so -L${NetCDF_ROOT}/lib -lnetcdff ${NetCDF_ROOT}/lib/libnetcdf.so -L${NetCDF_ROOT}/lib -lnetcdf
+#LIBS =  ${WRF_IO_LIB} -L${NETCDF}/lib -lnetcdf -lnetcdff ${NWPLIBS}
+LIBS =  ${LIB_NETCDF}
+
+OBJS = updateP_wrfinout.o
+
+all: update_pressure
+
+update_pressure: ${OBJS}
+	${FC} ${FC_FLAGS} -o rtma3d_updateP ${FL_FLAGS} ${OBJS} ${LIBS} 
+
+.SUFFIXES : .F90 .f90 .f .c .o
+
+.F90.o :
+	${FC} ${FC_FLAGS} ${INCLD} -c $<
+
+.f90.o :
+	${FC} ${FC_FLAGS} ${INCLD} -c $<
+
+.c.o :
+	${CC} ${CPPFLAGS} -c $<
+
+clean:
+	/bin/rm -f *.o *.exe *.mod rtma3d_updateP
