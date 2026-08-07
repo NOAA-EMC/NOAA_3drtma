@@ -133,6 +133,16 @@ timestr2=`${DATE} +%Y-%m-%d_%H:%M:%S -d "${START_TIME}"`
 
 #EOF
 
+#
+# Set namelist options
+#
+i_cch260_rtma=0            # 0: using cloud base calcualted with origianl Ferrier's algorithm (see CLDRAD.f in UPP)
+                           # 1: using cloud base calcualted with GSL legacy cloud ceiling algorithm (see CLDRAD.f in UPP)
+                           #    choose 1 if user prefers CCH 260 to be same as calcualted with 
+                           #    original UPP code used in 3DRTMAv1.
+                           #    Important Note: CCH 260 is changed to height ASL (as same as CCH 408), not AGL.
+                           #                    in original UPP of 3DRTMAv1, CCH 260 is height AGL.
+
 cat > itag <<EOF
 &model_inputs
 fileName='${DATAWRFHOME}/${DATAWRFFILE}'
@@ -144,7 +154,7 @@ SUBMODELNAME='RTMA'
 /
 &NAMPGB
 KPO=47,PO=2.,5.,7.,10.,20.,30.,50.,70.,75.,100.,125.,150.,175.,200.,225.,250.,275.,300.,325.,350.,375.,400.,425.,450.,475.,500.,525.,550.,575.,600.,625.,650.,675.,700.,725.,750.,775.,800.,825.,850.,875.,900.,925.,950.,975.,1000.,1013.2,
-synthetic_cfr=.true., capecin_2m=.true.,
+synthetic_cfr=.true., capecin_2m=.true., i_cch260_rtma=${i_cch260_rtma},
 /
 EOF
 

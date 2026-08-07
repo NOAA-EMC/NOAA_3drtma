@@ -3,9 +3,8 @@
 ## rtma3d_gsi.fd/:
 ```
                 github: https://github.com/NOAA-EMC/GSI.git
-                branch: *develop*
-                commit: **ec8215d** (202607 added to package)
                 history:
+			202607  	branch: develop			commit: #ec8215d
                 notes:
                         .gitignore (modified to track log*.f90)
 ```
@@ -13,9 +12,10 @@
 ## rtma3d_post.fd/:
 ```
                 github: https://github.com/NOAA-EMC/UPP.git
-                branch: *release/3drtma_v1*
-                commit: **ff3a3ab** (202607 added to package)
                 history:
+			202607  	branch: release/3drtma_v1	commit: #ff3a3ab
+			20260807	branch: release/3drtma_v1	commit: #a303f7b (see UPP PR #1579 for details)
+					Note: cloud ceiling height 260 is changed to height ASL as same as 408, not AGL
 ```
 
 ## other subpackages:

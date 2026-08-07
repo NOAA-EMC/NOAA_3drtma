@@ -25,9 +25,8 @@ case "${UPP_SOURCE}" in
             echo "git checkout latest version of 3DRTMAv1 release branch ==> release/3drtma_v1"
             git checkout release/3drtma_v1  # <--- checking out the latest commit of branch release/3drtma_v1
         else
-            echo "git checkout 3DRTMAv1 release branch with commit ==> #ff3a3ab"
-            git checkout ff3a3ab   # commit ff3a3ab (commited on 6th of May 2026)
-                                   # updated for HWT SFE 2026
+            echo "git checkout 3DRTMAv1 release branch with commit ==> #a303f7b"
+            git checkout a303f7b   # commit a303f7b (commited on 6th of Aug 2026) # see UPP PR #1579 for details
         fi
         ;;
     *)                             # no UPP_SOURCE is specified, use the local copy of UPP in this 3DRTMA pacakge
