@@ -84,7 +84,7 @@ cd sorc
 	user needs to change:
 		workflow/rtma3d_pbspro_conus.xml
 		workflow/rtma3d_pbspro_alaska.xml
-	RUN_UPDATEP="No"
+        <!ENTITY RUN_UPDATEP	"No">
 	"No/no/False/false": default: no updating pressure fields in analysis (wrf_inout)
 	"Yes/yes/True/true": updating pressure fields in analysis (wrf_inout)
    ```
