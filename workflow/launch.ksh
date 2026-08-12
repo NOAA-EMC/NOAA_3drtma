@@ -143,6 +143,12 @@ case "$COMMAND" in
     module load envvar/1.0
     module load gsi_wcoss2.intel
     module load cray-pals/1.2.2
+    module load prod_util/2.0.14         # ==> setpdy.sh
+#   module load wgrib2/2.0.8
+#   module load cfp/2.0.4
+#   module load grib_util/1.2.3
+#   module load libxmlparse/2.0.0
+#   module load python/3.8.6
     ;;
   # loading modules for running UPP
   *POST*)

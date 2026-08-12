@@ -233,7 +233,6 @@
 <!-- Variables in Namelist -->
 <!ENTITY GSI_grid_ratio_in_var       "1">
 <!ENTITY GSI_grid_ratio_in_cldanl    "1">
-<!ENTITY i_gsdsfc_uselist            "2">
 <!ENTITY VERBOSE_GSI                 ".false.">
 <!ENTITY READIN_LOCALIZATION         "TRUE">
 <!ENTITY L_WRFARW_NOFCST             "TRUE">
@@ -596,10 +595,6 @@
     <envar>
       <name>RUN_NCDIAG</name>
       <value>&RUN_NCDIAG;</value>
-    </envar>
-    <envar>
-      <name>i_gsdsfc_uselist</name>
-      <value>&i_gsdsfc_uselist;</value>
     </envar>'>
 
 <!-- BLOCKS for OPTIMIZATIONS FOR GSIANL DA step-->
