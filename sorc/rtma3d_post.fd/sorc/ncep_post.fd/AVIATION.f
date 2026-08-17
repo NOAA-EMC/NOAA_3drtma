@@ -499,7 +499,7 @@
       USE vrbls2d, only: fis
       use params_mod, only: small, gi
       use ctlblk_mod, only: jsta, jend, spval, im, modelname, ista, iend,       &
-                            submodelname
+                            submodelname, me
 !- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
       implicit none
 !     
@@ -516,8 +516,14 @@
           IF(ABS(TCLD(I,J)-SPVAL) <= SMALL) THEN
             CEILING(I,J)=SPVAL
           ELSE IF(TCLD(I,J) >= 50.) THEN
-            if(MODELNAME == 'RAPR' .AND. SUBMODELNAME /= 'RTMA')then
-              CEILING(I,J) = CLDZ(I,J) - FIS(I,J)*GI
+            if(MODELNAME == 'RAPR')then
+              if(SUBMODELNAME == 'RTMA')then
+                if (me == 0) print*, '(rank_id=', me,') ',                      &
+                  'CALCEILING::RTMA::Field 260 is Cloud Ceiling Height ASL.'
+                CEILING(I,J) = CLDZ(I,J) ! Height ASL
+              else
+                CEILING(I,J) = CLDZ(I,J) - FIS(I,J)*GI
+              endif
             else
               CEILING(I,J) = CLDZ(I,J) ! for RAP/HRRR   - FIS(I,J)*GI
             endif

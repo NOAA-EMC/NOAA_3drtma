@@ -123,12 +123,13 @@ timestr2=`${DATE} +%Y-%m-%d_%H:%M:%S -d "${START_TIME}"`
 #
 # Set namelist options
 #
-i_cch260_rtma=0            # 0: using cloud base calcualted with origianl Ferrier's algorithm (see CLDRAD.f in UPP)
-                           # 1: using cloud base calcualted with GSL legacy cloud ceiling algorithm (see CLDRAD.f in UPP)
-                           #    choose 1 if user prefers CCH 260 to be same as calcualted with 
-                           #    original UPP code used in 3DRTMAv1.
-                           #    Important Note: CCH 260 is changed to height ASL (as same as CCH 408), not AGL.
-                           #                    in original UPP of 3DRTMAv1, CCH 260 is height AGL.
+# "i_cch260_rtma" can be pre-set in xml file under workflow directory
+i_cch260_rtma=${i_cch260_rtma:-0} # 0: using cloud base calcualted with origianl Ferrier's algorithm (see CLDRAD.f in UPP)
+                                  # 1: using cloud base calcualted with GSL legacy cloud ceiling algorithm (see CLDRAD.f in UPP)
+                                  #    choose 1 if user prefers CCH 260 to be same as calcualted with 
+                                  #    original UPP code used in 3DRTMAv1.
+                                  #    Important Note: CCH 260 is changed to height ASL (as same as CCH 408), not AGL.
+                                  #                    in original UPP of 3DRTMAv1, CCH 260 is height AGL.
 
 cat > itag <<EOF
 &model_inputs
